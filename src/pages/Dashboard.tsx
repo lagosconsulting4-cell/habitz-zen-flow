@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { Plus, Calendar, TrendingUp } from "lucide-react";
+import { Plus, Calendar, TrendingUp, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import HabitCard from "@/components/HabitCard";
 import NavigationBar from "@/components/NavigationBar";
+import DailyQuote from "@/components/DailyQuote";
+import QuickTips from "@/components/QuickTips";
+import UpgradePrompt from "@/components/UpgradePrompt";
+import { useNavigate } from "react-router-dom";
 
 interface Habit {
   id: string;
@@ -57,15 +61,36 @@ const mockHabits: Habit[] = [
 
 const Dashboard = () => {
   const [habits, setHabits] = useState(mockHabits);
+  const navigate = useNavigate();
+  
+  const MAX_FREE_HABITS = 3;
+  const isPremium = false; // This would come from user subscription status
 
   const toggleHabit = (habitId: string) => {
     setHabits(prev => 
       prev.map(habit => 
         habit.id === habitId 
-          ? { ...habit, completed: !habit.completed }
+          ? { 
+              ...habit, 
+              completed: !habit.completed,
+              streak: !habit.completed ? habit.streak + 1 : Math.max(0, habit.streak - 1)
+            }
           : habit
       )
     );
+  };
+
+  const handleCreateHabit = () => {
+    if (!isPremium && habits.length >= MAX_FREE_HABITS) {
+      // Will show upgrade prompt instead of navigating
+      return;
+    }
+    navigate("/create");
+  };
+
+  const handleUpgrade = () => {
+    console.log("Redirect to Stripe checkout - R$ 247/year");
+    // This would redirect to Stripe checkout
   };
 
   const morningHabits = habits.filter(h => h.period === "morning");
@@ -81,10 +106,10 @@ const Dashboard = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8 animate-fade-in">
           <div>
-            <h1 className="text-3xl font-light">
-              Olá, <span className="font-medium gradient-text">Jovem!</span>
+            <h1 className="text-3xl font-bold">
+              Olá, <span className="gradient-text">Jovem!</span>
             </h1>
-            <p className="text-muted-foreground font-light">
+            <p className="text-muted-foreground">
               {new Date().toLocaleDateString('pt-BR', { 
                 weekday: 'long', 
                 day: 'numeric', 
@@ -93,16 +118,40 @@ const Dashboard = () => {
             </p>
           </div>
           <Button 
-            className="rounded-2xl px-6 shadow-soft hover:shadow-medium transition-all duration-300"
+            onClick={handleCreateHabit}
+            className="rounded-xl px-6 shadow-soft hover:shadow-medium transition-all duration-300"
             size="lg"
+            disabled={!isPremium && habits.length >= MAX_FREE_HABITS}
           >
             <Plus className="w-5 h-5 mr-2" />
             Novo Hábito
+            {!isPremium && (
+              <Crown className="w-4 h-4 ml-1 text-yellow-500" />
+            )}
           </Button>
         </div>
 
+        {/* Upgrade Prompt */}
+        <div className="mb-8">
+          <UpgradePrompt 
+            currentHabits={habits.length}
+            maxFreeHabits={MAX_FREE_HABITS}
+            onUpgrade={handleUpgrade}
+          />
+        </div>
+
+        {/* Daily Quote */}
+        <div className="mb-8 animate-slide-up">
+          <DailyQuote />
+        </div>
+
+        {/* Quick Tips */}
+        <div className="mb-8 animate-slide-up" style={{ animationDelay: "200ms" }}>
+          <QuickTips />
+        </div>
+
         {/* Progress Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-slide-up">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-slide-up" style={{ animationDelay: "400ms" }}>
           <Card className="glass-card p-6">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-primary/10 rounded-xl">
@@ -142,7 +191,7 @@ const Dashboard = () => {
 
         {/* Morning Habits */}
         {morningHabits.length > 0 && (
-          <div className="mb-8 animate-slide-up" style={{ animationDelay: "200ms" }}>
+          <div className="mb-8 animate-slide-up" style={{ animationDelay: "600ms" }}>
             <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
               <span className="text-2xl">🌅</span>
               Manhã
@@ -161,7 +210,7 @@ const Dashboard = () => {
 
         {/* Afternoon Habits */}
         {afternoonHabits.length > 0 && (
-          <div className="mb-8 animate-slide-up" style={{ animationDelay: "400ms" }}>
+          <div className="mb-8 animate-slide-up" style={{ animationDelay: "800ms" }}>
             <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
               <span className="text-2xl">☀️</span>
               Tarde
@@ -180,7 +229,7 @@ const Dashboard = () => {
 
         {/* Evening Habits */}
         {eveningHabits.length > 0 && (
-          <div className="mb-8 animate-slide-up" style={{ animationDelay: "600ms" }}>
+          <div className="mb-8 animate-slide-up" style={{ animationDelay: "1000ms" }}>
             <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
               <span className="text-2xl">🌙</span>
               Noite
