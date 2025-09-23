@@ -10,6 +10,10 @@ import CreateHabit from "./pages/CreateHabit";
 import Progress from "./pages/Progress";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import Meditation from "./pages/Meditation";
+import BooksHub from "./pages/BooksHub";
+import Tips from "./pages/Tips";
+import GuidedJourney from "./pages/GuidedJourney";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +29,10 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/create" element={<CreateHabit />} />
           <Route path="/progress" element={<Progress />} />
+          <Route path="/meditation" element={<Meditation />} />
+          <Route path="/books" element={<BooksHub />} />
+          <Route path="/tips" element={<Tips />} />
+          <Route path="/guided" element={<GuidedJourney />} />
           <Route path="/profile" element={<Profile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
