@@ -1,8 +1,12 @@
-import { Calendar, TrendingUp, Target, Award } from "lucide-react";
+import { Calendar, TrendingUp, Target, Award, Crown, Lock } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import NavigationBar from "@/components/NavigationBar";
 
 const Progress = () => {
+  const isPremium = false; // This would come from user subscription status
+  
   // Mock data - in real app this would come from Supabase
   const weeklyProgress = [
     { day: "Dom", completed: 2, total: 4 },
@@ -120,13 +124,13 @@ const Progress = () => {
         </Card>
 
         {/* Streaks */}
-        <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "400ms" }}>
+        <Card className="glass-card p-6 mb-8 animate-slide-up" style={{ animationDelay: "400ms" }}>
           <h2 className="text-xl font-medium mb-6">Sequências de Hábitos</h2>
           <div className="space-y-4">
             {streaks.map((streak, index) => (
               <div 
                 key={streak.habit}
-                className="flex items-center justify-between p-4 bg-muted/30 rounded-xl animate-slide-up"
+                className="flex items-center justify-between p-4 bg-muted/30 rounded-xl animate-slide-up hover:bg-muted/40 transition-colors"
                 style={{ animationDelay: `${600 + index * 100}ms` }}
               >
                 <div className="flex items-center gap-4">
@@ -140,7 +144,7 @@ const Progress = () => {
                 </div>
                 <div className="text-right">
                   <div className="flex items-center gap-1">
-                    <span className="text-2xl font-medium text-primary">
+                    <span className="text-2xl font-medium gradient-text">
                       {streak.streak}
                     </span>
                     <span className="text-orange-500">🔥</span>
@@ -153,6 +157,54 @@ const Progress = () => {
             ))}
           </div>
         </Card>
+
+        {/* Premium Features Teaser */}
+        {!isPremium && (
+          <Card className="glass-card p-6 border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors animate-slide-up" style={{ animationDelay: "800ms" }}>
+            <div className="text-center space-y-4">
+              <div className="flex justify-center">
+                <div className="p-4 bg-primary/10 rounded-full">
+                  <Crown className="w-8 h-8 text-primary" />
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-medium mb-2">Relatórios Premium</h3>
+                <p className="text-muted-foreground font-light mb-4">
+                  Desbloqueie análises mensais detalhadas, comparações e insights personalizados
+                </p>
+                
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Lock className="w-4 h-4" />
+                    <span>Relatório mensal</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Lock className="w-4 h-4" />
+                    <span>Comparações</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Lock className="w-4 h-4" />
+                    <span>Insights IA</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Lock className="w-4 h-4" />
+                    <span>Exportar dados</span>
+                  </div>
+                </div>
+              </div>
+
+              <Button className="w-full bg-gradient-primary hover:shadow-elegant transition-all duration-300">
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade para Premium
+              </Button>
+              
+              <p className="text-xs text-muted-foreground">
+                R$ 247/ano • Cancele quando quiser
+              </p>
+            </div>
+          </Card>
+        )}
       </div>
 
       <NavigationBar />
