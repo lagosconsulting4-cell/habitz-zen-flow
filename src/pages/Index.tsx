@@ -36,7 +36,7 @@ const Index = () => {
         <div className="flex items-center gap-3">
           <Button 
             variant="ghost" 
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/auth")}
             className="text-white/80 hover:text-white hover:bg-white/10"
           >
             Entrar
@@ -81,7 +81,7 @@ const Index = () => {
             <Button 
               size="lg"
               variant="outline"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/auth")}
               className="px-8 py-4 text-lg font-medium rounded-xl border-2 border-white/20 text-white bg-white/5 hover:bg-white/15 backdrop-blur-sm"
             >
               Ver Demo

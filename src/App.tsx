@@ -14,6 +14,8 @@ import Meditation from "./pages/Meditation";
 import BooksHub from "./pages/BooksHub";
 import Tips from "./pages/Tips";
 import GuidedJourney from "./pages/GuidedJourney";
+import Auth from "./pages/Auth";
+import Calendar from "./pages/Calendar";
 
 const queryClient = new QueryClient();
 
@@ -25,9 +27,11 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/create" element={<CreateHabit />} />
+          <Route path="/calendar" element={<Calendar />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/meditation" element={<Meditation />} />
           <Route path="/books" element={<BooksHub />} />
