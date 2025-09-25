@@ -1,17 +1,28 @@
-import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Quote } from "lucide-react";
-import { dailyQuotes } from "@/data/quotes";
+import { useQuotes } from "@/hooks/useSupabaseData";
 
 const DailyQuote = () => {
-  const [dailyQuote, setDailyQuote] = useState(dailyQuotes[0]);
+  const { getDailyQuote, loading } = useQuotes();
+  const dailyQuote = getDailyQuote();
 
-  useEffect(() => {
-    // Get a consistent quote based on the current date
-    const today = new Date().toDateString();
-    const quoteIndex = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % dailyQuotes.length;
-    setDailyQuote(dailyQuotes[quoteIndex]);
-  }, []);
+  if (loading || !dailyQuote) {
+    return (
+      <Card className="glass-card p-6 animate-fade-in">
+        <div className="flex items-start gap-4">
+          <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+            <Quote className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <div className="animate-pulse">
+              <div className="h-4 bg-white/20 rounded w-3/4 mb-2"></div>
+              <div className="h-3 bg-white/20 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="glass-card p-6 animate-fade-in">

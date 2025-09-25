@@ -7,16 +7,16 @@ interface Habit {
   emoji: string;
   category: string;
   period: "morning" | "afternoon" | "evening";
-  completed: boolean;
   streak: number;
 }
 
 interface HabitCardProps {
   habit: Habit;
   onToggle: (habitId: string) => void;
+  isCompleted?: boolean;
 }
 
-const HabitCard = ({ habit, onToggle }: HabitCardProps) => {
+const HabitCard = ({ habit, onToggle, isCompleted = false }: HabitCardProps) => {
   const getPeriodClass = () => {
     switch (habit.period) {
       case "morning": return "habit-card-morning";
@@ -38,7 +38,7 @@ const HabitCard = ({ habit, onToggle }: HabitCardProps) => {
 
   return (
     <Card 
-      className={`habit-card ${getPeriodClass()} ${habit.completed ? "opacity-75" : ""}`}
+      className={`habit-card ${getPeriodClass()} ${isCompleted ? "opacity-75" : ""}`}
       onClick={() => onToggle(habit.id)}
     >
       <div className="flex items-center gap-4">
@@ -48,7 +48,7 @@ const HabitCard = ({ habit, onToggle }: HabitCardProps) => {
         {/* Content */}
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h3 className={`font-medium text-lg ${habit.completed ? "line-through" : ""}`}>
+            <h3 className={`font-medium text-lg ${isCompleted ? "line-through" : ""}`}>
               {habit.name}
             </h3>
             <span className={`text-xs px-2 py-1 rounded-full bg-white/20 ${getCategoryColor()}`}>
@@ -69,12 +69,12 @@ const HabitCard = ({ habit, onToggle }: HabitCardProps) => {
         {/* Check Button */}
         <div 
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-            habit.completed 
+            isCompleted 
               ? "bg-primary text-primary-foreground scale-110" 
               : "bg-white/20 hover:bg-white/30 border-2 border-white/30"
           }`}
         >
-          {habit.completed ? (
+          {isCompleted ? (
             <Check className="w-6 h-6 animate-scale-in" />
           ) : (
             <div className="w-2 h-2 bg-white/50 rounded-full" />

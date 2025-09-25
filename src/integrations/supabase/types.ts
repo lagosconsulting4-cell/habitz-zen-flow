@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      books: {
+        Row: {
+          affiliate_link: string | null
+          author: string
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          rating: number | null
+          title: string
+        }
+        Insert: {
+          affiliate_link?: string | null
+          author: string
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          rating?: number | null
+          title: string
+        }
+        Update: {
+          affiliate_link?: string | null
+          author?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          rating?: number | null
+          title?: string
+        }
+        Relationships: []
+      }
       habit_completions: {
         Row: {
           completed_at: string
@@ -109,6 +145,57 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      quotes: {
+        Row: {
+          author: string
+          category: string | null
+          created_at: string
+          id: string
+          text: string
+        }
+        Insert: {
+          author: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          text: string
+        }
+        Update: {
+          author?: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          text?: string
+        }
+        Relationships: []
+      }
+      tips: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          icon: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          title?: string
         }
         Relationships: []
       }

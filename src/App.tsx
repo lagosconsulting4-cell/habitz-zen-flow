@@ -16,6 +16,7 @@ import Tips from "./pages/Tips";
 import GuidedJourney from "./pages/GuidedJourney";
 import Auth from "./pages/Auth";
 import Calendar from "./pages/Calendar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -28,16 +29,16 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/create" element={<CreateHabit />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/progress" element={<Progress />} />
-          <Route path="/meditation" element={<Meditation />} />
-          <Route path="/books" element={<BooksHub />} />
-          <Route path="/tips" element={<Tips />} />
-          <Route path="/guided" element={<GuidedJourney />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/create" element={<ProtectedRoute><CreateHabit /></ProtectedRoute>} />
+          <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
+          <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+          <Route path="/meditation" element={<ProtectedRoute><Meditation /></ProtectedRoute>} />
+          <Route path="/books" element={<ProtectedRoute><BooksHub /></ProtectedRoute>} />
+          <Route path="/tips" element={<ProtectedRoute><Tips /></ProtectedRoute>} />
+          <Route path="/guided" element={<ProtectedRoute><GuidedJourney /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

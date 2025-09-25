@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Calendar, TrendingUp, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,77 +8,35 @@ import DailyQuote from "@/components/DailyQuote";
 import QuickTips from "@/components/QuickTips";
 import UpgradePrompt from "@/components/UpgradePrompt";
 import { useNavigate } from "react-router-dom";
-
-interface Habit {
-  id: string;
-  name: string;
-  emoji: string;
-  category: string;
-  period: "morning" | "afternoon" | "evening";
-  completed: boolean;
-  streak: number;
-}
-
-// Mock data - in real app this would come from Supabase
-const mockHabits: Habit[] = [
-  {
-    id: "1",
-    name: "Meditação",
-    emoji: "🧘‍♂️", 
-    category: "mente",
-    period: "morning" as const,
-    completed: false,
-    streak: 7
-  },
-  {
-    id: "2", 
-    name: "Exercícios",
-    emoji: "💪",
-    category: "corpo", 
-    period: "morning" as const,
-    completed: true,
-    streak: 12
-  },
-  {
-    id: "3",
-    name: "Ler 30min",
-    emoji: "📚",
-    category: "estudo",
-    period: "afternoon" as const, 
-    completed: false,
-    streak: 5
-  },
-  {
-    id: "4",
-    name: "Gratidão", 
-    emoji: "✨",
-    category: "mente",
-    period: "evening" as const,
-    completed: false,
-    streak: 3
-  }
-];
+import { useHabits } from "@/hooks/useHabits";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
-  const [habits, setHabits] = useState(mockHabits);
+  const { habits, loading, toggleHabit, getHabitCompletionStatus } = useHabits();
+  const [userName, setUserName] = useState("Jovem");
   const navigate = useNavigate();
   
   const MAX_FREE_HABITS = 3;
   const isPremium = false; // This would come from user subscription status
 
-  const toggleHabit = (habitId: string) => {
-    setHabits(prev => 
-      prev.map(habit => 
-        habit.id === habitId 
-          ? { 
-              ...habit, 
-              completed: !habit.completed,
-              streak: !habit.completed ? habit.streak + 1 : Math.max(0, habit.streak - 1)
-            }
-          : habit
-      )
-    );
-  };
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile?.display_name) {
+          setUserName(profile.display_name);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const handleCreateHabit = () => {
     if (!isPremium && habits.length >= MAX_FREE_HABITS) {
@@ -97,8 +55,16 @@ const Dashboard = () => {
   const afternoonHabits = habits.filter(h => h.period === "afternoon"); 
   const eveningHabits = habits.filter(h => h.period === "evening");
 
-  const completedToday = habits.filter(h => h.completed).length;
-  const completionRate = Math.round((completedToday / habits.length) * 100);
+  const completedToday = habits.filter(h => getHabitCompletionStatus(h.id)).length;
+  const completionRate = habits.length > 0 ? Math.round((completedToday / habits.length) * 100) : 0;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,7 +73,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-8 animate-fade-in">
           <div>
             <h1 className="text-3xl font-bold">
-              Olá, <span className="gradient-text">Jovem!</span>
+              Olá, <span className="gradient-text">{userName}!</span>
             </h1>
             <p className="text-muted-foreground">
               {new Date().toLocaleDateString('pt-BR', { 
@@ -183,7 +149,7 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="font-light text-muted-foreground">Melhor streak</p>
-                <p className="text-2xl font-medium">{Math.max(...habits.map(h => h.streak))}</p>
+                <p className="text-2xl font-medium">{habits.length > 0 ? Math.max(...habits.map(h => h.streak)) : 0}</p>
               </div>
             </div>
           </Card>
@@ -202,6 +168,7 @@ const Dashboard = () => {
                   key={habit.id}
                   habit={habit}
                   onToggle={toggleHabit}
+                  isCompleted={getHabitCompletionStatus(habit.id)}
                 />
               ))}
             </div>
@@ -221,6 +188,7 @@ const Dashboard = () => {
                   key={habit.id}
                   habit={habit}
                   onToggle={toggleHabit}
+                  isCompleted={getHabitCompletionStatus(habit.id)}
                 />
               ))}
             </div>
@@ -240,6 +208,7 @@ const Dashboard = () => {
                   key={habit.id}
                   habit={habit}
                   onToggle={toggleHabit}
+                  isCompleted={getHabitCompletionStatus(habit.id)}
                 />
               ))}
             </div>
