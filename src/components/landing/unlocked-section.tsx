@@ -1,56 +1,49 @@
-﻿import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 
-import ExpandableCards, { type Card } from "@/components/smoothui/ui/ExpandableCards";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 
-const cards: Card[] = [
+const cards = [
   {
     id: 1,
     title: "Crie e organize seus hábitos com lembretes diários",
     image: "https://i.ibb.co/fVgGDsrB/14.png",
     content:
       "Defina metas claras, categorias e lembretes inteligentes para não esquecer do que importa. Visualize o progresso em tempo real e ajuste seus hábitos em poucos toques.",
-    author: {
-      name: "Planner diário",
-      role: "Sua central de hábitos",
-      image: "https://i.ibb.co/9kBTkx0b/Habitz-branco.webp",
-    },
+    highlight: "Planner diário",
   },
   {
     id: 2,
     title: "Receba frases motivacionais fortes, todos os dias",
     image: "https://i.ibb.co/m5g6Qg4P/13.png",
     content:
-      "Mensagens diretas para manter a disciplina. Escolhemos frases certeiras para relembrar por que você começou, nos momentos em que a energia cai.",
-    author: {
-      name: "Motivação diária",
-      role: "Com curadoria Habitz",
-      image: "https://i.ibb.co/9kBTkx0b/Habitz-branco.webp",
-    },
+      "Mensagens diretas para manter a disciplina. Selecionamos frases certeiras para relembrar por que você começou, nos momentos em que a energia cai.",
+    highlight: "Motivação diária",
   },
   {
     id: 3,
     title: "Use técnicas simples de meditação e respiração",
     image: "https://i.ibb.co/27x6X1rS/12.png",
     content:
-      "Áudios curtos e exercícios guiados para baixar a ansiedade, focar e dormir melhor. Escolha práticas de 3 a 10 minutos conforme seu tempo.",
-    author: {
-      name: "Sessões guiadas",
-      role: "Respiração, foco e calma",
-      image: "https://i.ibb.co/9kBTkx0b/Habitz-branco.webp",
-    },
+      "Áudios curtos e exercícios guiados para baixar a ansiedade, focar e dormir melhor. Escolha práticas de 3 a 10 minutos conforme o seu tempo.",
+    highlight: "Sessões guiadas",
   },
   {
     id: 4,
     title: "Acesse dicas de rotina, leitura, dieta e foco",
     image: "https://i.ibb.co/Cp88gGht/11.png",
     content:
-      "Conteúdo objetivo sobre performance, saúde, leitura e produtividade. Nada de teoria sem aplicação — só o essencial para colocar em prática hoje.",
-    author: {
-      name: "Kit de evolução",
-      role: "Rotina, leitura, dieta e foco",
-      image: "https://i.ibb.co/9kBTkx0b/Habitz-branco.webp",
-    },
+      "Conteúdo objetivo sobre performance, saúde, leitura e produtividade. Nada de teoria infinita — só o essencial para colocar em prática hoje.",
+    highlight: "Kit de evolução",
   },
   {
     id: 5,
@@ -58,43 +51,42 @@ const cards: Card[] = [
     image: "https://i.ibb.co/vCWMCwCc/jornada.webp",
     content:
       "Um passo por dia para sair do piloto automático. Cada tarefa concluída libera o próximo dia, com travas visuais, barra de progresso e reforço positivo.",
-    author: {
-      name: "Modo Guiado",
-      role: "4 semanas para resetar sua rotina",
-      image: "https://i.ibb.co/9kBTkx0b/Habitz-branco.webp",
-    },
+    highlight: "Modo Guiado",
   },
-];
+] as const;
 
 export type UnlockedSectionProps = {
-  onCardSelect?: (card: Card, state: "open" | "close") => void;
+  onCardSelect?: (card: (typeof cards)[number], state: "open" | "close") => void;
   onCtaClick: () => void;
   track?: (event: string, meta?: Record<string, unknown>) => void;
 };
 
 const UnlockedSection = ({ onCardSelect, onCtaClick, track }: UnlockedSectionProps) => {
-  const [selected, setSelected] = useState<number | null>(cards[0].id);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const handleSelect = (id: number) => {
-    setSelected((previous) => {
-      if (previous === id) {
-        const card = cards.find((item) => item.id === id);
-        if (card) {
-          onCardSelect?.(card, "close");
-          track?.("landing_expandable_card_close", { id: card.id, title: card.title });
-        }
-        return null;
-      }
+  useEffect(() => {
+    if (!carouselApi) {
+      return;
+    }
 
-      const card = cards.find((item) => item.id === id);
+    const handleSelect = () => {
+      const index = carouselApi.selectedScrollSnap();
+      setActiveIndex(index);
+      const card = cards[index];
       if (card) {
+        track?.("landing_feature_slide", { id: card.id, title: card.title });
         onCardSelect?.(card, "open");
-        track?.("landing_expandable_card_open", { id: card.id, title: card.title });
       }
+    };
 
-      return id;
-    });
-  };
+    handleSelect();
+    carouselApi.on("select", handleSelect);
+
+    return () => {
+      carouselApi.off("select", handleSelect);
+    };
+  }, [carouselApi, track, onCardSelect]);
 
   return (
     <section id="recursos" className="bg-white py-24">
@@ -111,7 +103,52 @@ const UnlockedSection = ({ onCardSelect, onCtaClick, track }: UnlockedSectionPro
           </p>
         </div>
 
-        <ExpandableCards cards={cards} selectedCard={selected} onSelect={handleSelect} />
+        <div className="relative">
+          <Carousel className="mx-auto max-w-6xl" opts={{ align: "start" }} setApi={setCarouselApi}>
+            <CarouselContent>
+              {cards.map((card) => (
+                <CarouselItem key={card.id} className="md:basis-1/2 lg:basis-1/3">
+                  <Card className="h-full overflow-hidden border border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+                    <CardHeader className="space-y-4 p-6">
+                      <div className="rounded-2xl bg-slate-50 p-4">
+                        <AspectRatio ratio={9 / 16}>
+                          <img
+                            src={card.image}
+                            alt={card.title}
+                            loading="lazy"
+                            decoding="async"
+                            className="h-full w-full rounded-xl object-contain"
+                          />
+                        </AspectRatio>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3 px-6 pb-8">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
+                        {card.highlight}
+                      </div>
+                      <h3 className="text-lg font-semibold text-slate-900">{card.title}</h3>
+                      <p className="text-sm leading-relaxed text-slate-600">{card.content}</p>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden lg:flex" />
+            <CarouselNext className="hidden lg:flex" />
+          </Carousel>
+
+          <div className="mt-6 flex items-center justify-center gap-2 lg:hidden">
+            {cards.map((card, index) => (
+              <button
+                key={card.id}
+                type="button"
+                onClick={() => carouselApi?.scrollTo(index)}
+                className={`h-2 w-2 rounded-full transition ${index === activeIndex ? "bg-emerald-600" : "bg-slate-300"}`}
+                aria-label={`Ir para ${card.title}`}
+              />
+            ))}
+          </div>
+        </div>
 
         <div className="fade-in animate-delay-200 mt-12 flex justify-center">
           <Button
@@ -128,3 +165,4 @@ const UnlockedSection = ({ onCardSelect, onCtaClick, track }: UnlockedSectionPro
 };
 
 export default UnlockedSection;
+

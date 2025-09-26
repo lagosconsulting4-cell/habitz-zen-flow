@@ -21,37 +21,37 @@ const habits = [
   {
     id: "meditation",
     title: "Meditar 10 minutos",
-    detail: "07:30 - Respiracao guiada",
+    detail: "07:30 - Respiração guiada",
     icon: Play,
   },
   {
     id: "reading",
-    title: "Ler 20 paginas",
+    title: "Ler 20 páginas",
     detail: "08:15 - Mindset",
     icon: Star,
   },
   {
     id: "exercise",
-    title: "Treino rapido",
+    title: "Treino rápido",
     detail: "Pendente",
     icon: CheckCircle2,
   },
   {
     id: "water",
-    title: "Beber 2L de agua",
+    title: "Beber 2L de água",
     detail: "17:00 - Lembrete",
     icon: AlarmClock,
   },
 ] as const;
 
 const guidedJourneyDays = [
-  { day: 1, state: "done" as const, label: "Respiracao consciente" },
-  { day: 2, state: "done" as const, label: "Micro vitorias" },
-  { day: 3, state: "active" as const, label: "Planejamento diario" },
+  { day: 1, state: "done" as const, label: "Respiração consciente" },
+  { day: 2, state: "done" as const, label: "Micro vitórias" },
+  { day: 3, state: "active" as const, label: "Planejamento diário" },
   { day: 4, state: "locked" as const, label: "Experimento social" },
   { day: 5, state: "locked" as const, label: "Sono profundo" },
   { day: 6, state: "locked" as const, label: "Foco profundo" },
-  { day: 7, state: "locked" as const, label: "Semana 1 concluida" },
+  { day: 7, state: "locked" as const, label: "Semana 1 concluída" },
 ];
 
 export type HeroPreviewProps = {
@@ -107,10 +107,10 @@ const HeroPreview = ({ onCtaClick, track }: HeroPreviewProps) => {
           <div className="flex items-center justify-between gap-4">
             <div>
               <h3 className="text-xl font-semibold text-slate-900">Hoje</h3>
-              <p className="text-sm text-slate-500">Complete 3 habitos para fechar sua barra diaria.</p>
+              <p className="text-sm text-slate-500">Complete 3 hábitos para fechar sua barra diária.</p>
             </div>
             <Badge variant="secondary" className="flex items-center gap-2 rounded-full bg-emerald-100 text-emerald-700">
-              <Flame className="h-4 w-4" strokeWidth={1.5} /> Sequencia 12 dias
+              <Flame className="h-4 w-4" strokeWidth={1.5} /> Sequência 12 dias
             </Badge>
           </div>
         </CardHeader>
@@ -184,7 +184,7 @@ const HeroPreview = ({ onCtaClick, track }: HeroPreviewProps) => {
               <Progress value={stats.percentage} className="h-2 bg-slate-200" />
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <AlarmClock className="h-4 w-4" strokeWidth={1.5} />
-                Proximo lembrete as 17:00
+                Próximo lembrete às 17:00
               </div>
             </div>
 
@@ -195,7 +195,7 @@ const HeroPreview = ({ onCtaClick, track }: HeroPreviewProps) => {
                   Semana 1
                 </Badge>
               </div>
-              <p className="text-sm text-slate-600">Depois de concluir o dia de hoje, o proximo conteudo e desbloqueado automaticamente.</p>
+              <p className="text-sm text-slate-600">Depois de concluir o dia de hoje, o próximo conteúdo é desbloqueado automaticamente.</p>
               <div className="grid grid-cols-7 gap-2">
                 {guidedJourneyDays.map((item) => (
                   <div key={item.day} className="relative">
@@ -223,7 +223,7 @@ const HeroPreview = ({ onCtaClick, track }: HeroPreviewProps) => {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">Mensagem do dia</p>
-                <p className="mt-1 text-sm text-slate-600">"Disciplina e liberdade. Faca o que precisa ser feito antes da motivacao chegar."</p>
+                <p className="mt-1 text-sm text-slate-600">"Disciplina e liberdade. Faça o que precisa ser feito antes da motivação chegar."</p>
               </div>
               <CalendarDays className="hidden h-8 w-8 text-emerald-600 sm:block" strokeWidth={1.5} />
             </div>
@@ -235,7 +235,7 @@ const HeroPreview = ({ onCtaClick, track }: HeroPreviewProps) => {
               }}
               className="h-12 rounded-2xl bg-slate-900 text-sm font-semibold text-white shadow-[0_12px_36px_rgba(15,23,42,0.18)] transition-transform hover:-translate-y-0.5 hover:bg-slate-800"
             >
-              Comecar agora por R$ 47,90
+              Começar agora por R$ 47,90
             </Button>
           </div>
         </CardContent>
@@ -245,3 +245,4 @@ const HeroPreview = ({ onCtaClick, track }: HeroPreviewProps) => {
 };
 
 export default HeroPreview;
+

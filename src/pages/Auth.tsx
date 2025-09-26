@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -116,7 +116,7 @@ const Auth = () => {
 
         if (error) {
           if (error.message.includes("User already registered")) {
-            toast.error("Este email ja esta cadastrado. Faca login.");
+            toast.error("Este email já está cadastrado. Faça login.");
             setMode("login");
           } else {
             toast.error(error.message);
@@ -136,7 +136,7 @@ const Auth = () => {
           toast.error(error.message);
           return;
         }
-        toast.success("Enviamos um link para redefinir sua senha. Confira seu email.");
+        toast.success("Enviamos um link para Redefinir sua senha. Confira seu email.");
         setMode("login");
       } else if (mode === "reset") {
         if (newPassword.length < 6) {
@@ -173,7 +173,7 @@ const Auth = () => {
       });
 
       if (error) {
-        toast.error("Erro ao fazer login com Google");
+        toast.error("Erro ao Fazer login com Google");
       }
     } catch (error) {
       console.error("Unexpected Google auth error", error);
@@ -205,7 +205,7 @@ const Auth = () => {
             <Button
               onClick={handleGoogleAuth}
               variant="outline"
-              className="w-full py-3 border-border/50 hover:bg-muted/50"
+              className="w-full py-3 border-border/60 bg-white text-slate-900 transition hover:bg-slate-100"
               type="button"
             >
               <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
@@ -219,7 +219,7 @@ const Auth = () => {
 
             <div className="flex items-center gap-4">
               <Separator className="flex-1" />
-              <span className="text-muted-foreground text-sm">ou</span>
+              <span className="text-white/75 text-sm">ou</span>
               <Separator className="flex-1" />
             </div>
 
@@ -228,7 +228,7 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome completo</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                    <User className="absolute left-3 top-3 h-5 w-5 text-white/80" />
                     <Input
                       id="name"
                       type="text"
@@ -247,11 +247,11 @@ const Auth = () => {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-3 h-5 w-5 text-white/80" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="voce@email.com"
+                    placeholder="você@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -264,11 +264,11 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="password">Senha</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                    <Lock className="absolute left-3 top-3 h-5 w-5 text-white/80" />
                     <Input
                       id="password"
                       type="password"
-                      placeholder={mode === "login" ? "Sua senha" : "Minimo 6 caracteres"}
+                      placeholder={mode === "login" ? "Sua senha" : "Mínimo 6 caracteres"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required={mode !== "forgot"}
@@ -284,11 +284,11 @@ const Auth = () => {
                   <div className="space-y-2">
                     <Label htmlFor="new-password">Nova senha</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                      <Lock className="absolute left-3 top-3 h-5 w-5 text-white/80" />
                       <Input
                         id="new-password"
                         type="password"
-                        placeholder="Minimo 6 caracteres"
+                        placeholder="Mínimo 6 caracteres"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         minLength={6}
@@ -299,7 +299,7 @@ const Auth = () => {
                   <div className="space-y-2">
                     <Label htmlFor="confirm-password">Confirmar nova senha</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                      <Lock className="absolute left-3 top-3 h-5 w-5 text-white/80" />
                       <Input
                         id="confirm-password"
                         type="password"
@@ -339,39 +339,39 @@ const Auth = () => {
               </Button>
             </form>
 
-            <div className="text-center pt-4 border-t border-border">
+            <div className="text-center pt-4 border-t border-border/40">
               {mode === "login" && (
                 <>
-                  <p className="text-muted-foreground">Esqueceu sua senha?</p>
-                  <Button variant="link" onClick={() => setMode("forgot")} className="font-semibold p-0 h-auto">
+                  <p className="text-white/80">Esqueceu sua senha?</p>
+                  <Button variant="link" onClick={() => setMode("forgot")} className="font-semibold p-0 h-auto text-white hover:text-white/80">
                     Redefinir senha
                   </Button>
-                  <p className="text-muted-foreground mt-2">Ainda não tem conta?</p>
-                  <Button variant="link" onClick={() => setMode("register")} className="font-semibold p-0 h-auto">
+                  <p className="text-white/80 mt-2">Ainda não tem conta?</p>
+                  <Button variant="link" onClick={() => setMode("register")} className="font-semibold p-0 h-auto text-white hover:text-white/80">
                     Criar conta
                   </Button>
                 </>
               )}
               {mode === "register" && (
                 <>
-                  <p className="text-muted-foreground">Já tem conta?</p>
-                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto">
+                  <p className="text-white/80">Já tem conta?</p>
+                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto text-white hover:text-white/80">
                     Fazer login
                   </Button>
                 </>
               )}
               {mode === "forgot" && (
                 <>
-                  <p className="text-muted-foreground">Lembrou a senha?</p>
-                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto">
+                  <p className="text-white/80">Lembrou a senha?</p>
+                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto text-white hover:text-white/80">
                     Voltar ao login
                   </Button>
                 </>
               )}
               {mode === "reset" && (
                 <>
-                  <p className="text-muted-foreground">Redefinindo sua senha</p>
-                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto">
+                  <p className="text-white/80">Redefinindo sua senha</p>
+                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto text-white hover:text-white/80">
                     Cancelar e voltar ao login
                   </Button>
                 </>
@@ -382,7 +382,7 @@ const Auth = () => {
 
         <div className="text-center mt-6 animate-fade-in" style={{ animationDelay: "400ms" }}>
           <p className="text-white/70 text-sm">
-            Ao continuar, voce concorda com nossos
+            Ao continuar, você concorda com nossos
             <Button variant="link" className="text-white underline p-0 h-auto text-sm">
               Termos de Uso
             </Button>

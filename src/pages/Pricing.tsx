@@ -55,7 +55,7 @@ const Pricing = () => {
       <Card className="max-w-2xl w-full glass-card p-10 text-center space-y-6">
         <div className="space-y-3">
           <p className="uppercase text-xs tracking-widest text-muted-foreground">Plano único</p>
-          <h1 className="text-4xl font-semibold">Habitz Premium Vitalício</h1>
+          <h1 className="text-4xl font-semibold">Habitz Premium vitalício</h1>
           <p className="text-muted-foreground">
             Pague uma única vez e tenha acesso completo para sempre. Gestão de hábitos, meditações, biblioteca e trilha guiada sem limitações.
           </p>
@@ -105,3 +105,4 @@ const Pricing = () => {
 };
 
 export default Pricing;
+

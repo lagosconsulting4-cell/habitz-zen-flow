@@ -31,42 +31,42 @@ const NAV_LINKS = [
 ];
 
 const HERO_COUNTERS = [
-  { label: "5K+ usuÃ¡rios ativos", icon: Users },
+  { label: "5K+ usuários ativos", icon: Users },
   { label: "87% concluem a primeira semana", icon: CheckCircle, iconClass: "text-green-500" },
-  { label: "+32K hÃ¡bitos marcados", icon: Flame, iconClass: "text-orange-500" },
+  { label: "+32K hábitos marcados", icon: Flame, iconClass: "text-orange-500" },
 ];
 
 const HERO_HABITS = [
-  { label: "MeditaÃ§Ã£o 10min", status: "done" as const, time: "07:30" },
-  { label: "Ler 20 pÃ¡ginas", status: "done" as const, time: "08:15" },
+  { label: "Meditação 10min", status: "done" as const, time: "07:30" },
+  { label: "Ler 20 páginas", status: "done" as const, time: "08:15" },
   { label: "Exercitar-se 30min", status: "pending" as const, tag: "Pendente" },
-  { label: "Beber 2L de Ã¡gua", status: "scheduled" as const, time: "17:00" },
+  { label: "Beber 2L de água", status: "scheduled" as const, time: "17:00" },
 ];
 
 const HERO_STATS = [
-  { value: "12", label: "SequÃªncia", icon: Flame, gradient: "from-orange-400 to-red-500" },
+  { value: "12", label: "Sequência", icon: Flame, gradient: "from-orange-400 to-red-500" },
   { value: "67%", label: "Hoje", icon: CheckCircle, gradient: "from-green-400 to-emerald-500" },
   { value: "94", label: "Total", icon: Activity, gradient: "from-blue-400 to-purple-500" },
 ];
 
 const BIG_NUMBERS = [
-  { value: "32K+", label: "HÃ¡bitos marcados", accent: "bg-emerald-200", hover: "group-hover/stat:text-emerald-600" },
+  { value: "32K+", label: "hábitos marcados", accent: "bg-emerald-200", hover: "group-hover/stat:text-emerald-600" },
   { value: "87%", label: "Completam a primeira semana", accent: "bg-amber-200", hover: "group-hover/stat:text-amber-600" },
-  { value: "5K+", label: "UsuÃ¡rios ativos diÃ¡rios", accent: "bg-gray-900", hover: "group-hover/stat:text-gray-900" },
+  { value: "5K+", label: "usuários ativos diários", accent: "bg-gray-900", hover: "group-hover/stat:text-gray-900" },
 ];
 
 const ROADMAP_STEPS = [
   {
     title: "Acesse o Habitz pelo link",
-    description: "Clique no botÃ£o e use direto no navegador. Nada de instalaÃ§Ã£o complicada.",
+    description: "Clique no botão e use direto no navegador. Nada de instalação complicada.",
   },
   {
     title: "Instale como app na tela inicial",
-    description: "ApÃ³s o checkout, siga as instruÃ§Ãµes para adicionar no celular ou computador.",
+    description: "Após o checkout, siga as instruções para adicionar no celular ou computador.",
   },
   {
     title: "Comece sua jornada",
-    description: "Escolha o Modo Guiado ou monte seus prÃ³prios hÃ¡bitos. Simples e sem distraÃ§Ã£o.",
+    description: "Escolha o Modo Guiado ou monte seus próprios hábitos. Simples e sem distração.",
   },
 ];
 
@@ -74,8 +74,8 @@ const TESTIMONIALS = [
   {
     name: "Regina Afonso",
     role: "Designer, 26 anos",
-    quote: "Depois de 3 dias usando o Habitz jÃ¡ estava acordando melhor e parando de enrolar. Simples, mas eficaz.",
-    highlight: "3 dias para sentir diferenÃ§a",
+    quote: "Depois de 3 dias usando o Habitz já estava acordando melhor e parando de enrolar. Simples, mas eficaz.",
+    highlight: "3 dias para sentir diferença",
     icon: TrendingUp,
     accent: "emerald",
     avatar: "https://i.ibb.co/b5nSxRWm/mariana-designer.webp",
@@ -83,7 +83,7 @@ const TESTIMONIALS = [
   {
     name: "Felipe Pereira",
     role: "Empreendedor, 34 anos",
-    quote: "Achei que seria mais um app... virou parte da minha rotina diÃ¡ria. ImpossÃ­vel nÃ£o marcar os hÃ¡bitos.",
+    quote: "Achei que seria mais um app... virou parte da minha rotina diária. Impossível não marcar os hábitos.",
     highlight: "Virou rotina automaticamente",
     icon: Repeat,
     accent: "sky",
@@ -93,7 +93,7 @@ const TESTIMONIALS = [
     name: "Luan Fonatti",
     role: "Estudante, 22 anos",
     quote: "O modo guiado fez mais por mim do que meses de planner. Em 4 semanas virei outra pessoa.",
-    highlight: "MudanÃ§a em 4 semanas",
+    highlight: "Mudança em 4 semanas",
     icon: Zap,
     accent: "violet",
     avatar: "https://i.ibb.co/spy6CscW/Luan-estudante.webp",
@@ -101,8 +101,8 @@ const TESTIMONIALS = [
   {
     name: "Anna Pirelli",
     role: "Advogada, 29 anos",
-    quote: "Mantive minha rotina de treino por mais de 2 meses. Antes nÃ£o passava de 2 semanas.",
-    highlight: "2+ meses de consistÃªncia",
+    quote: "Mantive minha rotina de treino por mais de 2 meses. Antes não passava de 2 semanas.",
+    highlight: "2+ meses de consistência",
     icon: CalendarCheck,
     accent: "amber",
     avatar: "https://i.ibb.co/n877s5MG/ana-advogada-webp.webp",
@@ -117,9 +117,9 @@ const TESTIMONIALS = [
     avatar: "https://i.ibb.co/VW6PKZV8/Quando-pensar-virou-trabalho-demais-1.webp",
   },
   {
-    name: "M?rcia Ferreira",
-    role: "PsicÃ³loga, 27 anos",
-    quote: "Como psicÃ³loga, vejo muita coisa complexa. O Habitz Ã© cientÃ­fico, direto e indico para pacientes.",
+    name: "M?Márcia Ferreira",
+    role: "Psicóloga, 27 anos",
+    quote: "Como Psicóloga, vejo muita coisa complexa. O Habitz é científico, direto e indico para pacientes.",
     highlight: "Indicado por profissional",
     icon: Heart,
     accent: "rose",
@@ -128,9 +128,9 @@ const TESTIMONIALS = [
 ];
 
 const PRICING_FEATURES = [
-  "Acesso vitalÃ­cio ao produto completo",
-  "1 ano de atualizaÃ§Ãµes incluÃ­das",
-  "InstalaÃ§Ã£o em segundos no navegador",
+  "Acesso vitalício ao produto completo",
+  "1 ano de Atualizações incluídas",
+  "instalação em segundos no navegador",
 ];
 
 const FOOTER_LINKS = [
@@ -250,7 +250,7 @@ const Index = () => {
                 onClick={() => handleCta("nav-pricing", heroCta)}
                 className="rounded-full bg-black px-5 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-gray-800"
               >
-                Quero comeÃ§ar
+                Quero Começar
               </Button>
             </div>
 
@@ -275,7 +275,7 @@ const Index = () => {
                     className="w-full rounded-xl bg-black py-3 text-sm font-medium text-white hover:bg-gray-800"
                     onClick={() => handleCta("mobile-pricing", heroCta)}
                   >
-                    Quero comeÃ§ar
+                    Quero Começar
                   </Button>
                 </div>
               </SheetContent>
@@ -345,9 +345,9 @@ const Index = () => {
         <section className="mx-6 mb-20 mt-8 overflow-hidden rounded-3xl bg-white shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)]">
           <div className="pt-16 pb-16 pr-6 pl-6 md:px-10 lg:px-14">
             <div className="fade-in mx-auto mb-16 max-w-3xl text-center">
-              <h2 className="text-4xl font-normal tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">NÃºmeros que falam,</h2>
+              <h2 className="text-4xl font-normal tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">Números que falam,</h2>
               <h3 className="mb-6 text-4xl font-normal tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">Resultados reais</h3>
-              <p className="text-lg text-slate-600">Gente comum que decidiu transformar intenÃ§Ã£o em rotina e viu a vida andar.</p>
+              <p className="text-lg text-slate-600">Gente comum que decidiu transformar intenção em rotina e viu a vida andar.</p>
             </div>
 
             <div className="relative rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100 p-8 transition-all duration-700 hover:shadow-2xl hover:shadow-black/10">
@@ -387,7 +387,7 @@ const Index = () => {
             <div className="fade-in mx-auto mb-16 max-w-2xl text-center">
               <h2 className="mb-6 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Como funciona?</h2>
               <p className="text-xl leading-relaxed text-gray-600">
-                Sem download. Sem cadastro complicado. Em minutos vocÃª estÃ¡ rodando seu plano.
+                Sem download. Sem cadastro complicado. Em minutos você está rodando seu plano.
               </p>
             </div>
 
@@ -411,11 +411,11 @@ const Index = () => {
           <div className="pt-16 pb-16 pr-6 pl-6 md:px-10 lg:px-14">
             <div className="fade-in mx-auto mb-16 max-w-3xl text-center">
               <h2 className="text-4xl font-normal tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-                TransformaÃ§Ãµes reais,
+                Transformações reais,
               </h2>
               <h3 className="mb-6 text-4xl font-normal tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">Pessoas reais</h3>
               <p className="text-lg text-slate-600">
-                O que a comunidade fala sobre sair do piloto automÃ¡tico com o Habitz.
+                O que a comunidade fala sobre sair do piloto automático com o Habitz.
               </p>
             </div>
 
@@ -446,7 +446,7 @@ const Index = () => {
                       ))}
                     </div>
                     <p className="mb-4 text-sm leading-relaxed text-slate-700 transition-colors duration-300 group-hover:text-slate-800">
-                      â€œ{item.quote}â€
+                      "{item.quote}"
                     </p>
                     <div
                       className={`flex items-center gap-2 text-neutral-950/50 transition-colors duration-300 ${accentHoverMap[item.accent]}`}
@@ -464,7 +464,7 @@ const Index = () => {
                 onClick={() => handleCta("testimonials-cta", heroCta)}
                 className="relative inline-flex h-12 w-60 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-black text-sm font-semibold text-white shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)] transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-black/20"
               >
-                Quero comeÃ§ar agora
+                Quero Começar agora
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
@@ -482,14 +482,14 @@ const Index = () => {
 
               <div className="relative mx-auto mt-12 max-w-lg rounded-3xl bg-white p-6 ring-1 ring-black/5 shadow-[0_1px_0_rgba(0,0,0,0.04),_0_12px_30px_rgba(0,0,0,0.06)] sm:p-8">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-900">Acesso vitalÃ­cio</span>
+                  <span className="text-sm font-medium text-gray-900">Acesso vitalício</span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-gray-900 px-2.5 py-1 text-xs font-medium text-white shadow-sm">
-                    <Heart className="h-3 w-3" strokeWidth={1.5} /> Oferta Ãºnica
+                    <Heart className="h-3 w-3" strokeWidth={1.5} /> Oferta única
                   </span>
                 </div>
                 <div className="mt-4 flex items-baseline gap-2">
                   <span className="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">R$ 47,90</span>
-                  <span className="text-sm text-gray-500">Pagamento Ãºnico</span>
+                  <span className="text-sm text-gray-500">Pagamento único</span>
                 </div>
                 <div className="mt-2 text-sm font-medium text-gray-600">
                   Sem mensalidade. Sem bloqueios. App completo desde o primeiro acesso.
@@ -512,7 +512,7 @@ const Index = () => {
                   <ShieldCheck className="mt-1 h-5 w-5 flex-shrink-0 text-gray-700" strokeWidth={1.5} />
                   <div>
                     <p className="font-semibold text-gray-800">Garantia de 7 dias</p>
-                    <p className="text-sm text-gray-600">Teste sem risco. Se nÃ£o for para vocÃª, devolvemos o valor sem perguntas.</p>
+                    <p className="text-sm text-gray-600">Teste sem risco. Se não for para você, devolvemos o valor sem perguntas.</p>
                   </div>
                 </div>
 
@@ -520,7 +520,7 @@ const Index = () => {
                   onClick={() => handleCta("pricing-primary", heroCta)}
                   className="mt-8 w-full items-center gap-2 rounded-xl bg-gray-900 py-3 text-sm font-medium text-white shadow-[0_6px_20px_rgba(0,0,0,0.12)] transition-colors hover:bg-gray-800"
                 >
-                  Quero acesso vitalÃ­cio por R$ 47,90
+                  Quero acesso vitalício por R$ 47,90
                 </Button>
               </div>
             </div>
@@ -536,13 +536,13 @@ const Index = () => {
               <h3 className="text-2xl font-bold text-gray-900">Habitz</h3>
             </div>
             <p className="fade-in animate-delay-100 mx-auto max-w-2xl text-xl leading-relaxed text-gray-600">
-              Transforme intenÃ§Ã£o em rotina, e rotina em evoluÃ§Ã£o. Direto do seu navegador.
+              Transforme intenção em rotina, e rotina em evolução. Direto do seu navegador.
             </p>
           </div>
 
           <div className="fade-in animate-delay-200 border-t border-gray-200 pt-8">
             <div className="flex flex-col items-center justify-between gap-4 text-sm text-gray-500 sm:flex-row">
-              <p>Â© 2024 Habitz. Feito com disciplina para pessoas disciplinadas.</p>
+              <p>© 2024 Habitz. Feito com disciplina para pessoas disciplinadas.</p>
               <div className="flex items-center gap-6">
                 {FOOTER_LINKS.map((link) => (
                   <a key={link.label} href={link.href} className="transition-colors hover:text-gray-900">
@@ -559,6 +559,12 @@ const Index = () => {
 };
 
 export default Index;
+
+
+
+
+
+
 
 
 

@@ -1,4 +1,4 @@
-export interface NutritionTip {
+﻿export interface NutritionTip {
   id: number;
   title: string;
   description: string;
@@ -15,15 +15,15 @@ export const nutritionTips: NutritionTip[] = [
     description: "Esquece pão com margarina. Café puro + ovos ou shake de proteína.",
     premium_only: false,
     impact: "Alto",
-    meal_time: "Manhã"
+    meal_time: "Manhã",
   },
   {
     id: 2,
-    title: "Come proteína antes do carbo", 
+    title: "Coma proteína antes do carbo",
     description: "Evita pico de açúcar no sangue e dá mais saciedade.",
     premium_only: false,
     impact: "Moderado",
-    meal_time: "Manhã"
+    meal_time: "Manhã",
   },
   {
     id: 3,
@@ -31,7 +31,7 @@ export const nutritionTips: NutritionTip[] = [
     description: "Reidrata o corpo e regula eletrólitos após jejum noturno.",
     premium_only: true,
     impact: "Leve",
-    meal_time: "Manhã"
+    meal_time: "Manhã",
   },
 
   // ALMOÇO / JANTA
@@ -41,23 +41,23 @@ export const nutritionTips: NutritionTip[] = [
     description: "1/2 vegetais, 1/4 proteína magra, 1/4 carboidrato bom.",
     premium_only: false,
     impact: "Alto",
-    meal_time: "Almoço"
+    meal_time: "Almoço/Jantar",
   },
   {
     id: 5,
     title: "Arroz + ovo nunca falha",
     description: "Combinação simples, completa e econômica para energia.",
     premium_only: false,
-    impact: "Moderado", 
-    meal_time: "Almoço"
+    impact: "Moderado",
+    meal_time: "Almoço/Jantar",
   },
   {
     id: 6,
-    title: "Evita líquido com refeição grande",
-    description: "Atrasa digestão. Bebe antes da refeição ou 40min depois.",
+    title: "Evite líquido com refeição grande",
+    description: "Atrasa digestão. Beba antes da refeição ou 40 min depois.",
     premium_only: true,
     impact: "Moderado",
-    meal_time: "Almoço"
+    meal_time: "Almoço/Jantar",
   },
 
   // DIA TODO / ROTINA
@@ -67,15 +67,15 @@ export const nutritionTips: NutritionTip[] = [
     description: "A mente ama padrão e o corpo responde melhor à consistência.",
     premium_only: true,
     impact: "Alto",
-    meal_time: "Dia todo"
+    meal_time: "Dia todo",
   },
   {
     id: 8,
     title: "Evite açúcar escondido",
     description: "Sucos, iogurtes adoçados e barras. Adoçado = sabotado.",
     premium_only: false,
-    impact: "Alto", 
-    meal_time: "Dia todo"
+    impact: "Alto",
+    meal_time: "Dia todo",
   },
   {
     id: 9,
@@ -83,7 +83,7 @@ export const nutritionTips: NutritionTip[] = [
     description: "Vai parecer detox, mas é só comer comida de verdade.",
     premium_only: false,
     impact: "Alto",
-    meal_time: "Dia todo"
+    meal_time: "Dia todo",
   },
   {
     id: 10,
@@ -91,17 +91,17 @@ export const nutritionTips: NutritionTip[] = [
     description: "Maçã + castanhas ou banana + pasta de amendoim. Energia sustentada.",
     premium_only: false,
     impact: "Leve",
-    meal_time: "Lanche"
+    meal_time: "Lanche",
   },
 
-  // PRÉ/PÓS TREINO
+  // PRÉ/PÓS-TREINO
   {
     id: 11,
     title: "Pré-treino: banana + café",
     description: "Energia natural, eficiente e econômica para o treino.",
     premium_only: false,
     impact: "Moderado",
-    meal_time: "Pré-treino"
+    meal_time: "Pré-treino",
   },
   {
     id: 12,
@@ -109,6 +109,7 @@ export const nutritionTips: NutritionTip[] = [
     description: "Reposição rápida de glicogênio e proteína para recuperação.",
     premium_only: true,
     impact: "Alto",
-    meal_time: "Pós-treino"
-  }
+    meal_time: "Pós-treino",
+  },
 ];
+
