@@ -235,7 +235,7 @@ const HeroPreview = ({ onCtaClick, track }: HeroPreviewProps) => {
               }}
               className="h-12 rounded-2xl bg-slate-900 text-sm font-semibold text-white shadow-[0_12px_36px_rgba(15,23,42,0.18)] transition-transform hover:-translate-y-0.5 hover:bg-slate-800"
             >
-              Começar agora por R$ 47,90
+              Comecar agora
             </Button>
           </div>
         </CardContent>

@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Carousel,
   CarouselContent,
@@ -110,21 +109,14 @@ const UnlockedSection = ({ onCardSelect, onCtaClick, track }: UnlockedSectionPro
                 <CarouselItem key={card.id} className="md:basis-1/2 lg:basis-1/3">
                   <Card className="h-full overflow-hidden border border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
                     <CardHeader className="space-y-4 p-6">
-                      <div className="flex justify-center rounded-3xl bg-slate-50 p-4 sm:p-6 lg:p-8">
-                        <AspectRatio
-                          ratio={9 / 16}
-                          className="w-full max-w-[220px] sm:max-w-[260px] lg:max-w-[320px]"
-                        >
-                          <img
-                            src={card.image}
-                            alt={card.title}
-                            loading="lazy"
-                            decoding="async"
-                            className="h-full w-full rounded-2xl object-contain"
-                          />
-                        </AspectRatio>
-                      </div>
-                    </CardHeader>
+                  <img
+                    src={card.image}
+                    alt={card.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full rounded-3xl border border-slate-200 object-cover shadow-sm"
+                  />
+                </CardHeader>
                     <CardContent className="space-y-3 px-6 pb-8">
                       <div className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
                         {card.highlight}
@@ -159,7 +151,7 @@ const UnlockedSection = ({ onCardSelect, onCtaClick, track }: UnlockedSectionPro
             onClick={onCtaClick}
             className="h-14 rounded-2xl bg-gray-900 px-8 text-base font-semibold text-white shadow-[0_16px_40px_rgba(15,23,42,0.18)] transition-transform duration-300 hover:-translate-y-0.5 hover:bg-gray-800"
           >
-            Quero tudo agora por R$ 47,90
+            Quero acessar o Habitz agora
           </Button>
         </div>
       </div>

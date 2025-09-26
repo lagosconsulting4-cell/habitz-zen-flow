@@ -31,9 +31,9 @@ const NAV_LINKS = [
 ];
 
 const HERO_COUNTERS = [
-  { label: "5K+ usuários ativos", icon: Users },
-  { label: "87% concluem a primeira semana", icon: CheckCircle, iconClass: "text-green-500" },
-  { label: "+32K hábitos marcados", icon: Flame, iconClass: "text-orange-500" },
+  { label: "500 usuarios ativos", icon: Users },
+  { label: "97% concluem a primeira semana", icon: CheckCircle, iconClass: "text-green-500" },
+  { label: "2.764 habitos criados", icon: Flame, iconClass: "text-orange-500" },
 ];
 
 const HERO_HABITS = [
@@ -47,12 +47,6 @@ const HERO_STATS = [
   { value: "12", label: "Sequência", icon: Flame, gradient: "from-orange-400 to-red-500" },
   { value: "67%", label: "Hoje", icon: CheckCircle, gradient: "from-green-400 to-emerald-500" },
   { value: "94", label: "Total", icon: Activity, gradient: "from-blue-400 to-purple-500" },
-];
-
-const BIG_NUMBERS = [
-  { value: "32K+", label: "hábitos marcados", accent: "bg-emerald-200", hover: "group-hover/stat:text-emerald-600" },
-  { value: "87%", label: "Completam a primeira semana", accent: "bg-amber-200", hover: "group-hover/stat:text-amber-600" },
-  { value: "5K+", label: "usuários ativos diários", accent: "bg-gray-900", hover: "group-hover/stat:text-gray-900" },
 ];
 
 const ROADMAP_STEPS = [
@@ -74,8 +68,8 @@ const TESTIMONIALS = [
   {
     name: "Regina Afonso",
     role: "Designer, 26 anos",
-    quote: "Depois de 3 dias usando o Habitz já estava acordando melhor e parando de enrolar. Simples, mas eficaz.",
-    highlight: "3 dias para sentir diferença",
+    quote: "Depois de 3 dias usando o Habitz j� estava acordando melhor e parando de enrolar. Simples, mas eficaz.",
+    highlight: "3 dias para sentir diferen�a",
     icon: TrendingUp,
     accent: "emerald",
     avatar: "https://i.ibb.co/b5nSxRWm/mariana-designer.webp",
@@ -83,7 +77,7 @@ const TESTIMONIALS = [
   {
     name: "Felipe Pereira",
     role: "Empreendedor, 34 anos",
-    quote: "Achei que seria mais um app... virou parte da minha rotina diária. Impossível não marcar os hábitos.",
+    quote: "Achei que seria mais um app... virou parte da minha rotina di�ria. Imposs�vel n�o marcar os h�bitos.",
     highlight: "Virou rotina automaticamente",
     icon: Repeat,
     accent: "sky",
@@ -93,44 +87,17 @@ const TESTIMONIALS = [
     name: "Luan Fonatti",
     role: "Estudante, 22 anos",
     quote: "O modo guiado fez mais por mim do que meses de planner. Em 4 semanas virei outra pessoa.",
-    highlight: "Mudança em 4 semanas",
+    highlight: "Mudan�a em 4 semanas",
     icon: Zap,
     accent: "violet",
     avatar: "https://i.ibb.co/spy6CscW/Luan-estudante.webp",
   },
-  {
-    name: "Anna Pirelli",
-    role: "Advogada, 29 anos",
-    quote: "Mantive minha rotina de treino por mais de 2 meses. Antes não passava de 2 semanas.",
-    highlight: "2+ meses de consistência",
-    icon: CalendarCheck,
-    accent: "amber",
-    avatar: "https://i.ibb.co/n877s5MG/ana-advogada-webp.webp",
-  },
-  {
-    name: "Aleixo Lima",
-    role: "Desenvolvedor, 31 anos",
-    quote: "Trabalho remoto e estava perdendo o ritmo. O Habitz reorganizou meu dia sem burocracia.",
-    highlight: "Perfeito para home office",
-    icon: Home,
-    accent: "teal",
-    avatar: "https://i.ibb.co/VW6PKZV8/Quando-pensar-virou-trabalho-demais-1.webp",
-  },
-  {
-    name: "Márcia Ferreira",
-    role: "Psicóloga, 27 anos",
-    quote: "Como Psicóloga, vejo muita coisa complexa. O Habitz é científico, direto e indico para pacientes.",
-    highlight: "Indicado por profissional",
-    icon: Heart,
-    accent: "rose",
-    avatar: "https://i.ibb.co/wF2zkBZt/julia-psicologa.webp",
-  },
 ];
 
 const PRICING_FEATURES = [
-  "Acesso vitalício ao produto completo",
-  "1 ano de Atualizações incluídas",
-  "instalação em segundos no navegador",
+  "Plano anual com todos os recursos liberados",
+  "12 meses com atualizacoes inclusas",
+  "Instalacao em segundos direto no navegador",
 ];
 
 const FOOTER_LINKS = [
@@ -287,19 +254,10 @@ const Index = () => {
             <div className="space-y-8 lg:col-span-6">
               <div className="space-y-6">
                 <h1 className="slide-up text-5xl font-bold leading-none tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
-                  Se organize.
-                  <br />
-                  <span className="slide-up animate-delay-200 text-gray-700">Evolua.</span>
-                  <br />
-                  <span className="slide-up animate-delay-300 text-4xl text-gray-500 sm:text-5xl lg:text-6xl">
-                    Direto do seu navegador.
-                  </span>
+                  Transforme a sua vida em apenas 7 dias.
                 </h1>
                 <p className="slide-up animate-delay-400 max-w-xl text-xl font-medium leading-relaxed text-gray-600 sm:text-2xl">
-                  Habitz e o aplicativo minimalista que transforma intencao em rotina, e rotina em evolucao.
-                </p>
-                <p className="slide-up animate-delay-500 text-lg text-gray-500">
-                  Sem distracao. Sem coach. Sem plano gratuito. Tudo liberado por R$ 47,90.
+                  Habitz e o app que transforma intencao em rotina. E rotina em evolucao.
                 </p>
               </div>
 
@@ -309,12 +267,8 @@ const Index = () => {
                   className="group inline-flex items-center gap-3 rounded-full bg-black px-8 py-4 text-base font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-900 hover:shadow-xl"
                 >
                   <CheckCircle className="h-5 w-5 transition-transform group-hover:scale-110" strokeWidth={1.5} />
-                  Quero comecar agora
+                  Comecar minha jornada
                 </Button>
-                <div className="flex flex-col text-sm text-gray-500">
-                  <span className="font-medium">R$ 47,90 - pagamento unico</span>
-                  <span>Acesso vitalicio. Sem mensalidade.</span>
-                </div>
               </div>
 
               <div className="slide-up animate-delay-700 flex flex-wrap items-center gap-6 text-sm text-gray-500">
@@ -342,42 +296,6 @@ const Index = () => {
       </header>
 
       <main>
-        <section className="mx-6 mb-20 mt-8 overflow-hidden rounded-3xl bg-white shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)]">
-          <div className="pt-16 pb-16 pr-6 pl-6 md:px-10 lg:px-14">
-            <div className="fade-in mx-auto mb-16 max-w-3xl text-center">
-              <h2 className="text-4xl font-normal tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">Números que falam,</h2>
-              <h3 className="mb-6 text-4xl font-normal tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">Resultados reais</h3>
-              <p className="text-lg text-slate-600">Gente comum que decidiu transformar intenção em rotina e viu a vida andar.</p>
-            </div>
-
-            <div className="relative rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100 p-8 transition-all duration-700 hover:shadow-2xl hover:shadow-black/10">
-              <div className="grid grid-cols-1 gap-8 text-center md:grid-cols-3">
-                {BIG_NUMBERS.map((item, index) => (
-                  <div
-                    key={item.label}
-                    className="group/stat transform transition-all duration-500 hover:-translate-y-2 hover:scale-110"
-                    style={{ transitionDelay: `${index * 0.1}s` }}
-                  >
-                    <div className={`text-3xl font-bold text-slate-900 transition-colors duration-300 md:text-4xl ${item.hover}`}>
-                      {item.value}
-                    </div>
-                    <div className="text-sm text-slate-600 transition-colors duration-300 group-hover/stat:text-slate-800">
-                      {item.label}
-                    </div>
-                    <div className={`mx-auto mt-2 h-1 w-12 rounded-full opacity-0 transition-all duration-500 group-hover/stat:opacity-100 ${item.accent}`} />
-                  </div>
-                ))}
-              </div>
-
-              <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-10">
-                <div className="absolute left-4 top-4 h-2 w-2 animate-ping rounded-full bg-emerald-400" />
-                <div className="absolute right-12 top-8 h-1 w-1 animate-ping rounded-full bg-amber-400" style={{ animationDelay: "0.5s" }} />
-                <div className="absolute bottom-6 left-8 h-1.5 w-1.5 animate-ping rounded-full bg-gray-400" style={{ animationDelay: "1s" }} />
-                <div className="absolute bottom-4 right-4 h-1 w-1 animate-ping rounded-full bg-black" style={{ animationDelay: "1.5s" }} />
-              </div>
-            </div>
-          </div>
-        </section>
 
         <UnlockedSection onCtaClick={() => handleCta("unlock-primary", heroCta)} track={track} />
 
@@ -477,22 +395,22 @@ const Index = () => {
                 Pronto para assumir o controle?
               </h2>
               <span className="mt-4 block text-3xl font-medium text-gray-600 sm:text-4xl lg:text-5xl">
-                Uma compra. Acesso total.
+                Um plano. Um ano inteiro de evolu��o.
               </span>
 
               <div className="relative mx-auto mt-12 max-w-lg rounded-3xl bg-white p-6 ring-1 ring-black/5 shadow-[0_1px_0_rgba(0,0,0,0.04),_0_12px_30px_rgba(0,0,0,0.06)] sm:p-8">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-900">Acesso vitalício</span>
+                  <span className="text-sm font-medium text-gray-900">Plano anual</span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-gray-900 px-2.5 py-1 text-xs font-medium text-white shadow-sm">
-                    <Heart className="h-3 w-3" strokeWidth={1.5} /> Oferta única
+                    <Heart className="h-3 w-3" strokeWidth={1.5} /> Renovacao anual
                   </span>
                 </div>
                 <div className="mt-4 flex items-baseline gap-2">
                   <span className="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">R$ 47,90</span>
-                  <span className="text-sm text-gray-500">Pagamento único</span>
+                  <span className="text-sm text-gray-500">Pagamento anual</span>
                 </div>
                 <div className="mt-2 text-sm font-medium text-gray-600">
-                  Sem mensalidade. Sem bloqueios. App completo desde o primeiro acesso.
+                  Pagamento anual unico para 12 meses completos do Habitz, com conteudos, atualizacoes e suporte inclusos.
                 </div>
 
                 <div className="mt-6 border-t border-gray-200" />
@@ -512,7 +430,7 @@ const Index = () => {
                   <ShieldCheck className="mt-1 h-5 w-5 flex-shrink-0 text-gray-700" strokeWidth={1.5} />
                   <div>
                     <p className="font-semibold text-gray-800">Garantia de 7 dias</p>
-                    <p className="text-sm text-gray-600">Teste sem risco. Se não for para você, devolvemos o valor sem perguntas.</p>
+                    <p className="text-sm text-gray-600">Teste sem risco. Se nao for para voce, devolvemos o valor sem perguntas.</p>
                   </div>
                 </div>
 
@@ -520,7 +438,7 @@ const Index = () => {
                   onClick={() => handleCta("pricing-primary", heroCta)}
                   className="mt-8 w-full items-center gap-2 rounded-xl bg-gray-900 py-3 text-sm font-medium text-white shadow-[0_6px_20px_rgba(0,0,0,0.12)] transition-colors hover:bg-gray-800"
                 >
-                  Quero acesso vitalício por R$ 47,90
+                  Quero o plano anual por R$ 47,90
                 </Button>
               </div>
             </div>
