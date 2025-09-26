@@ -1,18 +1,17 @@
-﻿import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import useLandingMetrics from "@/hooks/useLandingMetrics";
+import HeroPreview from "@/components/landing/hero-preview";
+import UnlockedSection from "@/components/landing/unlocked-section";
 import {
   Activity,
   ArrowRight,
-  Award,
-  BookOpen,
   CalendarCheck,
   Check,
   CheckCircle,
   Flame,
-  Focus,
   Heart,
   Home,
   Menu,
@@ -56,34 +55,6 @@ const BIG_NUMBERS = [
   { value: "5K+", label: "Usuários ativos diários", accent: "bg-gray-900", hover: "group-hover/stat:text-gray-900" },
 ];
 
-const FEATURE_ITEMS = [
-  {
-    icon: CheckCircle,
-    title: "Crie e organize seus hábitos com lembretes diários",
-    description: "Sistema direto para criar e acompanhar hábitos que importam, com alertas na hora certa.",
-  },
-  {
-    icon: Flame,
-    title: "Receba frases motivacionais poderosas, todos os dias",
-    description: "Mensagens diárias para manter o foco na disciplina e evitar recaídas.",
-  },
-  {
-    icon: Focus,
-    title: "Use técnicas simples de meditação e respiração",
-    description: "Áudios guiados e exercícios rápidos para equilibrar mente e corpo.",
-  },
-  {
-    icon: BookOpen,
-    title: "Acesse dicas de rotina, leitura, dieta e foco",
-    description: "Conteúdo curado sobre performance, saúde e produtividade, sem enrolação.",
-  },
-  {
-    icon: Award,
-    title: "Siga o Modo Guiado: 4 semanas para sair do piloto automático",
-    description: "Trilha estruturada que libera cada dia conforme você conclui a etapa anterior.",
-  },
-];
-
 const ROADMAP_STEPS = [
   {
     title: "Acesse o Habitz pelo link",
@@ -101,58 +72,58 @@ const ROADMAP_STEPS = [
 
 const TESTIMONIALS = [
   {
-    name: "Mariana Silva",
+    name: "Regina Afonso",
     role: "Designer, 26 anos",
     quote: "Depois de 3 dias usando o Habitz já estava acordando melhor e parando de enrolar. Simples, mas eficaz.",
     highlight: "3 dias para sentir diferença",
     icon: TrendingUp,
     accent: "emerald",
-    avatar: "https://images.unsplash.com/photo-1621619856624-42fd193a0661?w=1080&q=80",
+    avatar: "https://i.ibb.co/b5nSxRWm/mariana-designer.webp",
   },
   {
-    name: "Felipe Santos",
+    name: "Felipe Pereira",
     role: "Empreendedor, 34 anos",
     quote: "Achei que seria mais um app... virou parte da minha rotina diária. Impossível não marcar os hábitos.",
     highlight: "Virou rotina automaticamente",
     icon: Repeat,
     accent: "sky",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face",
+    avatar: "https://i.ibb.co/RkWBcYRP/felipe-empreendedor-webp.webp",
   },
   {
-    name: "Luan Costa",
+    name: "Luan Fonatti",
     role: "Estudante, 22 anos",
     quote: "O modo guiado fez mais por mim do que meses de planner. Em 4 semanas virei outra pessoa.",
     highlight: "Mudança em 4 semanas",
     icon: Zap,
     accent: "violet",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face",
+    avatar: "https://i.ibb.co/spy6CscW/Luan-estudante.webp",
   },
   {
-    name: "Ana Carolina",
+    name: "Anna Pirelli",
     role: "Advogada, 29 anos",
     quote: "Mantive minha rotina de treino por mais de 2 meses. Antes não passava de 2 semanas.",
     highlight: "2+ meses de consistência",
     icon: CalendarCheck,
     accent: "amber",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
+    avatar: "https://i.ibb.co/n877s5MG/ana-advogada-webp.webp",
   },
   {
-    name: "Pedro Lima",
+    name: "Aleixo Lima",
     role: "Desenvolvedor, 31 anos",
     quote: "Trabalho remoto e estava perdendo o ritmo. O Habitz reorganizou meu dia sem burocracia.",
     highlight: "Perfeito para home office",
     icon: Home,
     accent: "teal",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
+    avatar: "https://i.ibb.co/VW6PKZV8/Quando-pensar-virou-trabalho-demais-1.webp",
   },
   {
-    name: "Julia Ferreira",
+    name: "M?rcia Ferreira",
     role: "Psicóloga, 27 anos",
     quote: "Como psicóloga, vejo muita coisa complexa. O Habitz é científico, direto e indico para pacientes.",
     highlight: "Indicado por profissional",
     icon: Heart,
     accent: "rose",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=face",
+    avatar: "https://i.ibb.co/wF2zkBZt/julia-psicologa.webp",
   },
 ];
 
@@ -325,10 +296,10 @@ const Index = () => {
                   </span>
                 </h1>
                 <p className="slide-up animate-delay-400 max-w-xl text-xl font-medium leading-relaxed text-gray-600 sm:text-2xl">
-                  Habitz é o aplicativo minimalista que transforma intenção em rotina, e rotina em evolução.
+                  Habitz e o aplicativo minimalista que transforma intencao em rotina, e rotina em evolucao.
                 </p>
                 <p className="slide-up animate-delay-500 text-lg text-gray-500">
-                  Sem distração. Sem coach. Sem plano gratuito. Tudo liberado por R$ 47,90.
+                  Sem distracao. Sem coach. Sem plano gratuito. Tudo liberado por R$ 47,90.
                 </p>
               </div>
 
@@ -338,11 +309,11 @@ const Index = () => {
                   className="group inline-flex items-center gap-3 rounded-full bg-black px-8 py-4 text-base font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-900 hover:shadow-xl"
                 >
                   <CheckCircle className="h-5 w-5 transition-transform group-hover:scale-110" strokeWidth={1.5} />
-                  Quero começar agora
+                  Quero comecar agora
                 </Button>
                 <div className="flex flex-col text-sm text-gray-500">
-                  <span className="font-medium">R$ 47,90 – pagamento único</span>
-                  <span>Acesso vitalício. Sem mensalidade.</span>
+                  <span className="font-medium">R$ 47,90 - pagamento unico</span>
+                  <span>Acesso vitalicio. Sem mensalidade.</span>
                 </div>
               </div>
 
@@ -356,102 +327,15 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="blur-in animate-delay-600 lg:col-span-6">
-              <div className="relative">
-                <div className="minimal-gradient minimal-dots relative overflow-hidden rounded-3xl border border-gray-800/30 shadow-2xl">
-                  <div className="flex items-center justify-between border-b border-gray-700/30 bg-white/5 p-6 backdrop-blur-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gray-400 to-gray-600">
-                        <CheckCircle className="h-6 w-6 text-white" strokeWidth={1.5} />
-                      </div>
-                      <span className="font-semibold text-white">Meus hábitos</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-red-400/70" />
-                      <span className="h-2 w-2 rounded-full bg-yellow-400/70" />
-                      <span className="h-2 w-2 rounded-full bg-green-400/70" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-6 p-8">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-200">Progresso de hoje</span>
-                        <span className="text-sm text-gray-300">4/6 completos</span>
-                      </div>
-                      <div className="h-2 w-full rounded-full bg-white/10">
-                        <div className="h-2 rounded-full bg-gradient-to-r from-green-400 to-emerald-500" style={{ width: "67%" }} />
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      {HERO_HABITS.map((habit) => (
-                        <div
-                          key={habit.label}
-                          className={`flex items-center justify-between rounded-xl border p-4 backdrop-blur-sm ${
-                            habit.status === "done"
-                              ? "border-white/10 bg-white/10 opacity-75"
-                              : habit.status === "pending"
-                              ? "border-white/20 bg-white/20 animate-pulse"
-                              : "border-white/20 bg-white/20"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            {habit.status === "done" ? (
-                              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500">
-                                <Check className="h-3 w-3 text-white" strokeWidth={2} />
-                              </div>
-                            ) : (
-                              <div className="h-6 w-6 rounded-full border-2 border-gray-400" />
-                            )}
-                            <span
-                              className={`font-medium text-white ${habit.status === "done" ? "line-through" : ""}`}
-                            >
-                              {habit.label}
-                            </span>
-                          </div>
-                          {habit.status === "pending" ? (
-                            <span className="text-xs text-yellow-400">{habit.tag}</span>
-                          ) : (
-                            <span className="text-xs text-gray-300">{habit.time}</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="rounded-xl border border-white/10 bg-gradient-to-r from-gray-700/50 to-gray-800/50 p-4 backdrop-blur-sm">
-                      <div className="flex items-start gap-3">
-                        <PlusCircle className="mt-1 h-5 w-5 flex-shrink-0 text-yellow-400" strokeWidth={1.5} />
-                        <div>
-                          <p className="text-sm leading-relaxed text-white">
-                            “A disciplina é a ponte entre objetivos e conquistas. Cada hábito é um tijolo nessa construção.”
-                          </p>
-                          <p className="mt-2 text-xs text-gray-400">Frase do dia</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                      {HERO_STATS.map(({ value, label, icon: Icon, gradient }) => (
-                        <div key={label} className="space-y-1 text-center">
-                          <div className={`mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${gradient}`}>
-                            <Icon className="h-5 w-5 text-white" strokeWidth={1.5} />
-                          </div>
-                          <p className="text-lg font-bold text-white">{value}</p>
-                          <p className="text-xs text-gray-300">{label}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="scale-in animate-delay-800 absolute -top-6 -right-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-100 shadow-2xl backdrop-blur-3xl">
-                  <CheckCircle className="h-8 w-8 text-green-600" strokeWidth={1.5} />
-                </div>
-                <div className="scale-in animate-delay-700 absolute -bottom-4 -left-4 flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 shadow-lg backdrop-blur-3xl">
-                  <Flame className="h-6 w-6 text-orange-600" strokeWidth={1.5} />
-                </div>
+            <div className="relative hidden lg:col-span-6 lg:block">
+              <div className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-white/90 to-slate-100 shadow-[0_40px_120px_rgba(15,23,42,0.12)]" />
+              <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-100 bg-white/95 shadow-[0_30px_100px_rgba(15,23,42,0.14)]">
+                <HeroPreview onCtaClick={() => handleCta("hero-preview", heroCta)} track={track} />
               </div>
+            </div>
+
+            <div className="lg:hidden">
+              <HeroPreview onCtaClick={() => handleCta("hero-preview", heroCta)} track={track} />
             </div>
           </div>
         </section>
@@ -495,34 +379,8 @@ const Index = () => {
           </div>
         </section>
 
-        <section id="recursos" className="bg-white py-24">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="fade-in mx-auto mb-16 max-w-2xl text-center">
-              <h2 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-                Tudo destravado. Comece agora com o app completo
-              </h2>
-              <p className="mt-6 text-xl leading-relaxed text-gray-600">
-                Interface limpa, experiência leve e feita para funcionar. Sem distração, direto ao ponto.
-              </p>
-            </div>
+        <UnlockedSection onCtaClick={() => handleCta("unlock-primary", heroCta)} track={track} />
 
-            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-2">
-              {FEATURE_ITEMS.map((item, index) => (
-                <div key={item.title} className="slide-up space-y-6" style={{ animationDelay: `${0.1 * (index + 1)}s` }}>
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-black">
-                      <item.icon className="h-6 w-6 text-white" strokeWidth={1.5} />
-                    </div>
-                    <div>
-                      <h3 className="mb-2 text-xl font-semibold text-gray-900">{item.title}</h3>
-                      <p className="leading-relaxed text-gray-600">{item.description}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         <section id="funciona" className="bg-gray-50 py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
