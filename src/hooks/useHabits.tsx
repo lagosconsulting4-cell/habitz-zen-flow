@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -29,7 +29,7 @@ export const useHabits = () => {
   const [completions, setCompletions] = useState<HabitCompletion[]>([]);
   const { toast } = useToast();
 
-  const fetchHabits = async () => {
+  const fetchHabits = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('habits')
@@ -43,13 +43,13 @@ export const useHabits = () => {
       console.error('Error fetching habits:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar seus hábitos",
+        description: "Nao foi possivel carregar seus habitos",
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
-  const fetchTodayCompletions = async () => {
+  const fetchTodayCompletions = useCallback(async () => {
     try {
       const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
@@ -62,7 +62,7 @@ export const useHabits = () => {
     } catch (error) {
       console.error('Error fetching completions:', error);
     }
-  };
+  }, []);
 
   const createHabit = async (habitData: Omit<Habit, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'streak' | 'is_active'>) => {
     try {
@@ -85,7 +85,7 @@ export const useHabits = () => {
       setHabits(prev => [...prev, data as Habit]);
       toast({
         title: "Sucesso!",
-        description: "Hábito criado com sucesso",
+        description: "Habito criado com sucesso",
       });
       
       return data;
@@ -93,7 +93,7 @@ export const useHabits = () => {
       console.error('Error creating habit:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível criar o hábito",
+        description: "Nao foi possivel criar o habito",
         variant: "destructive",
       });
       throw error;
@@ -152,7 +152,7 @@ export const useHabits = () => {
       console.error('Error toggling habit:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o hábito",
+        description: "Nao foi possivel atualizar o habito",
         variant: "destructive",
       });
     }
@@ -185,7 +185,7 @@ export const useHabits = () => {
     };
 
     loadData();
-  }, []);
+  }, [fetchHabits, fetchTodayCompletions]);
 
   const getHabitCompletionStatus = (habitId: string) => {
     return completions.some(c => c.habit_id === habitId);

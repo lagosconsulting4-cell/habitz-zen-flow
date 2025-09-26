@@ -59,4 +59,4 @@ INSERT INTO public.books (title, author, description, category, rating, affiliat
 ('Hábitos Atômicos', 'James Clear', 'O guia definitivo para criar bons hábitos e quebrar os ruins. Estratégias práticas baseadas em ciência.', 'Produtividade', 4.8, '#'),
 ('O Poder do Hábito', 'Charles Duhigg', 'Como os hábitos funcionam e como transformá-los. Uma jornada fascinante pela neurociência dos hábitos.', 'Psicologia', 4.6, '#'),
 ('Mindset', 'Carol Dweck', 'A mentalidade do crescimento que transforma fracassos em sucessos. Essencial para desenvolvimento pessoal.', 'Mindset', 4.7, '#'),
-('Foco', 'Daniel Goleman', 'Como desenvolver foco e atenção em um mundo cheio de distrações. Fundamental para produtividade.', 'Concentração', 4.5, '#');
+('Foco', 'Daniel Goleman', 'Como desenvolver foco e atenção em um mundo cheio de distrações. Fundamental para produtividade.', 'Concentração', 4.5, '#');;

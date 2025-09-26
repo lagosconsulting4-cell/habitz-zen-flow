@@ -1,0 +1,61 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ArrowLeft, RefreshCw, ShieldOff } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { usePremium } from "@/hooks/usePremium";
+
+const Cancel = () => {
+  const navigate = useNavigate();
+  const [userId, setUserId] = useState<string | null>(null);
+  const { isPremium, loading } = usePremium(userId ?? undefined);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUserId(data.user?.id ?? null);
+    };
+
+    loadUser();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+      <Card className="max-w-xl w-full glass-card p-10 text-center space-y-6">
+        <div className="flex flex-col items-center gap-3">
+          <ShieldOff className="w-12 h-12 text-muted-foreground" />
+          <h1 className="text-2xl font-semibold">Checkout cancelado</h1>
+          <p className="text-muted-foreground">
+            Sem problema, voce pode tentar de novo quando estiver pronto. O acesso vitalicio continua disponivel por R$ 47,90.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button className="flex-1" onClick={() => navigate("/pricing", { replace: true })}>
+            Tentar novamente
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => navigate(isPremium ? "/dashboard" : "/", { replace: true })}
+            disabled={loading}
+          >
+            {loading ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : isPremium ? (
+              "Ir para o dashboard"
+            ) : (
+              <div className="flex items-center justify-center gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                <span>Voltar ao inicio</span>
+              </div>
+            )}
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+};
+
+export default Cancel;

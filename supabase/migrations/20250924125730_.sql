@@ -153,4 +153,4 @@ CREATE INDEX idx_habits_user_id ON public.habits (user_id);
 CREATE INDEX idx_habits_active ON public.habits (user_id, is_active);
 CREATE INDEX idx_habit_completions_user_id ON public.habit_completions (user_id);
 CREATE INDEX idx_habit_completions_date ON public.habit_completions (user_id, completed_at);
-CREATE INDEX idx_habit_completions_habit ON public.habit_completions (habit_id, completed_at);
+CREATE INDEX idx_habit_completions_habit ON public.habit_completions (habit_id, completed_at);;

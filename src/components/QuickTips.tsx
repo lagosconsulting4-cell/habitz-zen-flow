@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { ChevronRight, Lightbulb } from "lucide-react";
-import { useTips } from "@/hooks/useSupabaseData";
+import { useTips, type Tip } from "@/hooks/useSupabaseData";
 
 const QuickTips = () => {
   const { tips, loading } = useTips();
-  const [currentTip, setCurrentTip] = useState<any>(null);
+  const [currentTip, setCurrentTip] = useState<Tip | null>(null);
 
   useEffect(() => {
     if (tips.length > 0 && !currentTip) {
@@ -15,13 +15,14 @@ const QuickTips = () => {
 
   useEffect(() => {
     if (tips.length === 0) return;
-    
+
     // Rotate tips every 10 seconds
     const interval = setInterval(() => {
-      setCurrentTip((prev: any) => {
-        const currentIndex = tips.findIndex(tip => tip.id === prev?.id);
-        const nextIndex = (currentIndex + 1) % tips.length;
-        return tips[nextIndex];
+      setCurrentTip((prev) => {
+        if (tips.length === 0) return prev;
+        const currentIndex = prev ? tips.findIndex((tip) => tip.id === prev.id) : -1;
+        const nextIndex = (currentIndex + 1 + tips.length) % tips.length;
+        return tips[nextIndex] ?? prev ?? tips[0];
       });
     }, 10000);
 
