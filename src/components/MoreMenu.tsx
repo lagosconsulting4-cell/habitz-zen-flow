@@ -6,6 +6,7 @@ import {
   Headphones,
   Home,
   Lightbulb,
+  ListChecks,
   Map,
   Plus,
   TrendingUp,
@@ -44,6 +45,7 @@ const iconMap: Record<string, LucideIcon> = {
   headphones: Headphones,
   lightbulb: Lightbulb,
   map: Map,
+  "list-checks": ListChecks,
 };
 
 interface MoreMenuProps {

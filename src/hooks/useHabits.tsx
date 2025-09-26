@@ -10,9 +10,6 @@ const emitProgressChange = (date?: string) => {
   );
 };
 
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-
 export interface Habit {
   id: string;
   name: string;
@@ -47,7 +44,6 @@ export const useHabits = () => {
       const { data, error } = await supabase
         .from("habits")
         .select("*")
-        .eq("is_active", true)
         .order("created_at", { ascending: true });
 
       if (error) throw error;
@@ -60,7 +56,10 @@ export const useHabits = () => {
         variant: "destructive",
       });
     }
-  }, [toast]);
+  // Intentionally no dependencies to keep function identity stable and
+  // avoid re-triggering the initial load effect in a loop if `toast` changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchCompletionsForDate = useCallback(async (date: string) => {
     try {
@@ -75,7 +74,10 @@ export const useHabits = () => {
       return data || [];
     } catch (error) {
       console.error("Error fetching completions:", error);
-      throw error;
+      // Fail gracefully: keep UI responsive instead of hanging in loading state
+      setCompletions([]);
+      setCompletionsDate(date);
+      return [];
     }
   }, []);
 
@@ -83,8 +85,12 @@ export const useHabits = () => {
     const loadData = async () => {
       setLoading(true);
       const today = new Date().toISOString().split("T")[0];
-      await Promise.all([fetchHabits(), fetchCompletionsForDate(today)]);
-      setLoading(false);
+      try {
+        // Use settled to avoid hanging the UI if one query fails temporarily
+        await Promise.allSettled([fetchHabits(), fetchCompletionsForDate(today)]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadData();
@@ -126,6 +132,121 @@ export const useHabits = () => {
       toast({
         title: "Erro",
         description: "Nao foi possivel criar o habito",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const updateHabit = async (
+    habitId: string,
+    updates: Partial<Pick<Habit, "name" | "emoji" | "category" | "period" | "days_of_week" | "is_active">>
+  ) => {
+    try {
+      const { data, error } = await supabase
+        .from("habits")
+        .update({ ...updates })
+        .eq("id", habitId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setHabits((prev) => prev.map((habit) => (habit.id === habitId ? { ...habit, ...updates } : habit)));
+      return data as Habit;
+    } catch (error) {
+      console.error("Error updating habit:", error);
+      toast({
+        title: "Erro",
+        description: "Nao foi possivel atualizar o habito",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const setHabitActive = async (habitId: string, isActive: boolean) => {
+    await updateHabit(habitId, { is_active: isActive });
+    await fetchHabits();
+  };
+
+  const archiveHabit = async (habitId: string) => {
+    await setHabitActive(habitId, false);
+    toast({
+      title: "Habito arquivado",
+      description: "Ele nao aparecera mais no dia a dia",
+    });
+  };
+
+  const restoreHabit = async (habitId: string) => {
+    await setHabitActive(habitId, true);
+    toast({
+      title: "Habito reativado",
+      description: "Ele voltara a aparecer no seu dia a dia",
+    });
+  };
+
+  const deleteHabit = async (habitId: string) => {
+    try {
+      const { error } = await supabase
+        .from("habits")
+        .delete()
+        .eq("id", habitId);
+
+      if (error) throw error;
+
+      setHabits((prev) => prev.filter((habit) => habit.id !== habitId));
+      toast({ title: "Habito removido" });
+      emitProgressChange();
+    } catch (error) {
+      console.error("Error deleting habit:", error);
+      toast({
+        title: "Erro",
+        description: "Nao foi possivel remover o habito",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const duplicateHabit = async (habitId: string) => {
+    try {
+      const original = habits.find((habit) => habit.id === habitId);
+      if (!original) {
+        throw new Error("Habit not found");
+      }
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const { data, error } = await supabase
+        .from("habits")
+        .insert([
+          {
+            name: `${original.name} (copia)`,
+            emoji: original.emoji,
+            category: original.category,
+            period: original.period,
+            days_of_week: original.days_of_week,
+            user_id: user.id,
+            streak: 0,
+            is_active: true,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setHabits((prev) => [...prev, data as Habit]);
+      toast({ title: "Habito duplicado" });
+    } catch (error) {
+      console.error("Error duplicating habit:", error);
+      toast({
+        title: "Erro",
+        description: "Nao foi possivel duplicar o habito",
         variant: "destructive",
       });
       throw error;
@@ -228,6 +349,11 @@ export const useHabits = () => {
     habits,
     loading,
     createHabit,
+    updateHabit,
+    archiveHabit,
+    restoreHabit,
+    deleteHabit,
+    duplicateHabit,
     toggleHabit,
     getHabitsForDate,
     getHabitCompletionStatus,
@@ -237,8 +363,3 @@ export const useHabits = () => {
     completionsDate,
   };
 };
-
-
-
-
-

@@ -19,6 +19,7 @@ import Calendar from "./pages/Calendar";
 import Pricing from "./pages/Pricing";
 import Thanks from "./pages/Thanks";
 import Cancel from "./pages/Cancel";
+import MyHabits from "./pages/MyHabits";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "@/layouts/ProtectedLayout";
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/create" element={<CreateHabit />} />
+            <Route path="/habits" element={<MyHabits />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/progress" element={<Progress />} />
             <Route path="/meditation" element={<Meditation />} />

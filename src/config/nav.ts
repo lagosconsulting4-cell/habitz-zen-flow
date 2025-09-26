@@ -1,4 +1,4 @@
-﻿export type NavItemVariant = "primary" | "secondary";
+export type NavItemVariant = "primary" | "secondary";
 
 export interface NavItem {
   id: string;
@@ -18,8 +18,10 @@ export const navItems: NavItem[] = [
   { id: "books", label: "Biblioteca", path: "/books", icon: "book", variant: "secondary", requiresAuth: true },
   { id: "meditation", label: "Meditacao", path: "/meditation", icon: "headphones", variant: "secondary", requiresAuth: true },
   { id: "tips", label: "Insights", path: "/tips", icon: "lightbulb", variant: "secondary", requiresAuth: true },
-  { id: "guided", label: "Jornada", path: "/guided", icon: "map", variant: "secondary", requiresAuth: true }
+  { id: "guided", label: "Jornada", path: "/guided", icon: "map", variant: "secondary", requiresAuth: true },
+  { id: "my-habits", label: "Meus Habitos", path: "/habits", icon: "list-checks", variant: "secondary", requiresAuth: true }
 ];
 
 export const primaryNavItems = navItems.filter((item) => item.variant === "primary");
 export const secondaryNavItems = navItems.filter((item) => item.variant === "secondary");
+

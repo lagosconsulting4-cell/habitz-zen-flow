@@ -248,6 +248,18 @@ const CreateHabit = () => {
           )}
         </div>
 
+        <div className="mt-8 flex flex-col items-stretch md:flex-row md:justify-end">
+          <Button
+            onClick={handleSave}
+            disabled={!habitName.trim() || isSaving}
+            className="rounded-xl px-6 py-3 shadow-soft hover:shadow-medium transition-all duration-300 md:w-auto"
+            size="lg"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {isSaving ? "Salvando..." : "Salvar"}
+          </Button>
+        </div>
+
         <div className="h-20" />
       </div>
     </div>

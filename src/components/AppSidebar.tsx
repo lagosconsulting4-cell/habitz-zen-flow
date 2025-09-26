@@ -8,6 +8,7 @@ import {
   Book,
   Headphones,
   Lightbulb,
+  ListChecks,
   Map,
   type LucideIcon,
 } from "lucide-react";
@@ -23,6 +24,7 @@ const iconMap: Record<string, LucideIcon> = {
   book: Book,
   headphones: Headphones,
   lightbulb: Lightbulb,
+  "list-checks": ListChecks,
   map: Map,
 };
 
