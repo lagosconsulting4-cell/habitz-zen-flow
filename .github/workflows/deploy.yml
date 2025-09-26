@@ -31,9 +31,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
-        env:
-          CI: true
+        run: npm run build\n        env:\n          CI: true\n          GITHUB_PAGES: 'true'
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
