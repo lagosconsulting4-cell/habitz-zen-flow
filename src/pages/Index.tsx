@@ -168,7 +168,7 @@ const FOOTER_LINKS = [
   { label: "Suporte", href: "#" },
 ];
 
-const CTA_ROUTE = "/pricing";
+const CTA_ROUTE = "https://pay.kiwify.com.br/ZkOYIlG";
 
 const accentMap: Record<string, string> = {
   emerald: "group-hover:text-emerald-700",
@@ -253,7 +253,7 @@ const Index = () => {
     [track],
   );
 
-  const heroCta = () => navigate(CTA_ROUTE);
+  const heroCta = () => window.open(CTA_ROUTE, "_blank", "noopener,noreferrer");
 
   return (
     <div className="overflow-x-hidden bg-white text-gray-900">
@@ -701,6 +701,8 @@ const Index = () => {
 };
 
 export default Index;
+
+
 
 
 

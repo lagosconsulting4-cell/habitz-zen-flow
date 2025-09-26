@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, RefreshCw, ShieldOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePremium } from "@/hooks/usePremium";
+
+const KIWIFY_CHECKOUT_URL = "https://pay.kiwify.com.br/ZkOYIlG";
 
 const Cancel = () => {
   const navigate = useNavigate();
@@ -17,8 +19,12 @@ const Cancel = () => {
       setUserId(data.user?.id ?? null);
     };
 
-    loadUser();
+    void loadUser();
   }, []);
+
+  const handleRetryCheckout = () => {
+    window.open(KIWIFY_CHECKOUT_URL, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
@@ -27,12 +33,12 @@ const Cancel = () => {
           <ShieldOff className="w-12 h-12 text-muted-foreground" />
           <h1 className="text-2xl font-semibold">Checkout cancelado</h1>
           <p className="text-muted-foreground">
-            Sem problema, voce pode tentar de novo quando estiver pronto. O acesso vitalicio continua disponivel por R$ 47,90.
+            Sem problemas. Quando estiver pronto, basta clicar no botão abaixo para voltar ao checkout e concluir o acesso vitalício.
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button className="flex-1" onClick={() => navigate("/pricing", { replace: true })}>
+          <Button className="flex-1" onClick={handleRetryCheckout}>
             Tentar novamente
           </Button>
           <Button
@@ -48,7 +54,7 @@ const Cancel = () => {
             ) : (
               <div className="flex items-center justify-center gap-2">
                 <ArrowLeft className="w-4 h-4" />
-                <span>Voltar ao inicio</span>
+                <span>Voltar ao início</span>
               </div>
             )}
           </Button>

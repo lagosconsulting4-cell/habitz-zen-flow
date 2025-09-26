@@ -8,11 +8,11 @@ import { usePremium } from "@/hooks/usePremium";
 import { toast } from "sonner";
 
 const PRICE_DISPLAY = "R$ 47,90";
-const PRICE_ID = import.meta.env.VITE_STRIPE_PRICE_ID as string | undefined;
+const KIWIFY_CHECKOUT_URL = "https://pay.kiwify.com.br/ZkOYIlG";
 
 const benefits = [
-  "Acesso vitalicio a todos os modulos",
-  "Atualizacoes e novos conteudos incluidos",
+  "Acesso vitalício a todos os módulos",
+  "Atualizações e novos conteúdos incluídos",
   "Dados sincronizados e seguros via Supabase",
 ];
 
@@ -28,7 +28,7 @@ const Pricing = () => {
       setUserId(data.user?.id ?? null);
     };
 
-    loadUser();
+    void loadUser();
   }, []);
 
   useEffect(() => {
@@ -37,39 +37,18 @@ const Pricing = () => {
     }
   }, [isPremium, premiumLoading, navigate]);
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!userId) {
       navigate("/auth", { replace: true, state: { from: "/pricing" } });
       return;
     }
 
-    if (!PRICE_ID) {
-      toast.error("Config de pagamento ausente (VITE_STRIPE_PRICE_ID).");
-      return;
-    }
-
     setIsLoadingCheckout(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        method: "POST",
-        body: {
-          priceId: PRICE_ID,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data?.url) {
-        window.location.href = data.url;
-        return;
-      }
-
-      toast.error("Nao foi possivel iniciar o checkout agora.");
-    } catch (err) {
-      console.error("Failed to create checkout session", err);
-      toast.error("Erro ao iniciar o pagamento. Tente novamente mais tarde.");
+      window.open(KIWIFY_CHECKOUT_URL, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Failed to open Kiwify checkout", error);
+      toast.error("Não foi possível abrir o checkout agora. Tente novamente.");
     } finally {
       setIsLoadingCheckout(false);
     }
@@ -79,16 +58,16 @@ const Pricing = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
       <Card className="max-w-2xl w-full glass-card p-10 text-center space-y-6">
         <div className="space-y-3">
-          <p className="uppercase text-xs tracking-widest text-muted-foreground">Plano unico</p>
-          <h1 className="text-4xl font-semibold">Habitz Premium Vitalicio</h1>
+          <p className="uppercase text-xs tracking-widest text-muted-foreground">Plano único</p>
+          <h1 className="text-4xl font-semibold">Habitz Premium Vitalício</h1>
           <p className="text-muted-foreground">
-            Pague uma unica vez e tenha acesso completo para sempre. Gestao de habitos, meditacoes, biblioteca e trilha guiada sem limitacoes.
+            Pague uma única vez e tenha acesso completo para sempre. Gestão de hábitos, meditações, biblioteca e trilha guiada sem limitações.
           </p>
         </div>
 
         <div className="flex items-center justify-center gap-2 text-5xl font-bold">
           <span>{PRICE_DISPLAY}</span>
-          <span className="text-muted-foreground text-base font-normal">pagamento unico</span>
+          <span className="text-muted-foreground text-base font-normal">pagamento único</span>
         </div>
 
         <div className="grid sm:grid-cols-3 gap-3 text-left">
@@ -107,10 +86,10 @@ const Pricing = () => {
             onClick={handleCheckout}
             disabled={isLoadingCheckout || premiumLoading}
           >
-            {isLoadingCheckout ? "Redirecionando..." : "Comprar acesso vitalicio"}
+            {isLoadingCheckout ? "Abrindo checkout..." : "Comprar acesso vitalício"}
           </Button>
           <p className="text-xs text-muted-foreground">
-            Pagamento seguro processado pela Stripe. Valor unico, acesso imediato.
+            Pagamento seguro processado pela Kiwify. Valor único, acesso imediato.
           </p>
         </div>
 
@@ -121,7 +100,7 @@ const Pricing = () => {
           </div>
           <div className="flex items-center gap-1">
             <Zap className="w-4 h-4" />
-            <span>Acesso imediato apos pagamento</span>
+            <span>Acesso imediato após pagamento</span>
           </div>
         </div>
       </Card>
