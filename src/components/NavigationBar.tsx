@@ -6,7 +6,7 @@ import {
   Plus,
   TrendingUp,
   User,
-  EllipsisVertical,
+  Grid3X3,
   type LucideIcon,
 } from "lucide-react";
 import { motion } from "motion/react";
@@ -69,13 +69,13 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
           )}
           <Icon
             className={cn(
-              "relative h-5 w-5 transition-colors duration-200",
+              "relative h-4 w-4 transition-colors duration-200",
               isActive ? "text-primary" : "text-muted-foreground"
             )}
           />
           <span
             className={cn(
-              "relative text-xs font-medium transition-colors duration-200",
+              "relative text-[11px] font-medium transition-colors duration-200",
               isActive ? "text-primary" : "text-muted-foreground"
             )}
           >
@@ -87,9 +87,9 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/40 bg-card/85 backdrop-blur-lg safe-area-bottom md:hidden">
-      <div className="mx-auto grid w-full max-w-lg grid-cols-[1fr_auto_1fr] items-center gap-4 px-5 py-2.5">
-        <div className="flex items-center justify-evenly gap-2">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/40 bg-card/88 backdrop-blur-lg safe-area-bottom md:hidden">
+      <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-2.5">
+        <div className="flex flex-1 items-center justify-evenly gap-2 pr-1">
           {leftItems.map((item) =>
             renderNavButton(item.id, item.label, item.path, item.icon)
           )}
@@ -99,26 +99,26 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
           type="button"
           onClick={() => handleNavigate("/create")}
           aria-label="Criar habito"
-          className="flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-primary text-white shadow-[0_16px_28px_rgba(34,197,94,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          whileTap={{ scale: 0.92 }}
+          className="flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-primary text-white shadow-[0_18px_30px_rgba(34,197,94,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          whileTap={{ scale: 0.9 }}
         >
           <Plus className="h-6 w-6" />
         </motion.button>
 
-        <div className="flex items-center justify-evenly gap-2">
+        <div className="flex flex-1 items-center justify-evenly gap-2 pl-1">
           {rightItems.map((item) =>
             renderNavButton(item.id, item.label, item.path, item.icon)
           )}
           <motion.button
             type="button"
             onClick={onOpenMore}
-            aria-label="Abrir menu mais"
-            className="relative flex items-center justify-center rounded-2xl px-3 py-2 text-muted-foreground transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            aria-label="Abrir menu de mais secoes"
+            className="relative flex flex-col items-center justify-center rounded-2xl px-3 py-2 text-muted-foreground transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             whileTap={{ scale: 0.94 }}
           >
-            <span className="flex flex-col items-center gap-1">
-              <EllipsisVertical className="h-5 w-5" />
-              <span className="text-xs font-medium">Mais</span>
+            <span className="relative flex flex-col items-center gap-1">
+              <Grid3X3 className="h-4 w-4" />
+              <span className="text-[11px] font-medium">Mais</span>
             </span>
           </motion.button>
         </div>
