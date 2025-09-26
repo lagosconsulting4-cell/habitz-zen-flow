@@ -124,6 +124,69 @@ export type Database = {
         }
         Relationships: []
       }
+      meditations: {
+        Row: {
+          ambient_sounds: string[]
+          audio_path: string
+          category: string
+          category_label: string
+          cover_image_url: string | null
+          created_at: string
+          description: string
+          duration_label: string
+          duration_seconds: number
+          focus: string | null
+          id: string
+          is_active: boolean
+          premium_only: boolean
+          slug: string
+          sort_order: number
+          steps: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ambient_sounds?: string[]
+          audio_path: string
+          category: string
+          category_label: string
+          cover_image_url?: string | null
+          created_at?: string
+          description: string
+          duration_label?: string
+          duration_seconds?: number
+          focus?: string | null
+          id?: string
+          is_active?: boolean
+          premium_only?: boolean
+          slug: string
+          sort_order?: number
+          steps?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ambient_sounds?: string[]
+          audio_path?: string
+          category?: string
+          category_label?: string
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string
+          duration_label?: string
+          duration_seconds?: number
+          focus?: string | null
+          id?: string
+          is_active?: boolean
+          premium_only?: boolean
+          slug?: string
+          sort_order?: number
+          steps?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

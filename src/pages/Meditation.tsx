@@ -60,7 +60,7 @@ const Meditation = () => {
   useEffect(() => {
     if (audioRef.current && audioSrc) {
       audioRef.current.load();
-      audioRef.current.play().catch(() => {
+      void audioRef.current.play().catch(() => {
         setIsPlaying(false);
       });
     }
@@ -79,7 +79,7 @@ const Meditation = () => {
       if (isPlaying) {
         audio.pause();
       } else {
-        audio.play().catch(() => setIsPlaying(false));
+        void audio.play().catch(() => setIsPlaying(false));
       }
       return;
     }
@@ -93,7 +93,7 @@ const Meditation = () => {
     if (audio && audioSrc === signedUrl) {
       setActiveSessionId(session.id);
       audio.currentTime = 0;
-      audio.play().catch(() => setIsPlaying(false));
+      void audio.play().catch(() => setIsPlaying(false));
       return;
     }
 
@@ -143,8 +143,10 @@ const Meditation = () => {
             {filteredSessions.map((session, index) => (
               <Card
                 key={session.id}
-                className={}
-                style={{ animationDelay:  }}
+                className={`glass-card p-6 hover:shadow-elegant transition-all duration-300 animate-slide-up ${
+                  selectedSessionId === session.id ? "ring-2 ring-primary" : ""
+                }`}
+                style={{ animationDelay: `${index * 100}ms` }}
                 onClick={() => toggleSessionDetails(session.id)}
               >
                 <div className="flex items-start justify-between">
@@ -179,7 +181,7 @@ const Meditation = () => {
                     variant="ghost"
                     onClick={(event) => {
                       event.stopPropagation();
-                      handlePlay(session);
+                      void handlePlay(session);
                     }}
                   >
                     {loadingAudioId === session.id ? (
@@ -200,7 +202,7 @@ const Meditation = () => {
                         <ol className="space-y-2">
                           {session.steps.map((step, stepIndex) => (
                             <li
-                              key={}
+                              key={`${session.id}-step-${stepIndex}`}
                               className="text-sm text-muted-foreground flex items-start gap-2"
                             >
                               <span className="w-5 h-5 bg-primary/10 text-primary rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 mt-0.5">
@@ -218,7 +220,7 @@ const Meditation = () => {
                         </h4>
                         <div className="flex flex-wrap gap-2">
                           {session.ambient_sounds.map((sound, soundIndex) => (
-                            <Badge key={} variant="secondary" className="text-xs">
+                            <Badge key={`${session.id}-sound-${soundIndex}`} variant="secondary" className="text-xs">
                               {sound}
                             </Badge>
                           ))}
@@ -227,7 +229,7 @@ const Meditation = () => {
                           className="w-full mt-4 bg-gradient-primary hover:shadow-elegant transition-all duration-300"
                           onClick={(event) => {
                             event.stopPropagation();
-                            handlePlay(session);
+                            void handlePlay(session);
                           }}
                         >
                           {loadingAudioId === session.id ? (
@@ -271,7 +273,7 @@ const Meditation = () => {
                 const audio = audioRef.current;
                 if (!audio) return;
                 if (audio.paused) {
-                  audio.play().catch(() => setIsPlaying(false));
+                  void audio.play().catch(() => setIsPlaying(false));
                 } else {
                   audio.pause();
                 }
