@@ -1,4 +1,4 @@
-﻿import { useMemo } from "react";
+import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
@@ -54,10 +54,10 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
         onClick={() => handleNavigate(path)}
         aria-label={label}
         aria-current={isActive ? "page" : undefined}
-        className="relative flex items-center justify-center rounded-2xl px-2 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+        className="relative flex items-center justify-center rounded-2xl px-1.5 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         whileTap={{ scale: 0.95 }}
       >
-        <span className="relative flex flex-col items-center gap-1 rounded-xl px-3 py-2">
+        <span className="relative flex flex-col items-center gap-1 rounded-xl px-1.5 py-1.5">
           {isActive && (
             <motion.span
               layoutId="nav-active-pill"
@@ -67,13 +67,13 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
           )}
           <Icon
             className={cn(
-              "relative h-4 w-4 transition-colors duration-200",
+              "relative h-3.5 w-3.5 transition-colors duration-200",
               isActive ? "text-primary" : "text-muted-foreground"
             )}
           />
           <span
             className={cn(
-              "relative text-[11px] font-medium transition-colors duration-200",
+              "relative text-[10px] font-medium transition-colors duration-200",
               isActive ? "text-primary" : "text-muted-foreground"
             )}
           >
@@ -86,8 +86,8 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/40 bg-card/90 backdrop-blur-lg safe-area-bottom md:hidden">
-      <div className="mx-auto grid w-full max-w-md grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-2.5">
-        <div className="flex items-center justify-evenly gap-2">
+      <div className="mx-auto grid w-full max-w-xs grid-cols-[1fr_auto_1fr] items-center gap-2 px-2.5 py-1.5">
+        <div className="flex min-w-0 items-center justify-between gap-1">
           {leftItems.map((item) =>
             renderNavButton(item.id, item.label, item.path, item.icon)
           )}
@@ -97,13 +97,13 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
           type="button"
           onClick={() => handleNavigate("/create")}
           aria-label="Criar habito"
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-primary text-white shadow-[0_18px_30px_rgba(34,197,94,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-primary text-white shadow-[0_14px_22px_rgba(34,197,94,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           whileTap={{ scale: 0.9 }}
         >
-          <Plus className="h-6 w-6" />
+          <Plus className="h-5 w-5" />
         </motion.button>
 
-        <div className="flex items-center justify-evenly gap-2">
+        <div className="flex min-w-0 items-center justify-between gap-1">
           {rightItems.map((item) =>
             renderNavButton(item.id, item.label, item.path, item.icon)
           )}
@@ -111,12 +111,12 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
             type="button"
             onClick={onOpenMore}
             aria-label="Abrir menu de secoes"
-            className="relative flex flex-col items-center justify-center rounded-2xl px-3 py-2 text-muted-foreground transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            className="relative flex flex-col items-center justify-center rounded-2xl px-1.5 py-1.5 text-muted-foreground transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             whileTap={{ scale: 0.95 }}
           >
             <span className="relative flex flex-col items-center gap-1">
-              <Menu className="h-4 w-4" />
-              <span className="text-[11px] font-medium">Mais</span>
+              <Menu className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-medium">Mais</span>
             </span>
           </motion.button>
         </div>
