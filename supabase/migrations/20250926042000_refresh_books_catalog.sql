@@ -1,4 +1,4 @@
-﻿-- Refresh curated books catalog with the approved Portuguese list
+-- Refresh curated books catalog with the approved Portuguese list
 DELETE FROM public.books;
 
 INSERT INTO public.books (title, author, category, description, image_url, affiliate_link, rating)
