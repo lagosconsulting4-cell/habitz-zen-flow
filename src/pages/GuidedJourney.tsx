@@ -2,12 +2,23 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import NavigationBar from "@/components/NavigationBar";
-import { Target, CheckCircle2, Circle, Play, Clock } from "lucide-react";
-import { guidedJourney } from "@/data/guided-journey";
+import { Progress } from "@/components/ui/progress";
+import { useGuided } from "@/hooks/useGuided";
+import { Target, CheckCircle2, Circle, Lock, Play, Clock, Sparkles } from "lucide-react";
 
 const GuidedJourney = () => {
-  const [selectedWeek, setSelectedWeek] = useState<(typeof guidedJourney)[number] | null>(null);
+  const { weeks, loading, progressPercent, state, completeDay, todayGlobalDay } = useGuided();
+  const [expandedWeek, setExpandedWeek] = useState<number | null>(1);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  const activeWeek = expandedWeek ?? Math.ceil((state?.last_completed_global_day ?? 0 + 1) / 7);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -17,7 +28,7 @@ const GuidedJourney = () => {
             Modo <span className="font-medium gradient-text">Guiado</span>
           </h1>
           <p className="text-muted-foreground font-light">
-            Trilha de 4 semanas para transformar mente e corpo
+            Evolua dia a dia com a trilha personalizada para sua primeira jornada de 4 semanas.
           </p>
         </div>
 
@@ -25,88 +36,152 @@ const GuidedJourney = () => {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium">Progresso geral</h2>
             <Badge variant="default" className="bg-gradient-primary">
-              Semana 1 - Em andamento
+              Semana {Math.max(1, activeWeek)}
             </Badge>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex-1 bg-muted/30 rounded-full h-2">
-              <div className="bg-gradient-primary h-2 rounded-full" style={{ width: "25%" }}></div>
-            </div>
-            <span className="text-sm text-muted-foreground">25% completo</span>
+            <Progress value={progressPercent} className="h-2 flex-1" />
+            <span className="text-sm text-muted-foreground whitespace-nowrap">
+              {progressPercent}% concluido
+            </span>
           </div>
+          {state && (
+            <p className="text-xs text-muted-foreground mt-3">
+              Jornada iniciada em {new Date(state.started_at + "T00:00:00").toLocaleDateString("pt-BR")}
+            </p>
+          )}
         </Card>
 
         <div className="space-y-6">
-          {guidedJourney.map((week, index) => (
-            <Card
-              key={week.id}
-              className={`glass-card p-6 cursor-pointer hover:shadow-elegant transition-all duration-300 animate-slide-up ${
-                selectedWeek?.id === week.id ? "ring-2 ring-primary" : ""
-              }`}
-              style={{ animationDelay: `${index * 150}ms` }}
-              onClick={() => setSelectedWeek(selectedWeek?.id === week.id ? null : week)}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-xl">
-                    <Target className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-medium">Semana {week.week}: {week.title}</h3>
-                    <p className="text-muted-foreground font-light">{week.theme}</p>
-                  </div>
-                </div>
-                <Badge variant="secondary">{week.summary ? "Disponivel" : "Em preparo"}</Badge>
-              </div>
+          {weeks.map(({ week, days }, index) => {
+            const isExpanded = expandedWeek === week;
+            const weekCompleted = days.every((day) => day.status === "completed");
+            const weekTitle = week === 1 ? "Fundamentos" : week === 2 ? "Rotina" : week === 3 ? "Ritmo" : "Master";
 
-              <p className="text-muted-foreground mb-4">{week.summary}</p>
-
-              {selectedWeek?.id === week.id && (
-                <div className="mt-6 pt-6 border-t border-border/50 animate-fade-in">
-                  <h4 className="font-medium mb-4">Tarefas da semana</h4>
-                  <div className="grid gap-3">
-                    {week.daily_tasks.map((task, taskIndex) => (
-                      <div key={taskIndex} className="flex items-start gap-3 p-4 bg-muted/30 rounded-xl">
-                        <div className="flex-shrink-0 mt-1">
-                          {taskIndex === 0 ? (
-                            <CheckCircle2 className="w-5 h-5 text-green-600" />
-                          ) : (
-                            <Circle className="w-5 h-5 text-muted-foreground" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <h5 className="font-medium">Dia {task.day}: {task.title}</h5>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Clock className="w-3 h-3" />
-                              {task.estimated_time}
-                            </div>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
-                          <Badge variant="outline" className="text-xs">
-                            {task.type === "action" ? "Acao" : task.type === "reflection" ? "Reflexao" : "Desafio"}
-                          </Badge>
-                        </div>
+            return (
+              <Card
+                key={week}
+                className={`glass-card p-6 transition-all duration-300 animate-slide-up ${
+                  isExpanded ? "ring-2 ring-primary" : "hover:shadow-elegant"
+                } ${weekCompleted ? "border-primary/50" : ""}`}
+                style={{ animationDelay: `${index * 120}ms` }}
+              >
+                <button
+                  type="button"
+                  className="w-full text-left"
+                  onClick={() => setExpandedWeek(isExpanded ? null : week)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-primary/10 rounded-xl">
+                        <Target className="w-6 h-6 text-primary" />
                       </div>
-                    ))}
-                  </div>
-
-                  {week.audio_guide && (
-                    <div className="mt-6 pt-4 border-t border-border/50">
-                      <Button className="w-full bg-gradient-primary hover:shadow-elegant transition-all duration-300">
-                        <Play className="w-4 h-4 mr-2" />
-                        Ouvir audio motivacional
-                      </Button>
+                      <div>
+                        <h3 className="text-xl font-medium">Semana {week}</h3>
+                        <p className="text-sm text-muted-foreground">{weekTitle}</p>
+                      </div>
                     </div>
-                  )}
-                </div>
-              )}
-            </Card>
-          ))}
+                    <Badge variant={weekCompleted ? "default" : "secondary"}>
+                      {weekCompleted ? "Concluida" : isExpanded ? "Explorando" : "Visualizar"}
+                    </Badge>
+                  </div>
+                </button>
+
+                {isExpanded && (
+                  <div className="mt-6 pt-6 border-t border-border/50 space-y-4 animate-fade-in">
+                    {days.map((day) => {
+                      const locked = day.status === "locked";
+                      const completed = day.status === "completed";
+                      const available = day.status === "available";
+
+                      return (
+                        <div
+                          key={day.global_day}
+                          className={`relative flex items-start gap-4 p-4 rounded-xl transition-all duration-200 ${
+                            locked
+                              ? "bg-muted/20 border border-dashed border-border/50"
+                              : "bg-muted/30 border border-transparent hover:bg-muted/40"
+                          }`}
+                        >
+                          {locked && (
+                            <div className="absolute inset-0 bg-background/30 backdrop-blur-sm rounded-xl pointer-events-none" />
+                          )}
+
+                          <div className="flex-shrink-0 mt-1">
+                            {completed ? (
+                              <CheckCircle2 className="w-5 h-5 text-green-600" />
+                            ) : available ? (
+                              day.isToday ? (
+                                <Sparkles className="w-5 h-5 text-primary" />
+                              ) : (
+                                <Circle className="w-5 h-5 text-primary" />
+                              )
+                            ) : (
+                              <Lock className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </div>
+
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <h5 className="font-medium">
+                                  Dia {day.day}: {day.title}
+                                </h5>
+                                {day.isToday && available && (
+                                  <Badge variant="default" className="bg-primary/20 text-primary">
+                                    Hoje
+                                  </Badge>
+                                )}
+                              </div>
+                              {day.estimated_minutes && (
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Clock className="w-3 h-3" />
+                                  {day.estimated_minutes} min
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-3">
+                              {day.description ?? "Exercício guiado para o dia."}
+                            </p>
+                            <Badge variant="outline" className="text-xs">
+                              {day.type === "action"
+                                ? "Acao"
+                                : day.type === "reflection"
+                                  ? "Reflexao"
+                                  : "Desafio"}
+                            </Badge>
+                          </div>
+
+                          <div className="flex flex-col items-stretch gap-2">
+                            {day.audio_url && (
+                              <Button
+                                variant="secondary"
+                                className="justify-center"
+                                onClick={() => window.open(day.audio_url ?? "", "_blank")}
+                                disabled={locked}
+                              >
+                                <Play className="w-4 h-4 mr-2" />
+                                Audio
+                              </Button>
+                            )}
+                            <Button
+                              variant={completed ? "secondary" : "default"}
+                              disabled={locked || completed}
+                              onClick={() => completeDay(day.global_day)}
+                            >
+                              {completed ? "Concluido" : "Marcar como concluido"}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </Card>
+            );
+          })}
         </div>
       </div>
-
-      <NavigationBar />
     </div>
   );
 };

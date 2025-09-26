@@ -1,9 +1,8 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Calendar, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import HabitCard from "@/components/HabitCard";
-import NavigationBar from "@/components/NavigationBar";
 import DailyQuote from "@/components/DailyQuote";
 import QuickTips from "@/components/QuickTips";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +10,7 @@ import { useHabits } from "@/hooks/useHabits";
 import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
-  const { habits, loading, toggleHabit, getHabitCompletionStatus } = useHabits();
+  const { habits, loading, toggleHabit, getHabitCompletionStatus, getHabitsForDate } = useHabits();
   const [userName, setUserName] = useState("Habitz");
   const navigate = useNavigate();
 
@@ -38,12 +37,15 @@ const Dashboard = () => {
     navigate("/create");
   };
 
-  const morningHabits = habits.filter((habit) => habit.period === "morning");
-  const afternoonHabits = habits.filter((habit) => habit.period === "afternoon");
-  const eveningHabits = habits.filter((habit) => habit.period === "evening");
+  const today = new Date();
+  const todaysHabits = getHabitsForDate(today);
 
-  const completedToday = habits.filter((habit) => getHabitCompletionStatus(habit.id)).length;
-  const completionRate = habits.length > 0 ? Math.round((completedToday / habits.length) * 100) : 0;
+  const morningHabits = todaysHabits.filter((habit) => habit.period === "morning");
+  const afternoonHabits = todaysHabits.filter((habit) => habit.period === "afternoon");
+  const eveningHabits = todaysHabits.filter((habit) => habit.period === "evening");
+
+  const completedToday = todaysHabits.filter((habit) => getHabitCompletionStatus(habit.id)).length;
+  const completionRate = todaysHabits.length > 0 ? Math.round((completedToday / todaysHabits.length) * 100) : 0;
 
   if (loading) {
     return (
@@ -95,7 +97,7 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="font-light text-muted-foreground">Hoje</p>
-                <p className="text-2xl font-medium">{completedToday}/{habits.length}</p>
+                <p className="text-2xl font-medium">{completedToday}/{todaysHabits.length}</p>
               </div>
             </div>
           </Card>
@@ -182,10 +184,13 @@ const Dashboard = () => {
           </div>
         )}
       </div>
-
-      <NavigationBar />
     </div>
   );
 };
 
 export default Dashboard;
+
+
+
+
+

@@ -1,31 +1,22 @@
-﻿import { Calendar, TrendingUp, Target, Award } from "lucide-react";
+﻿import { useMemo } from "react";
+import { Calendar, TrendingUp, Target, Award, Flame } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import NavigationBar from "@/components/NavigationBar";
+import { Badge } from "@/components/ui/badge";
+import { Progress as ProgressBar } from "@/components/ui/progress";
+import useProgress from "@/hooks/useProgress";
 
 const Progress = () => {
-  const weeklyProgress = [
-    { day: "Dom", completed: 2, total: 4 },
-    { day: "Seg", completed: 4, total: 4 },
-    { day: "Ter", completed: 3, total: 4 },
-    { day: "Qua", completed: 4, total: 4 },
-    { day: "Qui", completed: 2, total: 4 },
-    { day: "Sex", completed: 3, total: 4 },
-    { day: "Sab", completed: 1, total: 4 },
-  ];
+  const { loading, weeklySeries, monthlyStats, habitStreaks, bestGlobalStreak } = useProgress();
 
-  const streaks = [
-    { habit: "Meditacao", emoji: "🧘", streak: 12, bestStreak: 15 },
-    { habit: "Exercicios", emoji: "🏋️", streak: 8, bestStreak: 20 },
-    { habit: "Leitura", emoji: "📚", streak: 5, bestStreak: 12 },
-    { habit: "Gratidao", emoji: "🙏", streak: 3, bestStreak: 7 },
-  ];
+  const hasData = useMemo(() => weeklySeries.some((point) => point.scheduled > 0), [weeklySeries]);
 
-  const monthlyStats = {
-    totalDays: 30,
-    perfectDays: 8,
-    consistency: 78,
-    topCategory: "Mente",
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -35,109 +26,137 @@ const Progress = () => {
             Seu <span className="font-medium gradient-text">Progresso</span>
           </h1>
           <p className="text-muted-foreground font-light">
-            Acompanhe sua jornada de desenvolvimento pessoal
+            Acompanhe sua disciplina nos hitos concluos no dia a dia
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slide-up">
-          <Card className="glass-card p-4">
-            <div className="text-center">
-              <div className="p-3 bg-primary/10 rounded-xl mx-auto w-fit mb-3">
-                <Calendar className="w-6 h-6 text-primary" />
-              </div>
-              <p className="text-2xl font-medium">{monthlyStats.perfectDays}</p>
-              <p className="text-xs text-muted-foreground font-light">Dias perfeitos</p>
-            </div>
+        {!hasData ? (
+          <Card className="glass-card p-8 text-center animate-fade-in">
+            <h2 className="text-xl font-medium mb-2">Comece criando seus hitos</h2>
+            <p className="text-sm text-muted-foreground">
+              Assim que voc marcar os hitos do dia como concluos, toda a evoluo aparecer aqui automaticamente.
+            </p>
           </Card>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slide-up">
+              <Card className="glass-card p-4">
+                <div className="text-center">
+                  <div className="p-3 bg-primary/10 rounded-xl mx-auto w-fit mb-3">
+                    <Calendar className="w-6 h-6 text-primary" />
+                  </div>
+                  <p className="text-2xl font-medium">{monthlyStats.perfectDays}</p>
+                  <p className="text-xs text-muted-foreground font-light">Dias perfeitos</p>
+                </div>
+              </Card>
 
-          <Card className="glass-card p-4">
-            <div className="text-center">
-              <div className="p-3 bg-accent/10 rounded-xl mx-auto w-fit mb-3">
-                <TrendingUp className="w-6 h-6 text-accent" />
-              </div>
-              <p className="text-2xl font-medium">{monthlyStats.consistency}%</p>
-              <p className="text-xs text-muted-foreground font-light">Consistencia</p>
+              <Card className="glass-card p-4">
+                <div className="text-center">
+                  <div className="p-3 bg-accent/10 rounded-xl mx-auto w-fit mb-3">
+                    <TrendingUp className="w-6 h-6 text-accent" />
+                  </div>
+                  <p className="text-2xl font-medium">{monthlyStats.consistency}%</p>
+                  <p className="text-xs text-muted-foreground font-light">Consistncia</p>
+                </div>
+              </Card>
+
+              <Card className="glass-card p-4">
+                <div className="text-center">
+                  <div className="p-3 bg-secondary/30 rounded-xl mx-auto w-fit mb-3">
+                    <Target className="w-6 h-6 text-secondary-foreground" />
+                  </div>
+                  <p className="text-2xl font-medium">
+                    {monthlyStats.topCategory ? monthlyStats.topCategory : "--"}
+                  </p>
+                  <p className="text-xs text-muted-foreground font-light">Categoria destaque</p>
+                </div>
+              </Card>
+
+              <Card className="glass-card p-4">
+                <div className="text-center">
+                  <div className="p-3 bg-gradient-primary rounded-xl mx-auto w-fit mb-3">
+                    <Award className="w-6 h-6 text-white" />
+                  </div>
+                  <p className="text-2xl font-medium">{bestGlobalStreak}</p>
+                  <p className="text-xs text-muted-foreground font-light">Melhor sequia</p>
+                </div>
+              </Card>
             </div>
-          </Card>
 
-          <Card className="glass-card p-4">
-            <div className="text-center">
-              <div className="p-3 bg-secondary/30 rounded-xl mx-auto w-fit mb-3">
-                <Target className="w-6 h-6 text-secondary-foreground" />
+            <Card className="glass-card p-6 mb-8 animate-slide-up" style={{ animationDelay: "200ms" }}>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-medium">Progresso da semana</h2>
+                <Badge variant="outline" className="text-xs">
+                  {weeklySeries[0].date}  {weeklySeries[6].date}
+                </Badge>
               </div>
-              <p className="text-2xl font-medium">{monthlyStats.topCategory}</p>
-              <p className="text-xs text-muted-foreground font-light">Categoria destaque</p>
-            </div>
-          </Card>
+              <div className="flex justify-between items-end h-36">
+                {weeklySeries.map((day, index) => {
+                  const percentage = day.scheduled > 0 ? day.completed / day.scheduled : 0;
+                  const barHeight = Math.max(percentage * 100, day.completed > 0 ? 20 : 6);
 
-          <Card className="glass-card p-4">
-            <div className="text-center">
-              <div className="p-3 bg-gradient-primary rounded-xl mx-auto w-fit mb-3">
-                <Award className="w-6 h-6 text-white" />
+                  return (
+                    <div key={day.date} className="flex flex-col items-center gap-2">
+                      <div className="relative w-10">
+                        <div
+                          className="w-full bg-gradient-primary rounded-t-xl transition-all duration-500"
+                          style={{ height: `${barHeight}%`, minHeight: `${Math.max(barHeight, 6)}px`, animationDelay: `${index * 120}ms` }}
+                        />
+                        <div
+                          className="absolute inset-x-0 bottom-0 h-full bg-muted/20 rounded-xl -z-10"
+                          aria-hidden
+                        />
+                      </div>
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {day.dayLabel}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {day.completed}/{day.scheduled}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
-              <p className="text-2xl font-medium">{Math.max(...streaks.map((s) => s.streak))}</p>
-              <p className="text-xs text-muted-foreground font-light">Melhor sequencia</p>
-            </div>
-          </Card>
-        </div>
+            </Card>
 
-        <Card className="glass-card p-6 mb-8 animate-slide-up" style={{ animationDelay: "200ms" }}>
-          <h2 className="text-xl font-medium mb-6">Progresso semanal</h2>
-          <div className="flex justify-between items-end h-32">
-            {weeklyProgress.map((day, index) => {
-              const percentage = (day.completed / day.total) * 100;
-              const height = Math.max((percentage / 100) * 80, 8);
-
-              return (
-                <div key={day.day} className="flex flex-col items-center gap-2">
-                  <div className="relative w-8">
+            <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "350ms" }}>
+              <h2 className="text-xl font-medium mb-6">Sequncias de hitos</h2>
+              <div className="space-y-4">
+                {habitStreaks.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Conclua seus hitos para acompanhar as sequncias aqui.
+                  </p>
+                ) : (
+                  habitStreaks.map((streak, index) => (
                     <div
-                      className="w-full bg-gradient-primary rounded-t-lg transition-all duration-500"
-                      style={{ height: `${height}px`, animationDelay: `${index * 100}ms` }}
-                    />
-                    <div
-                      className="w-full bg-muted/30 rounded-b-lg"
-                      style={{ height: `${80 - height}px` }}
-                    />
-                  </div>
-                  <span className="text-sm font-light text-muted-foreground">{day.day}</span>
-                  <span className="text-xs text-muted-foreground">{day.completed}/{day.total}</span>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-
-        <Card className="glass-card p-6 mb-8 animate-slide-up" style={{ animationDelay: "400ms" }}>
-          <h2 className="text-xl font-medium mb-6">Sequencias de habitos</h2>
-          <div className="space-y-4">
-            {streaks.map((streak, index) => (
-              <div
-                key={streak.habit}
-                className="flex items-center justify-between p-4 bg-muted/30 rounded-xl animate-slide-up hover:bg-muted/40 transition-colors"
-                style={{ animationDelay: `${600 + index * 100}ms` }}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="text-2xl">{streak.emoji}</div>
-                  <div>
-                    <p className="font-medium">{streak.habit}</p>
-                    <p className="text-sm text-muted-foreground font-light">Melhor: {streak.bestStreak} dias</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="flex items-center gap-1">
-                    <span className="text-2xl font-medium gradient-text">{streak.streak}</span>
-                    <span className="text-orange-500">🔥</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground font-light">dias seguidos</p>
-                </div>
+                      key={streak.habitId}
+                      className="flex items-center justify-between p-4 bg-muted/30 rounded-xl animate-slide-up hover:bg-muted/40 transition-colors"
+                      style={{ animationDelay: `${500 + index * 80}ms` }}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="text-2xl">{streak.emoji}</div>
+                        <div>
+                          <p className="font-medium">{streak.name}</p>
+                          <p className="text-xs text-muted-foreground font-light">
+                            Melhor: {streak.bestStreak} dias  Categoria: {streak.category}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="flex items-center gap-1 justify-end">
+                          <span className="text-2xl font-medium gradient-text">{streak.streak}</span>
+                          <Flame className="w-4 h-4 text-orange-500" />
+                        </div>
+                        <p className="text-xs text-muted-foreground font-light">dias seguidos</p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
-            ))}
-          </div>
-        </Card>
+            </Card>
+          </>
+        )}
       </div>
-
-      <NavigationBar />
     </div>
   );
 };

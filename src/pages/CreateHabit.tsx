@@ -11,10 +11,13 @@ import { useHabits } from "@/hooks/useHabits";
 const emojis = ["🔥", "📚", "💪", "🧠", "🧘", "🥗", "💧", "✍️", "🎧", "🏃", "🌞", "🌙"];
 
 const categories = [
-  { id: "mind", name: "Mente", color: "text-purple-600" },
-  { id: "body", name: "Corpo", color: "text-green-600" },
-  { id: "study", name: "Estudo", color: "text-blue-600" },
-  { id: "health", name: "Saude", color: "text-pink-600" },
+  { id: "mente", name: "Mente", color: "text-purple-600" },
+  { id: "corpo", name: "Corpo", color: "text-green-600" },
+  { id: "estudo", name: "Estudo", color: "text-blue-600" },
+  { id: "carreira", name: "Carreira", color: "text-amber-600" },
+  { id: "relacionamento", name: "Relacionamento", color: "text-pink-600" },
+  { id: "financeiro", name: "Financeiro", color: "text-emerald-600" },
+  { id: "outro", name: "Outro", color: "text-slate-600" },
 ];
 
 const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; emoji: string }> = [
@@ -23,15 +26,32 @@ const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; em
   { id: "evening", name: "Noite", emoji: "🌙" },
 ];
 
+const weekdays = [
+  { id: 1, label: "Seg" },
+  { id: 2, label: "Ter" },
+  { id: 3, label: "Qua" },
+  { id: 4, label: "Qui" },
+  { id: 5, label: "Sex" },
+  { id: 6, label: "Sab" },
+  { id: 0, label: "Dom" },
+];
+
 const CreateHabit = () => {
   const [habitName, setHabitName] = useState("");
   const [selectedEmoji, setSelectedEmoji] = useState(emojis[0]);
   const [selectedCategory, setSelectedCategory] = useState(categories[0].id);
   const [selectedPeriod, setSelectedPeriod] = useState<typeof periods[number]["id"]>(periods[0].id);
+  const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { createHabit } = useHabits();
+
+  const toggleDay = (day: number) => {
+    setSelectedDays((prev) => (
+      prev.includes(day) ? prev.filter((value) => value !== day) : [...prev, day]
+    ));
+  };
 
   const handleSave = async () => {
     if (!habitName.trim()) {
@@ -43,13 +63,24 @@ const CreateHabit = () => {
       return;
     }
 
+    if (selectedDays.length === 0) {
+      toast({
+        title: "Selecione dias",
+        description: "Escolha ao menos um dia da semana",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsSaving(true);
+      const days = [...selectedDays].sort((a, b) => a - b);
       await createHabit({
         name: habitName.trim(),
         emoji: selectedEmoji,
         category: selectedCategory,
         period: selectedPeriod,
+        days_of_week: days,
       });
       navigate("/dashboard");
     } catch (error) {
@@ -106,6 +137,7 @@ const CreateHabit = () => {
                 <button
                   key={emoji}
                   onClick={() => setSelectedEmoji(emoji)}
+                  aria-pressed={selectedEmoji === emoji}
                   className={`w-12 h-12 rounded-xl text-2xl transition-all duration-300 ${
                     selectedEmoji === emoji
                       ? "bg-primary/20 border-2 border-primary scale-110"
@@ -125,6 +157,7 @@ const CreateHabit = () => {
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
+                  aria-pressed={selectedCategory === category.id}
                   className={`p-4 rounded-xl text-left transition-all duration-300 ${
                     selectedCategory === category.id
                       ? "bg-primary/20 border-2 border-primary"
@@ -146,6 +179,7 @@ const CreateHabit = () => {
                 <button
                   key={period.id}
                   onClick={() => setSelectedPeriod(period.id)}
+                  aria-pressed={selectedPeriod === period.id}
                   className={`p-4 rounded-xl text-left transition-all duration-300 ${
                     selectedPeriod === period.id
                       ? "bg-primary/20 border-2 border-primary"
@@ -156,6 +190,26 @@ const CreateHabit = () => {
                     <span className="text-2xl">{period.emoji}</span>
                     <span className="font-medium">{period.name}</span>
                   </div>
+                </button>
+              ))}
+            </div>
+          </Card>
+
+          <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "400ms" }}>
+            <Label className="text-lg font-medium mb-4 block">Dias da semana</Label>
+            <div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
+              {weekdays.map((day) => (
+                <button
+                  key={day.id}
+                  onClick={() => toggleDay(day.id)}
+                  aria-pressed={selectedDays.includes(day.id)}
+                  className={`rounded-xl py-3 text-sm font-medium transition-all duration-200 ${
+                    selectedDays.includes(day.id)
+                      ? "bg-primary text-white shadow-soft"
+                      : "bg-muted text-muted-foreground hover:bg-muted/70"
+                  }`}
+                >
+                  {day.label}
                 </button>
               ))}
             </div>
@@ -178,6 +232,12 @@ const CreateHabit = () => {
                         {categories.find((category) => category.id === selectedCategory)?.name}
                       </span>
                     </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {selectedDays
+                        .sort((a, b) => a - b)
+                        .map((day) => weekdays.find((weekday) => weekday.id === day)?.label)
+                        .join(" • ")}
+                    </p>
                   </div>
                   <div className="w-12 h-12 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center">
                     <div className="w-2 h-2 bg-white/50 rounded-full" />
@@ -195,3 +255,4 @@ const CreateHabit = () => {
 };
 
 export default CreateHabit;
+

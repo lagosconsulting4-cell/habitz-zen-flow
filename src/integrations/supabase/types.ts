@@ -93,6 +93,7 @@ export type Database = {
           period: string
           streak: number
           updated_at: string
+          days_of_week: number[]
           user_id: string
         }
         Insert: {
@@ -105,6 +106,7 @@ export type Database = {
           period: string
           streak?: number
           updated_at?: string
+          days_of_week?: number[]
           user_id: string
         }
         Update: {
@@ -117,6 +119,7 @@ export type Database = {
           period?: string
           streak?: number
           updated_at?: string
+          days_of_week?: number[]
           user_id?: string
         }
         Relationships: []
@@ -337,3 +340,5 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
+
