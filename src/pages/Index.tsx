@@ -68,8 +68,8 @@ const TESTIMONIALS = [
   {
     name: "Regina Afonso",
     role: "Designer, 26 anos",
-    quote: "Depois de 3 dias usando o Habitz já estava acordando melhor e parando de enrolar. Simples, mas eficaz.",
-    highlight: "3 dias para sentir diferença",
+    quote: "Depois de 3 dias usando o Habitz jÃ¡ estava acordando melhor e parando de enrolar. Simples, mas eficaz.",
+    highlight: "3 dias para sentir diferenÃ§a",
     icon: TrendingUp,
     accent: "emerald",
     avatar: "https://i.ibb.co/b5nSxRWm/mariana-designer.webp",
@@ -77,7 +77,7 @@ const TESTIMONIALS = [
   {
     name: "Felipe Pereira",
     role: "Empreendedor, 34 anos",
-    quote: "Achei que seria mais um app... virou parte da minha rotina diária. Impossível não marcar os hábitos.",
+    quote: "Achei que seria mais um app... virou parte da minha rotina diÃ¡ria. ImpossÃ­vel nÃ£oo marcar os hÃ¡bitos.",
     highlight: "Virou rotina automaticamente",
     icon: Repeat,
     accent: "sky",
@@ -87,7 +87,7 @@ const TESTIMONIALS = [
     name: "Luan Fonatti",
     role: "Estudante, 22 anos",
     quote: "O modo guiado fez mais por mim do que meses de planner. Em 4 semanas virei outra pessoa.",
-    highlight: "Mudança em 4 semanas",
+    highlight: "Mudanï¿½a em 4 semanas",
     icon: Zap,
     accent: "violet",
     avatar: "https://i.ibb.co/spy6CscW/Luan-estudante.webp",
@@ -395,7 +395,7 @@ const Index = () => {
                 Pronto para assumir o controle?
               </h2>
               <span className="mt-4 block text-3xl font-medium text-gray-600 sm:text-4xl lg:text-5xl">
-                Um plano. Um ano inteiro de evolução.
+                Um plano. Um ano inteiro de evoluÃ§Ã£o.
               </span>
 
               <div className="relative mx-auto mt-12 max-w-lg rounded-3xl bg-white p-6 ring-1 ring-black/5 shadow-[0_1px_0_rgba(0,0,0,0.04),_0_12px_30px_rgba(0,0,0,0.06)] sm:p-8">
