@@ -26,15 +26,15 @@ const Progress = () => {
             Seu <span className="font-medium gradient-text">Progresso</span>
           </h1>
           <p className="text-muted-foreground font-light">
-            Acompanhe sua disciplina nos hitos concluos no dia a dia
+            Acompanhe sua disciplina nos hábitos concluídos no dia a dia
           </p>
         </div>
 
         {!hasData ? (
           <Card className="glass-card p-8 text-center animate-fade-in">
-            <h2 className="text-xl font-medium mb-2">Comece criando seus hitos</h2>
+            <h2 className="text-xl font-medium mb-2">Comece criando seus hábitos</h2>
             <p className="text-sm text-muted-foreground">
-              Assim que voc marcar os hitos do dia como concluos, toda a evoluo aparecer aqui automaticamente.
+              Assim que você marcar os hábitos do dia como concluídos, toda a evolução aparecerá aqui automaticamente.
             </p>
           </Card>
         ) : (
@@ -56,7 +56,7 @@ const Progress = () => {
                     <TrendingUp className="w-6 h-6 text-accent" />
                   </div>
                   <p className="text-2xl font-medium">{monthlyStats.consistency}%</p>
-                  <p className="text-xs text-muted-foreground font-light">Consistncia</p>
+                  <p className="text-xs text-muted-foreground font-light">Consistência</p>
                 </div>
               </Card>
 
@@ -78,7 +78,7 @@ const Progress = () => {
                     <Award className="w-6 h-6 text-white" />
                   </div>
                   <p className="text-2xl font-medium">{bestGlobalStreak}</p>
-                  <p className="text-xs text-muted-foreground font-light">Melhor sequia</p>
+                  <p className="text-xs text-muted-foreground font-light">Melhor sequência</p>
                 </div>
               </Card>
             </div>
@@ -87,7 +87,7 @@ const Progress = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-medium">Progresso da semana</h2>
                 <Badge variant="outline" className="text-xs">
-                  {weeklySeries[0].date}  {weeklySeries[6].date}
+                  {weeklySeries[0].date}  –  {weeklySeries[6].date}
                 </Badge>
               </div>
               <div className="flex justify-between items-end h-36">
@@ -120,11 +120,11 @@ const Progress = () => {
             </Card>
 
             <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "350ms" }}>
-              <h2 className="text-xl font-medium mb-6">Sequncias de hitos</h2>
+              <h2 className="text-xl font-medium mb-6">sequências de hábitos</h2>
               <div className="space-y-4">
                 {habitStreaks.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    Conclua seus hitos para acompanhar as sequncias aqui.
+                    Conclua seus hábitos para acompanhar as sequências aqui.
                   </p>
                 ) : (
                   habitStreaks.map((streak, index) => (
@@ -138,7 +138,7 @@ const Progress = () => {
                         <div>
                           <p className="font-medium">{streak.name}</p>
                           <p className="text-xs text-muted-foreground font-light">
-                            Melhor: {streak.bestStreak} dias  Categoria: {streak.category}
+                            Melhor: {streak.bestStreak} dias  –  Categoria: {streak.category}
                           </p>
                         </div>
                       </div>
@@ -162,3 +162,8 @@ const Progress = () => {
 };
 
 export default Progress;
+
+
+
+
+

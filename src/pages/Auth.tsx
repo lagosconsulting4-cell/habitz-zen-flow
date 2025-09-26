@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -382,10 +382,7 @@ const Auth = () => {
 
         <div className="text-center mt-6 animate-fade-in" style={{ animationDelay: "400ms" }}>
           <p className="text-white/70 text-sm">
-            Ao continuar, você concorda com nossos
-            <Button variant="link" className="text-white underline p-0 h-auto text-sm">
-              Termos de Uso
-            </Button>
+            Ao continuar, você concorda com nossos\r\n            <Button variant="link" className="text-white underline p-0 h-auto text-sm" asChild>\r\n              <Link to="/terms">Termos de Uso</Link>\r\n            </Button>
           </p>
         </div>
       </div>
@@ -394,4 +391,6 @@ const Auth = () => {
 };
 
 export default Auth;
+
+
 

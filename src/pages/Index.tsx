@@ -134,7 +134,7 @@ const PRICING_FEATURES = [
 ];
 
 const FOOTER_LINKS = [
-  { label: "Termos", href: "#" },
+  { label: "Termos e Condições", href: "/terms" },
   { label: "Privacidade", href: "#" },
   { label: "Suporte", href: "#" },
 ];
@@ -559,6 +559,7 @@ const Index = () => {
 };
 
 export default Index;
+
 
 
 

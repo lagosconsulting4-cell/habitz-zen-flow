@@ -36,8 +36,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { useHabits, Habit } from "@/hooks/useHabits";
 import { Loader2, MoreVertical, Check, Copy, Edit, Trash2, Sparkles } from "lucide-react";
+import { HABIT_EMOJIS } from "@/data/habit-emojis";
+import type { HabitEmoji } from "@/data/habit-emojis";
 
-const emojis = ["??", "??", "??", "??", "??", "??", "??", "??", "??", "??", "??", "??"];
 const categories = [
   { id: "mente", label: "Mente" },
   { id: "corpo", label: "Corpo" },
@@ -56,7 +57,7 @@ const weekdayLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
 
 interface HabitFormState {
   name: string;
-  emoji: string;
+  emoji: HabitEmoji;
   category: string;
   period: "morning" | "afternoon" | "evening";
   days_of_week: number[];
@@ -64,7 +65,7 @@ interface HabitFormState {
 
 const createFormState = (habit?: Habit): HabitFormState => ({
   name: habit?.name ?? "",
-  emoji: habit?.emoji ?? "??",
+  emoji: habit?.emoji ?? HABIT_EMOJIS[0],
   category: habit?.category ?? "mente",
   period: habit?.period ?? "morning",
   days_of_week: habit?.days_of_week ? [...habit.days_of_week] : [1, 2, 3, 4, 5],
@@ -387,7 +388,7 @@ const MyHabits = () => {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Emoji</label>
                 <div className="grid grid-cols-6 gap-2">
-                  {emojis.map((emoji) => (
+                  {HABIT_EMOJIS.map((emoji) => (
                     <Button
                       key={emoji}
                       type="button"
