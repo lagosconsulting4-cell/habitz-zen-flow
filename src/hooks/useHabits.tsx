@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -255,6 +255,12 @@ export const useHabits = () => {
 
   const toggleHabit = async (habitId: string, date?: string) => {
     const targetDate = date ?? new Date().toISOString().split("T")[0];
+    // Prevent toggling archived habits defensively
+    const targetHabit = habits.find((h) => h.id === habitId);
+    if (targetHabit && !targetHabit.is_active) {
+      toast({ title: "Habito arquivado", description: "Reative o habito para marcá-lo como concluído.", variant: "destructive" });
+      return;
+    }
 
     try {
       const { data: existingCompletion, error: existingError } = await supabase
@@ -334,8 +340,14 @@ export const useHabits = () => {
 
   const getHabitsForDate = (date: Date) => {
     const weekday = date.getDay();
-    return habits.filter((habit) => habit.days_of_week.includes(weekday));
+    return habits.filter((habit) => {
+      if (!habit.is_active) return false;
+      if (!habit.days_of_week.includes(weekday)) return false;
+      return new Date(habit.created_at) <= date;
+    });
   };
+
+
 
   const getHabitCompletionStatus = (habitId: string, date?: string) => {
     const targetDate = date ?? completionsDate;
@@ -363,3 +375,5 @@ export const useHabits = () => {
     completionsDate,
   };
 };
+
+
