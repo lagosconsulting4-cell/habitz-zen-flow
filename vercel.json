@@ -1,1 +1,6 @@
-﻿{"rewrites":[{"source":"/((?!assets|.*\\.(?:png|svg|jpg|jpeg|gif|webp|ico|txt|css|js|map|json)).*)","destination":"/"}]}
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
