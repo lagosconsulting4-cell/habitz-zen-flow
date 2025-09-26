@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Check } from "lucide-react";
 
@@ -9,7 +9,7 @@ const burstColors = [
   "#10b981",
   "#34d399",
   "#f59e0b",
-  "#14b8a6",
+  "#0ea5e9",
 ];
 
 interface HabitCompleteButtonProps {
@@ -27,12 +27,12 @@ const HabitCompleteButton = ({ completed, onToggle }: HabitCompleteButtonProps) 
     }
   }, [completed]);
 
-  const confettiPieces = useMemo(
+  const particles = useMemo(
     () =>
-      Array.from({ length: 9 }).map((_, index) => ({
+      Array.from({ length: 10 }).map((_, index) => ({
         index,
         color: burstColors[index % burstColors.length],
-        delay: index * 0.03,
+        delay: index * 0.02,
       })),
     [],
   );
@@ -40,7 +40,7 @@ const HabitCompleteButton = ({ completed, onToggle }: HabitCompleteButtonProps) 
   const handleClick = () => {
     setIsPressing(true);
     onToggle();
-    setTimeout(() => setIsPressing(false), 180);
+    setTimeout(() => setIsPressing(false), 120);
   };
 
   return (
@@ -48,25 +48,26 @@ const HabitCompleteButton = ({ completed, onToggle }: HabitCompleteButtonProps) 
       type="button"
       onClick={handleClick}
       className={cn(
-        "relative flex min-w-[120px] items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg transition-colors",
+        "relative flex min-w-[120px] items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold shadow-lg transition-colors duration-150",
         completed
           ? "bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500 text-white shadow-emerald-500/40"
-          : "bg-emerald-500 text-emerald-50 hover:bg-emerald-400"
+          : "border border-border/70 bg-white/85 text-foreground hover:border-primary/50 hover:text-primary hover:shadow-primary/20"
       )}
-      whileTap={{ scale: 0.93 }}
+      whileTap={{ scale: 0.94 }}
       animate={completed ? "completed" : "idle"}
       variants={{
         idle: {
           scale: 1,
-          boxShadow: "0 10px 30px rgba(16, 185, 129, 0.22)",
+          boxShadow: "0 10px 24px rgba(16, 185, 129, 0.15)",
         },
         completed: {
-          scale: isPressing ? 0.97 : 1.04,
-          boxShadow: "0 15px 45px rgba(16, 185, 129, 0.35)",
+          scale: isPressing ? 0.95 : 1.08,
+          boxShadow: "0 18px 42px rgba(16, 185, 129, 0.32)",
           transition: {
             type: "spring",
-            stiffness: 140,
-            damping: 12,
+            stiffness: 210,
+            damping: 16,
+            mass: 0.7,
           },
         },
       }}
@@ -74,17 +75,24 @@ const HabitCompleteButton = ({ completed, onToggle }: HabitCompleteButtonProps) 
       <motion.span
         layout
         className="flex items-center gap-2"
-        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+        transition={{ type: "spring", stiffness: 320, damping: 24 }}
       >
         <motion.span
           initial={false}
-          animate={completed ? { rotate: [0, 360], scale: [0.7, 1.1, 1] } : { rotate: 0, scale: 1 }}
-          transition={{ duration: completed ? 0.6 : 0.3, ease: "easeOut" }}
-          className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20"
+          animate={
+            completed
+              ? { rotate: [0, 360], scale: [0.6, 1.2, 1] }
+              : { rotate: 0, scale: isPressing ? 0.92 : 1 }
+          }
+          transition={{ duration: completed ? 0.35 : 0.18, ease: "easeOut" }}
+          className={cn(
+            "flex h-5 w-5 items-center justify-center rounded-full border",
+            completed ? "border-white/60 bg-white/25" : "border-primary/30 bg-primary/10"
+          )}
         >
           <Check className="h-3.5 w-3.5" strokeWidth={3} />
         </motion.span>
-        <span>{completed ? "Concluído" : "Marcar hoje"}</span>
+        <span>{completed ? "Conclu�do" : "Concluir"}</span>
       </motion.span>
 
       <AnimatePresence>
@@ -94,39 +102,29 @@ const HabitCompleteButton = ({ completed, onToggle }: HabitCompleteButtonProps) 
             initial={{ opacity: 1 }}
             animate={{ opacity: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.9, ease: "easeOut" }}
+            transition={{ duration: 0.55, ease: "easeOut" }}
             className="pointer-events-none absolute inset-0"
           >
-            {confettiPieces.map(({ index, color, delay }) => (
+            {particles.map(({ index, color, delay }) => (
               <motion.span
                 key={`${burstId}-${index}`}
                 className="absolute h-2 w-2 rounded-full"
-                style={{
-                  left: "50%",
-                  top: "50%",
-                  backgroundColor: color,
-                }}
-                initial={{
-                  scale: 0,
-                  opacity: 1,
-                  x: 0,
-                  y: 0,
-                }}
+                style={{ left: "50%", top: "50%", backgroundColor: color }}
+                initial={{ scale: 0, opacity: 1, x: 0, y: 0 }}
                 animate={{
-                  scale: [0, 1, 0.8],
-                  opacity: [0.9, 1, 0],
-                  x: Math.cos((index / confettiPieces.length) * Math.PI * 2) * 36,
-                  y: Math.sin((index / confettiPieces.length) * Math.PI * 2) * 36,
+                  scale: [0, 1, 0.4],
+                  opacity: [1, 1, 0],
+                  x: Math.cos((index / particles.length) * Math.PI * 2) * 32,
+                  y: Math.sin((index / particles.length) * Math.PI * 2) * 32,
                 }}
-                transition={{ duration: 0.9, delay, ease: "easeOut" }}
+                transition={{ duration: 0.55, delay, ease: "easeOut" }}
               />
             ))}
-
             <motion.div
-              className="absolute inset-0 rounded-full border border-white/40"
-              initial={{ scale: 0.6, opacity: 0.6 }}
-              animate={{ scale: 1.4, opacity: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="absolute inset-0 rounded-full border border-white/50"
+              initial={{ scale: 0.55, opacity: 0.6 }}
+              animate={{ scale: 1.3, opacity: 0 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
             />
           </motion.div>
         )}

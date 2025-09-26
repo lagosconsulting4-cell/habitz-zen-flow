@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toggle } from "@/components/ui/toggle";
 import {
@@ -233,9 +234,19 @@ const MyHabits = () => {
               className="md:max-w-sm"
             />
             <Tabs value={status} onValueChange={(value) => setStatus(value as typeof status)}>
-              <TabsList>
-                <TabsTrigger value="active">Ativos</TabsTrigger>
-                <TabsTrigger value="archived">Arquivados</TabsTrigger>
+              <TabsList className="grid grid-cols-2 rounded-full bg-muted/50 p-1 shadow-inner">
+                <TabsTrigger
+                  value="active"
+                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:ring-2 data-[state=active]:ring-emerald-300"
+                >
+                  Ativos
+                </TabsTrigger>
+                <TabsTrigger
+                  value="archived"
+                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:ring-2 data-[state=active]:ring-rose-300"
+                >
+                  Arquivados
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -256,7 +267,7 @@ const MyHabits = () => {
               >
                 {categories.find((item) => item.id === category)?.label ?? category}
               </Badge>
-            ))}
+             ))}
           </div>
 
           <div className="mt-3 flex flex-wrap gap-2">
@@ -274,8 +285,8 @@ const MyHabits = () => {
                 }
               >
                 {period.label}
-              </Badge>
-            ))}
+               </Badge>
+             ))}
           </div>
         </Card>
 
@@ -292,7 +303,10 @@ const MyHabits = () => {
           </Card>
         ) : (
           <div className="space-y-4">
-            {filteredHabits.map((habit) => (
+            {filteredHabits.map((habit) => {
+              const archived = !habit.is_active;
+
+              return (
               <Card key={habit.id} className="glass-card p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
@@ -362,7 +376,8 @@ const MyHabits = () => {
                   </DropdownMenu>
                 </div>
               </Card>
-            ))}
+            );
+          })}
           </div>
         )}
       </div>
@@ -488,3 +503,4 @@ const MyHabits = () => {
 };
 
 export default MyHabits;
+

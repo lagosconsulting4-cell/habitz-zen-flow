@@ -62,9 +62,9 @@ const Profile = () => {
   };
 
   const stats = [
-    { label: "Hábitos ativos", value: insights.activeHabits, highlight: true },
+    { label: "HÃ¡bitos ativos", value: insights.activeHabits, highlight: true },
     { label: "Dias usando", value: insights.daysUsing },
-    { label: "Consistência", value: insights.consistency, suffix: "%" },
+    { label: "ConsistÃªncia", value: insights.consistency, suffix: "%" },
   ];
 
   const accessStart = insights.sinceDate ?? premiumSince ?? accountCreatedAt;
@@ -81,7 +81,7 @@ const Profile = () => {
               <User className="w-10 h-10 text-white" />
             </div>
             <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-gradient-primary text-white border-0">
-              {isPremium ? "Premium vitalício" : "Conta aguardando ativação"}
+              {isPremium ? "Premium vitalÃ­cio" : "Conta aguardando ativaÃ§Ã£o"}
             </Badge>
           </div>
           <h1 className="text-2xl font-medium mb-2">{displayName}</h1>
@@ -118,10 +118,10 @@ const Profile = () => {
             </div>
             <div className="flex-1">
               <p className="font-medium flex items-center gap-2">
-                Conta vitalícia ativa
+                Conta vitalÃ­cia ativa
               </p>
               <p className="text-sm text-muted-foreground font-light">
-                Todos os módulos liberados e atualizações garantidas.
+                Todos os mÃ³dulos liberados e atualizaÃ§Ãµes garantidas.
               </p>
             </div>
             <Badge variant="outline">{isPremium ? "Premium" : "Pendente"}</Badge>
@@ -129,16 +129,16 @@ const Profile = () => {
         </Card>
 
         <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "300ms" }}>
-          <h2 className="text-lg font-medium mb-4">Configurações</h2>
+          <h2 className="text-lg font-medium mb-4">ConfiguraÃ§Ãµes</h2>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Bell className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Notificações</p>
+                  <p className="font-medium">NotificaÃ§Ãµes</p>
                   <p className="text-sm text-muted-foreground font-light">
-                    Lembretes dos seus hábitos
+                    Lembretes dos seus hÃ¡bitos
                   </p>
                 </div>
               </div>
@@ -165,7 +165,7 @@ const Profile = () => {
             <button className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors rounded-t-xl">
               <div className="flex items-center gap-3">
                 <Settings className="w-5 h-5 text-muted-foreground" />
-                <span className="font-medium">Preferências</span>
+                <span className="font-medium">PreferÃªncias</span>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </button>

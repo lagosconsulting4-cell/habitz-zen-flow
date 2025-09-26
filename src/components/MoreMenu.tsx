@@ -14,26 +14,20 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
-  navItems,
-  primaryNavItems,
-  secondaryNavItems,
-  type NavItem,
-} from "@/config/nav";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+  navItems,
+  primaryNavItems,
+  type NavItem,
+} from "@/config/nav";
+import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, LucideIcon> = {
   home: Home,
@@ -57,10 +51,9 @@ const MoreMenu = ({ open, onOpenChange }: MoreMenuProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const itemsByGroup = useMemo(() => {
-    const primary = primaryNavItems.filter((item) => item.id !== "create");
-    const secondary = secondaryNavItems;
-    return { primary, secondary };
+  const items = useMemo<NavItem[]>(() => {
+    const primaryIds = new Set(primaryNavItems.map((item) => item.id));
+    return navItems.filter((item) => !primaryIds.has(item.id));
   }, []);
 
   const handleSelect = (item: NavItem) => {
@@ -72,75 +65,43 @@ const MoreMenu = ({ open, onOpenChange }: MoreMenuProps) => {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[80vh] max-h-[520px] rounded-t-3xl border-border/60 bg-background/95 backdrop-blur-xl">
+      <SheetContent side="bottom" className="h-[70vh] max-h-[480px] rounded-t-3xl border-border/60 bg-background/95 backdrop-blur-xl">
         <SheetHeader className="text-left">
-          <SheetTitle>Navegacao rapida</SheetTitle>
+          <SheetTitle>Mais secoes</SheetTitle>
           <SheetDescription>
-            Acesse rapidamente qualquer pagina do Habitz
+            Explore conteudos que nao cabem na barra principal.
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-4">
-          <Command>
-            <CommandInput placeholder="Buscar paginas..." />
-            <CommandList>
-              <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
+        <ScrollArea className="mt-6 h-[calc(100%-96px)] pr-4">
+          <div className="grid gap-3">
+            {items.map((item) => {
+              const Icon = iconMap[item.icon] ?? Home;
+              const isActive = location.pathname === item.path;
 
-              <CommandGroup heading="Principais">
-                {itemsByGroup.primary.map((item) => {
-                  const Icon = iconMap[item.icon] ?? Home;
-                  return (
-                    <CommandItem
-                      key={item.id}
-                      value={`${item.label} ${item.path}`}
-                      onSelect={() => handleSelect(item)}
-                      className="flex items-center gap-3"
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span>{item.label}</span>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-
-              <CommandGroup heading="Conteudo extra">
-                {itemsByGroup.secondary.map((item) => {
-                  const Icon = iconMap[item.icon] ?? Home;
-                  return (
-                    <CommandItem
-                      key={item.id}
-                      value={`${item.label} ${item.path}`}
-                      onSelect={() => handleSelect(item)}
-                      className="flex items-center gap-3"
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span>{item.label}</span>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-
-              <CommandGroup heading="Atalhos">
-                {navItems
-                  .filter((item) => item.id === "create")
-                  .map((item) => {
-                    const Icon = iconMap[item.icon] ?? Plus;
-                    return (
-                      <CommandItem
-                        key={item.id}
-                        value={`${item.label} ${item.path}`}
-                        onSelect={() => handleSelect(item)}
-                        className="flex items-center gap-3"
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span>{item.label}</span>
-                      </CommandItem>
-                    );
-                  })}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </div>
+              return (
+                <Button
+                  key={item.id}
+                  type="button"
+                  variant="ghost"
+                  className={cn(
+                    "group flex w-full items-center justify-between rounded-2xl border border-border/50 bg-card/60 px-4 py-3 text-left transition-all duration-200 hover:border-primary/40 hover:bg-primary/5",
+                    isActive ? "border-primary/60 bg-primary/10" : ""
+                  )}
+                  onClick={() => handleSelect(item)}
+                >
+                  <span className="flex items-center gap-3 text-sm font-medium">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/40 text-muted-foreground transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    {item.label}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{item.path.replace("/", "") || "dashboard"}</span>
+                </Button>
+              );
+            })}
+          </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );

@@ -29,21 +29,27 @@ const HabitCard = ({ habit, onToggle, isCompleted = false }: HabitCardProps) => 
 
   return (
     <Card
-      className={`relative overflow-hidden border border-border/40 bg-card/90 backdrop-blur transition-all duration-500 hover:border-primary/60 ${
+      className={`relative overflow-hidden border border-border/40 bg-card/90 backdrop-blur transition-all duration-400 hover:border-primary/60 ${
         isCompleted ? "opacity-90 ring-1 ring-emerald-200" : "hover:-translate-y-0.5"
       }`}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" aria-hidden />
       <div className="relative flex flex-col gap-4 p-5 md:flex-row md:items-center">
         <div className="flex items-center gap-4">
-          <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/30 text-3xl shadow-inner ${
-            isCompleted ? "animate-pulse" : ""
-          }`}>
+          <div
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/30 text-3xl shadow-inner ${
+              isCompleted ? "animate-[bounce_0.6s_ease-out]" : ""
+            }`}
+          >
             {habit.emoji}
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className={`text-lg font-semibold ${isCompleted ? "text-emerald-600 line-through" : "text-foreground"}`}>
+              <h3
+                className={`text-lg font-semibold transition-colors ${
+                  isCompleted ? "text-emerald-600 line-through" : "text-foreground"
+                }`}
+              >
                 {habit.name}
               </h3>
               <span className="rounded-full bg-white/30 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -63,9 +69,6 @@ const HabitCard = ({ habit, onToggle, isCompleted = false }: HabitCardProps) => 
         </div>
 
         <div className="flex flex-1 flex-col items-stretch justify-end gap-3 md:flex-row md:items-center">
-          <div className={`w-full rounded-xl px-3 py-2 text-sm font-medium md:w-auto md:text-xs ${period.bg} ${period.accent}`}>
-            {isCompleted ? "Tempo liberado para novos desafios" : "Mantenha o ritmo hoje"}
-          </div>
           <HabitCompleteButton completed={isCompleted} onToggle={() => onToggle(habit.id)} />
         </div>
       </div>
