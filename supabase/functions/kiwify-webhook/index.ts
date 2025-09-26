@@ -250,7 +250,35 @@ serve(async (req) => {
 
   const supabaseUser = userLookup?.user ?? null;
   if (!supabaseUser) {
-    console.warn("No Supabase user found for email", email);
+    // No authenticated user yet for this email. Store as pending so we can
+    // attach it automatically when the user signs up or logs in later.
+    const amountCents = extractAmountCents(payload);
+    const currency = extractCurrency(payload);
+    const sessionId = extractId(payload);
+    const paymentReference = extractPaymentReference(payload);
+    const providerSessionId = sessionId ?? paymentReference ?? `kiwify-${crypto.randomUUID()}`;
+    const providerPaymentIntent = paymentReference ?? null;
+
+    const { error: pendingErr } = await supabaseAdmin
+      .from("pending_purchases")
+      .upsert(
+        {
+          email,
+          provider: "kiwify",
+          provider_session_id: providerSessionId,
+          provider_payment_intent: providerPaymentIntent,
+          amount_cents: amountCents,
+          currency,
+          status,
+        },
+        { onConflict: "provider_session_id" }
+      );
+
+    if (pendingErr) {
+      console.error("Failed to upsert pending purchase", pendingErr);
+      return new Response("Database error", { status: 500, headers: corsHeaders });
+    }
+
     return new Response("ok", { status: 200, headers: corsHeaders });
   }
 
