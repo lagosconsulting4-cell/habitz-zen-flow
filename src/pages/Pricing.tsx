@@ -37,7 +37,18 @@ const Pricing = () => {
     }
   }, [isPremium, premiumLoading, navigate]);
 
-  const handleCheckout = () => {\n    // Abrir checkout da Kiwify direto, mesmo sem login\n    setIsLoadingCheckout(true);\n    try {\n      window.location.href = KIWIFY_CHECKOUT_URL;\n    } catch (error) {\n      console.error('Failed to open Kiwify checkout', error);\n      toast.error('Não foi possível abrir o checkout agora. Tente novamente.');\n    } finally {\n      setIsLoadingCheckout(false);\n    }\n  };
+  const handleCheckout = () => {
+    // Abrir checkout da Kiwify direto, mesmo sem login
+    setIsLoadingCheckout(true);
+    try {
+      window.location.href = KIWIFY_CHECKOUT_URL;
+    } catch (error) {
+      console.error("Failed to open Kiwify checkout", error);
+      toast.error("Não foi possível abrir o checkout agora. Tente novamente.");
+    } finally {
+      setIsLoadingCheckout(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
