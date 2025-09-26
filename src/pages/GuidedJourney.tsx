@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useGuided } from "@/hooks/useGuided";
-import { Target, CheckCircle2, Circle, Lock, Play, Clock, Sparkles } from "lucide-react";
+import { Target, CheckCircle2, Circle, Lock, Clock, Sparkles } from "lucide-react";
 
 const GuidedJourney = () => {
   const { weeks, loading, progressPercent, state, completeDay, todayGlobalDay } = useGuided();
@@ -97,7 +97,7 @@ const GuidedJourney = () => {
                       return (
                         <div
                           key={day.global_day}
-                          className={`relative flex items-start gap-4 p-4 rounded-xl transition-all duration-200 ${
+                          className={`relative flex flex-col gap-4 p-4 rounded-xl transition-all duration-200 md:flex-row md:items-start ${
                             locked
                               ? "bg-muted/20 border border-dashed border-border/50"
                               : "bg-muted/30 border border-transparent hover:bg-muted/40"
@@ -107,64 +107,56 @@ const GuidedJourney = () => {
                             <div className="absolute inset-0 bg-background/30 backdrop-blur-sm rounded-xl pointer-events-none" />
                           )}
 
-                          <div className="flex-shrink-0 mt-1">
-                            {completed ? (
-                              <CheckCircle2 className="w-5 h-5 text-green-600" />
-                            ) : available ? (
-                              day.isToday ? (
-                                <Sparkles className="w-5 h-5 text-primary" />
+                          <div className="flex w-full items-start gap-4 md:flex-1">
+                            <div className="mt-1 flex-shrink-0">
+                              {completed ? (
+                                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                              ) : available ? (
+                                day.isToday ? (
+                                  <Sparkles className="w-5 h-5 text-primary" />
+                                ) : (
+                                  <Circle className="w-5 h-5 text-primary" />
+                                )
                               ) : (
-                                <Circle className="w-5 h-5 text-primary" />
-                              )
-                            ) : (
-                              <Lock className="w-5 h-5 text-muted-foreground" />
-                            )}
-                          </div>
-
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <h5 className="font-medium">
-                                  Dia {day.day}: {day.title}
-                                </h5>
-                                {day.isToday && available && (
-                                  <Badge variant="default" className="bg-primary/20 text-primary">
-                                    Hoje
-                                  </Badge>
-                                )}
-                              </div>
-                              {day.estimated_minutes && (
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <Clock className="w-3 h-3" />
-                                  {day.estimated_minutes} min
-                                </div>
+                                <Lock className="w-5 h-5 text-muted-foreground" />
                               )}
                             </div>
-                            <p className="text-sm text-muted-foreground mb-3">
-                              {day.description ?? "Exercício guiado para o dia."}
-                            </p>
-                            <Badge variant="outline" className="text-xs">
-                              {day.type === "action"
-                                ? "Acao"
-                                : day.type === "reflection"
-                                  ? "Reflexao"
-                                  : "Desafio"}
-                            </Badge>
+
+                            <div className="flex-1">
+                              <div className="flex flex-col gap-2 mb-2 md:flex-row md:items-center md:justify-between">
+                                <div className="flex items-start gap-2 md:items-center">
+                                  <h5 className="font-medium leading-tight md:leading-normal">
+                                    Dia {day.day}: {day.title}
+                                  </h5>
+                                  {day.isToday && available && (
+                                    <Badge variant="default" className="bg-primary/20 text-primary">
+                                      Hoje
+                                    </Badge>
+                                  )}
+                                </div>
+                                {day.estimated_minutes && (
+                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                    <Clock className="w-3 h-3" />
+                                    {day.estimated_minutes} min
+                                  </div>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-3">
+                                {day.description ?? "Exerc?cio guiado para o dia."}
+                              </p>
+                              <Badge variant="outline" className="text-xs">
+                                {day.type === "action"
+                                  ? "Acao"
+                                  : day.type === "reflection"
+                                    ? "Reflexao"
+                                    : "Desafio"}
+                              </Badge>
+                            </div>
                           </div>
 
-                          <div className="flex flex-col items-stretch gap-2">
-                            {day.audio_url && (
-                              <Button
-                                variant="secondary"
-                                className="justify-center"
-                                onClick={() => window.open(day.audio_url ?? "", "_blank")}
-                                disabled={locked}
-                              >
-                                <Play className="w-4 h-4 mr-2" />
-                                Audio
-                              </Button>
-                            )}
+                          <div className="flex w-full flex-col gap-2 md:w-48 md:flex-shrink-0">
                             <Button
+                              className="w-full"
                               variant={completed ? "secondary" : "default"}
                               disabled={locked || completed}
                               onClick={() => completeDay(day.global_day)}
@@ -187,3 +179,5 @@ const GuidedJourney = () => {
 };
 
 export default GuidedJourney;
+
+

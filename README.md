@@ -1,73 +1,45 @@
-# Welcome to your Lovable project
+﻿# Habitz
 
-## Project info
+Aplicativo web focado em desenvolvimento de hábitos, com integração Supabase e experiência 100% premium (pagamento vitalício).
 
-**URL**: https://lovable.dev/projects/34141667-115d-4cae-a41c-3acf4da9ae62
+## Tecnologias principais
 
-## How can I edit this code?
+- React + Vite + TypeScript
+- Supabase (Auth, Database, Storage)
+- shadcn/ui + Tailwind CSS
+- TanStack Query para cache e estados remotos
 
-There are several ways of editing your application.
+## Como rodar localmente
 
-**Use Lovable**
+1. Instale as dependências:
+   ```bash
+   npm install
+   ```
+2. Crie um arquivo `.env.local` com:
+   ```bash
+   VITE_SUPABASE_URL=... // URL do projeto Supabase
+   VITE_SUPABASE_ANON_KEY=... // chave pública (anon)
+   ```
+   Outras variáveis (Stripe, etc.) ficam em `.env` conforme documentação interna do projeto.
+3. Execute o modo desenvolvimento:
+   ```bash
+   npm run dev
+   ```
+4. Abra `http://localhost:5173`.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/34141667-115d-4cae-a41c-3acf4da9ae62) and start prompting.
+## Fluxo Supabase
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Auth**: Supabase Email/Password com verificação por link. O formulário `src/pages/Auth.tsx` cobre login, cadastro, recuperação e redefinição de senha.
+- **Banco e Migrations**: arquivos em `supabase/migrations`. Use `supabase db push` para aplicar mudanças no remoto.
+- **Storage**: Audios de meditação ficam no bucket `meditation-audios`, com estrutura `<categoria>/<arquivo>.mp3`.
 
-**Use your preferred IDE**
+## Scripts úteis
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- `npm run dev` – servidor local.
+- `npm run build` – build de produção.
+- `npm run lint` – checagem ESLint.
+- `supabase db push` – aplica migrations pendentes.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Deploy
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/34141667-115d-4cae-a41c-3acf4da9ae62) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+O projeto está configurado para Vercel/GitHub Pages via workflow em `.github/workflows`. Ajuste variáveis de ambiente na plataforma escolhida antes do deploy.
