@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+﻿name: Deploy to GitHub Pages
 
 on:
   push:
@@ -31,11 +31,13 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build\n        env:\n          CI: true\n          GITHUB_PAGES: 'true'
+        env:
+          CI: true
+          GITHUB_PAGES: 'true'
+        run: npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -51,3 +53,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
