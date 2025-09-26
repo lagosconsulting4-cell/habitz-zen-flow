@@ -307,18 +307,13 @@ const MyHabits = () => {
               const archived = !habit.is_active;
 
               return (
-              <Card key={habit.id} className="glass-card p-5">
+              <Card key={habit.id} className={cn("glass-card p-5 transition-colors duration-200", archived && "border border-rose-300/60 shadow-[0_0_0_1px_rgba(244,63,94,0.18)]")}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
                     <div className="text-3xl">{habit.emoji}</div>
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-xl font-semibold">{habit.name}</h3>
-                        {!habit.is_active && (
-                          <Badge variant="outline" className="text-xs">
-                            Arquivado
-                          </Badge>
-                        )}
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                         <Badge variant="outline">{categories.find((item) => item.id === habit.category)?.label ?? habit.category}</Badge>

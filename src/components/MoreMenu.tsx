@@ -2,14 +2,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Book,
-  Calendar,
   Headphones,
   Home,
   Lightbulb,
   ListChecks,
   Map,
-  Plus,
-  TrendingUp,
   User,
   type LucideIcon,
 } from "lucide-react";
@@ -31,15 +28,12 @@ import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, LucideIcon> = {
   home: Home,
-  calendar: Calendar,
-  plus: Plus,
-  "trending-up": TrendingUp,
-  user: User,
   book: Book,
   headphones: Headphones,
   lightbulb: Lightbulb,
   map: Map,
   "list-checks": ListChecks,
+  user: User,
 };
 
 interface MoreMenuProps {
@@ -65,15 +59,15 @@ const MoreMenu = ({ open, onOpenChange }: MoreMenuProps) => {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[70vh] max-h-[480px] rounded-t-3xl border-border/60 bg-background/95 backdrop-blur-xl">
+      <SheetContent side="bottom" className="h-[68vh] max-h-[460px] rounded-t-3xl border-border/60 bg-background/95 backdrop-blur-xl">
         <SheetHeader className="text-left">
           <SheetTitle>Mais secoes</SheetTitle>
           <SheetDescription>
-            Explore conteudos que nao cabem na barra principal.
+            Escolha outra parte do Habitz para explorar.
           </SheetDescription>
         </SheetHeader>
 
-        <ScrollArea className="mt-6 h-[calc(100%-96px)] pr-4">
+        <ScrollArea className="mt-6 h-[calc(100%-96px)] pr-3">
           <div className="grid gap-3">
             {items.map((item) => {
               const Icon = iconMap[item.icon] ?? Home;
