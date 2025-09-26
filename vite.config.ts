@@ -1,10 +1,11 @@
+﻿const isGitHubPages = process.env.GITHUB_ACTIONS === "true";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === "production" ? "/habitz-zen-flow/" : "/",
+  base: mode === "production" && isGitHubPages ? "/habitz-zen-flow/" : "/",
   server: {
     host: "::",
     port: 8080,
@@ -16,3 +17,5 @@ export default defineConfig(({ mode }) => ({
     },
   },
 }));
+
+
