@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,9 +21,9 @@ const categories = [
 ];
 
 const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; emoji: string }> = [
-  { id: "morning", name: "Manhã", emoji: "☀️" },
-  { id: "afternoon", name: "Tarde", emoji: "🌇" },
-  { id: "evening", name: "Noite", emoji: "🌙" },
+  { id: "morning", name: "ManhÃ£", emoji: "â˜€ï¸" },
+  { id: "afternoon", name: "Tarde", emoji: "ðŸŒ‡" },
+  { id: "evening", name: "Noite", emoji: "ðŸŒ™" },
 ];
 
 const weekdays = [
@@ -32,7 +32,7 @@ const weekdays = [
   { id: 3, label: "Qua" },
   { id: 4, label: "Qui" },
   { id: 5, label: "Sex" },
-  { id: 6, label: "Sáb" },
+  { id: 6, label: "SÃ¡b" },
   { id: 0, label: "Dom" },
 ];
 
@@ -57,7 +57,7 @@ const CreateHabit = () => {
     if (!habitName.trim()) {
       toast({
         title: "Informe um nome",
-        description: "Escolha um título para o hábito antes de salvar",
+        description: "Escolha um tÃ­tulo para o hÃ¡bito antes de salvar",
         variant: "destructive",
       });
       return;
@@ -103,7 +103,7 @@ const CreateHabit = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="text-center">
-            <h1 className="text-2xl font-semibold">Novo hábito</h1>
+            <h1 className="text-2xl font-semibold">Novo hÃ¡bito</h1>
             <p className="text-xs text-muted-foreground">Crie uma rotina alinhada com suas metas</p>
           </div>
           <Button
@@ -119,7 +119,7 @@ const CreateHabit = () => {
         <div className="space-y-6">
           <Card className="glass-card p-6 animate-slide-up">
             <Label htmlFor="habit-name" className="text-lg font-medium">
-              Nome do hábito
+              Nome do hÃ¡bito
             </Label>
             <Input
               id="habit-name"
@@ -173,7 +173,7 @@ const CreateHabit = () => {
           </Card>
 
           <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "300ms" }}>
-            <Label className="text-lg font-medium mb-4 block">Período do dia</Label>
+            <Label className="text-lg font-medium mb-4 block">PerÃ­odo do dia</Label>
             <div className="grid grid-cols-1 gap-3">
               {periods.map((period) => (
                 <button
@@ -222,10 +222,10 @@ const CreateHabit = () => {
                 <div className="flex items-center gap-4">
                   <div className="text-3xl">{selectedEmoji}</div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-lg">{habitName}</h3>
+                    <div className="flex flex-wrap items-center gap-2 min-w-0">
+                      <h3 className="font-medium text-lg truncate">{habitName}</h3>
                       <span
-                        className={`text-xs px-2 py-1 rounded-full bg-white/20 ${
+                        className={`text-xs px-2 py-1 rounded-full bg-white/20 whitespace-nowrap ${
                           categories.find((category) => category.id === selectedCategory)?.color ?? ""
                         }`}
                       >
@@ -236,7 +236,7 @@ const CreateHabit = () => {
                       {selectedDays
                         .sort((a, b) => a - b)
                         .map((day) => weekdays.find((weekday) => weekday.id === day)?.label)
-                        .join(" • ")}
+                        .join(" â€¢ ")}
                     </p>
                   </div>
                   <div className="w-12 h-12 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center">
@@ -267,4 +267,5 @@ const CreateHabit = () => {
 };
 
 export default CreateHabit;
+
 

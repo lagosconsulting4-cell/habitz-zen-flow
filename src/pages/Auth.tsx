@@ -382,7 +382,10 @@ const Auth = () => {
 
         <div className="text-center mt-6 animate-fade-in" style={{ animationDelay: "400ms" }}>
           <p className="text-white/70 text-sm">
-            Ao continuar, você concorda com nossos\r\n            <Button variant="link" className="text-white underline p-0 h-auto text-sm" asChild>\r\n              <Link to="/terms">Termos de Uso</Link>\r\n            </Button>
+            Ao continuar, você concorda com nossos{" "}
+            <Button variant="link" className="text-white underline p-0 h-auto text-sm" asChild>
+              <Link to="/terms">Termos de Uso</Link>
+            </Button>
           </p>
         </div>
       </div>
