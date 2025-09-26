@@ -70,37 +70,44 @@ export const useLandingMetrics = () => {
     if (!meta) {
       return;
     }
-    void supabase
-      .from("landing_events")
-      .insert({
-        event: "pageview",
-        session_id: sessionIdRef.current,
-        meta,
-      })
-      .catch(() => null);
+
+    (async () => {
+      try {
+        await supabase.from("landing_events").insert({
+          event: "pageview",
+          session_id: sessionIdRef.current,
+          meta,
+        });
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.warn("Landing pageview tracking failed", error);
+        }
+      }
+    })();
   }, []);
 
-  const track = useCallback(
-    (event: string, meta?: Record<string, unknown>) => {
-      if (typeof window === "undefined") {
-        return Promise.resolve();
+  const track = useCallback(async (event: string, meta?: Record<string, unknown>) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const payload = {
+      event,
+      session_id: sessionIdRef.current,
+      meta: {
+        ...(meta ?? {}),
+        path: window.location.pathname,
+      },
+    };
+
+    try {
+      await supabase.from("landing_events").insert(payload);
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn("Landing event tracking failed", error);
       }
-      const payload = {
-        event,
-        session_id: sessionIdRef.current,
-        meta: {
-          ...(meta ?? {}),
-          path: window.location.pathname,
-        },
-      };
-      return supabase
-        .from("landing_events")
-        .insert(payload)
-        .then(() => undefined)
-        .catch(() => undefined);
-    },
-    [],
-  );
+    }
+  }, []);
 
   return track;
 };
