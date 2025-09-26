@@ -110,14 +110,17 @@ const UnlockedSection = ({ onCardSelect, onCtaClick, track }: UnlockedSectionPro
                 <CarouselItem key={card.id} className="md:basis-1/2 lg:basis-1/3">
                   <Card className="h-full overflow-hidden border border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
                     <CardHeader className="space-y-4 p-6">
-                      <div className="rounded-2xl bg-slate-50 p-4">
-                        <AspectRatio ratio={9 / 16}>
+                      <div className="flex justify-center rounded-3xl bg-slate-50 p-4 sm:p-6 lg:p-8">
+                        <AspectRatio
+                          ratio={9 / 16}
+                          className="w-full max-w-[220px] sm:max-w-[260px] lg:max-w-[320px]"
+                        >
                           <img
                             src={card.image}
                             alt={card.title}
                             loading="lazy"
                             decoding="async"
-                            className="h-full w-full rounded-xl object-contain"
+                            className="h-full w-full rounded-2xl object-contain"
                           />
                         </AspectRatio>
                       </div>
@@ -165,4 +168,5 @@ const UnlockedSection = ({ onCardSelect, onCtaClick, track }: UnlockedSectionPro
 };
 
 export default UnlockedSection;
+
 

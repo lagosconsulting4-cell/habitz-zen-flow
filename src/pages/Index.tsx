@@ -117,7 +117,7 @@ const TESTIMONIALS = [
     avatar: "https://i.ibb.co/VW6PKZV8/Quando-pensar-virou-trabalho-demais-1.webp",
   },
   {
-    name: "M?Márcia Ferreira",
+    name: "Márcia Ferreira",
     role: "Psicóloga, 27 anos",
     quote: "Como Psicóloga, vejo muita coisa complexa. O Habitz é científico, direto e indico para pacientes.",
     highlight: "Indicado por profissional",
@@ -559,6 +559,8 @@ const Index = () => {
 };
 
 export default Index;
+
+
 
 
 
