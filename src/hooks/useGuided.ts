@@ -72,9 +72,25 @@ export const useGuided = (): UseGuidedReturn => {
   const queryClient = useQueryClient();
   const ensureStateMutation = useEnsureState();
 
+  // Perform best-effort initialization without blocking the UI rendering
   useEffect(() => {
-    ensureStateMutation.mutate();
-  }, [ensureStateMutation]);
+    let cancelled = false;
+    (async () => {
+      try {
+        await ensureStateMutation.mutateAsync();
+      } catch (err) {
+        // Fail quietly: if state table is missing (404) or RLS blocks, don't freeze the UI
+        console.warn("Guided state init failed", err);
+      } finally {
+        // nothing
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // We intentionally run once at mount; mutation ref is stable for this scope
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { data: daysData, isLoading: daysLoading } = useQuery<{ days: GuidedDay[] }>({
     queryKey: ["guided-days"],
@@ -90,6 +106,7 @@ export const useGuided = (): UseGuidedReturn => {
 
       return { days: (data || []) as GuidedDay[] };
     },
+    retry: 1,
   });
 
   const { data: stateData, isLoading: stateLoading } = useQuery<{ state: GuidedState | null }>({
@@ -106,6 +123,7 @@ export const useGuided = (): UseGuidedReturn => {
 
       return { state: data as GuidedState | null };
     },
+    retry: 1,
   });
 
   const { data: completionsData, isLoading: completionsLoading } = useQuery<{ completions: number[] }>({
@@ -123,6 +141,7 @@ export const useGuided = (): UseGuidedReturn => {
         completions: (data || []).map((item) => item.global_day),
       };
     },
+    retry: 1,
   });
 
   const completeDayMutation = useMutation({
@@ -200,7 +219,8 @@ export const useGuided = (): UseGuidedReturn => {
     ? 0
     : Math.min(100, Math.round((lastCompleted / totalDays) * 100));
 
-  const loading = daysLoading || stateLoading || completionsLoading || ensureStateMutation.isPending;
+  // Do not tie UI loading state to the ensureState mutation to avoid spinner locks
+  const loading = daysLoading || stateLoading || completionsLoading;
 
   return {
     weeks,

@@ -1,17 +1,25 @@
-﻿import { useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import NavigationBar from "@/components/NavigationBar";
-import { Book, ExternalLink } from "lucide-react";
-import { booksHub, bookCategories } from "@/data/books";
+import { Book, ExternalLink, Loader2 } from "lucide-react";
+import { useBooks } from "@/hooks/useSupabaseData";
 
 const BooksHub = () => {
+  const { books, loading } = useBooks();
   const [selectedCategory, setSelectedCategory] = useState("Todos");
 
-  const filteredBooks = selectedCategory === "Todos"
-    ? booksHub
-    : booksHub.filter((book) => book.category === selectedCategory);
+  const categories = useMemo(() => {
+    const unique = new Set<string>();
+    books.forEach((b) => b.category && unique.add(b.category));
+    return ["Todos", ...Array.from(unique.values())];
+  }, [books]);
+
+  const filteredBooks = useMemo(() => {
+    if (selectedCategory === "Todos") return books;
+    return books.filter((b) => b.category === selectedCategory);
+  }, [books, selectedCategory]);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -26,7 +34,7 @@ const BooksHub = () => {
         </div>
 
         <div className="flex overflow-x-auto gap-2 mb-6 animate-slide-up">
-          {bookCategories.map((category) => (
+          {categories.map((category) => (
             <Button
               key={category}
               variant={selectedCategory === category ? "default" : "outline"}
@@ -39,18 +47,32 @@ const BooksHub = () => {
           ))}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4 mb-8">
-          {filteredBooks.map((book, index) => (
-            <Card
-              key={book.id}
-              className="glass-card p-6 hover:shadow-elegant transition-all duration-300 animate-slide-up"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
+        {loading ? (
+          <Card className="glass-card p-8 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </Card>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-4 mb-8">
+            {filteredBooks.map((book, index) => (
+              <Card
+                key={book.id}
+                className="glass-card p-6 hover:shadow-elegant transition-all duration-300 animate-slide-up"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
-                  <div className="w-16 h-20 bg-muted/30 rounded-lg flex items-center justify-center">
-                    <Book className="w-8 h-8 text-muted-foreground" />
-                  </div>
+                  {book.image_url ? (
+                    <img
+                      src={book.image_url}
+                      alt={book.title}
+                      className="w-16 h-20 rounded-lg object-cover border border-border/40"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-16 h-20 bg-muted/30 rounded-lg flex items-center justify-center">
+                      <Book className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -72,7 +94,8 @@ const BooksHub = () => {
                     <Button
                       size="sm"
                       className="bg-gradient-primary hover:shadow-elegant transition-all duration-300"
-                      onClick={() => window.open(book.link, "_blank")}
+                      onClick={() => window.open(book.affiliate_link ?? '#', "_blank")}
+                      disabled={!book.affiliate_link}
                     >
                       <ExternalLink className="w-3 h-3 mr-1" />
                       Ver Livro
@@ -80,9 +103,10 @@ const BooksHub = () => {
                   </div>
                 </div>
               </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       <NavigationBar />

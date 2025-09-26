@@ -46,12 +46,13 @@ CREATE TRIGGER set_timestamp_on_meditations
   EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Create the storage bucket that will hold meditation audio files
-DO 249
+DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM storage.buckets WHERE name = 'meditation-audios') THEN
     PERFORM storage.create_bucket(name => 'meditation-audios', public => false);
   END IF;
-END 249;
+END;
+$$;
 
 -- Storage policies so authenticated users can stream audio while only the service role manages content
 DROP POLICY IF EXISTS "Authenticated users can read meditation audio" ON storage.objects;

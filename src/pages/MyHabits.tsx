@@ -48,7 +48,7 @@ const categories = [
   { id: "outro", label: "Outro" },
 ];
 const periods = [
-  { id: "morning", label: "Manh�" },
+  { id: "morning", label: "Manhã" },
   { id: "afternoon", label: "Tarde" },
   { id: "evening", label: "Noite" },
 ];
@@ -133,7 +133,7 @@ const MyHabits = () => {
     if (!formState.name.trim()) {
       toast({
         title: "Informe um nome",
-        description: "O habito precisa de um titulo",
+        description: "O hábito precisa de um título",
         variant: "destructive",
       });
       return;
@@ -156,7 +156,7 @@ const MyHabits = () => {
         period: formState.period,
         days_of_week: formState.days_of_week,
       });
-      toast({ title: "Habito atualizado" });
+      toast({ title: "Hábito atualizado" });
       setEditSheetOpen(false);
       setEditingHabit(null);
     } catch (error) {
@@ -212,21 +212,21 @@ const MyHabits = () => {
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-light mb-1">
-              Meus <span className="font-medium gradient-text">Habitos</span>
+              Meus <span className="font-medium gradient-text">Hábitos</span>
             </h1>
             <p className="text-sm text-muted-foreground">
-              Gerencie seus habitos, agenda semanal e conclua tarefas do dia.
+              Gerencie seus hábitos, agenda semanal e conclua tarefas do dia.
             </p>
           </div>
           <Button asChild>
-            <Link to="/create">Adicionar novo habito</Link>
+            <Link to="/create">Adicionar novo hábito</Link>
           </Button>
         </div>
 
         <Card className="glass-card p-4 mb-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <Input
-              placeholder="Buscar habito"
+              placeholder="Buscar hábito"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               className="md:max-w-sm"
@@ -284,9 +284,9 @@ const MyHabits = () => {
           </Card>
         ) : filteredHabits.length === 0 ? (
           <Card className="glass-card p-8 text-center">
-            <h2 className="text-lg font-medium mb-2">Nenhum habito encontrado</h2>
+            <h2 className="text-lg font-medium mb-2">Nenhum hábito encontrado</h2>
             <p className="text-sm text-muted-foreground">
-              Ajuste os filtros ou cadastre um novo habito para come�ar.
+              Ajuste os filtros ou cadastre um novo hábito para começar.
             </p>
           </Card>
         ) : (
@@ -312,7 +312,7 @@ const MyHabits = () => {
                         </Badge>
                         <div className="flex items-center gap-1">
                           <Sparkles className="h-3 w-3 text-orange-500" />
-                          <span>{habit.streak} dias de sequencia</span>
+                          <span>{habit.streak} dias de sequência</span>
                         </div>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-1">
@@ -369,8 +369,8 @@ const MyHabits = () => {
       <Sheet open={editSheetOpen} onOpenChange={setEditSheetOpen}>
         <SheetContent className="flex flex-col gap-6 sm:max-w-xl">
           <SheetHeader>
-            <SheetTitle>Editar habito</SheetTitle>
-            <SheetDescription>Atualize o nome, emoji, categoria, periodo e agenda.</SheetDescription>
+            <SheetTitle>Editar hábito</SheetTitle>
+            <SheetDescription>Atualize o nome, emoji, categoria, período e agenda.</SheetDescription>
           </SheetHeader>
 
           <ScrollArea className="flex-1 pr-4">
@@ -418,7 +418,7 @@ const MyHabits = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Per�odo</label>
+                <label className="text-sm font-medium">Período</label>
                 <div className="flex gap-2">
                   {periods.map((period) => (
                     <Button
@@ -460,7 +460,7 @@ const MyHabits = () => {
             </SheetClose>
             <Button onClick={handleSave} disabled={isSaving}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Salvar altera��es
+              Salvar alterações
             </Button>
           </SheetFooter>
         </SheetContent>
@@ -469,9 +469,9 @@ const MyHabits = () => {
       <AlertDialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir habito?</AlertDialogTitle>
+            <AlertDialogTitle>Excluir hábito?</AlertDialogTitle>
             <AlertDialogDescription>
-              Essa a��o n�o pode ser desfeita. Remove o h�bito e suas conclus�es.
+              Essa ação não pode ser desfeita. Remove o hábito e suas conclusões.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

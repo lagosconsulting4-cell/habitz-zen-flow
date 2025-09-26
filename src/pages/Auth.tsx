@@ -10,10 +10,13 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  type Mode = "login" | "register" | "forgot" | "reset";
+  const [mode, setMode] = useState<Mode>("login");
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,16 +52,20 @@ const Auth = () => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       const userId = data.session?.user?.id;
-      if (userId) {
+      if (userId && mode !== "reset") {
         redirectAfterAuth(userId);
       }
     };
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setMode("reset");
+        return;
+      }
       const userId = session?.user?.id;
-      if (userId) {
+      if (userId && mode !== "reset") {
         redirectAfterAuth(userId);
       }
     });
@@ -66,6 +73,7 @@ const Auth = () => {
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [redirectAfterAuth]);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -73,7 +81,7 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      if (isLogin) {
+      if (mode === "login") {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
@@ -92,7 +100,7 @@ const Auth = () => {
           toast.success("Login feito com sucesso");
           await redirectAfterAuth(data.user.id);
         }
-      } else {
+      } else if (mode === "register") {
         const redirectUrl = `${window.location.origin}/`;
 
         const { data, error } = await supabase.auth.signUp({
@@ -109,7 +117,7 @@ const Auth = () => {
         if (error) {
           if (error.message.includes("User already registered")) {
             toast.error("Este email ja esta cadastrado. Faca login.");
-            setIsLogin(true);
+            setMode("login");
           } else {
             toast.error(error.message);
           }
@@ -118,8 +126,34 @@ const Auth = () => {
 
         if (data.user) {
           toast.success("Conta criada! Verifique seu email para confirmar e finalize a compra.");
-          setIsLogin(true);
+          setMode("login");
         }
+      } else if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: `${window.location.origin}/auth`,
+        });
+        if (error) {
+          toast.error(error.message);
+          return;
+        }
+        toast.success("Enviamos um link para redefinir sua senha. Confira seu email.");
+        setMode("login");
+      } else if (mode === "reset") {
+        if (newPassword.length < 6) {
+          toast.error("A nova senha deve ter ao menos 6 caracteres.");
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          toast.error("As senhas não coincidem.");
+          return;
+        }
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) {
+          toast.error(error.message);
+          return;
+        }
+        toast.success("Senha atualizada com sucesso. Faça login novamente.");
+        setMode("login");
       }
     } catch (error) {
       console.error("Unexpected auth error", error);
@@ -190,7 +224,7 @@ const Auth = () => {
             </div>
 
             <form onSubmit={handleAuth} className="space-y-4">
-              {!isLogin && (
+              {mode === "register" && (
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome completo</Label>
                   <div className="relative">
@@ -201,7 +235,7 @@ const Auth = () => {
                       placeholder="Seu nome"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      required={!isLogin}
+                      required={mode === "register"}
                       className="pl-10 py-3"
                       minLength={2}
                       maxLength={50}
@@ -226,22 +260,59 @@ const Auth = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder={isLogin ? "Sua senha" : "Minimo 6 caracteres"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    className="pl-10 py-3"
-                  />
+              {mode !== "forgot" && mode !== "reset" && (
+                <div className="space-y-2">
+                  <Label htmlFor="password">Senha</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder={mode === "login" ? "Sua senha" : "Minimo 6 caracteres"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required={mode !== "forgot"}
+                      minLength={6}
+                      className="pl-10 py-3"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {mode === "reset" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password">Nova senha</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        id="new-password"
+                        type="password"
+                        placeholder="Minimo 6 caracteres"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        minLength={6}
+                        className="pl-10 py-3"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Confirmar nova senha</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        placeholder="Repita a nova senha"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        minLength={6}
+                        className="pl-10 py-3"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
 
               <Button
                 type="submit"
@@ -251,25 +322,60 @@ const Auth = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    {isLogin ? "Entrando..." : "Criando conta..."}
+                    {mode === "login" && "Entrando..."}
+                    {mode === "register" && "Criando conta..."}
+                    {mode === "forgot" && "Enviando link..."}
+                    {mode === "reset" && "Salvando..."}
                   </>
                 ) : (
-                  isLogin ? "Entrar" : "Criar conta"
+                  mode === "login"
+                    ? "Entrar"
+                    : mode === "register"
+                      ? "Criar conta"
+                      : mode === "forgot"
+                        ? "Enviar link de redefinição"
+                        : "Salvar nova senha"
                 )}
               </Button>
             </form>
 
             <div className="text-center pt-4 border-t border-border">
-              <p className="text-muted-foreground">
-                {isLogin ? "Ainda nao tem conta?" : "Ja tem conta?"}
-              </p>
-              <Button
-                variant="link"
-                onClick={() => setIsLogin(!isLogin)}
-                className="font-semibold p-0 h-auto"
-              >
-                {isLogin ? "Criar conta" : "Fazer login"}
-              </Button>
+              {mode === "login" && (
+                <>
+                  <p className="text-muted-foreground">Esqueceu sua senha?</p>
+                  <Button variant="link" onClick={() => setMode("forgot")} className="font-semibold p-0 h-auto">
+                    Redefinir senha
+                  </Button>
+                  <p className="text-muted-foreground mt-2">Ainda não tem conta?</p>
+                  <Button variant="link" onClick={() => setMode("register")} className="font-semibold p-0 h-auto">
+                    Criar conta
+                  </Button>
+                </>
+              )}
+              {mode === "register" && (
+                <>
+                  <p className="text-muted-foreground">Já tem conta?</p>
+                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto">
+                    Fazer login
+                  </Button>
+                </>
+              )}
+              {mode === "forgot" && (
+                <>
+                  <p className="text-muted-foreground">Lembrou a senha?</p>
+                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto">
+                    Voltar ao login
+                  </Button>
+                </>
+              )}
+              {mode === "reset" && (
+                <>
+                  <p className="text-muted-foreground">Redefinindo sua senha</p>
+                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto">
+                    Cancelar e voltar ao login
+                  </Button>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -288,6 +394,4 @@ const Auth = () => {
 };
 
 export default Auth;
-
-
 
