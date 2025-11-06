@@ -1,7 +1,7 @@
 {
-  "buildCommand": "npm run build && node scripts/organize-dist.js",
+  "installCommand": "cd landing && npm install && cd .. && npm install",
+  "buildCommand": "cd landing && npm run build && cd .. && npm run build && node scripts/prepare-dist.js",
   "outputDirectory": "dist",
-  "installCommand": "npm install",
   "rewrites": [
     {
       "source": "/app/:path((?!.*\\.).*)",
