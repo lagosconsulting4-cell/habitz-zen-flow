@@ -2,8 +2,10 @@
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Quiz from "./pages/Quiz";
+import Analysis from "./pages/Analysis";
+import PersonalPlan from "./pages/PersonalPlan";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import CreateHabit from "./pages/CreateHabit";
@@ -34,7 +36,9 @@ const App = () => (
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/quiz" element={<Quiz />} />
+          <Route path="/analise" element={<Analysis />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/thanks" element={<Thanks />} />
@@ -42,6 +46,7 @@ const App = () => (
 
           <Route element={<ProtectedRoute><ProtectedLayout /></ProtectedRoute>}>
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/plano" element={<PersonalPlan />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/create" element={<CreateHabit />} />
             <Route path="/habits" element={<MyHabits />} />
