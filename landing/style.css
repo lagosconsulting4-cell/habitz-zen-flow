@@ -43,6 +43,7 @@ img {
   width: min(960px, 100% - 32px);
   margin: 0 auto;
   padding: 56px 0 120px;
+  transition: padding 0.3s ease;
 }
 
 .step {
@@ -621,9 +622,11 @@ p {
 
 .fixed-bottom-btn {
   position: fixed;
-  inset-inline: 16px;
+  left: 50%;
   bottom: 24px;
+  width: min(480px, calc(100% - 32px));
   padding: 18px 24px;
+  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
   border-radius: 999px;
   border: none;
   font-weight: 700;
@@ -632,12 +635,13 @@ p {
   background: linear-gradient(135deg, #2563eb, #7c3aed);
   box-shadow: 0 28px 60px -18px rgba(79, 70, 229, 0.55);
   cursor: pointer;
+  transform: translate3d(-50%, 0, 0);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
   z-index: 20;
 }
 
 .fixed-bottom-btn:hover {
-  transform: translateY(-3px);
+  transform: translate3d(-50%, -3px, 0);
   box-shadow: 0 24px 42px -12px rgba(79, 70, 229, 0.55);
 }
 
@@ -863,6 +867,16 @@ p {
   color: #334155;
 }
 
+@media (max-width: 768px) {
+  .quiz-container {
+    padding: 36px 0 96px;
+  }
+
+  .step {
+    margin-bottom: 36px;
+  }
+}
+
 @media (max-width: 960px) {
   .step {
     padding: 32px 20px;
@@ -889,6 +903,10 @@ p {
 }
 
 @media (max-width: 640px) {
+  .quiz-container {
+    padding: 28px 0 80px;
+  }
+
   h1 {
     font-size: 1.9rem;
   }
@@ -931,5 +949,69 @@ p {
 
   .faq-item {
     grid-template-columns: auto 1fr auto;
+  }
+}
+
+@media (max-width: 540px) {
+  .step {
+    padding: 28px 18px;
+  }
+
+  .gender-options,
+  .other-options,
+  .age-options,
+  .motivation-options,
+  .thoughts-options,
+  .humor-options,
+  .esteem-options,
+  .forget-options,
+  .words-options,
+  .distract-options,
+  .distract2-options,
+  .mood-options,
+  .priority-options,
+  .personalized-options,
+  .guide-options,
+  .life-options {
+    grid-template-columns: 1fr;
+  }
+
+  .gender-btn,
+  .other-btn,
+  .age-btn,
+  .motivation-btn,
+  .thoughts-btn,
+  .humor-btn,
+  .esteem-btn,
+  .forget-btn,
+  .words-btn,
+  .distract-btn,
+  .distract2-btn,
+  .mood-btn,
+  .priority-btn,
+  .personalized-btn,
+  .guide-btn,
+  .life-btn,
+  .plan-btn,
+  .unique-btn,
+  .organized-btn,
+  .carousel-btn,
+  .motiv-btn,
+  .ready-btn,
+  .profile-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .step {
+    padding: 24px 16px;
+    border-radius: 24px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .fixed-bottom-btn {
+    font-size: 0.95rem;
+    padding: 16px 20px;
   }
 }
