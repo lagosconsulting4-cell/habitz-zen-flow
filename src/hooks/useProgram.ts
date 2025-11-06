@@ -7,11 +7,16 @@ export type ProgramModule = Tables<"program_modules">;
 export type ModuleLesson = Tables<"module_lessons">;
 export type ModuleResource = Tables<"module_resources">;
 export type ModuleProgress = Tables<"module_progress">;
+export type LessonStatus = "not_started" | "in_progress" | "completed";
 
 export interface ModuleWithLessons extends ProgramModule {
   lessons: ModuleLesson[];
   resources?: ModuleResource[];
 }
+
+const isLessonStatus = (status: string | null | undefined): status is LessonStatus => {
+  return status === "not_started" || status === "in_progress" || status === "completed";
+};
 
 export const useProgram = () => {
   // Fetch all modules with their lessons
@@ -128,10 +133,11 @@ export const useModuleProgress = () => {
 export const getLessonStatus = (
   lessonId: string,
   progress: ModuleProgress[] | undefined
-): "not_started" | "in_progress" | "completed" => {
+): LessonStatus => {
   if (!progress) return "not_started";
   const lessonProgress = progress.find((p) => p.lesson_id === lessonId);
-  return lessonProgress?.status as any || "not_started";
+  const status = lessonProgress?.status;
+  return isLessonStatus(status) ? status : "not_started";
 };
 
 // Helper to calculate module completion percentage

@@ -11,10 +11,31 @@ import { useNavigate } from "react-router-dom";
 import { useHabits } from "@/hooks/useHabits";
 import { supabase } from "@/integrations/supabase/client";
 
+interface SuggestedHabitsPayload {
+  habits: string[];
+  rewardStrategy: string;
+  diagnosisType: string;
+  timestamp: string;
+}
+
+const isSuggestedHabitsPayload = (value: unknown): value is SuggestedHabitsPayload => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Partial<SuggestedHabitsPayload>;
+  return (
+    Array.isArray(candidate.habits) &&
+    typeof candidate.rewardStrategy === "string" &&
+    typeof candidate.diagnosisType === "string" &&
+    typeof candidate.timestamp === "string"
+  );
+};
+
 const Dashboard = () => {
   const { habits, loading, toggleHabit, getHabitCompletionStatus, getHabitsForDate } = useHabits();
   const [userName, setUserName] = useState("Habitz");
-  const [suggestedHabits, setSuggestedHabits] = useState<any>(null);
+  const [suggestedHabits, setSuggestedHabits] = useState<SuggestedHabitsPayload | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,7 +47,7 @@ const Dashboard = () => {
         // Only show if less than 24 hours old
         const timestamp = new Date(data.timestamp);
         const hoursSince = (Date.now() - timestamp.getTime()) / (1000 * 60 * 60);
-        if (hoursSince < 24) {
+        if (hoursSince < 24 && isSuggestedHabitsPayload(data)) {
           setSuggestedHabits(data);
         } else {
           localStorage.removeItem("habitz:suggested-habits");

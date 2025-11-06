@@ -13,7 +13,8 @@ import {
   getModuleCompletion,
   getProgramProgress,
   ModuleWithLessons,
-  ModuleLesson
+  ModuleLesson,
+  ModuleResource
 } from "@/hooks/useProgram";
 import { downloadFile } from "@/lib/storage";
 import {
@@ -70,7 +71,7 @@ const PersonalPlan = () => {
     }
   };
 
-  const handleDownloadResource = async (resource: any) => {
+  const handleDownloadResource = async (resource: ModuleResource) => {
     if (!resource.file_url) {
       toast.error("Link de download não disponível");
       return;

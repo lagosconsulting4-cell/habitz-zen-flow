@@ -1,6 +1,6 @@
 {
   "installCommand": "cd landing && npm install && cd .. && npm install",
-  "buildCommand": "cd landing && npm run build && cd .. && npm run build && node scripts/prepare-dist.js",
+  "buildCommand": "cd landing && npm run build && cd .. && npm run build && node scripts/prepare-dist.cjs",
   "outputDirectory": "dist",
   "rewrites": [
     {

@@ -6,11 +6,9 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppMetrics } from "@/hooks/useAppMetrics";
-import { generateDiagnosisResult, QuizAnswers } from "@/lib/quizAnalysis";
+import { generateDiagnosisResult, QuizAnswers, DiagnosisResult } from "@/lib/quizAnalysis";
 import { Download, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 
 const Analysis = () => {
   const navigate = useNavigate();
@@ -19,7 +17,7 @@ const Analysis = () => {
   const assessmentId = searchParams.get("assessment_id");
 
   const [loading, setLoading] = useState(true);
-  const [diagnosisResult, setDiagnosisResult] = useState<any>(null);
+  const [diagnosisResult, setDiagnosisResult] = useState<DiagnosisResult | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   useEffect(() => {
@@ -74,6 +72,15 @@ const Analysis = () => {
     setIsGeneratingPDF(true);
 
     try {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      const [{ default: html2canvas }, { default: JsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf")
+      ]);
+
       // Get the analysis card element
       const element = document.getElementById("analysis-content");
       if (!element) throw new Error("Element not found");
@@ -87,7 +94,7 @@ const Analysis = () => {
 
       // Create PDF
       const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
+      const pdf = new JsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4"
