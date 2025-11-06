@@ -11,9 +11,12 @@ const PRICE_DISPLAY = "R$ 47,90";
 const KIWIFY_CHECKOUT_URL = "https://pay.kiwify.com.br/ZkOYIlG";
 
 const benefits = [
-  "Acesso vitalício a todos os módulos",
-  "Atualizações e novos conteúdos incluídos",
-  "Dados sincronizados e seguros via Supabase",
+  "Programa completo de 30 dias para TDAH",
+  "Mini-hábitos personalizados para seu perfil",
+  "Acesso vitalício a todos os módulos e conteúdos",
+  "Atualizações e novos materiais incluídos",
+  "Suporte baseado em técnicas comprovadas",
+  "Dados sincronizados e seguros",
 ];
 
 const Pricing = () => {
@@ -54,10 +57,10 @@ const Pricing = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
       <Card className="max-w-2xl w-full glass-card p-10 text-center space-y-6">
         <div className="space-y-3">
-          <p className="uppercase text-xs tracking-widest text-muted-foreground">Plano único</p>
-          <h1 className="text-4xl font-semibold">Habitz Premium vitalício</h1>
+          <p className="uppercase text-xs tracking-widest text-muted-foreground">Plano Personalizado</p>
+          <h1 className="text-4xl font-semibold">Programa Completo para TDAH</h1>
           <p className="text-muted-foreground">
-            Pague uma única vez e tenha acesso completo para sempre. Gestão de hábitos, meditações, biblioteca e trilha guiada sem limitações.
+            Pague uma única vez e tenha acesso vitalício ao seu plano personalizado. Técnicas comprovadas, mini-hábitos e suporte contínuo para transformar sua rotina em 30 dias.
           </p>
         </div>
 
@@ -66,7 +69,7 @@ const Pricing = () => {
           <span className="text-muted-foreground text-base font-normal">pagamento único</span>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-3 text-left">
+        <div className="grid sm:grid-cols-2 gap-3 text-left">
           {benefits.map((benefit) => (
             <div key={benefit} className="flex items-start gap-2 text-sm text-muted-foreground">
               <CheckCircle2 className="w-4 h-4 text-primary mt-1" />
@@ -82,7 +85,7 @@ const Pricing = () => {
             onClick={handleCheckout}
             disabled={isLoadingCheckout || premiumLoading}
           >
-            {isLoadingCheckout ? "Abrindo checkout..." : "Comprar acesso vitalício"}
+            {isLoadingCheckout ? "Abrindo checkout..." : "Quero meu Plano Personalizado"}
           </Button>
           <p className="text-xs text-muted-foreground">
             Pagamento seguro processado pela Kiwify. Valor único, acesso imediato.

@@ -40,7 +40,7 @@ const Thanks = () => {
         <>
           <h1 className="text-2xl font-semibold">Pagamento concluído!</h1>
           <p className="text-muted-foreground">
-            Entre com a mesma conta usada no checkout para acessar o Habitz premium vitalício.
+            Entre com a mesma conta usada no checkout para acessar seu Plano Personalizado completo.
           </p>
           <Button
             className="w-full"
@@ -67,7 +67,7 @@ const Thanks = () => {
           <CheckCircle2 className="w-12 h-12 text-primary" />
           <h1 className="text-2xl font-semibold">Acesso liberado</h1>
           <p className="text-muted-foreground">
-            Tudo pronto! Seu acesso vitalício já está ativo. Clique abaixo para entrar no app.
+            Tudo pronto! Seu Plano Personalizado já está ativo. Clique abaixo para começar sua jornada de 30 dias.
           </p>
           <Button className="w-full" onClick={handleGoToDashboard}>
             Ir para o dashboard

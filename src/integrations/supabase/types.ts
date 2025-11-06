@@ -50,6 +50,49 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_checkins: {
+        Row: {
+          id: string
+          user_id: string
+          checkin_date: string
+          mood_level: number
+          energy_level: number | null
+          focus_level: number | null
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          checkin_date: string
+          mood_level: number
+          energy_level?: number | null
+          focus_level?: number | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          checkin_date?: string
+          mood_level?: number
+          energy_level?: number | null
+          focus_level?: number | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_checkins_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       habit_completions: {
         Row: {
           completed_at: string
@@ -264,6 +307,316 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      assessment_responses: {
+        Row: {
+          id: string
+          session_id: string
+          user_id: string | null
+          answers: Json
+          scores: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          user_id?: string | null
+          answers: Json
+          scores?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          session_id?: string
+          user_id?: string | null
+          answers?: Json
+          scores?: Json | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      analysis_summaries: {
+        Row: {
+          id: string
+          assessment_id: string
+          user_id: string | null
+          diagnosis_type: string
+          probability_score: number
+          summary_pdf_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          assessment_id: string
+          user_id?: string | null
+          diagnosis_type: string
+          probability_score: number
+          summary_pdf_url?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          assessment_id?: string
+          user_id?: string | null
+          diagnosis_type?: string
+          probability_score?: number
+          summary_pdf_url?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analysis_summaries_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_responses"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      tdah_archetypes: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          primary_symptoms: Json
+        }
+        Insert: {
+          id: string
+          title: string
+          description: string
+          primary_symptoms: Json
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          primary_symptoms?: Json
+        }
+        Relationships: []
+      }
+      program_modules: {
+        Row: {
+          id: string
+          module_number: number
+          title: string
+          subtitle: string | null
+          description: string | null
+          focus: string | null
+          week_assignment: number | null
+          sort_order: number
+          is_bonus: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          module_number: number
+          title: string
+          subtitle?: string | null
+          description?: string | null
+          focus?: string | null
+          week_assignment?: number | null
+          sort_order?: number
+          is_bonus?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          module_number?: number
+          title?: string
+          subtitle?: string | null
+          description?: string | null
+          focus?: string | null
+          week_assignment?: number | null
+          sort_order?: number
+          is_bonus?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      module_lessons: {
+        Row: {
+          id: string
+          module_id: string
+          lesson_number: number
+          title: string
+          lesson_type: string
+          duration_minutes: number | null
+          content_url: string | null
+          transcript: string | null
+          sort_order: number
+          is_premium: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          module_id: string
+          lesson_number: number
+          title: string
+          lesson_type: string
+          duration_minutes?: number | null
+          content_url?: string | null
+          transcript?: string | null
+          sort_order?: number
+          is_premium?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          module_id?: string
+          lesson_number?: number
+          title?: string
+          lesson_type?: string
+          duration_minutes?: number | null
+          content_url?: string | null
+          transcript?: string | null
+          sort_order?: number
+          is_premium?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "program_modules"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      module_resources: {
+        Row: {
+          id: string
+          module_id: string | null
+          resource_type: string
+          title: string
+          description: string | null
+          file_url: string | null
+          is_bonus: boolean
+          tags: string[] | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          module_id?: string | null
+          resource_type: string
+          title: string
+          description?: string | null
+          file_url?: string | null
+          is_bonus?: boolean
+          tags?: string[] | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          module_id?: string | null
+          resource_type?: string
+          title?: string
+          description?: string | null
+          file_url?: string | null
+          is_bonus?: boolean
+          tags?: string[] | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_resources_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "program_modules"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      module_progress: {
+        Row: {
+          id: string
+          user_id: string
+          lesson_id: string
+          status: string
+          completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          lesson_id: string
+          status?: string
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          lesson_id?: string
+          status?: string
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "module_lessons"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      personal_plans: {
+        Row: {
+          id: string
+          user_id: string
+          assessment_id: string | null
+          diagnosis_type: string
+          recommended_modules: Json | null
+          recommended_habits: Json | null
+          week_schedule: Json | null
+          generated_pdf_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          assessment_id?: string | null
+          diagnosis_type: string
+          recommended_modules?: Json | null
+          recommended_habits?: Json | null
+          week_schedule?: Json | null
+          generated_pdf_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          assessment_id?: string | null
+          diagnosis_type?: string
+          recommended_modules?: Json | null
+          recommended_habits?: Json | null
+          week_schedule?: Json | null
+          generated_pdf_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_plans_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_responses"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {

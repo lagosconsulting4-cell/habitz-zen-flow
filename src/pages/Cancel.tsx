@@ -33,7 +33,7 @@ const Cancel = () => {
           <ShieldOff className="w-12 h-12 text-muted-foreground" />
           <h1 className="text-2xl font-semibold">Checkout cancelado</h1>
           <p className="text-muted-foreground">
-            Sem problemas. Quando estiver pronto, basta clicar no botão abaixo para voltar ao checkout e concluir o acesso vitalício.
+            Sem problemas. Quando estiver pronto, basta clicar no botão abaixo para voltar ao checkout e garantir seu Plano Personalizado.
           </p>
         </div>
 

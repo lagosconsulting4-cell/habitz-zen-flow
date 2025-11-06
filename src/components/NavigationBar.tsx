@@ -6,6 +6,7 @@ import {
   Plus,
   TrendingUp,
   Menu,
+  BookOpen,
   type LucideIcon,
 } from "lucide-react";
 import { motion } from "motion/react";
@@ -15,6 +16,7 @@ import { primaryNavItems } from "@/config/nav";
 
 const iconMap: Record<string, LucideIcon> = {
   home: Home,
+  "book-open": BookOpen,
   calendar: Calendar,
   plus: Plus,
   "trending-up": TrendingUp,

@@ -11,6 +11,7 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   { id: "dashboard", label: "Inicio", path: "/dashboard", icon: "home", variant: "primary", requiresAuth: true },
+  { id: "plano", label: "Meu Plano", path: "/plano", icon: "book-open", variant: "primary", requiresAuth: true },
   { id: "calendar", label: "Calendario", path: "/calendar", icon: "calendar", variant: "primary", requiresAuth: true },
   { id: "create", label: "Criar", path: "/create", icon: "plus", variant: "primary", requiresAuth: true },
   { id: "progress", label: "Progresso", path: "/progress", icon: "trending-up", variant: "primary", requiresAuth: true },

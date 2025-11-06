@@ -195,9 +195,9 @@ const Auth = () => {
 
         <Card className="glass-card border-white/10 bg-white/10 text-white">
           <CardHeader className="space-y-2 text-center">
-            <CardTitle className="text-2xl font-semibold">Acesse o Habitz Premium</CardTitle>
+            <CardTitle className="text-2xl font-semibold">Acesse seu Plano Personalizado</CardTitle>
             <CardDescription className="text-white/80">
-              Plano unico por R$ 47,90. Entre ou crie sua conta para liberar o acesso vitalicio.
+              Entre ou crie sua conta para acessar seu programa completo de 30 dias para TDAH.
             </CardDescription>
           </CardHeader>
 
