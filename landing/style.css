@@ -508,13 +508,15 @@ p {
 }
 
 .modules-carousel-track {
-  display: flex;
-  gap: 12px;
+  display: grid;
+  position: relative;
 }
 
 .modules-carousel-img {
   width: 100%;
   max-width: 320px;
+  grid-area: 1 / 1;
+  justify-self: center;
   border-radius: 20px;
   opacity: 0;
   transform: translateX(12px);
