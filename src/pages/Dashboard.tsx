@@ -36,6 +36,7 @@ const Dashboard = () => {
   const { habits, loading, toggleHabit, getHabitCompletionStatus, getHabitsForDate } = useHabits();
   const [userName, setUserName] = useState("Habitz");
   const [suggestedHabits, setSuggestedHabits] = useState<SuggestedHabitsPayload | null>(null);
+  const [hasCompletedQuiz, setHasCompletedQuiz] = useState(true); // Default true to not show until checked
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -71,6 +72,16 @@ const Dashboard = () => {
         if (profile?.display_name) {
           setUserName(profile.display_name);
         }
+
+        // Check if user has completed quiz
+        const { data: assessments } = await supabase
+          .from("assessment_responses")
+          .select("id, completed_at")
+          .eq("user_id", user.id)
+          .not("completed_at", "is", null)
+          .limit(1);
+
+        setHasCompletedQuiz((assessments?.length ?? 0) > 0);
       }
     };
 
@@ -138,6 +149,38 @@ const Dashboard = () => {
 
         {/* Indicador de Aderência ao Plano */}
         <AdherenceCard />
+
+        {/* Card para fazer Quiz (se nunca fez) */}
+        {!hasCompletedQuiz && (
+          <Card
+            className="mb-8 animate-slide-up bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200"
+            style={{ animationDelay: "200ms" }}
+          >
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-2xl">🧠</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    Faça sua Avaliação de TDAH
+                  </h3>
+                  <p className="text-gray-700 mb-4">
+                    Responda 5 minutos de perguntas e receba uma análise personalizada com mini-hábitos específicos para o seu perfil.
+                  </p>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => navigate("/quiz")}
+                      className="bg-purple-600 hover:bg-purple-700"
+                    >
+                      Começar Avaliação
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Hábitos Sugeridos do Quiz */}
         {suggestedHabits && habits.length === 0 && (

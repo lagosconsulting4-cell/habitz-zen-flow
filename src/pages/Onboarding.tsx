@@ -4,6 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Target, Brain, Dumbbell, BookOpen, Heart, Briefcase, CheckCircle2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const goalOptions = [
   {
@@ -59,21 +61,52 @@ const goalOptions = [
 const Onboarding = () => {
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
 
   const toggleGoal = (goalId: string) => {
-    setSelectedGoals(prev => 
-      prev.includes(goalId) 
+    setSelectedGoals(prev =>
+      prev.includes(goalId)
         ? prev.filter(id => id !== goalId)
         : [...prev, goalId]
     );
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep === 1 && selectedGoals.length > 0) {
       setCurrentStep(2);
     } else if (currentStep === 2) {
-      navigate("/dashboard");
+      // Salvar dados do onboarding no Supabase
+      setIsSaving(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+          toast.error("Usuário não autenticado");
+          navigate("/auth");
+          return;
+        }
+
+        // Salvar áreas de foco escolhidas
+        const { error } = await supabase.rpc("complete_onboarding", {
+          p_user_id: user.id,
+          p_goals: selectedGoals
+        });
+
+        if (error) {
+          console.error("Erro ao salvar onboarding:", error);
+          toast.error("Erro ao salvar suas preferências");
+          return;
+        }
+
+        toast.success("Preferências salvas com sucesso!");
+        navigate("/dashboard");
+      } catch (error) {
+        console.error("Erro inesperado ao salvar onboarding:", error);
+        toast.error("Erro ao salvar suas preferências");
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -197,11 +230,12 @@ const Onboarding = () => {
 
         <Button
           onClick={handleNext}
+          disabled={isSaving}
           size="lg"
-          className="px-12 py-4 text-lg font-semibold rounded-xl bg-white text-primary hover:bg-white/90 shadow-strong"
+          className="px-12 py-4 text-lg font-semibold rounded-xl bg-white text-primary hover:bg-white/90 shadow-strong disabled:opacity-50"
         >
-          Começar Jornada
-          <ArrowRight className="w-5 h-5 ml-2" />
+          {isSaving ? "Salvando..." : "Começar Jornada"}
+          {!isSaving && <ArrowRight className="w-5 h-5 ml-2" />}
         </Button>
         
         <p className="text-white/60 text-sm mt-6">

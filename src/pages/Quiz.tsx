@@ -93,7 +93,8 @@ const Quiz = () => {
           session_id: sessionId,
           user_id: user?.id || null,
           answers: answers,
-          scores: scores
+          scores: scores,
+          completed_at: new Date().toISOString()
         })
         .select()
         .single();

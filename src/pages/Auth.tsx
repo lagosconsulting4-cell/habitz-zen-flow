@@ -25,7 +25,7 @@ const Auth = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("is_premium")
+        .select("is_premium, has_completed_onboarding")
         .eq("user_id", userId)
         .single();
 
@@ -36,8 +36,14 @@ const Auth = () => {
       const locationState = location.state as { from?: { pathname?: string } } | null;
       const preferredPath = locationState?.from?.pathname;
 
+      // Se não completou onboarding, redirecionar para lá primeiro
+      if (!data?.has_completed_onboarding) {
+        navigate("/onboarding", { replace: true });
+        return;
+      }
+
       if (data?.is_premium) {
-        const safePath = preferredPath && !["/auth", "/pricing"].includes(preferredPath) ? preferredPath : "/dashboard";
+        const safePath = preferredPath && !["/auth", "/pricing", "/onboarding"].includes(preferredPath) ? preferredPath : "/dashboard";
         navigate(safePath, { replace: true });
       } else {
         navigate("/pricing", { replace: true });

@@ -20,6 +20,7 @@ export const navItems: NavItem[] = [
   { id: "meditation", label: "Meditacao", path: "/meditation", icon: "headphones", variant: "secondary", requiresAuth: true },
   { id: "tips", label: "Insights", path: "/tips", icon: "lightbulb", variant: "secondary", requiresAuth: true },
   { id: "guided", label: "Jornada", path: "/guided", icon: "map", variant: "secondary", requiresAuth: true },
+  { id: "quiz", label: "Avaliacao TDAH", path: "/quiz", icon: "brain", variant: "secondary", requiresAuth: true },
   { id: "my-habits", label: "Meus Habitos", path: "/habits", icon: "list-checks", variant: "secondary", requiresAuth: true }
 ];
 

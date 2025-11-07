@@ -105,24 +105,51 @@ const Analysis = () => {
 
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
 
-      // Download PDF
-      pdf.save(`analise-habitz-${assessmentId}.pdf`);
-
-      // Save to Supabase (would need storage bucket configured)
-      // For now, we'll just save the record that PDF was generated
+      // Get current user
       const { data: { user } } = await supabase.auth.getUser();
 
+      // Generate PDF as blob
+      const pdfBlob = pdf.output("blob");
+      const fileName = `analise-habitz-${assessmentId}.pdf`;
+
+      // Upload to Supabase Storage (plan-pdfs bucket)
+      let pdfStoragePath: string | null = null;
+
+      if (user) {
+        // Authenticated user: save to user's folder
+        const storagePath = `${user.id}/analysis-${assessmentId}.pdf`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("plan-pdfs")
+          .upload(storagePath, pdfBlob, {
+            contentType: "application/pdf",
+            upsert: true // Allow overwriting if already exists
+          });
+
+        if (uploadError) {
+          console.error("Erro ao fazer upload do PDF:", uploadError);
+          toast.error("Erro ao salvar PDF no servidor. O download local continuará.");
+        } else {
+          pdfStoragePath = uploadData.path;
+        }
+      }
+
+      // Download PDF locally
+      pdf.save(fileName);
+
+      // Save metadata to database
       await supabase.from("analysis_summaries").insert({
         assessment_id: assessmentId,
         user_id: user?.id || null,
         diagnosis_type: diagnosisResult.type,
         probability_score: diagnosisResult.probabilityScore,
-        summary_pdf_url: null // Would be storage URL in production
+        summary_pdf_url: pdfStoragePath // Save storage path
       });
 
       track("analysis_pdf_downloaded", {
         assessment_id: assessmentId,
-        diagnosis_type: diagnosisResult.type
+        diagnosis_type: diagnosisResult.type,
+        saved_to_storage: !!pdfStoragePath
       });
 
       toast.success("PDF baixado com sucesso!");
