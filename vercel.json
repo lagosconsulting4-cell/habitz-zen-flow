@@ -4,10 +4,8 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/obrigado", "destination": "/obrigado.html" },
-    { "source": "/app", "destination": "/app/index.html" },
     {
-      "source": "/app/:path*",
-      "has": [ { "type": "header", "key": "accept", "value": "text/html.*" } ],
+      "source": "/app/:path((?!.*\\.).*)",
       "destination": "/app/index.html"
     }
   ],
