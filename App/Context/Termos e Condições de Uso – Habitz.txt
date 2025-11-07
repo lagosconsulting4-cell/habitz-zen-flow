@@ -1,0 +1,120 @@
+Termos e Condições de Uso – Habitz
+
+Última atualização: 16 de setembro de 2025
+
+Identificação da Empresa
+
+Razão Social: BRUNO GIORGIO KAHN FALCI 
+CNPJ: 59.393.438/0001-20 
+Endereço: Rua Tanhaçu, 336, Jardim Panorama, São Paulo, SP, 05679040
+E-mail: lagosconsulting4@gmail.com
+
+
+
+
+Bem-vindo ao Habitz, aplicativo web desenvolvido por Bruno Falci. Estes Termos e Condições de Uso ('Termos') regem o seu acesso e uso do aplicativo Habitz, estabelecendo um contrato legal entre você ('Usuário' ou 'Você') e a empresa acima identificada ('Empresa', 'Nós').
+
+Ao adquirir, acessar e utilizar o Habitz, você declara que leu, compreendeu e concorda integralmente com estes Termos. Caso não concorde com qualquer disposição aqui presente, você não deverá utilizar o aplicativo.
+
+1. Objeto e Descrição do Serviço
+
+1.1. O Habitz é um aplicativo web destinado ao desenvolvimento de hábitos saudáveis, prática de meditação e acompanhamento de rotinas pessoais de bem-estar.
+
+1.2. O aplicativo oferece as seguintes funcionalidades:
+a) Sistema de tracking (acompanhamento) de hábitos pessoais
+b) Meditações guiadas em áudio
+c) Diferentes níveis e programas de meditação
+d) Funcionamento offline após o primeiro acesso
+e) Interface para criação e monitoramento de rotinas
+
+1.3. Natureza do Serviço: O Habitz é uma ferramenta de apoio ao desenvolvimento pessoal e bem-estar. Não constitui aconselhamento médico, psicológico ou terapêutico. O aplicativo não substitui tratamento médico profissional ou acompanhamento de saúde mental.
+
+1.4. Resultados: Os benefícios do uso do aplicativo dependem exclusivamente da dedicação, constância e aplicação pessoal do usuário. Não garantimos resultados específicos relacionados à saúde, bem-estar ou mudanças comportamentais.
+
+2. Licença de Uso e Acesso
+
+2.1. Pagamento Único: O acesso ao Habitz é concedido mediante pagamento único de R$ 47,90 (quarenta e sete reais e noventa centavos), garantindo uso vitalício do aplicativo.
+
+2.2. Formas de Pagamento: Aceitamos pagamento via PIX, boleto bancário e cartão de crédito.
+
+2.3. Licença Pessoal: A licença concedida é pessoal, intransferível e não exclusiva. Você pode usar o aplicativo em seus dispositivos pessoais, mas não pode compartilhar seu acesso com terceiros.
+
+2.4. Acesso Vitalício: Uma vez confirmado o pagamento, você terá acesso permanente ao aplicativo e suas funcionalidades, incluindo atualizações futuras sem custo adicional.
+
+3. Cancelamento e Reembolso
+
+3.1. Direito de Arrependimento: Conforme o Art. 49 do Código de Defesa do Consumidor (Lei nº 8.078/90), você poderá exercer o seu direito de arrependimento e solicitar o cancelamento da sua compra no prazo de 7 (sete) dias corridos, a contar da data da confirmação do pagamento. Neste caso, o reembolso do valor pago será integral e incondicional.
+
+3.2. Solicitação de Cancelamento: A solicitação de cancelamento e reembolso dentro do prazo de 7 dias deve ser feita por escrito, através do e-mail de suporte: [INSERIR EMAIL DE SUPORTE].
+
+3.3. Cancelamento Após 7 Dias: Após o prazo de 7 dias, não haverá reembolso de qualquer valor pago, considerando que o acesso completo ao aplicativo já terá sido disponibilizado.
+
+3.4. Suspensão por Violação: Reservamo-nos o direito de suspender ou cancelar o acesso ao aplicativo, sem direito a reembolso, em caso de violação destes Termos, uso indevido do aplicativo ou atividades que prejudiquem outros usuários.
+
+4. Propriedade Intelectual
+
+4.1. Todos os conteúdos do Habitz, incluindo, mas não se limitando a, áudios de meditação, textos, interfaces, códigos, algoritmos e design, são de propriedade exclusiva da Empresa e protegidos pela legislação de direitos autorais (Lei nº 9.610/98).
+
+4.2. É estritamente proibido:
+a) Copiar, reproduzir, distribuir ou compartilhar qualquer conteúdo do aplicativo
+b) Fazer engenharia reversa do código ou funcionalidades
+c) Criar obras derivadas baseadas no aplicativo
+d) Usar o conteúdo para fins comerciais sem autorização expressa
+
+4.3. A violação dos direitos de propriedade intelectual sujeitará o infrator às sanções civis e criminais cabíveis.
+
+5. Coleta e Proteção de Dados de Saúde (LGPD)
+
+5.1. Dados Coletados: O Habitz coleta e processa dados relacionados aos seus hábitos, progresso pessoal e informações de bem-estar que você inserir voluntariamente no aplicativo.
+
+5.2. Base Legal: O tratamento dos seus dados é realizado com base no seu consentimento e no legítimo interesse para fornecimento do serviço, em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/18).
+
+5.3. Finalidades do Tratamento:
+a) Permitir o funcionamento das funcionalidades de tracking de hábitos
+b) Personalizar sua experiência no aplicativo
+c) Gerar relatórios de progresso pessoal
+d) Melhorar as funcionalidades do aplicativo
+
+5.4. Dados Sensíveis: Reconhecemos que dados relacionados à saúde e bem-estar são considerados dados pessoais sensíveis pela LGPD. Estes dados são tratados com máxima segurança e nunca compartilhados com terceiros.
+
+5.5. Armazenamento Local: Como o aplicativo funciona offline, muitos dos seus dados são armazenados localmente no seu dispositivo, garantindo maior privacidade e controle.
+
+5.6. Seus Direitos: Você tem direito a:
+a) Confirmar a existência de tratamento dos seus dados
+b) Acessar seus dados pessoais
+c) Corrigir dados incompletos, inexatos ou desatualizados
+d) Solicitar a eliminação de dados desnecessários
+e) Revogar seu consentimento a qualquer momento
+
+6. Responsabilidades e Limitações
+
+6.1. Uso Responsável: Você se compromete a usar o aplicativo de forma responsável e em conformidade com estes Termos. O Habitz é uma ferramenta de apoio e não substitui orientação médica profissional.
+
+6.2. Limitação de Responsabilidade: A Empresa não se responsabiliza por:
+a) Decisões tomadas com base nas informações do aplicativo
+b) Resultados de saúde ou bem-estar
+c) Problemas técnicos do seu dispositivo ou conexão de internet
+d) Perda de dados por problemas no seu dispositivo
+
+6.3. Recomendação Médica: Recomendamos consultar profissionais de saúde antes de iniciar qualquer programa de exercícios, meditação ou mudanças significativas de hábitos, especialmente se você possui condições médicas preexistentes.
+
+7. Atualizações e Modificações
+
+7.1. Atualizações do Aplicativo: Podemos lançar atualizações, melhorias e novas funcionalidades sem custo adicional para usuários com acesso vitalício.
+
+7.2. Alterações nos Termos: Estes Termos podem ser atualizados periodicamente. Você será notificado sobre mudanças significativas através do aplicativo ou e-mail.
+
+7.3. Continuidade do Serviço: Embora o acesso seja vitalício, reservamo-nos o direito de descontinuar o serviço mediante aviso prévio de 90 dias, garantindo que você possa exportar seus dados pessoais.
+
+8. Disposições Gerais
+
+8.1. Idade Mínima: O uso do Habitz é destinado a pessoas maiores de 18 anos. Menores de idade devem ter autorização dos responsáveis legais.
+
+8.2. Suporte Técnico: Oferecemos suporte técnico através do e-mail [INSERIR EMAIL DE SUPORTE]. O tempo de resposta pode variar entre 24 a 48 horas úteis.
+
+8.3. Foro: Para a resolução de quaisquer controvérsias decorrentes deste contrato, fica eleito o foro da Comarca de São Paulo, SP, com renúncia a qualquer outro, por mais privilegiado que seja.
+
+8.4. Validade: Se qualquer disposição destes Termos for considerada inválida, as demais cláusulas permanecerão em pleno vigor.
+
+Ao confirmar sua compra e utilizar o Habitz, você declara ter lido, compreendido e concordado com todos os termos e condições aqui estabelecidos.
+
