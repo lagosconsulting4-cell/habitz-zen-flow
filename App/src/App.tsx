@@ -33,7 +33,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/app">
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
