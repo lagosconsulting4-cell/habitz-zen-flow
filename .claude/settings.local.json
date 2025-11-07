@@ -1,0 +1,12 @@
+{
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "shadcn"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(copy index.html index.html.backup)",
+      "Bash(copy:*)"
+    ]
+  }
+}

@@ -4,9 +4,9 @@ const { cpSync, existsSync, renameSync, rmSync } = require("node:fs");
 const { join } = require("node:path");
 
 const rootDir = process.cwd();
-const landingDist = join(rootDir, "landing", "dist");
-const appDist = join(rootDir, "dist");
-const tempAppDist = join(rootDir, ".tmp-app-dist");
+const landingDist = join(rootDir, "Landing", "dist");
+const appDist = join(rootDir, "App", "dist");
+const outputDir = join(rootDir, "dist");
 
 if (!existsSync(landingDist)) {
   console.error(`[prepare-dist] Build da landing não encontrado em "${landingDist}".`);
@@ -18,13 +18,8 @@ if (!existsSync(appDist)) {
   process.exit(1);
 }
 
-rmSync(tempAppDist, { recursive: true, force: true });
-renameSync(appDist, tempAppDist);
-
-rmSync(appDist, { recursive: true, force: true });
-cpSync(landingDist, appDist, { recursive: true });
-cpSync(tempAppDist, join(appDist, "app"), { recursive: true });
-
-rmSync(tempAppDist, { recursive: true, force: true });
+rmSync(outputDir, { recursive: true, force: true });
+cpSync(landingDist, outputDir, { recursive: true });
+cpSync(appDist, join(outputDir, "app"), { recursive: true });
 
 console.log("[prepare-dist] Landing publicada na raiz e app disponível em /app/.");

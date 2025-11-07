@@ -1,0 +1,1145 @@
+📚 DOCUMENTAÇÃO COMPLETA: ORDER BUMP DE MEDITAÇÃO
+
+  Sistema de Controle de Acesso Granular para Order Bump
+
+  ---
+  📋 ÍNDICE
+
+  1. #visão-geral
+  2. #arquitetura-banco
+  3. #fluxo-completo
+  4. #implementação-backend
+  5. #implementação-webhook
+  6. #implementação-frontend
+  7. #guia-testes
+  8. #troubleshooting
+
+  ---
+
+  🎯 1. VISÃO GERAL DO SISTEMA
+
+  Objetivo
+
+  Criar um sistema onde apenas usuários que compraram o Order Bump de Meditação no Kirvano terão acesso à seção de meditação no app Habitz.
+
+  Fluxo Resumido
+
+  USUÁRIO COMPRA ORDER BUMP
+           ↓
+  KIRVANO ENVIA WEBHOOK
+           ↓
+  SUPABASE REGISTRA COMPRA + PRODUCT_ID
+           ↓
+  TRIGGER ATIVA FLAG has_meditation_access
+           ↓
+  APP VERIFICA FLAG ANTES DE MOSTRAR CONTEÚDO
+           ↓
+  ✅ ACESSO LIBERADO ou ❌ UPGRADE NECESSÁRIO
+
+  Componentes Envolvidos
+
+  - Kirvano: Plataforma de checkout (envia webhook com dados do order bump)
+  - Supabase: Banco de dados + Edge Functions + Triggers
+  - App React: Frontend que valida acesso
+
+  ---
+
+  🗄️ 2. ARQUITETURA DO BANCO DE DADOS
+
+  2.1. Tabela profiles (MODIFICAÇÕES)
+
+  -- ADICIONAR COLUNA PARA CONTROLE DE ACESSO A MEDITAÇÃO
+  ALTER TABLE public.profiles
+    ADD COLUMN IF NOT EXISTS has_meditation_access boolean NOT NULL DEFAULT false,
+    ADD COLUMN IF NOT EXISTS meditation_access_granted_at timestamptz;
+
+  -- ÍNDICE PARA PERFORMANCE
+  CREATE INDEX IF NOT EXISTS profiles_meditation_access_idx
+    ON public.profiles (has_meditation_access)
+    WHERE has_meditation_access = true;
+
+  Campos:
+  - has_meditation_access: Boolean que indica se o usuário comprou o order bump
+  - meditation_access_granted_at: Timestamp de quando o acesso foi concedido
+
+  ---
+  2.2. Tabela purchases (MODIFICAÇÕES)
+
+  -- ADICIONAR COLUNA PARA IDENTIFICAR PRODUTOS/ORDER BUMPS
+  ALTER TABLE public.purchases
+    ADD COLUMN IF NOT EXISTS product_ids text[] DEFAULT '{}',
+    ADD COLUMN IF NOT EXISTS has_order_bump boolean NOT NULL DEFAULT false,
+    ADD COLUMN IF NOT EXISTS order_bump_type text;
+
+  -- ÍNDICE PARA BUSCA RÁPIDA
+  CREATE INDEX IF NOT EXISTS purchases_order_bump_idx
+    ON public.purchases (has_order_bump)
+    WHERE has_order_bump = true;
+
+  CREATE INDEX IF NOT EXISTS purchases_product_ids_idx
+    ON public.purchases USING GIN (product_ids);
+
+  Campos:
+  - product_ids: Array de IDs de produtos (ex: ['plano-premium', 'meditacao-order-bump'])
+  - has_order_bump: Boolean rápido para identificar se tem order bump
+  - order_bump_type: Tipo específico (ex: 'meditation', 'books', etc.)
+
+  ---
+  2.3. Nova Função: handle_meditation_order_bump()
+
+  -- FUNÇÃO QUE ATIVA ACESSO A MEDITAÇÃO QUANDO ORDER BUMP É DETECTADO
+  CREATE OR REPLACE FUNCTION public.handle_meditation_order_bump()
+  RETURNS trigger
+  LANGUAGE plpgsql
+  SECURITY DEFINER SET search_path = public
+  AS $$
+  BEGIN
+    -- Verifica se a compra está paga E tem o order bump de meditação
+    IF NEW.status = 'paid'
+       AND (
+         NEW.order_bump_type = 'meditation'
+         OR 'meditacao-order-bump' = ANY(NEW.product_ids)
+         OR 'meditation-order-bump' = ANY(NEW.product_ids)
+       ) THEN
+
+      -- Ativa acesso a meditação no perfil do usuário
+      UPDATE public.profiles
+      SET
+        has_meditation_access = true,
+        meditation_access_granted_at = COALESCE(
+          public.profiles.meditation_access_granted_at,
+          now()
+        ),
+        updated_at = now()
+      WHERE public.profiles.user_id = NEW.user_id;
+
+      -- Log para debugging (opcional)
+      RAISE NOTICE 'Meditation access granted to user %', NEW.user_id;
+    END IF;
+
+    RETURN NEW;
+  END;
+  $$;
+
+  ---
+  2.4. Trigger: purchases_grant_meditation_access
+
+  -- TRIGGER QUE DISPARA AUTOMATICAMENTE AO INSERIR/ATUALIZAR COMPRA
+  DROP TRIGGER IF EXISTS purchases_grant_meditation_access ON public.purchases;
+  CREATE TRIGGER purchases_grant_meditation_access
+    AFTER INSERT OR UPDATE ON public.purchases
+    FOR EACH ROW
+    EXECUTE FUNCTION public.handle_meditation_order_bump();
+
+  ---
+  2.5. RLS Policy para meditations
+
+  -- POLÍTICA QUE MOSTRA MEDITAÇÕES APENAS PARA QUEM TEM ACESSO
+  DROP POLICY IF EXISTS "Users with meditation access can view sessions" ON public.meditations;
+  CREATE POLICY "Users with meditation access can view sessions"
+    ON public.meditations
+    FOR SELECT
+    USING (
+      auth.role() = 'authenticated'
+      AND (
+        -- Meditações gratuitas são visíveis para todos autenticados
+        premium_only = false
+        OR
+        -- Meditações premium requerem acesso
+        EXISTS (
+          SELECT 1 FROM public.profiles
+          WHERE profiles.user_id = auth.uid()
+          AND profiles.has_meditation_access = true
+        )
+      )
+    );
+
+  Lógica:
+  - Meditações com premium_only=false → Visíveis para todos
+  - Meditações com premium_only=true → Requerem has_meditation_access=true
+
+  ---
+
+  🔄 3. FLUXO COMPLETO DE INTEGRAÇÃO
+
+  3.1. Fluxo Visual
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │                    USUÁRIO NO CHECKOUT                       │
+  │  Seleciona: Plano Premium + Order Bump Meditação            │
+  └────────────────────┬────────────────────────────────────────┘
+                       │
+                       ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │                  KIRVANO PROCESSA PAGAMENTO                  │
+  │  - Pagamento aprovado                                        │
+  │  - Identifica produtos:                                      │
+  │    * product_1: "Plano Premium"                              │
+  │    * product_2: "Meditação Order Bump"                       │
+  └────────────────────┬────────────────────────────────────────┘
+                       │
+                       ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │              KIRVANO ENVIA WEBHOOK HTTP POST                 │
+  │  POST /functions/v1/kirvano-webhook                          │
+  │  {                                                            │
+  │    "event": "SALE_APPROVED",                                 │
+  │    "sale_id": "12345",                                       │
+  │    "customer": { "email": "user@email.com" },               │
+  │    "products": [                                             │
+  │      { "id": "prod_premium", "name": "Habitz Premium" },    │
+  │      { "id": "prod_meditation", "name": "Meditação Bump" }  │
+  │    ]                                                          │
+  │  }                                                            │
+  └────────────────────┬────────────────────────────────────────┘
+                       │
+                       ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │            EDGE FUNCTION: kirvano-webhook                    │
+  │  1. Valida token de segurança                                │
+  │  2. Busca ou cria usuário pelo email                         │
+  │  3. Identifica produtos comprados                            │
+  │  4. Registra compra na tabela purchases:                     │
+  │     - status: 'paid'                                         │
+  │     - product_ids: ['prod_premium', 'prod_meditation']      │
+  │     - has_order_bump: true                                   │
+  │     - order_bump_type: 'meditation'                          │
+  └────────────────────┬────────────────────────────────────────┘
+                       │
+                       ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │           TRIGGER: handle_paid_purchase()                    │
+  │  - Detecta status = 'paid'                                   │
+  │  - Atualiza profiles.is_premium = true                       │
+  └────────────────────┬────────────────────────────────────────┘
+                       │
+                       ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │     TRIGGER: handle_meditation_order_bump()                  │
+  │  - Detecta order_bump_type = 'meditation'                    │
+  │  - Atualiza profiles.has_meditation_access = true            │
+  │  - Define meditation_access_granted_at = now()               │
+  └────────────────────┬────────────────────────────────────────┘
+                       │
+                       ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │                 USUÁRIO ACESSA O APP                         │
+  │  - Hook useMeditationAccess() consulta profile               │
+  │  - Verifica has_meditation_access                            │
+  │  - Se true: Mostra todas as meditações                       │
+  │  - Se false: Mostra upgrade modal                            │
+  └─────────────────────────────────────────────────────────────┘
+
+  ---
+
+  💾 4. IMPLEMENTAÇÃO BACKEND (SUPABASE)
+
+  4.1. Migration Completa
+
+  Crie arquivo: supabase/migrations/20250107000000_order_bump_meditation.sql
+
+  -- ==================================================================
+  -- MIGRATION: ORDER BUMP DE MEDITAÇÃO
+  -- Descrição: Adiciona suporte para controle de acesso granular
+  --            baseado em order bumps do Kirvano
+  -- ==================================================================
+
+  -- 1. ADICIONAR COLUNAS EM PROFILES
+  ALTER TABLE public.profiles
+    ADD COLUMN IF NOT EXISTS has_meditation_access boolean NOT NULL DEFAULT false,
+    ADD COLUMN IF NOT EXISTS meditation_access_granted_at timestamptz;
+
+  -- Índice para performance
+  CREATE INDEX IF NOT EXISTS profiles_meditation_access_idx
+    ON public.profiles (has_meditation_access)
+    WHERE has_meditation_access = true;
+
+  COMMENT ON COLUMN public.profiles.has_meditation_access IS
+    'Indica se o usuário comprou o order bump de meditação';
+  COMMENT ON COLUMN public.profiles.meditation_access_granted_at IS
+    'Data/hora em que o acesso à meditação foi concedido';
+
+  -- 2. ADICIONAR COLUNAS EM PURCHASES
+  ALTER TABLE public.purchases
+    ADD COLUMN IF NOT EXISTS product_ids text[] DEFAULT '{}',
+    ADD COLUMN IF NOT EXISTS has_order_bump boolean NOT NULL DEFAULT false,
+    ADD COLUMN IF NOT EXISTS order_bump_type text;
+
+  -- Índices para busca rápida
+  CREATE INDEX IF NOT EXISTS purchases_order_bump_idx
+    ON public.purchases (has_order_bump)
+    WHERE has_order_bump = true;
+
+  CREATE INDEX IF NOT EXISTS purchases_product_ids_idx
+    ON public.purchases USING GIN (product_ids);
+
+  COMMENT ON COLUMN public.purchases.product_ids IS
+    'Array de IDs de produtos comprados (plano + order bumps)';
+  COMMENT ON COLUMN public.purchases.has_order_bump IS
+    'Flag rápida para identificar compras com order bump';
+  COMMENT ON COLUMN public.purchases.order_bump_type IS
+    'Tipo do order bump: meditation, books, coaching, etc.';
+
+  -- 3. FUNÇÃO PARA ATIVAR ACESSO A MEDITAÇÃO
+  CREATE OR REPLACE FUNCTION public.handle_meditation_order_bump()
+  RETURNS trigger
+  LANGUAGE plpgsql
+  SECURITY DEFINER SET search_path = public
+  AS $$
+  BEGIN
+    -- Só processa se compra está paga
+    IF NEW.status <> 'paid' THEN
+      RETURN NEW;
+    END IF;
+
+    -- Verifica se tem order bump de meditação
+    IF NEW.order_bump_type = 'meditation'
+       OR 'meditacao-order-bump' = ANY(NEW.product_ids)
+       OR 'meditation-order-bump' = ANY(NEW.product_ids)
+       OR 'order-bump-meditacao' = ANY(NEW.product_ids) THEN
+
+      -- Ativa acesso a meditação
+      UPDATE public.profiles
+      SET
+        has_meditation_access = true,
+        meditation_access_granted_at = COALESCE(
+          public.profiles.meditation_access_granted_at,
+          now()
+        ),
+        updated_at = now()
+      WHERE public.profiles.user_id = NEW.user_id;
+
+      RAISE NOTICE 'Meditation access granted to user %', NEW.user_id;
+    END IF;
+
+    RETURN NEW;
+  END;
+  $$;
+
+  -- 4. TRIGGER QUE DISPARA A FUNÇÃO
+  DROP TRIGGER IF EXISTS purchases_grant_meditation_access ON public.purchases;
+  CREATE TRIGGER purchases_grant_meditation_access
+    AFTER INSERT OR UPDATE OF status, product_ids, order_bump_type ON public.purchases
+    FOR EACH ROW
+    EXECUTE FUNCTION public.handle_meditation_order_bump();
+
+  -- 5. ATUALIZAR RLS POLICY DE MEDITAÇÕES
+  DROP POLICY IF EXISTS "Users with meditation access can view sessions" ON public.meditations;
+  CREATE POLICY "Users with meditation access can view sessions"
+    ON public.meditations
+    FOR SELECT
+    USING (
+      auth.role() = 'authenticated'
+      AND (
+        -- Meditações gratuitas: visíveis para todos autenticados
+        premium_only = false
+        OR
+        -- Meditações premium: requerem acesso
+        EXISTS (
+          SELECT 1 FROM public.profiles
+          WHERE profiles.user_id = auth.uid()
+          AND profiles.has_meditation_access = true
+        )
+      )
+    );
+
+  -- 6. FUNÇÃO HELPER PARA CONSULTAR ACESSO (OPCIONAL)
+  CREATE OR REPLACE FUNCTION public.check_meditation_access(check_user_id uuid)
+  RETURNS boolean
+  LANGUAGE sql
+  SECURITY DEFINER SET search_path = public
+  STABLE
+  AS $$
+    SELECT COALESCE(
+      (SELECT has_meditation_access FROM public.profiles WHERE user_id = check_user_id),
+      false
+    );
+  $$;
+
+  COMMENT ON FUNCTION public.check_meditation_access IS
+    'Helper function para verificar se usuário tem acesso a meditações premium';
+
+  -- ==================================================================
+  -- FIM DA MIGRATION
+  -- ==================================================================
+
+  ---
+
+  🔗 5. IMPLEMENTAÇÃO WEBHOOK (KIRVANO)
+
+  5.1. Atualizar Edge Function kirvano-webhook
+
+  Arquivo: supabase/functions/kirvano-webhook/index.ts
+
+  // ... (imports existentes)
+
+  type KirvanoPayload = {
+    event?: string;
+    sale_id?: string;
+    payment_method?: string;
+    total_price?: string;
+    products?: Array<{
+      id?: string;
+      name?: string;
+      // Kirvano pode enviar metadados
+      metadata?: Record<string, unknown>;
+    }>;
+    customer?: {
+      id?: string;
+      name?: string;
+      email?: string;
+    };
+  };
+
+  // ... (código existente até linha 150)
+
+  // NOVA FUNÇÃO: Detectar order bumps nos produtos
+  const detectOrderBumps = (products: KirvanoPayload['products']) => {
+    if (!Array.isArray(products)) {
+      return {
+        hasOrderBump: false,
+        orderBumpType: null,
+        productIds: [],
+      };
+    }
+
+    const productIds: string[] = [];
+    let hasOrderBump = false;
+    let orderBumpType: string | null = null;
+
+    for (const product of products) {
+      const productId = product.id ?? product.name?.toLowerCase().replace(/\s+/g, '-');
+      if (productId) {
+        productIds.push(productId);
+      }
+
+      const name = (product.name ?? '').toLowerCase();
+
+      // Detecta order bump de meditação
+      if (
+        name.includes('meditação') ||
+        name.includes('meditacao') ||
+        name.includes('meditation') ||
+        productId?.includes('meditation') ||
+        productId?.includes('meditacao')
+      ) {
+        hasOrderBump = true;
+        orderBumpType = 'meditation';
+      }
+
+      // Aqui você pode adicionar outros order bumps no futuro:
+      // if (name.includes('livros') || name.includes('books')) {
+      //   hasOrderBump = true;
+      //   orderBumpType = 'books';
+      // }
+    }
+
+    return { hasOrderBump, orderBumpType, productIds };
+  };
+
+  // ... (dentro do serve handler, após linha 151)
+
+  const saleId = payload.sale_id ?? crypto.randomUUID();
+  const amountInCents = parseAmountInCents(payload.total_price ?? "0");
+  const currency = "BRL";
+
+  // DETECTAR ORDER BUMPS
+  const { hasOrderBump, orderBumpType, productIds } = detectOrderBumps(payload.products);
+
+  // REGISTRAR COMPRA COM INFORMAÇÕES DE ORDER BUMP
+  const { error: purchaseError } = await adminClient
+    .from("purchases")
+    .upsert(
+      {
+        user_id: userId,
+        provider: "kirvano",
+        provider_session_id: saleId,
+        provider_payment_intent: saleId,
+        amount_cents: amountInCents || 0,
+        currency,
+        status: "paid",
+        // NOVOS CAMPOS:
+        product_ids: productIds,
+        has_order_bump: hasOrderBump,
+        order_bump_type: orderBumpType,
+      },
+      { onConflict: "provider_session_id" }
+    );
+
+  // ... (resto do código permanece igual)
+
+  ---
+  5.2. Configurar Kirvano
+
+  No painel do Kirvano:
+
+  1. Acesse Configurações → Webhooks
+  2. Configure webhook:
+    - URL: https://jbucnphyrziaxupdsnbn.supabase.co/functions/v1/kirvano-webhook
+    - Token: Use o valor de KIRVANO_WEBHOOK_TOKEN (mesma env var do Supabase)
+    - Eventos: Marque SALE_APPROVED
+  3. No Order Bump de Meditação, configure:
+    - Nome do produto: "Meditação Order Bump" (ou similar com "meditação")
+    - ID do produto (se disponível): meditation-order-bump ou meditacao-order-bump
+
+  Payload esperado do Kirvano:
+  {
+    "event": "SALE_APPROVED",
+    "sale_id": "abc123",
+    "customer": {
+      "email": "cliente@email.com",
+      "name": "João Silva"
+    },
+    "products": [
+      {
+        "id": "habitz-premium",
+        "name": "Habitz Plano Premium"
+      },
+      {
+        "id": "meditation-order-bump",
+        "name": "Meditação Order Bump"
+      }
+    ],
+    "total_price": "147.00"
+  }
+
+  ---
+
+  🎨 6. IMPLEMENTAÇÃO FRONTEND (APP)
+
+  6.1. Hook: useMeditationAccess
+
+  Crie arquivo: src/hooks/useMeditationAccess.ts
+
+  import { useQuery } from "@tanstack/react-query";
+  import { supabase } from "@/integrations/supabase/client";
+
+  interface MeditationAccessProfile {
+    has_meditation_access: boolean;
+    meditation_access_granted_at: string | null;
+  }
+
+  export const useMeditationAccess = (userId?: string) => {
+    const query = useQuery({
+      queryKey: ["meditation-access", userId],
+      queryFn: async (): Promise<MeditationAccessProfile | null> => {
+        if (!userId) {
+          return null;
+        }
+
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("has_meditation_access, meditation_access_granted_at")
+          .eq("user_id", userId)
+          .single();
+
+        if (error) {
+          throw error;
+        }
+
+        return data as MeditationAccessProfile;
+      },
+      enabled: Boolean(userId),
+      staleTime: 30_000, // Cache por 30 segundos
+    });
+
+    return {
+      hasMeditationAccess: Boolean(query.data?.has_meditation_access),
+      meditationAccessGrantedAt: query.data?.meditation_access_granted_at ?? null,
+      loading: query.isLoading,
+      refresh: query.refetch,
+    };
+  };
+
+  ---
+  6.2. Atualizar Hook: useMeditations
+
+  Modificar src/hooks/useMeditations.ts:
+
+  import { useCallback, useMemo, useState } from "react";
+  import { useQuery, useQueryClient } from "@tanstack/react-query";
+  import { supabase } from "@/integrations/supabase/client";
+  import { useToast } from "@/hooks/use-toast";
+  import { useMeditationAccess } from "@/hooks/useMeditationAccess"; // NOVO IMPORT
+
+  // ... (interfaces existentes)
+
+  export const useMeditations = (userId?: string) => { // ADICIONAR userId
+    const { toast } = useToast();
+    const queryClient = useQueryClient();
+    const [audioUrls, setAudioUrls] = useState<SignedUrlCache>({});
+    const [loadingAudioId, setLoadingAudioId] = useState<string | null>(null);
+
+    // NOVO: Verificar acesso a meditação
+    const { hasMeditationAccess } = useMeditationAccess(userId);
+
+    const query = useQuery<{ data: MeditationSession[] }, Error, MeditationSession[]>({
+      queryKey: ["meditations"],
+      queryFn: async () => {
+        // RLS Policy automaticamente filtra baseado em has_meditation_access
+        const { data, error } = await supabase
+          .from("meditations")
+          .select(
+            "id, slug, title, description, focus, steps, duration_seconds, duration_label, ambient_sounds, category, category_label, premium_only, audio_path, cover_image_url, sort_order"
+          )
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: true });
+
+        if (error) throw error;
+        return (data ?? []) as MeditationSession[];
+      },
+      onError: () => {
+        toast({
+          title: "Erro ao carregar",
+          description: "Não foi possível carregar as meditações agora.",
+          variant: "destructive",
+        });
+      },
+      staleTime: 60_000,
+    });
+
+    // Filtra localmente também (redundância para UX)
+    const sessions = useMemo(() => {
+      const allSessions = query.data ?? [];
+
+      // Se não tem acesso, mostra só as gratuitas
+      if (!hasMeditationAccess) {
+        return allSessions.filter(s => !s.premium_only);
+      }
+
+      // Se tem acesso, mostra todas
+      return allSessions;
+    }, [query.data, hasMeditationAccess]);
+
+    // ... (resto do código permanece igual)
+
+    return {
+      sessions,
+      isLoading: query.isLoading,
+      isError: query.isError,
+      loadingAudioId,
+      getSignedUrl,
+      refresh,
+      hasMeditationAccess, // EXPOR para componente
+    };
+  };
+
+  ---
+  6.3. Atualizar Página: Meditation.tsx
+
+  import { useEffect, useMemo, useRef, useState } from "react";
+  import { Card } from "@/components/ui/card";
+  import { Button } from "@/components/ui/button";
+  import { Badge } from "@/components/ui/badge";
+  import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // NOVO
+  import NavigationBar from "@/components/NavigationBar";
+  import { Brain, Clock, Volume2, Play, Pause, Loader2, Lock } from "lucide-react"; // Lock NOVO
+  import useMeditations, { MeditationSession } from "@/hooks/useMeditations";
+  import { supabase } from "@/integrations/supabase/client"; // NOVO
+  import { useNavigate } from "react-router-dom"; // NOVO
+
+  const Meditation = () => {
+    const navigate = useNavigate(); // NOVO
+    const [userId, setUserId] = useState<string | null>(null); // NOVO
+
+    // NOVO: Carregar userId
+    useEffect(() => {
+      const loadUser = async () => {
+        const { data } = await supabase.auth.getUser();
+        setUserId(data.user?.id ?? null);
+      };
+      void loadUser();
+    }, []);
+
+    const {
+      sessions,
+      isLoading,
+      loadingAudioId,
+      getSignedUrl,
+      hasMeditationAccess // NOVO
+    } = useMeditations(userId ?? undefined);
+
+    const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState("all");
+    const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+    const [audioSrc, setAudioSrc] = useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    // NOVO: Contar meditações bloqueadas
+    const lockedCount = useMemo(() => {
+      if (hasMeditationAccess) return 0;
+      return sessions.filter(s => s.premium_only).length;
+    }, [sessions, hasMeditationAccess]);
+
+    // ... (resto do código permanece igual até o return)
+
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <div className="container mx-auto px-4 py-6 max-w-4xl">
+          <div className="mb-8 animate-fade-in">
+            <h1 className="text-3xl font-light mb-2">
+              <span className="font-medium gradient-text">Meditação</span> & Respiração
+            </h1>
+            <p className="text-muted-foreground font-light">
+              Técnicas práticas para controle mental e foco
+            </p>
+          </div>
+
+          {/* NOVO: Alert de Upgrade se não tiver acesso */}
+          {!hasMeditationAccess && lockedCount > 0 && (
+            <Alert className="mb-6 border-amber-500/50 bg-amber-500/10 animate-fade-in">
+              <Lock className="h-5 w-5 text-amber-500" />
+              <AlertTitle className="text-amber-700 dark:text-amber-400">
+                {lockedCount} meditações premium bloqueadas
+              </AlertTitle>
+              <AlertDescription className="text-amber-600 dark:text-amber-300">
+                Desbloqueie o acesso completo à biblioteca de meditações com o Order Bump de Meditação.
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 w-full border-amber-500 text-amber-700 hover:bg-amber-500/20"
+                  onClick={() => navigate("/pricing")}
+                >
+                  Ver planos e order bumps
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* ... (resto do código de filtros e lista permanece igual) */}
+
+          <div className="space-y-4">
+            {filteredSessions.map((session, index) => (
+              <Card
+                key={session.id}
+                className={`glass-card p-6 hover:shadow-elegant transition-all duration-300 animate-slide-up ${
+                  selectedSessionId === session.id ? "ring-2 ring-primary" : ""
+                } ${
+                  session.premium_only && !hasMeditationAccess ? "opacity-60" : ""
+                }`} {/* NOVO: opacidade para bloqueadas */}
+                style={{ animationDelay: `${index * 100}ms` }}
+                onClick={() => {
+                  // NOVO: Bloquear clique em meditações premium
+                  if (session.premium_only && !hasMeditationAccess) {
+                    return;
+                  }
+                  toggleSessionDetails(session.id);
+                }}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        {session.premium_only && !hasMeditationAccess ? (
+                          <Lock className="w-5 h-5 text-amber-500" /> // NOVO
+                        ) : (
+                          <Brain className="w-5 h-5 text-primary" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-lg">{session.title}</h3>
+                          {session.premium_only && !hasMeditationAccess && (
+                            <Badge variant="secondary" className="text-xs bg-amber-500/20 text-amber-700">
+                              Premium
+                            </Badge>
+                          )}
+                        </div>
+                        {session.focus && (
+                          <p className="text-sm text-muted-foreground">{session.focus}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-muted-foreground mb-4">{session.description}</p>
+
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        <span>{session.duration_label}</span>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {session.category_label}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    disabled={session.premium_only && !hasMeditationAccess} // NOVO
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (session.premium_only && !hasMeditationAccess) {
+                        navigate("/pricing");
+                        return;
+                      }
+                      void handlePlay(session);
+                    }}
+                  >
+                    {session.premium_only && !hasMeditationAccess ? (
+                      <Lock className="w-4 h-4 text-amber-500" /> // NOVO
+                    ) : loadingAudioId === session.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : activeSessionId === session.id && isPlaying ? (
+                      <Pause className="w-4 h-4" />
+                    ) : (
+                      <Play className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+
+                {/* ... (resto do card permanece igual) */}
+              </Card>
+            ))}
+          </div>
+
+          {/* ... (resto do código permanece igual) */}
+        </div>
+
+        <NavigationBar />
+      </div>
+    );
+  };
+
+  export default Meditation;
+
+  ---
+  6.4. Página de Upgrade (Opcional)
+
+  Crie src/pages/MeditationUpgrade.tsx:
+
+  import { Card } from "@/components/ui/card";
+  import { Button } from "@/components/ui/button";
+  import { Check, Lock } from "lucide-react";
+  import { useNavigate } from "react-router-dom";
+
+  const MeditationUpgrade = () => {
+    const navigate = useNavigate();
+
+    const benefits = [
+      "Acesso a 10+ meditações premium exclusivas",
+      "Técnicas avançadas de respiração",
+      "Áudios guiados profissionais",
+      "Novos conteúdos mensais",
+      "Suporte prioritário",
+    ];
+
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+        <Card className="max-w-2xl w-full glass-card p-10 space-y-6 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="p-4 bg-amber-500/10 rounded-full">
+              <Lock className="w-12 h-12 text-amber-500" />
+            </div>
+          </div>
+
+          <h1 className="text-3xl font-bold gradient-text">
+            Desbloqueie o Poder da Meditação
+          </h1>
+
+          <p className="text-muted-foreground text-lg">
+            Eleve sua prática com meditações premium desenvolvidas por especialistas.
+          </p>
+
+          <div className="bg-card/50 rounded-lg p-6 space-y-3 text-left">
+            {benefits.map((benefit, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <Check className="w-5 h-5 text-primary flex-shrink-0" />
+                <span className="text-muted-foreground">{benefit}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-4">
+            <Button
+              size="lg"
+              className="w-full bg-gradient-primary hover:shadow-elegant"
+              onClick={() => navigate("/pricing")}
+            >
+              Ver planos e fazer upgrade
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full mt-3"
+              onClick={() => navigate("/meditation")}
+            >
+              Voltar para meditações
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
+  export default MeditationUpgrade;
+
+  ---
+
+  🧪 7. GUIA DE TESTES
+
+  7.1. Teste 1: Usuário SEM Order Bump
+
+  -- No Supabase SQL Editor
+  -- 1. Criar usuário de teste
+  INSERT INTO auth.users (id, email, email_confirmed_at, encrypted_password, role)
+  VALUES (
+    gen_random_uuid(),
+    'sem-orderbump@teste.com',
+    now(),
+    crypt('senha123', gen_salt('bf')),
+    'authenticated'
+  );
+
+  -- 2. Criar compra SEM order bump
+  INSERT INTO purchases (user_id, provider, status, amount_cents, currency, product_ids, has_order_bump)
+  VALUES (
+    (SELECT id FROM auth.users WHERE email = 'sem-orderbump@teste.com'),
+    'kirvano',
+    'paid',
+    9700,
+    'BRL',
+    ARRAY['plano-premium'], -- Só o plano, sem order bump
+    false
+  );
+
+  -- 3. Verificar profiles
+  SELECT user_id, is_premium, has_meditation_access
+  FROM profiles
+  WHERE user_id = (SELECT id FROM auth.users WHERE email = 'sem-orderbump@teste.com');
+
+  -- Resultado esperado:
+  -- is_premium: true
+  -- has_meditation_access: false
+
+  No App:
+  - Login com sem-orderbump@teste.com
+  - Acessar /meditation
+  - ✅ Deve ver apenas meditações com premium_only=false
+  - ✅ Deve ver alert de upgrade
+  - ❌ Não consegue reproduzir meditações premium
+
+  ---
+  7.2. Teste 2: Usuário COM Order Bump
+
+  -- 1. Criar usuário de teste
+  INSERT INTO auth.users (id, email, email_confirmed_at, encrypted_password, role)
+  VALUES (
+    gen_random_uuid(),
+    'com-orderbump@teste.com',
+    now(),
+    crypt('senha123', gen_salt('bf')),
+    'authenticated'
+  );
+
+  -- 2. Criar compra COM order bump
+  INSERT INTO purchases (user_id, provider, status, amount_cents, currency, product_ids, has_order_bump, order_bump_type)
+  VALUES (
+    (SELECT id FROM auth.users WHERE email = 'com-orderbump@teste.com'),
+    'kirvano',
+    'paid',
+    14700, -- 97 + 50 do order bump
+    'BRL',
+    ARRAY['plano-premium', 'meditacao-order-bump'], -- Com order bump
+    true,
+    'meditation'
+  );
+
+  -- 3. Verificar profiles
+  SELECT user_id, is_premium, has_meditation_access, meditation_access_granted_at
+  FROM profiles
+  WHERE user_id = (SELECT id FROM auth.users WHERE email = 'com-orderbump@teste.com');
+
+  -- Resultado esperado:
+  -- is_premium: true
+  -- has_meditation_access: true
+  -- meditation_access_granted_at: <timestamp>
+
+  No App:
+  - Login com com-orderbump@teste.com
+  - Acessar /meditation
+  - ✅ Deve ver TODAS as meditações (free + premium)
+  - ✅ NÃO deve ver alert de upgrade
+  - ✅ Consegue reproduzir todas as meditações
+
+  ---
+  7.3. Teste 3: Webhook do Kirvano
+
+  # Simular webhook com order bump
+  curl -X POST https://jbucnphyrziaxupdsnbn.supabase.co/functions/v1/kirvano-webhook \
+    -H "Content-Type: application/json" \
+    -H "x-kirvano-token: SEU_TOKEN_AQUI" \
+    -d '{
+      "event": "SALE_APPROVED",
+      "sale_id": "test-order-bump-001",
+      "total_price": "147.00",
+      "customer": {
+        "email": "webhook-test@habitz.life",
+        "name": "Test Webhook"
+      },
+      "products": [
+        {
+          "id": "habitz-premium",
+          "name": "Habitz Plano Premium"
+        },
+        {
+          "id": "meditation-order-bump",
+          "name": "Meditação Order Bump"
+        }
+      ]
+    }'
+
+  Verificar resultado:
+  -- Ver compra criada
+  SELECT * FROM purchases WHERE provider_session_id = 'test-order-bump-001';
+
+  -- Ver perfil atualizado
+  SELECT p.user_id, p.is_premium, p.has_meditation_access
+  FROM profiles p
+  JOIN auth.users u ON u.id = p.user_id
+  WHERE u.email = 'webhook-test@habitz.life';
+
+  -- Resultado esperado:
+  -- has_order_bump: true
+  -- order_bump_type: 'meditation'
+  -- profile.has_meditation_access: true
+
+  ---
+  7.4. Teste 4: RLS Policy
+
+  -- Como usuário SEM acesso
+  SET ROLE authenticated;
+  SET request.jwt.claim.sub = '(ID_DO_USUARIO_SEM_ACESSO)';
+
+  SELECT count(*) FROM meditations WHERE premium_only = true;
+  -- Resultado esperado: 0
+
+  SELECT count(*) FROM meditations WHERE premium_only = false;
+  -- Resultado esperado: > 0
+
+  RESET ROLE;
+
+  -- Como usuário COM acesso
+  SET ROLE authenticated;
+  SET request.jwt.claim.sub = '(ID_DO_USUARIO_COM_ACESSO)';
+
+  SELECT count(*) FROM meditations WHERE premium_only = true;
+  -- Resultado esperado: > 0
+
+  RESET ROLE;
+
+  ---
+
+  🔧 8. TROUBLESHOOTING
+
+  Problema 1: Webhook não ativa has_meditation_access
+
+  Diagnóstico:
+  -- 1. Verificar se compra foi registrada
+  SELECT * FROM purchases WHERE provider_session_id = 'SEU_SALE_ID';
+
+  -- 2. Verificar product_ids
+  SELECT product_ids, has_order_bump, order_bump_type
+  FROM purchases
+  WHERE user_id = 'SEU_USER_ID';
+
+  -- 3. Verificar se trigger disparou
+  SELECT has_meditation_access FROM profiles WHERE user_id = 'SEU_USER_ID';
+
+  Soluções:
+  - Verificar se product_ids contém string com "meditation" ou "meditacao"
+  - Testar trigger manualmente:
+  UPDATE purchases
+  SET status = 'paid', order_bump_type = 'meditation'
+  WHERE id = 'PURCHASE_ID';
+
+  ---
+  Problema 2: Usuário vê meditações premium mesmo sem acesso
+
+  Diagnóstico:
+  -- Verificar RLS está ativo
+  SELECT tablename, rowsecurity FROM pg_tables WHERE tablename = 'meditations';
+  -- rowsecurity deve ser 'true'
+
+  -- Verificar policies
+  SELECT policyname, cmd, qual FROM pg_policies WHERE tablename = 'meditations';
+
+  Soluções:
+  -- Recriar policy
+  ALTER TABLE meditations ENABLE ROW LEVEL SECURITY;
+
+  DROP POLICY IF EXISTS "Users with meditation access can view sessions" ON meditations;
+  CREATE POLICY "Users with meditation access can view sessions"
+    ON meditations FOR SELECT
+    USING (
+      auth.role() = 'authenticated'
+      AND (
+        premium_only = false
+        OR EXISTS (
+          SELECT 1 FROM profiles
+          WHERE profiles.user_id = auth.uid()
+          AND profiles.has_meditation_access = true
+        )
+      )
+    );
+
+  ---
+  Problema 3: Frontend não detecta acesso
+
+  Diagnóstico:
+  1. Verificar no console do navegador:
+  const { data } = await supabase.auth.getUser();
+  console.log('User ID:', data.user?.id);
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('has_meditation_access')
+    .eq('user_id', data.user?.id)
+    .single();
+  console.log('Has Access:', profile);
+
+  Soluções:
+  - Limpar cache do React Query: queryClient.clear()
+  - Forçar refresh: useMeditationAccess().refresh()
+  - Verificar se userId está sendo passado corretamente para os hooks
+
+  ---
+  📊 RESUMO DO FLUXO
+
+  | Etapa | Sistema  | Ação                              | Resultado                         |
+  |-------|----------|-----------------------------------|-----------------------------------|
+  | 1     | Kirvano  | Usuário compra plano + order bump | Gera evento SALE_APPROVED         |
+  | 2     | Webhook  | Recebe payload com produtos       | Detecta "meditation" nos produtos |
+  | 3     | Database | INSERT em purchases               | order_bump_type='meditation'      |
+  | 4     | Trigger  | handle_meditation_order_bump()    | UPDATE has_meditation_access=true |
+  | 5     | RLS      | Policy filtra meditações          | Libera premium_only=true          |
+  | 6     | Frontend | Hook useMeditationAccess()        | Renderiza UI baseado em acesso    |
+
+  ---
+  ✅ CHECKLIST FINAL DE IMPLEMENTAÇÃO
+
+  - Migration 20250107000000_order_bump_meditation.sql aplicada
+  - Colunas adicionadas em profiles e purchases
+  - Função handle_meditation_order_bump() criada
+  - Trigger purchases_grant_meditation_access ativo
+  - RLS Policy atualizada em meditations
+  - Edge Function kirvano-webhook atualizada com detectOrderBumps()
+  - Hook useMeditationAccess criado
+  - Hook useMeditations atualizado
+  - Página Meditation.tsx atualizada com locks e alerts
+  - Webhook configurado no painel do Kirvano
+  - Order bump configurado com nome identificável
+  - Testes manuais executados (usuário com/sem acesso)
+  - Teste de webhook executado com sucesso
+  - RLS testado com diferentes usuários
+
+  ---
+  🚀 PRÓXIMOS PASSOS (FUTURO)
+
+  1. Analytics: Rastrear quantos usuários compram order bump
+  2. Upsell: Modal de upgrade dentro da página de meditação
+  3. Múltiplos Order Bumps: Livros, Coaching, etc.
+  4. Gamificação: Badges para quem completa X meditações
+  5. Social Proof: Mostrar quantas pessoas compraram o order bump
