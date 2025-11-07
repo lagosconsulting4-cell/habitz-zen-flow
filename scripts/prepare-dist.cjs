@@ -5,7 +5,7 @@ const { join } = require("node:path");
 
 const rootDir = process.cwd();
 const landingDist = join(rootDir, "landing", "dist");
-const appDist = join(rootDir, "App", "dist");
+const appDist = join(rootDir, "dist");
 const tempAppDist = join(rootDir, ".tmp-app-dist");
 
 if (!existsSync(landingDist)) {

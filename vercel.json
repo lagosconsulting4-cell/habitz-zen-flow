@@ -1,55 +1,28 @@
 {
-  "installCommand": "cd landing && npm install && cd ../App && npm install",
-  "buildCommand": "cd landing && npm run build && cd ../App && npm run build && cd .. && node scripts/prepare-dist.cjs",
+  "installCommand": "cd Landing && npm install && cd ../App && npm install",
+  "buildCommand": "cd Landing && npm run build && cd ../App && npm run build && cd .. && node scripts/prepare-dist.cjs",
   "outputDirectory": "dist",
   "rewrites": [
-    {
-      "source": "/obrigado",
-      "destination": "/obrigado.html"
-    },
-    {
-      "source": "/app",
-      "destination": "/app/index.html"
-    },
+    { "source": "/obrigado", "destination": "/obrigado.html" },
+    { "source": "/app", "destination": "/app/index.html" },
     {
       "source": "/app/:path*",
-      "has": [
-        {
-          "type": "header",
-          "key": "accept",
-          "value": "text/html.*"
-        }
-      ],
+      "has": [ { "type": "header", "key": "accept", "value": "text/html.*" } ],
       "destination": "/app/index.html"
     }
   ],
   "headers": [
     {
       "source": "/app/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
+      "headers": [ { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" } ]
     },
     {
       "source": "/(.*).mp4",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
+      "headers": [ { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" } ]
     },
     {
       "source": "/(.*).mp3",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
+      "headers": [ { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" } ]
     }
   ]
 }
