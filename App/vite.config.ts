@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
     (mode === "production"
       ? isGitHubPages
         ? "/habitz-zen-flow/"
-        : "/"
+        : "/app/"
       : "/");
 
   return {

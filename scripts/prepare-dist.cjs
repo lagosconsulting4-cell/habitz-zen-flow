@@ -20,6 +20,10 @@ if (!existsSync(appDist)) {
 
 rmSync(outputDir, { recursive: true, force: true });
 cpSync(landingDist, outputDir, { recursive: true });
+
+// Copy App/dist/ to dist/app/
+// Vite builds with base "/app/" but outputs to dist/ directly
+// (not dist/app/), so we copy App/dist/ → dist/app/
 cpSync(appDist, join(outputDir, "app"), { recursive: true });
 
 console.log("[prepare-dist] Landing publicada na raiz e app disponível em /app/.");
