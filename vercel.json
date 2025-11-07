@@ -13,6 +13,13 @@
     },
     {
       "source": "/app/:path*",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": "text/html.*"
+        }
+      ],
       "destination": "/app/index.html"
     }
   ],
