@@ -309,12 +309,18 @@ document.querySelectorAll(".faq-item").forEach((item) => {
   };
 
   question.setAttribute("tabindex", "0");
-  question.addEventListener("click", toggle);
   question.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       toggle();
     }
+  });
+
+  item.addEventListener("click", (event) => {
+    if (event.target.closest(".faq-item") !== item) {
+      return;
+    }
+    toggle();
   });
 });
 
