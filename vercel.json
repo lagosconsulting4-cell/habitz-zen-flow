@@ -1,7 +1,7 @@
 {
-  "installCommand": "cd landing && npm install && cd .. && npm install",
-  "buildCommand": "cd landing && npm run build && cd .. && npm run build && node scripts/prepare-dist.cjs",
-  "outputDirectory": "dist",
+  "installCommand": "cd app/landing && npm install && cd .. && npm install",
+  "buildCommand": "cd app/landing && npm run build && cd .. && npm run build && node scripts/prepare-dist.cjs",
+  "outputDirectory": "app/dist",
   "rewrites": [
     {
       "source": "/obrigado",
@@ -13,13 +13,6 @@
     },
     {
       "source": "/app/:path*",
-      "has": [
-        {
-          "type": "header",
-          "key": "accept",
-          "value": "text/html.*"
-        }
-      ],
       "destination": "/app/index.html"
     }
   ],
