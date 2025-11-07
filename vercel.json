@@ -1,7 +1,7 @@
 {
-  "installCommand": "cd app/landing && npm install && cd .. && npm install",
-  "buildCommand": "cd app/landing && npm run build && cd .. && npm run build && node scripts/prepare-dist.cjs",
-  "outputDirectory": "app/dist",
+  "installCommand": "cd landing && npm install && cd .. && npm install",
+  "buildCommand": "cd landing && npm run build && cd .. && npm run build && node scripts/prepare-dist.cjs",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/obrigado",
