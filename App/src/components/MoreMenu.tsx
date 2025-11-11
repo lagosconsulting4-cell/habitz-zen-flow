@@ -7,6 +7,7 @@ import {
   Lightbulb,
   ListChecks,
   Map,
+  TrendingUp,
   User,
   type LucideIcon,
 } from "lucide-react";
@@ -34,6 +35,7 @@ const iconMap: Record<string, LucideIcon> = {
   map: Map,
   "list-checks": ListChecks,
   user: User,
+  "trending-up": TrendingUp,
 };
 
 interface MoreMenuProps {
@@ -47,7 +49,7 @@ const MoreMenu = ({ open, onOpenChange }: MoreMenuProps) => {
 
   const items = useMemo<NavItem[]>(() => {
     const primaryIds = new Set(primaryNavItems.map((item) => item.id));
-    return navItems.filter((item) => !primaryIds.has(item.id));
+    return navItems.filter((item) => item.includeInMoreMenu || !primaryIds.has(item.id));
   }, []);
 
   const handleSelect = (item: NavItem) => {

@@ -11,15 +11,35 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppMetrics } from "@/hooks/useAppMetrics";
-import { QuizAnswers, calculateScores, generateDiagnosisResult } from "@/lib/quizAnalysis";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
-const Quiz = () => {
+// Interface para respostas do onboarding
+interface OnboardingAnswers {
+  ageRange?: string;
+  hasDiagnosis?: string;
+  usesMedication?: string;
+  energyPeriod?: string;
+  challenges?: string[];
+  specificChallenge?: string;
+  focusLevel?: number;
+  motivationLevel?: number;
+  overloadLevel?: number;
+  clarityLevel?: number;
+  selfEsteemLevel?: number;
+  dailyTimeCommitment?: string;
+  preferredFormats?: string[];
+  environment?: string;
+  environmentOther?: string;
+  email?: string;
+  consent?: boolean;
+}
+
+const OnboardingFlow = () => {
   const navigate = useNavigate();
   const { track, getSessionId } = useAppMetrics();
   const [currentStep, setCurrentStep] = useState(1);
-  const [answers, setAnswers] = useState<Partial<QuizAnswers>>({
+  const [answers, setAnswers] = useState<Partial<OnboardingAnswers>>({
     challenges: [],
     preferredFormats: [],
     focusLevel: 3,
@@ -33,12 +53,12 @@ const Quiz = () => {
   const progress = (currentStep / totalSteps) * 100;
 
   useEffect(() => {
-    track("quiz_started");
+    track("onboarding_started");
   }, [track]);
 
   useEffect(() => {
     if (currentStep > 1) {
-      track("quiz_step_completed", { step: currentStep - 1 });
+      track("onboarding_step_completed", { step: currentStep - 1 });
     }
   }, [currentStep, track]);
 
@@ -82,39 +102,47 @@ const Quiz = () => {
       const sessionId = getSessionId();
       const { data: { user } } = await supabase.auth.getUser();
 
-      // Calculate scores and diagnosis
-      const scores = calculateScores(answers as QuizAnswers);
-      const diagnosisResult = generateDiagnosisResult(answers as QuizAnswers);
+      if (!user) {
+        toast.error("Você precisa estar autenticado para completar o onboarding.");
+        navigate("/auth");
+        return;
+      }
 
-      // Insert assessment response
-      const { data: assessment, error } = await supabase
-        .from("assessment_responses")
+      // Insert onboarding response
+      const { error: insertError } = await supabase
+        .from("onboarding_responses")
         .insert({
           session_id: sessionId,
-          user_id: user?.id || null,
+          user_id: user.id,
           answers: answers,
-          scores: scores,
           completed_at: new Date().toISOString()
+        });
+
+      if (insertError) throw insertError;
+
+      // Mark user as onboarded
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          has_completed_onboarding: true,
+          onboarding_completed_at: new Date().toISOString()
         })
-        .select()
-        .single();
+        .eq("user_id", user.id);
 
-      if (error) throw error;
-
-      // Store assessment_id in localStorage for the analysis page
-      localStorage.setItem("habitz:current-assessment", assessment.id);
+      if (updateError) throw updateError;
 
       // Track completion
-      track("quiz_completed", {
-        diagnosis_type: diagnosisResult.type,
-        probability_score: diagnosisResult.probabilityScore,
-        has_email: !!answers.email
+      track("onboarding_completed", {
+        has_email: !!answers.email,
+        challenges_count: answers.challenges?.length || 0
       });
 
-      // Navigate to analysis page
-      navigate(`/analise?assessment_id=${assessment.id}`);
+      toast.success("Onboarding concluído com sucesso!");
+
+      // Navigate to dashboard
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Error submitting quiz:", error);
+      console.error("Error submitting onboarding:", error);
       toast.error("Erro ao enviar respostas. Tente novamente.");
     }
   };
@@ -155,10 +183,10 @@ const Quiz = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Descubra seu Perfil TDAH
+            Bem-vindo ao Habitz
           </h1>
           <p className="text-gray-600">
-            Responda com sinceridade para receber sua análise personalizada
+            Vamos conhecer você melhor para personalizar sua experiência
           </p>
         </div>
 
@@ -530,8 +558,8 @@ const Quiz = () => {
           {currentStep === 5 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Receba sua análise</h2>
-                <p className="text-gray-600">Quer receber a análise inicial por e-mail?</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Fique por dentro</h2>
+                <p className="text-gray-600">Quer receber dicas e novidades por e-mail?</p>
               </div>
 
               <div className="space-y-4">
@@ -559,14 +587,14 @@ const Quiz = () => {
                       onCheckedChange={(checked) => setAnswers({ ...answers, consent: checked as boolean })}
                     />
                     <Label htmlFor="consent" className="font-normal cursor-pointer text-sm">
-                      Autorizo o Habitz a enviar minha análise e orientações por e-mail.
+                      Autorizo o Habitz a enviar dicas e orientações por e-mail.
                     </Label>
                   </div>
                 )}
 
                 <div className="bg-purple-50 p-4 rounded-lg mt-6">
                   <p className="text-sm text-gray-700">
-                    <strong>Observação:</strong> Sem email? Tudo bem — a análise aparece na próxima tela.
+                    <strong>Observação:</strong> Sem email? Tudo bem — você pode adicionar depois nas configurações.
                   </p>
                 </div>
               </div>
@@ -603,7 +631,7 @@ const Quiz = () => {
               className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
               size="lg"
             >
-              Gerar minha análise personalizada
+              Começar a usar o Habitz
             </Button>
           )}
         </div>
@@ -612,4 +640,4 @@ const Quiz = () => {
   );
 };
 
-export default Quiz;
+export default OnboardingFlow;

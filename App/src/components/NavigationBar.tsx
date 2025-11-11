@@ -31,7 +31,7 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
   const navigate = useNavigate();
 
   const { leftItems, rightItems } = useMemo(() => {
-    const items = primaryNavItems.filter((item) => item.id !== "create");
+    const items = primaryNavItems.filter((item) => item.id !== "create" && item.showInMobileNav !== false);
     return {
       leftItems: items.slice(0, 2),
       rightItems: items.slice(2),

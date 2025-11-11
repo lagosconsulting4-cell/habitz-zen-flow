@@ -4,127 +4,110 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? Deno.env.get("PROJECT_URL");
-const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SERVICE_ROLE_KEY");
-
-if (!supabaseUrl || !serviceRoleKey) {
-  console.error("[create-password-direct] Missing Supabase credentials");
-}
-
-const adminClient = supabaseUrl && serviceRoleKey
-  ? createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
-  : null;
-
 serve(async (req) => {
+  console.log("[create-password-direct] 🚀 Request received");
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   }
 
-  if (!adminClient) {
-    return new Response("Misconfigured", { status: 500, headers: corsHeaders });
-  }
-
-  let body: { email?: string; password?: string };
   try {
-    body = await req.json();
+    const { email, password } = await req.json();
+    console.log("[create-password-direct] 📧 Email:", email);
+
+    if (!email || !password) {
+      throw new Error("Email e senha são obrigatórios");
+    }
+    if (password.length < 6) {
+      throw new Error("Senha deve ter no mínimo 6 caracteres");
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error("Email inválido");
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new Error("Supabase não configurado corretamente");
+    }
+
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
+    const { data: existingUsers, error: listError } = await adminClient.auth.admin.listUsers();
+    if (listError) {
+      console.error("[create-password-direct] ❌ Erro ao listar usuários:", listError);
+      throw new Error("Erro ao validar usuário");
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const existingUser = existingUsers?.users?.find(
+      (user) => user.email?.trim().toLowerCase() === normalizedEmail,
+    );
+
+    if (!existingUser) {
+      console.log("[create-password-direct] ❌ Usuário não encontrado");
+      throw new Error("Email não encontrado. Verifique se sua compra foi processada.");
+    }
+
+    console.log("[create-password-direct] ✅ Usuário encontrado:", existingUser.id);
+
+    const { data: purchase, error: purchaseError } = await adminClient
+      .from("purchases")
+      .select("*")
+      .eq("user_id", existingUser.id)
+      .eq("status", "paid")
+      .limit(1)
+      .maybeSingle();
+
+    if (purchaseError) {
+      console.error("[create-password-direct] ❌ Erro ao buscar purchase:", purchaseError);
+      throw new Error("Erro ao verificar pagamento");
+    }
+
+    if (!purchase) {
+      console.log("[create-password-direct] ❌ Nenhuma purchase ativa para:", email);
+      throw new Error("Nenhum pagamento ativo encontrado para este email. Entre em contato com o suporte.");
+    }
+
+    console.log("[create-password-direct] 💳 Pagamento ativo encontrado");
+    console.log("[create-password-direct] 🔐 Atualizando senha para:", existingUser.id);
+
+    const { error: updateError } = await adminClient.auth.admin.updateUserById(existingUser.id, {
+      password,
+      email_confirm: true,
+    });
+
+    if (updateError) {
+      console.error("[create-password-direct] ❌ Erro ao definir senha:", updateError);
+      throw new Error(updateError.message ?? "Erro ao definir senha");
+    }
+
+    console.log("[create-password-direct] ✅ Senha atualizada com sucesso");
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Senha criada com sucesso! Você já pode fazer login.",
+        user_id: existingUser.id,
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (error) {
-    console.error("[create-password-direct] Invalid JSON", error);
+    console.error("[create-password-direct] 💥 Erro:", error);
+    const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
     return new Response(
-      JSON.stringify({ success: false, error: "INVALID_BODY" }),
+      JSON.stringify({
+        success: false,
+        error: errorMessage,
+      }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
-
-  const email = body.email?.trim().toLowerCase();
-  const password = body.password?.trim();
-
-  if (!email || !password) {
-    return new Response(
-      JSON.stringify({ success: false, error: "Informe email e senha." }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
-
-  if (password.length < 6) {
-    return new Response(
-      JSON.stringify({ success: false, error: "A senha precisa ter pelo menos 6 caracteres." }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return new Response(
-      JSON.stringify({ success: false, error: "E-mail inválido." }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
-
-  const { data: userLookup, error: userLookupError } = await adminClient.auth.admin.getUserByEmail(email);
-  if (userLookupError) {
-    console.error("[create-password-direct] Erro ao buscar usuário", userLookupError);
-    return new Response(
-      JSON.stringify({ success: false, error: "Erro ao validar usuário." }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
-
-  const user = userLookup?.user;
-  if (!user) {
-    return new Response(
-      JSON.stringify({ success: false, error: "Não encontramos uma compra ativa para este e-mail." }),
-      { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
-
-  const { data: purchase, error: purchaseError } = await adminClient
-    .from("purchases")
-    .select("id, status")
-    .eq("user_id", user.id)
-    .eq("status", "paid")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (purchaseError) {
-    console.error("[create-password-direct] Erro ao consultar pagamentos", purchaseError);
-    return new Response(
-      JSON.stringify({ success: false, error: "Erro ao verificar pagamento." }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
-
-  if (!purchase) {
-    return new Response(
-      JSON.stringify({ success: false, error: "Ainda não identificamos o pagamento para este e-mail." }),
-      { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
-
-  const { error: updateError } = await adminClient.auth.admin.updateUserById(user.id, {
-    password,
-    email_confirm: true,
-  });
-
-  if (updateError) {
-    console.error("[create-password-direct] Erro ao definir senha", updateError);
-    return new Response(
-      JSON.stringify({ success: false, error: updateError.message ?? "Erro ao definir senha." }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
-
-  return new Response(
-    JSON.stringify({ success: true, user_id: user.id, message: "Senha criada com sucesso!" }),
-    { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-  );
 });

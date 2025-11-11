@@ -34,13 +34,13 @@ const CheckinCard = () => {
         </div>
 
         {/* Emojis de humor */}
-        <div className="flex gap-2 justify-center items-center py-4">
+        <div className="flex flex-wrap gap-3 justify-center items-center py-4 sm:flex-nowrap">
           {[1, 2, 3, 4, 5].map((level) => (
             <motion.button
               key={level}
               onClick={() => handleMoodClick(level)}
               disabled={createCheckin.isPending || isLoading}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all hover:bg-white hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed group"
+              className="flex flex-col items-center gap-1 p-3 rounded-xl transition-all hover:bg-white hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed group flex-1 min-w-[72px] max-w-[96px]"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               aria-label={`Registrar humor: ${getMoodLabel(level)}`}

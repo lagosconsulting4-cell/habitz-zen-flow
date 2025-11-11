@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd LP_loteri.AI && npm install && npm run build",
-  "outputDirectory": "LP_loteri.AI/dist",
-  "installCommand": "echo 'Install will be done in build command'"
-}

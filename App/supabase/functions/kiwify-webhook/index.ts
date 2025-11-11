@@ -242,13 +242,16 @@ serve(async (req) => {
     return new Response("ok", { status: 200, headers: corsHeaders });
   }
 
-  const { data: userLookup, error: userError } = await supabaseAdmin.auth.admin.getUserByEmail(email);
+  const {
+    data: userLookup,
+    error: userError,
+  } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1, email });
   if (userError) {
     console.error("Failed to fetch user by email", { email, userError });
     return new Response("Internal error", { status: 500, headers: corsHeaders });
   }
 
-  const supabaseUser = userLookup?.user ?? null;
+  const supabaseUser = userLookup?.users?.[0] ?? null;
   if (!supabaseUser) {
     // No authenticated user yet for this email. Store as pending so we can
     // attach it automatically when the user signs up or logs in later.
