@@ -520,7 +520,7 @@ if (audioIconList.length > 0) {
   if (!audio2) {
     audio2 = document.createElement('audio');
     audio2.id = 'audio-player-2';
-    audio2.src = 'public/audio/audio2.mp3';
+    audio2.src = '/audio/audio2.mp3';
     audio2.style.display = 'none';
     document.body.appendChild(audio2);
   }
