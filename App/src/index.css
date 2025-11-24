@@ -113,27 +113,19 @@
     --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   }
 
-  /* Tema Verde para Dashboard Circular */
-  .theme-green {
-    --background: oklch(0.8636 0.2207 130.1457); /* Verde vibrante primary */
-    --foreground: oklch(1 0 0); /* branco puro */
-    --card: oklch(0.7400 0.1800 130.1457); /* Verde escuro para círculos */
-    --card-foreground: oklch(1 0 0);
-    --popover: oklch(0.8636 0.2207 130.1457);
-    --popover-foreground: oklch(1 0 0);
-    --primary: oklch(1 0 0); /* branco para progresso */
-    --primary-foreground: oklch(0.8636 0.2207 130.1457); /* verde */
-    --secondary: oklch(0.9200 0.1500 130.1457); /* verde claro */
-    --secondary-foreground: oklch(0.1450 0 0);
-    --muted: oklch(0.9200 0.1500 130.1457); /* verde claro */
-    --muted-foreground: oklch(0.9700 0.0500 130.1457);
-    --accent: oklch(0.5850 0.2140 22.3680); /* vermelho para coração */
-    --accent-foreground: oklch(1 0 0);
-    --destructive: oklch(0.5770 0.2450 27.3250);
-    --destructive-foreground: oklch(1 0 0);
-    --border: oklch(0.7400 0.1800 130.1457); /* verde escuro */
-    --input: oklch(0.9220 0 0);
-    --ring: oklch(1 0 0);
+  /* Tema Dark Premium para Dashboard - Match CreateHabit */
+  .theme-dashboard-dark {
+    --background: #000000; /* Preto puro como CreateHabit */
+    --foreground: #ffffff; /* Branco puro */
+    --card: #1a1a1a; /* Cinza muito escuro para círculos */
+    --card-foreground: #ffffff;
+    --primary: #A3E635; /* Verde lime premium - mesma cor do CreateHabit */
+    --primary-foreground: #000000;
+    --accent: #A3E635; /* Verde lime */
+    --accent-foreground: #000000;
+    --muted: #2a2a2a;
+    --muted-foreground: #888888;
+    --border: #2a2a2a;
   }
 
   /* Tema Coral para Dashboard Circular */

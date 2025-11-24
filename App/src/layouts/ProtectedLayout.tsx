@@ -18,7 +18,7 @@ const ProtectedLayout = () => {
   const showSidebar = !shouldHideNav && !isDashboard && !isCreate;
   const containerWidth = isDashboard || isCreate ? "max-w-4xl" : "max-w-6xl";
   const bottomPadding = shouldHideNav ? "pb-8" : "pb-24 md:pb-16";
-  const backgroundClass = isDashboard ? "bg-primary" : "bg-background";
+  const backgroundClass = isDashboard ? "bg-[#000000]" : "bg-background";
 
   return (
     <div className={`relative min-h-screen ${backgroundClass}`}>

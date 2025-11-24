@@ -44,6 +44,9 @@ export const CircularHabitCard = ({
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
 
+  // Lime green from CreateHabit
+  const limeGreen = "#A3E635";
+
   return (
     <motion.button
       whileHover={{ scale: 1.08 }}
@@ -87,30 +90,30 @@ export const CircularHabitCard = ({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke="currentColor"
+            stroke="#2a2a2a"
             strokeWidth={strokeWidth}
             fill="transparent"
-            className="text-card opacity-90"
+            opacity={0.3}
           />
 
-          {/* Progress circle */}
+          {/* Progress circle - Lime green */}
           <motion.circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke="currentColor"
+            stroke={limeGreen}
             strokeWidth={strokeWidth}
             fill="transparent"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
-            className="text-white transition-all duration-500"
+            className="transition-all duration-500"
             initial={false}
             animate={{ strokeDashoffset: offset }}
           />
         </svg>
 
-        {/* Inner filled circle when completed */}
+        {/* Inner filled circle when completed - lime green */}
         <motion.div
           initial={false}
           animate={{
@@ -118,10 +121,11 @@ export const CircularHabitCard = ({
             scale: completed ? 1 : 0.85
           }}
           transition={{ duration: 0.3, delay: completed ? 0.15 : 0, type: "spring" }}
-          className="absolute inset-0 m-2.5 bg-white rounded-full shadow-inner"
+          className="absolute inset-0 m-2.5 rounded-full shadow-inner"
+          style={{ backgroundColor: completed ? limeGreen : "transparent" }}
         />
 
-        {/* Icon - always white, prefer Lucide icons over emojis */}
+        {/* Icon - lime green or black when completed */}
         <div className="absolute inset-0 flex items-center justify-center">
           {Icon ? (
             <motion.div
@@ -132,14 +136,15 @@ export const CircularHabitCard = ({
             >
               <Icon
                 size={52}
-                color="white"
+                color={completed ? "#000000" : limeGreen}
                 strokeWidth={2.5}
                 className="drop-shadow-lg"
               />
             </motion.div>
           ) : habit.emoji ? (
             <motion.span
-              className="text-5xl drop-shadow-md filter brightness-0 invert"
+              className="text-5xl drop-shadow-md"
+              style={{ color: completed ? "#000000" : limeGreen }}
               animate={{
                 scale: completed ? 1.1 : 1,
               }}

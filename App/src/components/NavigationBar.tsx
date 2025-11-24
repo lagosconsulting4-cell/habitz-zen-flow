@@ -17,6 +17,9 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
     navigate(path);
   };
 
+  const isDashboard = location.pathname === "/dashboard";
+  const limeGreen = "#A3E635";
+
   const renderButton = ({
     label,
     icon: Icon,
@@ -29,6 +32,10 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
     onClick?: () => void;
   }) => {
     const isActive = path ? location.pathname === path : false;
+    const iconColor = isDashboard
+      ? (isActive ? limeGreen : "#ffffff80")
+      : (isActive ? "currentColor" : "currentColor");
+
     return (
       <motion.button
         type="button"
@@ -37,20 +44,17 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
         aria-current={isActive ? "page" : undefined}
         className={cn(
           "flex items-center justify-center rounded-full p-3 transition-colors",
-          isActive ? "text-white" : "text-white/70"
+          !isDashboard && (isActive ? "text-primary" : "text-muted-foreground")
         )}
         whileTap={{ scale: 0.9 }}
         whileHover={{ scale: 1.1 }}
       >
-        <Icon className="h-6 w-6" strokeWidth={2.5} />
+        <Icon className="h-6 w-6" strokeWidth={2.5} style={{ color: iconColor }} />
       </motion.button>
     );
   };
 
-  // Check if on dashboard for different styling
-  const isDashboard = location.pathname === "/dashboard";
-  const navBg = isDashboard ? "bg-transparent" : "bg-card/95 backdrop-blur-md border-t border-border/60";
-  const iconColor = isDashboard ? "text-white" : "text-foreground";
+  const navBg = isDashboard ? "bg-black/50 backdrop-blur-sm" : "bg-card/95 backdrop-blur-md border-t border-border/60";
 
   return (
     <div className={cn("fixed inset-x-0 bottom-0 z-40 safe-area-bottom md:hidden", navBg)}>
