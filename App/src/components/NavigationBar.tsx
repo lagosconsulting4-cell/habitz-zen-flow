@@ -54,10 +54,17 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
     );
   };
 
-  const navBg = isDashboard ? "bg-black/50 backdrop-blur-sm" : "bg-card/95 backdrop-blur-md border-t border-border/60";
+  const navBg = isDashboard
+    ? "bg-[#1a1a1a]"
+    : "bg-card/95 backdrop-blur-md border-t border-border/60";
+
+  const borderStyle = isDashboard ? { borderTop: `2px solid ${limeGreen}` } : {};
 
   return (
-    <div className={cn("fixed inset-x-0 bottom-0 z-40 safe-area-bottom md:hidden", navBg)}>
+    <div
+      className={cn("fixed inset-x-0 bottom-0 z-40 safe-area-bottom md:hidden", navBg)}
+      style={borderStyle}
+    >
       <div className="mx-auto grid w-full max-w-md grid-cols-3 items-center px-8 py-4">
         {renderButton({ label: "Config", icon: Settings, path: "/profile" })}
         {renderButton({ label: "Menu", icon: Grid3x3, onClick: onOpenMore })}

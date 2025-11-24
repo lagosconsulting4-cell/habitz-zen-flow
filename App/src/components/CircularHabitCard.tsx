@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Heart } from "lucide-react";
+import { Heart, Target } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +37,8 @@ export const CircularHabitCard = ({
   isFavorite,
   className
 }: CircularHabitCardProps) => {
-  const Icon = getHabitIcon(habit.icon_key);
+  // Always use Lucide icon - prefer icon_key, fallback to Target icon
+  const Icon = getHabitIcon(habit.icon_key) || Target;
   const size = 140;
   const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
@@ -125,33 +126,21 @@ export const CircularHabitCard = ({
           style={{ backgroundColor: completed ? limeGreen : "transparent" }}
         />
 
-        {/* Icon - lime green or black when completed */}
+        {/* Icon - always Lucide, lime green or black when completed */}
         <div className="absolute inset-0 flex items-center justify-center">
-          {Icon ? (
-            <motion.div
-              animate={{
-                scale: completed ? 1.1 : 1,
-              }}
-              transition={{ duration: 0.3 }}
-            >
-              <Icon
-                size={52}
-                color={completed ? "#000000" : limeGreen}
-                strokeWidth={2.5}
-                className="drop-shadow-lg"
-              />
-            </motion.div>
-          ) : habit.emoji ? (
-            <motion.span
-              className="text-5xl drop-shadow-md"
-              style={{ color: completed ? "#000000" : limeGreen }}
-              animate={{
-                scale: completed ? 1.1 : 1,
-              }}
-            >
-              {habit.emoji}
-            </motion.span>
-          ) : null}
+          <motion.div
+            animate={{
+              scale: completed ? 1.1 : 1,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            <Icon
+              size={52}
+              color={completed ? "#000000" : limeGreen}
+              strokeWidth={2.5}
+              className="drop-shadow-lg"
+            />
+          </motion.div>
         </div>
       </div>
 
