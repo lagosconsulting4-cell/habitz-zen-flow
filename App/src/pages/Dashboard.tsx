@@ -64,6 +64,26 @@ const Dashboard = () => {
     () => selectedDate.toISOString().split("T")[0],
     [selectedDate]
   );
+  const habitsForDate = useMemo(() => getHabitsForDate(selectedDate), [getHabitsForDate, selectedDate]);
+  const completedCount = useMemo(
+    () => habitsForDate.filter((habit) => getHabitCompletionStatus(habit.id)).length,
+    [habitsForDate, getHabitCompletionStatus]
+  );
+  const todayKey = useMemo(() => today.toISOString().split("T")[0], [today]);
+  const isSelectedToday = selectedDateKey === todayKey;
+
+  const completionRate = habitsForDate.length > 0 ? Math.round((completedCount / habitsForDate.length) * 100) : 0;
+
+  const progressByHabit = useMemo(() => {
+    if (completionsDate !== selectedDateKey) return new Map<string, number>();
+    const map = new Map<string, number>();
+    completions.forEach((comp) => {
+      if (!comp.habit_id) return;
+      const value = comp.value ?? 1;
+      map.set(comp.habit_id, Number(value));
+    });
+    return map;
+  }, [completions, completionsDate, selectedDateKey]);
 
   useEffect(() => {
     const sync = async () => {
@@ -159,27 +179,6 @@ const Dashboard = () => {
     });
     localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify(serializable));
   };
-
-  const habitsForDate = useMemo(() => getHabitsForDate(selectedDate), [getHabitsForDate, selectedDate]);
-  const completedCount = useMemo(
-    () => habitsForDate.filter((habit) => getHabitCompletionStatus(habit.id)).length,
-    [habitsForDate, getHabitCompletionStatus]
-  );
-  const todayKey = useMemo(() => today.toISOString().split("T")[0], [today]);
-  const isSelectedToday = selectedDateKey === todayKey;
-
-  const completionRate = habitsForDate.length > 0 ? Math.round((completedCount / habitsForDate.length) * 100) : 0;
-
-  const progressByHabit = useMemo(() => {
-    if (completionsDate !== selectedDateKey) return new Map<string, number>();
-    const map = new Map<string, number>();
-    completions.forEach((comp) => {
-      if (!comp.habit_id) return;
-      const value = comp.value ?? 1;
-      map.set(comp.habit_id, Number(value));
-    });
-    return map;
-  }, [completions, completionsDate, selectedDateKey]);
 
   const parseHour = (value?: string | null) => {
     if (!value) return undefined;
