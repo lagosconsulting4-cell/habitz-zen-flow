@@ -40,80 +40,103 @@ export const CircularHabitCard = ({
   className,
 }: HabitCardProps) => {
   const Icon = useMemo(() => getHabitIcon(icon_key), [icon_key]);
-  const gradient = color ?? "var(--primary)";
   const pct = progress !== undefined ? Math.min(1, Math.max(0, progress)) : completed ? 1 : 0;
-  const ringFill = `${pct * 360}deg`;
+  const size = 128;
+  const stroke = 8;
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference * (1 - pct);
+  const isDone = completed || pct >= 1;
+  const progressColor = isDone ? "hsl(var(--success))" : "hsl(var(--primary))";
+  const trackColor = "hsl(var(--muted-foreground) / 0.18)";
 
   return (
     <motion.button
       type="button"
       onClick={onClick}
+      aria-pressed={completed}
       className={cn(
-        "relative flex h-32 w-32 flex-col items-center justify-center rounded-full border border-border/60 bg-card/80 p-3 shadow-lg backdrop-blur hover:-translate-y-[2px] transition",
-        completed ? "ring-2 ring-emerald-200" : "ring-1 ring-border/40",
+        "relative isolate flex flex-col items-center gap-2 rounded-3xl bg-card p-3 text-center shadow-[var(--shadow-soft)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-medium)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2",
         className
       )}
-      whileTap={{ scale: 0.97 }}
-      animate={completed ? "done" : "idle"}
+      whileTap={{ scale: 0.98 }}
+      animate={isDone ? "done" : "idle"}
       variants={{
         idle: { scale: 1 },
-        done: { scale: 1.04 },
+        done: { scale: 1.02 },
       }}
       transition={{ type: "spring", stiffness: 240, damping: 18 }}
     >
-      <motion.div
-        className="absolute inset-1 rounded-full"
-        style={{
-          background: `conic-gradient(${gradient} 0deg, ${gradient} ${ringFill}, rgba(0,0,0,0) 0deg)`,
-          opacity: 0.16,
-        }}
-        aria-hidden
-        animate={{ scale: completed ? 1.02 : 1 }}
-        transition={{ type: "spring", stiffness: 240, damping: 18 }}
-      />
-      <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-background/80 shadow-inner">
-        {completed ? (
-          <Check className="h-8 w-8 text-emerald-500" strokeWidth={3} />
-        ) : Icon ? (
-          <Icon className="h-7 w-7 text-foreground" />
-        ) : (
-          <span className="text-3xl">{emoji}</span>
-        )}
+      <div className="relative">
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="block">
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={trackColor}
+            strokeWidth={stroke}
+            fill="transparent"
+          />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={progressColor}
+            strokeWidth={stroke}
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+            strokeLinecap="round"
+            style={{ transition: "stroke-dashoffset 0.3s ease, stroke 0.2s ease" }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+          {autoCompleteSource === "health" && (
+            <span className="absolute right-1 top-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 shadow-sm">
+              Auto
+            </span>
+          )}
+          {!isDone && isPending && (
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 shadow-sm">
+              Pendente
+            </span>
+          )}
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/85 text-foreground shadow-inner">
+            {isDone ? (
+              <Check className="h-8 w-8 text-[hsl(var(--success))]" strokeWidth={3} />
+            ) : Icon ? (
+              <Icon className="h-7 w-7" />
+            ) : (
+              <span className="text-3xl">{emoji}</span>
+            )}
+          </div>
+          <div className="mt-1 space-y-1 text-center">
+            <p className={cn("text-sm font-semibold leading-tight", isDone ? "text-[hsl(var(--success))]" : "text-foreground")}>
+              {name}
+            </p>
+            <p className="text-[11px] text-muted-foreground leading-none">{category}</p>
+            {!isDone && progress !== undefined && (
+              <p className="text-[11px] text-muted-foreground leading-none">{Math.round(pct * 100)}%</p>
+            )}
+          </div>
+        </div>
       </div>
+
       <AnimatePresence>
-        {completed && (
+        {isDone && (
           <motion.div
             key="burst"
-            className="pointer-events-none absolute inset-0 rounded-full"
-            initial={{ opacity: 0.6, scale: 0.8 }}
-            animate={{ opacity: 0, scale: 1.4 }}
+            className="pointer-events-none absolute inset-0 rounded-3xl"
+            initial={{ opacity: 0.5, scale: 0.9 }}
+            animate={{ opacity: 0, scale: 1.2 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            style={{ boxShadow: "0 0 0 8px rgba(16,185,129,0.25)" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
           />
         )}
       </AnimatePresence>
-      {autoCompleteSource === "health" && (
-        <span className="absolute right-2 top-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 shadow-sm">
-          Auto
-        </span>
-      )}
-      {!completed && isPending && (
-        <span className="absolute left-2 top-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 shadow-sm">
-          Pendente
-        </span>
-      )}
-      <div className="mt-2 flex flex-col items-center gap-0.5 text-center">
-        <p className={cn("text-sm font-semibold", completed ? "text-emerald-700" : "text-foreground")}>
-          {name}
-        </p>
-        <p className="text-[11px] text-muted-foreground">{category}</p>
-        {progress !== undefined && progress < 1 && !completed && (
-          <p className="text-[11px] text-muted-foreground">{Math.round(progress * 100)}%</p>
-        )}
-      </div>
+
       {streak > 0 && (
-        <div className="absolute -bottom-2 flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-[11px] text-orange-600 shadow-sm">
+        <div className="absolute -bottom-2 flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[11px] text-orange-600 shadow-sm">
           <Flame className="h-3 w-3" />
           {streak}d
         </div>
@@ -131,8 +154,8 @@ export const AddHabitCard = ({ onClick, label = "Adicionar" }: AddCardProps) => 
     <motion.button
       type="button"
       onClick={onClick}
-      className="flex h-32 w-32 flex-col items-center justify-center rounded-full border border-dashed border-border/70 bg-muted/40 text-muted-foreground transition hover:border-primary/60 hover:text-primary"
-      whileTap={{ scale: 0.96 }}
+      className="flex h-32 w-32 flex-col items-center justify-center rounded-full border-2 border-dashed border-border bg-card text-muted-foreground shadow-[var(--shadow-soft)] transition hover:-translate-y-1 hover:border-primary/60 hover:text-primary hover:shadow-[var(--shadow-medium)]"
+      whileTap={{ scale: 0.98 }}
     >
       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
         <Plus className="h-6 w-6" />

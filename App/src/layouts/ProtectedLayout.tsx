@@ -9,16 +9,22 @@ const ProtectedLayout = () => {
   const [moreOpen, setMoreOpen] = useState(false);
 
   const shouldHideNav = useMemo(() => {
-    const hiddenRoutes = new Set(["/onboarding"]);
+    const hiddenRoutes = new Set(["/onboarding", "/create"]);
     return hiddenRoutes.has(location.pathname);
   }, [location.pathname]);
+
+  const isDashboard = location.pathname === "/dashboard";
+  const isCreate = location.pathname === "/create";
+  const showSidebar = !shouldHideNav && !isDashboard && !isCreate;
+  const containerWidth = isDashboard || isCreate ? "max-w-4xl" : "max-w-6xl";
+  const bottomPadding = shouldHideNav ? "pb-8" : "pb-24 md:pb-16";
 
   return (
     <div className="relative min-h-screen bg-background">
       <MoreMenu open={moreOpen} onOpenChange={setMoreOpen} />
 
-      <div className={`mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pt-4 md:flex-row md:px-8 ${shouldHideNav ? "pb-8" : "pb-24 md:pb-16"}`}>
-        {!shouldHideNav && <AppSidebar onOpenMore={() => setMoreOpen(true)} />}
+      <div className={`mx-auto flex w-full ${containerWidth} flex-col gap-6 px-4 pt-4 md:flex-row md:px-8 ${bottomPadding}`}>
+        {showSidebar && <AppSidebar onOpenMore={() => setMoreOpen(true)} />}
         <main className="flex-1">
           <Outlet />
         </main>

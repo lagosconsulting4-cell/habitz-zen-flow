@@ -48,8 +48,8 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/40 bg-card/90 backdrop-blur-lg safe-area-bottom md:hidden">
-      <div className="mx-auto grid w-full max-w-md grid-cols-3 items-center px-3 py-2">
+    <div className="fixed inset-x-0 bottom-0 z-40 border border-border/60 bg-card/95 shadow-[var(--shadow-medium)] backdrop-blur-md safe-area-bottom md:hidden">
+      <div className="mx-auto grid w-full max-w-md grid-cols-3 items-center px-4 py-3">
         {renderButton({ label: "Config", icon: Settings, path: "/profile" })}
         {renderButton({ label: "Menu", icon: Menu, onClick: onOpenMore })}
         {renderButton({ label: "Streaks", icon: TrendingUp, path: "/progress" })}

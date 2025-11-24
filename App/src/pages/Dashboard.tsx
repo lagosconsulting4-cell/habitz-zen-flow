@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CircleEllipsis, Sparkles } from "lucide-react";
+import { CircleEllipsis } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { AddHabitCard, CircularHabitCard } from "@/components/CircularHabitCard";
@@ -388,34 +388,36 @@ const Dashboard = () => {
   return (
     <>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Hoje</p>
-              <h1 className="text-3xl font-semibold mt-1">
+        <div className="mx-auto w-full max-w-4xl px-4 pb-28 pt-8">
+          <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-2">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">Hoje</p>
+              <h1 className="text-3xl font-semibold leading-tight">
                 Proteja sua <span className="gradient-text">sequência</span>, {userName}.
               </h1>
-              <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+              <p className="text-sm text-muted-foreground">
                 {selectedDate.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
-                <span className="inline-flex items-center gap-1 rounded-full bg-muted/50 px-2 py-0.5 text-[11px]">
-                  <Sparkles className="h-3 w-3 text-amber-500" />
-                  {completedCount}/{habitsForDate.length} no dia
-                </span>
               </p>
+              <div className="mt-2 inline-flex flex-col items-center rounded-2xl bg-card px-3 py-2 text-[11px] shadow-[var(--shadow-soft)]">
+                <span className="text-sm font-semibold text-foreground">
+                  {completedCount}/{habitsForDate.length}
+                </span>
+                <span className="text-muted-foreground">no dia</span>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="gap-2" onClick={() => navigate("/progress")}>
-                <CircleEllipsis className="h-4 w-4" />
+            <div className="flex items-center gap-2 self-start">
+              <Button variant="outline" className="rounded-full border border-border/70 bg-card px-4" onClick={() => navigate("/progress")}>
+                <CircleEllipsis className="mr-2 h-4 w-4" />
                 Métricas
               </Button>
-              <Button className="rounded-full" onClick={handleCreateHabit}>
+              <Button className="rounded-full px-4" onClick={handleCreateHabit}>
                 Criar hábito
               </Button>
             </div>
-          </div>
+          </header>
 
-          <Card className="glass-card p-4 mb-6">
-            <div className="flex items-center justify-between">
+          <Card className="mb-4 rounded-2xl border border-border/60 shadow-[var(--shadow-soft)]">
+            <div className="flex items-center justify-between gap-4 p-4">
               <div>
                 <p className="text-sm text-muted-foreground">Taxa de sucesso</p>
                 <p className="text-3xl font-semibold">{completionRate}%</p>
@@ -429,16 +431,16 @@ const Dashboard = () => {
             </div>
           </Card>
 
-          <div className="mb-4 flex gap-2 overflow-x-auto pb-2">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
             {dayOptions.map((option) => {
               const key = option.date.toISOString().split("T")[0];
               const isActive = selectedDateKey === key;
               return (
                 <Button
                   key={key}
-                  variant={isActive ? "default" : "outline"}
+                  variant={isActive ? "default" : "secondary"}
                   size="sm"
-                  className="rounded-full"
+                  className="rounded-full px-3"
                   onClick={() => setSelectedDate(option.date)}
                 >
                   {option.label}
@@ -452,7 +454,7 @@ const Dashboard = () => {
               type="checkbox"
               checked={!showCompleted}
               onChange={(e) => setShowCompleted(!e.target.checked)}
-              className="h-4 w-4 rounded border-border"
+              className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
             />
             <label htmlFor="hide-completed" className="text-sm text-muted-foreground">
               Ocultar concluídos
@@ -461,12 +463,12 @@ const Dashboard = () => {
 
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             </div>
           ) : (
-            <Card className="glass-card p-4">
+            <Card className="rounded-2xl border border-border/60 bg-card/90 p-4 shadow-[var(--shadow-soft)]">
               {isSyncingDate && (
-                <p className="text-xs text-muted-foreground mb-3">Sincronizando conclusão do dia...</p>
+                <p className="mb-3 text-xs text-muted-foreground">Sincronizando conclusão do dia...</p>
               )}
               {gridHabits.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -474,7 +476,7 @@ const Dashboard = () => {
                   <Button variant="link" onClick={handleCreateHabit} className="mt-2">Adicionar hábito</Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                   <AddHabitCard onClick={handleCreateHabit} label="Add task" />
                   {gridHabits.map((habit) => {
                     const timer = (habit as any).__timer as { remaining: number; total: number } | undefined;
@@ -522,7 +524,7 @@ const Dashboard = () => {
                           <Button
                             size="sm"
                             variant={timerRunning ? "outline" : "default"}
-                            className="h-8 text-xs"
+                            className="h-8 rounded-full px-3 text-xs"
                             onClick={() => (timerRunning ? pauseTimer(habit.id) : startTimer(habit))}
                           >
                             {timerRunning ? `Pausar ${remainingLabel}` : "Iniciar timer"}
@@ -532,7 +534,7 @@ const Dashboard = () => {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-8 text-xs"
+                            className="h-8 rounded-full px-3 text-xs"
                             onClick={() => stopTimer(habit.id)}
                           >
                             Encerrar
@@ -546,8 +548,8 @@ const Dashboard = () => {
             </Card>
           )}
           {notesForDate.length > 0 && (
-            <Card className="glass-card p-4 mt-4">
-              <div className="flex items-center justify-between mb-3">
+            <Card className="mt-4 rounded-2xl border border-border/60 bg-card/90 p-4 shadow-[var(--shadow-soft)]">
+              <div className="mb-3 flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Notas do dia</p>
                   <p className="text-sm text-muted-foreground">

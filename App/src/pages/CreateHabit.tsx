@@ -1,6 +1,10 @@
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Save } from "lucide-react";
+import {
+  ArrowLeft,
+  X,
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,15 +16,7 @@ import useHabitCatalog, { HabitTemplate } from "@/hooks/useHabitCatalog";
 import { useAppPreferences } from "@/hooks/useAppPreferences";
 import { HABIT_EMOJIS } from "@/data/habit-emojis";
 import type { HabitEmoji } from "@/data/habit-emojis";
-
-const fallbackCategories = [
-  { id: "Health", name: "Saúde", color: "#2ecc71", icon_key: "heart" },
-  { id: "Fitness", name: "Fitness", color: "#1abc9c", icon_key: "run" },
-  { id: "Mindfulness", name: "Mindfulness", color: "#9b59b6", icon_key: "meditate" },
-  { id: "Nutrition", name: "Nutrição", color: "#f39c12", icon_key: "carrot" },
-  { id: "Productivity", name: "Produtividade", color: "#3498db", icon_key: "focus" },
-  { id: "custom", name: "Outro", color: "#475569", icon_key: "check" },
-];
+import { HabitIconKey, getHabitIcon } from "@/components/icons/HabitIcons";
 
 const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; emoji: string }> = [
   { id: "morning", name: "Manhã", emoji: "☀️" },
@@ -38,6 +34,102 @@ const weekdays = [
   { id: 0, label: "Dom" },
 ];
 
+type Step = "category" | "templates" | "details";
+
+const CATEGORY_DATA: Array<{
+  id: string;
+  name: string;
+  description: string;
+  iconKey: HabitIconKey;
+  colorToken: string;
+  tasks: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    default_goal_value?: number;
+    default_unit?: "none" | "steps" | "minutes" | "km" | "custom";
+    default_frequency_type?: "fixed_days" | "times_per_week" | "times_per_month" | "every_n_days" | "daily";
+    default_times_per_week?: number;
+    default_times_per_month?: number;
+    default_every_n_days?: number;
+    default_days_of_week?: number[];
+  }>;
+}> = [
+  {
+    id: "movement",
+    name: "Movimento",
+    description: "Caminhadas, corridas e mobilidade.",
+    iconKey: "run",
+    colorToken: "var(--primary)",
+    tasks: [
+      { id: "walk_run", name: "Walk or Run", default_unit: "steps", default_goal_value: 5000, default_frequency_type: "daily" },
+      { id: "cycle", name: "Cycle", default_unit: "km", default_goal_value: 5, default_frequency_type: "times_per_week", default_times_per_week: 3 },
+      { id: "swim", name: "Swim", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "times_per_week", default_times_per_week: 2 },
+      { id: "mindful_minutes", name: "Mindful Minutes", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
+      { id: "climb_flights", name: "Climb Flights", default_unit: "steps", default_goal_value: 20, default_frequency_type: "daily" },
+    ],
+  },
+  {
+    id: "mind",
+    name: "Mente",
+    description: "Mindfulness, foco e clareza.",
+    iconKey: "meditate",
+    colorToken: "var(--secondary)",
+    tasks: [
+      { id: "meditate", name: "Meditate", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
+      { id: "journal", name: "Journal", default_unit: "none", default_frequency_type: "times_per_week", default_times_per_week: 3 },
+      { id: "gratitude", name: "Gratitude Notes", default_unit: "none", default_frequency_type: "daily" },
+    ],
+  },
+  {
+    id: "nutrition",
+    name: "Nutrição",
+    description: "Alimentação equilibrada e hidratação.",
+    iconKey: "meal",
+    colorToken: "var(--accent)",
+    tasks: [
+      { id: "healthy_meal", name: "Healthy Meal", default_unit: "none", default_frequency_type: "times_per_week", default_times_per_week: 7 },
+      { id: "drink_water", name: "Drink Water", default_unit: "custom", default_goal_value: 8, default_frequency_type: "daily" },
+      { id: "no_fast_food", name: "Avoid Fast Food", default_unit: "none", default_frequency_type: "times_per_week", default_times_per_week: 5 },
+    ],
+  },
+  {
+    id: "sleep",
+    name: "Sono",
+    description: "Descanso e recuperação.",
+    iconKey: "sleep",
+    colorToken: "var(--foreground)",
+    tasks: [
+      { id: "sleep_hours", name: "Sleep 8h", default_unit: "custom", default_goal_value: 8, default_frequency_type: "daily" },
+      { id: "no_screens", name: "No screens before bed", default_unit: "none", default_frequency_type: "daily" },
+    ],
+  },
+  {
+    id: "productivity",
+    name: "Produtividade",
+    description: "Prioridades, foco e execução.",
+    iconKey: "plan",
+    colorToken: "var(--foreground)",
+    tasks: [
+      { id: "daily_plan", name: "Daily Plan", default_unit: "none", default_frequency_type: "daily" },
+      { id: "deep_work", name: "Deep Work", default_unit: "minutes", default_goal_value: 60, default_frequency_type: "times_per_week", default_times_per_week: 4 },
+    ],
+  },
+  {
+    id: "personal",
+    name: "Pessoal",
+    description: "Relacionamentos e bem-estar.",
+    iconKey: "heart",
+    colorToken: "var(--primary)",
+    tasks: [
+      { id: "call_family", name: "Call family", default_unit: "none", default_frequency_type: "times_per_week", default_times_per_week: 2 },
+      { id: "digital_detox", name: "Digital Detox", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "daily" },
+    ],
+  },
+];
+
+const fallbackCategories = CATEGORY_DATA.map((c) => ({ id: c.id, name: c.name, color: c.colorToken, icon_key: null }));
+
 const CreateHabit = () => {
   const [habitName, setHabitName] = useState("");
   const [selectedEmoji, setSelectedEmoji] = useState<HabitEmoji>(HABIT_EMOJIS[0]);
@@ -46,33 +138,35 @@ const CreateHabit = () => {
   const [selectedIconKey, setSelectedIconKey] = useState<string | null>(fallbackCategories[0].icon_key ?? null);
   const [goalValue, setGoalValue] = useState<number | undefined>(undefined);
   const [unit, setUnit] = useState<"none" | "steps" | "minutes" | "km" | "custom">("none");
-  const [frequencyType, setFrequencyType] = useState<"fixed_days" | "times_per_week" | "times_per_month" | "every_n_days" | "daily">("fixed_days");
+  const [frequencyType, setFrequencyType] = useState<"fixed_days" | "times_per_week" | "times_per_month" | "every_n_days" | "daily">("daily");
   const [timesPerWeek, setTimesPerWeek] = useState<number | undefined>(undefined);
   const [timesPerMonth, setTimesPerMonth] = useState<number | undefined>(undefined);
   const [everyNDays, setEveryNDays] = useState<number | undefined>(undefined);
   const [selectedPeriod, setSelectedPeriod] = useState<typeof periods[number]["id"]>(periods[0].id);
-  const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
   const [isSaving, setIsSaving] = useState(false);
-  const [templateFilter, setTemplateFilter] = useState<string>("all");
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string } | null>(null);
+  const [selectedTemplateAuto, setSelectedTemplateAuto] = useState<boolean>(false);
+  const [step, setStep] = useState<Step>("category");
+  const [selectedCategoryData, setSelectedCategoryData] = useState<(typeof CATEGORY_DATA)[number] | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { createHabit } = useHabits();
   const { categories: catalogCategories, templates, isLoading: catalogLoading } = useHabitCatalog();
   const { prefs } = useAppPreferences();
 
-  const categories = useMemo(
-    () =>
-      catalogCategories.length > 0
-        ? catalogCategories.map((cat) => ({
-            id: cat.id,
-            name: cat.name,
-            color: cat.color ?? undefined,
-            icon_key: cat.icon_key ?? null,
-          }))
-        : fallbackCategories,
-    [catalogCategories]
-  );
+  const categories = useMemo(() => {
+    if (catalogCategories.length > 0) {
+      return catalogCategories.map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        color: cat.color ?? undefined,
+        icon_key: cat.icon_key ?? null,
+      }));
+    }
+    return fallbackCategories;
+  }, [catalogCategories]);
 
   useEffect(() => {
     if (catalogCategories.length > 0 && selectedCategory === fallbackCategories[0].id) {
@@ -90,20 +184,25 @@ const CreateHabit = () => {
 
   const clearTemplateSelection = () => {
     setSelectedTemplateId(null);
+    setSelectedTemplate(null);
+    setSelectedTemplateAuto(false);
     setHabitName("");
     setGoalValue(undefined);
     setUnit("none");
-    setFrequencyType("fixed_days");
+    setFrequencyType("daily");
     setTimesPerWeek(undefined);
     setTimesPerMonth(undefined);
     setEveryNDays(undefined);
-    setSelectedDays([1, 2, 3, 4, 5]);
+    setSelectedDays([1, 2, 3, 4, 5, 6, 0]);
     setSelectedColor(categories[0]?.color ?? fallbackCategories[0].color ?? null);
     setSelectedIconKey(categories[0]?.icon_key ?? fallbackCategories[0].icon_key ?? null);
+    setStep("category");
   };
 
   const applyTemplate = (template: HabitTemplate) => {
     setSelectedTemplateId(template.id);
+    setSelectedTemplate({ id: template.id, name: template.name });
+    setSelectedTemplateAuto(template.auto_complete_source === "health");
     setHabitName(template.name);
     if (template.category_id) {
       setSelectedCategory(template.category_id);
@@ -112,7 +211,7 @@ const CreateHabit = () => {
     setSelectedIconKey(template.icon_key ?? null);
     setUnit((template.default_unit as typeof unit) ?? "none");
     setGoalValue(template.default_goal_value ?? undefined);
-    setFrequencyType((template.default_frequency_type as typeof frequencyType) ?? "fixed_days");
+    setFrequencyType((template.default_frequency_type as typeof frequencyType) ?? "daily");
     setTimesPerWeek(template.default_times_per_week ?? undefined);
     setTimesPerMonth(template.default_times_per_month ?? undefined);
     setEveryNDays(template.default_every_n_days ?? undefined);
@@ -125,26 +224,11 @@ const CreateHabit = () => {
     }
   };
 
-  const filteredTemplates = useMemo(() => {
-    if (templateFilter === "all") return templates;
-    return templates.filter((tpl) => tpl.category_id === templateFilter);
-  }, [templateFilter, templates]);
-
-  const templateCategoryOptions = useMemo(() => {
-    const base = [{ id: "all", name: "Todos" }, ...categories];
-    const seen = new Set<string>();
-    return base.filter((item) => {
-      const exists = seen.has(item.id);
-      seen.add(item.id);
-      return !exists;
-    });
-  }, [categories]);
-
-  const renderTemplateFrequency = (template: HabitTemplate) => {
-    const freq = template.default_frequency_type;
-    if (freq === "daily") return "Todos os dias";
-    if (freq === "fixed_days" && template.default_days_of_week?.length) {
-      return `Dias: ${template.default_days_of_week
+const renderTemplateFrequency = (template: HabitTemplate) => {
+  const freq = template.default_frequency_type;
+  if (freq === "daily") return "Todos os dias";
+  if (freq === "fixed_days" && template.default_days_of_week?.length) {
+    return `Dias: ${template.default_days_of_week
         .map((d) => weekdays.find((w) => w.id === d)?.label ?? d)
         .join(" ")}`;
     }
@@ -306,250 +390,413 @@ const CreateHabit = () => {
     return null;
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
-        <div className="flex items-center justify-between mb-8 animate-fade-in">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/dashboard")}
-            className="rounded-xl"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="text-center">
-            <h1 className="text-2xl font-semibold">Novo hábito</h1>
-            <p className="text-xs text-muted-foreground">Crie uma rotina alinhada com suas metas</p>
-          </div>
-          <Button
-            onClick={handleSave}
-            disabled={!habitName.trim() || isSaving}
-            className="rounded-xl px-6 shadow-soft hover:shadow-medium transition-all duration-300"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            {isSaving ? "Salvando..." : "Salvar"}
-          </Button>
-        </div>
+  const handleSelectCategory = (cat: (typeof CATEGORY_DATA)[number]) => {
+    setSelectedCategory(cat.id);
+    setSelectedCategoryData(cat);
+    setSelectedColor(cat.colorToken);
+    setSelectedIconKey(null);
+    setStep("templates");
+  };
 
-        <div className="space-y-6">
-          <Card className="glass-card p-6 animate-slide-up">
-            <Label htmlFor="habit-name" className="text-lg font-medium">
-              Nome do hábito
-            </Label>
-            <Input
-              id="habit-name"
-              value={habitName}
-              onChange={(e) => setHabitName(e.target.value)}
-              placeholder="Ex: Meditar 10 minutos"
-              className="mt-3 rounded-xl border-2 text-lg py-3"
-            />
-          </Card>
+  const handleSelectTemplateFromCatalog = (template: HabitTemplate) => {
+    applyTemplate(template);
+    setStep("details");
+  };
 
-          <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "100ms" }}>
-            <div className="flex items-start justify-between gap-3 mb-4">
-              <div>
-                <Label className="text-lg font-medium block">Escolha um hábito pronto (opcional)</Label>
-                <p className="text-sm text-muted-foreground">Templates preenchem meta, frequência e ícone automaticamente.</p>
+  const handleSelectTemplate = (tpl: (typeof CATEGORY_DATA)[number]["tasks"][number]) => {
+    setSelectedTemplate({ id: tpl.id, name: tpl.name });
+    setSelectedTemplateId(tpl.id);
+    setSelectedTemplateAuto(false);
+    setHabitName(tpl.name);
+    setUnit((tpl.default_unit as typeof unit) ?? "none");
+    setGoalValue(tpl.default_goal_value ?? undefined);
+    setFrequencyType((tpl.default_frequency_type as typeof frequencyType) ?? "daily");
+    setTimesPerWeek(tpl.default_times_per_week ?? undefined);
+    setTimesPerMonth(tpl.default_times_per_month ?? undefined);
+    setEveryNDays(tpl.default_every_n_days ?? undefined);
+    if (tpl.default_days_of_week?.length) {
+      setSelectedDays(tpl.default_days_of_week);
+    } else {
+      setSelectedDays([1, 2, 3, 4, 5]);
+    }
+    setStep("details");
+  };
+
+  const HeaderBar = (
+    <div className="flex items-center justify-between px-4 py-3">
+      {step !== "category" ? (
+        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setStep(step === "details" ? "templates" : "category")}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+      ) : (
+        <div className="w-10" />
+      )}
+      <div className="text-center">
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          {step === "category" ? "Categorias" : step === "templates" ? "Hábito pronto" : "Confirmar hábito"}
+        </p>
+        <p className="text-base font-semibold">Adicionar hábito</p>
+      </div>
+      <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate("/dashboard")}>
+        <X className="h-5 w-5" />
+      </Button>
+    </div>
+  );
+
+  const CategoryStep = (
+    <motion.div
+      key="category"
+      initial={{ opacity: 0, x: 16 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -16 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="space-y-4 px-4 pb-6"
+    >
+      <p className="text-sm text-muted-foreground">Escolha uma categoria para ver sugestões de hábitos.</p>
+      <div className="grid grid-cols-2 gap-3">
+        {CATEGORY_DATA.map((cat) => {
+          const Icon = getHabitIcon(cat.iconKey);
+          return (
+            <button
+              key={cat.id}
+              onClick={() => handleSelectCategory(cat)}
+              className="flex flex-col items-start gap-2 rounded-2xl border border-border/60 bg-card px-4 py-4 text-left shadow-[var(--shadow-soft)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-medium)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))]"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-foreground">
+                {Icon ? <Icon className="h-5 w-5" /> : <span className="text-sm font-semibold">+</span>}
               </div>
-              <Button variant="ghost" size="sm" onClick={clearTemplateSelection} disabled={!selectedTemplateId}>
-                Criar do zero
-              </Button>
-            </div>
+              <div>
+                <p className="font-semibold">{cat.name}</p>
+                <p className="text-xs text-muted-foreground">{cat.description}</p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </motion.div>
+  );
 
-            <div className="flex flex-wrap gap-2 mb-4">
-              {templateCategoryOptions.map((cat) => (
-                <Button
-                  key={cat.id}
-                  variant={templateFilter === cat.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setTemplateFilter(cat.id)}
-                >
-                  {cat.name}
-                </Button>
-              ))}
-            </div>
+  const TemplateStep = (
+    <motion.div
+      key="templates"
+      initial={{ opacity: 0, x: 16 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -16 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="space-y-4 px-4 pb-6"
+    >
+      <div className="flex flex-wrap items-center gap-2 overflow-x-auto pb-2">
+        {CATEGORY_DATA.map((cat) => {
+          const Icon = getHabitIcon(cat.iconKey);
+          const isActive = selectedCategoryData?.id === cat.id;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => handleSelectCategory(cat)}
+              className={`flex items-center gap-2 rounded-full px-3 py-2 text-sm shadow-[var(--shadow-soft)] transition ${
+                isActive ? "bg-primary text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              {Icon ? <Icon className="h-4 w-4" /> : null}
+              <span>{cat.name}</span>
+            </button>
+          );
+        })}
+      </div>
+      {selectedCategoryData && (
+        <div className="flex items-center gap-3 rounded-2xl bg-muted/60 p-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            {getHabitIcon(selectedCategoryData.iconKey)?.({ className: "h-6 w-6" })}
+          </div>
+          <div>
+            <p className="font-semibold">{selectedCategoryData.name}</p>
+            <p className="text-xs text-muted-foreground">{selectedCategoryData.description}</p>
+          </div>
+        </div>
+      )}
 
-            <div className="grid gap-2 max-h-64 overflow-y-auto pr-1">
-              {catalogLoading && <p className="text-sm text-muted-foreground">Carregando catálogo...</p>}
-              {!catalogLoading && filteredTemplates.length === 0 && (
-                <p className="text-sm text-muted-foreground">Nenhum template disponível nessa categoria.</p>
-              )}
-              {filteredTemplates.map((template) => (
-                <button
-                  key={template.id}
-                  onClick={() => applyTemplate(template)}
-                  className={`flex flex-col gap-1 rounded-xl border px-4 py-3 text-left transition-colors ${
-                    selectedTemplateId === template.id
-                      ? "border-primary bg-primary/10"
-                      : "border-border hover:border-primary/40 hover:bg-muted/50"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">{template.name}</span>
-                      {template.color && (
-                        <span className="h-3 w-3 rounded-full border" style={{ backgroundColor: template.color }} />
-                      )}
-                    </div>
-                    {template.auto_complete_source === "health" && (
-                      <span className="text-[11px] font-medium text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">
-                        Auto
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">{renderTemplateFrequency(template)}</p>
-                </button>
-              ))}
+      <div className="space-y-2">
+        {selectedCategoryData?.tasks.map((tpl) => (
+          <button
+            key={tpl.id}
+            onClick={() => handleSelectTemplate(tpl)}
+            className={`flex items-center justify-between rounded-2xl border px-4 py-3 shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-medium)] ${
+              selectedTemplateId === tpl.id ? "border-primary bg-primary/10" : "border-border/60 bg-card"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-foreground">
+                {getHabitIcon(selectedCategoryData?.iconKey ?? null)?.({ className: "h-5.5 w-5.5" } as any) ?? getHabitIcon("run")?.({ className: "h-5 w-5" })}
+              </div>
+              <div className="text-left">
+                <p className="font-semibold">{tpl.name}</p>
+                {tpl.default_frequency_type && (
+                  <p className="text-xs text-muted-foreground">
+                    {tpl.default_frequency_type === "daily"
+                      ? "Todos os dias"
+                      : tpl.default_frequency_type === "times_per_week" && tpl.default_times_per_week
+                        ? `${tpl.default_times_per_week}x / semana`
+                        : tpl.default_frequency_type === "times_per_month" && tpl.default_times_per_month
+                          ? `${tpl.default_times_per_month}x / mês`
+                          : "Personalizado"}
+                  </p>
+                )}
+              </div>
             </div>
-          </Card>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </button>
+        ))}
+      </div>
 
-          <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "200ms" }}>
-            <Label className="text-lg font-medium mb-4 block">Escolha um emoji</Label>
-            <div className="grid grid-cols-6 gap-3">
-              {HABIT_EMOJIS.map((emoji) => (
-                <button
-                  key={emoji}
-                  onClick={() => setSelectedEmoji(emoji)}
-                  aria-pressed={selectedEmoji === emoji}
-                  className={`w-12 h-12 rounded-xl text-2xl transition-all duration-300 ${
-                    selectedEmoji === emoji
-                      ? "bg-primary/20 border-2 border-primary scale-110"
-                      : "bg-muted hover:bg-muted/80 border-2 border-transparent hover:scale-105"
-                  }`}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-          </Card>
-
-          <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "300ms" }}>
-            <Label className="text-lg font-medium mb-4 block">Categoria</Label>
-            <div className="grid grid-cols-2 gap-3">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => {
-                    setSelectedCategory(category.id);
-                    setSelectedColor(category.color ?? null);
-                    setSelectedIconKey(category.icon_key ?? null);
-                  }}
-                  aria-pressed={selectedCategory === category.id}
-                  className={`p-4 rounded-xl text-left transition-all duration-300 ${
-                    selectedCategory === category.id
-                      ? "bg-primary/20 border-2 border-primary"
-                      : "bg-muted hover:bg-muted/80 border-2 border-transparent"
-                  }`}
-                >
-                  <span className="font-medium" style={category.color ? { color: category.color } : undefined}>
-                    {category.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </Card>
-
-          <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "300ms" }}>
-          <Label className="text-lg font-medium mb-4 block">Meta (opcional)</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <Input
-                type="number"
-                min={0}
-                step={1}
-                value={goalValue ?? ""}
-                onChange={(e) => setGoalValue(e.target.value ? Number(e.target.value) : undefined)}
-                placeholder="Ex.: 5000"
-                className="rounded-xl"
-              />
-              <div className="flex flex-wrap gap-2">
-                {["none", "steps", "minutes", "km", "custom"].map((u) => (
+      {templates.length > 0 && (
+        <div className="space-y-2 pt-4">
+          <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Sugestões adicionais</p>
+          <div className="grid gap-2">
+            {catalogLoading && <p className="text-sm text-muted-foreground">Carregando catálogo...</p>}
+            {!catalogLoading &&
+              templates
+                .filter((tpl) => (selectedCategoryData ? tpl.category_id === selectedCategoryData.id : true))
+                .map((tpl) => (
                   <button
-                    key={u}
-                    type="button"
-                    onClick={() => setUnit(u as typeof unit)}
-                    className={`rounded-lg px-3 py-2 text-sm border ${
-                      unit === u ? "border-primary bg-primary/10 text-primary" : "border-border"
+                    key={tpl.id}
+                    onClick={() => handleSelectTemplateFromCatalog(tpl)}
+                    className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-left shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-medium)] ${
+                      selectedTemplateId === tpl.id ? "border-primary bg-primary/10" : "border-border/60 bg-card"
                     }`}
                   >
-                    {u}
+                    <div>
+                      <p className="font-semibold">{tpl.name}</p>
+                      <p className="text-xs text-muted-foreground">{renderTemplateFrequency(tpl)}</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </button>
                 ))}
-              </div>
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+
+  const DetailsStep = (
+    <motion.div
+      key="details"
+      initial={{ opacity: 0, x: 16 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -16 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="space-y-4 px-4 pb-6"
+    >
+      <Card className="rounded-2xl border border-border/60 bg-card/90 p-4 shadow-[var(--shadow-soft)]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative flex h-26 w-26 items-center justify-center rounded-full bg-muted">
+            <div className="absolute inset-0 rounded-full border-[6px] border-primary/35" />
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-card text-primary shadow-inner shadow-[var(--shadow-soft)]">
+              {selectedCategoryData ? (
+                getHabitIcon(selectedCategoryData.iconKey)?.({ className: "h-7 w-7" }) ?? <span className="text-2xl">{selectedEmoji}</span>
+              ) : (
+                <span className="text-2xl">{selectedEmoji}</span>
+              )}
             </div>
-          </Card>
+          </div>
+          <p className="text-sm text-muted-foreground">Configurar hábito</p>
+          <Input
+            value={habitName}
+            onChange={(e) => setHabitName(e.target.value)}
+            placeholder="Nome do hábito"
+            className="rounded-xl text-center text-lg"
+          />
+        </div>
+      </Card>
 
-          <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "400ms" }}>
-            <Label className="text-lg font-medium mb-4 block">Frequência</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <select
-                className="rounded-xl border px-3 py-2"
-                value={frequencyType}
-                onChange={(e) => setFrequencyType(e.target.value as typeof frequencyType)}
-              >
-                <option value="fixed_days">Dias específicos</option>
-                <option value="times_per_week">X vezes por semana</option>
-                <option value="times_per_month">X vezes por mês</option>
-                <option value="every_n_days">A cada N dias</option>
-                <option value="daily">Todos os dias</option>
-              </select>
-
-              <div className="md:col-span-2">{renderFrequencyFields()}</div>
+      <Card className="rounded-2xl border border-border/60 bg-card/90 p-0 shadow-[var(--shadow-soft)]">
+        <button
+          className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted/60 transition"
+          type="button"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+              {getHabitIcon("plan")?.({ className: "h-5 w-5" })}
             </div>
-          </Card>
-
-          <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "500ms" }}>
-            <Label className="text-lg font-medium mb-4 block">Período do dia</Label>
-            <div className="grid grid-cols-1 gap-3">
-              {periods.map((period) => (
+            <div>
+              <p className="text-sm text-muted-foreground">Meta</p>
+              <p className="text-base font-semibold">{goalValue ?? "Sem meta"}</p>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </button>
+        <div className="border-t border-border/60 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              type="number"
+              min={0}
+              value={goalValue ?? ""}
+              onChange={(e) => setGoalValue(e.target.value ? Number(e.target.value) : undefined)}
+              className="w-24 rounded-xl"
+              placeholder="5000"
+            />
+            <div className="flex gap-1">
+              {["none", "steps", "minutes", "km", "custom"].map((u) => (
                 <button
-                  key={period.id}
-                  onClick={() => setSelectedPeriod(period.id)}
-                  aria-pressed={selectedPeriod === period.id}
-                  className={`p-4 rounded-xl text-left transition-all duration-300 ${
-                    selectedPeriod === period.id
-                      ? "bg-primary/20 border-2 border-primary"
-                      : "bg-muted hover:bg-muted/80 border-2 border-transparent"
+                  key={u}
+                  type="button"
+                  onClick={() => setUnit(u as typeof unit)}
+                  className={`rounded-lg px-3 py-2 text-sm border transition ${
+                    unit === u ? "border-primary bg-primary/10 text-primary" : "border-border bg-muted/70 text-muted-foreground hover:bg-muted"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{period.emoji}</span>
-                    <span className="font-medium">{period.name}</span>
-                  </div>
+                  {u === "none" ? "Nenhum" : u}
                 </button>
               ))}
             </div>
-          </Card>
-
-          {habitName && (
-            <Card className="glass-card p-6 animate-scale-in">
-              <Label className="text-lg font-medium mb-4 block">Preview</Label>
-              <div className="flex items-center gap-3">
-                <div className="text-3xl">{selectedEmoji}</div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{habitName}</span>
-                    <span className="text-xs px-2 py-1 rounded-full bg-muted">{selectedCategory}</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {frequencyType === "fixed_days"
-                      ? selectedDays
-                          .sort((a, b) => a - b)
-                          .map((d) => weekdays.find((w) => w.id === d)?.label)
-                          .join(" • ")
-                      : frequencyType === "times_per_week"
-                        ? `${timesPerWeek ?? 0}x / semana`
-                        : frequencyType === "times_per_month"
-                          ? `${timesPerMonth ?? 0}x / mês`
-                          : frequencyType === "every_n_days"
-                            ? `A cada ${everyNDays ?? 0} dias`
-                            : "Todos os dias"}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          )}
+          </div>
         </div>
+      </Card>
+
+      <Card className="rounded-2xl border border-border/60 bg-card/90 p-0 shadow-[var(--shadow-soft)]">
+        <button
+          type="button"
+          className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted/60 transition"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/15 text-foreground">
+              {getHabitIcon("plan")?.({ className: "h-5 w-5" })}
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Frequência</p>
+              <p className="text-base font-semibold">
+                {frequencyType === "daily"
+                  ? "Todos os dias"
+                  : frequencyType === "times_per_week" && timesPerWeek
+                    ? `${timesPerWeek}x / semana`
+                    : frequencyType === "times_per_month" && timesPerMonth
+                      ? `${timesPerMonth}x / mês`
+                      : frequencyType === "every_n_days" && everyNDays
+                        ? `A cada ${everyNDays} dias`
+                        : "Dias específicos"}
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </button>
+        <div className="border-t border-border/60 px-4 py-3 space-y-3">
+          <select
+            className="w-full rounded-xl border px-3 py-2"
+            value={frequencyType}
+            onChange={(e) => setFrequencyType(e.target.value as typeof frequencyType)}
+          >
+            <option value="fixed_days">Dias específicos</option>
+            <option value="times_per_week">X vezes por semana</option>
+            <option value="times_per_month">X vezes por mês</option>
+            <option value="every_n_days">A cada N dias</option>
+            <option value="daily">Todos os dias</option>
+          </select>
+          <div>{renderFrequencyFields()}</div>
+        </div>
+      </Card>
+
+      <Card className="rounded-2xl border border-border/60 bg-card/90 p-0 shadow-[var(--shadow-soft)]">
+        <button type="button" className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted/60 transition">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/15 text-foreground">
+              <span className="text-lg">⏰</span>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Período do dia</p>
+              <p className="text-base font-semibold">{periods.find((p) => p.id === selectedPeriod)?.name ?? ""}</p>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </button>
+        <div className="border-t border-border/60 px-4 py-3">
+          <div className="grid grid-cols-3 gap-2">
+            {periods.map((period) => (
+              <button
+                key={period.id}
+                onClick={() => setSelectedPeriod(period.id)}
+                aria-pressed={selectedPeriod === period.id}
+                className={`rounded-xl px-3 py-2 text-sm transition ${
+                  selectedPeriod === period.id ? "bg-primary/15 border border-primary text-primary" : "bg-muted text-muted-foreground border border-border/60"
+                }`}
+              >
+                <span className="mr-1">{period.emoji}</span>
+                {period.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </Card>
+
+      <Card className="rounded-2xl border border-border/60 bg-card/90 p-0 shadow-[var(--shadow-soft)]">
+        <button type="button" className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted/60 transition">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+              {getHabitIcon(selectedCategoryData?.iconKey ?? "heart")?.({ className: "h-5 w-5" })}
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Ícone</p>
+              <p className="text-base font-semibold">Escolha um visual</p>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </button>
+        <div className="border-t border-border/60 px-4 py-3">
+          <div className="grid grid-cols-6 gap-2">
+            {HABIT_EMOJIS.slice(0, 12).map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => setSelectedEmoji(emoji)}
+                aria-pressed={selectedEmoji === emoji}
+                className={`flex h-10 w-10 items-center justify-center rounded-xl text-xl transition ${
+                  selectedEmoji === emoji ? "bg-primary/20 border border-primary scale-105" : "bg-muted border border-border/60 hover:bg-muted/80"
+                }`}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+      </Card>
+
+      {selectedTemplateAuto && (
+        <Card className="rounded-2xl border border-amber-200 bg-amber-50 p-3 shadow-[var(--shadow-soft)]">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+              <span className="text-base">★</span>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-amber-800">Este hábito usa integração automática.</p>
+              <p className="text-xs text-amber-700">Marcará como concluído quando os dados forem registrados.</p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      <div className="pt-2">
+        <Button
+          className="h-12 w-full rounded-xl shadow-[var(--shadow-medium)]"
+          disabled={!habitName.trim() || isSaving}
+          onClick={handleSave}
+        >
+          {isSaving ? "Salvando..." : "Salvar hábito"}
+        </Button>
+        <div className="mt-2 text-center">
+          <Button variant="ghost" size="sm" onClick={clearTemplateSelection}>
+            Limpar e voltar
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 backdrop-blur-sm">
+      <div className="mt-4 w-full max-w-md overflow-hidden rounded-3xl bg-background shadow-[var(--shadow-strong)] animate-fade-in">
+        {HeaderBar}
+        <AnimatePresence mode="wait">
+          {step === "category" && CategoryStep}
+          {step === "templates" && TemplateStep}
+          {step === "details" && DetailsStep}
+        </AnimatePresence>
       </div>
     </div>
   );
