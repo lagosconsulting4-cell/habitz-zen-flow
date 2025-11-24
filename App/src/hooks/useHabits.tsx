@@ -22,6 +22,17 @@ export interface Habit {
   created_at: string;
   updated_at: string;
   days_of_week: number[];
+  // Novos campos do schema
+  color?: string | null;
+  icon_key?: string | null;
+  unit?: "none" | "steps" | "minutes" | "km" | "custom" | null;
+  goal_value?: number | null;
+  frequency_type?: "fixed_days" | "times_per_week" | "times_per_month" | "every_n_days" | "daily" | null;
+  times_per_week?: number | null;
+  times_per_month?: number | null;
+  every_n_days?: number | null;
+  notification_pref?: HabitNotificationPref | null;
+  auto_complete_source?: "manual" | "health" | null;
 }
 
 export interface HabitCompletion {
@@ -30,6 +41,17 @@ export interface HabitCompletion {
   user_id: string;
   completed_at: string;
   created_at: string;
+  // Novos campos do schema
+  value?: number | null;
+  note?: string | null;
+  completed_at_time?: string | null;
+}
+
+export interface HabitNotificationPref {
+  reminder_enabled?: boolean;
+  reminder_time?: string;
+  sound?: string | null;
+  time_sensitive?: boolean;
 }
 
 export const useHabits = () => {
@@ -113,6 +135,17 @@ export const useHabits = () => {
             user_id: user.id,
             streak: 0,
             is_active: true,
+            // Defaults for new schema fields if not provided
+            color: habitData.color ?? null,
+            icon_key: habitData.icon_key ?? null,
+            unit: habitData.unit ?? "none",
+            goal_value: habitData.goal_value ?? null,
+            frequency_type: habitData.frequency_type ?? "fixed_days",
+            times_per_week: habitData.times_per_week ?? null,
+            times_per_month: habitData.times_per_month ?? null,
+            every_n_days: habitData.every_n_days ?? null,
+            notification_pref: habitData.notification_pref ?? null,
+            auto_complete_source: habitData.auto_complete_source ?? "manual",
           },
         ])
         .select()
@@ -140,7 +173,24 @@ export const useHabits = () => {
 
   const updateHabit = async (
     habitId: string,
-    updates: Partial<Pick<Habit, "name" | "emoji" | "category" | "period" | "days_of_week" | "is_active">>
+    updates: Partial<Pick<Habit,
+      "name" |
+      "emoji" |
+      "category" |
+      "period" |
+      "days_of_week" |
+      "is_active" |
+      "color" |
+      "icon_key" |
+      "unit" |
+      "goal_value" |
+      "frequency_type" |
+      "times_per_week" |
+      "times_per_month" |
+      "every_n_days" |
+      "notification_pref" |
+      "auto_complete_source"
+    >>
   ) => {
     try {
       const { data, error } = await supabase
@@ -373,6 +423,21 @@ export const useHabits = () => {
     fetchCompletionsForDate,
     completions,
     completionsDate,
+    saveCompletionNote: async (habitId: string, date: string, note: string) => {
+      try {
+        const { error } = await supabase
+          .from("habit_completions")
+          .update({ note })
+          .eq("habit_id", habitId)
+          .eq("completed_at", date);
+        if (error) throw error;
+        await fetchCompletionsForDate(date);
+        return true;
+      } catch (err) {
+        console.error("Erro ao salvar nota", err);
+        return false;
+      }
+    },
   };
 };
 

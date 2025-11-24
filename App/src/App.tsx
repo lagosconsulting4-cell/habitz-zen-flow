@@ -20,6 +20,7 @@ import Pricing from "./pages/Pricing";
 import Thanks from "./pages/Thanks";
 import Cancel from "./pages/Cancel";
 import MyHabits from "./pages/MyHabits";
+import Bonus from "./pages/Bonus";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "@/layouts/ProtectedLayout";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/tips" element={<Tips />} />
             <Route path="/guided" element={<GuidedJourney />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/bonus" element={<Bonus />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

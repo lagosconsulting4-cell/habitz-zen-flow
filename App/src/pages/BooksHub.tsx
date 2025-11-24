@@ -1,14 +1,17 @@
-﻿import { useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import NavigationBar from "@/components/NavigationBar";
 import { Book, ExternalLink, Loader2 } from "lucide-react";
 import { useBooks } from "@/hooks/useSupabaseData";
+import { useNavigate } from "react-router-dom";
+import { isBonusEnabled } from "@/config/bonusFlags";
 
 const BooksHub = () => {
   const { books, loading } = useBooks();
   const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const navigate = useNavigate();
 
   const categories = useMemo(() => {
     const unique = new Set<string>();
@@ -20,6 +23,12 @@ const BooksHub = () => {
     if (selectedCategory === "Todos") return books;
     return books.filter((b) => b.category === selectedCategory);
   }, [books, selectedCategory]);
+
+  useEffect(() => {
+    if (!isBonusEnabled("books")) {
+      navigate("/bonus", { replace: true });
+    }
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-background pb-20">

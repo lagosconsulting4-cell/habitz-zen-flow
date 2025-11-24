@@ -93,74 +93,255 @@ export type Database = {
           }
         ]
       }
-      habit_completions: {
-        Row: {
-          completed_at: string
-          created_at: string
-          habit_id: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          completed_at?: string
-          created_at?: string
-          habit_id: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          completed_at?: string
-          created_at?: string
-          habit_id?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "habit_completions_habit_id_fkey"
-            columns: ["habit_id"]
-            isOneToOne: false
-            referencedRelation: "habits"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      habit_categories: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          icon_key: string | null
+          id: string
+          name: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          icon_key?: string | null
+          id?: string
+          name: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          icon_key?: string | null
+          id?: string
+          name?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      habit_completions: {
+        Row: {
+          completed_at: string
+          completed_at_time: string | null
+          created_at: string
+          habit_id: string
+          id: string
+          note: string | null
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          completed_at: string
+          completed_at_time?: string | null
+          created_at?: string
+          habit_id: string
+          id?: string
+          note?: string | null
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          completed_at?: string
+          completed_at_time?: string | null
+          created_at?: string
+          habit_id?: string
+          id?: string
+          note?: string | null
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_completions_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      habit_notifications: {
+        Row: {
+          channel: string | null
+          created_at: string | null
+          habit_id: string
+          id: string
+          sound: string | null
+          time: string
+          time_sensitive: boolean | null
+          type: Database["public"]["Enums"]["habit_notification_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          channel?: string | null
+          created_at?: string | null
+          habit_id: string
+          id?: string
+          sound?: string | null
+          time: string
+          time_sensitive?: boolean | null
+          type: Database["public"]["Enums"]["habit_notification_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          channel?: string | null
+          created_at?: string | null
+          habit_id?: string
+          id?: string
+          sound?: string | null
+          time?: string
+          time_sensitive?: boolean | null
+          type?: Database["public"]["Enums"]["habit_notification_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_notifications_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      habit_templates: {
+        Row: {
+          auto_complete_source: Database["public"]["Enums"]["habit_auto_complete_source"] | null
+          category_id: string | null
+          color: string | null
+          created_at: string | null
+          default_days_of_week: number[] | null
+          default_every_n_days: number | null
+          default_frequency_type: Database["public"]["Enums"]["habit_frequency_type"] | null
+          default_goal_value: number | null
+          default_notifications: Json | null
+          default_times_per_month: number | null
+          default_times_per_week: number | null
+          default_unit: Database["public"]["Enums"]["habit_unit"] | null
+          icon_key: string | null
+          id: string
+          name: string
+          slug: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_complete_source?: Database["public"]["Enums"]["habit_auto_complete_source"] | null
+          category_id?: string | null
+          color?: string | null
+          created_at?: string | null
+          default_days_of_week?: number[] | null
+          default_every_n_days?: number | null
+          default_frequency_type?: Database["public"]["Enums"]["habit_frequency_type"] | null
+          default_goal_value?: number | null
+          default_notifications?: Json | null
+          default_times_per_month?: number | null
+          default_times_per_week?: number | null
+          default_unit?: Database["public"]["Enums"]["habit_unit"] | null
+          icon_key?: string | null
+          id?: string
+          name: string
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_complete_source?: Database["public"]["Enums"]["habit_auto_complete_source"] | null
+          category_id?: string | null
+          color?: string | null
+          created_at?: string | null
+          default_days_of_week?: number[] | null
+          default_every_n_days?: number | null
+          default_frequency_type?: Database["public"]["Enums"]["habit_frequency_type"] | null
+          default_goal_value?: number | null
+          default_notifications?: Json | null
+          default_times_per_month?: number | null
+          default_times_per_week?: number | null
+          default_unit?: Database["public"]["Enums"]["habit_unit"] | null
+          icon_key?: string | null
+          id?: string
+          name?: string
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_templates_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "habit_categories"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       habits: {
         Row: {
+          auto_complete_source: Database["public"]["Enums"]["habit_auto_complete_source"] | null
           category: string
+          color: string | null
           created_at: string
           emoji: string | null
+          every_n_days: number | null
+          frequency_type: Database["public"]["Enums"]["habit_frequency_type"] | null
+          goal_value: number | null
           id: string
+          icon_key: string | null
           is_active: boolean
           name: string
+          notification_pref: Json | null
           period: string
           streak: number
+          times_per_month: number | null
+          times_per_week: number | null
+          unit: Database["public"]["Enums"]["habit_unit"] | null
           updated_at: string
           days_of_week: number[]
           user_id: string
         }
         Insert: {
+          auto_complete_source?: Database["public"]["Enums"]["habit_auto_complete_source"] | null
           category: string
+          color?: string | null
           created_at?: string
           emoji?: string | null
+          every_n_days?: number | null
+          frequency_type?: Database["public"]["Enums"]["habit_frequency_type"] | null
+          goal_value?: number | null
           id?: string
+          icon_key?: string | null
           is_active?: boolean
           name: string
+          notification_pref?: Json | null
           period: string
           streak?: number
+          times_per_month?: number | null
+          times_per_week?: number | null
+          unit?: Database["public"]["Enums"]["habit_unit"] | null
           updated_at?: string
           days_of_week?: number[]
           user_id: string
         }
         Update: {
+          auto_complete_source?: Database["public"]["Enums"]["habit_auto_complete_source"] | null
           category?: string
+          color?: string | null
           created_at?: string
           emoji?: string | null
+          every_n_days?: number | null
+          frequency_type?: Database["public"]["Enums"]["habit_frequency_type"] | null
+          goal_value?: number | null
           id?: string
+          icon_key?: string | null
           is_active?: boolean
           name?: string
+          notification_pref?: Json | null
           period?: string
           streak?: number
+          times_per_month?: number | null
+          times_per_week?: number | null
+          unit?: Database["public"]["Enums"]["habit_unit"] | null
           updated_at?: string
           days_of_week?: number[]
           user_id?: string
@@ -236,6 +417,10 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          is_premium?: boolean | null
+          premium_since?: string | null
+          has_completed_onboarding?: boolean | null
+          onboarding_completed_at?: string | null
           updated_at: string
           user_id: string
         }
@@ -244,6 +429,10 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_premium?: boolean | null
+          premium_since?: string | null
+          has_completed_onboarding?: boolean | null
+          onboarding_completed_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -252,6 +441,10 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_premium?: boolean | null
+          premium_since?: string | null
+          has_completed_onboarding?: boolean | null
+          onboarding_completed_at?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -278,6 +471,33 @@ export type Database = {
           created_at?: string
           id?: string
           text?: string
+        }
+        Relationships: []
+      }
+      onboarding_responses: {
+        Row: {
+          id: string
+          session_id: string
+          user_id: string | null
+          answers: Json
+          completed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          user_id?: string | null
+          answers: Json
+          completed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          session_id?: string
+          user_id?: string | null
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
         }
         Relationships: []
       }
@@ -372,6 +592,119 @@ export type Database = {
             referencedColumns: ["id"]
           }
         ]
+      }
+      guided_days: {
+        Row: {
+          id: string
+          week: number
+          day: number
+          global_day: number
+          title: string
+          description: string | null
+          estimated_minutes: number | null
+          type: string
+          audio_url: string | null
+        }
+        Insert: {
+          id?: string
+          week: number
+          day: number
+          global_day: number
+          title: string
+          description?: string | null
+          estimated_minutes?: number | null
+          type: string
+          audio_url?: string | null
+        }
+        Update: {
+          id?: string
+          week?: number
+          day?: number
+          global_day?: number
+          title?: string
+          description?: string | null
+          estimated_minutes?: number | null
+          type?: string
+          audio_url?: string | null
+        }
+        Relationships: []
+      }
+      guided_user_state: {
+        Row: {
+          user_id: string
+          started_at: string
+          last_completed_global_day: number
+        }
+        Insert: {
+          user_id: string
+          started_at?: string
+          last_completed_global_day?: number
+        }
+        Update: {
+          user_id?: string
+          started_at?: string
+          last_completed_global_day?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guided_user_state_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      guided_day_completions: {
+        Row: {
+          id: string
+          user_id: string
+          global_day: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          global_day: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          global_day?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guided_day_completions_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      landing_events: {
+        Row: {
+          id: number
+          event: string
+          session_id: string
+          meta: Json | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: number
+          event: string
+          session_id: string
+          meta?: Json | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: number
+          event?: string
+          session_id?: string
+          meta?: Json | null
+          created_at?: string | null
+        }
+        Relationships: []
       }
       tdah_archetypes: {
         Row: {
@@ -626,7 +959,10 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      habit_auto_complete_source: "manual" | "health"
+      habit_frequency_type: "fixed_days" | "times_per_week" | "times_per_month" | "every_n_days" | "daily"
+      habit_notification_type: "reminder" | "completed"
+      habit_unit: "none" | "steps" | "minutes" | "km" | "custom"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -1,12 +1,25 @@
 ﻿import { useMemo } from "react";
-import { Calendar, TrendingUp, Target, Award, Flame } from "lucide-react";
+import { Calendar, TrendingUp, Target, Award, Flame, ListOrdered, Timer } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress as ProgressBar } from "@/components/ui/progress";
 import useProgress from "@/hooks/useProgress";
 
 const Progress = () => {
-  const { loading, weeklySeries, monthlyStats, habitStreaks, bestGlobalStreak } = useProgress();
+  const {
+    loading,
+    weeklySeries,
+    monthlyStats,
+    habitStreaks,
+    bestGlobalStreak,
+    heatmap,
+    topHabits,
+    dailyTrend,
+    weekdayDist,
+    hourDist,
+    totalCompletions,
+    consistencyAllTime,
+  } = useProgress();
 
   const hasData = useMemo(() => weeklySeries.some((point) => point.scheduled > 0), [weeklySeries]);
 
@@ -83,6 +96,27 @@ const Progress = () => {
               </Card>
             </div>
 
+            <Card className="glass-card p-4 mb-8 animate-slide-up" style={{ animationDelay: "120ms" }}>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="flex flex-col items-start">
+                  <span className="text-xs text-muted-foreground">Total de conclusões (90d)</span>
+                  <span className="text-2xl font-semibold">{totalCompletions}</span>
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="text-xs text-muted-foreground">Consistência 90d</span>
+                  <span className="text-2xl font-semibold">{consistencyAllTime}%</span>
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="text-xs text-muted-foreground">Melhor streak global</span>
+                  <span className="text-2xl font-semibold">{bestGlobalStreak}d</span>
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="text-xs text-muted-foreground">Destaque</span>
+                  <span className="text-sm font-medium">{monthlyStats.topCategory || "—"}</span>
+                </div>
+              </div>
+            </Card>
+
             <Card className="glass-card p-6 mb-8 animate-slide-up" style={{ animationDelay: "200ms" }}>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-medium">Progresso da semana</h2>
@@ -117,6 +151,14 @@ const Progress = () => {
                   );
                 })}
               </div>
+            </Card>
+
+            <Card className="glass-card p-6 mb-8 animate-slide-up" style={{ animationDelay: "300ms" }}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-medium">Evolução diária (90d)</h2>
+                <Badge variant="outline" className="text-xs">Últimos 90 dias</Badge>
+              </div>
+              <Sparkline data={dailyTrend.map((d) => d.count)} />
             </Card>
 
             <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "350ms" }}>
@@ -154,6 +196,98 @@ const Progress = () => {
                 )}
               </div>
             </Card>
+
+            <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "450ms" }}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-medium">Heatmap 30 dias</h2>
+                <Badge variant="outline" className="text-xs">Últimos 30 dias</Badge>
+              </div>
+              <div className="grid grid-cols-10 gap-1">
+                {heatmap.map((day) => {
+                  const intensity = Math.min(day.count, 4);
+                  const shades = ["bg-muted/40", "bg-emerald-50", "bg-emerald-100", "bg-emerald-200", "bg-emerald-300"];
+                  return (
+                    <div
+                      key={day.date}
+                      className={`aspect-square rounded ${shades[intensity]} border border-border/40`}
+                      title={`${day.date}: ${day.count} conclusões`}
+                    />
+                  );
+                })}
+              </div>
+            </Card>
+
+            <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "550ms" }}>
+              <div className="flex items-center gap-2 mb-4">
+                <ListOrdered className="h-4 w-4 text-primary" />
+                <h2 className="text-xl font-medium">Ranking de hábitos</h2>
+              </div>
+              {topHabits.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Complete hábitos para ver o ranking.</p>
+              ) : (
+                <div className="space-y-2">
+                  {topHabits.map((habit, index) => (
+                    <div
+                      key={habit.habitId}
+                      className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/40 p-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-semibold text-muted-foreground">#{index + 1}</span>
+                        <div>
+                          <p className="font-medium">{habit.name}</p>
+                          <p className="text-xs text-muted-foreground">{habit.category}</p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-semibold">{habit.completions}x</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+
+            <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "650ms" }}>
+              <div className="flex items-center gap-2 mb-4">
+                <Timer className="h-4 w-4 text-primary" />
+                <h2 className="text-xl font-medium">Distribuição por hora</h2>
+              </div>
+              <div className="grid grid-cols-6 md:grid-cols-12 gap-2">
+                {hourDist.map((item) => {
+                  const max = Math.max(...hourDist.map((h) => h.count), 1);
+                  const height = (item.count / max) * 100;
+                  return (
+                    <div key={item.hour} className="flex flex-col items-center gap-1">
+                      <div className="h-24 w-full bg-muted/40 rounded-lg overflow-hidden flex items-end">
+                        <div className="w-full bg-gradient-primary" style={{ height: `${height}%` }} />
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">
+                        {item.hour}h
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+
+            <Card className="glass-card p-6 animate-slide-up" style={{ animationDelay: "750ms" }}>
+              <div className="flex items-center gap-2 mb-4">
+                <Target className="h-4 w-4 text-primary" />
+                <h2 className="text-xl font-medium">Distribuição por dia da semana</h2>
+              </div>
+              <div className="grid grid-cols-7 gap-2">
+                {weekdayDist.map((item) => {
+                  const max = Math.max(...weekdayDist.map((d) => d.count), 1);
+                  const height = (item.count / max) * 100;
+                  return (
+                    <div key={item.weekday} className="flex flex-col items-center gap-1">
+                      <div className="h-24 w-full bg-muted/40 rounded-lg overflow-hidden flex items-end">
+                        <div className="w-full bg-primary/70" style={{ height: `${height}%` }} />
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">{item.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
           </>
         )}
       </div>
@@ -162,6 +296,33 @@ const Progress = () => {
 };
 
 export default Progress;
+
+// Sparkline simples em SVG
+const Sparkline = ({ data }: { data: number[] }) => {
+  if (!data || data.length === 0) return null;
+  const max = Math.max(...data, 1);
+  const width = 300;
+  const height = 80;
+  const step = width / (data.length - 1 || 1);
+  const points = data.map((val, idx) => {
+    const x = idx * step;
+    const y = height - (val / max) * height;
+    return `${x},${y}`;
+  }).join(" ");
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-24 text-primary">
+      <polyline
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        points={points}
+      />
+    </svg>
+  );
+};
 
 
 

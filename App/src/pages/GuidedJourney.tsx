@@ -1,14 +1,23 @@
-﻿import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useGuided } from "@/hooks/useGuided";
 import { Target, CheckCircle2, Circle, Lock, Clock, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { isBonusEnabled } from "@/config/bonusFlags";
 
 const GuidedJourney = () => {
+  const navigate = useNavigate();
   const { weeks, loading, progressPercent, state, completeDay, todayGlobalDay } = useGuided();
   const [expandedWeek, setExpandedWeek] = useState<number | null>(1);
+
+  useEffect(() => {
+    if (!isBonusEnabled("guided")) {
+      navigate("/bonus", { replace: true });
+    }
+  }, [navigate]);
 
   if (loading) {
     return (

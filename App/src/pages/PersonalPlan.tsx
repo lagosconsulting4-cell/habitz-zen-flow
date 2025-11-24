@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -28,14 +28,23 @@ import {
   Award,
   TrendingUp
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { isBonusEnabled } from "@/config/bonusFlags";
 
 const PersonalPlan = () => {
+  const navigate = useNavigate();
   const { modules, userProgress, isLoading } = useProgram();
   const { markLessonComplete, markLessonInProgress } = useModuleProgress();
   const [selectedLesson, setSelectedLesson] = useState<ModuleLesson | null>(null);
   const [selectedModule, setSelectedModule] = useState<ModuleWithLessons | null>(null);
 
   const programProgress = getProgramProgress(modules, userProgress);
+
+  useEffect(() => {
+    if (!isBonusEnabled("plano")) {
+      navigate("/bonus", { replace: true });
+    }
+  }, [navigate]);
 
   const getLessonIcon = (type: string) => {
     switch (type) {

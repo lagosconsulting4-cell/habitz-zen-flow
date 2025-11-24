@@ -1,7 +1,6 @@
 ﻿import { useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
-  Calendar,
   Plus,
   TrendingUp,
   User,
@@ -11,15 +10,16 @@ import {
   Lightbulb,
   ListChecks,
   Map,
+  Calendar,
+  Gift,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { primaryNavItems, secondaryNavItems, type NavItem } from "@/config/nav";
+import { navItems, type NavItem } from "@/config/nav";
 
 const iconMap: Record<string, LucideIcon> = {
   home: Home,
   "book-open": BookOpen,
-  calendar: Calendar,
   plus: Plus,
   "trending-up": TrendingUp,
   user: User,
@@ -28,6 +28,8 @@ const iconMap: Record<string, LucideIcon> = {
   lightbulb: Lightbulb,
   "list-checks": ListChecks,
   map: Map,
+  calendar: Calendar,
+  gift: Gift,
 };
 
 interface AppSidebarProps {
@@ -65,26 +67,36 @@ const AppSidebar = ({ onOpenMore }: AppSidebarProps) => {
     );
   };
 
+  const essentials = navItems.filter((item) => ["dashboard", "progress", "my-habits"].includes(item.id));
+  const extras = navItems.filter((item) => !["dashboard", "progress", "my-habits", "create"].includes(item.id));
+
   return (
     <aside className="sticky top-6 hidden h-[calc(100vh-3rem)] w-60 flex-shrink-0 flex-col justify-between rounded-3xl border border-border/40 bg-card/70 p-5 backdrop-blur md:flex">
       <div className="space-y-6">
         <div>
           <h2 className="text-sm font-semibold text-foreground">Navegacao</h2>
           <nav className="mt-3 space-y-1">
-            {primaryNavItems.filter((item) => item.id !== "create").map(renderLink)}
+            {essentials.map(renderLink)}
           </nav>
         </div>
 
         <div>
           <h3 className="text-xs font-semibold uppercase text-muted-foreground">Conteudo</h3>
           <nav className="mt-2 space-y-1">
-            {secondaryNavItems.map(renderLink)}
+            {extras.map(renderLink)}
           </nav>
         </div>
       </div>
 
       <div className="space-y-2">
-        <Button variant="outline" className="w-full" onClick={() => handleNavigate(primaryNavItems.find((item) => item.id === "create")!)}>
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => {
+            const create = navItems.find((item) => item.id === "create");
+            if (create) handleNavigate(create);
+          }}
+        >
           <Plus className="mr-2 h-4 w-4" />
           Novo habito
         </Button>

@@ -18,6 +18,7 @@ import NavigationBar from "@/components/NavigationBar";
 import { supabase } from "@/integrations/supabase/client";
 import { usePremium } from "@/hooks/usePremium";
 import { useProfileInsights } from "@/hooks/useProfileInsights";
+import { useAppPreferences } from "@/hooks/useAppPreferences";
 
 const Profile = () => {
   const [userId, setUserId] = useState<string | null>(null);
@@ -27,6 +28,7 @@ const Profile = () => {
 
   const { isPremium, premiumSince } = usePremium(userId ?? undefined);
   const { insights, loading: insightsLoading } = useProfileInsights(userId ?? undefined);
+  const { prefs, setPreferences } = useAppPreferences();
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat("pt-BR"), []);
 
@@ -138,11 +140,11 @@ const Profile = () => {
                 <div>
                   <p className="font-medium">Notificações</p>
                   <p className="text-sm text-muted-foreground font-light">
-                    Lembretes dos seus hábitos
+                    Lembretes dos seus hábitos (on/off global)
                   </p>
                 </div>
               </div>
-              <Switch defaultChecked />
+              <Switch checked={prefs.notificationsEnabled} onCheckedChange={(checked) => setPreferences({ notificationsEnabled: checked })} />
             </div>
 
             <div className="flex items-center justify-between">
@@ -155,7 +157,56 @@ const Profile = () => {
                   </p>
                 </div>
               </div>
-              <Switch />
+              <Switch disabled />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Badge className="bg-primary/10 text-primary">Grid</Badge>
+                <div>
+                  <p className="font-medium">Ordenação do dia</p>
+                  <p className="text-sm text-muted-foreground font-light">
+                    Pendentes primeiro ou por streak
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={prefs.gridOrder === "pending_first" ? "default" : "outline"}
+                  onClick={() => setPreferences({ gridOrder: "pending_first" })}
+                >
+                  Pendentes
+                </Button>
+                <Button
+                  size="sm"
+                  variant={prefs.gridOrder === "streak" ? "default" : "outline"}
+                  onClick={() => setPreferences({ gridOrder: "streak" })}
+                >
+                  Streak
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Badge className="bg-primary/10 text-primary">Som</Badge>
+                <div>
+                  <p className="font-medium">Som padrão</p>
+                  <p className="text-sm text-muted-foreground font-light">
+                    Escolha o som base para lembretes
+                  </p>
+                </div>
+              </div>
+              <select
+                className="rounded-md border px-2 py-1 text-sm"
+                value={prefs.defaultSound}
+                onChange={(e) => setPreferences({ defaultSound: e.target.value as any })}
+              >
+                <option value="default">Padrão</option>
+                <option value="soft">Suave</option>
+                <option value="bright">Vibrante</option>
+              </select>
             </div>
           </div>
         </Card>

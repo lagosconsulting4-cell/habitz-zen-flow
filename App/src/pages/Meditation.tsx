@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import NavigationBar from "@/components/NavigationBar";
 import { Brain, Clock, Volume2, Play, Pause, Loader2 } from "lucide-react";
 import useMeditations, { MeditationSession } from "@/hooks/useMeditations";
+import { isBonusEnabled } from "@/config/bonusFlags";
 
 const Meditation = () => {
+  const navigate = useNavigate();
   const { sessions, isLoading, loadingAudioId, getSignedUrl } = useMeditations();
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -33,6 +36,12 @@ const Meditation = () => {
     }
     return sessions.filter((session) => session.category === selectedCategory);
   }, [sessions, selectedCategory]);
+
+  useEffect(() => {
+    if (!isBonusEnabled("meditation")) {
+      navigate("/bonus", { replace: true });
+    }
+  }, [navigate]);
 
   const activeSession = useMemo(
     () => sessions.find((session) => session.id === activeSessionId) ?? null,

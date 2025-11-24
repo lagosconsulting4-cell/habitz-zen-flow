@@ -1,7 +1,8 @@
-﻿import { Flame } from "lucide-react";
+import { Flame } from "lucide-react";
 
 import HabitCompleteButton from "@/components/HabitCompleteButton";
 import { Card } from "@/components/ui/card";
+import { getHabitIcon } from "@/lib/habit-icons";
 
 interface Habit {
   id: string;
@@ -10,6 +11,8 @@ interface Habit {
   category: string;
   period: "morning" | "afternoon" | "evening";
   streak: number;
+  color?: string | null;
+  icon_key?: string | null;
 }
 
 interface HabitCardProps {
@@ -27,6 +30,8 @@ const periodMap: Record<Habit["period"], { label: string; bg: string; accent: st
 const HabitCard = ({ habit, onToggle, isCompleted = false }: HabitCardProps) => {
   const period = periodMap[habit.period];
 
+  const Icon = getHabitIcon(habit.icon_key);
+
   return (
     <Card
       className={`relative overflow-hidden border border-border/40 bg-card/90 backdrop-blur transition-all duration-400 hover:border-primary/60 ${
@@ -37,11 +42,12 @@ const HabitCard = ({ habit, onToggle, isCompleted = false }: HabitCardProps) => 
       <div className="relative flex flex-col gap-4 p-5 md:flex-row md:items-center">
         <div className="flex items-center gap-4">
           <div
-            className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/30 text-3xl shadow-inner ${
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl text-3xl shadow-inner ${
               isCompleted ? "animate-[bounce_0.6s_ease-out]" : ""
             }`}
+            style={{ backgroundColor: habit.color ?? "var(--card)" }}
           >
-            {habit.emoji}
+            {Icon ? <Icon className="h-6 w-6 text-foreground" /> : habit.emoji}
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">

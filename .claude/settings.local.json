@@ -1,12 +1,15 @@
 {
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "shadcn"
-  ],
   "permissions": {
     "allow": [
-      "Bash(copy index.html index.html.backup)",
-      "Bash(copy:*)"
-    ]
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp remove:*)",
+      "Bash(claude mcp:*)",
+      "Bash(curl:*)",
+      "Bash(npm search:*)",
+      "Bash(npm install:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
   }
 }

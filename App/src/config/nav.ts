@@ -12,28 +12,22 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { id: "dashboard", label: "Inicio", path: "/dashboard", icon: "home", variant: "primary", requiresAuth: true },
-  { id: "plano", label: "Meu Plano", path: "/plano", icon: "book-open", variant: "primary", requiresAuth: true },
-  { id: "calendar", label: "Calendario", path: "/calendar", icon: "calendar", variant: "primary", requiresAuth: true },
-  { id: "create", label: "Criar", path: "/create", icon: "plus", variant: "primary", requiresAuth: true },
+  { id: "dashboard", label: "Home", path: "/dashboard", icon: "home", variant: "primary", requiresAuth: true, includeInMoreMenu: true },
+  { id: "progress", label: "Streaks", path: "/progress", icon: "trending-up", variant: "primary", requiresAuth: true },
+  { id: "create", label: "Adicionar", path: "/create", icon: "plus", variant: "primary", requiresAuth: true },
   {
-    id: "progress",
-    label: "Progresso",
-    path: "/progress",
-    icon: "trending-up",
-    variant: "primary",
+    id: "my-habits",
+    label: "Hábitos",
+    path: "/habits",
+    icon: "list-checks",
+    variant: "secondary",
     requiresAuth: true,
-    showInMobileNav: false,
+    showInMobileNav: true,
     includeInMoreMenu: true,
   },
-  { id: "profile", label: "Perfil", path: "/profile", icon: "user", variant: "secondary", requiresAuth: true },
-  { id: "books", label: "Biblioteca", path: "/books", icon: "book", variant: "secondary", requiresAuth: true },
-  { id: "meditation", label: "Meditacao", path: "/meditation", icon: "headphones", variant: "secondary", requiresAuth: true },
-  { id: "tips", label: "Insights", path: "/tips", icon: "lightbulb", variant: "secondary", requiresAuth: true },
-  { id: "guided", label: "Jornada", path: "/guided", icon: "map", variant: "secondary", requiresAuth: true },
-  { id: "my-habits", label: "Meus Habitos", path: "/habits", icon: "list-checks", variant: "secondary", requiresAuth: true }
+  { id: "profile", label: "Perfil", path: "/profile", icon: "user", variant: "secondary", requiresAuth: true, showInMobileNav: false, includeInMoreMenu: true },
+  { id: "bonus", label: "Bônus", path: "/bonus", icon: "gift", variant: "secondary", requiresAuth: true, showInMobileNav: false, includeInMoreMenu: true }
 ];
 
 export const primaryNavItems = navItems.filter((item) => item.variant === "primary");
 export const secondaryNavItems = navItems.filter((item) => item.variant === "secondary");
-

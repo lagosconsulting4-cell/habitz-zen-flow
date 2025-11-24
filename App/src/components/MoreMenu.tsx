@@ -9,6 +9,9 @@ import {
   Map,
   TrendingUp,
   User,
+  BookOpen,
+  Calendar,
+  Gift,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -36,6 +39,9 @@ const iconMap: Record<string, LucideIcon> = {
   "list-checks": ListChecks,
   user: User,
   "trending-up": TrendingUp,
+  "book-open": BookOpen,
+  calendar: Calendar,
+  gift: Gift,
 };
 
 interface MoreMenuProps {
@@ -49,7 +55,9 @@ const MoreMenu = ({ open, onOpenChange }: MoreMenuProps) => {
 
   const items = useMemo<NavItem[]>(() => {
     const primaryIds = new Set(primaryNavItems.map((item) => item.id));
-    return navItems.filter((item) => item.includeInMoreMenu || !primaryIds.has(item.id));
+    const list = navItems.filter((item) => item.includeInMoreMenu || !primaryIds.has(item.id));
+    const priority = ["bonus", "my-habits", "profile", "dashboard", "progress"];
+    return list.sort((a, b) => (priority.indexOf(a.id) - priority.indexOf(b.id)));
   }, []);
 
   const handleSelect = (item: NavItem) => {

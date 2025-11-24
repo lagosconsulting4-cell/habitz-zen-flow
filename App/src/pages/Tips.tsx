@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +6,8 @@ import NavigationBar from "@/components/NavigationBar";
 import { Lightbulb, Clock, TrendingUp, Utensils, Target } from "lucide-react";
 import { routineTips, type RoutineTip } from "@/data/routine-tips";
 import { nutritionTips, type NutritionTip } from "@/data/nutrition-tips";
+import { useNavigate } from "react-router-dom";
+import { isBonusEnabled } from "@/config/bonusFlags";
 
 type TabKey = "rotina" | "nutricao";
 type TipItem = RoutineTip | NutritionTip;
@@ -14,6 +16,13 @@ const isRoutineTip = (tip: TipItem): tip is RoutineTip => "time_suggestion" in t
 
 const Tips = () => {
   const [activeTab, setActiveTab] = useState<TabKey>("rotina");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isBonusEnabled("tips")) {
+      navigate("/bonus", { replace: true });
+    }
+  }, [navigate]);
 
   const getTabIcon = (tab: TabKey) => {
     switch (tab) {
