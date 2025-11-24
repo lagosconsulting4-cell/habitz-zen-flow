@@ -59,7 +59,6 @@ const periods = [
 ];
 const weekdayLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
 const iconKeys = ["heart", "run", "bike", "meditate", "banana", "carrot", "check", "water", "dumbbell", "focus", "target", "book", "flame"];
-const colorPalette = ["#2ecc71", "#1abc9c", "#9b59b6", "#f39c12", "#3498db", "#ef4444", "#10b981", "#6366f1", "#f97316"];
 
 interface HabitFormState {
   name: string;
@@ -504,13 +503,13 @@ const handleSave = async () => {
               <TabsList className="grid grid-cols-2 rounded-full bg-muted/50 p-1 shadow-inner">
                 <TabsTrigger
                   value="active"
-                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:ring-2 data-[state=active]:ring-emerald-300"
+                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
                 >
                   Ativos
                 </TabsTrigger>
                 <TabsTrigger
                   value="archived"
-                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:ring-2 data-[state=active]:ring-rose-300"
+                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground data-[state=active]:shadow-lg"
                 >
                   Arquivados
                 </TabsTrigger>
@@ -574,7 +573,7 @@ const handleSave = async () => {
               const archived = !habit.is_active;
 
               return (
-              <Card key={habit.id} className={cn("glass-card p-5 transition-colors duration-200", archived && "border border-rose-300/60 shadow-[0_0_0_1px_rgba(244,63,94,0.18)]")}>
+              <Card key={habit.id} className={cn("glass-card p-5 transition-colors duration-200", archived && "border-destructive/30 shadow-lg")}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
                     <div className="text-3xl">{habit.emoji}</div>
@@ -726,26 +725,18 @@ const handleSave = async () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Cor do hábito</label>
-                <div className="flex flex-wrap gap-2">
-                  {colorPalette.map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setFormState((prev) => ({ ...prev, color }))}
-                      className={`h-8 w-8 rounded-full border shadow-inner transition ${
-                        formState.color === color ? "ring-2 ring-primary" : ""
-                      }`}
-                      style={{ backgroundColor: color }}
-                      aria-label={`Selecionar cor ${color}`}
-                    />
-                  ))}
-                </div>
+                <label className="text-sm font-medium">Cor do hábito (opcional)</label>
+                <Input
+                  type="color"
+                  value={formState.color ?? "#000000"}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, color: event.target.value || null }))}
+                  className="h-10 w-full"
+                />
                 <Input
                   type="text"
                   value={formState.color ?? ""}
                   onChange={(event) => setFormState((prev) => ({ ...prev, color: event.target.value || null }))}
-                  placeholder="#34d399 opcional"
+                  placeholder="Ou digite ex: #34d399"
                   className="mt-2"
                 />
               </div>

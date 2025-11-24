@@ -4,14 +4,6 @@ import { Check } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-const burstColors = [
-  "#22c55e",
-  "#10b981",
-  "#34d399",
-  "#f59e0b",
-  "#0ea5e9",
-];
-
 interface HabitCompleteButtonProps {
   completed: boolean;
   onToggle: () => void;
@@ -31,7 +23,6 @@ const HabitCompleteButton = ({ completed, onToggle }: HabitCompleteButtonProps) 
     () =>
       Array.from({ length: 10 }).map((_, index) => ({
         index,
-        color: burstColors[index % burstColors.length],
         delay: index * 0.02,
       })),
     [],
@@ -50,19 +41,17 @@ const HabitCompleteButton = ({ completed, onToggle }: HabitCompleteButtonProps) 
       className={cn(
         "relative flex min-w-[120px] items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold shadow-lg transition-colors duration-150",
         completed
-          ? "bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500 text-white shadow-emerald-500/40"
-          : "border border-border/70 bg-white/85 text-foreground hover:border-primary/50 hover:text-primary hover:shadow-primary/20"
+          ? "bg-primary text-primary-foreground"
+          : "border border-border bg-card text-foreground hover:border-primary/50 hover:text-primary"
       )}
       whileTap={{ scale: 0.94 }}
       animate={completed ? "completed" : "idle"}
       variants={{
         idle: {
           scale: 1,
-          boxShadow: "0 10px 24px rgba(16, 185, 129, 0.15)",
         },
         completed: {
           scale: isPressing ? 0.95 : 1.08,
-          boxShadow: "0 18px 42px rgba(16, 185, 129, 0.32)",
           transition: {
             type: "spring",
             stiffness: 210,
@@ -87,12 +76,12 @@ const HabitCompleteButton = ({ completed, onToggle }: HabitCompleteButtonProps) 
           transition={{ duration: completed ? 0.35 : 0.18, ease: "easeOut" }}
           className={cn(
             "flex h-5 w-5 items-center justify-center rounded-full border",
-            completed ? "border-white/60 bg-white/25" : "border-primary/30 bg-primary/10"
+            completed ? "border-primary-foreground/60 bg-primary-foreground/25" : "border-primary/30 bg-primary/10"
           )}
         >
           <Check className="h-3.5 w-3.5" strokeWidth={3} />
         </motion.span>
-        <span>{completed ? "Concluído" : "Concluir"}</span>
+        <span>{completed ? "Concluï¿½do" : "Concluir"}</span>
       </motion.span>
 
       <AnimatePresence>
@@ -105,11 +94,11 @@ const HabitCompleteButton = ({ completed, onToggle }: HabitCompleteButtonProps) 
             transition={{ duration: 0.55, ease: "easeOut" }}
             className="pointer-events-none absolute inset-0"
           >
-            {particles.map(({ index, color, delay }) => (
+            {particles.map(({ index, delay }) => (
               <motion.span
                 key={`${burstId}-${index}`}
-                className="absolute h-2 w-2 rounded-full"
-                style={{ left: "50%", top: "50%", backgroundColor: color }}
+                className="absolute h-2 w-2 rounded-full bg-primary"
+                style={{ left: "50%", top: "50%" }}
                 initial={{ scale: 0, opacity: 1, x: 0, y: 0 }}
                 animate={{
                   scale: [0, 1, 0.4],
@@ -121,7 +110,7 @@ const HabitCompleteButton = ({ completed, onToggle }: HabitCompleteButtonProps) 
               />
             ))}
             <motion.div
-              className="absolute inset-0 rounded-full border border-white/50"
+              className="absolute inset-0 rounded-full border border-primary-foreground/50"
               initial={{ scale: 0.55, opacity: 0.6 }}
               animate={{ scale: 1.3, opacity: 0 }}
               transition={{ duration: 0.45, ease: "easeOut" }}

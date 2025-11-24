@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePremium } from "@/hooks/usePremium";
 import { useProfileInsights } from "@/hooks/useProfileInsights";
 import { useAppPreferences } from "@/hooks/useAppPreferences";
+import { useTheme } from "@/hooks/useTheme";
 
 const Profile = () => {
   const [userId, setUserId] = useState<string | null>(null);
@@ -29,6 +30,7 @@ const Profile = () => {
   const { isPremium, premiumSince } = usePremium(userId ?? undefined);
   const { insights, loading: insightsLoading } = useProfileInsights(userId ?? undefined);
   const { prefs, setPreferences } = useAppPreferences();
+  const { theme, setTheme } = useTheme();
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat("pt-BR"), []);
 
@@ -79,10 +81,10 @@ const Profile = () => {
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         <div className="text-center mb-8 animate-fade-in">
           <div className="relative">
-            <div className="w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-soft">
-              <User className="w-10 h-10 text-white" />
+            <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <User className="w-10 h-10 text-primary-foreground" />
             </div>
-            <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-gradient-primary text-white border-0">
+            <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground border-0">
               {isPremium ? "Premium vitalício" : "Conta aguardando ativação"}
             </Badge>
           </div>
@@ -151,13 +153,35 @@ const Profile = () => {
               <div className="flex items-center gap-3">
                 <Palette className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Tema escuro</p>
+                  <p className="font-medium">Tema</p>
                   <p className="text-sm text-muted-foreground font-light">
-                    Alternar entre claro e escuro
+                    Claro, Escuro ou Sistema
                   </p>
                 </div>
               </div>
-              <Switch disabled />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={theme === "light" ? "default" : "outline"}
+                  onClick={() => setTheme("light")}
+                >
+                  Claro
+                </Button>
+                <Button
+                  size="sm"
+                  variant={theme === "dark" ? "default" : "outline"}
+                  onClick={() => setTheme("dark")}
+                >
+                  Escuro
+                </Button>
+                <Button
+                  size="sm"
+                  variant={theme === "system" ? "default" : "outline"}
+                  onClick={() => setTheme("system")}
+                >
+                  Sistema
+                </Button>
+              </div>
             </div>
 
             <div className="flex items-center justify-between">
