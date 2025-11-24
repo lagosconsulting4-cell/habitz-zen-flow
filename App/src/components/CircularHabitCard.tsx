@@ -38,25 +38,29 @@ export const CircularHabitCard = ({
   className
 }: CircularHabitCardProps) => {
   const Icon = getHabitIcon(habit.icon_key);
-  const size = 120;
-  const strokeWidth = 8;
+  const size = 140;
+  const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
 
   return (
     <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.08 }}
+      whileTap={{ scale: 0.92 }}
       onClick={onToggle}
-      className={cn("flex flex-col items-center gap-2 relative", className)}
+      className={cn("flex flex-col items-center gap-3 relative group", className)}
       type="button"
     >
       {/* Favorite indicator */}
       {isFavorite && (
-        <div className="absolute -top-2 -left-2 bg-white/80 rounded-full p-1 z-10">
-          <Heart size={14} fill="#EF4444" color="#EF4444" />
-        </div>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="absolute -top-2 -left-2 bg-white rounded-full p-1.5 shadow-lg z-10"
+        >
+          <Heart size={16} fill="#EF4444" color="#EF4444" />
+        </motion.div>
       )}
 
       {/* Streak badge */}
@@ -65,7 +69,7 @@ export const CircularHabitCard = ({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 15 }}
-          className="absolute -top-2 right-2 bg-white/20 rounded-full w-6 h-6 flex items-center justify-center text-[11px] font-bold text-white z-10"
+          className="absolute -top-1 -right-1 bg-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-extrabold text-card shadow-lg z-10 border-2 border-background"
         >
           {streakDays}
         </motion.div>
@@ -73,7 +77,11 @@ export const CircularHabitCard = ({
 
       {/* SVG Circular Progress */}
       <div className="relative" style={{ width: size, height: size }}>
-        <svg width={size} height={size} className="transform -rotate-90">
+        <svg
+          width={size}
+          height={size}
+          className="transform -rotate-90 drop-shadow-lg"
+        >
           {/* Background circle */}
           <circle
             cx={size / 2}
@@ -82,7 +90,7 @@ export const CircularHabitCard = ({
             stroke="currentColor"
             strokeWidth={strokeWidth}
             fill="transparent"
-            className="text-card"
+            className="text-card opacity-90"
           />
 
           {/* Progress circle */}
@@ -96,7 +104,7 @@ export const CircularHabitCard = ({
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
-            className="text-white transition-all duration-300"
+            className="text-white transition-all duration-500"
             initial={false}
             animate={{ strokeDashoffset: offset }}
           />
@@ -107,29 +115,48 @@ export const CircularHabitCard = ({
           initial={false}
           animate={{
             opacity: completed ? 1 : 0,
-            scale: completed ? 1 : 0.8
+            scale: completed ? 1 : 0.85
           }}
-          transition={{ duration: 0.2, delay: completed ? 0.1 : 0 }}
-          className="absolute inset-0 m-2 bg-white/80 rounded-full"
+          transition={{ duration: 0.3, delay: completed ? 0.15 : 0, type: "spring" }}
+          className="absolute inset-0 m-2.5 bg-white rounded-full shadow-inner"
         />
 
         {/* Icon */}
         <div className="absolute inset-0 flex items-center justify-center">
           {Icon ? (
-            <Icon size={32} color="white" strokeWidth={2.5} />
+            <motion.div
+              animate={{
+                scale: completed ? 1.1 : 1,
+              }}
+              transition={{ duration: 0.3 }}
+            >
+              <Icon
+                size={48}
+                color={completed ? "hsl(var(--card))" : "white"}
+                strokeWidth={2.5}
+                className="drop-shadow-md transition-colors duration-300"
+              />
+            </motion.div>
           ) : (
-            <span className="text-3xl">{habit.emoji}</span>
+            <motion.span
+              className="text-5xl drop-shadow-md transition-all duration-300"
+              animate={{
+                scale: completed ? 1.1 : 1,
+              }}
+            >
+              {habit.emoji}
+            </motion.span>
           )}
         </div>
       </div>
 
       {/* Habit name */}
-      <div className="text-center max-w-[120px]">
-        <p className="text-white font-bold text-xs uppercase tracking-wide leading-tight line-clamp-2">
+      <div className="text-center max-w-[140px]">
+        <p className="text-white font-extrabold text-sm uppercase tracking-wider leading-tight line-clamp-2 drop-shadow-md">
           {habit.name}
         </p>
         {goalInfo && (
-          <p className="text-white/70 text-[10px] font-medium mt-1">
+          <p className="text-white/80 text-xs font-semibold mt-1.5 drop-shadow">
             {goalInfo}
           </p>
         )}

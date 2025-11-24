@@ -113,6 +113,29 @@
     --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   }
 
+  /* Tema Verde para Dashboard Circular */
+  .theme-green {
+    --background: oklch(0.8636 0.2207 130.1457); /* Verde vibrante primary */
+    --foreground: oklch(1 0 0); /* branco puro */
+    --card: oklch(0.7400 0.1800 130.1457); /* Verde escuro para círculos */
+    --card-foreground: oklch(1 0 0);
+    --popover: oklch(0.8636 0.2207 130.1457);
+    --popover-foreground: oklch(1 0 0);
+    --primary: oklch(1 0 0); /* branco para progresso */
+    --primary-foreground: oklch(0.8636 0.2207 130.1457); /* verde */
+    --secondary: oklch(0.9200 0.1500 130.1457); /* verde claro */
+    --secondary-foreground: oklch(0.1450 0 0);
+    --muted: oklch(0.9200 0.1500 130.1457); /* verde claro */
+    --muted-foreground: oklch(0.9700 0.0500 130.1457);
+    --accent: oklch(0.5850 0.2140 22.3680); /* vermelho para coração */
+    --accent-foreground: oklch(1 0 0);
+    --destructive: oklch(0.5770 0.2450 27.3250);
+    --destructive-foreground: oklch(1 0 0);
+    --border: oklch(0.7400 0.1800 130.1457); /* verde escuro */
+    --input: oklch(0.9220 0 0);
+    --ring: oklch(1 0 0);
+  }
+
   /* Tema Coral para Dashboard Circular */
   .theme-coral {
     --background: oklch(0.7350 0.1520 32.4610); /* #FF7B54 coral */
@@ -223,16 +246,35 @@
   .habits-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    padding: 2rem 1rem;
+    gap: 2rem;
+    padding: 2.5rem 1rem;
     max-width: 480px;
     margin: 0 auto;
   }
 
   @media (max-width: 640px) {
     .habits-grid {
-      gap: 1rem;
-      padding: 1.5rem 0.75rem;
+      gap: 1.5rem;
+      padding: 2rem 1rem;
+    }
+  }
+
+  /* Desktop: grid com 3 colunas para telas maiores */
+  @media (min-width: 768px) {
+    .habits-grid {
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 720px;
+      gap: 2.5rem;
+      padding: 3rem 2rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .habits-grid {
+      grid-template-columns: repeat(4, 1fr);
+      max-width: 960px;
+      gap: 3rem;
+      padding: 4rem 2rem;
     }
   }
 

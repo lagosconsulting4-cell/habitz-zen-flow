@@ -4,24 +4,24 @@ import { useNavigate } from "react-router-dom";
 
 export const AddHabitCircle = () => {
   const navigate = useNavigate();
-  const size = 120;
+  const size = 140;
 
   return (
     <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.08 }}
+      whileTap={{ scale: 0.92 }}
       onClick={() => navigate("/create")}
-      className="flex flex-col items-center gap-2"
+      className="flex flex-col items-center gap-3 group"
     >
       <div
-        className="rounded-full border-4 border-card flex items-center justify-center bg-transparent"
+        className="rounded-full border-[6px] border-white/80 flex items-center justify-center bg-transparent transition-all duration-300 group-hover:border-white group-hover:shadow-xl"
         style={{ width: size, height: size }}
       >
-        <Plus size={48} color="white" strokeWidth={2.5} />
+        <Plus size={56} color="white" strokeWidth={3} className="drop-shadow-lg" />
       </div>
 
-      <p className="text-white font-bold text-xs uppercase tracking-wide">
-        ADD A TASK
+      <p className="text-white font-extrabold text-sm uppercase tracking-wider drop-shadow-md">
+        ADICIONAR
       </p>
     </motion.button>
   );

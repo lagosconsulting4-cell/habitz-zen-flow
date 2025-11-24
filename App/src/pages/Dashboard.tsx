@@ -80,14 +80,14 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen theme-coral flex items-center justify-center pb-20">
-        <div className="text-white text-lg">Carregando...</div>
+      <div className="min-h-screen theme-green flex items-center justify-center pb-20">
+        <div className="text-white text-lg font-medium">Carregando seus hábitos...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen theme-coral pb-20">
+    <div className="min-h-screen theme-green pb-20 md:pb-6">
       {/* Grid de hábitos */}
       <div className="habits-grid">
         {todayHabits.map((habit) => (
