@@ -23,6 +23,7 @@ import type { HabitEmoji } from "@/data/habit-emojis";
 import { HabitIconKey, getHabitIcon } from "@/components/icons/HabitIcons";
 import { HeroCircle } from "@/components/HeroCircle";
 import { HealthIntegrationAlert } from "@/components/HealthIntegrationAlert";
+import { SmartGoalCard } from "@/components/goals";
 
 const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; emoji: string }> = [
   { id: "morning", name: "Manhã", emoji: "☀️" },
@@ -662,63 +663,16 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         </p>
       </div>
 
-      {/* Goal Card */}
-      <div className="mx-4 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime-400/10">
-              <Target className="h-6 w-6 text-lime-400" />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-                Meta
-              </p>
-              <p className="text-base font-semibold text-white">
-                {goalValue
-                  ? `${goalValue} ${unit === "none" ? "" : unit === "steps" ? "passos" : unit === "minutes" ? "min" : unit === "hours" ? "hrs" : unit === "pages" ? "pág" : unit === "liters" ? "L" : unit === "km" ? "km" : "un"}`
-                  : "Definir meta"}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-white/10 px-4 py-4 space-y-3">
-          <Input
-            type="number"
-            min={0}
-            value={goalValue ?? ""}
-            onChange={(e) =>
-              setGoalValue(e.target.value ? Number(e.target.value) : undefined)
-            }
-            className="w-full rounded-xl bg-black/30 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50"
-            placeholder="Ex: 10000"
-          />
-          <div className="grid grid-cols-4 gap-2">
-            {[
-              { value: "none", label: "Nenhum" },
-              { value: "steps", label: "Passos" },
-              { value: "minutes", label: "Minutos" },
-              { value: "hours", label: "Horas" },
-              { value: "km", label: "Km" },
-              { value: "pages", label: "Páginas" },
-              { value: "liters", label: "Litros" },
-              { value: "custom", label: "Outro" },
-            ].map((unitOption) => (
-              <button
-                key={unitOption.value}
-                type="button"
-                onClick={() => setUnit(unitOption.value as typeof unit)}
-                className={`rounded-lg py-2.5 text-xs font-semibold transition-all duration-200 ${
-                  unit === unitOption.value
-                    ? "bg-lime-400 text-black"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                {unitOption.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Smart Goal Card - Metas inteligentes baseadas no hábito */}
+      {selectedTemplateId && (
+        <SmartGoalCard
+          habitId={selectedTemplateId}
+          value={goalValue}
+          unit={unit}
+          onChange={setGoalValue}
+          onUnitChange={setUnit}
+        />
+      )}
 
       {/* Task Days Card */}
       <div className="mx-4 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
