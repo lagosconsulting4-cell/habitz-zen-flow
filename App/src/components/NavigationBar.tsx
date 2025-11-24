@@ -36,20 +36,20 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
         aria-label={label}
         aria-current={isActive ? "page" : undefined}
         className={cn(
-          "flex flex-col items-center justify-center gap-1 rounded-2xl px-4 py-2 text-[11px] font-medium transition-colors",
-          isActive ? "text-primary" : "text-muted-foreground"
+          "flex items-center justify-center rounded-full p-3 transition-colors",
+          isActive ? "text-white" : "text-white/70"
         )}
-        whileTap={{ scale: 0.95 }}
+        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.1 }}
       >
-        <Icon className="h-4 w-4" />
-        <span>{label}</span>
+        <Icon className="h-6 w-6" strokeWidth={2.5} />
       </motion.button>
     );
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border border-border/60 bg-card/95 shadow-[var(--shadow-medium)] backdrop-blur-md safe-area-bottom md:hidden">
-      <div className="mx-auto grid w-full max-w-md grid-cols-3 items-center px-4 py-3">
+    <div className="fixed inset-x-0 bottom-0 z-40 bg-transparent safe-area-bottom md:hidden">
+      <div className="mx-auto grid w-full max-w-md grid-cols-3 items-center px-8 py-4">
         {renderButton({ label: "Config", icon: Settings, path: "/profile" })}
         {renderButton({ label: "Menu", icon: Menu, onClick: onOpenMore })}
         {renderButton({ label: "Streaks", icon: TrendingUp, path: "/progress" })}

@@ -42,6 +42,9 @@ const weekdays = [
 
 type Step = "select" | "details";
 
+// Cor unificada para todas as categorias - verde lime premium
+const UNIFIED_COLOR = "#A3E635";
+
 const CATEGORY_DATA: Array<{
   id: string;
   name: string;
@@ -68,7 +71,7 @@ const CATEGORY_DATA: Array<{
     name: "Produtividade",
     description: "Organização pessoal e desenvolvimento",
     iconKey: "plan",
-    colorToken: "#FBBF24",
+    colorToken: UNIFIED_COLOR,
     tasks: [
       { id: "wake_early", name: "Acordar Cedo", default_unit: "none", default_frequency_type: "daily" },
       { id: "make_bed", name: "Fazer a Cama", default_unit: "none", default_frequency_type: "daily" },
@@ -87,7 +90,7 @@ const CATEGORY_DATA: Array<{
     name: "Saúde/Fitness",
     description: "Saúde física e bem-estar corporal",
     iconKey: "run",
-    colorToken: "#A3E635",
+    colorToken: UNIFIED_COLOR,
     tasks: [
       { id: "walk_run", name: "Caminhar ou Correr", default_unit: "steps", default_goal_value: 10000, default_frequency_type: "daily", auto_complete_source: "health" },
       { id: "cycle", name: "Pedalar", iconKey: "cycle", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "times_per_week", default_times_per_week: 3 },
@@ -110,7 +113,7 @@ const CATEGORY_DATA: Array<{
     name: "Alimentação",
     description: "Nutrição e alimentação saudável",
     iconKey: "meal",
-    colorToken: "#FB923C",
+    colorToken: UNIFIED_COLOR,
     tasks: [
       { id: "healthy_breakfast", name: "Café da Manhã Saudável", default_unit: "none", default_frequency_type: "daily" },
       { id: "eat_fruits", name: "Comer Frutas", iconKey: "fruits", default_unit: "custom", default_goal_value: 2, default_frequency_type: "daily" },
@@ -128,7 +131,7 @@ const CATEGORY_DATA: Array<{
     name: "Tempo/Rotina",
     description: "Gestão de tempo e rotinas",
     iconKey: "clock",
-    colorToken: "#60A5FA",
+    colorToken: UNIFIED_COLOR,
     tasks: [
       { id: "pomodoro", name: "Pomodoro de Trabalho", iconKey: "focus", default_unit: "custom", default_goal_value: 4, default_frequency_type: "times_per_week", default_times_per_week: 5 },
       { id: "deep_focus", name: "Tempo de Foco Profundo", iconKey: "deep_work", default_unit: "hours", default_goal_value: 2, default_frequency_type: "daily" },
@@ -145,7 +148,7 @@ const CATEGORY_DATA: Array<{
     name: "Evitar",
     description: "Hábitos a serem eliminados",
     iconKey: "target",
-    colorToken: "#F472B6",
+    colorToken: UNIFIED_COLOR,
     tasks: [
       { id: "no_smoking", name: "Não Fumar", iconKey: "no_smoke", default_unit: "none", default_frequency_type: "daily" },
       { id: "no_alcohol", name: "Não Beber Álcool", iconKey: "no_alcohol", default_unit: "none", default_frequency_type: "daily" },
@@ -377,7 +380,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
           value={timesPerWeek ?? ""}
           onChange={(e) => setTimesPerWeek(e.target.value ? Number(e.target.value) : undefined)}
           placeholder="Ex.: 4 vezes/semana"
-          className="rounded-xl"
+          className="rounded-xl bg-black/30 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50"
         />
       );
     }
@@ -390,7 +393,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
           value={timesPerMonth ?? ""}
           onChange={(e) => setTimesPerMonth(e.target.value ? Number(e.target.value) : undefined)}
           placeholder="Ex.: 10 vezes/mês"
-          className="rounded-xl"
+          className="rounded-xl bg-black/30 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50"
         />
       );
     }
@@ -402,7 +405,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
           value={everyNDays ?? ""}
           onChange={(e) => setEveryNDays(e.target.value ? Number(e.target.value) : undefined)}
           placeholder="Ex.: a cada 2 dias"
-          className="rounded-xl"
+          className="rounded-xl bg-black/30 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50"
         />
       );
     }
@@ -414,10 +417,10 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
               key={day.id}
               onClick={() => toggleDay(day.id)}
               aria-pressed={selectedDays.includes(day.id)}
-              className={`rounded-xl py-3 text-sm font-medium transition-all duration-200 ${
+              className={`rounded-xl py-3 text-sm font-bold transition-all duration-200 ${
                 selectedDays.includes(day.id)
-                  ? "bg-primary text-white shadow-soft"
-                  : "bg-muted text-muted-foreground hover:bg-muted/70"
+                  ? "bg-lime-400 text-black"
+                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
               }`}
             >
               {day.label}
@@ -462,22 +465,28 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
   };
 
   const HeaderBar = (
-    <div className="flex items-center justify-between px-4 py-3">
+    <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
       {step === "details" ? (
-        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setStep("select")}>
+        <button
+          onClick={() => setStep("select")}
+          className="flex h-10 w-10 items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/5 transition-all"
+        >
           <ArrowLeft className="h-5 w-5" />
-        </Button>
+        </button>
       ) : (
         <div className="w-10" />
       )}
       <div className="text-center">
-        <p className="text-base font-semibold">
+        <p className="text-base font-semibold text-white tracking-wide">
           {step === "select" ? "Add Task" : "Confirm Task"}
         </p>
       </div>
-      <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate("/dashboard")}>
+      <button
+        onClick={() => navigate("/dashboard")}
+        className="flex h-10 w-10 items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/5 transition-all"
+      >
         <X className="h-5 w-5" />
-      </Button>
+      </button>
     </div>
   );
 
@@ -488,10 +497,10 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -16 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-4 pb-6"
+      className="space-y-6 pb-6 pt-4"
     >
-      {/* Category Pills - Apenas ícones circulares */}
-      <div className="flex items-center justify-center gap-3 px-4 py-2">
+      {/* Category Pills - Apenas ícones circulares minimalistas */}
+      <div className="flex items-center justify-center gap-2 px-4">
         {CATEGORY_DATA.map((cat) => {
           const Icon = getHabitIcon(cat.iconKey);
           const isActive = selectedCategoryData?.id === cat.id;
@@ -499,12 +508,13 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             <button
               key={cat.id}
               onClick={() => handleSelectCategory(cat)}
-              className="flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 active:scale-95"
+              className="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 active:scale-95"
               style={{
-                backgroundColor: isActive ? cat.colorToken : `${cat.colorToken}30`,
+                backgroundColor: isActive ? UNIFIED_COLOR : "rgba(163, 230, 53, 0.15)",
+                border: isActive ? `2px solid ${UNIFIED_COLOR}` : "2px solid transparent",
               }}
             >
-              {Icon && <Icon className="h-6 w-6" style={{ color: isActive ? "#FFFFFF" : cat.colorToken }} />}
+              {Icon && <Icon className="h-5 w-5" style={{ color: isActive ? "#000000" : UNIFIED_COLOR }} />}
             </button>
           );
         })}
@@ -512,8 +522,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
 
       {/* Descrição da categoria selecionada */}
       {selectedCategoryData && (
-        <div className="px-4 pt-2">
-          <p className="text-sm text-muted-foreground">
+        <div className="px-6 pt-0">
+          <p className="text-sm text-white/60 text-center leading-relaxed">
             Health tasks are linked to the Health app and are automatically marked as complete when new data is recorded.
           </p>
         </div>
@@ -521,9 +531,9 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
 
       {/* Lista de hábitos */}
       {selectedCategoryData && (
-        <div className="space-y-2 px-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-foreground">
-            CREATE A HEALTH TASK:
+        <div className="space-y-3 px-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 px-2">
+            Select a Task
           </p>
           {selectedCategoryData.tasks.map((tpl) => {
             const TaskIcon = tpl.iconKey ? getHabitIcon(tpl.iconKey as any) : getHabitIcon(selectedCategoryData.iconKey);
@@ -532,25 +542,26 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
               <button
                 key={tpl.id}
                 onClick={() => handleSelectTemplate(tpl)}
-                className="flex w-full items-center justify-between rounded-2xl px-4 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+                className="group flex w-full items-center justify-between rounded-2xl px-4 py-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
-                  backgroundColor: selectedCategoryData.colorToken,
+                  backgroundColor: UNIFIED_COLOR,
+                  boxShadow: "0 4px 20px rgba(163, 230, 53, 0.25)",
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                    {TaskIcon && <TaskIcon className="h-5 w-5 text-white" />}
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-black/20">
+                    {TaskIcon && <TaskIcon className="h-6 w-6 text-black" />}
                   </div>
                   <div className="flex items-center gap-2 text-left">
                     {isHealthTask && (
-                      <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="h-4 w-4 text-black/80" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
                       </svg>
                     )}
-                    <p className="text-base font-semibold text-white">{tpl.name}</p>
+                    <p className="text-base font-bold text-black">{tpl.name}</p>
                   </div>
                 </div>
-                <ChevronRight className="h-5 w-5 text-white" />
+                <ChevronRight className="h-5 w-5 text-black/60 group-hover:text-black transition-colors" />
               </button>
             );
           })}
@@ -559,8 +570,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
 
       {/* Mensagem inicial se nenhuma categoria selecionada */}
       {!selectedCategoryData && (
-        <div className="px-4 pt-8 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="px-6 pt-12 text-center">
+          <p className="text-sm text-white/50">
             Escolha uma categoria acima para ver os hábitos disponíveis
           </p>
         </div>
@@ -575,77 +586,78 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -16 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-4 pb-6"
+      className="space-y-6 pb-6 pt-4"
     >
       {/* Hero Circle Section */}
-      <div className="flex flex-col items-center gap-4 py-6">
+      <div className="flex flex-col items-center gap-4 py-4">
         <HeroCircle
           iconKey={selectedTemplate?.iconKey ? (selectedTemplate.iconKey as any) : selectedCategoryData?.iconKey ?? null}
-          color={selectedCategoryData?.colorToken ?? "#A3E635"}
+          color={UNIFIED_COLOR}
           isAutoTask={selectedTemplateAuto}
         />
 
         {/* Task Title */}
-        <div className="w-full px-4 text-center">
-          <p
-            className="text-xl font-bold uppercase tracking-wider"
-            style={{ color: selectedCategoryData?.colorToken ?? "#A3E635" }}
-          >
+        <div className="w-full px-6 text-center">
+          <p className="text-2xl font-bold uppercase tracking-wide text-white">
             {habitName || "NOME DO HÁBITO"}
           </p>
         </div>
       </div>
 
       {/* Health Integration Alert */}
-      {selectedTemplateAuto && <HealthIntegrationAlert />}
+      {selectedTemplateAuto && (
+        <div className="mx-4 flex items-start gap-3 rounded-xl bg-white/5 border border-white/10 p-4">
+          <svg className="h-5 w-5 text-lime-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+          </svg>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-white">
+              This task uses data from the Health app.
+            </p>
+            <p className="mt-1 text-xs text-white/60">
+              Please grant Streaks permission if prompted.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Title Input */}
       <div className="px-4">
-        <Label className="text-xs uppercase tracking-wider text-muted-foreground">
-          TITLE:
+        <Label className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+          TITLE
         </Label>
         <Input
           value={habitName}
           onChange={(e) => setHabitName(e.target.value)}
-          placeholder="Automatic"
+          placeholder="Enter task name"
           maxLength={18}
-          className="mt-1 rounded-xl"
+          className="mt-2 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50 focus:ring-lime-400/20"
         />
-        <p className="mt-1 text-right text-xs text-muted-foreground">
+        <p className="mt-1.5 text-right text-xs text-white/40">
           {habitName.length} / 18
         </p>
       </div>
 
       {/* Goal Card */}
-      <div className="mx-4 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-muted/40"
-        >
+      <div className="mx-4 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+        <div className="flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-11 w-11 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${selectedCategoryData?.colorToken ?? "#A3E635"}20` }}
-            >
-              <Target
-                className="h-6 w-6"
-                style={{ color: selectedCategoryData?.colorToken ?? "#A3E635" }}
-              />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime-400/10">
+              <Target className="h-6 w-6 text-lime-400" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
                 Goal
               </p>
-              <p className="text-base font-semibold">
+              <p className="text-base font-semibold text-white">
                 {goalValue
                   ? `${goalValue} ${unit === "none" ? "" : unit}`
                   : "Set goal"}
               </p>
             </div>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground" />
-        </button>
-        <div className="border-t border-border/60 px-4 py-4">
+        </div>
+        <div className="border-t border-white/10 px-4 py-4">
           <div className="flex items-center gap-2">
             <Input
               type="number"
@@ -654,13 +666,13 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
               onChange={(e) =>
                 setGoalValue(e.target.value ? Number(e.target.value) : undefined)
               }
-              className="w-24 rounded-xl"
+              className="w-24 rounded-xl bg-black/30 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50"
               placeholder="5000"
             />
             <select
               value={unit}
               onChange={(e) => setUnit(e.target.value as typeof unit)}
-              className="flex-1 rounded-xl border px-3 py-2"
+              className="flex-1 rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-white focus:border-lime-400/50 focus:outline-none focus:ring-2 focus:ring-lime-400/20"
             >
               <option value="none">None</option>
               <option value="steps">Steps</option>
@@ -676,26 +688,17 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       </div>
 
       {/* Task Days Card */}
-      <div className="mx-4 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-muted/40"
-        >
+      <div className="mx-4 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+        <div className="flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-11 w-11 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${selectedCategoryData?.colorToken ?? "#A3E635"}20` }}
-            >
-              <Calendar
-                className="h-6 w-6"
-                style={{ color: selectedCategoryData?.colorToken ?? "#A3E635" }}
-              />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime-400/10">
+              <Calendar className="h-6 w-6 text-lime-400" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
                 Task Days
               </p>
-              <p className="text-base font-semibold">
+              <p className="text-base font-semibold text-white">
                 {frequencyType === "daily"
                   ? "Every Day"
                   : frequencyType === "times_per_week" && timesPerWeek
@@ -708,11 +711,10 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
               </p>
             </div>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground" />
-        </button>
-        <div className="border-t border-border/60 px-4 py-4 space-y-3">
+        </div>
+        <div className="border-t border-white/10 px-4 py-4 space-y-3">
           <select
-            className="w-full rounded-xl border px-3 py-2"
+            className="w-full rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-white focus:border-lime-400/50 focus:outline-none focus:ring-2 focus:ring-lime-400/20"
             value={frequencyType}
             onChange={(e) =>
               setFrequencyType(e.target.value as typeof frequencyType)
@@ -729,56 +731,47 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       </div>
 
       {/* Notifications Card */}
-      <div className="mx-4 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-muted/40"
-        >
+      <div className="mx-4 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+        <div className="flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-11 w-11 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${selectedCategoryData?.colorToken ?? "#A3E635"}20` }}
-            >
-              <Bell
-                className="h-6 w-6"
-                style={{ color: selectedCategoryData?.colorToken ?? "#A3E635" }}
-              />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime-400/10">
+              <Bell className="h-6 w-6 text-lime-400" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
                 Notifications
               </p>
-              <p className="text-base font-semibold">
+              <p className="text-base font-semibold text-white">
                 {prefs.notificationsEnabled ? "Enabled" : "Disabled"}
               </p>
             </div>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground" />
-        </button>
+        </div>
       </div>
 
       {/* CTA Button */}
-      <div className="px-4 pt-2">
-        <Button
-          className="h-14 w-full rounded-xl text-base font-bold uppercase tracking-wide shadow-lg transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{
-            backgroundColor: selectedCategoryData?.colorToken ?? "#A3E635",
-            color: "#000000",
-          }}
-          disabled={!habitName.trim() || isSaving}
+      <div className="px-4 pt-4">
+        <button
           onClick={handleSave}
+          disabled={!habitName.trim() || isSaving}
+          className="h-14 w-full rounded-xl text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: UNIFIED_COLOR,
+            color: "#000000",
+            boxShadow: "0 4px 24px rgba(163, 230, 53, 0.3)",
+          }}
         >
           {isSaving ? "SAVING..." : "SAVE TASK"}
-        </Button>
+        </button>
       </div>
     </motion.div>
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 backdrop-blur-sm">
-      <div className="mt-4 w-full max-w-md overflow-hidden rounded-3xl bg-background shadow-[var(--shadow-strong)] animate-fade-in" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)' }}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/90">
+      <div className="mt-4 w-full max-w-md overflow-hidden rounded-3xl bg-[#000000] shadow-2xl animate-fade-in" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)' }}>
         {HeaderBar}
-        <div className="overflow-y-auto overscroll-contain" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 6rem)' }}>
+        <div className="overflow-y-auto overscroll-contain scrollbar-hide" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 6rem)' }}>
           <AnimatePresence mode="wait">
             {step === "select" && SelectStep}
             {step === "details" && DetailsStep}
