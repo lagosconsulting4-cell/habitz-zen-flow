@@ -63,8 +63,8 @@ export const CircularHabitCard = ({
         </motion.div>
       )}
 
-      {/* Streak badge */}
-      {streakDays && streakDays > 0 && (
+      {/* Streak badge - only show if > 0 */}
+      {streakDays !== undefined && streakDays > 0 && (
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -121,7 +121,7 @@ export const CircularHabitCard = ({
           className="absolute inset-0 m-2.5 bg-white rounded-full shadow-inner"
         />
 
-        {/* Icon */}
+        {/* Icon - always white, prefer Lucide icons over emojis */}
         <div className="absolute inset-0 flex items-center justify-center">
           {Icon ? (
             <motion.div
@@ -131,22 +131,22 @@ export const CircularHabitCard = ({
               transition={{ duration: 0.3 }}
             >
               <Icon
-                size={48}
-                color={completed ? "hsl(var(--card))" : "white"}
+                size={52}
+                color="white"
                 strokeWidth={2.5}
-                className="drop-shadow-md transition-colors duration-300"
+                className="drop-shadow-lg"
               />
             </motion.div>
-          ) : (
+          ) : habit.emoji ? (
             <motion.span
-              className="text-5xl drop-shadow-md transition-all duration-300"
+              className="text-5xl drop-shadow-md filter brightness-0 invert"
               animate={{
                 scale: completed ? 1.1 : 1,
               }}
             >
               {habit.emoji}
             </motion.span>
-          )}
+          ) : null}
         </div>
       </div>
 

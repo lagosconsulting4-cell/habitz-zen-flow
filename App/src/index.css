@@ -246,16 +246,17 @@
   .habits-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-    padding: 2.5rem 1rem;
+    gap: 1.5rem;
+    padding: 2rem 1.5rem 6rem 1.5rem;
     max-width: 480px;
     margin: 0 auto;
+    place-items: center;
   }
 
   @media (max-width: 640px) {
     .habits-grid {
-      gap: 1.5rem;
-      padding: 2rem 1rem;
+      gap: 1.25rem;
+      padding: 1.5rem 1rem 5rem 1rem;
     }
   }
 
@@ -264,8 +265,8 @@
     .habits-grid {
       grid-template-columns: repeat(3, 1fr);
       max-width: 720px;
-      gap: 2.5rem;
-      padding: 3rem 2rem;
+      gap: 2rem;
+      padding: 3rem 2rem 4rem 2rem;
     }
   }
 
@@ -273,8 +274,8 @@
     .habits-grid {
       grid-template-columns: repeat(4, 1fr);
       max-width: 960px;
-      gap: 3rem;
-      padding: 4rem 2rem;
+      gap: 2.5rem;
+      padding: 4rem 2rem 4rem 2rem;
     }
   }
 
