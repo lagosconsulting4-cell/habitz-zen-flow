@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   X,
+  ChevronRight,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
