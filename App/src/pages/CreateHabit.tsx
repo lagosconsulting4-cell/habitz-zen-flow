@@ -51,6 +51,7 @@ const CATEGORY_DATA: Array<{
   tasks: Array<{
     id: string;
     name: string;
+    iconKey?: HabitIconKey;
     description?: string;
     default_goal_value?: number;
     default_unit?: "none" | "steps" | "minutes" | "km" | "hours" | "pages" | "liters" | "custom";
@@ -226,6 +227,7 @@ const CreateHabit = () => {
     setSelectedDays([1, 2, 3, 4, 5, 6, 0]);
     setSelectedColor(categories[0]?.color ?? fallbackCategories[0].color ?? null);
     setSelectedIconKey(categories[0]?.icon_key ?? fallbackCategories[0].icon_key ?? null);
+    setSelectedCategoryData(null);
     setStep("category");
   };
 
@@ -434,9 +436,9 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
   };
 
   const handleSelectTemplate = (tpl: (typeof CATEGORY_DATA)[number]["tasks"][number]) => {
-    setSelectedTemplate({ id: tpl.id, name: tpl.name });
+    setSelectedTemplate({ id: tpl.id, name: tpl.name, iconKey: tpl.iconKey });
     setSelectedTemplateId(tpl.id);
-    setSelectedTemplateAuto(false);
+    setSelectedTemplateAuto(tpl.auto_complete_source === "health");
     setHabitName(tpl.name);
     setUnit((tpl.default_unit as typeof unit) ?? "none");
     setGoalValue(tpl.default_goal_value ?? undefined);
@@ -490,7 +492,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             <button
               key={cat.id}
               onClick={() => handleSelectCategory(cat)}
-              className="flex flex-col items-start gap-3 rounded-2xl border border-border/60 bg-card px-5 py-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2"
+              className="flex flex-col items-start gap-3 rounded-2xl border border-border/60 bg-card px-5 py-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg active:scale-95 focus-visible:outline-none focus-visible:ring-2"
               style={{ focusVisible: { outlineColor: cat.colorToken } }}
             >
               <div
@@ -525,7 +527,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       transition={{ duration: 0.25, ease: "easeOut" }}
       className="space-y-4 px-4 pb-6"
     >
-      <div className="flex flex-wrap items-center gap-2 overflow-x-auto pb-2">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {CATEGORY_DATA.map((cat) => {
           const Icon = getHabitIcon(cat.iconKey);
           const isActive = selectedCategoryData?.id === cat.id;
@@ -533,7 +535,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             <button
               key={cat.id}
               onClick={() => handleSelectCategory(cat)}
-              className="flex items-center gap-2 rounded-full px-3 py-2 text-sm shadow-sm transition"
+              className="flex flex-shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm shadow-sm transition active:scale-95"
               style={{
                 backgroundColor: isActive ? cat.colorToken : undefined,
                 color: isActive ? "#000000" : undefined,
@@ -545,7 +547,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                   style={{ color: isActive ? "#000000" : cat.colorToken }}
                 />
               ) : null}
-              <span>{cat.name}</span>
+              <span className="whitespace-nowrap">{cat.name}</span>
             </button>
           );
         })}
@@ -577,7 +579,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             <button
               key={tpl.id}
               onClick={() => handleSelectTemplate(tpl)}
-              className={`flex items-center justify-between rounded-2xl border px-4 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+              className={`flex items-center justify-between rounded-2xl border px-4 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] ${
                 selectedTemplateId === tpl.id ? "border-primary bg-primary/10" : "border-border/60 bg-card"
               }`}
             >
@@ -849,13 +851,15 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 backdrop-blur-sm">
-      <div className="mt-4 w-full max-w-md overflow-hidden rounded-3xl bg-background shadow-[var(--shadow-strong)] animate-fade-in">
+      <div className="mt-4 w-full max-w-md overflow-hidden rounded-3xl bg-background shadow-[var(--shadow-strong)] animate-fade-in" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)' }}>
         {HeaderBar}
-        <AnimatePresence mode="wait">
-          {step === "category" && CategoryStep}
-          {step === "templates" && TemplateStep}
-          {step === "details" && DetailsStep}
-        </AnimatePresence>
+        <div className="overflow-y-auto overscroll-contain" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 6rem)' }}>
+          <AnimatePresence mode="wait">
+            {step === "category" && CategoryStep}
+            {step === "templates" && TemplateStep}
+            {step === "details" && DetailsStep}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
