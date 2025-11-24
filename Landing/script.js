@@ -52,6 +52,22 @@ function showStep(index) {
       initCarousel();
     }, 100);
   }
+
+  // Garantir que cada novo slide comece do topo da tela
+  const prefersReducedMotion = typeof window.matchMedia === 'function'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
+  const scrollBehavior = prefersReducedMotion ? 'auto' : 'smooth';
+  const quizRoot = document.querySelector('.quiz-container');
+  if (quizRoot && typeof quizRoot.scrollIntoView === 'function') {
+    quizRoot.scrollIntoView({ behavior: scrollBehavior, block: 'start' });
+  } else if (typeof window.scrollTo === 'function') {
+    try {
+      window.scrollTo({ top: 0, behavior: scrollBehavior });
+    } catch (err) {
+      window.scrollTo(0, 0);
+    }
+  }
 }
 
 // Avança para a próxima etapa ao clicar em qualquer botão das opções
@@ -520,7 +536,7 @@ if (audioIconList.length > 0) {
   if (!audio2) {
     audio2 = document.createElement('audio');
     audio2.id = 'audio-player-2';
-    audio2.src = '/audio/audio2.mp3';
+    audio2.src = 'IMG/audio2.mp3';
     audio2.style.display = 'none';
     document.body.appendChild(audio2);
   }
