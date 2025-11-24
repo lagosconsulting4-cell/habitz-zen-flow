@@ -18,9 +18,10 @@ const ProtectedLayout = () => {
   const showSidebar = !shouldHideNav && !isDashboard && !isCreate;
   const containerWidth = isDashboard || isCreate ? "max-w-4xl" : "max-w-6xl";
   const bottomPadding = shouldHideNav ? "pb-8" : "pb-24 md:pb-16";
+  const backgroundClass = isDashboard ? "bg-primary" : "bg-background";
 
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className={`relative min-h-screen ${backgroundClass}`}>
       <MoreMenu open={moreOpen} onOpenChange={setMoreOpen} />
 
       <div className={`mx-auto flex w-full ${containerWidth} flex-col gap-6 px-4 pt-4 md:flex-row md:px-8 ${bottomPadding}`}>

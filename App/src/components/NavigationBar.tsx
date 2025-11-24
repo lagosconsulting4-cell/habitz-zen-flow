@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { TrendingUp, Menu, Settings } from "lucide-react";
+import { TrendingUp, Menu, Settings, Grid3x3 } from "lucide-react";
 import { motion } from "motion/react";
 
 import { cn } from "@/lib/utils";
@@ -47,11 +47,16 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
     );
   };
 
+  // Check if on dashboard for different styling
+  const isDashboard = location.pathname === "/dashboard";
+  const navBg = isDashboard ? "bg-transparent" : "bg-card/95 backdrop-blur-md border-t border-border/60";
+  const iconColor = isDashboard ? "text-white" : "text-foreground";
+
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 bg-transparent safe-area-bottom md:hidden">
+    <div className={cn("fixed inset-x-0 bottom-0 z-40 safe-area-bottom md:hidden", navBg)}>
       <div className="mx-auto grid w-full max-w-md grid-cols-3 items-center px-8 py-4">
         {renderButton({ label: "Config", icon: Settings, path: "/profile" })}
-        {renderButton({ label: "Menu", icon: Menu, onClick: onOpenMore })}
+        {renderButton({ label: "Menu", icon: Grid3x3, onClick: onOpenMore })}
         {renderButton({ label: "Streaks", icon: TrendingUp, path: "/progress" })}
       </div>
     </div>

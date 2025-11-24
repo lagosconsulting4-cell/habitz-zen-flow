@@ -410,22 +410,46 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       );
     }
     if (frequencyType === "fixed_days") {
+      const allDaysSelected = selectedDays.length === 7;
+
       return (
-        <div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
-          {weekdays.map((day) => (
+        <div className="space-y-3">
+          {/* Botões de seleção rápida */}
+          <div className="grid grid-cols-2 gap-2">
             <button
-              key={day.id}
-              onClick={() => toggleDay(day.id)}
-              aria-pressed={selectedDays.includes(day.id)}
-              className={`rounded-xl py-3 text-sm font-bold transition-all duration-200 ${
-                selectedDays.includes(day.id)
-                  ? "bg-lime-400 text-black"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
-              }`}
+              type="button"
+              onClick={() => setSelectedDays([0, 1, 2, 3, 4, 5, 6])}
+              className="rounded-lg py-2 text-xs font-semibold transition-all duration-200 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
             >
-              {day.label}
+              Selecionar todos
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => setSelectedDays([])}
+              className="rounded-lg py-2 text-xs font-semibold transition-all duration-200 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+            >
+              Limpar
+            </button>
+          </div>
+
+          {/* Grade de dias da semana */}
+          <div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
+            {weekdays.map((day) => (
+              <button
+                key={day.id}
+                type="button"
+                onClick={() => toggleDay(day.id)}
+                aria-pressed={selectedDays.includes(day.id)}
+                className={`rounded-xl py-3 text-sm font-bold transition-all duration-200 ${
+                  selectedDays.includes(day.id)
+                    ? "bg-lime-400 text-black"
+                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {day.label}
+              </button>
+            ))}
+          </div>
         </div>
       );
     }
@@ -478,7 +502,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       )}
       <div className="text-center">
         <p className="text-base font-semibold text-white tracking-wide">
-          {step === "select" ? "Add Task" : "Confirm Task"}
+          {step === "select" ? "Nova Tarefa" : "Confirmar Tarefa"}
         </p>
       </div>
       <button
@@ -524,7 +548,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       {selectedCategoryData && (
         <div className="px-6 pt-0">
           <p className="text-sm text-white/60 text-center leading-relaxed">
-            Health tasks are linked to the Health app and are automatically marked as complete when new data is recorded.
+            {selectedCategoryData.description}
           </p>
         </div>
       )}
@@ -533,7 +557,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       {selectedCategoryData && (
         <div className="space-y-3 px-4">
           <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 px-2">
-            Select a Task
+            Selecione uma tarefa
           </p>
           {selectedCategoryData.tasks.map((tpl) => {
             const TaskIcon = tpl.iconKey ? getHabitIcon(tpl.iconKey as any) : getHabitIcon(selectedCategoryData.iconKey);
@@ -612,10 +636,10 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
           </svg>
           <div className="flex-1">
             <p className="text-sm font-medium text-white">
-              This task uses data from the Health app.
+              Esta tarefa usa dados do app Saúde.
             </p>
             <p className="mt-1 text-xs text-white/60">
-              Please grant Streaks permission if prompted.
+              Conceda permissão ao Habitz quando solicitado.
             </p>
           </div>
         </div>
@@ -624,12 +648,12 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       {/* Title Input */}
       <div className="px-4">
         <Label className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-          TITLE
+          TÍTULO
         </Label>
         <Input
           value={habitName}
           onChange={(e) => setHabitName(e.target.value)}
-          placeholder="Enter task name"
+          placeholder="Digite o nome da tarefa"
           maxLength={18}
           className="mt-2 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50 focus:ring-lime-400/20"
         />
@@ -647,42 +671,51 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-                Goal
+                Meta
               </p>
               <p className="text-base font-semibold text-white">
                 {goalValue
-                  ? `${goalValue} ${unit === "none" ? "" : unit}`
-                  : "Set goal"}
+                  ? `${goalValue} ${unit === "none" ? "" : unit === "steps" ? "passos" : unit === "minutes" ? "min" : unit === "hours" ? "hrs" : unit === "pages" ? "pág" : unit === "liters" ? "L" : unit === "km" ? "km" : "un"}`
+                  : "Definir meta"}
               </p>
             </div>
           </div>
         </div>
-        <div className="border-t border-white/10 px-4 py-4">
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              min={0}
-              value={goalValue ?? ""}
-              onChange={(e) =>
-                setGoalValue(e.target.value ? Number(e.target.value) : undefined)
-              }
-              className="w-24 rounded-xl bg-black/30 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50"
-              placeholder="5000"
-            />
-            <select
-              value={unit}
-              onChange={(e) => setUnit(e.target.value as typeof unit)}
-              className="flex-1 rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-white focus:border-lime-400/50 focus:outline-none focus:ring-2 focus:ring-lime-400/20"
-            >
-              <option value="none">None</option>
-              <option value="steps">Steps</option>
-              <option value="minutes">Minutes</option>
-              <option value="hours">Hours</option>
-              <option value="km">km</option>
-              <option value="pages">Pages</option>
-              <option value="liters">Liters</option>
-              <option value="custom">Custom</option>
-            </select>
+        <div className="border-t border-white/10 px-4 py-4 space-y-3">
+          <Input
+            type="number"
+            min={0}
+            value={goalValue ?? ""}
+            onChange={(e) =>
+              setGoalValue(e.target.value ? Number(e.target.value) : undefined)
+            }
+            className="w-full rounded-xl bg-black/30 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50"
+            placeholder="Ex: 10000"
+          />
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { value: "none", label: "Nenhum" },
+              { value: "steps", label: "Passos" },
+              { value: "minutes", label: "Minutos" },
+              { value: "hours", label: "Horas" },
+              { value: "km", label: "Km" },
+              { value: "pages", label: "Páginas" },
+              { value: "liters", label: "Litros" },
+              { value: "custom", label: "Outro" },
+            ].map((unitOption) => (
+              <button
+                key={unitOption.value}
+                type="button"
+                onClick={() => setUnit(unitOption.value as typeof unit)}
+                className={`rounded-lg py-2.5 text-xs font-semibold transition-all duration-200 ${
+                  unit === unitOption.value
+                    ? "bg-lime-400 text-black"
+                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {unitOption.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -696,36 +729,44 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-                Task Days
+                Frequência
               </p>
               <p className="text-base font-semibold text-white">
                 {frequencyType === "daily"
-                  ? "Every Day"
+                  ? "Todo dia"
                   : frequencyType === "times_per_week" && timesPerWeek
-                    ? `${timesPerWeek}x / week`
+                    ? `${timesPerWeek}x / semana`
                     : frequencyType === "times_per_month" && timesPerMonth
-                      ? `${timesPerMonth}x / month`
+                      ? `${timesPerMonth}x / mês`
                       : frequencyType === "every_n_days" && everyNDays
-                        ? `Every ${everyNDays} days`
-                        : "Specific days"}
+                        ? `A cada ${everyNDays} dias`
+                        : "Dias específicos"}
               </p>
             </div>
           </div>
         </div>
         <div className="border-t border-white/10 px-4 py-4 space-y-3">
-          <select
-            className="w-full rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 text-white focus:border-lime-400/50 focus:outline-none focus:ring-2 focus:ring-lime-400/20"
-            value={frequencyType}
-            onChange={(e) =>
-              setFrequencyType(e.target.value as typeof frequencyType)
-            }
-          >
-            <option value="daily">Every day</option>
-            <option value="fixed_days">Specific days</option>
-            <option value="times_per_week">X times per week</option>
-            <option value="times_per_month">X times per month</option>
-            <option value="every_n_days">Every N days</option>
-          </select>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { value: "daily", label: "Todo dia" },
+              { value: "fixed_days", label: "Dias específicos" },
+              { value: "times_per_week", label: "X vezes/semana" },
+              { value: "times_per_month", label: "X vezes/mês" },
+            ].map((freqOption) => (
+              <button
+                key={freqOption.value}
+                type="button"
+                onClick={() => setFrequencyType(freqOption.value as typeof frequencyType)}
+                className={`rounded-lg py-2.5 text-xs font-semibold transition-all duration-200 ${
+                  frequencyType === freqOption.value
+                    ? "bg-lime-400 text-black"
+                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {freqOption.label}
+              </button>
+            ))}
+          </div>
           <div>{renderFrequencyFields()}</div>
         </div>
       </div>
@@ -739,10 +780,10 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-                Notifications
+                Notificações
               </p>
               <p className="text-base font-semibold text-white">
-                {prefs.notificationsEnabled ? "Enabled" : "Disabled"}
+                {prefs.notificationsEnabled ? "Ativadas" : "Desativadas"}
               </p>
             </div>
           </div>
@@ -761,7 +802,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             boxShadow: "0 4px 24px rgba(163, 230, 53, 0.3)",
           }}
         >
-          {isSaving ? "SAVING..." : "SAVE TASK"}
+          {isSaving ? "SALVANDO..." : "SALVAR TAREFA"}
         </button>
       </div>
     </motion.div>
