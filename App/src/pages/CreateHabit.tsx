@@ -40,7 +40,7 @@ const weekdays = [
   { id: 0, label: "Dom" },
 ];
 
-type Step = "category" | "templates" | "details";
+type Step = "select" | "details";
 
 const CATEGORY_DATA: Array<{
   id: string;
@@ -179,7 +179,7 @@ const CreateHabit = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string; iconKey?: HabitIconKey } | null>(null);
   const [selectedTemplateAuto, setSelectedTemplateAuto] = useState<boolean>(false);
-  const [step, setStep] = useState<Step>("category");
+  const [step, setStep] = useState<Step>("select");
   const [selectedCategoryData, setSelectedCategoryData] = useState<(typeof CATEGORY_DATA)[number] | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -207,6 +207,13 @@ const CreateHabit = () => {
     }
   }, [catalogCategories, selectedCategory]);
 
+  // Seleciona a primeira categoria por padrão ao abrir
+  useEffect(() => {
+    if (!selectedCategoryData && step === "select" && CATEGORY_DATA.length > 0) {
+      handleSelectCategory(CATEGORY_DATA[0]);
+    }
+  }, [step]);
+
   const toggleDay = (day: number) => {
     setSelectedDays((prev) =>
       prev.includes(day) ? prev.filter((value) => value !== day) : [...prev, day]
@@ -228,7 +235,7 @@ const CreateHabit = () => {
     setSelectedColor(categories[0]?.color ?? fallbackCategories[0].color ?? null);
     setSelectedIconKey(categories[0]?.icon_key ?? fallbackCategories[0].icon_key ?? null);
     setSelectedCategoryData(null);
-    setStep("category");
+    setStep("select");
   };
 
   const applyTemplate = (template: HabitTemplate) => {
@@ -427,7 +434,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     setSelectedCategoryData(cat);
     setSelectedColor(cat.colorToken);
     setSelectedIconKey(null);
-    setStep("templates");
+    // Não muda de step, tudo acontece na mesma tela
   };
 
   const handleSelectTemplateFromCatalog = (template: HabitTemplate) => {
@@ -456,18 +463,17 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
 
   const HeaderBar = (
     <div className="flex items-center justify-between px-4 py-3">
-      {step !== "category" ? (
-        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setStep(step === "details" ? "templates" : "category")}>
+      {step === "details" ? (
+        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setStep("select")}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
       ) : (
         <div className="w-10" />
       )}
       <div className="text-center">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          {step === "category" ? "Categorias" : step === "templates" ? "Hábito pronto" : "Confirmar hábito"}
+        <p className="text-base font-semibold">
+          {step === "select" ? "Add Task" : "Confirm Task"}
         </p>
-        <p className="text-base font-semibold">Adicionar hábito</p>
       </div>
       <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate("/dashboard")}>
         <X className="h-5 w-5" />
@@ -475,59 +481,17 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     </div>
   );
 
-  const CategoryStep = (
+  const SelectStep = (
     <motion.div
-      key="category"
+      key="select"
       initial={{ opacity: 0, x: 16 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -16 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-4 px-4 pb-6"
+      className="space-y-4 pb-6"
     >
-      <p className="text-sm text-muted-foreground">Escolha uma categoria para ver sugestões de hábitos.</p>
-      <div className="grid grid-cols-2 gap-3">
-        {CATEGORY_DATA.map((cat) => {
-          const Icon = getHabitIcon(cat.iconKey);
-          return (
-            <button
-              key={cat.id}
-              onClick={() => handleSelectCategory(cat)}
-              className="flex flex-col items-start gap-3 rounded-2xl border border-border/60 bg-card px-5 py-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg active:scale-95 focus-visible:outline-none focus-visible:ring-2"
-              style={{ focusVisible: { outlineColor: cat.colorToken } }}
-            >
-              <div
-                className="flex h-14 w-14 items-center justify-center rounded-full"
-                style={{ backgroundColor: `${cat.colorToken}20` }}
-              >
-                {Icon ? (
-                  <Icon className="h-7 w-7" style={{ color: cat.colorToken }} />
-                ) : (
-                  <span className="text-sm font-semibold">+</span>
-                )}
-              </div>
-              <div>
-                <p className="text-base font-semibold">{cat.name}</p>
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  {cat.description}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </motion.div>
-  );
-
-  const TemplateStep = (
-    <motion.div
-      key="templates"
-      initial={{ opacity: 0, x: 16 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -16 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-4 px-4 pb-6"
-    >
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      {/* Category Pills - Apenas ícones circulares */}
+      <div className="flex items-center justify-center gap-3 px-4 py-2">
         {CATEGORY_DATA.map((cat) => {
           const Icon = getHabitIcon(cat.iconKey);
           const isActive = selectedCategoryData?.id === cat.id;
@@ -535,109 +499,70 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             <button
               key={cat.id}
               onClick={() => handleSelectCategory(cat)}
-              className="flex flex-shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm shadow-sm transition active:scale-95"
+              className="flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 active:scale-95"
               style={{
-                backgroundColor: isActive ? cat.colorToken : undefined,
-                color: isActive ? "#000000" : undefined,
+                backgroundColor: isActive ? cat.colorToken : `${cat.colorToken}30`,
               }}
             >
-              {Icon ? (
-                <Icon
-                  className="h-4 w-4"
-                  style={{ color: isActive ? "#000000" : cat.colorToken }}
-                />
-              ) : null}
-              <span className="whitespace-nowrap">{cat.name}</span>
+              {Icon && <Icon className="h-6 w-6" style={{ color: isActive ? "#FFFFFF" : cat.colorToken }} />}
             </button>
           );
         })}
       </div>
+
+      {/* Descrição da categoria selecionada */}
       {selectedCategoryData && (
-        <div className="flex items-center gap-3 rounded-2xl bg-muted/60 p-3">
-          <div
-            className="flex h-12 w-12 items-center justify-center rounded-full"
-            style={{ backgroundColor: `${selectedCategoryData.colorToken}20` }}
-          >
-            {getHabitIcon(selectedCategoryData.iconKey)?.({
-              className: "h-6 w-6",
-              style: { color: selectedCategoryData.colorToken },
-            } as any)}
-          </div>
-          <div>
-            <p className="font-semibold">{selectedCategoryData.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {selectedCategoryData.description}
-            </p>
-          </div>
+        <div className="px-4 pt-2">
+          <p className="text-sm text-muted-foreground">
+            Health tasks are linked to the Health app and are automatically marked as complete when new data is recorded.
+          </p>
         </div>
       )}
 
-      <div className="space-y-2">
-        {selectedCategoryData?.tasks.map((tpl) => {
-          const TaskIcon = tpl.iconKey ? getHabitIcon(tpl.iconKey as any) : getHabitIcon(selectedCategoryData.iconKey);
-          return (
-            <button
-              key={tpl.id}
-              onClick={() => handleSelectTemplate(tpl)}
-              className={`flex items-center justify-between rounded-2xl border px-4 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] ${
-                selectedTemplateId === tpl.id ? "border-primary bg-primary/10" : "border-border/60 bg-card"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex h-12 w-12 items-center justify-center rounded-full"
-                  style={{ backgroundColor: `${selectedCategoryData.colorToken}20` }}
-                >
-                  {TaskIcon?.({
-                    className: "h-6 w-6",
-                    style: { color: selectedCategoryData.colorToken },
-                  } as any)}
+      {/* Lista de hábitos */}
+      {selectedCategoryData && (
+        <div className="space-y-2 px-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-foreground">
+            CREATE A HEALTH TASK:
+          </p>
+          {selectedCategoryData.tasks.map((tpl) => {
+            const TaskIcon = tpl.iconKey ? getHabitIcon(tpl.iconKey as any) : getHabitIcon(selectedCategoryData.iconKey);
+            const isHealthTask = tpl.auto_complete_source === "health";
+            return (
+              <button
+                key={tpl.id}
+                onClick={() => handleSelectTemplate(tpl)}
+                className="flex w-full items-center justify-between rounded-2xl px-4 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+                style={{
+                  backgroundColor: selectedCategoryData.colorToken,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                    {TaskIcon && <TaskIcon className="h-5 w-5 text-white" />}
+                  </div>
+                  <div className="flex items-center gap-2 text-left">
+                    {isHealthTask && (
+                      <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    <p className="text-base font-semibold text-white">{tpl.name}</p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="text-base font-semibold">{tpl.name}</p>
-                  {tpl.default_frequency_type && (
-                    <p className="text-xs text-muted-foreground">
-                      {tpl.default_frequency_type === "daily"
-                        ? "Todos os dias"
-                        : tpl.default_frequency_type === "times_per_week" && tpl.default_times_per_week
-                          ? `${tpl.default_times_per_week}x / semana`
-                          : tpl.default_frequency_type === "times_per_month" && tpl.default_times_per_month
-                            ? `${tpl.default_times_per_month}x / mês`
-                            : "Personalizado"}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </button>
-          );
-        })}
-      </div>
+                <ChevronRight className="h-5 w-5 text-white" />
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-      {templates.length > 0 && (
-        <div className="space-y-2 pt-4">
-          <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Sugestões adicionais</p>
-          <div className="grid gap-2">
-            {catalogLoading && <p className="text-sm text-muted-foreground">Carregando catálogo...</p>}
-            {!catalogLoading &&
-              templates
-                .filter((tpl) => (selectedCategoryData ? tpl.category_id === selectedCategoryData.id : true))
-                .map((tpl) => (
-                  <button
-                    key={tpl.id}
-                    onClick={() => handleSelectTemplateFromCatalog(tpl)}
-                    className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-left shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-medium)] ${
-                      selectedTemplateId === tpl.id ? "border-primary bg-primary/10" : "border-border/60 bg-card"
-                    }`}
-                  >
-                    <div>
-                      <p className="font-semibold">{tpl.name}</p>
-                      <p className="text-xs text-muted-foreground">{renderTemplateFrequency(tpl)}</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </button>
-                ))}
-          </div>
+      {/* Mensagem inicial se nenhuma categoria selecionada */}
+      {!selectedCategoryData && (
+        <div className="px-4 pt-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            Escolha uma categoria acima para ver os hábitos disponíveis
+          </p>
         </div>
       )}
     </motion.div>
@@ -855,8 +780,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         {HeaderBar}
         <div className="overflow-y-auto overscroll-contain" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 6rem)' }}>
           <AnimatePresence mode="wait">
-            {step === "category" && CategoryStep}
-            {step === "templates" && TemplateStep}
+            {step === "select" && SelectStep}
             {step === "details" && DetailsStep}
           </AnimatePresence>
         </div>
