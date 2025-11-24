@@ -4,6 +4,9 @@ import {
   ArrowLeft,
   X,
   ChevronRight,
+  Target,
+  Calendar,
+  Bell,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -18,6 +21,8 @@ import { useAppPreferences } from "@/hooks/useAppPreferences";
 import { HABIT_EMOJIS } from "@/data/habit-emojis";
 import type { HabitEmoji } from "@/data/habit-emojis";
 import { HabitIconKey, getHabitIcon } from "@/components/icons/HabitIcons";
+import { HeroCircle } from "@/components/HeroCircle";
+import { HealthIntegrationAlert } from "@/components/HealthIntegrationAlert";
 
 const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; emoji: string }> = [
   { id: "morning", name: "Manhã", emoji: "☀️" },
@@ -48,83 +53,107 @@ const CATEGORY_DATA: Array<{
     name: string;
     description?: string;
     default_goal_value?: number;
-    default_unit?: "none" | "steps" | "minutes" | "km" | "custom";
+    default_unit?: "none" | "steps" | "minutes" | "km" | "hours" | "pages" | "liters" | "custom";
     default_frequency_type?: "fixed_days" | "times_per_week" | "times_per_month" | "every_n_days" | "daily";
     default_times_per_week?: number;
     default_times_per_month?: number;
     default_every_n_days?: number;
     default_days_of_week?: number[];
+    auto_complete_source?: "manual" | "health";
   }>;
 }> = [
   {
-    id: "movement",
-    name: "Movimento",
-    description: "Caminhadas, corridas e mobilidade.",
-    iconKey: "run",
-    colorToken: "var(--primary)",
+    id: "productivity",
+    name: "Produtividade",
+    description: "Organização pessoal e desenvolvimento",
+    iconKey: "plan",
+    colorToken: "#FBBF24",
     tasks: [
-      { id: "walk_run", name: "Walk or Run", default_unit: "steps", default_goal_value: 5000, default_frequency_type: "daily" },
-      { id: "cycle", name: "Cycle", default_unit: "km", default_goal_value: 5, default_frequency_type: "times_per_week", default_times_per_week: 3 },
-      { id: "swim", name: "Swim", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "times_per_week", default_times_per_week: 2 },
-      { id: "mindful_minutes", name: "Mindful Minutes", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
-      { id: "climb_flights", name: "Climb Flights", default_unit: "steps", default_goal_value: 20, default_frequency_type: "daily" },
+      { id: "wake_early", name: "Acordar Cedo", default_unit: "none", default_frequency_type: "daily" },
+      { id: "make_bed", name: "Fazer a Cama", default_unit: "none", default_frequency_type: "daily" },
+      { id: "plan_day", name: "Planejar o Dia", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
+      { id: "review_goals", name: "Revisar Objetivos", default_unit: "none", default_frequency_type: "times_per_week", default_times_per_week: 1 },
+      { id: "journaling", name: "Journaling", iconKey: "journal", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
+      { id: "read_books", name: "Ler Livros", iconKey: "book", default_unit: "pages", default_goal_value: 30, default_frequency_type: "daily" },
+      { id: "meditate", name: "Meditar", iconKey: "meditate", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
+      { id: "study", name: "Estudar", iconKey: "study", default_unit: "hours", default_goal_value: 1, default_frequency_type: "daily" },
+      { id: "organize_space", name: "Organizar Ambiente", iconKey: "organize", default_unit: "minutes", default_goal_value: 15, default_frequency_type: "daily" },
+      { id: "task_list", name: "Fazer Lista de Tarefas", iconKey: "checklist", default_unit: "none", default_frequency_type: "daily" },
     ],
   },
   {
-    id: "mind",
-    name: "Mente",
-    description: "Mindfulness, foco e clareza.",
-    iconKey: "meditate",
-    colorToken: "var(--secondary)",
+    id: "fitness",
+    name: "Saúde/Fitness",
+    description: "Saúde física e bem-estar corporal",
+    iconKey: "run",
+    colorToken: "#A3E635",
     tasks: [
-      { id: "meditate", name: "Meditate", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
-      { id: "journal", name: "Journal", default_unit: "none", default_frequency_type: "times_per_week", default_times_per_week: 3 },
-      { id: "gratitude", name: "Gratitude Notes", default_unit: "none", default_frequency_type: "daily" },
+      { id: "walk_run", name: "Caminhar ou Correr", default_unit: "steps", default_goal_value: 10000, default_frequency_type: "daily", auto_complete_source: "health" },
+      { id: "cycle", name: "Pedalar", iconKey: "cycle", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "times_per_week", default_times_per_week: 3 },
+      { id: "swim", name: "Nadar", iconKey: "swim", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "times_per_week", default_times_per_week: 2 },
+      { id: "mindful_minutes", name: "Minutos de Atenção Plena", iconKey: "meditate", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily", auto_complete_source: "health" },
+      { id: "climb_stairs", name: "Subir Escadas", iconKey: "stairs", default_unit: "custom", default_goal_value: 10, default_frequency_type: "daily", auto_complete_source: "health" },
+      { id: "activity_rings", name: "Completar Anéis de Atividade", iconKey: "activity_rings", default_unit: "none", default_frequency_type: "daily", auto_complete_source: "health" },
+      { id: "stand_hours", name: "Horas em Pé", iconKey: "stand_hours", default_unit: "custom", default_goal_value: 12, default_frequency_type: "daily", auto_complete_source: "health" },
+      { id: "exercise_minutes", name: "Minutos de Exercício", iconKey: "exercise_minutes", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "daily", auto_complete_source: "health" },
+      { id: "burn_calories", name: "Queimar Calorias", iconKey: "burn_energy", default_unit: "custom", default_goal_value: 500, default_frequency_type: "daily", auto_complete_source: "health" },
+      { id: "stretching", name: "Alongamento", iconKey: "stretch", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
+      { id: "yoga", name: "Yoga", iconKey: "yoga", default_unit: "minutes", default_goal_value: 20, default_frequency_type: "times_per_week", default_times_per_week: 3 },
+      { id: "strength_training", name: "Treino de Força", iconKey: "strength", default_unit: "minutes", default_goal_value: 45, default_frequency_type: "times_per_week", default_times_per_week: 3 },
+      { id: "drink_water", name: "Beber Água", iconKey: "water", default_unit: "liters", default_goal_value: 2, default_frequency_type: "daily" },
+      { id: "sleep_8h", name: "Dormir 8 Horas", iconKey: "sleep", default_unit: "hours", default_goal_value: 8, default_frequency_type: "daily", auto_complete_source: "health" },
     ],
   },
   {
     id: "nutrition",
-    name: "Nutrição",
-    description: "Alimentação equilibrada e hidratação.",
+    name: "Alimentação",
+    description: "Nutrição e alimentação saudável",
     iconKey: "meal",
-    colorToken: "var(--accent)",
+    colorToken: "#FB923C",
     tasks: [
-      { id: "healthy_meal", name: "Healthy Meal", default_unit: "none", default_frequency_type: "times_per_week", default_times_per_week: 7 },
-      { id: "drink_water", name: "Drink Water", default_unit: "custom", default_goal_value: 8, default_frequency_type: "daily" },
-      { id: "no_fast_food", name: "Avoid Fast Food", default_unit: "none", default_frequency_type: "times_per_week", default_times_per_week: 5 },
+      { id: "healthy_breakfast", name: "Café da Manhã Saudável", default_unit: "none", default_frequency_type: "daily" },
+      { id: "eat_fruits", name: "Comer Frutas", iconKey: "fruits", default_unit: "custom", default_goal_value: 2, default_frequency_type: "daily" },
+      { id: "eat_vegetables", name: "Comer Vegetais", iconKey: "vegetables", default_unit: "custom", default_goal_value: 3, default_frequency_type: "daily" },
+      { id: "drink_water_2l", name: "Beber 2L de Água", iconKey: "water", default_unit: "liters", default_goal_value: 2, default_frequency_type: "daily" },
+      { id: "avoid_sugar", name: "Evitar Açúcar", iconKey: "target", default_unit: "none", default_frequency_type: "daily" },
+      { id: "meal_prep", name: "Preparar Refeições", default_unit: "custom", default_goal_value: 3, default_frequency_type: "times_per_week", default_times_per_week: 1 },
+      { id: "eat_protein", name: "Comer Proteína", iconKey: "protein", default_unit: "custom", default_goal_value: 3, default_frequency_type: "daily" },
+      { id: "take_vitamins", name: "Tomar Vitaminas", iconKey: "vitamins", default_unit: "none", default_frequency_type: "daily" },
+      { id: "avoid_fast_food", name: "Evitar Fast Food", iconKey: "no_fast_food", default_unit: "none", default_frequency_type: "daily" },
     ],
   },
   {
-    id: "sleep",
-    name: "Sono",
-    description: "Descanso e recuperação.",
-    iconKey: "sleep",
-    colorToken: "var(--foreground)",
+    id: "time_routine",
+    name: "Tempo/Rotina",
+    description: "Gestão de tempo e rotinas",
+    iconKey: "clock",
+    colorToken: "#60A5FA",
     tasks: [
-      { id: "sleep_hours", name: "Sleep 8h", default_unit: "custom", default_goal_value: 8, default_frequency_type: "daily" },
-      { id: "no_screens", name: "No screens before bed", default_unit: "none", default_frequency_type: "daily" },
+      { id: "pomodoro", name: "Pomodoro de Trabalho", iconKey: "focus", default_unit: "custom", default_goal_value: 4, default_frequency_type: "times_per_week", default_times_per_week: 5 },
+      { id: "deep_focus", name: "Tempo de Foco Profundo", iconKey: "deep_work", default_unit: "hours", default_goal_value: 2, default_frequency_type: "daily" },
+      { id: "family_time", name: "Tempo com Família", iconKey: "family", default_unit: "hours", default_goal_value: 1, default_frequency_type: "daily" },
+      { id: "leisure_time", name: "Tempo de Lazer", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "daily" },
+      { id: "sleep_on_time", name: "Dormir no Horário", iconKey: "bed", default_unit: "none", default_frequency_type: "daily" },
+      { id: "wake_on_time", name: "Acordar no Horário", default_unit: "none", default_frequency_type: "daily" },
+      { id: "regular_breaks", name: "Fazer Pausas Regulares", iconKey: "pause", default_unit: "custom", default_goal_value: 8, default_frequency_type: "daily" },
+      { id: "screen_free_time", name: "Tempo Sem Telas", iconKey: "no_screens", default_unit: "hours", default_goal_value: 1, default_frequency_type: "daily" },
     ],
   },
   {
-    id: "productivity",
-    name: "Produtividade",
-    description: "Prioridades, foco e execução.",
-    iconKey: "plan",
-    colorToken: "var(--foreground)",
+    id: "avoid",
+    name: "Evitar",
+    description: "Hábitos a serem eliminados",
+    iconKey: "target",
+    colorToken: "#F472B6",
     tasks: [
-      { id: "daily_plan", name: "Daily Plan", default_unit: "none", default_frequency_type: "daily" },
-      { id: "deep_work", name: "Deep Work", default_unit: "minutes", default_goal_value: 60, default_frequency_type: "times_per_week", default_times_per_week: 4 },
-    ],
-  },
-  {
-    id: "personal",
-    name: "Pessoal",
-    description: "Relacionamentos e bem-estar.",
-    iconKey: "heart",
-    colorToken: "var(--primary)",
-    tasks: [
-      { id: "call_family", name: "Call family", default_unit: "none", default_frequency_type: "times_per_week", default_times_per_week: 2 },
-      { id: "digital_detox", name: "Digital Detox", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "daily" },
+      { id: "no_smoking", name: "Não Fumar", iconKey: "no_smoke", default_unit: "none", default_frequency_type: "daily" },
+      { id: "no_alcohol", name: "Não Beber Álcool", iconKey: "no_alcohol", default_unit: "none", default_frequency_type: "daily" },
+      { id: "no_sweets", name: "Não Comer Doces", default_unit: "none", default_frequency_type: "daily" },
+      { id: "limit_social_media", name: "Limitar Redes Sociais", iconKey: "no_screens", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "daily" },
+      { id: "no_procrastination", name: "Não Procrastinar", iconKey: "target", default_unit: "none", default_frequency_type: "daily" },
+      { id: "no_skip_meals", name: "Não Pular Refeições", iconKey: "meal", default_unit: "custom", default_goal_value: 3, default_frequency_type: "daily" },
+      { id: "no_late_sleep", name: "Não Dormir Tarde", iconKey: "sleep", default_unit: "none", default_frequency_type: "daily" },
+      { id: "no_sedentary", name: "Não Ficar Sedentário", iconKey: "stand_hours", default_unit: "custom", default_goal_value: 8, default_frequency_type: "daily" },
     ],
   },
 ];
@@ -138,7 +167,7 @@ const CreateHabit = () => {
   const [selectedColor, setSelectedColor] = useState<string | null>(fallbackCategories[0].color ?? null);
   const [selectedIconKey, setSelectedIconKey] = useState<string | null>(fallbackCategories[0].icon_key ?? null);
   const [goalValue, setGoalValue] = useState<number | undefined>(undefined);
-  const [unit, setUnit] = useState<"none" | "steps" | "minutes" | "km" | "custom">("none");
+  const [unit, setUnit] = useState<"none" | "steps" | "minutes" | "km" | "hours" | "pages" | "liters" | "custom">("none");
   const [frequencyType, setFrequencyType] = useState<"fixed_days" | "times_per_week" | "times_per_month" | "every_n_days" | "daily">("daily");
   const [timesPerWeek, setTimesPerWeek] = useState<number | undefined>(undefined);
   const [timesPerMonth, setTimesPerMonth] = useState<number | undefined>(undefined);
@@ -147,7 +176,7 @@ const CreateHabit = () => {
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string } | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string; iconKey?: HabitIconKey } | null>(null);
   const [selectedTemplateAuto, setSelectedTemplateAuto] = useState<boolean>(false);
   const [step, setStep] = useState<Step>("category");
   const [selectedCategoryData, setSelectedCategoryData] = useState<(typeof CATEGORY_DATA)[number] | null>(null);
@@ -461,14 +490,24 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             <button
               key={cat.id}
               onClick={() => handleSelectCategory(cat)}
-              className="flex flex-col items-start gap-2 rounded-2xl border border-border/60 bg-card px-4 py-4 text-left shadow-[var(--shadow-soft)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-medium)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))]"
+              className="flex flex-col items-start gap-3 rounded-2xl border border-border/60 bg-card px-5 py-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2"
+              style={{ focusVisible: { outlineColor: cat.colorToken } }}
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-foreground">
-                {Icon ? <Icon className="h-5 w-5" /> : <span className="text-sm font-semibold">+</span>}
+              <div
+                className="flex h-14 w-14 items-center justify-center rounded-full"
+                style={{ backgroundColor: `${cat.colorToken}20` }}
+              >
+                {Icon ? (
+                  <Icon className="h-7 w-7" style={{ color: cat.colorToken }} />
+                ) : (
+                  <span className="text-sm font-semibold">+</span>
+                )}
               </div>
               <div>
-                <p className="font-semibold">{cat.name}</p>
-                <p className="text-xs text-muted-foreground">{cat.description}</p>
+                <p className="text-base font-semibold">{cat.name}</p>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  {cat.description}
+                </p>
               </div>
             </button>
           );
@@ -494,11 +533,18 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             <button
               key={cat.id}
               onClick={() => handleSelectCategory(cat)}
-              className={`flex items-center gap-2 rounded-full px-3 py-2 text-sm shadow-[var(--shadow-soft)] transition ${
-                isActive ? "bg-primary text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+              className="flex items-center gap-2 rounded-full px-3 py-2 text-sm shadow-sm transition"
+              style={{
+                backgroundColor: isActive ? cat.colorToken : undefined,
+                color: isActive ? "#000000" : undefined,
+              }}
             >
-              {Icon ? <Icon className="h-4 w-4" /> : null}
+              {Icon ? (
+                <Icon
+                  className="h-4 w-4"
+                  style={{ color: isActive ? "#000000" : cat.colorToken }}
+                />
+              ) : null}
               <span>{cat.name}</span>
             </button>
           );
@@ -506,47 +552,64 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       </div>
       {selectedCategoryData && (
         <div className="flex items-center gap-3 rounded-2xl bg-muted/60 p-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            {getHabitIcon(selectedCategoryData.iconKey)?.({ className: "h-6 w-6" })}
+          <div
+            className="flex h-12 w-12 items-center justify-center rounded-full"
+            style={{ backgroundColor: `${selectedCategoryData.colorToken}20` }}
+          >
+            {getHabitIcon(selectedCategoryData.iconKey)?.({
+              className: "h-6 w-6",
+              style: { color: selectedCategoryData.colorToken },
+            } as any)}
           </div>
           <div>
             <p className="font-semibold">{selectedCategoryData.name}</p>
-            <p className="text-xs text-muted-foreground">{selectedCategoryData.description}</p>
+            <p className="text-xs text-muted-foreground">
+              {selectedCategoryData.description}
+            </p>
           </div>
         </div>
       )}
 
       <div className="space-y-2">
-        {selectedCategoryData?.tasks.map((tpl) => (
-          <button
-            key={tpl.id}
-            onClick={() => handleSelectTemplate(tpl)}
-            className={`flex items-center justify-between rounded-2xl border px-4 py-3 shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-medium)] ${
-              selectedTemplateId === tpl.id ? "border-primary bg-primary/10" : "border-border/60 bg-card"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-foreground">
-                {getHabitIcon(selectedCategoryData?.iconKey ?? null)?.({ className: "h-5.5 w-5.5" } as any) ?? getHabitIcon("run")?.({ className: "h-5 w-5" })}
+        {selectedCategoryData?.tasks.map((tpl) => {
+          const TaskIcon = tpl.iconKey ? getHabitIcon(tpl.iconKey as any) : getHabitIcon(selectedCategoryData.iconKey);
+          return (
+            <button
+              key={tpl.id}
+              onClick={() => handleSelectTemplate(tpl)}
+              className={`flex items-center justify-between rounded-2xl border px-4 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                selectedTemplateId === tpl.id ? "border-primary bg-primary/10" : "border-border/60 bg-card"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex h-12 w-12 items-center justify-center rounded-full"
+                  style={{ backgroundColor: `${selectedCategoryData.colorToken}20` }}
+                >
+                  {TaskIcon?.({
+                    className: "h-6 w-6",
+                    style: { color: selectedCategoryData.colorToken },
+                  } as any)}
+                </div>
+                <div className="text-left">
+                  <p className="text-base font-semibold">{tpl.name}</p>
+                  {tpl.default_frequency_type && (
+                    <p className="text-xs text-muted-foreground">
+                      {tpl.default_frequency_type === "daily"
+                        ? "Todos os dias"
+                        : tpl.default_frequency_type === "times_per_week" && tpl.default_times_per_week
+                          ? `${tpl.default_times_per_week}x / semana`
+                          : tpl.default_frequency_type === "times_per_month" && tpl.default_times_per_month
+                            ? `${tpl.default_times_per_month}x / mês`
+                            : "Personalizado"}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="text-left">
-                <p className="font-semibold">{tpl.name}</p>
-                {tpl.default_frequency_type && (
-                  <p className="text-xs text-muted-foreground">
-                    {tpl.default_frequency_type === "daily"
-                      ? "Todos os dias"
-                      : tpl.default_frequency_type === "times_per_week" && tpl.default_times_per_week
-                        ? `${tpl.default_times_per_week}x / semana`
-                        : tpl.default_frequency_type === "times_per_month" && tpl.default_times_per_month
-                          ? `${tpl.default_times_per_month}x / mês`
-                          : "Personalizado"}
-                  </p>
-                )}
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
-        ))}
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+          );
+        })}
       </div>
 
       {templates.length > 0 && (
@@ -585,206 +648,201 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -16 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-4 px-4 pb-6"
+      className="space-y-4 pb-6"
     >
-      <Card className="rounded-2xl border border-border/60 bg-card/90 p-4 shadow-[var(--shadow-soft)]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="relative flex h-26 w-26 items-center justify-center rounded-full bg-muted">
-            <div className="absolute inset-0 rounded-full border-[6px] border-primary/35" />
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-card text-primary shadow-inner shadow-[var(--shadow-soft)]">
-              {selectedCategoryData ? (
-                getHabitIcon(selectedCategoryData.iconKey)?.({ className: "h-7 w-7" }) ?? <span className="text-2xl">{selectedEmoji}</span>
-              ) : (
-                <span className="text-2xl">{selectedEmoji}</span>
-              )}
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground">Configurar hábito</p>
-          <Input
-            value={habitName}
-            onChange={(e) => setHabitName(e.target.value)}
-            placeholder="Nome do hábito"
-            className="rounded-xl text-center text-lg"
-          />
-        </div>
-      </Card>
+      {/* Hero Circle Section */}
+      <div className="flex flex-col items-center gap-4 py-6">
+        <HeroCircle
+          iconKey={selectedTemplate?.iconKey ? (selectedTemplate.iconKey as any) : selectedCategoryData?.iconKey ?? null}
+          color={selectedCategoryData?.colorToken ?? "#A3E635"}
+          isAutoTask={selectedTemplateAuto}
+        />
 
-      <Card className="rounded-2xl border border-border/60 bg-card/90 p-0 shadow-[var(--shadow-soft)]">
+        {/* Task Title */}
+        <div className="w-full px-4 text-center">
+          <p
+            className="text-xl font-bold uppercase tracking-wider"
+            style={{ color: selectedCategoryData?.colorToken ?? "#A3E635" }}
+          >
+            {habitName || "NOME DO HÁBITO"}
+          </p>
+        </div>
+      </div>
+
+      {/* Health Integration Alert */}
+      {selectedTemplateAuto && <HealthIntegrationAlert />}
+
+      {/* Title Input */}
+      <div className="px-4">
+        <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+          TITLE:
+        </Label>
+        <Input
+          value={habitName}
+          onChange={(e) => setHabitName(e.target.value)}
+          placeholder="Automatic"
+          maxLength={18}
+          className="mt-1 rounded-xl"
+        />
+        <p className="mt-1 text-right text-xs text-muted-foreground">
+          {habitName.length} / 18
+        </p>
+      </div>
+
+      {/* Goal Card */}
+      <div className="mx-4 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
         <button
-          className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted/60 transition"
           type="button"
+          className="flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-muted/40"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-              {getHabitIcon("plan")?.({ className: "h-5 w-5" })}
+            <div
+              className="flex h-11 w-11 items-center justify-center rounded-full"
+              style={{ backgroundColor: `${selectedCategoryData?.colorToken ?? "#A3E635"}20` }}
+            >
+              <Target
+                className="h-6 w-6"
+                style={{ color: selectedCategoryData?.colorToken ?? "#A3E635" }}
+              />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Meta</p>
-              <p className="text-base font-semibold">{goalValue ?? "Sem meta"}</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                Goal
+              </p>
+              <p className="text-base font-semibold">
+                {goalValue
+                  ? `${goalValue} ${unit === "none" ? "" : unit}`
+                  : "Set goal"}
+              </p>
             </div>
           </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </button>
-        <div className="border-t border-border/60 px-4 py-3">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="border-t border-border/60 px-4 py-4">
+          <div className="flex items-center gap-2">
             <Input
               type="number"
               min={0}
               value={goalValue ?? ""}
-              onChange={(e) => setGoalValue(e.target.value ? Number(e.target.value) : undefined)}
+              onChange={(e) =>
+                setGoalValue(e.target.value ? Number(e.target.value) : undefined)
+              }
               className="w-24 rounded-xl"
               placeholder="5000"
             />
-            <div className="flex gap-1">
-              {["none", "steps", "minutes", "km", "custom"].map((u) => (
-                <button
-                  key={u}
-                  type="button"
-                  onClick={() => setUnit(u as typeof unit)}
-                  className={`rounded-lg px-3 py-2 text-sm border transition ${
-                    unit === u ? "border-primary bg-primary/10 text-primary" : "border-border bg-muted/70 text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  {u === "none" ? "Nenhum" : u}
-                </button>
-              ))}
-            </div>
+            <select
+              value={unit}
+              onChange={(e) => setUnit(e.target.value as typeof unit)}
+              className="flex-1 rounded-xl border px-3 py-2"
+            >
+              <option value="none">None</option>
+              <option value="steps">Steps</option>
+              <option value="minutes">Minutes</option>
+              <option value="hours">Hours</option>
+              <option value="km">km</option>
+              <option value="pages">Pages</option>
+              <option value="liters">Liters</option>
+              <option value="custom">Custom</option>
+            </select>
           </div>
         </div>
-      </Card>
+      </div>
 
-      <Card className="rounded-2xl border border-border/60 bg-card/90 p-0 shadow-[var(--shadow-soft)]">
+      {/* Task Days Card */}
+      <div className="mx-4 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
         <button
           type="button"
-          className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted/60 transition"
+          className="flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-muted/40"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/15 text-foreground">
-              {getHabitIcon("plan")?.({ className: "h-5 w-5" })}
+            <div
+              className="flex h-11 w-11 items-center justify-center rounded-full"
+              style={{ backgroundColor: `${selectedCategoryData?.colorToken ?? "#A3E635"}20` }}
+            >
+              <Calendar
+                className="h-6 w-6"
+                style={{ color: selectedCategoryData?.colorToken ?? "#A3E635" }}
+              />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Frequência</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                Task Days
+              </p>
               <p className="text-base font-semibold">
                 {frequencyType === "daily"
-                  ? "Todos os dias"
+                  ? "Every Day"
                   : frequencyType === "times_per_week" && timesPerWeek
-                    ? `${timesPerWeek}x / semana`
+                    ? `${timesPerWeek}x / week`
                     : frequencyType === "times_per_month" && timesPerMonth
-                      ? `${timesPerMonth}x / mês`
+                      ? `${timesPerMonth}x / month`
                       : frequencyType === "every_n_days" && everyNDays
-                        ? `A cada ${everyNDays} dias`
-                        : "Dias específicos"}
+                        ? `Every ${everyNDays} days`
+                        : "Specific days"}
               </p>
             </div>
           </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </button>
-        <div className="border-t border-border/60 px-4 py-3 space-y-3">
+        <div className="border-t border-border/60 px-4 py-4 space-y-3">
           <select
             className="w-full rounded-xl border px-3 py-2"
             value={frequencyType}
-            onChange={(e) => setFrequencyType(e.target.value as typeof frequencyType)}
+            onChange={(e) =>
+              setFrequencyType(e.target.value as typeof frequencyType)
+            }
           >
-            <option value="fixed_days">Dias específicos</option>
-            <option value="times_per_week">X vezes por semana</option>
-            <option value="times_per_month">X vezes por mês</option>
-            <option value="every_n_days">A cada N dias</option>
-            <option value="daily">Todos os dias</option>
+            <option value="daily">Every day</option>
+            <option value="fixed_days">Specific days</option>
+            <option value="times_per_week">X times per week</option>
+            <option value="times_per_month">X times per month</option>
+            <option value="every_n_days">Every N days</option>
           </select>
           <div>{renderFrequencyFields()}</div>
         </div>
-      </Card>
+      </div>
 
-      <Card className="rounded-2xl border border-border/60 bg-card/90 p-0 shadow-[var(--shadow-soft)]">
-        <button type="button" className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted/60 transition">
+      {/* Notifications Card */}
+      <div className="mx-4 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+        <button
+          type="button"
+          className="flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-muted/40"
+        >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/15 text-foreground">
-              <span className="text-lg">⏰</span>
+            <div
+              className="flex h-11 w-11 items-center justify-center rounded-full"
+              style={{ backgroundColor: `${selectedCategoryData?.colorToken ?? "#A3E635"}20` }}
+            >
+              <Bell
+                className="h-6 w-6"
+                style={{ color: selectedCategoryData?.colorToken ?? "#A3E635" }}
+              />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Período do dia</p>
-              <p className="text-base font-semibold">{periods.find((p) => p.id === selectedPeriod)?.name ?? ""}</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                Notifications
+              </p>
+              <p className="text-base font-semibold">
+                {prefs.notificationsEnabled ? "Enabled" : "Disabled"}
+              </p>
             </div>
           </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </button>
-        <div className="border-t border-border/60 px-4 py-3">
-          <div className="grid grid-cols-3 gap-2">
-            {periods.map((period) => (
-              <button
-                key={period.id}
-                onClick={() => setSelectedPeriod(period.id)}
-                aria-pressed={selectedPeriod === period.id}
-                className={`rounded-xl px-3 py-2 text-sm transition ${
-                  selectedPeriod === period.id ? "bg-primary/15 border border-primary text-primary" : "bg-muted text-muted-foreground border border-border/60"
-                }`}
-              >
-                <span className="mr-1">{period.emoji}</span>
-                {period.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </Card>
+      </div>
 
-      <Card className="rounded-2xl border border-border/60 bg-card/90 p-0 shadow-[var(--shadow-soft)]">
-        <button type="button" className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted/60 transition">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-              {getHabitIcon(selectedCategoryData?.iconKey ?? "heart")?.({ className: "h-5 w-5" })}
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Ícone</p>
-              <p className="text-base font-semibold">Escolha um visual</p>
-            </div>
-          </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        </button>
-        <div className="border-t border-border/60 px-4 py-3">
-          <div className="grid grid-cols-6 gap-2">
-            {HABIT_EMOJIS.slice(0, 12).map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => setSelectedEmoji(emoji)}
-                aria-pressed={selectedEmoji === emoji}
-                className={`flex h-10 w-10 items-center justify-center rounded-xl text-xl transition ${
-                  selectedEmoji === emoji ? "bg-primary/20 border border-primary scale-105" : "bg-muted border border-border/60 hover:bg-muted/80"
-                }`}
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-        </div>
-      </Card>
-
-      {selectedTemplateAuto && (
-        <Card className="rounded-2xl border border-amber-200 bg-amber-50 p-3 shadow-[var(--shadow-soft)]">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-              <span className="text-base">★</span>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-amber-800">Este hábito usa integração automática.</p>
-              <p className="text-xs text-amber-700">Marcará como concluído quando os dados forem registrados.</p>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      <div className="pt-2">
+      {/* CTA Button */}
+      <div className="px-4 pt-2">
         <Button
-          className="h-12 w-full rounded-xl shadow-[var(--shadow-medium)]"
+          className="h-14 w-full rounded-xl text-base font-bold uppercase tracking-wide shadow-lg transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: selectedCategoryData?.colorToken ?? "#A3E635",
+            color: "#000000",
+          }}
           disabled={!habitName.trim() || isSaving}
           onClick={handleSave}
         >
-          {isSaving ? "Salvando..." : "Salvar hábito"}
+          {isSaving ? "SAVING..." : "SAVE TASK"}
         </Button>
-        <div className="mt-2 text-center">
-          <Button variant="ghost" size="sm" onClick={clearTemplateSelection}>
-            Limpar e voltar
-          </Button>
-        </div>
       </div>
     </motion.div>
   );

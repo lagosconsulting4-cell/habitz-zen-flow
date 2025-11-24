@@ -15,6 +15,13 @@ import {
   AlarmClockCheck,
   Coffee,
   Sandwich,
+  Dog,
+  Carrot,
+  Ban,
+  Footprints,
+  Sparkles,
+  Plus,
+  CigaretteOff,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -26,7 +33,7 @@ const registry: Record<string, LucideIcon> = {
   mediate: Brain,
   meditate: Brain,
   banana: Soup,
-  carrot: Soup,
+  carrot: Carrot,
   check: Check,
   water: Droplets,
   dumbbell: Dumbbell,
@@ -39,6 +46,16 @@ const registry: Record<string, LucideIcon> = {
   alarm: AlarmClockCheck,
   coffee: Coffee,
   meal: Sandwich,
+  // Novos ícones para referência
+  dog: Dog,
+  'walk-dog': Dog,
+  'healthy-meal': Carrot,
+  'dont-smoke': CigaretteOff,
+  'no-smoke': Ban,
+  footprints: Footprints,
+  brush: Sparkles,
+  'brush-teeth': Sparkles,
+  plus: Plus,
 };
 
 export function getHabitIcon(iconKey?: string | null): LucideIcon | null {
