@@ -153,12 +153,6 @@ const questions: Question[] = [
   },
 ];
 
-const playClickSound = () => {
-  const audio = new Audio(
-    "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSA0PWKzn7aVXFAxTqOXzu2sfBTCA0fTRfi4GIG/B7uSaRw0QWrTn7aRXFAxRqOPyu2wcBi+A0vPSgDEGH2/B7uOaSQ0PXLbn7aVXEw1Sp+Xyu2sfBzGA0fPSgDEGH2/B7uOaSQ0QXLXn7aVXEw1Sp+Xyu2sfBzGA0fPSgDEGH2/B7uOaSQ0QXLXn7aVXEw1Sp+Xyu2sfBzGA0fPSgDEGH2/B7uOaSQ0QXLXn7aVXEw1Sp+Xyu2sfBzGA0fPSgDEGH2/B7uOaSQ0QXLXn7aVXEw1Sp+Xyu2sfBzGA0fPSgDEGH2/B7uOaSQ0QXLXn7aVXEw1Sp+Xyu2sfBzGA0fPSgDEGH2/B7uOaSQ0QXLXn7aVXEw1Sp+Xyu2sfBzGA0fPSgDEGH2/B7uOaSQ0QXLXn7aVXEw1Sp+Xyu2sfBzGA0fPSgDEGH2/B7uOaSQ0QXLXn7aVX"
-  );
-  audio.play().catch(() => {});
-};
 
 const Quiz = () => {
   const navigate = useNavigate();
@@ -172,13 +166,10 @@ const Quiz = () => {
   const hasCurrentAnswer = answers[currentQuestion] !== undefined;
 
   const handleAnswer = (answer: string) => {
-    playClickSound();
     setAnswers({ ...answers, [currentQuestion]: answer });
   };
 
   const handleNext = useCallback(() => {
-    playClickSound();
-
     if (currentQuestion === 4 && !showMidFeedback) {
       setShowMidFeedback(true);
       return;
@@ -198,9 +189,7 @@ const Quiz = () => {
   }, [currentQuestion, showMidFeedback, navigate]);
 
   const handlePrevious = useCallback(() => {
-    if (currentQuestion > 0) {
-      playClickSound();
-      setCurrentQuestion(currentQuestion - 1);
+    if (currentQuestion > 0) {setCurrentQuestion(currentQuestion - 1);
     }
   }, [currentQuestion]);
 
