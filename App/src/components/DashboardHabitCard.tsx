@@ -135,12 +135,12 @@ export const DashboardHabitCard = ({
       )}
 
       {/* Main Progress Ring with Icon Inside */}
-      <div className="relative mb-2">
+      <div className="relative mb-2 w-[90px] h-[90px]">
         {/* Progress Ring SVG */}
         <svg
           width={ringSize}
           height={ringSize}
-          className="transform -rotate-90"
+          className="transform -rotate-90 absolute inset-0"
         >
           {/* Background circle */}
           <circle
@@ -171,30 +171,27 @@ export const DashboardHabitCard = ({
         </svg>
 
         {/* Icon Container - Centered inside ring */}
-        <motion.div
-          className={cn(
-            "absolute inset-0 m-auto flex items-center justify-center rounded-xl w-12 h-12",
-            completed ? "bg-lime-400" : "bg-white/[0.08]"
-          )}
-          style={{
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-          }}
-          animate={showCelebration ? { scale: [1, 1.15, 1] } : { scale: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          {completed ? (
-            <Check size={24} strokeWidth={3} className="text-black" />
-          ) : (
-            <Icon
-              width={28}
-              height={28}
-              strokeWidth={2.5}
-              style={{ color: limeGreen }}
-            />
-          )}
-        </motion.div>
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <motion.div
+            className={cn(
+              "flex items-center justify-center rounded-xl w-12 h-12",
+              completed ? "bg-lime-400" : "bg-white/[0.08]"
+            )}
+            animate={showCelebration ? { scale: [1, 1.15, 1] } : { scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {completed ? (
+              <Check size={24} strokeWidth={3} className="text-black" />
+            ) : (
+              <Icon
+                width={28}
+                height={28}
+                strokeWidth={2.5}
+                style={{ color: limeGreen }}
+              />
+            )}
+          </motion.div>
+        </div>
       </div>
 
       {/* Habit Name */}

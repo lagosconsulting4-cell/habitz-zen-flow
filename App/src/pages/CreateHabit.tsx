@@ -547,6 +547,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     setSelectedTemplateId(tpl.id);
     setSelectedTemplateAuto(tpl.auto_complete_source === "health");
     setHabitName(tpl.name);
+    // IMPORTANTE: Atualizar o icon_key com o ícone do template selecionado
+    setSelectedIconKey(tpl.iconKey || null);
     setUnit((tpl.default_unit as typeof unit) ?? "none");
     setGoalValue(tpl.default_goal_value ?? undefined);
     setFrequencyType((tpl.default_frequency_type as typeof frequencyType) ?? "daily");

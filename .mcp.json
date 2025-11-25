@@ -13,7 +13,8 @@
     },
     "shadcn": {
       "command": "C:\\\\Users\\\\bruno\\\\.codex\\\\wrap-npx.cmd",
-      "args": ["-y", "shadcn@latest", "mcp"]
+      "args": ["-y", "shadcn@latest", "mcp"],
+      "cwd": "Landing"
     }
   }
 }
