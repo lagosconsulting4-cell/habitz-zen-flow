@@ -35,7 +35,7 @@ export const DashboardHabitCard = ({
 }: DashboardHabitCardProps) => {
   const Icon = getHabitIconWithFallback(habit.icon_key, habit.category);
 
-  // Progress ring dimensions - maiores para dar destaque
+  // Progress ring dimensions
   const ringSize = 116;
   const strokeWidth = 8;
   const radius = (ringSize - strokeWidth) / 2;
@@ -66,18 +66,19 @@ export const DashboardHabitCard = ({
     onToggle();
   }, [onToggle]);
 
-  const limeGreen = "#A3E635";
-  const iconColor = completed ? "#0F172A" : limeGreen;
-
   return (
     <motion.button
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.97 }}
       onClick={handleClick}
       className={cn(
-        "relative w-full aspect-square flex flex-col items-center justify-center gap-2 p-2 text-foreground",
-        "bg-transparent",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400/70",
+        "relative w-full aspect-square flex flex-col items-center justify-center gap-2 p-2",
+        // Light mode: card with subtle border
+        "bg-card rounded-3xl border border-border/60",
+        // Dark mode: transparent background
+        "dark:bg-transparent dark:border-transparent",
+        "text-foreground",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70",
         "transition-all duration-200",
         className
       )}
@@ -91,10 +92,7 @@ export const DashboardHabitCard = ({
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: [0, 0.6, 0], scale: [0.8, 1.1, 1.2] }}
           transition={{ duration: 0.5 }}
-          className="absolute inset-0 rounded-[24px] pointer-events-none"
-          style={{
-            background: `radial-gradient(circle, ${limeGreen}40 0%, transparent 70%)`,
-          }}
+          className="absolute inset-0 rounded-3xl pointer-events-none bg-primary/30"
         />
       )}
 
@@ -108,7 +106,7 @@ export const DashboardHabitCard = ({
                 cx={14}
                 cy={14}
                 r={11}
-                stroke="rgba(163, 230, 53, 0.2)"
+                className="stroke-primary/20"
                 strokeWidth={2}
                 fill="transparent"
               />
@@ -116,18 +114,15 @@ export const DashboardHabitCard = ({
                 cx={14}
                 cy={14}
                 r={11}
-                stroke={limeGreen}
+                className="stroke-primary"
                 strokeWidth={2}
                 fill="transparent"
                 strokeDasharray={2 * Math.PI * 11}
                 strokeDashoffset={2 * Math.PI * 11 - (progress / 100) * 2 * Math.PI * 11}
                 strokeLinecap="round"
-                style={{
-                  filter: progress > 0 ? `drop-shadow(0 0 3px ${limeGreen}60)` : 'none'
-                }}
               />
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white">
+            <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-foreground">
               {streakDays}
             </span>
           </div>
@@ -147,7 +142,7 @@ export const DashboardHabitCard = ({
             cx={ringSize / 2}
             cy={ringSize / 2}
             r={radius}
-            stroke="rgba(163, 230, 53, 0.12)"
+            className="stroke-primary/10 dark:stroke-primary/15"
             strokeWidth={strokeWidth}
             fill="transparent"
           />
@@ -156,7 +151,7 @@ export const DashboardHabitCard = ({
             cx={ringSize / 2}
             cy={ringSize / 2}
             r={radius}
-            stroke={limeGreen}
+            className="stroke-primary"
             strokeWidth={strokeWidth}
             fill="transparent"
             strokeDasharray={circumference}
@@ -164,9 +159,6 @@ export const DashboardHabitCard = ({
             animate={{ strokeDashoffset: offset }}
             transition={{ duration: 0.5, ease: "easeOut" }}
             strokeLinecap="round"
-            style={{
-              filter: progress > 0 ? `drop-shadow(0 0 8px ${limeGreen}60)` : 'none'
-            }}
           />
         </svg>
 
@@ -175,7 +167,9 @@ export const DashboardHabitCard = ({
           <motion.div
             className={cn(
               "flex items-center justify-center rounded-full w-14 h-14",
-              completed ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+              completed
+                ? "bg-primary text-primary-foreground"
+                : "bg-primary/10 text-primary dark:bg-primary/15"
             )}
             animate={showCelebration ? { scale: [1, 1.15, 1] } : { scale: 1 }}
             transition={{ duration: 0.3 }}
@@ -184,14 +178,13 @@ export const DashboardHabitCard = ({
               width={30}
               height={30}
               strokeWidth={2.5}
-              style={{ color: iconColor }}
             />
           </motion.div>
         </div>
       </div>
 
       {/* Habit Name */}
-      <h3 className="text-[10px] font-semibold text-center leading-tight line-clamp-2 px-1 tracking-wide">
+      <h3 className="text-[10px] font-semibold text-center leading-tight line-clamp-2 px-1 tracking-wide text-foreground">
         {habit.name.toUpperCase()}
       </h3>
     </motion.button>

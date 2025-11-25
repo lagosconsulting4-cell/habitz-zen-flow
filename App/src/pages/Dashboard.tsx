@@ -5,6 +5,7 @@ import { Sparkles } from "lucide-react";
 import { DashboardHabitCard } from "@/components/DashboardHabitCard";
 import { TimerModal } from "@/components/timer";
 import { useHabits } from "@/hooks/useHabits";
+import { useTheme } from "@/hooks/useTheme";
 import type { Habit } from "@/components/DashboardHabitCard";
 
 // Helper to check if habit has time-based goal
@@ -14,6 +15,8 @@ const isTimedHabit = (unit?: string | null): boolean => {
 
 const Dashboard = () => {
   const { habits, loading, toggleHabit, getHabitCompletionStatus } = useHabits();
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
 
   // Timer modal state
   const [timerHabit, setTimerHabit] = useState<Habit | null>(null);
@@ -77,13 +80,13 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="text-lg font-semibold text-white">
+          <div className="text-lg font-semibold text-foreground">
             Carregando seus hábitos...
           </div>
         </motion.div>
@@ -92,7 +95,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Main Content */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -115,17 +118,11 @@ const Dashboard = () => {
               transition={{ delay: 0.1, duration: 0.3 }}
               className="mb-6"
             >
-              <div
-                className="relative w-20 h-20 rounded-full flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg, rgba(163, 230, 53, 0.15) 0%, rgba(163, 230, 53, 0.05) 100%)",
-                  boxShadow: "0 8px 32px rgba(163, 230, 53, 0.1)"
-                }}
-              >
+              <div className="relative w-20 h-20 rounded-full flex items-center justify-center bg-primary/10 dark:bg-primary/15">
                 <Sparkles
                   size={32}
                   strokeWidth={1.5}
-                  className="text-lime-400"
+                  className="text-primary"
                 />
               </div>
             </motion.div>
@@ -137,10 +134,10 @@ const Dashboard = () => {
               transition={{ delay: 0.2, duration: 0.3 }}
               className="text-center mb-8"
             >
-              <h3 className="text-xl font-bold mb-2 text-white">
+              <h3 className="text-xl font-bold mb-2 text-foreground">
                 Comece sua jornada
               </h3>
-              <p className="text-sm text-white/50 max-w-[260px]">
+              <p className="text-sm text-muted-foreground max-w-[260px]">
                 Crie seu primeiro hábito e transforme sua rotina
               </p>
             </motion.div>
@@ -175,7 +172,7 @@ const Dashboard = () => {
           isOpen={!!timerHabit}
           onClose={() => setTimerHabit(null)}
           onComplete={handleTimerComplete}
-          isDarkMode={true}
+          isDarkMode={isDarkMode}
         />
       )}
     </div>
