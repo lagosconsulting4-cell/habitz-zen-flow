@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { TestimonialCard } from "@/components/premium/TestimonialCard";
 import { FeatureCard } from "@/components/premium/FeatureCard";
+import SiriOrb from "@/components/smoothui/siri-orb";
 import {
   Sun,
   Target,
@@ -112,6 +113,32 @@ const Offer = () => {
       {/* Background effects */}
       <div className="absolute inset-0 bg-gradient-radial pointer-events-none" />
       <div className="absolute inset-0 bg-dots pointer-events-none opacity-30" />
+
+      {/* SiriOrb decorative elements */}
+      <div className="absolute top-20 -right-40 opacity-15 pointer-events-none blur-sm">
+        <SiriOrb
+          size="450px"
+          colors={{
+            bg: "oklch(10% 0.01 120)",
+            c1: "oklch(72% 0.18 125)",
+            c2: "oklch(68% 0.15 130)",
+            c3: "oklch(75% 0.12 118)",
+          }}
+          animationDuration={30}
+        />
+      </div>
+      <div className="absolute bottom-40 -left-48 opacity-10 pointer-events-none blur-md">
+        <SiriOrb
+          size="550px"
+          colors={{
+            bg: "oklch(10% 0.01 120)",
+            c1: "oklch(65% 0.14 128)",
+            c2: "oklch(70% 0.12 122)",
+            c3: "oklch(60% 0.10 135)",
+          }}
+          animationDuration={40}
+        />
+      </div>
 
       <div className="relative z-10 max-w-4xl mx-auto px-6 py-16 space-y-20">
         {/* Hero Section */}

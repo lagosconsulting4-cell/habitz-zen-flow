@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useAnimation, type PanInfo } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import {
   Target,
   MessageCircle,
@@ -17,7 +18,10 @@ import {
   Compass,
   Heart,
   ArrowRight,
+  ArrowLeft,
   CheckCircle,
+  ChevronLeft,
+  ChevronRight,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -27,6 +31,7 @@ import {
   staggerContainer,
   staggerItem,
 } from "@/hooks/useAnimations";
+import SiriOrb from "@/components/smoothui/siri-orb";
 
 interface Question {
   id: number;
@@ -160,15 +165,18 @@ const Quiz = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showMidFeedback, setShowMidFeedback] = useState(false);
+  const [dragDirection, setDragDirection] = useState<"left" | "right" | null>(null);
+  const controls = useAnimation();
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
+  const hasCurrentAnswer = answers[currentQuestion] !== undefined;
 
   const handleAnswer = (answer: string) => {
     playClickSound();
     setAnswers({ ...answers, [currentQuestion]: answer });
   };
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     playClickSound();
 
     if (currentQuestion === 4 && !showMidFeedback) {
@@ -187,7 +195,48 @@ const Quiz = () => {
     } else {
       navigate("/mirror");
     }
-  };
+  }, [currentQuestion, showMidFeedback, navigate]);
+
+  const handlePrevious = useCallback(() => {
+    if (currentQuestion > 0) {
+      playClickSound();
+      setCurrentQuestion(currentQuestion - 1);
+    }
+  }, [currentQuestion]);
+
+  // Swipe gesture handler
+  const handleDragEnd = useCallback(
+    (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      const threshold = 100;
+      const velocity = 500;
+
+      // Swipe left - next question (if answered)
+      if ((info.offset.x < -threshold || info.velocity.x < -velocity) && hasCurrentAnswer) {
+        handleNext();
+      }
+      // Swipe right - previous question
+      else if ((info.offset.x > threshold || info.velocity.x > velocity) && currentQuestion > 0) {
+        handlePrevious();
+      }
+
+      setDragDirection(null);
+      controls.start({ x: 0, transition: { type: "spring", stiffness: 300, damping: 30 } });
+    },
+    [hasCurrentAnswer, currentQuestion, handleNext, handlePrevious, controls]
+  );
+
+  const handleDrag = useCallback(
+    (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      if (info.offset.x < -50) {
+        setDragDirection("left");
+      } else if (info.offset.x > 50) {
+        setDragDirection("right");
+      } else {
+        setDragDirection(null);
+      }
+    },
+    []
+  );
 
   // Mid-quiz feedback screen
   if (showMidFeedback) {
@@ -257,36 +306,114 @@ const Quiz = () => {
   }
 
   const currentQ = questions[currentQuestion];
-  const hasAnswer = answers[currentQuestion] !== undefined;
   const QuestionIcon = currentQ.icon;
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden flex flex-col">
-      {/* Background */}
+      {/* Background decorations */}
       <div className="absolute inset-0 bg-dots pointer-events-none opacity-30" />
+
+      {/* SiriOrb decorative elements */}
+      <div className="absolute -top-32 -right-32 opacity-20 pointer-events-none blur-sm">
+        <SiriOrb
+          size="400px"
+          colors={{
+            bg: "oklch(10% 0.01 120)",
+            c1: "oklch(70% 0.18 125)",
+            c2: "oklch(65% 0.15 130)",
+            c3: "oklch(75% 0.12 118)",
+          }}
+          animationDuration={25}
+        />
+      </div>
+      <div className="absolute -bottom-40 -left-40 opacity-15 pointer-events-none blur-md">
+        <SiriOrb
+          size="500px"
+          colors={{
+            bg: "oklch(10% 0.01 120)",
+            c1: "oklch(68% 0.16 128)",
+            c2: "oklch(72% 0.14 122)",
+            c3: "oklch(60% 0.10 135)",
+          }}
+          animationDuration={35}
+        />
+      </div>
+
+      {/* Swipe indicators */}
+      <AnimatePresence>
+        {dragDirection === "left" && hasCurrentAnswer && (
+          <motion.div
+            className="fixed right-4 top-1/2 -translate-y-1/2 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 border border-primary/30"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+          >
+            <span className="text-sm text-primary font-medium">Próxima</span>
+            <ChevronRight className="h-5 w-5 text-primary" />
+          </motion.div>
+        )}
+        {dragDirection === "right" && currentQuestion > 0 && (
+          <motion.div
+            className="fixed left-4 top-1/2 -translate-y-1/2 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-muted/80 border border-border/50"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+          >
+            <ChevronLeft className="h-5 w-5 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground font-medium">Anterior</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Progress header */}
       <div className="relative z-10 w-full px-6 pt-6">
         <div className="max-w-2xl mx-auto">
-          {/* Progress bar */}
-          <div className="progress-premium">
-            <motion.div
-              className="progress-premium-fill"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            />
+          {/* Progress bar with step indicators */}
+          <div className="relative">
+            <Progress value={progress} className="h-2" />
+
+            {/* Step dots */}
+            <div className="flex justify-between mt-2">
+              {questions.map((_, index) => (
+                <motion.div
+                  key={index}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    index < currentQuestion
+                      ? "bg-primary"
+                      : index === currentQuestion
+                      ? "bg-primary scale-125"
+                      : "bg-muted"
+                  }`}
+                  initial={false}
+                  animate={{
+                    scale: index === currentQuestion ? 1.25 : 1,
+                  }}
+                />
+              ))}
+            </div>
           </div>
 
-          {/* Question counter */}
+          {/* Question counter with navigation */}
           <div className="flex items-center justify-between mt-3">
-            <p className="text-sm text-muted-foreground">
-              Pergunta{" "}
-              <span className="text-foreground font-medium">
-                {currentQuestion + 1}
-              </span>{" "}
-              de {questions.length}
-            </p>
+            <div className="flex items-center gap-3">
+              {currentQuestion > 0 && (
+                <motion.button
+                  onClick={handlePrevious}
+                  className="p-2 rounded-full hover:bg-muted/50 transition-colors"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ArrowLeft className="h-4 w-4 text-muted-foreground" />
+                </motion.button>
+              )}
+              <p className="text-sm text-muted-foreground">
+                Pergunta{" "}
+                <span className="text-foreground font-medium">
+                  {currentQuestion + 1}
+                </span>{" "}
+                de {questions.length}
+              </p>
+            </div>
             <p className="text-sm text-primary font-medium">
               {Math.round(progress)}%
             </p>
@@ -294,16 +421,21 @@ const Quiz = () => {
         </div>
       </div>
 
-      {/* Question content */}
-      <div className="relative z-10 flex-1 flex items-center justify-center p-6">
+      {/* Question content with swipe */}
+      <div className="relative z-10 flex-1 flex items-center justify-center p-6 overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentQuestion}
-            className="max-w-2xl w-full space-y-8"
-            initial={{ opacity: 0, x: 20 }}
+            className="max-w-2xl w-full space-y-8 touch-pan-y select-none"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.15}
+            onDrag={handleDrag}
+            onDragEnd={handleDragEnd}
+            initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           >
             {/* Question header */}
             <div className="space-y-4">
@@ -316,7 +448,7 @@ const Quiz = () => {
               </h2>
             </div>
 
-            {/* Options */}
+            {/* Options with enhanced micro-animations */}
             <RadioGroup
               value={answers[currentQuestion]}
               onValueChange={handleAnswer}
@@ -333,67 +465,98 @@ const Quiz = () => {
 
                   return (
                     <motion.div
-                      key={index}
+                      key={option}
                       variants={staggerItem}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      layout
                     >
-                      <div
+                      <motion.div
                         className={`quiz-option-card ${
                           isSelected ? "selected" : ""
                         }`}
                         onClick={() => handleAnswer(option)}
+                        animate={isSelected ? {
+                          scale: [1, 1.02, 1],
+                          transition: { duration: 0.3 }
+                        } : {}}
                       >
                         <div className="flex items-center gap-4">
-                          <RadioGroupItem
-                            value={option}
-                            id={`option-${index}`}
-                            className="border-2"
-                          />
+                          <motion.div
+                            animate={isSelected ? {
+                              scale: [1, 1.2, 1],
+                              transition: { duration: 0.3 }
+                            } : {}}
+                          >
+                            <RadioGroupItem
+                              value={option}
+                              id={`option-${index}`}
+                              className="border-2"
+                            />
+                          </motion.div>
                           <Label
                             htmlFor={`option-${index}`}
                             className="text-base md:text-lg cursor-pointer flex-1 leading-relaxed"
                           >
                             {option}
                           </Label>
-                          {isSelected && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              transition={springTransition}
-                            >
-                              <CheckCircle className="h-5 w-5 text-primary" />
-                            </motion.div>
-                          )}
+                          <AnimatePresence mode="wait">
+                            {isSelected && (
+                              <motion.div
+                                initial={{ scale: 0, rotate: -180 }}
+                                animate={{ scale: 1, rotate: 0 }}
+                                exit={{ scale: 0, rotate: 180 }}
+                                transition={{
+                                  type: "spring",
+                                  stiffness: 300,
+                                  damping: 20
+                                }}
+                              >
+                                <CheckCircle className="h-5 w-5 text-primary" />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
-                      </div>
+                      </motion.div>
                     </motion.div>
                   );
                 })}
               </motion.div>
             </RadioGroup>
 
-            {/* Next button */}
-            <motion.div {...buttonHoverTap}>
-              <Button
-                onClick={handleNext}
-                disabled={!hasAnswer}
-                variant="premium"
-                size="xl"
-                className="w-full group"
+            {/* Next button with swipe hint */}
+            <div className="space-y-3">
+              <motion.div {...buttonHoverTap}>
+                <Button
+                  onClick={handleNext}
+                  disabled={!hasCurrentAnswer}
+                  variant="premium"
+                  size="xl"
+                  className="w-full group"
+                >
+                  <span>
+                    {currentQuestion === questions.length - 1
+                      ? "Ver meu resultado"
+                      : "Próxima"}
+                  </span>
+                  {currentQuestion === questions.length - 1 ? (
+                    <Target className="h-5 w-5 ml-2" />
+                  ) : (
+                    <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  )}
+                </Button>
+              </motion.div>
+
+              {/* Swipe hint for mobile */}
+              <motion.p
+                className="text-center text-xs text-muted-foreground md:hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
               >
-                <span>
-                  {currentQuestion === questions.length - 1
-                    ? "Ver meu resultado"
-                    : "Próxima"}
-                </span>
-                {currentQuestion === questions.length - 1 ? (
-                  <Target className="h-5 w-5 ml-2" />
-                ) : (
-                  <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                )}
-              </Button>
-            </motion.div>
+                Deslize para navegar entre perguntas
+              </motion.p>
+            </div>
           </motion.div>
         </AnimatePresence>
       </div>
