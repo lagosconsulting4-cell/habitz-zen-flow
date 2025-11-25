@@ -203,7 +203,7 @@ const AnimatedCounter = ({ value, suffix = "" }: { value: number; suffix?: strin
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="text-4xl md:text-5xl font-bold text-primary"
+      className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary"
     >
       {value.toLocaleString()}{suffix}
     </motion.span>
@@ -223,19 +223,19 @@ const Offer = () => {
   const heroScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden w-full max-w-full">
       {/* ============ HERO SECTION ============ */}
       <motion.section
         ref={heroRef}
-        className="relative min-h-[90vh] flex items-center justify-center px-6 py-20"
-        style={{ opacity: heroOpacity, scale: heroScale }}
+        className="relative min-h-[90vh] flex items-center justify-center px-4 md:px-6 py-20 w-full"
+        style={{ opacity: heroOpacity }}
       >
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-48 md:w-96 h-48 md:h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-48 md:w-96 h-48 md:h-96 bg-emerald-500/10 rounded-full blur-3xl" />
 
-        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8">
+        <div className="relative z-10 w-full max-w-4xl mx-auto text-center space-y-8">
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -250,7 +250,7 @@ const Offer = () => {
 
           {/* Title */}
           <motion.h1
-            className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight"
+            className="text-3xl md:text-5xl lg:text-7xl font-bold leading-tight px-2"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
@@ -258,14 +258,14 @@ const Offer = () => {
             Em menos de{" "}
             <span className="text-primary">7 minutos</span> por dia,
             <br />
-            <span className="bg-gradient-to-r from-primary via-emerald-500 to-primary bg-clip-text text-transparent">
+            <span className="text-primary">
               você vira o jogo
             </span>
           </motion.h1>
 
           {/* Subtitle */}
           <motion.p
-            className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto"
+            className="text-base md:text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto px-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -278,22 +278,22 @@ const Offer = () => {
 
           {/* Stats */}
           <motion.div
-            className="flex flex-wrap justify-center gap-8 md:gap-16 pt-8"
+            className="flex flex-wrap justify-center gap-4 md:gap-16 pt-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <div className="text-center">
+            <div className="text-center min-w-[80px]">
               <AnimatedCounter value={7} />
-              <p className="text-muted-foreground mt-1">minutos/dia</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">minutos/dia</p>
             </div>
-            <div className="text-center">
+            <div className="text-center min-w-[100px]">
               <AnimatedCounter value={5000} suffix="+" />
-              <p className="text-muted-foreground mt-1">vidas transformadas</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">vidas transformadas</p>
             </div>
-            <div className="text-center">
+            <div className="text-center min-w-[80px]">
               <AnimatedCounter value={94} suffix="%" />
-              <p className="text-muted-foreground mt-1">mantêm a rotina</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">mantêm a rotina</p>
             </div>
           </motion.div>
 
@@ -404,7 +404,7 @@ const Offer = () => {
               Transformação garantida
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold">
-              A diferença que o <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">BORA</span> faz
+              A diferença que o <span className="text-primary font-extrabold">BORA</span> faz
             </h2>
           </motion.div>
 
@@ -510,7 +510,7 @@ const Offer = () => {
               Histórias reais
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold">
-              Quem já <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">virou o jogo</span>
+              Quem já <span className="text-primary font-extrabold">virou o jogo</span>
             </h2>
           </motion.div>
 
@@ -591,7 +591,7 @@ const Offer = () => {
               Recursos exclusivos
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold">
-              O que você vai ter no <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">BORA</span>
+              O que você vai ter no <span className="text-primary font-extrabold">BORA</span>
             </h2>
           </motion.div>
 
@@ -714,7 +714,7 @@ const Offer = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl md:text-4xl font-bold">
-              Comece sua <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">transformação</span>
+              Comece sua <span className="text-primary font-extrabold">transformação</span>
             </h2>
           </motion.div>
 
@@ -746,7 +746,7 @@ const Offer = () => {
               <div className="text-center mb-8 relative z-10">
                 <p className="text-muted-foreground line-through text-xl mb-2">R$ 97</p>
                 <div className="relative inline-block">
-                  <span className="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-emerald-500 to-teal-500">
+                  <span className="text-7xl md:text-8xl font-black text-primary">
                     R$ 47
                   </span>
                   {/* Glow behind price */}
@@ -840,7 +840,7 @@ const Offer = () => {
               Tire suas dúvidas
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold">
-              Perguntas <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">frequentes</span>
+              Perguntas <span className="text-primary font-extrabold">frequentes</span>
             </h2>
           </motion.div>
 
