@@ -1,11 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { useTheme } from "next-themes";
 
-import { CircularHabitCard } from "@/components/CircularHabitCard";
+import { CircularHabitCard, isTimedHabit } from "@/components/CircularHabitCard";
 import { AddHabitCircle } from "@/components/AddHabitCircle";
 import NavigationBar from "@/components/NavigationBar";
+import { TimerModal } from "@/components/timer";
 import { useHabits } from "@/hooks/useHabits";
 import type { Habit } from "@/components/CircularHabitCard";
 
@@ -14,6 +15,9 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
+
+  // Timer modal state
+  const [timerHabit, setTimerHabit] = useState<Habit | null>(null);
 
   // Filter habits for today
   const todayHabits = useMemo(() => {
@@ -77,9 +81,26 @@ const Dashboard = () => {
     return getHabitCompletionStatus(habitId);
   };
 
-  // Handle habit toggle
-  const handleToggle = async (habitId: string) => {
-    await toggleHabit(habitId);
+  // Handle habit toggle - opens timer for timed habits
+  const handleToggle = async (habit: Habit) => {
+    const isCompleted = getHabitCompletionStatus(habit.id);
+
+    // If it's a timed habit and not completed, open timer
+    if (isTimedHabit(habit.unit) && !isCompleted && habit.goal_value && habit.goal_value > 0) {
+      setTimerHabit(habit);
+      return;
+    }
+
+    // Otherwise, toggle directly
+    await toggleHabit(habit.id);
+  };
+
+  // Handle timer completion
+  const handleTimerComplete = async () => {
+    if (timerHabit) {
+      await toggleHabit(timerHabit.id);
+      setTimerHabit(null);
+    }
   };
 
   // Light mode: fundo verde vibrante | Dark mode: fundo escuro
@@ -137,7 +158,7 @@ const Dashboard = () => {
                 habit={habit as Habit}
                 progress={calculateProgress(habit as Habit)}
                 completed={isCompletedToday(habit.id)}
-                onToggle={() => handleToggle(habit.id)}
+                onToggle={() => handleToggle(habit as Habit)}
                 streakDays={habit.streak}
                 goalInfo={formatGoalInfo(habit as Habit)}
                 isFavorite={habit.is_favorite}
@@ -157,6 +178,17 @@ const Dashboard = () => {
       </motion.div>
 
       <NavigationBar isDarkMode={isDarkMode} />
+
+      {/* Timer Modal */}
+      {timerHabit && (
+        <TimerModal
+          habit={timerHabit}
+          isOpen={!!timerHabit}
+          onClose={() => setTimerHabit(null)}
+          onComplete={handleTimerComplete}
+          isDarkMode={isDarkMode}
+        />
+      )}
     </div>
   );
 };

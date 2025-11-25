@@ -41,7 +41,7 @@ import { useHabits, Habit } from "@/hooks/useHabits";
 import { Loader2, MoreVertical, Check, Copy, Edit, Trash2, Sparkles, Target } from "lucide-react";
 import { HABIT_EMOJIS } from "@/data/habit-emojis";
 import type { HabitEmoji } from "@/data/habit-emojis";
-import { getHabitIcon } from "@/lib/habit-icons";
+import { getHabitIcon, HabitIconKey } from "@/components/icons/HabitIcons";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppPreferences } from "@/hooks/useAppPreferences";
 
@@ -60,7 +60,27 @@ const periods = [
   { id: "evening", label: "Noite" },
 ];
 const weekdayLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
-const iconKeys = ["heart", "run", "bike", "meditate", "banana", "carrot", "check", "water", "dumbbell", "focus", "target", "book", "flame"];
+// All available icon keys from HabitIcons.tsx
+const iconKeys: HabitIconKey[] = [
+  // Exercícios
+  "run", "cycle", "swim", "stairs", "stretch", "yoga", "strength", "active",
+  // Saúde Mental
+  "meditate", "journal", "gratitude", "focus", "pause", "leisure",
+  // Alimentação
+  "meal", "water", "fruits", "vegetables", "protein", "vitamins", "breakfast",
+  // Sono
+  "sleep", "bed", "alarm", "no_late_sleep",
+  // Produtividade
+  "plan", "deep_work", "review", "organize", "checklist", "target", "clock",
+  // Social/Família
+  "call_family", "family",
+  // Restrições/Evitar
+  "no_fast_food", "no_screens", "no_smoke", "no_alcohol", "no_sugar", "no_procrastination", "no_skip_meals", "ban", "detox", "social_media",
+  // Apple Health
+  "heart", "activity_rings", "stand_hours", "exercise_minutes", "burn_energy",
+  // Rotina
+  "sunrise", "make_bed", "book", "study",
+];
 
 interface HabitFormState {
   name: string;
@@ -75,7 +95,7 @@ interface HabitFormState {
   times_per_month?: number | null;
   every_n_days?: number | null;
   color?: string | null;
-  icon_key?: string | null;
+  icon_key?: HabitIconKey | string | null;
   notification_pref?: {
     reminder_enabled?: boolean;
     reminder_time?: string;

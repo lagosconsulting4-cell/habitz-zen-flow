@@ -1,7 +1,12 @@
 import { motion } from "framer-motion";
-import { Heart, Target } from "lucide-react";
-import { getHabitIcon } from "@/lib/habit-icons";
+import { Heart, Target, Clock } from "lucide-react";
+import { getHabitIcon } from "@/components/icons/HabitIcons";
 import { cn } from "@/lib/utils";
+
+// Helper to check if habit has time-based goal
+export const isTimedHabit = (unit?: string | null): boolean => {
+  return unit === "minutes" || unit === "hours";
+};
 
 export interface Habit {
   id: string;
@@ -121,6 +126,24 @@ export const CircularHabitCard = ({
           aria-hidden="true"
         >
           {streakDays}
+        </motion.div>
+      )}
+
+      {/* Timer indicator - show for timed habits */}
+      {isTimedHabit(habit.unit) && !completed && (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.1 }}
+          className={cn(
+            "absolute -bottom-1 -right-1 rounded-full w-7 h-7 flex items-center justify-center shadow-lg z-10 border-2",
+            isDarkMode
+              ? "bg-lime-400 text-black border-background"
+              : "bg-white text-primary border-primary/20"
+          )}
+          aria-label="Hábito com cronômetro"
+        >
+          <Clock size={14} strokeWidth={2.5} />
         </motion.div>
       )}
 
