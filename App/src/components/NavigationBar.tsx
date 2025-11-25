@@ -103,13 +103,13 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps) => {
                   "shadow-lg shadow-lime-400/30",
                   "transition-shadow duration-200",
                   "hover:shadow-xl hover:shadow-lime-400/40",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0f0f]"
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 )}
               >
                 <Icon
                   size={22}
                   strokeWidth={2.5}
-                  className="text-black"
+                  className="text-primary-foreground"
                 />
               </motion.button>
             );
@@ -130,10 +130,10 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps) => {
               className={cn(
                 "relative flex items-center justify-center py-2.5 rounded-xl",
                 "transition-colors duration-200",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400/50 focus-visible:ring-offset-1",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
                 isActive
-                  ? "bg-lime-400 text-black"
-                  : "text-white/40 hover:text-white/70 hover:bg-white/[0.04] active:bg-white/[0.06]"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/20 active:bg-muted/30"
               )}
               whileTap={{ scale: 0.95 }}
             >
@@ -169,8 +169,8 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps) => {
             className={cn(
               "relative flex items-center justify-center py-2.5 px-3 rounded-xl",
               "transition-colors duration-200",
-              "text-white/40 hover:text-white/70 hover:bg-white/[0.04] active:bg-white/[0.06]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400/50 focus-visible:ring-offset-1"
+              "text-muted-foreground hover:text-foreground hover:bg-muted/20 active:bg-muted/30",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background"
             )}
             whileTap={{ scale: 0.95 }}
           >

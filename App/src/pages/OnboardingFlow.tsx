@@ -179,7 +179,7 @@ const OnboardingFlow = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#000000] py-8 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -189,126 +189,126 @@ const OnboardingFlow = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-lime-400/10 rounded-full">
-              <Sparkles className="w-8 h-8 text-lime-400" />
+            <div className="p-3 bg-primary/10 rounded-full">
+              <Sparkles className="w-8 h-8 text-primary" />
             </div>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold uppercase tracking-wide text-white mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold uppercase tracking-wide text-foreground mb-2">
             Bem-vindo ao Habitz
           </h1>
-          <p className="text-white/60">
+          <p className="text-muted-foreground">
             Vamos conhecer você melhor para personalizar sua experiência
           </p>
         </div>
 
         {/* Progress Bar */}
         <div className="mb-8">
-          <div className="flex justify-between text-sm text-white/60 mb-2">
+          <div className="flex justify-between text-sm text-muted-foreground mb-2">
             <span>Etapa {currentStep} de {totalSteps}</span>
-            <span className="text-lime-400 font-semibold">{Math.round(progress)}%</span>
+            <span className="text-primary font-semibold">{Math.round(progress)}%</span>
           </div>
-          <Progress value={progress} className="h-2 bg-white/10" />
+          <Progress value={progress} className="h-2 bg-muted/20" />
         </div>
 
         {/* Step Content */}
-        <Card className="rounded-2xl bg-white/5 border border-white/10 p-6 md:p-8 mb-6">
+        <Card className="rounded-2xl bg-card/80 border border-border p-6 md:p-8 mb-6">
           {/* Step 1 - Sobre você */}
           {currentStep === 1 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-white mb-2">Sobre você</h2>
-                <p className="text-white/60">Vamos começar conhecendo um pouco mais sobre você</p>
+                <h2 className="text-2xl font-bold text-foreground mb-2">Sobre você</h2>
+                <p className="text-muted-foreground">Vamos começar conhecendo um pouco mais sobre você</p>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <Label className="text-base font-semibold mb-3 block text-white">
+                  <Label className="text-base font-semibold mb-3 block text-foreground">
                     Com qual faixa de idade você se identifica?
                   </Label>
                   <RadioGroup value={answers.ageRange} onValueChange={(value) => setAnswers({ ...answers, ageRange: value })}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="13-17" id="age1" />
-                      <Label htmlFor="age1" className="font-normal cursor-pointer text-white/80">13-17 anos</Label>
+                      <Label htmlFor="age1" className="font-normal cursor-pointer text-foreground/90">13-17 anos</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="18-24" id="age2" />
-                      <Label htmlFor="age2" className="font-normal cursor-pointer text-white/80">18-24 anos</Label>
+                      <Label htmlFor="age2" className="font-normal cursor-pointer text-foreground/90">18-24 anos</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="25-34" id="age3" />
-                      <Label htmlFor="age3" className="font-normal cursor-pointer text-white/80">25-34 anos</Label>
+                      <Label htmlFor="age3" className="font-normal cursor-pointer text-foreground/90">25-34 anos</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="35-44" id="age4" />
-                      <Label htmlFor="age4" className="font-normal cursor-pointer text-white/80">35-44 anos</Label>
+                      <Label htmlFor="age4" className="font-normal cursor-pointer text-foreground/90">35-44 anos</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="45+" id="age5" />
-                      <Label htmlFor="age5" className="font-normal cursor-pointer text-white/80">45+ anos</Label>
+                      <Label htmlFor="age5" className="font-normal cursor-pointer text-foreground/90">45+ anos</Label>
                     </div>
                   </RadioGroup>
                 </div>
 
                 <div>
-                  <Label className="text-base font-semibold mb-3 block text-white">
+                  <Label className="text-base font-semibold mb-3 block text-foreground">
                     Você já recebeu diagnóstico formal de TDAH?
                   </Label>
                   <RadioGroup value={answers.hasDiagnosis} onValueChange={(value) => setAnswers({ ...answers, hasDiagnosis: value })}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="nao" id="diag1" />
-                      <Label htmlFor="diag1" className="font-normal cursor-pointer text-white/80">Ainda não</Label>
+                      <Label htmlFor="diag1" className="font-normal cursor-pointer text-foreground/90">Ainda não</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="suspeito" id="diag2" />
-                      <Label htmlFor="diag2" className="font-normal cursor-pointer text-white/80">Suspeito que sim</Label>
+                      <Label htmlFor="diag2" className="font-normal cursor-pointer text-foreground/90">Suspeito que sim</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="sim" id="diag3" />
-                      <Label htmlFor="diag3" className="font-normal cursor-pointer text-white/80">Sim, confirmadíssimo</Label>
+                      <Label htmlFor="diag3" className="font-normal cursor-pointer text-foreground/90">Sim, confirmadíssimo</Label>
                     </div>
                   </RadioGroup>
                 </div>
 
                 <div>
-                  <Label className="text-base font-semibold mb-3 block text-white">
+                  <Label className="text-base font-semibold mb-3 block text-foreground">
                     Atualmente faz uso de medicação?
                   </Label>
                   <RadioGroup value={answers.usesMedication} onValueChange={(value) => setAnswers({ ...answers, usesMedication: value })}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="nao" id="med1" />
-                      <Label htmlFor="med1" className="font-normal cursor-pointer text-white/80">Não</Label>
+                      <Label htmlFor="med1" className="font-normal cursor-pointer text-foreground/90">Não</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="diariamente" id="med2" />
-                      <Label htmlFor="med2" className="font-normal cursor-pointer text-white/80">Sim, diariamente</Label>
+                      <Label htmlFor="med2" className="font-normal cursor-pointer text-foreground/90">Sim, diariamente</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="especificos" id="med3" />
-                      <Label htmlFor="med3" className="font-normal cursor-pointer text-white/80">Sim, em dias específicos</Label>
+                      <Label htmlFor="med3" className="font-normal cursor-pointer text-foreground/90">Sim, em dias específicos</Label>
                     </div>
                   </RadioGroup>
                 </div>
 
                 <div>
-                  <Label className="text-base font-semibold mb-3 block text-white">
+                  <Label className="text-base font-semibold mb-3 block text-foreground">
                     Em qual período do dia você sente maior energia?
                   </Label>
                   <RadioGroup value={answers.energyPeriod} onValueChange={(value) => setAnswers({ ...answers, energyPeriod: value })}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="manha" id="energy1" />
-                      <Label htmlFor="energy1" className="font-normal cursor-pointer text-white/80">Manhã</Label>
+                      <Label htmlFor="energy1" className="font-normal cursor-pointer text-foreground/90">Manhã</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="tarde" id="energy2" />
-                      <Label htmlFor="energy2" className="font-normal cursor-pointer text-white/80">Tarde</Label>
+                      <Label htmlFor="energy2" className="font-normal cursor-pointer text-foreground/90">Tarde</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="noite" id="energy3" />
-                      <Label htmlFor="energy3" className="font-normal cursor-pointer text-white/80">Noite</Label>
+                      <Label htmlFor="energy3" className="font-normal cursor-pointer text-foreground/90">Noite</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="variavel" id="energy4" />
-                      <Label htmlFor="energy4" className="font-normal cursor-pointer text-white/80">Variável</Label>
+                      <Label htmlFor="energy4" className="font-normal cursor-pointer text-foreground/90">Variável</Label>
                     </div>
                   </RadioGroup>
                 </div>
@@ -320,12 +320,12 @@ const OnboardingFlow = () => {
           {currentStep === 2 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-white mb-2">Seus maiores desafios</h2>
-                <p className="text-white/60">Selecione todos que se aplicam ao seu dia a dia</p>
+                <h2 className="text-2xl font-bold text-foreground mb-2">Seus maiores desafios</h2>
+                <p className="text-muted-foreground">Selecione todos que se aplicam ao seu dia a dia</p>
               </div>
 
               <div className="space-y-4">
-                <Label className="text-base font-semibold mb-3 block text-white">
+                <Label className="text-base font-semibold mb-3 block text-foreground">
                   O que mais atrapalha sua rotina hoje?
                 </Label>
 
@@ -346,7 +346,7 @@ const OnboardingFlow = () => {
                         checked={answers.challenges?.includes(challenge)}
                         onCheckedChange={() => toggleChallenge(challenge)}
                       />
-                      <Label htmlFor={challenge} className="font-normal cursor-pointer text-white/80">
+                      <Label htmlFor={challenge} className="font-normal cursor-pointer text-foreground/90">
                         {challenge}
                       </Label>
                     </div>
@@ -354,7 +354,7 @@ const OnboardingFlow = () => {
                 </div>
 
                 <div className="mt-6">
-                  <Label htmlFor="specific" className="text-base font-semibold mb-2 block text-white">
+                  <Label htmlFor="specific" className="text-base font-semibold mb-2 block text-foreground">
                     Existe algo específico que gostaria de mudar? (Opcional)
                   </Label>
                   <Textarea
@@ -362,7 +362,7 @@ const OnboardingFlow = () => {
                     placeholder="Descreva aqui..."
                     value={answers.specificChallenge || ''}
                     onChange={(e) => setAnswers({ ...answers, specificChallenge: e.target.value })}
-                    className="min-h-[100px] bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                    className="min-h-[100px] bg-card/80 border-border text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
               </div>
@@ -373,15 +373,15 @@ const OnboardingFlow = () => {
           {currentStep === 3 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-white mb-2">Como você se sente hoje?</h2>
-                <p className="text-white/60">Avalie de 1 (Nada) a 5 (Muito)</p>
+                <h2 className="text-2xl font-bold text-foreground mb-2">Como você se sente hoje?</h2>
+                <p className="text-muted-foreground">Avalie de 1 (Nada) a 5 (Muito)</p>
               </div>
 
               <div className="space-y-6">
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <Label className="text-base font-semibold text-white">Foco no dia a dia</Label>
-                    <span className="text-2xl font-bold text-lime-400">{answers.focusLevel}</span>
+                    <Label className="text-base font-semibold text-foreground">Foco no dia a dia</Label>
+                    <span className="text-2xl font-bold text-primary">{answers.focusLevel}</span>
                   </div>
                   <Slider
                     value={[answers.focusLevel || 3]}
@@ -391,7 +391,7 @@ const OnboardingFlow = () => {
                     step={1}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-xs text-white/40 mt-1">
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>Nada</span>
                     <span>Muito</span>
                   </div>
@@ -399,8 +399,8 @@ const OnboardingFlow = () => {
 
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <Label className="text-base font-semibold text-white">Motivação para começar</Label>
-                    <span className="text-2xl font-bold text-lime-400">{answers.motivationLevel}</span>
+                    <Label className="text-base font-semibold text-foreground">Motivação para começar</Label>
+                    <span className="text-2xl font-bold text-primary">{answers.motivationLevel}</span>
                   </div>
                   <Slider
                     value={[answers.motivationLevel || 3]}
@@ -410,7 +410,7 @@ const OnboardingFlow = () => {
                     step={1}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-xs text-white/40 mt-1">
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>Nada</span>
                     <span>Muito</span>
                   </div>
@@ -418,8 +418,8 @@ const OnboardingFlow = () => {
 
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <Label className="text-base font-semibold text-white">Nível de sobrecarga</Label>
-                    <span className="text-2xl font-bold text-lime-400">{answers.overloadLevel}</span>
+                    <Label className="text-base font-semibold text-foreground">Nível de sobrecarga</Label>
+                    <span className="text-2xl font-bold text-primary">{answers.overloadLevel}</span>
                   </div>
                   <Slider
                     value={[answers.overloadLevel || 3]}
@@ -429,7 +429,7 @@ const OnboardingFlow = () => {
                     step={1}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-xs text-white/40 mt-1">
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>Nada</span>
                     <span>Muito</span>
                   </div>
@@ -437,8 +437,8 @@ const OnboardingFlow = () => {
 
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <Label className="text-base font-semibold text-white">Clareza de objetivos</Label>
-                    <span className="text-2xl font-bold text-lime-400">{answers.clarityLevel}</span>
+                    <Label className="text-base font-semibold text-foreground">Clareza de objetivos</Label>
+                    <span className="text-2xl font-bold text-primary">{answers.clarityLevel}</span>
                   </div>
                   <Slider
                     value={[answers.clarityLevel || 3]}
@@ -448,7 +448,7 @@ const OnboardingFlow = () => {
                     step={1}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-xs text-white/40 mt-1">
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>Nada</span>
                     <span>Muito</span>
                   </div>
@@ -456,8 +456,8 @@ const OnboardingFlow = () => {
 
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <Label className="text-base font-semibold text-white">Autoestima e autoconfiança</Label>
-                    <span className="text-2xl font-bold text-lime-400">{answers.selfEsteemLevel}</span>
+                    <Label className="text-base font-semibold text-foreground">Autoestima e autoconfiança</Label>
+                    <span className="text-2xl font-bold text-primary">{answers.selfEsteemLevel}</span>
                   </div>
                   <Slider
                     value={[answers.selfEsteemLevel || 3]}
@@ -467,7 +467,7 @@ const OnboardingFlow = () => {
                     step={1}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-xs text-white/40 mt-1">
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>Nada</span>
                     <span>Muito</span>
                   </div>
@@ -480,37 +480,37 @@ const OnboardingFlow = () => {
           {currentStep === 4 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-white mb-2">Preferências de aprendizado</h2>
-                <p className="text-white/60">Como você prefere receber orientações?</p>
+                <h2 className="text-2xl font-bold text-foreground mb-2">Preferências de aprendizado</h2>
+                <p className="text-muted-foreground">Como você prefere receber orientações?</p>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <Label className="text-base font-semibold mb-3 block text-white">
+                  <Label className="text-base font-semibold mb-3 block text-foreground">
                     Quanto tempo por dia você pode dedicar para o plano?
                   </Label>
                   <RadioGroup value={answers.dailyTimeCommitment} onValueChange={(value) => setAnswers({ ...answers, dailyTimeCommitment: value })}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="5-10" id="time1" />
-                      <Label htmlFor="time1" className="font-normal cursor-pointer text-white/80">5-10 minutos</Label>
+                      <Label htmlFor="time1" className="font-normal cursor-pointer text-foreground/90">5-10 minutos</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="10-20" id="time2" />
-                      <Label htmlFor="time2" className="font-normal cursor-pointer text-white/80">10-20 minutos</Label>
+                      <Label htmlFor="time2" className="font-normal cursor-pointer text-foreground/90">10-20 minutos</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="20-30" id="time3" />
-                      <Label htmlFor="time3" className="font-normal cursor-pointer text-white/80">20-30 minutos</Label>
+                      <Label htmlFor="time3" className="font-normal cursor-pointer text-foreground/90">20-30 minutos</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="30+" id="time4" />
-                      <Label htmlFor="time4" className="font-normal cursor-pointer text-white/80">30+ minutos</Label>
+                      <Label htmlFor="time4" className="font-normal cursor-pointer text-foreground/90">30+ minutos</Label>
                     </div>
                   </RadioGroup>
                 </div>
 
                 <div>
-                  <Label className="text-base font-semibold mb-3 block text-white">
+                  <Label className="text-base font-semibold mb-3 block text-foreground">
                     Qual formato funciona melhor para você?
                   </Label>
                   <div className="space-y-3">
@@ -521,7 +521,7 @@ const OnboardingFlow = () => {
                           checked={answers.preferredFormats?.includes(format)}
                           onCheckedChange={() => toggleFormat(format)}
                         />
-                        <Label htmlFor={format} className="font-normal cursor-pointer text-white/80">
+                        <Label htmlFor={format} className="font-normal cursor-pointer text-foreground/90">
                           {format}
                         </Label>
                       </div>
@@ -530,25 +530,25 @@ const OnboardingFlow = () => {
                 </div>
 
                 <div>
-                  <Label className="text-base font-semibold mb-3 block text-white">
+                  <Label className="text-base font-semibold mb-3 block text-foreground">
                     Em qual ambiente você pretende praticar os hábitos?
                   </Label>
                   <RadioGroup value={answers.environment} onValueChange={(value) => setAnswers({ ...answers, environment: value })}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="casa" id="env1" />
-                      <Label htmlFor="env1" className="font-normal cursor-pointer text-white/80">Casa</Label>
+                      <Label htmlFor="env1" className="font-normal cursor-pointer text-foreground/90">Casa</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="trabalho" id="env2" />
-                      <Label htmlFor="env2" className="font-normal cursor-pointer text-white/80">Trabalho/Estudo</Label>
+                      <Label htmlFor="env2" className="font-normal cursor-pointer text-foreground/90">Trabalho/Estudo</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="externo" id="env3" />
-                      <Label htmlFor="env3" className="font-normal cursor-pointer text-white/80">Espaço externo</Label>
+                      <Label htmlFor="env3" className="font-normal cursor-pointer text-foreground/90">Espaço externo</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="outro" id="env4" />
-                      <Label htmlFor="env4" className="font-normal cursor-pointer text-white/80">Outro</Label>
+                      <Label htmlFor="env4" className="font-normal cursor-pointer text-foreground/90">Outro</Label>
                     </div>
                   </RadioGroup>
 
@@ -557,7 +557,7 @@ const OnboardingFlow = () => {
                       placeholder="Especifique..."
                       value={answers.environmentOther || ''}
                       onChange={(e) => setAnswers({ ...answers, environmentOther: e.target.value })}
-                      className="mt-3 bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                      className="mt-3 bg-card/80 border-border text-foreground placeholder:text-muted-foreground"
                     />
                   )}
                 </div>
@@ -569,13 +569,13 @@ const OnboardingFlow = () => {
           {currentStep === 5 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-white mb-2">Fique por dentro</h2>
-                <p className="text-white/60">Quer receber dicas e novidades por e-mail?</p>
+                <h2 className="text-2xl font-bold text-foreground mb-2">Fique por dentro</h2>
+                <p className="text-muted-foreground">Quer receber dicas e novidades por e-mail?</p>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="email" className="text-base font-semibold text-white mb-2 block">
+                  <Label htmlFor="email" className="text-base font-semibold text-foreground mb-2 block">
                     E-mail (opcional)
                   </Label>
                   <Input
@@ -584,9 +584,9 @@ const OnboardingFlow = () => {
                     placeholder="seu@email.com"
                     value={answers.email || ''}
                     onChange={(e) => setAnswers({ ...answers, email: e.target.value })}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                    className="bg-card/80 border-border text-foreground placeholder:text-muted-foreground"
                   />
-                  <p className="text-sm text-white/40 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     Não enviamos spam e você pode sair quando quiser.
                   </p>
                 </div>
@@ -598,15 +598,15 @@ const OnboardingFlow = () => {
                       checked={answers.consent || false}
                       onCheckedChange={(checked) => setAnswers({ ...answers, consent: checked as boolean })}
                     />
-                    <Label htmlFor="consent" className="font-normal cursor-pointer text-sm text-white/80">
+                    <Label htmlFor="consent" className="font-normal cursor-pointer text-sm text-foreground/90">
                       Autorizo o Habitz a enviar dicas e orientações por e-mail.
                     </Label>
                   </div>
                 )}
 
-                <div className="bg-lime-400/10 border border-lime-400/30 p-4 rounded-2xl mt-6">
-                  <p className="text-sm text-white/80">
-                    <strong className="text-lime-400">Observação:</strong> Sem email? Tudo bem — você pode adicionar depois nas configurações.
+                <div className="bg-primary/10 border border-lime-400/30 p-4 rounded-2xl mt-6">
+                  <p className="text-sm text-foreground/90">
+                    <strong className="text-primary">Observação:</strong> Sem email? Tudo bem — você pode adicionar depois nas configurações.
                   </p>
                 </div>
               </div>
@@ -620,7 +620,7 @@ const OnboardingFlow = () => {
             <Button
               variant="outline"
               onClick={handleBack}
-              className="flex items-center gap-2 bg-white/5 border-white/10 text-white hover:bg-white/10"
+              className="flex items-center gap-2 bg-card/80 border-border text-foreground hover:bg-muted/20"
             >
               <ChevronLeft className="w-4 h-4" />
               Voltar
@@ -632,7 +632,7 @@ const OnboardingFlow = () => {
           {currentStep < totalSteps ? (
             <Button
               onClick={handleNext}
-              className="flex items-center gap-2 bg-lime-400 text-black hover:bg-lime-500 font-semibold"
+              className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-lime-500 font-semibold"
             >
               Avançar
               <ChevronRight className="w-4 h-4" />
@@ -640,7 +640,7 @@ const OnboardingFlow = () => {
           ) : (
             <Button
               onClick={handleSubmit}
-              className="flex items-center gap-2 bg-lime-400 text-black hover:bg-lime-500 font-semibold"
+              className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-lime-500 font-semibold"
               size="lg"
             >
               Começar a usar o Habitz

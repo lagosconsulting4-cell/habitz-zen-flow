@@ -9,7 +9,7 @@ import {
   Bell,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/hooks/useTheme";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

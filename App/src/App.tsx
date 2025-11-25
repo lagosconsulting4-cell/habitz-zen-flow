@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "@/layouts/ProtectedLayout";
 import ScrollToTop from "@/components/ScrollToTop";
+import { useTheme } from "@/hooks/useTheme";
 
 // Lazy load pages for better initial bundle size
 const OnboardingFlow = lazy(() => import("./pages/OnboardingFlow"));
@@ -37,12 +38,19 @@ const PageLoader = () => (
 
 const queryClient = new QueryClient();
 
+const ThemeInitializer = () => {
+  // Apenas para garantir que a classe de tema seja aplicada no carregamento
+  useTheme();
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter basename="/app">
+        <ThemeInitializer />
         <ScrollToTop />
         <Suspense fallback={<PageLoader />}>
           <Routes>

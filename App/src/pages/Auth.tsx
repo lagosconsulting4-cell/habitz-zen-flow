@@ -222,7 +222,7 @@ const Auth = () => {
             <Button
               onClick={handleGoogleAuth}
               variant="outline"
-              className="w-full py-3 border-border/60 bg-white text-slate-900 transition hover:bg-slate-100"
+              className="w-full py-3 border-border/60 bg-foreground text-background transition hover:bg-foreground/90"
               type="button"
             >
               <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">

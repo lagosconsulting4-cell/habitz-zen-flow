@@ -35,9 +35,9 @@ export const DashboardHabitCard = ({
 }: DashboardHabitCardProps) => {
   const Icon = getHabitIconWithFallback(habit.icon_key, habit.category);
 
-  // Progress ring dimensions - GRANDE como na referência
-  const ringSize = 90;
-  const strokeWidth = 6;
+  // Progress ring dimensions - maiores para dar destaque
+  const ringSize = 116;
+  const strokeWidth = 8;
   const radius = (ringSize - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
@@ -75,9 +75,9 @@ export const DashboardHabitCard = ({
       whileTap={{ scale: 0.97 }}
       onClick={handleClick}
       className={cn(
-        "relative w-full aspect-square rounded-[24px] p-3 flex flex-col items-center justify-center",
-        "bg-[#141414] border border-white/[0.03]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400",
+        "relative w-full aspect-square flex flex-col items-center justify-center gap-2 p-2 text-foreground",
+        "bg-transparent",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400/70",
         "transition-all duration-200",
         className
       )}
@@ -135,7 +135,7 @@ export const DashboardHabitCard = ({
       )}
 
       {/* Main Progress Ring with Icon Inside */}
-      <div className="relative mb-2 w-[90px] h-[90px]">
+      <div className="relative mb-1 w-[116px] h-[116px]">
         {/* Progress Ring SVG */}
         <svg
           width={ringSize}
@@ -175,7 +175,7 @@ export const DashboardHabitCard = ({
           <motion.div
             className={cn(
               "flex items-center justify-center rounded-xl w-12 h-12",
-              completed ? "bg-lime-400" : "bg-white/[0.08]"
+              completed ? "bg-primary" : "bg-muted"
             )}
             animate={showCelebration ? { scale: [1, 1.15, 1] } : { scale: 1 }}
             transition={{ duration: 0.3 }}
@@ -191,12 +191,12 @@ export const DashboardHabitCard = ({
       </div>
 
       {/* Habit Name */}
-      <h3 className="text-[10px] font-semibold text-white text-center leading-tight line-clamp-2 px-1 tracking-wide">
+      <h3 className="text-[10px] font-semibold text-center leading-tight line-clamp-2 px-1 tracking-wide">
         {habit.name.toUpperCase()}
       </h3>
 
       {/* Progress Percentage */}
-      <p className="text-[9px] text-white/35 mt-0.5 font-medium">
+      <p className="text-[9px] text-muted-foreground font-medium">
         {Math.round(progress)} %
       </p>
     </motion.button>

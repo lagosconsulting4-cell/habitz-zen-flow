@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Accordion,
   AccordionContent,
@@ -116,6 +117,42 @@ const timeBlocks: TimeBlock[] = [
   },
 ];
 
+interface EmotionAccent {
+  wrapper: string;
+  iconWrapper: string;
+  badge: string;
+}
+
+const emotionAccents: Record<string, EmotionAccent> = {
+  default: {
+    wrapper: "bg-gradient-to-r from-primary/15 via-primary/5 to-transparent border-primary/30",
+    iconWrapper: "bg-primary/20 text-primary-foreground border-white/15",
+    badge: "border-white/30 text-white/80 bg-white/5",
+  },
+  morning: {
+    wrapper: "bg-gradient-to-r from-rose-500/20 via-orange-400/15 to-amber-200/10 border-rose-200/40",
+    iconWrapper: "bg-white/15 text-rose-50 border-rose-100/50",
+    badge: "border-rose-100/70 text-rose-50/90 bg-rose-500/15",
+  },
+  noon: {
+    wrapper: "bg-gradient-to-r from-amber-400/20 via-yellow-300/15 to-lime-200/10 border-amber-200/40",
+    iconWrapper: "bg-white/15 text-amber-100 border-amber-100/40",
+    badge: "border-amber-100/70 text-amber-50/90 bg-amber-500/15",
+  },
+  afternoon: {
+    wrapper: "bg-gradient-to-r from-orange-500/20 via-rose-400/15 to-pink-300/10 border-orange-200/40",
+    iconWrapper: "bg-white/15 text-orange-50 border-orange-100/40",
+    badge: "border-orange-100/70 text-orange-50/90 bg-orange-500/15",
+  },
+  night: {
+    wrapper: "bg-gradient-to-r from-slate-800/40 via-purple-900/20 to-indigo-900/10 border-indigo-300/30",
+    iconWrapper: "bg-white/10 text-indigo-50 border-indigo-200/40",
+    badge: "border-indigo-200/70 text-indigo-50/90 bg-indigo-500/15",
+  },
+};
+
+const getEmotionAccent = (id: string): EmotionAccent => emotionAccents[id] ?? emotionAccents.default;
+
 const Mirror = () => {
   const navigate = useNavigate();
   const [openItem, setOpenItem] = useState<string>("morning");
@@ -210,6 +247,7 @@ const Mirror = () => {
                 const EmotionIcon = block.emotionIcon;
                 const isOpen = openItem === block.id;
                 const isVisited = visitedItems.has(block.id);
+                const emotionAccent = getEmotionAccent(block.id);
 
                 return (
                   <motion.div
@@ -319,21 +357,32 @@ const Mirror = () => {
 
                           {/* Emotion card */}
                           <motion.div
-                            className="flex items-center gap-4 p-4 rounded-xl bg-destructive/10 border border-destructive/20"
+                            className={`relative overflow-hidden rounded-2xl border p-5 shadow-lg shadow-black/20 backdrop-blur-sm ${emotionAccent.wrapper}`}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
                           >
-                            <div className="w-12 h-12 rounded-full bg-destructive/20 flex items-center justify-center">
-                              <EmotionIcon className="w-6 h-6 text-destructive" />
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium text-destructive/70 uppercase tracking-wider">
-                                Como você se sente
-                              </p>
-                              <p className="text-lg font-semibold text-destructive">
-                                {block.emotion}
-                              </p>
+                            <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.45),_transparent_65%)]" />
+                            <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
+                              <div
+                                className={`w-16 h-16 rounded-2xl border flex items-center justify-center backdrop-blur ${emotionAccent.iconWrapper}`}
+                              >
+                                <EmotionIcon className="w-7 h-7" />
+                              </div>
+                              <div className="flex-1 text-white space-y-1">
+                                <Badge
+                                  variant="outline"
+                                  className={`w-fit tracking-[0.35em] uppercase text-[0.6rem] font-semibold ${emotionAccent.badge}`}
+                                >
+                                  Sensação do momento
+                                </Badge>
+                                <p className="text-sm font-medium text-white/70">
+                                  Como você se sente agora?
+                                </p>
+                                <p className="text-2xl font-semibold leading-tight drop-shadow">
+                                  {block.emotion}
+                                </p>
+                              </div>
                             </div>
                           </motion.div>
                         </motion.div>
@@ -411,7 +460,7 @@ const Mirror = () => {
                     <Button
                       onClick={() => navigate("/offer")}
                       size="xl"
-                      className="w-full group bg-white hover:bg-white/95 text-primary font-bold shadow-xl"
+                      className="w-full group bg-white/95 text-slate-900 hover:bg-white border border-white/30 font-bold shadow-xl shadow-black/20"
                     >
                       <Sparkles className="h-5 w-5 mr-2" />
                       <span>Ver minha rotina personalizada</span>
