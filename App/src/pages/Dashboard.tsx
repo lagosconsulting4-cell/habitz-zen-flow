@@ -161,7 +161,6 @@ const Dashboard = () => {
                 onToggle={() => handleToggle(habit as Habit)}
                 streakDays={habit.streak}
                 goalInfo={formatGoalInfo(habit as Habit)}
-                isFavorite={habit.is_favorite}
                 isDarkMode={isDarkMode}
               />
             </motion.div>

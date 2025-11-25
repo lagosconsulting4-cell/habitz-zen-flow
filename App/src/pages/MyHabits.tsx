@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
+import { useTheme } from "next-themes";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +39,9 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { useHabits, Habit } from "@/hooks/useHabits";
-import { Loader2, MoreVertical, Check, Copy, Edit, Trash2, Sparkles, Target } from "lucide-react";
+import { TimerModal } from "@/components/timer";
+import { isTimedHabit } from "@/components/CircularHabitCard";
+import { Loader2, MoreVertical, Check, Copy, Edit, Trash2, Sparkles, Target, Clock, CheckCircle2, Calendar } from "lucide-react";
 import { HABIT_EMOJIS } from "@/data/habit-emojis";
 import type { HabitEmoji } from "@/data/habit-emojis";
 import { getHabitIcon, HabitIconKey } from "@/components/icons/HabitIcons";
@@ -132,6 +135,8 @@ const createFormState = (habit?: Habit): HabitFormState => ({
 
 const MyHabits = () => {
   const { toast } = useToast();
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
   const {
     habits,
     loading,
@@ -141,12 +146,13 @@ const MyHabits = () => {
     restoreHabit,
     deleteHabit,
     duplicateHabit,
+    getHabitCompletionStatus,
   } = useHabits();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
-  const [status, setStatus] = useState<"active" | "archived">("active");
+  const [status, setStatus] = useState<"active" | "archived" | "today">("active");
   const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [formState, setFormState] = useState<HabitFormState>(createFormState());
@@ -154,13 +160,31 @@ const MyHabits = () => {
   const [deleteTarget, setDeleteTarget] = useState<Habit | null>(null);
   const [notifications, setNotifications] = useState<HabitNotification[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
+  const [timerHabit, setTimerHabit] = useState<Habit | null>(null);
   const { prefs } = useAppPreferences();
+
+  // Check if habit is scheduled for today
+  const isScheduledToday = (habit: Habit): boolean => {
+    const today = new Date().getDay();
+    return habit.days_of_week?.includes(today) ?? false;
+  };
+
+  // Check if habit is completed today
+  const isCompletedToday = (habitId: string): boolean => {
+    return getHabitCompletionStatus(habitId);
+  };
 
   const filteredHabits = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
+    const today = new Date().getDay();
 
     return habits
-      .filter((habit) => (status === "active" ? habit.is_active : !habit.is_active))
+      .filter((habit) => {
+        if (status === "today") {
+          return habit.is_active && (habit.days_of_week?.includes(today) ?? false);
+        }
+        return status === "active" ? habit.is_active : !habit.is_active;
+      })
       .filter((habit) => (term ? habit.name.toLowerCase().includes(term) : true))
       .filter((habit) =>
         selectedCategories.length > 0 ? selectedCategories.includes(habit.category) : true,
@@ -458,11 +482,28 @@ const handleSave = async () => {
 
   const handleToggle = async (habit: Habit) => {
     if (!habit.is_active) return;
+
+    const completed = isCompletedToday(habit.id);
+
+    // If it's a timed habit and not completed, open timer
+    if (isTimedHabit(habit.unit) && !completed && habit.goal_value && habit.goal_value > 0) {
+      setTimerHabit(habit);
+      return;
+    }
+
     try {
       await toggleHabit(habit.id);
-      toast({ title: "Dia marcado" });
+      toast({ title: completed ? "Desmarcado" : "Concluído!" });
     } catch (error) {
       // toast handled no need
+    }
+  };
+
+  const handleTimerComplete = async () => {
+    if (timerHabit) {
+      await toggleHabit(timerHabit.id);
+      toast({ title: "Hábito concluído!" });
+      setTimerHabit(null);
     }
   };
 
@@ -528,16 +569,23 @@ const handleSave = async () => {
               className="md:max-w-sm bg-secondary border-border text-foreground placeholder:text-muted-foreground"
             />
             <Tabs value={status} onValueChange={(value) => setStatus(value as typeof status)}>
-              <TabsList className="grid grid-cols-2 rounded-full bg-muted p-1">
+              <TabsList className="grid grid-cols-3 rounded-full bg-muted p-1">
+                <TabsTrigger
+                  value="today"
+                  className="rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-lime-500 data-[state=active]:text-black data-[state=active]:font-semibold"
+                >
+                  <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                  Hoje
+                </TabsTrigger>
                 <TabsTrigger
                   value="active"
-                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-semibold"
+                  className="rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-semibold"
                 >
                   Ativos
                 </TabsTrigger>
                 <TabsTrigger
                   value="archived"
-                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground data-[state=active]:font-semibold"
+                  className="rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground data-[state=active]:font-semibold"
                 >
                   Arquivados
                 </TabsTrigger>
@@ -607,6 +655,9 @@ const handleSave = async () => {
           <div className="space-y-4">
             {filteredHabits.map((habit, index) => {
               const archived = !habit.is_active;
+              const completed = isCompletedToday(habit.id);
+              const scheduledToday = isScheduledToday(habit);
+              const isTimed = isTimedHabit(habit.unit) && habit.goal_value && habit.goal_value > 0;
 
               return (
               <motion.div
@@ -615,13 +666,50 @@ const handleSave = async () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-              <Card className={cn("rounded-2xl bg-card border p-5 transition-colors duration-200", archived ? "border-destructive/30 shadow-lg" : "border-border")}>
+              <Card className={cn(
+                "rounded-2xl bg-card border p-5 transition-all duration-200",
+                archived ? "border-destructive/30 shadow-lg opacity-60" : "border-border",
+                completed && !archived && "border-lime-500/50 bg-lime-500/5"
+              )}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
-                    <div className="text-3xl">{habit.emoji}</div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-bold text-foreground">{habit.name}</h3>
+                    {/* Emoji/Icon with completion indicator */}
+                    <div className="relative">
+                      <div className={cn(
+                        "text-3xl transition-all",
+                        completed && "opacity-50"
+                      )}>
+                        {habit.emoji}
+                      </div>
+                      {completed && (
+                        <div className="absolute -bottom-1 -right-1 bg-lime-500 rounded-full p-0.5">
+                          <CheckCircle2 className="h-4 w-4 text-white" />
+                        </div>
+                      )}
+                      {isTimed && !completed && scheduledToday && (
+                        <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-0.5">
+                          <Clock className="h-3.5 w-3.5 text-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className={cn(
+                          "text-xl font-bold text-foreground",
+                          completed && "line-through opacity-60"
+                        )}>
+                          {habit.name}
+                        </h3>
+                        {scheduledToday && !archived && (
+                          <Badge variant="outline" className="text-[10px] bg-lime-500/10 text-lime-600 border-lime-500/30">
+                            HOJE
+                          </Badge>
+                        )}
+                        {completed && (
+                          <Badge className="text-[10px] bg-lime-500 text-white">
+                            FEITO
+                          </Badge>
+                        )}
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                         <span className="rounded-md px-2 py-1 bg-secondary border border-border font-medium">
@@ -630,22 +718,31 @@ const handleSave = async () => {
                         <span className="rounded-md px-2 py-1 bg-secondary border border-border font-medium">
                           {periods.find((period) => period.id === habit.period)?.label ?? habit.period}
                         </span>
+                        {isTimed && (
+                          <span className="rounded-md px-2 py-1 bg-primary/10 border border-primary/30 font-medium text-primary flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {habit.goal_value} {habit.unit === "minutes" ? "min" : "h"}
+                          </span>
+                        )}
                         <div className="flex items-center gap-1">
                           <Sparkles className="h-3 w-3 text-primary" />
-                          <span className="font-semibold">{habit.streak} dias de sequência</span>
+                          <span className="font-semibold">{habit.streak} dias</span>
                         </div>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-1">
-                        {weekdayLabels.map((label, index) => {
-                          const active = habit.days_of_week.includes(index);
+                        {weekdayLabels.map((label, dayIndex) => {
+                          const active = habit.days_of_week.includes(dayIndex);
+                          const isToday = dayIndex === new Date().getDay();
                           return (
                             <span
                               key={`${habit.id}-${label}`}
-                              className={`rounded-md px-2 py-1 text-xs font-semibold transition ${
+                              className={cn(
+                                "rounded-md px-2 py-1 text-xs font-semibold transition",
                                 active
                                   ? "bg-primary/20 text-primary border border-primary/30"
-                                  : "bg-secondary text-muted-foreground border border-border"
-                              }`}
+                                  : "bg-secondary text-muted-foreground border border-border",
+                                isToday && active && "ring-2 ring-lime-400 ring-offset-1"
+                              )}
                             >
                               {label}
                             </span>
@@ -654,26 +751,61 @@ const handleSave = async () => {
                       </div>
                     </div>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-9 w-9 text-foreground hover:bg-muted">
-                        <MoreVertical className="h-4 w-4" />
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-2">
+                    {/* Quick toggle button */}
+                    {!archived && scheduledToday && (
+                      <Button
+                        variant={completed ? "outline" : "default"}
+                        size="sm"
+                        onClick={() => handleToggle(habit)}
+                        className={cn(
+                          "h-9 px-3",
+                          completed
+                            ? "bg-lime-500/10 border-lime-500/30 text-lime-600 hover:bg-lime-500/20"
+                            : "bg-primary text-primary-foreground hover:bg-primary/90"
+                        )}
+                      >
+                        {isTimed && !completed ? (
+                          <>
+                            <Clock className="h-4 w-4 mr-1" />
+                            Iniciar
+                          </>
+                        ) : completed ? (
+                          <>
+                            <CheckCircle2 className="h-4 w-4 mr-1" />
+                            Feito
+                          </>
+                        ) : (
+                          <>
+                            <Check className="h-4 w-4 mr-1" />
+                            Fazer
+                          </>
+                        )}
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem onSelect={() => handleEdit(habit)}>
-                        <Edit className="mr-2 h-4 w-4" /> Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => handleDuplicate(habit)}>
-                        <Copy className="mr-2 h-4 w-4" /> Duplicar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => handleToggle(habit)} disabled={!habit.is_active}>
-                        <Check className="mr-2 h-4 w-4" /> Concluir hoje
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onSelect={() => handleArchiveToggle(habit)}>
-                        {habit.is_active ? "Arquivar" : "Reativar"}
-                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-foreground hover:bg-muted">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem onSelect={() => handleEdit(habit)}>
+                          <Edit className="mr-2 h-4 w-4" /> Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleDuplicate(habit)}>
+                          <Copy className="mr-2 h-4 w-4" /> Duplicar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleToggle(habit)} disabled={!habit.is_active}>
+                          <Check className="mr-2 h-4 w-4" /> {completed ? "Desmarcar" : "Concluir hoje"}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={() => handleArchiveToggle(habit)}>
+                          {habit.is_active ? "Arquivar" : "Reativar"}
+                        </DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => setDeleteTarget(habit)} className="text-destructive">
                         <Trash2 className="mr-2 h-4 w-4" /> Excluir
                       </DropdownMenuItem>
@@ -1123,6 +1255,17 @@ const handleSave = async () => {
       </AlertDialog>
 
       <NavigationBar />
+
+      {/* Timer Modal */}
+      {timerHabit && (
+        <TimerModal
+          habit={timerHabit}
+          isOpen={!!timerHabit}
+          onClose={() => setTimerHabit(null)}
+          onComplete={handleTimerComplete}
+          isDarkMode={isDarkMode}
+        />
+      )}
     </div>
   );
 };
