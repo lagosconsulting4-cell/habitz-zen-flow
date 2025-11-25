@@ -69,10 +69,13 @@ const MoreMenu = ({ open, onOpenChange }: MoreMenuProps) => {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[68vh] max-h-[460px] rounded-t-3xl border-border/60 bg-background/95 backdrop-blur-xl">
-        <SheetHeader className="text-left">
-          <SheetTitle>Mais secoes</SheetTitle>
-          <SheetDescription>
+      <SheetContent
+        side="bottom"
+        className="h-[68vh] max-h-[460px] rounded-t-3xl border border-border/70 bg-[radial-gradient(circle_at_top,rgba(163,230,53,0.08),transparent_40%),rgba(15,23,42,0.94)] text-foreground shadow-2xl backdrop-blur-2xl dark:bg-[radial-gradient(circle_at_top,rgba(163,230,53,0.1),transparent_45%),rgba(10,12,20,0.96)]"
+      >
+        <SheetHeader className="text-left space-y-1.5">
+          <SheetTitle className="text-lg font-semibold">Mais secoes</SheetTitle>
+          <SheetDescription className="text-sm text-muted-foreground/90">
             Escolha outra parte do Habitz para explorar.
           </SheetDescription>
         </SheetHeader>
@@ -89,18 +92,27 @@ const MoreMenu = ({ open, onOpenChange }: MoreMenuProps) => {
                   type="button"
                   variant="ghost"
                   className={cn(
-                    "group flex w-full items-center justify-between rounded-2xl border border-border/50 bg-card/60 px-4 py-3 text-left transition-all duration-200 hover:border-primary/40 hover:bg-primary/5",
-                    isActive ? "border-primary/60 bg-primary/10" : ""
+                    "group flex w-full items-center justify-between rounded-2xl border border-border/70 bg-card/80 px-4 py-3 text-left text-foreground transition-all duration-200 shadow-sm",
+                    "hover:border-primary/50 hover:bg-primary/5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary/50",
+                    isActive ? "border-primary/70 bg-primary/10 shadow-[0_0_0_1px_rgba(163,230,53,0.25)]" : ""
                   )}
                   onClick={() => handleSelect(item)}
                 >
                   <span className="flex items-center gap-3 text-sm font-medium">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/40 text-muted-foreground transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary">
+                    <span
+                      className={cn(
+                        "flex h-10 w-10 items-center justify-center rounded-2xl bg-muted text-muted-foreground transition-colors duration-200",
+                        "group-hover:bg-primary/15 group-hover:text-primary",
+                        isActive ? "bg-primary/15 text-primary" : ""
+                      )}
+                    >
                       <Icon className="h-5 w-5" />
                     </span>
                     {item.label}
                   </span>
-                  <span className="text-xs text-muted-foreground">{item.path.replace("/", "") || "dashboard"}</span>
+                  <span className="text-xs font-semibold text-muted-foreground/90">
+                    {item.path.replace("/", "") || "dashboard"}
+                  </span>
                 </Button>
               );
             })}

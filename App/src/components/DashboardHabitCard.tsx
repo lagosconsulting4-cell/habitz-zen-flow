@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
-import { Check } from "lucide-react";
 import { getHabitIconWithFallback } from "@/components/icons/HabitIcons";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +67,7 @@ export const DashboardHabitCard = ({
   }, [onToggle]);
 
   const limeGreen = "#A3E635";
+  const iconColor = completed ? "#0F172A" : limeGreen;
 
   return (
     <motion.button
@@ -180,16 +180,12 @@ export const DashboardHabitCard = ({
             animate={showCelebration ? { scale: [1, 1.15, 1] } : { scale: 1 }}
             transition={{ duration: 0.3 }}
           >
-            {completed ? (
-              <Check size={24} strokeWidth={3} className="text-black" />
-            ) : (
-              <Icon
-                width={28}
-                height={28}
-                strokeWidth={2.5}
-                style={{ color: limeGreen }}
-              />
-            )}
+            <Icon
+              width={28}
+              height={28}
+              strokeWidth={2.5}
+              style={{ color: iconColor }}
+            />
           </motion.div>
         </div>
       </div>
