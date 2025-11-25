@@ -365,121 +365,74 @@ const Quiz = () => {
         )}
       </AnimatePresence>
 
-      {/* Progress header - Premium */}
-      <div className="relative z-10 w-full px-6 pt-8">
-        <div className="max-w-2xl mx-auto">
+      {/* Progress header - Clean & Minimal */}
+      <div className="relative z-10 w-full px-6 pt-6">
+        <div className="max-w-2xl mx-auto space-y-4">
           {/* Premium Progress Bar */}
-          <div className="space-y-4">
-            {/* Main progress bar with glow */}
-            <div className="relative pt-10">
-              {/* Floating progress indicator */}
-              <motion.div
-                className="absolute top-0 flex flex-col items-center"
-                initial={{ left: "0%" }}
-                animate={{ left: `${Math.min(progress, 92)}%` }}
-                transition={{ duration: 0.7, ease: "easeOut" }}
-                style={{ transform: "translateX(-50%)" }}
-              >
-                <motion.span
-                  className="text-sm font-bold text-primary-foreground bg-primary px-3 py-1 rounded-full shadow-lg"
-                  initial={{ scale: 1 }}
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  {Math.round(progress)}%
-                </motion.span>
-                <div className="w-0.5 h-3 bg-primary" />
-              </motion.div>
+          <div className="progress-premium">
+            <motion.div
+              className="progress-premium-fill"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+            />
+          </div>
 
-              {/* Progress bar */}
-              <div className="progress-premium">
+          {/* Step indicators with checks */}
+          <div className="flex justify-between items-center">
+            {questions.map((_, index) => {
+              const isCompleted = index < currentQuestion;
+              const isCurrent = index === currentQuestion;
+
+              return (
                 <motion.div
-                  className="progress-premium-fill"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.7, ease: "easeOut" }}
-                />
-                <div className="progress-premium-glow" style={{ width: `${progress}%` }} />
-              </div>
-            </div>
-
-            {/* Step indicators */}
-            <div className="flex justify-between items-center px-1">
-              {questions.map((q, index) => {
-                const StepIcon = q.icon;
-                const isCompleted = index < currentQuestion;
-                const isCurrent = index === currentQuestion;
-
-                return (
-                  <motion.div
-                    key={index}
-                    className="flex flex-col items-center gap-1"
-                    initial={false}
-                    animate={{
-                      scale: isCurrent ? 1.1 : 1,
-                      opacity: isCompleted || isCurrent ? 1 : 0.4,
-                    }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div
-                      className={`progress-step-dot ${
-                        isCompleted ? "completed" : isCurrent ? "current" : ""
-                      }`}
-                    >
-                      {isCompleted && (
-                        <CheckCircle className="w-3 h-3 text-primary-foreground" />
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Question counter with navigation */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-3">
-              {currentQuestion > 0 && (
-                <motion.button
-                  onClick={handlePrevious}
-                  className="p-2 rounded-full bg-secondary/50 hover:bg-secondary transition-colors border border-border/50"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
+                  key={index}
+                  className={`
+                    w-8 h-8 rounded-full flex items-center justify-center
+                    transition-all duration-300 border-2
+                    ${isCompleted
+                      ? "bg-primary border-primary"
+                      : isCurrent
+                        ? "border-primary bg-primary/20"
+                        : "border-muted bg-transparent"
+                    }
+                  `}
+                  initial={false}
+                  animate={{
+                    scale: isCurrent ? 1.15 : 1,
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
-                  <ArrowLeft className="h-4 w-4 text-muted-foreground" />
-                </motion.button>
-              )}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Pergunta</span>
-                <span className="text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
-                  {currentQuestion + 1}/{questions.length}
-                </span>
-              </div>
-            </div>
-
-            {/* Visual completion indicator */}
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-1">
-                {[...Array(questions.length)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className={`w-2 h-2 rounded-full border border-background ${
-                      i < currentQuestion
-                        ? "bg-primary"
-                        : i === currentQuestion
-                        ? "bg-primary/50"
-                        : "bg-muted"
-                    }`}
-                    initial={false}
-                    animate={{
-                      scale: i === currentQuestion ? 1.3 : 1,
-                    }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  />
-                ))}
-              </div>
-            </div>
+                  {isCompleted ? (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                    >
+                      <CheckCircle className="w-5 h-5 text-primary-foreground" />
+                    </motion.div>
+                  ) : (
+                    <span className={`text-xs font-bold ${isCurrent ? "text-primary" : "text-muted-foreground"}`}>
+                      {index + 1}
+                    </span>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
+
+          {/* Back button only */}
+          {currentQuestion > 0 && (
+            <motion.button
+              onClick={handlePrevious}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              whileHover={{ x: -2 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Voltar</span>
+            </motion.button>
+          )}
         </div>
       </div>
 
