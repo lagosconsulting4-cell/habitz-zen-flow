@@ -7,6 +7,7 @@ import {
   Target,
   Calendar,
   Bell,
+  BellRing,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTheme } from "@/hooks/useTheme";
@@ -25,6 +26,14 @@ import { HabitIconKey, getHabitIcon } from "@/components/icons/HabitIcons";
 import { HeroCircle } from "@/components/HeroCircle";
 import { HealthIntegrationAlert } from "@/components/HealthIntegrationAlert";
 import { SmartGoalCard } from "@/components/goals";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; emoji: string }> = [
   { id: "morning", name: "Manhã", emoji: "☀️" },
@@ -43,6 +52,7 @@ const weekdays = [
 ];
 
 type Step = "select" | "details" | "confirm";
+type FrequencyType = "daily" | "fixed_days";
 
 // Cor unificada para todas as categorias - verde lime premium
 const UNIFIED_COLOR = "#A3E635";
@@ -174,12 +184,14 @@ const CreateHabit = () => {
   const [selectedIconKey, setSelectedIconKey] = useState<string | null>(fallbackCategories[0].icon_key ?? null);
   const [goalValue, setGoalValue] = useState<number | undefined>(undefined);
   const [unit, setUnit] = useState<"none" | "steps" | "minutes" | "km" | "hours" | "pages" | "liters" | "custom">("none");
-  const [frequencyType, setFrequencyType] = useState<"fixed_days" | "times_per_week" | "times_per_month" | "every_n_days" | "daily">("daily");
+  const [frequencyType, setFrequencyType] = useState<FrequencyType>("daily");
   const [timesPerWeek, setTimesPerWeek] = useState<number | undefined>(undefined);
   const [timesPerMonth, setTimesPerMonth] = useState<number | undefined>(undefined);
   const [everyNDays, setEveryNDays] = useState<number | undefined>(undefined);
   const [selectedPeriod, setSelectedPeriod] = useState<typeof periods[number]["id"]>(periods[0].id);
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
+  const [notificationSound, setNotificationSound] = useState<"default" | "soft" | "bright">("default");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string; iconKey?: HabitIconKey } | null>(null);
@@ -193,6 +205,16 @@ const CreateHabit = () => {
   const { prefs } = useAppPreferences();
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
+  // Sincroniza estado local com preferências do app (fallback)
+  useEffect(() => {
+    setNotificationsEnabled(prefs.notificationsEnabled);
+    setNotificationSound(prefs.defaultSound);
+  }, [prefs.notificationsEnabled, prefs.defaultSound]);
+  const soundOptions: Array<{ value: "default" | "soft" | "bright"; label: string; description: string }> = [
+    { value: "default", label: "Padrão", description: "Alerta equilibrado para o dia a dia" },
+    { value: "soft", label: "Suave", description: "Discreto, sem assustar" },
+    { value: "bright", label: "Vibrante", description: "Curto e chamativo" },
+  ];
 
   // Cores adaptativas baseadas no tema
   const themeColors = isDarkMode
@@ -370,33 +392,6 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       return;
     }
 
-    if (frequencyType === "times_per_week" && !timesPerWeek) {
-      toast({
-        title: "Informe a meta semanal",
-        description: "Preencha quantas vezes por semana deseja cumprir",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (frequencyType === "times_per_month" && !timesPerMonth) {
-      toast({
-        title: "Informe a meta mensal",
-        description: "Preencha quantas vezes por mês deseja cumprir",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (frequencyType === "every_n_days" && !everyNDays) {
-      toast({
-        title: "Informe o intervalo",
-        description: "Preencha a cada quantos dias deseja repetir",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (goalValue !== undefined && goalValue !== null && Number.isNaN(Number(goalValue))) {
       toast({
         title: "Meta inválida",
@@ -408,7 +403,10 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
 
     try {
       setIsSaving(true);
-      const days = [...selectedDays].sort((a, b) => a - b);
+      const days =
+        frequencyType === "daily"
+          ? [0, 1, 2, 3, 4, 5, 6]
+          : [...selectedDays].sort((a, b) => a - b);
       // Usa selectedCategoryData.id que sempre vem de CATEGORY_DATA com valores válidos
       const categoryValue = selectedCategoryData?.id || selectedCategory;
       await createHabit({
@@ -422,14 +420,14 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         unit,
         goal_value: goalValue ?? null,
         frequency_type: frequencyType,
-        times_per_week: timesPerWeek ?? null,
-        times_per_month: timesPerMonth ?? null,
-        every_n_days: everyNDays ?? null,
-        notification_pref: prefs.notificationsEnabled
+        times_per_week: null,
+        times_per_month: null,
+        every_n_days: null,
+        notification_pref: notificationsEnabled
           ? {
               reminder_enabled: true,
               reminder_time: "08:00",
-              sound: prefs.defaultSound,
+              sound: notificationSound,
               time_sensitive: false,
             }
           : null,
@@ -551,14 +549,17 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     setSelectedIconKey(tpl.iconKey || null);
     setUnit((tpl.default_unit as typeof unit) ?? "none");
     setGoalValue(tpl.default_goal_value ?? undefined);
-    setFrequencyType((tpl.default_frequency_type as typeof frequencyType) ?? "daily");
-    setTimesPerWeek(tpl.default_times_per_week ?? undefined);
-    setTimesPerMonth(tpl.default_times_per_month ?? undefined);
-    setEveryNDays(tpl.default_every_n_days ?? undefined);
-    if (tpl.default_days_of_week?.length) {
+    const tplFreq = tpl.default_frequency_type === "fixed_days" ? "fixed_days" : "daily";
+    setFrequencyType(tplFreq);
+    setTimesPerWeek(undefined);
+    setTimesPerMonth(undefined);
+    setEveryNDays(undefined);
+    if (tplFreq === "fixed_days" && tpl.default_days_of_week?.length) {
       setSelectedDays(tpl.default_days_of_week);
-    } else {
+    } else if (tplFreq === "fixed_days") {
       setSelectedDays([1, 2, 3, 4, 5]);
+    } else {
+      setSelectedDays([0, 1, 2, 3, 4, 5, 6]);
     }
     setStep("details");
   };
@@ -768,15 +769,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                 Frequência
               </p>
               <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {frequencyType === "daily"
-                  ? "Todo dia"
-                  : frequencyType === "times_per_week" && timesPerWeek
-                    ? `${timesPerWeek}x / semana`
-                    : frequencyType === "times_per_month" && timesPerMonth
-                      ? `${timesPerMonth}x / mês`
-                      : frequencyType === "every_n_days" && everyNDays
-                        ? `A cada ${everyNDays} dias`
-                        : "Dias específicos"}
+                {frequencyType === "daily" ? "Todo dia" : "Dias específicos"}
               </p>
             </div>
           </div>
@@ -786,13 +779,11 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             {[
               { value: "daily", label: "Todo dia" },
               { value: "fixed_days", label: "Dias específicos" },
-              { value: "times_per_week", label: "X vezes/semana" },
-              { value: "times_per_month", label: "X vezes/mês" },
             ].map((freqOption) => (
               <button
                 key={freqOption.value}
                 type="button"
-                onClick={() => setFrequencyType(freqOption.value as typeof frequencyType)}
+                onClick={() => setFrequencyType(freqOption.value as FrequencyType)}
                 className={`rounded-lg py-2.5 text-xs font-semibold transition-all duration-200 ${
                   frequencyType === freqOption.value
                     ? themeColors.buttonActive
@@ -808,23 +799,58 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       </div>
 
       {/* Notifications Card */}
-      <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
-              <Bell className={`h-6 w-6 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Notificações
-              </p>
-              <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {prefs.notificationsEnabled ? "Ativadas" : "Desativadas"}
-              </p>
+    <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
+      <div className="flex items-center justify-between px-4 py-4">
+        <div className="flex items-center gap-3">
+          <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
+            <Bell className={`h-6 w-6 ${themeColors.iconColor}`} />
+          </div>
+          <div>
+            <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+              Notificações
+            </p>
+            <p className={`text-base font-semibold ${themeColors.bodyText}`}>
+                {notificationsEnabled ? "Ativadas" : "Desativadas"}
+            </p>
+          </div>
+        </div>
+        <Switch
+          checked={notificationsEnabled}
+          onCheckedChange={(checked) => setNotificationsEnabled(checked)}
+          className="data-[state=checked]:bg-primary"
+        />
+      </div>
+
+      {notificationsEnabled && (
+        <div className="px-4 pb-4 space-y-3">
+          <div className="rounded-xl border border-border/60 bg-muted/10 p-3">
+            <div className="flex items-center gap-3">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-full ${themeColors.iconBg}`}>
+                <BellRing className={`h-5 w-5 ${themeColors.iconColor}`} />
+              </div>
+              <div className="flex-1">
+                <p className={`text-xs font-semibold ${themeColors.bodyText}`}>Som da notificação</p>
+                <Select value={notificationSound} onValueChange={(val) => setNotificationSound(val as typeof notificationSound)}>
+                  <SelectTrigger className={`mt-2 h-11 w-full rounded-lg ${themeColors.input}`}>
+                    <SelectValue placeholder="Escolha um som" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {soundOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{opt.label}</span>
+                          <span className="text-xs text-muted-foreground">{opt.description}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+    </div>
 
       {/* CTA Button - Go to Confirm */}
       <div className="px-4 pt-4">
@@ -847,9 +873,6 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
   // Helper to format frequency text for confirmation
   const getFrequencyText = () => {
     if (frequencyType === "daily") return "Todos os dias";
-    if (frequencyType === "times_per_week" && timesPerWeek) return `${timesPerWeek}x por semana`;
-    if (frequencyType === "times_per_month" && timesPerMonth) return `${timesPerMonth}x por mês`;
-    if (frequencyType === "every_n_days" && everyNDays) return `A cada ${everyNDays} dias`;
     if (frequencyType === "fixed_days") {
       const sortedDays = [...selectedDays].sort((a, b) => {
         const order = [1, 2, 3, 4, 5, 6, 0];
@@ -988,7 +1011,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                 Notificações
               </p>
               <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
-                {prefs.notificationsEnabled ? "Ativadas" : "Desativadas"}
+                {notificationsEnabled ? `Ativadas • Som: ${soundOptions.find((s) => s.value === notificationSound)?.label ?? "Padrão"}` : "Desativadas"}
               </p>
             </div>
           </div>
