@@ -174,15 +174,15 @@ export const DashboardHabitCard = ({
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <motion.div
             className={cn(
-              "flex items-center justify-center rounded-xl w-12 h-12",
-              completed ? "bg-primary" : "bg-muted"
+              "flex items-center justify-center rounded-full w-14 h-14",
+              completed ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
             )}
             animate={showCelebration ? { scale: [1, 1.15, 1] } : { scale: 1 }}
             transition={{ duration: 0.3 }}
           >
             <Icon
-              width={28}
-              height={28}
+              width={30}
+              height={30}
               strokeWidth={2.5}
               style={{ color: iconColor }}
             />
