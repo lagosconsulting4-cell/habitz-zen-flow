@@ -187,11 +187,11 @@ const faqs = [
   },
   {
     question: "Preciso baixar algum app?",
-    answer: "Sim! O BORA é um aplicativo mobile disponível para Android e iOS. Você terá acesso imediato após a compra.",
+    answer: "Não precisa baixar nada! O BORA funciona direto do seu celular pelo navegador. Você pode salvar na tela inicial como um app e usar offline. Acesso imediato após a compra.",
   },
   {
     question: "Como funciona a personalização?",
-    answer: "Baseado nas suas respostas do quiz, criamos uma rotina única para você. O app aprende com seu uso e se adapta ao longo do tempo.",
+    answer: "Baseado nas suas respostas do quiz, criamos uma rotina única para você. O sistema aprende com seu uso e se adapta ao longo do tempo.",
   },
 ];
 
@@ -302,18 +302,18 @@ const Offer = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="pt-4"
+            className="pt-4 px-2"
           >
             <motion.div {...buttonHoverTap}>
               <Button
                 onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
                 variant="premium"
-                size="2xl"
-                className="group"
+                size="lg"
+                className="group w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 py-3 sm:py-4"
               >
-                <Sparkles className="w-5 h-5 mr-2" />
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Ver minha rotina personalizada
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>
           </motion.div>
@@ -321,7 +321,7 @@ const Offer = () => {
       </motion.section>
 
       {/* ============ TIMELINE SECTION ============ */}
-      <section className="py-20 px-6 bg-muted/30">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 bg-muted/30">
         <div className="max-w-5xl mx-auto">
           <motion.div
             className="text-center mb-16"
@@ -388,7 +388,7 @@ const Offer = () => {
       </section>
 
       {/* ============ BEFORE/AFTER SECTION ============ */}
-      <section className="py-20 px-6 relative overflow-hidden">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
         {/* Subtle background */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-muted/30 to-transparent" />
 
@@ -409,27 +409,27 @@ const Offer = () => {
           </motion.div>
 
           <Tabs defaultValue="after" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8 h-16 p-1.5 bg-muted/50 rounded-2xl">
+            <TabsList className="grid w-full grid-cols-2 mb-8 h-14 sm:h-16 p-1 sm:p-1.5 bg-muted/50 rounded-2xl">
               <TabsTrigger
                 value="before"
-                className="text-base font-semibold rounded-xl h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
+                className="text-xs sm:text-base font-semibold rounded-xl h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
               >
-                <HeartCrack className="w-5 h-5 mr-2" />
-                Sem o BORA
+                <HeartCrack className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Sem o </span>BORA
               </TabsTrigger>
               <TabsTrigger
                 value="after"
-                className="text-base font-semibold rounded-xl h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
+                className="text-xs sm:text-base font-semibold rounded-xl h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
               >
-                <Sparkles className="w-5 h-5 mr-2" />
-                Com o BORA
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Com o </span>BORA
               </TabsTrigger>
             </TabsList>
 
             <AnimatePresence mode="wait">
               <TabsContent value="before" className="mt-0">
                 <motion.div
-                  className="relative rounded-3xl bg-gradient-to-br from-red-500/10 via-card to-rose-500/10 border-2 border-red-500/30 p-8 md:p-12 overflow-hidden shadow-xl"
+                  className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-red-500/10 via-card to-rose-500/10 border-2 border-red-500/30 p-4 sm:p-8 md:p-12 overflow-hidden shadow-xl"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
@@ -437,19 +437,19 @@ const Offer = () => {
                   {/* Decorative gradient */}
                   <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/20 rounded-full blur-[100px]" />
 
-                  <div className="grid md:grid-cols-2 gap-6 relative z-10">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 relative z-10">
                     {beforeProblems.map((item, index) => (
                       <motion.div
                         key={index}
-                        className="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-br from-card to-red-500/5 border border-red-500/20 shadow-lg"
+                        className="flex items-start gap-3 sm:gap-4 p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-card to-red-500/5 border border-red-500/20 shadow-lg"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                       >
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-500/30">
-                          <item.icon className="w-6 h-6 text-white" />
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-500/30">
+                          <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         </div>
-                        <span className="text-foreground font-medium text-lg pt-2">{item.text}</span>
+                        <span className="text-foreground font-medium text-sm sm:text-lg pt-1 sm:pt-2">{item.text}</span>
                       </motion.div>
                     ))}
                   </div>
@@ -458,7 +458,7 @@ const Offer = () => {
 
               <TabsContent value="after" className="mt-0">
                 <motion.div
-                  className="relative rounded-3xl bg-gradient-to-br from-primary/10 via-card to-emerald-500/10 border-2 border-primary/30 p-8 md:p-12 overflow-hidden shadow-xl"
+                  className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary/10 via-card to-emerald-500/10 border-2 border-primary/30 p-4 sm:p-8 md:p-12 overflow-hidden shadow-xl"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
@@ -467,20 +467,20 @@ const Offer = () => {
                   <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
                   <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/20 rounded-full blur-[80px]" />
 
-                  <div className="grid md:grid-cols-2 gap-6 relative z-10">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 relative z-10">
                     {afterBenefits.map((item, index) => (
                       <motion.div
                         key={index}
-                        className="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-br from-card to-primary/5 border border-primary/20 shadow-lg group hover:border-primary/40 transition-colors"
+                        className="flex items-start gap-3 sm:gap-4 p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-card to-primary/5 border border-primary/20 shadow-lg group hover:border-primary/40 transition-colors"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ scale: 1.02 }}
                       >
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
-                          <item.icon className="w-6 h-6 text-white" />
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
+                          <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         </div>
-                        <span className="text-foreground font-medium text-lg pt-2">{item.text}</span>
+                        <span className="text-foreground font-medium text-sm sm:text-lg pt-1 sm:pt-2">{item.text}</span>
                       </motion.div>
                     ))}
                   </div>
@@ -492,7 +492,7 @@ const Offer = () => {
       </section>
 
       {/* ============ TESTIMONIALS CAROUSEL ============ */}
-      <section className="py-20 px-6 relative overflow-hidden">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
         {/* Gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-emerald-500/5 to-transparent" />
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-[100px]" />
@@ -575,7 +575,7 @@ const Offer = () => {
       </section>
 
       {/* ============ FEATURES BENTO GRID ============ */}
-      <section className="py-20 px-6 relative overflow-hidden">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
         {/* Background decorations */}
         <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent" />
 
@@ -595,32 +595,32 @@ const Offer = () => {
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             {/* Large feature card - HERO CARD */}
             <motion.div
-              className="col-span-2 row-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-emerald-500 to-teal-600 p-8 text-white shadow-2xl shadow-primary/30"
+              className="col-span-2 row-span-2 relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary via-emerald-500 to-teal-600 p-5 sm:p-8 text-white shadow-2xl shadow-primary/30"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               whileHover={{ scale: 1.02 }}
             >
               {/* Animated glow */}
-              <div className="absolute top-0 right-0 w-60 h-60 bg-white/20 rounded-full blur-3xl animate-pulse" />
-              <div className="absolute bottom-0 left-0 w-40 h-40 bg-emerald-300/30 rounded-full blur-3xl" />
+              <div className="absolute top-0 right-0 w-40 sm:w-60 h-40 sm:h-60 bg-white/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 left-0 w-24 sm:w-40 h-24 sm:h-40 bg-emerald-300/30 rounded-full blur-3xl" />
 
               <div className="relative z-10 h-full flex flex-col justify-between">
                 <div>
-                  <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-6 shadow-lg">
-                    <Target className="w-10 h-10 text-white" />
+                  <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 sm:mb-6 shadow-lg">
+                    <Target className="w-7 h-7 sm:w-10 sm:h-10 text-white" />
                   </div>
-                  <h3 className="text-3xl md:text-4xl font-bold mb-3">Rotina Sob Medida</h3>
-                  <p className="text-white/90 text-xl leading-relaxed">
+                  <h3 className="text-xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">Rotina Sob Medida</h3>
+                  <p className="text-white/90 text-sm sm:text-xl leading-relaxed">
                     Criada especificamente para seus objetivos e estilo de vida. Nada genérico.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 mt-6 text-white/80">
-                  <CheckCircle className="w-5 h-5" />
+                <div className="flex items-center gap-2 mt-4 sm:mt-6 text-white/80 text-xs sm:text-base">
+                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                   <span>100% personalizada para você</span>
                 </div>
               </div>
@@ -628,7 +628,7 @@ const Offer = () => {
 
             {/* Checklists card - TOP RIGHT */}
             <motion.div
-              className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 via-card to-orange-500/10 rounded-2xl p-6 border border-amber-500/20 shadow-lg group"
+              className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 via-card to-orange-500/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-amber-500/20 shadow-lg group"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -636,16 +636,16 @@ const Offer = () => {
               whileHover={{ y: -4, scale: 1.02 }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mb-4 shadow-lg shadow-amber-500/30">
-                <Calendar className="w-7 h-7 text-white" />
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mb-3 sm:mb-4 shadow-lg shadow-amber-500/30">
+                <Calendar className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
               </div>
-              <h4 className="font-bold text-xl mb-1">Checklists Diários</h4>
-              <p className="text-muted-foreground">Simples e práticos</p>
+              <h4 className="font-bold text-sm sm:text-xl mb-1">Checklists Diários</h4>
+              <p className="text-muted-foreground text-xs sm:text-base">Simples e práticos</p>
             </motion.div>
 
             {/* Progresso card */}
             <motion.div
-              className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 via-card to-indigo-500/10 rounded-2xl p-6 border border-blue-500/20 shadow-lg group"
+              className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 via-card to-indigo-500/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-blue-500/20 shadow-lg group"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -653,16 +653,16 @@ const Offer = () => {
               whileHover={{ y: -4, scale: 1.02 }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
-                <LineChart className="w-7 h-7 text-white" />
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center mb-3 sm:mb-4 shadow-lg shadow-blue-500/30">
+                <LineChart className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
               </div>
-              <h4 className="font-bold text-xl mb-1">Progresso Visual</h4>
-              <p className="text-muted-foreground">Veja sua evolução</p>
+              <h4 className="font-bold text-sm sm:text-xl mb-1">Progresso Visual</h4>
+              <p className="text-muted-foreground text-xs sm:text-base">Veja sua evolução</p>
             </motion.div>
 
             {/* Lembretes card */}
             <motion.div
-              className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 via-card to-pink-500/10 rounded-2xl p-6 border border-purple-500/20 shadow-lg group"
+              className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 via-card to-pink-500/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-purple-500/20 shadow-lg group"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -670,16 +670,16 @@ const Offer = () => {
               whileHover={{ y: -4, scale: 1.02 }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-4 shadow-lg shadow-purple-500/30">
-                <Bell className="w-7 h-7 text-white" />
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-3 sm:mb-4 shadow-lg shadow-purple-500/30">
+                <Bell className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
               </div>
-              <h4 className="font-bold text-xl mb-1">Lembretes Inteligentes</h4>
-              <p className="text-muted-foreground">No momento certo</p>
+              <h4 className="font-bold text-sm sm:text-xl mb-1">Lembretes</h4>
+              <p className="text-muted-foreground text-xs sm:text-base">No momento certo</p>
             </motion.div>
 
             {/* Transformação card */}
             <motion.div
-              className="relative overflow-hidden bg-gradient-to-br from-rose-500/10 via-card to-red-500/10 rounded-2xl p-6 border border-rose-500/20 shadow-lg group"
+              className="relative overflow-hidden bg-gradient-to-br from-rose-500/10 via-card to-red-500/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-rose-500/20 shadow-lg group"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -687,18 +687,18 @@ const Offer = () => {
               whileHover={{ y: -4, scale: 1.02 }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-rose-500 to-red-500 flex items-center justify-center mb-4 shadow-lg shadow-rose-500/30">
-                <Rocket className="w-7 h-7 text-white" />
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-rose-500 to-red-500 flex items-center justify-center mb-3 sm:mb-4 shadow-lg shadow-rose-500/30">
+                <Rocket className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
               </div>
-              <h4 className="font-bold text-xl mb-1">Transformação Real</h4>
-              <p className="text-muted-foreground">Execução prática</p>
+              <h4 className="font-bold text-sm sm:text-xl mb-1">Transformação</h4>
+              <p className="text-muted-foreground text-xs sm:text-base">Execução prática</p>
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* ============ PRICING SECTION ============ */}
-      <section id="pricing" className="py-24 px-6 relative overflow-hidden">
+      <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
         {/* Massive gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-emerald-500/5 to-background" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[150px]" />
@@ -729,7 +729,7 @@ const Offer = () => {
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-emerald-500 to-teal-500 rounded-[2rem] blur-lg opacity-50 animate-pulse" />
 
             {/* Main card */}
-            <div className="relative bg-gradient-to-br from-card via-card to-primary/5 rounded-3xl p-8 md:p-10 shadow-2xl border-2 border-primary/30 overflow-hidden">
+            <div className="relative bg-gradient-to-br from-card via-card to-primary/5 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 shadow-2xl border-2 border-primary/30 overflow-hidden">
               {/* Inner decorative elements */}
               <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl" />
@@ -744,17 +744,17 @@ const Offer = () => {
 
               {/* Price - DESTACADO */}
               <div className="text-center mb-8 relative z-10">
-                <p className="text-muted-foreground line-through text-xl mb-2">R$ 97</p>
+                <p className="text-muted-foreground line-through text-lg sm:text-xl mb-2">R$ 97</p>
                 <div className="relative inline-block">
-                  <span className="text-7xl md:text-8xl font-black text-primary">
+                  <span className="text-5xl sm:text-7xl md:text-8xl font-black text-primary">
                     R$ 47
                   </span>
                   {/* Glow behind price */}
-                  <div className="absolute inset-0 text-7xl md:text-8xl font-black text-primary blur-2xl opacity-30">
+                  <div className="absolute inset-0 text-5xl sm:text-7xl md:text-8xl font-black text-primary blur-2xl opacity-30">
                     R$ 47
                   </div>
                 </div>
-                <p className="text-muted-foreground mt-3 text-lg">
+                <p className="text-muted-foreground mt-3 text-sm sm:text-lg">
                   pagamento único • <span className="text-primary font-semibold">acesso vitalício</span>
                 </p>
               </div>
@@ -763,20 +763,20 @@ const Offer = () => {
               <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent mb-8" />
 
               {/* Benefits list - DESTACADO */}
-              <ul className="space-y-4 mb-8 relative z-10">
+              <ul className="space-y-2 sm:space-y-4 mb-6 sm:mb-8 relative z-10">
                 {pricingBenefits.map((benefit, index) => (
                   <motion.li
                     key={index}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10"
+                    className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg sm:rounded-xl bg-primary/5 border border-primary/10"
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" strokeWidth={3} />
                     </div>
-                    <span className="text-foreground font-medium">{benefit}</span>
+                    <span className="text-foreground font-medium text-sm sm:text-base">{benefit}</span>
                   </motion.li>
                 ))}
               </ul>
@@ -784,19 +784,22 @@ const Offer = () => {
               {/* CTA Button - PREMIUM */}
               <motion.div
                 {...buttonHoverTap}
-                className="relative"
+                className="relative group"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                {/* Button glow */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-emerald-500 to-teal-500 rounded-2xl blur opacity-70 group-hover:opacity-100 transition-opacity animate-pulse" />
+                {/* Animated glow effect */}
+                <div className="absolute -inset-1 sm:-inset-1.5 bg-gradient-to-r from-primary via-emerald-400 to-teal-400 rounded-xl sm:rounded-2xl blur-md opacity-75 group-hover:opacity-100 transition-all duration-300 animate-pulse" />
+                <div className="absolute -inset-0.5 sm:-inset-1 bg-gradient-to-r from-primary via-emerald-500 to-teal-500 rounded-xl sm:rounded-2xl opacity-90" />
 
                 <Button
-                  onClick={() => navigate("/checkout")}
-                  size="2xl"
-                  className="relative w-full bg-gradient-to-r from-primary via-emerald-500 to-teal-500 hover:from-primary hover:via-emerald-600 hover:to-teal-600 text-white font-bold text-xl py-7 rounded-xl shadow-2xl shadow-primary/40 group"
+                  onClick={() => window.open("https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac", "_blank")}
+                  size="lg"
+                  className="relative w-full bg-gradient-to-r from-primary via-emerald-500 to-teal-500 hover:from-primary hover:via-emerald-400 hover:to-teal-400 text-white font-black text-sm sm:text-lg md:text-xl py-5 sm:py-6 md:py-8 rounded-xl shadow-2xl shadow-primary/50 transition-all duration-300"
                 >
-                  <Unlock className="w-6 h-6 mr-3" />
-                  Desbloquear Minha Rotina
-                  <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 mr-2 sm:mr-3 animate-pulse flex-shrink-0" />
+                  <span className="truncate">QUERO MINHA ROTINA</span>
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-2 sm:ml-3 group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0" />
                 </Button>
               </motion.div>
 
@@ -824,7 +827,7 @@ const Offer = () => {
       </section>
 
       {/* ============ FAQ SECTION ============ */}
-      <section className="py-20 px-6 relative overflow-hidden">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-muted/20 to-transparent" />
 
@@ -844,7 +847,7 @@ const Offer = () => {
             </h2>
           </motion.div>
 
-          <Accordion type="single" collapsible className="space-y-4">
+          <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
             {faqs.map((faq, index) => (
               <motion.div
                 key={index}
@@ -855,12 +858,12 @@ const Offer = () => {
               >
                 <AccordionItem
                   value={`faq-${index}`}
-                  className="bg-gradient-to-br from-card to-primary/5 rounded-2xl border border-primary/10 px-6 shadow-lg hover:border-primary/20 transition-colors data-[state=open]:border-primary/30 data-[state=open]:shadow-xl"
+                  className="bg-gradient-to-br from-card to-primary/5 rounded-xl sm:rounded-2xl border border-primary/10 px-4 sm:px-6 shadow-lg hover:border-primary/20 transition-colors data-[state=open]:border-primary/30 data-[state=open]:shadow-xl"
                 >
-                  <AccordionTrigger className="text-left font-semibold hover:no-underline py-5 text-lg">
+                  <AccordionTrigger className="text-left font-semibold hover:no-underline py-4 sm:py-5 text-sm sm:text-lg">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-5 text-base leading-relaxed">
+                  <AccordionContent className="text-muted-foreground pb-4 sm:pb-5 text-sm sm:text-base leading-relaxed">
                     {faq.answer}
                   </AccordionContent>
                 </AccordionItem>
@@ -871,63 +874,68 @@ const Offer = () => {
       </section>
 
       {/* ============ FINAL CTA ============ */}
-      <section className="py-20 px-6">
+      <section className="py-16 sm:py-20 px-4 sm:px-6">
         <motion.div
-          className="max-w-3xl mx-auto relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary to-emerald-600 p-10 md:p-16 text-center shadow-2xl"
+          className="max-w-3xl mx-auto relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary via-primary to-emerald-600 p-6 sm:p-10 md:p-16 text-center shadow-2xl"
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
         >
           {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-300/20 rounded-full blur-3xl" />
+          <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-white/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-24 sm:w-48 h-24 sm:h-48 bg-emerald-300/20 rounded-full blur-3xl" />
 
-          <div className="relative z-10 space-y-6">
+          <div className="relative z-10 space-y-4 sm:space-y-6">
             <motion.div
               initial={{ scale: 0 }}
               whileInView={{ scale: 1 }}
               viewport={{ once: true }}
               transition={springTransition}
             >
-              <div className="w-20 h-20 mx-auto rounded-2xl bg-white/20 flex items-center justify-center mb-6">
-                <Rocket className="w-10 h-10 text-white" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-xl sm:rounded-2xl bg-white/20 flex items-center justify-center mb-4 sm:mb-6">
+                <Rocket className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
               </div>
             </motion.div>
 
-            <h2 className="text-3xl md:text-5xl font-bold text-white leading-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white leading-tight">
               Sua nova rotina está pronta
               <br />
               <span className="text-white/90">para começar agora.</span>
             </h2>
 
-            <p className="text-xl text-white/80 max-w-xl mx-auto">
+            <p className="text-base sm:text-xl text-white/80 max-w-xl mx-auto px-2">
               Junte-se a mais de 5.000 pessoas que já transformaram suas vidas com apenas 7 minutos por dia.
             </p>
 
-            <motion.div {...buttonHoverTap} className="pt-4">
+            <motion.div
+              {...buttonHoverTap}
+              className="pt-2 sm:pt-4"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
               <Button
-                onClick={() => navigate("/checkout")}
-                size="2xl"
-                className="bg-white hover:bg-white/95 text-primary font-bold shadow-xl group"
+                onClick={() => window.open("https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac", "_blank")}
+                size="lg"
+                className="bg-white hover:bg-white/95 text-primary font-black text-sm sm:text-lg md:text-xl shadow-2xl shadow-white/30 group px-4 sm:px-8 py-4 sm:py-6 w-full sm:w-auto"
               >
-                <Unlock className="w-6 h-6 mr-2" />
-                Começar minha transformação
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 mr-2 animate-pulse flex-shrink-0" />
+                <span className="truncate">COMEÇAR TRANSFORMAÇÃO</span>
+                <ArrowRight className="w-4 h-4 sm:w-6 sm:h-6 ml-2 group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0" />
               </Button>
             </motion.div>
 
-            <div className="flex flex-wrap items-center justify-center gap-6 pt-6 text-white/80">
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                <span>Garantia de 7 dias</span>
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-4 sm:pt-6 text-white/80 text-xs sm:text-base">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span>Garantia 7 dias</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span>Acesso imediato</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4" />
-                <span>Resultados em 7 dias</span>
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span>Resultados 7 dias</span>
               </div>
             </div>
           </div>
