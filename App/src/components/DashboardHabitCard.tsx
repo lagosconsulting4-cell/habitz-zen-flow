@@ -188,9 +188,9 @@ export const DashboardHabitCard = ({
             <Check size={24} strokeWidth={3} className="text-black" />
           ) : (
             <Icon
-              width={24}
-              height={24}
-              strokeWidth={1.5}
+              width={28}
+              height={28}
+              strokeWidth={2.5}
               style={{ color: limeGreen }}
             />
           )}
