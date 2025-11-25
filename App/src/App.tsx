@@ -27,7 +27,7 @@ const Thanks = lazy(() => import("./pages/Thanks"));
 const Cancel = lazy(() => import("./pages/Cancel"));
 const MyHabits = lazy(() => import("./pages/MyHabits"));
 const Bonus = lazy(() => import("./pages/Bonus"));
-
+const Preview = lazy(() => import("./pages/Preview"));
 // Loading fallback component
 const PageLoader = () => (
   <div className="min-h-screen bg-background flex items-center justify-center transition-colors duration-300">
@@ -51,6 +51,7 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/thanks" element={<Thanks />} />
             <Route path="/cancel" element={<Cancel />} />
+            <Route path="/preview" element={<Preview />} />
 
             <Route element={<ProtectedRoute><ProtectedLayout /></ProtectedRoute>}>
               <Route path="/onboarding" element={<OnboardingFlow />} />

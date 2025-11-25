@@ -1,21 +1,22 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { useTheme } from "next-themes";
-import { Sparkles } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 
-import { CircularHabitCard, isTimedHabit } from "@/components/CircularHabitCard";
-import { AddHabitCircle } from "@/components/AddHabitCircle";
+import { DashboardHabitCard } from "@/components/DashboardHabitCard";
 import NavigationBar from "@/components/NavigationBar";
 import { TimerModal } from "@/components/timer";
 import { useHabits } from "@/hooks/useHabits";
-import type { Habit } from "@/components/CircularHabitCard";
+import type { Habit } from "@/components/DashboardHabitCard";
+
+// Helper to check if habit has time-based goal
+const isTimedHabit = (unit?: string | null): boolean => {
+  return unit === "minutes" || unit === "hours";
+};
 
 const Dashboard = () => {
   const { habits, loading, toggleHabit, getHabitCompletionStatus } = useHabits();
   const navigate = useNavigate();
-  const { resolvedTheme } = useTheme();
-  const isDarkMode = resolvedTheme === "dark";
 
   // Timer modal state
   const [timerHabit, setTimerHabit] = useState<Habit | null>(null);
@@ -43,38 +44,11 @@ const Dashboard = () => {
 
     // If has numeric goal
     if (habit.goal_value && habit.goal_value > 0) {
-      // For now, return 100 if completed, 0 if not
-      // In future, implement partial progress tracking
       return completed ? 100 : 0;
     }
 
     // Binary completion
     return completed ? 100 : 0;
-  };
-
-  // Format goal info string
-  const formatGoalInfo = (habit: Habit): string | undefined => {
-    if (!habit.goal_value || habit.goal_value <= 0) return undefined;
-
-    switch (habit.unit) {
-      case "km":
-        return `${habit.goal_value} KM`;
-      case "minutes": {
-        const hours = Math.floor(habit.goal_value / 60);
-        const mins = habit.goal_value % 60;
-        if (hours > 0) {
-          return `${hours}:${mins.toString().padStart(2, "0")}`;
-        }
-        return `${mins} min`;
-      }
-      case "steps":
-        return `${habit.goal_value.toLocaleString()} steps`;
-      case "reps":
-      case "custom":
-        return `${habit.goal_value}`;
-      default:
-        return undefined;
-    }
   };
 
   // Check if habit is completed today
@@ -104,18 +78,15 @@ const Dashboard = () => {
     }
   };
 
-  // Light mode: fundo verde vibrante | Dark mode: fundo escuro
-  const bgClass = isDarkMode ? "bg-background" : "bg-primary";
-
   if (loading) {
     return (
-      <div className={`min-h-screen ${bgClass} flex items-center justify-center transition-colors duration-300`}>
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className={`text-lg font-semibold ${isDarkMode ? "text-foreground" : "text-white"}`}>
+          <div className="text-lg font-semibold text-white">
             Carregando seus hábitos...
           </div>
         </motion.div>
@@ -124,113 +95,103 @@ const Dashboard = () => {
   }
 
   return (
-    <div className={`min-h-screen ${bgClass} pb-20 md:pb-6 transition-colors duration-300`}>
+    <div className="min-h-screen bg-black flex flex-col">
+      {/* Main Content */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
+        className="flex-1 px-4 pt-6 pb-32"
       >
-        {/* Grid de hábitos */}
-        <div className="habits-grid">
-          {todayHabits.length === 0 ? (
-            /* Empty State Premium - Centralizado e minimalista */
+        {todayHabits.length === 0 ? (
+          /* Empty State Premium */
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="flex flex-col items-center justify-center h-[60vh]"
+          >
+            {/* Ilustração minimalista */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
-              className="col-span-2 flex flex-col items-center justify-center py-12 px-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.3 }}
+              className="mb-6"
             >
-              {/* Ilustração minimalista */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.3 }}
-                className="mb-6"
+              <div
+                className="relative w-20 h-20 rounded-full flex items-center justify-center"
+                style={{
+                  background: "linear-gradient(135deg, rgba(163, 230, 53, 0.15) 0%, rgba(163, 230, 53, 0.05) 100%)",
+                  boxShadow: "0 8px 32px rgba(163, 230, 53, 0.1)"
+                }}
               >
-                <div
-                  className="relative w-20 h-20 rounded-full flex items-center justify-center"
-                  style={{
-                    background: isDarkMode
-                      ? "linear-gradient(135deg, rgba(163, 230, 53, 0.15) 0%, rgba(163, 230, 53, 0.05) 100%)"
-                      : "linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%)",
-                    boxShadow: isDarkMode
-                      ? "0 8px 32px rgba(163, 230, 53, 0.1)"
-                      : "0 8px 32px rgba(255, 255, 255, 0.15)"
-                  }}
-                >
-                  <Sparkles
-                    size={32}
-                    strokeWidth={1.5}
-                    style={{ color: isDarkMode ? "#A3E635" : "#FFFFFF" }}
-                  />
-                </div>
-              </motion.div>
-
-              {/* Texto motivacional */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.3 }}
-                className="text-center mb-8"
-              >
-                <h3
-                  className="text-lg font-bold mb-2"
-                  style={{ color: isDarkMode ? "#FFFFFF" : "#FFFFFF" }}
-                >
-                  Comece sua jornada
-                </h3>
-                <p
-                  className="text-sm max-w-[240px]"
-                  style={{ color: isDarkMode ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.8)" }}
-                >
-                  Crie seu primeiro hábito e transforme sua rotina
-                </p>
-              </motion.div>
-
-              {/* CTA - AddHabitCircle destacado */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.3 }}
-              >
-                <AddHabitCircle isDarkMode={isDarkMode} highlighted />
-              </motion.div>
+                <Sparkles
+                  size={32}
+                  strokeWidth={1.5}
+                  className="text-lime-400"
+                />
+              </div>
             </motion.div>
-          ) : (
-            /* Lista normal de hábitos */
-            <>
-              {todayHabits.map((habit, index) => (
-                <motion.div
-                  key={habit.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                >
-                  <CircularHabitCard
-                    habit={habit as Habit}
-                    progress={calculateProgress(habit as Habit)}
-                    completed={isCompletedToday(habit.id)}
-                    onToggle={() => handleToggle(habit as Habit)}
-                    streakDays={habit.streak}
-                    goalInfo={formatGoalInfo(habit as Habit)}
-                    isDarkMode={isDarkMode}
-                  />
-                </motion.div>
-              ))}
 
+            {/* Texto motivacional */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+              className="text-center mb-8"
+            >
+              <h3 className="text-xl font-bold mb-2 text-white">
+                Comece sua jornada
+              </h3>
+              <p className="text-sm text-white/50 max-w-[260px]">
+                Crie seu primeiro hábito e transforme sua rotina
+              </p>
+            </motion.div>
+          </motion.div>
+        ) : (
+          /* Grid de hábitos - 2 colunas */
+          <div className="grid grid-cols-2 gap-3">
+            {todayHabits.map((habit, index) => (
               <motion.div
+                key={habit.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: todayHabits.length * 0.05 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-                <AddHabitCircle isDarkMode={isDarkMode} />
+                <DashboardHabitCard
+                  habit={habit as Habit}
+                  progress={calculateProgress(habit as Habit)}
+                  completed={isCompletedToday(habit.id)}
+                  onToggle={() => handleToggle(habit as Habit)}
+                  streakDays={habit.streak}
+                />
               </motion.div>
-            </>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </motion.div>
 
-      <NavigationBar isDarkMode={isDarkMode} />
+      {/* CTA Button - CRIAR ROTINA */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="fixed bottom-24 left-0 right-0 flex justify-center px-4 z-10"
+      >
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => navigate("/create")}
+          className="flex items-center gap-2 px-8 py-4 rounded-full bg-[#1a1a1a] border border-lime-400/30 shadow-lg shadow-lime-400/10"
+        >
+          <Plus size={20} className="text-lime-400" />
+          <span className="text-sm font-semibold text-lime-400 tracking-wide">
+            CRIAR ROTINA
+          </span>
+        </motion.button>
+      </motion.div>
+
+      <NavigationBar isDarkMode={true} />
 
       {/* Timer Modal */}
       {timerHabit && (
@@ -239,7 +200,7 @@ const Dashboard = () => {
           isOpen={!!timerHabit}
           onClose={() => setTimerHabit(null)}
           onComplete={handleTimerComplete}
-          isDarkMode={isDarkMode}
+          isDarkMode={true}
         />
       )}
     </div>
