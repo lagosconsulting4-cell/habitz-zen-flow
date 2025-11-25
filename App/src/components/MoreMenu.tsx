@@ -99,15 +99,13 @@ const MoreMenu = ({ open, onOpenChange }: MoreMenuProps) => {
                   onClick={() => handleSelect(item)}
                 >
                   <span className="flex items-center gap-3 text-sm font-medium">
-                    <span
+                    <Icon
                       className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-2xl bg-muted text-muted-foreground transition-colors duration-200",
-                        "group-hover:bg-primary/15 group-hover:text-primary",
-                        isActive ? "bg-primary/15 text-primary" : ""
+                        "h-5 w-5 transition-colors duration-200",
+                        isActive ? "text-primary" : "text-foreground/80",
+                        "group-hover:text-primary"
                       )}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </span>
+                    />
                     {item.label}
                   </span>
                   <span className="text-xs font-semibold text-muted-foreground/90">
