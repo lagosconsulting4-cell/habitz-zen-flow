@@ -5,24 +5,27 @@ import { cn } from "@/lib/utils";
 
 interface AddHabitCircleProps {
   isDarkMode?: boolean;
+  highlighted?: boolean; // Para destacar no empty state
 }
 
-export const AddHabitCircle = ({ isDarkMode = true }: AddHabitCircleProps) => {
+export const AddHabitCircle = ({ isDarkMode = true, highlighted = false }: AddHabitCircleProps) => {
   const navigate = useNavigate();
-  const size = 140;
+  const size = highlighted ? 160 : 140; // Maior quando destacado
 
   // Cores adaptivas
   const limeGreen = "#A3E635";
   const colors = isDarkMode
     ? {
-        border: `${limeGreen}40`, // Verde translúcido
+        border: highlighted ? limeGreen : `${limeGreen}40`, // Mais visível quando destacado
         icon: limeGreen,
         text: limeGreen,
+        bg: highlighted ? `${limeGreen}10` : "transparent",
       }
     : {
-        border: "rgba(255, 255, 255, 0.4)", // Branco translúcido
+        border: highlighted ? "#FFFFFF" : "rgba(255, 255, 255, 0.4)",
         icon: "#FFFFFF",
         text: "#FFFFFF",
+        bg: highlighted ? "rgba(255, 255, 255, 0.1)" : "transparent",
       };
 
   return (
@@ -36,20 +39,72 @@ export const AddHabitCircle = ({ isDarkMode = true }: AddHabitCircleProps) => {
       )}
       aria-label="Adicionar novo hábito"
     >
-      <div
-        className="rounded-full flex items-center justify-center bg-transparent transition-all duration-300 group-hover:shadow-xl"
-        style={{
-          width: size,
-          height: size,
-          border: `6px solid ${colors.border}`,
-        }}
-      >
-        <Plus size={56} strokeWidth={3} className="drop-shadow-lg" style={{ color: colors.icon }} />
+      {/* Círculo com animação de pulse sutil */}
+      <div className="relative">
+        {/* Pulse animation quando highlighted */}
+        {highlighted && (
+          <motion.div
+            className="absolute inset-0 rounded-full"
+            style={{
+              border: `3px solid ${isDarkMode ? limeGreen : "#FFFFFF"}`,
+            }}
+            animate={{
+              scale: [1, 1.15, 1],
+              opacity: [0.6, 0, 0.6],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        )}
+
+        {/* Glow animado no hover */}
+        <motion.div
+          className={cn(
+            "absolute inset-0 rounded-full transition-opacity duration-300",
+            highlighted ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+          )}
+          style={{
+            background: isDarkMode
+              ? 'radial-gradient(circle, rgba(163, 230, 53, 0.2) 0%, transparent 70%)'
+              : 'radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%)',
+            transform: 'scale(1.2)',
+          }}
+        />
+        <motion.div
+          className="relative rounded-full flex items-center justify-center transition-all duration-300"
+          style={{
+            width: size,
+            height: size,
+            border: highlighted ? `3px solid ${colors.border}` : `4px dashed ${colors.border}`,
+            backgroundColor: colors.bg,
+          }}
+          animate={highlighted ? { scale: [1, 1.02, 1] } : {}}
+          transition={highlighted ? { duration: 2, repeat: Infinity, ease: "easeInOut" } : {}}
+        >
+          <Plus
+            size={highlighted ? 56 : 48}
+            strokeWidth={2.5}
+            className="drop-shadow-lg"
+            style={{ color: colors.icon }}
+          />
+        </motion.div>
       </div>
 
-      <p className="font-extrabold text-sm uppercase tracking-wider drop-shadow-md" style={{ color: colors.text }}>
-        ADICIONAR
-      </p>
+      {/* Texto com altura fixa para alinhar com os outros cards */}
+      <div className={cn("flex items-start justify-center", highlighted ? "h-auto" : "h-[48px]")}>
+        <p
+          className={cn(
+            "font-extrabold uppercase tracking-wider drop-shadow-md",
+            highlighted ? "text-base" : "text-sm"
+          )}
+          style={{ color: colors.text }}
+        >
+          {highlighted ? "CRIAR HÁBITO" : "ADICIONAR"}
+        </p>
+      </div>
     </motion.button>
   );
 };

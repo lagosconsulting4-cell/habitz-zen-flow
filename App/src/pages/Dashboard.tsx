@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { useTheme } from "next-themes";
+import { Sparkles } from "lucide-react";
 
 import { CircularHabitCard, isTimedHabit } from "@/components/CircularHabitCard";
 import { AddHabitCircle } from "@/components/AddHabitCircle";
@@ -131,48 +132,101 @@ const Dashboard = () => {
       >
         {/* Grid de hábitos */}
         <div className="habits-grid">
-          {todayHabits.length === 0 && (
+          {todayHabits.length === 0 ? (
+            /* Empty State Premium - Centralizado e minimalista */
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="col-span-2 text-center py-8"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="col-span-2 flex flex-col items-center justify-center py-12 px-6"
             >
-              <p className={`text-sm mb-2 ${isDarkMode ? "text-muted-foreground" : "text-white/80"}`}>
-                Nenhum hábito para hoje
-              </p>
-              <p className={`text-xs ${isDarkMode ? "text-muted-foreground/60" : "text-white/60"}`}>
-                Adicione um hábito para começar
-              </p>
+              {/* Ilustração minimalista */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
+                className="mb-6"
+              >
+                <div
+                  className="relative w-20 h-20 rounded-full flex items-center justify-center"
+                  style={{
+                    background: isDarkMode
+                      ? "linear-gradient(135deg, rgba(163, 230, 53, 0.15) 0%, rgba(163, 230, 53, 0.05) 100%)"
+                      : "linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%)",
+                    boxShadow: isDarkMode
+                      ? "0 8px 32px rgba(163, 230, 53, 0.1)"
+                      : "0 8px 32px rgba(255, 255, 255, 0.15)"
+                  }}
+                >
+                  <Sparkles
+                    size={32}
+                    strokeWidth={1.5}
+                    style={{ color: isDarkMode ? "#A3E635" : "#FFFFFF" }}
+                  />
+                </div>
+              </motion.div>
+
+              {/* Texto motivacional */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.3 }}
+                className="text-center mb-8"
+              >
+                <h3
+                  className="text-lg font-bold mb-2"
+                  style={{ color: isDarkMode ? "#FFFFFF" : "#FFFFFF" }}
+                >
+                  Comece sua jornada
+                </h3>
+                <p
+                  className="text-sm max-w-[240px]"
+                  style={{ color: isDarkMode ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.8)" }}
+                >
+                  Crie seu primeiro hábito e transforme sua rotina
+                </p>
+              </motion.div>
+
+              {/* CTA - AddHabitCircle destacado */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.3 }}
+              >
+                <AddHabitCircle isDarkMode={isDarkMode} highlighted />
+              </motion.div>
             </motion.div>
+          ) : (
+            /* Lista normal de hábitos */
+            <>
+              {todayHabits.map((habit, index) => (
+                <motion.div
+                  key={habit.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                >
+                  <CircularHabitCard
+                    habit={habit as Habit}
+                    progress={calculateProgress(habit as Habit)}
+                    completed={isCompletedToday(habit.id)}
+                    onToggle={() => handleToggle(habit as Habit)}
+                    streakDays={habit.streak}
+                    goalInfo={formatGoalInfo(habit as Habit)}
+                    isDarkMode={isDarkMode}
+                  />
+                </motion.div>
+              ))}
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: todayHabits.length * 0.05 }}
+              >
+                <AddHabitCircle isDarkMode={isDarkMode} />
+              </motion.div>
+            </>
           )}
-
-          {todayHabits.map((habit, index) => (
-            <motion.div
-              key={habit.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-            >
-              <CircularHabitCard
-                habit={habit as Habit}
-                progress={calculateProgress(habit as Habit)}
-                completed={isCompletedToday(habit.id)}
-                onToggle={() => handleToggle(habit as Habit)}
-                streakDays={habit.streak}
-                goalInfo={formatGoalInfo(habit as Habit)}
-                isDarkMode={isDarkMode}
-              />
-            </motion.div>
-          ))}
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: todayHabits.length * 0.05 }}
-          >
-            <AddHabitCircle isDarkMode={isDarkMode} />
-          </motion.div>
         </div>
       </motion.div>
 

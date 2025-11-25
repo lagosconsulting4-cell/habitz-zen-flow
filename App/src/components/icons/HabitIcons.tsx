@@ -365,7 +365,59 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
   ]),
 };
 
+// Mapeamento de categoria para ícone padrão
+export const CATEGORY_ICON_MAP: Record<string, HabitIconKey> = {
+  // Categorias principais do app
+  "productivity": "plan",
+  "fitness": "run",
+  "nutrition": "meal",
+  "time_routine": "clock",
+  "avoid": "ban",
+  // Categorias alternativas/legadas
+  "health": "activity_rings",
+  "exercise": "run",
+  "meditation": "meditate",
+  "reading": "book",
+  "sleep": "sleep",
+  "water": "water",
+  "social": "family",
+  "work": "deep_work",
+  "study": "study",
+  "wellness": "heart",
+  // Fallbacks por nome de categoria
+  "Produtividade": "plan",
+  "Saúde/Fitness": "run",
+  "Alimentação": "meal",
+  "Tempo/Rotina": "clock",
+  "Evitar": "ban",
+};
+
+// Ícone padrão quando nenhum é encontrado (melhor que Target genérico)
+export const DEFAULT_HABIT_ICON: HabitIconKey = "activity_rings";
+
 export const getHabitIcon = (key?: HabitIconKey | null) => {
   if (!key) return null;
   return HabitIcons[key] ?? null;
+};
+
+// Nova função que considera categoria como fallback
+export const getHabitIconWithFallback = (
+  iconKey?: HabitIconKey | null,
+  category?: string | null
+): ((props: SVGProps<SVGSVGElement>) => JSX.Element) => {
+  // Prioridade 1: icon_key específico
+  if (iconKey && HabitIcons[iconKey]) {
+    return HabitIcons[iconKey];
+  }
+
+  // Prioridade 2: baseado na categoria
+  if (category) {
+    const categoryIcon = CATEGORY_ICON_MAP[category];
+    if (categoryIcon && HabitIcons[categoryIcon]) {
+      return HabitIcons[categoryIcon];
+    }
+  }
+
+  // Prioridade 3: ícone padrão (activity_rings é mais bonito que target)
+  return HabitIcons[DEFAULT_HABIT_ICON];
 };

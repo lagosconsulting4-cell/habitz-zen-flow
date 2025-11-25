@@ -1,7 +1,8 @@
-import { motion } from "framer-motion";
-import { Heart, Target, Clock } from "lucide-react";
-import { getHabitIcon } from "@/components/icons/HabitIcons";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, Clock, Check, Flame } from "lucide-react";
+import { getHabitIconWithFallback } from "@/components/icons/HabitIcons";
 import { cn } from "@/lib/utils";
+import { useState, useEffect, useCallback } from "react";
 
 // Helper to check if habit has time-based goal
 export const isTimedHabit = (unit?: string | null): boolean => {
@@ -44,48 +45,79 @@ export const CircularHabitCard = ({
   className,
   isDarkMode = true
 }: CircularHabitCardProps) => {
-  // Always use Lucide icon - prefer icon_key, fallback to Target icon
-  const Icon = getHabitIcon(habit.icon_key) || Target;
+  const Icon = getHabitIconWithFallback(habit.icon_key, habit.category);
   const size = 140;
   const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
 
-  // Cores adaptivas baseadas no tema
-  // Light mode: inspirado no app de referência (fundo colorido, ícones brancos, círculos escuros)
-  // Dark mode: fundo escuro, ícones verdes
+  // Estado para controlar animação de celebração
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [wasCompleted, setWasCompleted] = useState(completed);
+
+  // Detecta quando hábito é completado (transição de false para true)
+  useEffect(() => {
+    if (completed && !wasCompleted) {
+      // Acabou de completar - trigger celebração
+      setShowCelebration(true);
+
+      // Haptic feedback sutil
+      if ("vibrate" in navigator) {
+        navigator.vibrate([15, 50, 25]);
+      }
+
+      // Remove celebração após animação
+      const timer = setTimeout(() => {
+        setShowCelebration(false);
+      }, 800);
+
+      return () => clearTimeout(timer);
+    } else if (!completed && wasCompleted) {
+      // Desfez - haptic sutil
+      if ("vibrate" in navigator) {
+        navigator.vibrate(10);
+      }
+    }
+    setWasCompleted(completed);
+  }, [completed, wasCompleted]);
+
+  const handleClick = useCallback(() => {
+    onToggle();
+  }, [onToggle]);
+
+  // Cores
   const limeGreen = "#A3E635";
 
-  // Light mode colors (sobre fundo verde)
   const lightModeColors = {
-    iconDefault: "#FFFFFF", // Branco
-    iconCompleted: "#1a1a1a", // Escuro quando completo
-    progressStroke: "#FFFFFF", // Branco
-    bgCircle: "rgba(0, 0, 0, 0.25)", // Escuro translúcido
-    fillCompleted: "#FFFFFF", // Branco quando completo
+    iconDefault: "#FFFFFF",
+    iconCompleted: "#166534",
+    progressStroke: "#FFFFFF",
+    bgCircle: "rgba(255, 255, 255, 0.25)",
+    fillCompleted: "#FFFFFF",
     textColor: "#FFFFFF",
     textSecondary: "rgba(255, 255, 255, 0.8)",
+    glowColor: "rgba(255, 255, 255, 0.8)",
   };
 
-  // Dark mode colors (sobre fundo escuro)
   const darkModeColors = {
     iconDefault: limeGreen,
     iconCompleted: "#000000",
     progressStroke: limeGreen,
-    bgCircle: "#2a2a2a",
+    bgCircle: "rgba(163, 230, 53, 0.15)",
     fillCompleted: limeGreen,
     textColor: "#FFFFFF",
     textSecondary: "rgba(255, 255, 255, 0.8)",
+    glowColor: "rgba(163, 230, 53, 0.6)",
   };
 
   const colors = isDarkMode ? darkModeColors : lightModeColors;
 
   return (
     <motion.button
-      whileHover={{ scale: 1.08 }}
-      whileTap={{ scale: 0.92 }}
-      onClick={onToggle}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={handleClick}
       className={cn(
         "flex flex-col items-center gap-3 relative group",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 rounded-full",
@@ -101,40 +133,58 @@ export const CircularHabitCard = ({
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className={cn(
-            "absolute -top-2 -left-2 rounded-full p-1.5 shadow-lg z-10",
-            isDarkMode ? "bg-white" : "bg-white"
-          )}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          className="absolute -top-2 -left-2 rounded-full p-1.5 shadow-lg z-10 bg-white"
           aria-hidden="true"
         >
           <Heart size={16} fill="#EF4444" color="#EF4444" />
         </motion.div>
       )}
 
-      {/* Streak badge - only show if > 0 */}
+      {/* Streak badge - Premium design com fogo para streaks altas */}
       {streakDays !== undefined && streakDays > 0 && (
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 15 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
           className={cn(
-            "absolute -top-1 -right-1 rounded-full w-8 h-8 flex items-center justify-center text-xs font-extrabold shadow-lg z-10 border-2",
-            isDarkMode
-              ? "bg-white text-card border-background"
-              : "bg-white text-primary border-primary/20"
+            "absolute -top-1 -right-1 rounded-full flex items-center justify-center shadow-lg z-10 border-2",
+            // Tamanho baseado se tem fogo ou não
+            streakDays >= 3 ? "gap-0.5 px-2 py-1" : "w-8 h-8",
+            // Cores - destaque especial para streaks longas
+            streakDays >= 7
+              ? "bg-gradient-to-br from-orange-400 to-red-500 text-white border-orange-300"
+              : isDarkMode
+                ? "bg-white text-card border-background"
+                : "bg-white text-primary border-primary/20"
           )}
           aria-hidden="true"
         >
-          {streakDays}
+          {/* Ícone de fogo para streaks >= 3 */}
+          {streakDays >= 3 && (
+            <Flame
+              size={12}
+              className={cn(
+                streakDays >= 7 ? "text-yellow-200" : "text-orange-500"
+              )}
+              fill={streakDays >= 7 ? "#fef08a" : "#f97316"}
+            />
+          )}
+          <span className={cn(
+            "font-extrabold",
+            streakDays >= 3 ? "text-xs" : "text-xs"
+          )}>
+            {streakDays}
+          </span>
         </motion.div>
       )}
 
-      {/* Timer indicator - show for timed habits */}
+      {/* Timer indicator */}
       {isTimedHabit(habit.unit) && !completed && (
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.1 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}
           className={cn(
             "absolute -bottom-1 -right-1 rounded-full w-7 h-7 flex items-center justify-center shadow-lg z-10 border-2",
             isDarkMode
@@ -147,13 +197,43 @@ export const CircularHabitCard = ({
         </motion.div>
       )}
 
-      {/* SVG Circular Progress */}
+      {/* Círculo principal */}
       <div className="relative" style={{ width: size, height: size }}>
-        <svg
+
+        {/* Glow celebration - aparece brevemente ao completar */}
+        <AnimatePresence>
+          {showCelebration && (
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{
+                scale: [0.8, 1.2, 1.3],
+                opacity: [0, 0.7, 0]
+              }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="absolute inset-0 rounded-full pointer-events-none"
+              style={{
+                background: `radial-gradient(circle, ${colors.glowColor} 0%, transparent 70%)`,
+              }}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* SVG */}
+        <motion.svg
           width={size}
           height={size}
-          className="transform -rotate-90 drop-shadow-lg"
+          className="transform -rotate-90"
+          animate={showCelebration ? { scale: [1, 1.02, 1] } : { scale: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
         >
+          <defs>
+            <linearGradient id={`progress-gradient-${habit.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor={isDarkMode ? "#A3E635" : "#FFFFFF"} stopOpacity="1" />
+              <stop offset="100%" stopColor={isDarkMode ? "#65A30D" : "#E2E8F0"} stopOpacity="1" />
+            </linearGradient>
+          </defs>
+
           {/* Background circle */}
           <circle
             cx={size / 2}
@@ -162,7 +242,6 @@ export const CircularHabitCard = ({
             stroke={colors.bgCircle}
             strokeWidth={strokeWidth}
             fill="transparent"
-            opacity={isDarkMode ? 0.3 : 1}
           />
 
           {/* Progress circle */}
@@ -170,50 +249,109 @@ export const CircularHabitCard = ({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke={colors.progressStroke}
+            stroke={`url(#progress-gradient-${habit.id})`}
             strokeWidth={strokeWidth}
             fill="transparent"
             strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            strokeLinecap="round"
-            className="transition-all duration-500"
             initial={false}
-            animate={{ strokeDashoffset: offset }}
+            animate={{
+              strokeDashoffset: offset,
+            }}
+            transition={{
+              duration: 0.5,
+              ease: "easeOut"
+            }}
+            strokeLinecap="round"
+            style={{
+              filter: progress > 0
+                ? `drop-shadow(0 0 ${isDarkMode ? '6px' : '3px'} ${colors.glowColor})`
+                : 'none'
+            }}
           />
-        </svg>
+        </motion.svg>
 
-        {/* Inner filled circle when completed */}
+        {/* Círculo preenchido quando completo */}
         <motion.div
           initial={false}
           animate={{
             opacity: completed ? 1 : 0,
-            scale: completed ? 1 : 0.85
+            scale: completed ? 1 : 0.8
           }}
-          transition={{ duration: 0.3, delay: completed ? 0.15 : 0, type: "spring" }}
-          className="absolute inset-0 m-2.5 rounded-full shadow-inner"
-          style={{ backgroundColor: completed ? colors.fillCompleted : "transparent" }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 25,
+            delay: completed ? 0.1 : 0
+          }}
+          className="absolute inset-0 m-2.5 rounded-full"
+          style={{
+            backgroundColor: completed ? colors.fillCompleted : "transparent",
+            boxShadow: completed ? `inset 0 2px 4px rgba(0,0,0,0.1)` : 'none'
+          }}
         />
 
-        {/* Icon */}
+        {/* Ícone */}
         <div className="absolute inset-0 flex items-center justify-center">
           <motion.div
+            initial={false}
             animate={{
-              scale: completed ? 1.1 : 1,
+              scale: completed ? 1.05 : 1,
             }}
-            transition={{ duration: 0.3 }}
+            transition={{
+              type: "spring",
+              stiffness: 400,
+              damping: 15
+            }}
           >
             <Icon
-              size={52}
-              color={completed ? colors.iconCompleted : colors.iconDefault}
+              width={52}
+              height={52}
               strokeWidth={2.5}
               className="drop-shadow-lg"
+              style={{ color: completed ? colors.iconCompleted : colors.iconDefault }}
             />
           </motion.div>
         </div>
+
+        {/* Checkmark overlay - aparece brevemente ao completar */}
+        <AnimatePresence>
+          {showCelebration && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{
+                type: "spring",
+                stiffness: 500,
+                damping: 25
+              }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                className={cn(
+                  "rounded-full p-3",
+                  isDarkMode ? "bg-lime-400/90" : "bg-white/90"
+                )}
+                style={{
+                  boxShadow: `0 4px 20px ${colors.glowColor}`
+                }}
+              >
+                <Check
+                  size={32}
+                  strokeWidth={3}
+                  className={isDarkMode ? "text-black" : "text-primary"}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Habit name */}
-      <div className="text-center max-w-[140px]">
+      {/* Nome do hábito */}
+      <div className="text-center w-[140px] h-[48px] flex flex-col justify-start">
         <p
           className="font-extrabold text-sm uppercase tracking-wider leading-tight line-clamp-2 drop-shadow-md"
           style={{ color: colors.textColor }}
@@ -222,7 +360,7 @@ export const CircularHabitCard = ({
         </p>
         {goalInfo && (
           <p
-            className="text-xs font-semibold mt-1.5 drop-shadow"
+            className="text-xs font-semibold mt-1 drop-shadow"
             style={{ color: colors.textSecondary }}
           >
             {goalInfo}

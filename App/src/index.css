@@ -232,7 +232,7 @@
     @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
   }
 
-  /* Grid para hábitos circulares */
+  /* Grid para hábitos circulares - alinhamento perfeito */
   .habits-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -240,13 +240,26 @@
     padding: 2rem 1.5rem 6rem 1.5rem;
     max-width: 480px;
     margin: 0 auto;
-    place-items: center;
+    /* Removido place-items: center - cada item alinha ao topo */
+    align-items: start;
+    justify-items: center;
+  }
+
+  /* Cada card de hábito tem altura consistente */
+  .habits-grid > * {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   @media (max-width: 640px) {
     .habits-grid {
       gap: 1.25rem;
       padding: 1.5rem 1rem 5rem 1rem;
+    }
+    .habits-grid > * {
+      min-height: 180px;
     }
   }
 
