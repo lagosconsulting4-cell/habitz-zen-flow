@@ -460,11 +460,9 @@ const Mirror = () => {
                     <Button
                       onClick={() => navigate("/offer")}
                       size="xl"
-                      className="w-full group bg-white/95 text-slate-900 hover:bg-white border border-white/30 font-bold shadow-xl shadow-black/20"
+                      className="w-full bg-white/95 text-slate-900 hover:bg-white border border-white/30 font-bold shadow-xl shadow-black/20"
                     >
-                      <Sparkles className="h-5 w-5 mr-2" />
-                      <span>Ver minha rotina personalizada</span>
-                      <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                      Ver minha rotina personalizada
                     </Button>
                   </motion.div>
                 </motion.div>

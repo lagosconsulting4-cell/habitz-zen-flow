@@ -90,117 +90,85 @@ body::before {
   gap: clamp(1rem, 2vw, 1.5rem);
 }
 
-.banner {
+.image-banner {
   border: 1px solid var(--stroke);
   border-radius: 28px;
-  padding: clamp(1.25rem, 2vw, 1.75rem);
-  text-decoration: none;
-  color: inherit;
-  position: relative;
   overflow: hidden;
-  min-height: 180px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-  background: rgba(15, 23, 42, 0.6);
+  min-height: 240px;
+  display: block;
+  position: relative;
+  isolation: isolate;
+  box-shadow: 0 25px 55px rgba(2, 6, 23, 0.55);
+  transition: transform 0.45s ease, border-color 0.45s ease, box-shadow 0.45s ease;
 }
 
-.banner::after {
+.image-banner::after,
+.image-banner::before {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.35;
-  z-index: 0;
-  transition: opacity 0.3s ease;
-}
-
-.banner-habitz::after {
-  background: var(--accent);
-}
-
-.banner-foquinha::after {
-  background: var(--accent-2);
-}
-
-.banner:hover {
-  transform: translateY(-6px) scale(1.01);
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 25px 50px rgba(15, 23, 42, 0.45);
-}
-
-.banner:hover::after {
-  opacity: 0.55;
-}
-
-.badge {
-  align-self: flex-start;
-  text-transform: uppercase;
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  padding: 0.45rem 0.9rem;
-  border-radius: 999px;
-  border: 1px solid rgba(248, 250, 252, 0.4);
-  background: rgba(2, 6, 23, 0.4);
   z-index: 1;
+  transition: opacity 0.35s ease;
 }
 
-.badge.secondary {
-  border-color: rgba(253, 224, 71, 0.8);
+.image-banner::before {
+  background: rgba(2, 6, 23, 0.15);
 }
 
-.content {
-  display: flex;
-  gap: 1.25rem;
-  align-items: center;
-  z-index: 1;
+.image-banner::after {
+  opacity: 0.6;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(2, 6, 23, 0.2));
 }
 
-.icon {
-  width: 70px;
-  height: 70px;
-  border-radius: 20px;
-  background: rgba(2, 6, 23, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  position: relative;
+.image-banner[data-variant="habitz"]::after {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.45), rgba(15, 23, 42, 0.75));
 }
 
-.icon::before,
-.icon::after {
-  content: "";
+.image-banner[data-variant="foquinha"]::after {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(192, 132, 252, 0.5));
+}
+
+.image-banner:hover {
+  transform: translateY(-8px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 30px 60px rgba(2, 6, 23, 0.65);
+}
+
+.image-banner:hover::after {
+  opacity: 0.75;
+}
+
+.image-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  aspect-ratio: 16 / 9;
+}
+
+.image-banner__label {
   position: absolute;
-  inset: 16px;
-  border-radius: 12px;
-  background: var(--text);
+  inset: auto 0 0 0;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  z-index: 2;
+  color: #fff;
+  background: linear-gradient(180deg, transparent, rgba(2, 6, 23, 0.85));
+  text-shadow: 0 3px 12px rgba(2, 6, 23, 0.8);
+}
+
+.image-banner__label span {
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
   opacity: 0.85;
 }
 
-.icon::after {
-  inset: 22px 14px 14px 22px;
-  border-radius: 50%;
-  background: rgba(2, 6, 23, 0.9);
-}
-
-.banner h2 {
-  margin: 0;
-  font-size: clamp(1.5rem, 2.4vw, 1.9rem);
-}
-
-.banner p {
-  margin: 0.5rem 0 0;
-  color: var(--muted);
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.cta {
-  z-index: 1;
+.image-banner__label strong {
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
   font-weight: 600;
-  font-size: 1rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  opacity: 0.9;
 }
 
 .cta-board {
@@ -218,26 +186,20 @@ body::before {
   font-size: 0.95rem;
 }
 
-@media (max-width: 640px) {
-  body {
-    padding: 1.25rem;
-  }
+  @media (max-width: 640px) {
+    body {
+      padding: 1.25rem;
+    }
 
   .hub-shell {
     border-radius: 24px;
   }
 
-  .content {
-    flex-direction: column;
-    text-align: center;
+  .image-banner {
+    min-height: 200px;
   }
 
-  .icon {
-    width: 60px;
-    height: 60px;
-  }
-
-  .badge {
-    align-self: center;
+  .image-banner__label {
+    padding: 1rem 1.25rem;
   }
 }
