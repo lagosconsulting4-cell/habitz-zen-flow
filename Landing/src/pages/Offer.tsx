@@ -795,11 +795,11 @@ const Offer = () => {
                 <Button
                   onClick={() => window.open("https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac", "_blank")}
                   size="lg"
-                  className="relative w-full bg-gradient-to-r from-primary via-emerald-500 to-teal-500 hover:from-primary hover:via-emerald-400 hover:to-teal-400 text-white font-black text-sm sm:text-lg md:text-xl py-5 sm:py-6 md:py-8 rounded-xl shadow-2xl shadow-primary/50 transition-all duration-300"
+                  className="relative w-full bg-gradient-to-r from-primary via-emerald-500 to-teal-500 hover:from-primary hover:via-emerald-400 hover:to-teal-400 text-white font-black text-base sm:text-xl md:text-2xl py-6 sm:py-7 md:py-8 rounded-xl shadow-2xl shadow-primary/50 transition-all duration-300 tracking-wide"
                 >
-                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 mr-2 sm:mr-3 animate-pulse flex-shrink-0" />
-                  <span className="truncate">QUERO MINHA ROTINA</span>
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-2 sm:ml-3 group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0" />
+                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mr-2 sm:mr-3 animate-pulse flex-shrink-0" />
+                  <span>QUERO MINHA ROTINA</span>
+                  <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 ml-2 sm:ml-3 group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0" />
                 </Button>
               </motion.div>
 
@@ -916,11 +916,11 @@ const Offer = () => {
               <Button
                 onClick={() => window.open("https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac", "_blank")}
                 size="lg"
-                className="bg-white hover:bg-white/95 text-primary font-black text-sm sm:text-lg md:text-xl shadow-2xl shadow-white/30 group px-4 sm:px-8 py-4 sm:py-6 w-full sm:w-auto"
+                className="bg-white hover:bg-gray-100 !text-emerald-600 font-black text-sm sm:text-lg md:text-xl shadow-2xl shadow-white/30 group px-4 sm:px-8 py-5 sm:py-6 w-full sm:w-auto border-0"
               >
-                <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 mr-2 animate-pulse flex-shrink-0" />
-                <span className="truncate">COMEÇAR TRANSFORMAÇÃO</span>
-                <ArrowRight className="w-4 h-4 sm:w-6 sm:h-6 ml-2 group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0" />
+                <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 mr-2 animate-pulse flex-shrink-0 text-emerald-600" />
+                <span className="text-emerald-600">COMEÇAR TRANSFORMAÇÃO</span>
+                <ArrowRight className="w-4 h-4 sm:w-6 sm:h-6 ml-2 group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0 text-emerald-600" />
               </Button>
             </motion.div>
 
