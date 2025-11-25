@@ -1,11 +1,12 @@
-﻿import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Mail, Lock, User, Loader2 } from "lucide-react";
+import { ArrowLeft, Mail, Lock, User, Loader2, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -188,21 +189,31 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-primary flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 transition-colors duration-300">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="w-full max-w-md"
+      >
         <Button
           variant="ghost"
-          className="text-white/80 hover:text-white mb-6 flex items-center gap-2"
+          className="text-muted-foreground hover:text-foreground hover:bg-muted mb-6 flex items-center gap-2"
           onClick={() => navigate("/")}
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar para inicio
         </Button>
 
-        <Card className="glass-card border-white/10 bg-white/10 text-white">
-          <CardHeader className="space-y-2 text-center">
-            <CardTitle className="text-2xl font-semibold">Acesse seu Plano Personalizado</CardTitle>
-            <CardDescription className="text-white/80">
+        <Card className="rounded-2xl bg-card border border-border text-foreground">
+          <CardHeader className="space-y-4 text-center">
+            <div className="flex justify-center">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <KeyRound className="w-8 h-8 text-primary" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-bold uppercase tracking-wide">Acesse seu Plano</CardTitle>
+            <CardDescription className="text-muted-foreground">
               Entre ou crie sua conta para acessar seu programa completo de 30 dias para TDAH.
             </CardDescription>
           </CardHeader>
@@ -224,17 +235,17 @@ const Auth = () => {
             </Button>
 
             <div className="flex items-center gap-4">
-              <Separator className="flex-1" />
-              <span className="text-white/75 text-sm">ou</span>
-              <Separator className="flex-1" />
+              <Separator className="flex-1 bg-border" />
+              <span className="text-muted-foreground text-sm">ou</span>
+              <Separator className="flex-1 bg-border" />
             </div>
 
             <form onSubmit={handleAuth} className="space-y-4">
               {mode === "register" && (
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nome completo</Label>
+                  <Label htmlFor="name" className="text-foreground">Nome completo</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 h-5 w-5 text-white/80" />
+                    <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                     <Input
                       id="name"
                       type="text"
@@ -242,7 +253,7 @@ const Auth = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required={mode === "register"}
-                      className="pl-10 py-3"
+                      className="pl-10 py-3 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                       minLength={2}
                       maxLength={50}
                     />
@@ -251,9 +262,9 @@ const Auth = () => {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-foreground">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-white/80" />
+                  <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
@@ -261,16 +272,16 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-10 py-3"
+                    className="pl-10 py-3 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
               </div>
 
               {mode !== "forgot" && mode !== "reset" && (
                 <div className="space-y-2">
-                  <Label htmlFor="password">Senha</Label>
+                  <Label htmlFor="password" className="text-foreground">Senha</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-5 w-5 text-white/80" />
+                    <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                     <Input
                       id="password"
                       type="password"
@@ -279,7 +290,7 @@ const Auth = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       required={mode !== "forgot"}
                       minLength={6}
-                      className="pl-10 py-3"
+                      className="pl-10 py-3 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
                 </div>
@@ -288,9 +299,9 @@ const Auth = () => {
               {mode === "reset" && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="new-password">Nova senha</Label>
+                    <Label htmlFor="new-password" className="text-foreground">Nova senha</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-5 w-5 text-white/80" />
+                      <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                       <Input
                         id="new-password"
                         type="password"
@@ -298,14 +309,14 @@ const Auth = () => {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         minLength={6}
-                        className="pl-10 py-3"
+                        className="pl-10 py-3 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirmar nova senha</Label>
+                    <Label htmlFor="confirm-password" className="text-foreground">Confirmar nova senha</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-5 w-5 text-white/80" />
+                      <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                       <Input
                         id="confirm-password"
                         type="password"
@@ -313,7 +324,7 @@ const Auth = () => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         minLength={6}
-                        className="pl-10 py-3"
+                        className="pl-10 py-3 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                       />
                     </div>
                   </div>
@@ -322,7 +333,7 @@ const Auth = () => {
 
               <Button
                 type="submit"
-                className="w-full py-3 font-semibold"
+                className="w-full py-3 font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -345,39 +356,39 @@ const Auth = () => {
               </Button>
             </form>
 
-            <div className="text-center pt-4 border-t border-border/40">
+            <div className="text-center pt-4 border-t border-border">
               {mode === "login" && (
                 <>
-                  <p className="text-white/80">Esqueceu sua senha?</p>
-                  <Button variant="link" onClick={() => setMode("forgot")} className="font-semibold p-0 h-auto text-white hover:text-white/80">
+                  <p className="text-muted-foreground">Esqueceu sua senha?</p>
+                  <Button variant="link" onClick={() => setMode("forgot")} className="font-semibold p-0 h-auto text-primary hover:text-primary/80">
                     Redefinir senha
                   </Button>
-                  <p className="text-white/80 mt-2">Ainda não tem conta?</p>
-                  <Button variant="link" onClick={() => setMode("register")} className="font-semibold p-0 h-auto text-white hover:text-white/80">
+                  <p className="text-muted-foreground mt-2">Ainda não tem conta?</p>
+                  <Button variant="link" onClick={() => setMode("register")} className="font-semibold p-0 h-auto text-primary hover:text-primary/80">
                     Criar conta
                   </Button>
                 </>
               )}
               {mode === "register" && (
                 <>
-                  <p className="text-white/80">Já tem conta?</p>
-                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto text-white hover:text-white/80">
+                  <p className="text-muted-foreground">Já tem conta?</p>
+                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto text-primary hover:text-primary/80">
                     Fazer login
                   </Button>
                 </>
               )}
               {mode === "forgot" && (
                 <>
-                  <p className="text-white/80">Lembrou a senha?</p>
-                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto text-white hover:text-white/80">
+                  <p className="text-muted-foreground">Lembrou a senha?</p>
+                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto text-primary hover:text-primary/80">
                     Voltar ao login
                   </Button>
                 </>
               )}
               {mode === "reset" && (
                 <>
-                  <p className="text-white/80">Redefinindo sua senha</p>
-                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto text-white hover:text-white/80">
+                  <p className="text-muted-foreground">Redefinindo sua senha</p>
+                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto text-primary hover:text-primary/80">
                     Cancelar e voltar ao login
                   </Button>
                 </>
@@ -386,15 +397,15 @@ const Auth = () => {
           </CardContent>
         </Card>
 
-        <div className="text-center mt-6 animate-fade-in" style={{ animationDelay: "400ms" }}>
-          <p className="text-white/70 text-sm">
+        <div className="text-center mt-6">
+          <p className="text-muted-foreground text-sm">
             Ao continuar, você concorda com nossos{" "}
-            <Button variant="link" className="text-white underline p-0 h-auto text-sm" asChild>
-              <Link to="/terms">Termos de Uso</Link>
-            </Button>
+            <Link to="/terms" className="text-primary underline hover:text-primary/80">
+              Termos de Uso
+            </Link>
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

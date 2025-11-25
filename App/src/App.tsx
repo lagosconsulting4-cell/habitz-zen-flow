@@ -30,8 +30,8 @@ const Bonus = lazy(() => import("./pages/Bonus"));
 
 // Loading fallback component
 const PageLoader = () => (
-  <div className="min-h-screen bg-[#000000] flex items-center justify-center">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lime-400" />
+  <div className="min-h-screen bg-background flex items-center justify-center transition-colors duration-300">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
   </div>
 );
 

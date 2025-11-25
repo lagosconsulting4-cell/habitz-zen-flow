@@ -47,18 +47,18 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
   };
 
   return (
-    <div className="mx-4 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+    <div className="mx-4 overflow-hidden rounded-2xl border border-border bg-card">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime-400/10">
-            <Target className="h-6 w-6 text-lime-400" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
+            <Target className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               META
             </p>
-            <p className="text-base font-semibold text-white">
+            <p className="text-base font-semibold text-foreground">
               {value ? formatGoalValue(value, config.primaryUnit, config) : "Definir meta"}
             </p>
           </div>
@@ -69,7 +69,7 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
       </div>
 
       {/* Body */}
-      <div className="border-t border-white/10 px-4 py-4 space-y-3">
+      <div className="border-t border-border px-4 py-4 space-y-3">
         {/* Input */}
         <div className="relative">
           <Input
@@ -80,10 +80,10 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
             onChange={(e) =>
               onChange(e.target.value ? Number(e.target.value) : undefined)
             }
-            className="w-full rounded-xl bg-black/30 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50 pr-16"
+            className="w-full rounded-xl bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50 pr-16"
             placeholder={`Ex: ${config.defaultValue || 10}`}
           />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-white/40 pointer-events-none">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
             {unitLabel}
           </div>
         </div>
@@ -98,8 +98,8 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
                 onClick={() => handleSuggestionClick(suggestion)}
                 className={`rounded-lg py-2.5 text-xs font-semibold transition-all duration-200 ${
                   value === suggestion
-                    ? "bg-lime-400 text-black"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                 }`}
               >
                 {suggestion} {unitLabel}
@@ -114,7 +114,7 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
             <div className="flex-shrink-0 mt-0.5">
               <span className="text-xs">💡</span>
             </div>
-            <p className="text-xs text-white/60 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               {config.helpText}
             </p>
           </div>

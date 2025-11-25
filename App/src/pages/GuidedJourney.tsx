@@ -23,13 +23,13 @@ const GuidedJourney = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#000000] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center transition-colors duration-300">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lime-400" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
         </motion.div>
       </div>
     );
@@ -38,7 +38,7 @@ const GuidedJourney = () => {
   const activeWeek = expandedWeek ?? Math.ceil((state?.last_completed_global_day ?? 0 + 1) / 7);
 
   return (
-    <div className="min-h-screen bg-[#000000] pb-20">
+    <div className="min-h-screen bg-background pb-20 transition-colors duration-300">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -46,30 +46,30 @@ const GuidedJourney = () => {
         className="container mx-auto px-4 py-6 max-w-4xl"
       >
         <div className="mb-8">
-          <h1 className="text-2xl font-bold uppercase tracking-wide text-white flex items-center gap-3 mb-2">
-            <Target className="w-8 h-8 text-lime-400" />
+          <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground flex items-center gap-3 mb-2">
+            <Target className="w-8 h-8 text-primary" />
             Modo Guiado
           </h1>
-          <p className="text-white/60">
+          <p className="text-muted-foreground">
             Evolua dia a dia com a trilha personalizada para sua primeira jornada de 4 semanas.
           </p>
         </div>
 
-        <Card className="rounded-2xl bg-white/5 border border-white/10 p-6 mb-8">
+        <Card className="rounded-2xl bg-card border border-border p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Progresso geral</h2>
-            <Badge className="bg-lime-400 text-black border-0 font-semibold">
+            <h2 className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Progresso geral</h2>
+            <Badge className="bg-primary text-primary-foreground border-0 font-semibold">
               Semana {Math.max(1, activeWeek)}
             </Badge>
           </div>
           <div className="flex items-center gap-4">
-            <Progress value={progressPercent} className="h-3 flex-1 bg-white/10" />
-            <span className="text-sm text-white font-semibold whitespace-nowrap">
+            <Progress value={progressPercent} className="h-3 flex-1 bg-muted" />
+            <span className="text-sm text-foreground font-semibold whitespace-nowrap">
               {progressPercent}%
             </span>
           </div>
           {state && (
-            <p className="text-xs text-white/60 mt-3">
+            <p className="text-xs text-muted-foreground mt-3">
               Jornada iniciada em {new Date(state.started_at + "T00:00:00").toLocaleDateString("pt-BR")}
             </p>
           )}
@@ -89,9 +89,9 @@ const GuidedJourney = () => {
                 transition={{ duration: 0.3, delay: index * 0.05 }}
               >
                 <Card
-                  className={`rounded-2xl bg-white/5 border border-white/10 p-6 transition-all duration-300 ${
-                    isExpanded ? "ring-2 ring-lime-400" : "hover:border-lime-400/50"
-                  } ${weekCompleted ? "border-lime-400/30" : ""}`}
+                  className={`rounded-2xl bg-card border border-border p-6 transition-all duration-300 ${
+                    isExpanded ? "ring-2 ring-primary" : "hover:border-primary/50"
+                  } ${weekCompleted ? "border-primary/30" : ""}`}
                 >
                   <button
                     type="button"
@@ -100,22 +100,22 @@ const GuidedJourney = () => {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="p-3 bg-lime-400/10 rounded-xl">
-                          <Target className="w-6 h-6 text-lime-400" />
+                        <div className="p-3 bg-primary/10 rounded-xl">
+                          <Target className="w-6 h-6 text-primary" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-semibold text-white">Semana {week}</h3>
-                          <p className="text-sm text-white/60">{weekTitle}</p>
+                          <h3 className="text-xl font-semibold text-foreground">Semana {week}</h3>
+                          <p className="text-sm text-muted-foreground">{weekTitle}</p>
                         </div>
                       </div>
-                      <Badge className={weekCompleted ? "bg-lime-400 text-black border-0 font-semibold" : "bg-white/5 text-white/60 border-white/10 font-semibold"}>
+                      <Badge className={weekCompleted ? "bg-primary text-primary-foreground border-0 font-semibold" : "bg-muted text-muted-foreground border-border font-semibold"}>
                         {weekCompleted ? "Concluída" : isExpanded ? "Explorando" : "Visualizar"}
                       </Badge>
                     </div>
                   </button>
 
                 {isExpanded && (
-                  <div className="mt-6 pt-6 border-t border-white/10 space-y-4">
+                  <div className="mt-6 pt-6 border-t border-border space-y-4">
                     {days.map((day) => {
                       const locked = day.status === "locked";
                       const completed = day.status === "completed";
@@ -126,54 +126,54 @@ const GuidedJourney = () => {
                           key={day.global_day}
                           className={`relative flex flex-col gap-4 p-4 rounded-xl transition-all duration-200 md:flex-row md:items-start ${
                             locked
-                              ? "bg-white/5 border border-dashed border-white/20"
+                              ? "bg-muted border border-dashed border-border"
                               : completed
-                              ? "bg-lime-400/10 border border-lime-400/30"
-                              : "bg-white/5 border border-white/10 hover:border-lime-400/50"
+                              ? "bg-primary/10 border border-primary/30"
+                              : "bg-secondary border border-border hover:border-primary/50"
                           }`}
                         >
                           {locked && (
-                            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-xl pointer-events-none" />
+                            <div className="absolute inset-0 bg-background/50 backdrop-blur-sm rounded-xl pointer-events-none" />
                           )}
 
                           <div className="flex w-full items-start gap-4 md:flex-1">
                             <div className="mt-1 flex-shrink-0">
                               {completed ? (
-                                <CheckCircle2 className="w-5 h-5 text-lime-400" />
+                                <CheckCircle2 className="w-5 h-5 text-primary" />
                               ) : available ? (
                                 day.isToday ? (
-                                  <Sparkles className="w-5 h-5 text-lime-400" />
+                                  <Sparkles className="w-5 h-5 text-primary" />
                                 ) : (
-                                  <Circle className="w-5 h-5 text-lime-400" />
+                                  <Circle className="w-5 h-5 text-primary" />
                                 )
                               ) : (
-                                <Lock className="w-5 h-5 text-white/40" />
+                                <Lock className="w-5 h-5 text-muted-foreground" />
                               )}
                             </div>
 
                             <div className="flex-1">
                               <div className="flex flex-col gap-2 mb-2 md:flex-row md:items-center md:justify-between">
                                 <div className="flex items-start gap-2 md:items-center">
-                                  <h5 className="font-semibold text-white leading-tight md:leading-normal">
+                                  <h5 className="font-semibold text-foreground leading-tight md:leading-normal">
                                     Dia {day.day}: {day.title}
                                   </h5>
                                   {day.isToday && available && (
-                                    <Badge className="bg-lime-400 text-black border-0 font-semibold text-xs">
+                                    <Badge className="bg-primary text-primary-foreground border-0 font-semibold text-xs">
                                       Hoje
                                     </Badge>
                                   )}
                                 </div>
                                 {day.estimated_minutes && (
-                                  <div className="flex items-center gap-1 text-xs text-white/60">
+                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                     <Clock className="w-3 h-3" />
                                     {day.estimated_minutes} min
                                   </div>
                                 )}
                               </div>
-                              <p className="text-sm text-white/60 mb-3">
+                              <p className="text-sm text-muted-foreground mb-3">
                                 {day.description ?? "Exercício guiado para o dia."}
                               </p>
-                              <Badge className="bg-white/5 text-white/60 border-white/10 text-xs font-semibold">
+                              <Badge className="bg-muted text-muted-foreground border-border text-xs font-semibold">
                                 {day.type === "action"
                                   ? "Ação"
                                   : day.type === "reflection"
@@ -187,8 +187,8 @@ const GuidedJourney = () => {
                             <Button
                               className={`w-full font-semibold ${
                                 completed
-                                  ? "bg-white/10 border border-white/20 hover:bg-white/20 text-white"
-                                  : "bg-lime-400 text-black hover:bg-lime-500"
+                                  ? "bg-muted border border-border hover:bg-muted/80 text-foreground"
+                                  : "bg-primary text-primary-foreground hover:bg-primary/90"
                               }`}
                               disabled={locked || completed}
                               onClick={() => completeDay(day.global_day)}

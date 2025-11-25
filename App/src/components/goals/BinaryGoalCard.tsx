@@ -19,17 +19,17 @@ interface BinaryGoalCardProps {
 
 export const BinaryGoalCard: React.FC<BinaryGoalCardProps> = ({ config }) => {
   return (
-    <div className="mx-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+    <div className="mx-4 rounded-2xl border border-border bg-card px-4 py-4">
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 mt-0.5">
-          <Info className="h-5 w-5 text-lime-400" />
+          <Info className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1">
-          <p className="text-sm font-medium text-white/80">
+          <p className="text-sm font-medium text-foreground/80">
             Hábito de confirmação
           </p>
           {config.helpText && (
-            <p className="mt-1.5 text-xs text-white/60 leading-relaxed">
+            <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
               {config.helpText}
             </p>
           )}

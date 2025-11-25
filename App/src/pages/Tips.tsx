@@ -44,18 +44,18 @@ const Tips = () => {
   const getImpactColor = (impact: TipItem["impact"]) => {
     switch (impact) {
       case "Alto":
-        return "bg-lime-400 text-black border-lime-400";
+        return "bg-primary text-primary-foreground border-primary";
       case "Moderado":
-        return "bg-lime-400/30 text-lime-400 border-lime-400/30";
+        return "bg-primary/30 text-primary border-primary/30";
       case "Leve":
-        return "bg-lime-400/10 text-lime-400 border-lime-400/30";
+        return "bg-primary/10 text-primary border-primary/30";
       default:
-        return "bg-white/5 text-white/60 border-white/10";
+        return "bg-muted text-muted-foreground border-border";
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#000000] pb-20">
+    <div className="min-h-screen bg-background pb-20 transition-colors duration-300">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -63,11 +63,11 @@ const Tips = () => {
         className="container mx-auto px-4 py-6 max-w-4xl"
       >
         <div className="mb-8">
-          <h1 className="text-2xl font-bold uppercase tracking-wide text-white flex items-center gap-3 mb-2">
-            <Lightbulb className="w-8 h-8 text-lime-400" />
+          <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground flex items-center gap-3 mb-2">
+            <Lightbulb className="w-8 h-8 text-primary" />
             Dicas Práticas
           </h1>
-          <p className="text-white/60">
+          <p className="text-muted-foreground">
             Rotina e nutrição para desenvolvimento masculino
           </p>
         </div>
@@ -77,8 +77,8 @@ const Tips = () => {
             onClick={() => setActiveTab("rotina")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
               activeTab === "rotina"
-                ? "bg-lime-400 text-black"
-                : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary border border-border text-foreground hover:bg-muted"
             }`}
           >
             <Target className="w-4 h-4" />
@@ -88,8 +88,8 @@ const Tips = () => {
             onClick={() => setActiveTab("nutricao")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
               activeTab === "nutricao"
-                ? "bg-lime-400 text-black"
-                : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary border border-border text-foreground hover:bg-muted"
             }`}
           >
             <Utensils className="w-4 h-4" />
@@ -105,22 +105,22 @@ const Tips = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
             >
-              <Card className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:border-lime-400/50 transition-all duration-300">
+              <Card className="rounded-2xl bg-card border border-border p-6 hover:border-primary/50 transition-all duration-300">
                 <div className="flex items-start gap-3 mb-3">
-                  <div className="p-2 bg-lime-400/10 rounded-lg">
+                  <div className="p-2 bg-primary/10 rounded-lg">
                     {getTabIcon(activeTab)}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-white">{tip.title}</h3>
-                    <p className="text-sm text-white/60">{getSecondaryLabel(tip)}</p>
+                    <h3 className="font-semibold text-lg text-foreground">{tip.title}</h3>
+                    <p className="text-sm text-muted-foreground">{getSecondaryLabel(tip)}</p>
                   </div>
                 </div>
 
-                <p className="text-white/60 mb-4">{tip.description}</p>
+                <p className="text-muted-foreground mb-4">{tip.description}</p>
 
                 <div className="flex items-center gap-3 flex-wrap">
                   {isRoutineTip(tip) && (
-                    <div className="flex items-center gap-1 text-sm text-white/60">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Clock className="w-4 h-4" />
                       <span>{tip.time_suggestion}</span>
                     </div>

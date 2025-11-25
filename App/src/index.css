@@ -5,112 +5,108 @@
 /* Habitz Design System - Clean & Minimal for Young Men */
 
 @layer base {
+  /* ═══════════════════════════════════════════════════════════════════════════
+     HABITZ PREMIUM THEME SYSTEM
+     Light Mode: Clean, minimal, premium off-white aesthetic
+     Dark Mode: Deep black with lime accents
+     ═══════════════════════════════════════════════════════════════════════════ */
+
   :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.1450 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.1450 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.1450 0 0);
-    --primary: oklch(0.8636 0.2207 130.1457);
-    --primary-foreground: oklch(0.9850 0 0);
-    --secondary: oklch(0.9700 0 0);
-    --secondary-foreground: oklch(0.2050 0 0);
-    --muted: oklch(0.9700 0 0);
-    --muted-foreground: oklch(0.5560 0 0);
-    --accent: oklch(0.9700 0 0);
-    --accent-foreground: oklch(0.2050 0 0);
-    --destructive: oklch(0.5770 0.2450 27.3250);
-    --destructive-foreground: oklch(1 0 0);
-    --border: oklch(0.9220 0 0);
-    --input: oklch(0.9220 0 0);
-    --ring: oklch(0.7080 0 0);
+    /* Light Mode - Premium Minimalist */
+    --background: #FAFAFA;           /* Off-white elegante */
+    --foreground: #1A1A1A;           /* Cinza quase preto */
+    --card: #FFFFFF;                 /* Branco puro para cards */
+    --card-foreground: #1A1A1A;
+    --popover: #FFFFFF;
+    --popover-foreground: #1A1A1A;
+    --primary: #65A30D;              /* Lime-600 para melhor contraste em light */
+    --primary-foreground: #FFFFFF;
+    --secondary: #F5F5F5;            /* Cinza muito claro */
+    --secondary-foreground: #1A1A1A;
+    --muted: #F0F0F0;                /* Cinza neutro para backgrounds sutis */
+    --muted-foreground: #737373;     /* Cinza médio para texto secundário */
+    --accent: #65A30D;               /* Mesmo lime do primary */
+    --accent-foreground: #FFFFFF;
+    --destructive: #DC2626;          /* Vermelho para erros */
+    --destructive-foreground: #FFFFFF;
+    --border: #E5E5E5;               /* Borda sutil */
+    --input: #E5E5E5;
+    --ring: #65A30D;                 /* Ring com accent color */
     --chart-1: oklch(0.8100 0.1000 252);
     --chart-2: oklch(0.6200 0.1900 260);
     --chart-3: oklch(0.5500 0.2200 263);
     --chart-4: oklch(0.4900 0.2200 264);
     --chart-5: oklch(0.4200 0.1800 266);
-    --sidebar: oklch(0.9850 0 0);
-    --sidebar-foreground: oklch(0.1450 0 0);
-    --sidebar-primary: oklch(0.2050 0 0);
-    --sidebar-primary-foreground: oklch(0.9850 0 0);
-    --sidebar-accent: oklch(0.9700 0 0);
-    --sidebar-accent-foreground: oklch(0.2050 0 0);
-    --sidebar-border: oklch(0.9220 0 0);
-    --sidebar-ring: oklch(0.7080 0 0);
+    --sidebar: #FFFFFF;
+    --sidebar-foreground: #1A1A1A;
+    --sidebar-primary: #65A30D;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #F5F5F5;
+    --sidebar-accent-foreground: #1A1A1A;
+    --sidebar-border: #E5E5E5;
+    --sidebar-ring: #65A30D;
     --font-sans: Alexandria, ui-sans-serif, sans-serif, system-ui;
     --font-serif: Alike, ui-serif, serif;
     --font-mono: Cousine, ui-monospace, monospace;
     --radius: 0.625rem;
-    --shadow-x: 0;
-    --shadow-y: 1px;
-    --shadow-blur: 3px;
-    --shadow-spread: 0px;
-    --shadow-opacity: 0.1;
-    --shadow-color: oklch(0 0 0);
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 2px 4px -1px hsl(0 0% 0% / 0.10);
-    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.03);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.04);
+    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.06), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
+    --shadow: 0 2px 4px 0px hsl(0 0% 0% / 0.06), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.08), 0 2px 4px -2px hsl(0 0% 0% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.08), 0 4px 6px -4px hsl(0 0% 0% / 0.06);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.08), 0 8px 10px -6px hsl(0 0% 0% / 0.06);
+    --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.15);
     --tracking-normal: 0em;
     --spacing: 0.25rem;
   }
 
   .dark {
-    --background: oklch(0.1450 0 0);
-    --foreground: oklch(0.9850 0 0);
-    --card: oklch(0.2050 0 0);
-    --card-foreground: oklch(0.9850 0 0);
-    --popover: oklch(0.2690 0 0);
-    --popover-foreground: oklch(0.9850 0 0);
-    --primary: oklch(0.8636 0.2207 130.1457);
-    --primary-foreground: oklch(0 0 0);
-    --secondary: oklch(0.3582 0.0028 17.2855);
-    --secondary-foreground: oklch(1.0000 0 0);
-    --muted: oklch(0.2690 0 0);
-    --muted-foreground: oklch(0.7080 0 0);
-    --accent: oklch(0.3710 0 0);
-    --accent-foreground: oklch(0.9850 0 0);
-    --destructive: oklch(0.7040 0.1910 22.2160);
-    --destructive-foreground: oklch(0.9850 0 0);
-    --border: oklch(0.2750 0 0);
-    --input: oklch(0.3250 0 0);
-    --ring: oklch(0.5560 0 0);
+    /* Dark Mode - Premium Black with Lime Accents */
+    --background: #000000;           /* Preto puro */
+    --foreground: #FFFFFF;           /* Branco puro */
+    --card: #0A0A0A;                 /* Preto levemente mais claro */
+    --card-foreground: #FFFFFF;
+    --popover: #0A0A0A;
+    --popover-foreground: #FFFFFF;
+    --primary: #A3E635;              /* Lime-400 vibrante */
+    --primary-foreground: #000000;
+    --secondary: #1A1A1A;            /* Cinza muito escuro */
+    --secondary-foreground: #FFFFFF;
+    --muted: #1A1A1A;                /* Para backgrounds sutis */
+    --muted-foreground: #A3A3A3;     /* Cinza médio para texto secundário */
+    --accent: #A3E635;               /* Lime accent */
+    --accent-foreground: #000000;
+    --destructive: #EF4444;          /* Vermelho para erros */
+    --destructive-foreground: #FFFFFF;
+    --border: #262626;               /* Borda sutil */
+    --input: #262626;
+    --ring: #A3E635;                 /* Ring com accent color */
     --chart-1: oklch(0.7971 0.2410 139.4915);
     --chart-2: oklch(0.2740 0.0720 132.1090);
     --chart-3: oklch(0.5942 0.1872 139.6370);
     --chart-4: oklch(0.7495 0.2128 134.5907);
     --chart-5: oklch(0.6480 0.2000 131.6840);
-    --sidebar: oklch(0.2050 0 0);
-    --sidebar-foreground: oklch(0.9850 0 0);
-    --sidebar-primary: oklch(0.5317 0.1243 136.4459);
-    --sidebar-primary-foreground: oklch(0.9850 0 0);
-    --sidebar-accent: oklch(0.2690 0 0);
-    --sidebar-accent-foreground: oklch(0.9850 0 0);
-    --sidebar-border: oklch(0.2750 0 0);
-    --sidebar-ring: oklch(0.4390 0 0);
+    --sidebar: #0A0A0A;
+    --sidebar-foreground: #FFFFFF;
+    --sidebar-primary: #A3E635;
+    --sidebar-primary-foreground: #000000;
+    --sidebar-accent: #1A1A1A;
+    --sidebar-accent-foreground: #FFFFFF;
+    --sidebar-border: #262626;
+    --sidebar-ring: #A3E635;
     --font-sans: Alexandria, ui-sans-serif, sans-serif, system-ui;
     --font-serif: Alike, ui-serif, serif;
     --font-mono: Cousine, ui-monospace, monospace;
     --radius: 0.625rem;
-    --shadow-x: 0;
-    --shadow-y: 1px;
-    --shadow-blur: 3px;
-    --shadow-spread: 0px;
-    --shadow-opacity: 0.1;
-    --shadow-color: oklch(0 0 0);
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 2px 4px -1px hsl(0 0% 0% / 0.10);
-    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.20);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.30), 0 1px 2px -1px hsl(0 0% 0% / 0.30);
+    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.30), 0 1px 2px -1px hsl(0 0% 0% / 0.30);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.35), 0 2px 4px -2px hsl(0 0% 0% / 0.30);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.35), 0 4px 6px -4px hsl(0 0% 0% / 0.30);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.35), 0 8px 10px -6px hsl(0 0% 0% / 0.30);
+    --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.50);
   }
 
   /* Tema Dark Premium para Dashboard - Match CreateHabit */
@@ -227,7 +223,9 @@
   }
 
   .glass-card {
-    @apply bg-card/80 backdrop-blur-sm border border-border/50 rounded-3xl;
+    @apply backdrop-blur-sm border rounded-3xl;
+    background-color: color-mix(in srgb, var(--card) 80%, transparent);
+    border-color: color-mix(in srgb, var(--border) 50%, transparent);
   }
 
   .gradient-text {

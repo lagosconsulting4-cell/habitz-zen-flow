@@ -81,20 +81,20 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#000000] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center transition-colors duration-300">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="text-white text-lg font-semibold">Carregando seus hábitos...</div>
+          <div className="text-foreground text-lg font-semibold">Carregando seus hábitos...</div>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] pb-20 md:pb-6">
+    <div className="min-h-screen bg-background pb-20 md:pb-6 transition-colors duration-300">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -109,8 +109,8 @@ const Dashboard = () => {
               transition={{ duration: 0.3 }}
               className="col-span-2 text-center py-8"
             >
-              <p className="text-white/60 text-sm mb-2">Nenhum hábito para hoje</p>
-              <p className="text-white/40 text-xs">Adicione um hábito para começar</p>
+              <p className="text-muted-foreground text-sm mb-2">Nenhum hábito para hoje</p>
+              <p className="text-muted-foreground/60 text-xs">Adicione um hábito para começar</p>
             </motion.div>
           )}
 

@@ -133,10 +133,10 @@ const Calendar = () => {
   };
 
   const getCompletionColor = (rate: number) => {
-    if (rate >= 100) return "bg-lime-400";
-    if (rate >= 75) return "bg-lime-400/70";
-    if (rate >= 50) return "bg-lime-400/50";
-    if (rate > 0) return "bg-lime-400/30";
+    if (rate >= 100) return "bg-primary";
+    if (rate >= 75) return "bg-primary/70";
+    if (rate >= 50) return "bg-primary/50";
+    if (rate > 0) return "bg-primary/30";
     return "bg-transparent";
   };
 
@@ -191,20 +191,20 @@ const Calendar = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#000000] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center transition-colors duration-300">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lime-400" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] pb-20">
+    <div className="min-h-screen bg-background pb-20 transition-colors duration-300">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -213,11 +213,11 @@ const Calendar = () => {
       >
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold uppercase tracking-wide text-white flex items-center gap-3">
-              <CalendarIcon className="w-8 h-8 text-lime-400" />
+            <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground flex items-center gap-3">
+              <CalendarIcon className="w-8 h-8 text-primary" />
               Calendário
             </h1>
-            <p className="text-white/60">
+            <p className="text-muted-foreground">
               Acompanhe seu progresso ao longo do tempo
             </p>
           </div>
@@ -237,13 +237,13 @@ const Calendar = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-                <Card className="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <Card className="rounded-2xl bg-card border border-border p-4">
                   <div className="text-center">
-                    <div className="p-3 bg-lime-400/10 rounded-xl mx-auto w-fit mb-3">
-                      <Icon className="w-6 h-6 text-lime-400" />
+                    <div className="p-3 bg-primary/10 rounded-xl mx-auto w-fit mb-3">
+                      <Icon className="w-6 h-6 text-primary" />
                     </div>
-                    <p className="text-2xl font-bold text-white">{stat.value}</p>
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mt-1">
+                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mt-1">
                       {stat.label}
                     </p>
                   </div>
@@ -258,10 +258,10 @@ const Calendar = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.15 }}
         >
-          <Card className="rounded-2xl bg-white/5 border border-white/10 mb-8">
+          <Card className="rounded-2xl bg-card border border-border mb-8">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-xl font-bold uppercase tracking-wide text-white">
+                <CardTitle className="text-xl font-bold uppercase tracking-wide text-foreground">
                   {format(currentDate, "MMMM yyyy", { locale: ptBR })}
                 </CardTitle>
                 <div className="flex items-center gap-2">
@@ -269,7 +269,7 @@ const Calendar = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setCurrentDate(subMonths(currentDate, 1))}
-                    className="bg-white/5 border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-all duration-200"
+                    className="bg-secondary border-border hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
@@ -277,7 +277,7 @@ const Calendar = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setCurrentDate(addMonths(currentDate, 1))}
-                    className="bg-white/5 border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-all duration-200"
+                    className="bg-secondary border-border hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </Button>
@@ -307,9 +307,9 @@ const Calendar = () => {
                     className={`
                       aspect-square p-2 rounded-lg text-sm font-medium relative
                       transition-all duration-200 hover:scale-105
-                      ${isCurrentMonth ? "text-white" : "text-white/40"}
-                      ${isSelected ? "ring-2 ring-lime-400" : ""}
-                      ${isToday ? "bg-lime-400 text-black font-bold" : "hover:bg-white/10"}
+                      ${isCurrentMonth ? "text-foreground" : "text-muted-foreground/40"}
+                      ${isSelected ? "ring-2 ring-primary" : ""}
+                      ${isToday ? "bg-primary text-primary-foreground font-bold" : "hover:bg-muted"}
                     `}
                   >
                     <span className="relative z-10">{format(day, "d")}</span>
@@ -328,18 +328,18 @@ const Calendar = () => {
       </motion.div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg bg-[#000000] border-white/10">
+        <DialogContent className="max-w-lg bg-background border-border">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold uppercase tracking-wide text-white">
+            <DialogTitle className="text-xl font-bold uppercase tracking-wide text-foreground">
               {selectedDate ? format(selectedDate, "dd 'de' MMMM", { locale: ptBR }) : ""}
             </DialogTitle>
-            <DialogDescription className="text-white/60">
+            <DialogDescription className="text-muted-foreground">
               Visualize e atualize os habitos programados para este dia
             </DialogDescription>
           </DialogHeader>
 
           {selectedDayHabits.length === 0 ? (
-            <p className="text-sm text-white/60">
+            <p className="text-sm text-muted-foreground">
               Nenhum habito foi programado para este dia.
             </p>
           ) : (
@@ -349,14 +349,14 @@ const Calendar = () => {
                 return (
                   <div
                     key={habit.id}
-                    className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4"
+                    className="flex items-center justify-between rounded-2xl border border-border bg-card p-4"
                   >
                     <div>
-                      <p className="font-semibold text-white flex items-center gap-2">
+                      <p className="font-semibold text-foreground flex items-center gap-2">
                         <span className="text-xl">{habit.emoji}</span>
                         {habit.name}
                       </p>
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mt-1">
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mt-1">
                         {habit.category} • {habit.period === "morning" ? "Manha" : habit.period === "afternoon" ? "Tarde" : "Noite"}
                       </p>
                     </div>
@@ -364,8 +364,8 @@ const Calendar = () => {
                       onClick={() => handleToggleHabit(habit.id)}
                       className={`flex items-center gap-2 font-semibold transition-all duration-200 ${
                         isCompleted
-                          ? "bg-lime-400 text-black hover:bg-lime-500"
-                          : "bg-white/5 border border-white/10 hover:bg-white/10 text-white"
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                          : "bg-secondary border border-border hover:bg-muted text-foreground"
                       }`}
                     >
                       {isCompleted ? (

@@ -477,7 +477,7 @@ const handleSave = async () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#000000] pb-20">
+    <div className="min-h-screen bg-background pb-20 transition-colors duration-300">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -486,38 +486,38 @@ const handleSave = async () => {
       >
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold uppercase tracking-wide text-white flex items-center gap-3 mb-2">
-              <Target className="w-8 h-8 text-lime-400" />
+            <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground flex items-center gap-3 mb-2">
+              <Target className="w-8 h-8 text-primary" />
               Meus Hábitos
             </h1>
-            <p className="text-sm text-white/60">
+            <p className="text-sm text-muted-foreground">
               Gerencie seus hábitos, agenda semanal e conclua tarefas do dia.
             </p>
           </div>
-          <Button asChild className="bg-lime-400 text-black hover:bg-lime-500 font-semibold">
+          <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
             <Link to="/create">Adicionar novo hábito</Link>
           </Button>
         </div>
 
-        <Card className="rounded-2xl bg-white/5 border border-white/10 p-4 mb-6">
+        <Card className="rounded-2xl bg-card border border-border p-4 mb-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <Input
               placeholder="Buscar hábito"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="md:max-w-sm bg-white/5 border-white/10 text-white placeholder:text-white/40"
+              className="md:max-w-sm bg-secondary border-border text-foreground placeholder:text-muted-foreground"
             />
             <Tabs value={status} onValueChange={(value) => setStatus(value as typeof status)}>
-              <TabsList className="grid grid-cols-2 rounded-full bg-white/5 p-1">
+              <TabsList className="grid grid-cols-2 rounded-full bg-muted p-1">
                 <TabsTrigger
                   value="active"
-                  className="rounded-full px-4 py-1.5 text-sm font-medium text-white/60 transition-all data-[state=active]:bg-lime-400 data-[state=active]:text-black data-[state=active]:font-semibold"
+                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-semibold"
                 >
                   Ativos
                 </TabsTrigger>
                 <TabsTrigger
                   value="archived"
-                  className="rounded-full px-4 py-1.5 text-sm font-medium text-white/60 transition-all data-[state=active]:bg-red-500 data-[state=active]:text-white data-[state=active]:font-semibold"
+                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground data-[state=active]:font-semibold"
                 >
                   Arquivados
                 </TabsTrigger>
@@ -532,8 +532,8 @@ const handleSave = async () => {
                 type="button"
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
                   selectedCategories.includes(category)
-                    ? "bg-lime-400 text-black"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/10"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-muted-foreground hover:bg-muted hover:text-foreground border border-border"
                 }`}
                 onClick={() =>
                   setSelectedCategories((prev) =>
@@ -555,8 +555,8 @@ const handleSave = async () => {
                 type="button"
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
                   selectedPeriods.includes(period.id)
-                    ? "bg-lime-400 text-black"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/10"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-muted-foreground hover:bg-muted hover:text-foreground border border-border"
                 }`}
                 onClick={() =>
                   setSelectedPeriods((prev) =>
@@ -573,13 +573,13 @@ const handleSave = async () => {
         </Card>
 
         {loading ? (
-          <Card className="rounded-2xl bg-white/5 border border-white/10 p-8 text-center">
-            <Loader2 className="mx-auto h-8 w-8 animate-spin text-lime-400" />
+          <Card className="rounded-2xl bg-card border border-border p-8 text-center">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
           </Card>
         ) : filteredHabits.length === 0 ? (
-          <Card className="rounded-2xl bg-white/5 border border-white/10 p-8 text-center">
-            <h2 className="text-lg font-bold uppercase tracking-wide text-white mb-2">Nenhum hábito encontrado</h2>
-            <p className="text-sm text-white/60">
+          <Card className="rounded-2xl bg-card border border-border p-8 text-center">
+            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-2">Nenhum hábito encontrado</h2>
+            <p className="text-sm text-muted-foreground">
               Ajuste os filtros ou cadastre um novo hábito para começar.
             </p>
           </Card>
@@ -595,23 +595,23 @@ const handleSave = async () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-              <Card className={cn("rounded-2xl bg-white/5 border p-5 transition-colors duration-200", archived ? "border-red-500/30 shadow-lg" : "border-white/10")}>
+              <Card className={cn("rounded-2xl bg-card border p-5 transition-colors duration-200", archived ? "border-destructive/30 shadow-lg" : "border-border")}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
                     <div className="text-3xl">{habit.emoji}</div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-bold text-white">{habit.name}</h3>
+                        <h3 className="text-xl font-bold text-foreground">{habit.name}</h3>
                       </div>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/60">
-                        <span className="rounded-md px-2 py-1 bg-white/5 border border-white/10 font-medium">
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <span className="rounded-md px-2 py-1 bg-secondary border border-border font-medium">
                           {categories.find((item) => item.id === habit.category)?.label ?? habit.category}
                         </span>
-                        <span className="rounded-md px-2 py-1 bg-white/5 border border-white/10 font-medium">
+                        <span className="rounded-md px-2 py-1 bg-secondary border border-border font-medium">
                           {periods.find((period) => period.id === habit.period)?.label ?? habit.period}
                         </span>
                         <div className="flex items-center gap-1">
-                          <Sparkles className="h-3 w-3 text-lime-400" />
+                          <Sparkles className="h-3 w-3 text-primary" />
                           <span className="font-semibold">{habit.streak} dias de sequência</span>
                         </div>
                       </div>
@@ -623,8 +623,8 @@ const handleSave = async () => {
                               key={`${habit.id}-${label}`}
                               className={`rounded-md px-2 py-1 text-xs font-semibold transition ${
                                 active
-                                  ? "bg-lime-400/20 text-lime-400 border border-lime-400/30"
-                                  : "bg-white/5 text-white/40 border border-white/10"
+                                  ? "bg-primary/20 text-primary border border-primary/30"
+                                  : "bg-secondary text-muted-foreground border border-border"
                               }`}
                             >
                               {label}
@@ -636,7 +636,7 @@ const handleSave = async () => {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-9 w-9 text-white hover:bg-white/10">
+                      <Button variant="ghost" size="icon" className="h-9 w-9 text-foreground hover:bg-muted">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -678,24 +678,24 @@ const handleSave = async () => {
           <ScrollArea className="flex-1 pr-4">
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-semibold uppercase tracking-wide text-white">Nome</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-foreground">Nome</label>
                 <Input
                   value={formState.name}
                   onChange={(event) => setFormState((prev) => ({ ...prev, name: event.target.value }))}
                   placeholder="Ex: Meditar 10 minutos"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                  className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold uppercase tracking-wide text-white">Emoji</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-foreground">Emoji</label>
                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                   {HABIT_EMOJIS.map((emoji) => (
                     <Button
                       key={emoji}
                       type="button"
                       variant={formState.emoji === emoji ? "default" : "outline"}
-                      className={`h-10 ${formState.emoji === emoji ? "bg-lime-400 text-black hover:bg-lime-500" : "bg-white/5 border-white/10 hover:bg-white/10"}`}
+                      className={`h-10 ${formState.emoji === emoji ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-secondary border-border hover:bg-muted"}`}
                       onClick={() => setFormState((prev) => ({ ...prev, emoji }))}
                     >
                       {emoji}
@@ -705,7 +705,7 @@ const handleSave = async () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold uppercase tracking-wide text-white">Categoria</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-foreground">Categoria</label>
                 <div className="flex flex-wrap gap-2">
                   {categories.map((category) => (
                     <button
@@ -713,8 +713,8 @@ const handleSave = async () => {
                       type="button"
                       className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
                         formState.category === category.id
-                          ? "bg-lime-400 text-black"
-                          : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/10"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-muted-foreground hover:bg-muted hover:text-foreground border border-border"
                       }`}
                       onClick={() => setFormState((prev) => ({ ...prev, category: category.id }))}
                     >
@@ -725,7 +725,7 @@ const handleSave = async () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold uppercase tracking-wide text-white">Ícone</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-foreground">Ícone</label>
                 <div className="flex flex-wrap gap-2">
                   {iconKeys.map((key) => {
                     const Icon = getHabitIcon(key);
@@ -735,7 +735,7 @@ const handleSave = async () => {
                         type="button"
                         variant={formState.icon_key === key ? "default" : "outline"}
                         size="sm"
-                        className={`gap-2 ${formState.icon_key === key ? "bg-lime-400 text-black hover:bg-lime-500" : "bg-white/5 border-white/10 hover:bg-white/10"}`}
+                        className={`gap-2 ${formState.icon_key === key ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-secondary border-border hover:bg-muted"}`}
                         onClick={() => setFormState((prev) => ({ ...prev, icon_key: key }))}
                       >
                         {Icon ? <Icon className="h-4 w-4" /> : "?"}
@@ -747,7 +747,7 @@ const handleSave = async () => {
                     type="button"
                     variant={!formState.icon_key ? "default" : "ghost"}
                     size="sm"
-                    className={!formState.icon_key ? "bg-lime-400 text-black hover:bg-lime-500" : "hover:bg-white/10"}
+                    className={!formState.icon_key ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-muted"}
                     onClick={() => setFormState((prev) => ({ ...prev, icon_key: null }))}
                   >
                     Usar emoji
@@ -756,31 +756,31 @@ const handleSave = async () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold uppercase tracking-wide text-white">Cor do hábito (opcional)</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-foreground">Cor do hábito (opcional)</label>
                 <Input
                   type="color"
                   value={formState.color ?? "#000000"}
                   onChange={(event) => setFormState((prev) => ({ ...prev, color: event.target.value || null }))}
-                  className="h-10 w-full bg-white/5 border-white/10"
+                  className="h-10 w-full bg-secondary border-border"
                 />
                 <Input
                   type="text"
                   value={formState.color ?? ""}
                   onChange={(event) => setFormState((prev) => ({ ...prev, color: event.target.value || null }))}
                   placeholder="Ou digite ex: #34d399"
-                  className="mt-2 bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                  className="mt-2 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold uppercase tracking-wide text-white">Período</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-foreground">Período</label>
                 <div className="flex gap-2">
                   {periods.map((period) => (
                     <Button
                       key={period.id}
                       type="button"
                       variant={formState.period === period.id ? "default" : "outline"}
-                      className={formState.period === period.id ? "bg-lime-400 text-black hover:bg-lime-500 font-semibold" : "bg-white/5 border-white/10 hover:bg-white/10"}
+                      className={formState.period === period.id ? "bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" : "bg-secondary border-border hover:bg-muted"}
                       onClick={() => setFormState((prev) => ({ ...prev, period: period.id as HabitFormState["period"] }))}
                     >
                       {period.label}
@@ -790,7 +790,7 @@ const handleSave = async () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold uppercase tracking-wide text-white">Meta (opcional)</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-foreground">Meta (opcional)</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Input
                     type="number"
@@ -804,7 +804,7 @@ const handleSave = async () => {
                       }))
                     }
                     placeholder="Ex.: 5000"
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                    className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                   />
                   <div className="flex flex-wrap gap-2">
                     {["none", "steps", "minutes", "km", "custom"].map((u) => (
@@ -813,7 +813,7 @@ const handleSave = async () => {
                         type="button"
                         variant={formState.unit === u ? "default" : "outline"}
                         size="sm"
-                        className={formState.unit === u ? "bg-lime-400 text-black hover:bg-lime-500 font-semibold" : "bg-white/5 border-white/10 hover:bg-white/10"}
+                        className={formState.unit === u ? "bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" : "bg-secondary border-border hover:bg-muted"}
                         onClick={() => setFormState((prev) => ({ ...prev, unit: u as HabitFormState["unit"] }))}
                       >
                         {u}
@@ -824,9 +824,9 @@ const handleSave = async () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold uppercase tracking-wide text-white">Frequência</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-foreground">Frequência</label>
                 <select
-                  className="w-full rounded-md border px-3 py-2 text-sm bg-white/5 border-white/10 text-white"
+                  className="w-full rounded-md border px-3 py-2 text-sm bg-secondary border-border text-foreground"
                   value={formState.frequency_type ?? "fixed_days"}
                   onChange={(event) =>
                     setFormState((prev) => ({
@@ -895,7 +895,7 @@ const handleSave = async () => {
 
               {(formState.frequency_type === "fixed_days" || !formState.frequency_type) && (
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold uppercase tracking-wide text-white">Dias da semana</label>
+                  <label className="text-sm font-semibold uppercase tracking-wide text-foreground">Dias da semana</label>
                   <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
                     {weekdayLabels.map((label, index) => {
                       const active = formState.days_of_week.includes(index);
@@ -904,7 +904,7 @@ const handleSave = async () => {
                           key={label}
                           pressed={active}
                           onPressedChange={() => handleToggleDay(index)}
-                          className={active ? "bg-lime-400/20 text-lime-400 border border-lime-400/30 data-[state=on]:bg-lime-400/20 data-[state=on]:text-lime-400" : "bg-white/5 text-white/60 border border-white/10"}
+                          className={active ? "bg-primary/20 text-primary border border-primary/30 data-[state=on]:bg-primary/20 data-[state=on]:text-primary" : "bg-secondary text-muted-foreground border border-border"}
                         >
                           {label}
                         </Toggle>
@@ -1075,9 +1075,9 @@ const handleSave = async () => {
 
           <SheetFooter className="flex justify-between gap-3">
             <SheetClose asChild>
-              <Button variant="outline" className="bg-white/5 border-white/10 hover:bg-white/10">Cancelar</Button>
+              <Button variant="outline" className="bg-secondary border-border hover:bg-muted">Cancelar</Button>
             </SheetClose>
-            <Button onClick={handleSave} disabled={isSaving} className="bg-lime-400 text-black hover:bg-lime-500 font-semibold">
+            <Button onClick={handleSave} disabled={isSaving} className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Salvar alterações
             </Button>

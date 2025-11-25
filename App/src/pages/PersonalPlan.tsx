@@ -118,22 +118,22 @@ const PersonalPlan = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#000000] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center transition-colors duration-300">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
           className="text-center"
         >
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lime-400 mx-auto mb-4" />
-          <p className="text-white/60">Carregando seu plano personalizado...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Carregando seu plano personalizado...</p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] pb-20">
+    <div className="min-h-screen bg-background pb-20 transition-colors duration-300">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -144,45 +144,45 @@ const PersonalPlan = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-white">
+              <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground">
                 Seu Programa de 30 Dias
               </h1>
-              <p className="text-white/60 mt-2">
+              <p className="text-muted-foreground mt-2">
                 Plano personalizado para transformar sua rotina com TDAH
               </p>
             </div>
-            <Badge className="bg-lime-400 text-black border-0 text-base px-4 py-2 font-semibold">
+            <Badge className="bg-primary text-primary-foreground border-0 text-base px-4 py-2 font-semibold">
               <Award className="w-5 h-5 mr-2" />
               {programProgress.percentage}% concluído
             </Badge>
           </div>
 
           {/* Progress Bar */}
-          <Card className="rounded-2xl bg-white/5 border border-white/10 p-6">
+          <Card className="rounded-2xl bg-card border border-border p-6">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Progresso geral</span>
-                <span className="text-white font-semibold">{programProgress.completedLessons} de {programProgress.totalLessons} aulas</span>
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Progresso geral</span>
+                <span className="text-foreground font-semibold">{programProgress.completedLessons} de {programProgress.totalLessons} aulas</span>
               </div>
-              <Progress value={programProgress.percentage} className="h-3 bg-white/10" />
+              <Progress value={programProgress.percentage} className="h-3 bg-muted" />
             </div>
           </Card>
         </div>
 
       {/* Timeline by Weeks */}
       <Tabs defaultValue="week1" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-white/5 border border-white/10 p-1">
-          <TabsTrigger value="week1" className="data-[state=active]:bg-lime-400 data-[state=active]:text-black font-semibold">Semana 1</TabsTrigger>
-          <TabsTrigger value="week2" className="data-[state=active]:bg-lime-400 data-[state=active]:text-black font-semibold">Semana 2</TabsTrigger>
-          <TabsTrigger value="week3" className="data-[state=active]:bg-lime-400 data-[state=active]:text-black font-semibold">Semana 3</TabsTrigger>
-          <TabsTrigger value="week4" className="data-[state=active]:bg-lime-400 data-[state=active]:text-black font-semibold">Semana 4</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 bg-muted border border-border p-1">
+          <TabsTrigger value="week1" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold">Semana 1</TabsTrigger>
+          <TabsTrigger value="week2" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold">Semana 2</TabsTrigger>
+          <TabsTrigger value="week3" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold">Semana 3</TabsTrigger>
+          <TabsTrigger value="week4" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold">Semana 4</TabsTrigger>
         </TabsList>
 
         {[1, 2, 3, 4].map((week) => (
           <TabsContent key={week} value={`week${week}`} className="space-y-6 mt-6">
-            <Card className="rounded-2xl bg-white/5 border border-white/10 p-6">
-              <h2 className="text-xl font-bold uppercase tracking-wide text-white mb-2">Semana {week}</h2>
-              <p className="text-white/60">
+            <Card className="rounded-2xl bg-card border border-border p-6">
+              <h2 className="text-xl font-bold uppercase tracking-wide text-foreground mb-2">Semana {week}</h2>
+              <p className="text-muted-foreground">
                 {week === 1 && "Fundamentos e motivação para começar sua jornada"}
                 {week === 2 && "Expandindo sua zona de conforto e enfrentando desafios"}
                 {week === 3 && "Definindo e consolidando seus mini-hábitos"}
@@ -196,26 +196,26 @@ const PersonalPlan = () => {
                 const completion = getModuleCompletion(module, userProgress);
 
                 return (
-                  <Card key={module.id} className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
-                    <div className="bg-lime-400 p-6 text-black">
+                  <Card key={module.id} className="rounded-2xl bg-card border border-border overflow-hidden">
+                    <div className="bg-primary p-6 text-primary-foreground">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <Badge className="bg-black text-lime-400 border-0 font-semibold">
+                            <Badge className="bg-background text-primary border-0 font-semibold">
                               {module.title}
                             </Badge>
                             {module.is_bonus && (
-                              <Badge className="bg-black text-lime-400 border-0 font-semibold">
+                              <Badge className="bg-background text-primary border-0 font-semibold">
                                 BÔNUS
                               </Badge>
                             )}
                           </div>
                           <h3 className="text-xl font-bold uppercase tracking-wide">{module.subtitle}</h3>
-                          <p className="text-black/80 mt-2">{module.description}</p>
+                          <p className="text-primary-foreground/80 mt-2">{module.description}</p>
                         </div>
                         <div className="text-center">
                           <div className="text-3xl font-bold">{completion}%</div>
-                          <div className="text-[10px] font-semibold uppercase tracking-widest text-black/60">concluído</div>
+                          <div className="text-[10px] font-semibold uppercase tracking-widest text-primary-foreground/60">concluído</div>
                         </div>
                       </div>
                     </div>
@@ -234,20 +234,20 @@ const PersonalPlan = () => {
                               onClick={() => handleLessonClick(lesson, module)}
                               className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all cursor-pointer ${
                                 isCompleted
-                                  ? "bg-lime-400/10 border-lime-400/30"
+                                  ? "bg-primary/10 border-primary/30"
                                   : isInProgress
-                                  ? "bg-white/10 border-white/20"
-                                  : "bg-white/5 border-white/10 hover:border-lime-400/50 hover:bg-white/10"
+                                  ? "bg-muted border-border"
+                                  : "bg-secondary border-border hover:border-primary/50 hover:bg-muted"
                               }`}
                             >
                               <div className="flex items-center gap-4 flex-1">
                                 <div
                                   className={`w-10 h-10 rounded-full flex items-center justify-center ${
                                     isCompleted
-                                      ? "bg-lime-400 text-black"
+                                      ? "bg-primary text-primary-foreground"
                                       : isInProgress
-                                      ? "bg-white/20 text-white"
-                                      : "bg-white/10 text-white/60"
+                                      ? "bg-muted text-foreground"
+                                      : "bg-muted text-muted-foreground"
                                   }`}
                                 >
                                   {isCompleted ? (
@@ -258,11 +258,11 @@ const PersonalPlan = () => {
                                 </div>
 
                                 <div className="flex-1">
-                                  <h4 className="font-semibold text-white">
+                                  <h4 className="font-semibold text-foreground">
                                     Aula {lesson.lesson_number}: {lesson.title}
                                   </h4>
                                   <div className="flex items-center gap-4 mt-1 text-xs">
-                                    <span className="flex items-center gap-1 text-white/60">
+                                    <span className="flex items-center gap-1 text-muted-foreground">
                                       {getLessonIcon(lesson.lesson_type)}
                                       {lesson.lesson_type === "video" && "Vídeo"}
                                       {lesson.lesson_type === "audio" && "Áudio"}
@@ -270,7 +270,7 @@ const PersonalPlan = () => {
                                       {lesson.lesson_type === "ebook" && "E-book"}
                                     </span>
                                     {lesson.duration_minutes && (
-                                      <span className="flex items-center gap-1 text-white/60">
+                                      <span className="flex items-center gap-1 text-muted-foreground">
                                         <Clock className="w-3 h-3" />
                                         {lesson.duration_minutes} min
                                       </span>
@@ -287,8 +287,8 @@ const PersonalPlan = () => {
                                 }}
                                 className={`font-semibold ${
                                   isCompleted
-                                    ? "bg-white/10 border border-white/20 hover:bg-white/20 text-white"
-                                    : "bg-lime-400 text-black hover:bg-lime-500"
+                                    ? "bg-muted border border-border hover:bg-muted/80 text-foreground"
+                                    : "bg-primary text-primary-foreground hover:bg-primary/90"
                                 }`}
                               >
                                 {isCompleted ? "Revisar" : isInProgress ? "Continuar" : "Iniciar"}
@@ -297,39 +297,39 @@ const PersonalPlan = () => {
                           );
                         })
                       ) : (
-                        <p className="text-white/40 text-center py-4">Nenhuma aula disponível</p>
+                        <p className="text-muted-foreground text-center py-4">Nenhuma aula disponível</p>
                       )}
 
                       {/* Resources */}
                       {module.resources && module.resources.length > 0 && (
-                        <div className="mt-6 pt-6 border-t border-white/10">
-                          <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
-                            <Download className="w-4 h-4 text-lime-400" />
+                        <div className="mt-6 pt-6 border-t border-border">
+                          <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                            <Download className="w-4 h-4 text-primary" />
                             Recursos Extras
                           </h4>
                           <div className="grid gap-3">
                             {module.resources.map((resource) => (
                               <div
                                 key={resource.id}
-                                className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10"
+                                className="flex items-center justify-between p-3 bg-secondary rounded-2xl border border-border"
                               >
                                 <div className="flex items-center gap-3 flex-1">
-                                  <BookOpen className="w-5 h-5 text-lime-400" />
+                                  <BookOpen className="w-5 h-5 text-primary" />
                                   <div className="flex-1">
-                                    <p className="font-semibold text-white">{resource.title}</p>
-                                    <p className="text-xs text-white/60">{resource.description}</p>
+                                    <p className="font-semibold text-foreground">{resource.title}</p>
+                                    <p className="text-xs text-muted-foreground">{resource.description}</p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   {resource.is_bonus && (
-                                    <Badge className="bg-lime-400 text-black border-0 font-semibold">
+                                    <Badge className="bg-primary text-primary-foreground border-0 font-semibold">
                                       BÔNUS
                                     </Badge>
                                   )}
                                   <Button
                                     size="sm"
                                     onClick={() => handleDownloadResource(resource)}
-                                    className="bg-lime-400 text-black hover:bg-lime-500 font-semibold"
+                                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
                                   >
                                     <Download className="w-4 h-4 mr-1" />
                                     Baixar
@@ -352,8 +352,8 @@ const PersonalPlan = () => {
       {/* Bonus Modules */}
       {modules && modules.some((m) => m.is_bonus) && (
         <div className="mt-12">
-          <h2 className="text-xl font-bold uppercase tracking-wide text-white mb-6 flex items-center gap-2">
-            <Award className="w-6 h-6 text-lime-400" />
+          <h2 className="text-xl font-bold uppercase tracking-wide text-foreground mb-6 flex items-center gap-2">
+            <Award className="w-6 h-6 text-primary" />
             Conteúdo Bônus
           </h2>
 
@@ -364,19 +364,19 @@ const PersonalPlan = () => {
                 const completion = getModuleCompletion(module, userProgress);
 
                 return (
-                  <Card key={module.id} className="rounded-2xl bg-white/5 border-2 border-lime-400/50 overflow-hidden">
-                    <div className="bg-lime-400 p-6 text-black">
+                  <Card key={module.id} className="rounded-2xl bg-card border-2 border-primary/50 overflow-hidden">
+                    <div className="bg-primary p-6 text-primary-foreground">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <Badge className="bg-black text-lime-400 border-0 font-semibold mb-2">
+                          <Badge className="bg-background text-primary border-0 font-semibold mb-2">
                             {module.title} - BÔNUS
                           </Badge>
                           <h3 className="text-xl font-bold uppercase tracking-wide">{module.subtitle}</h3>
-                          <p className="text-black/80 mt-2">{module.description}</p>
+                          <p className="text-primary-foreground/80 mt-2">{module.description}</p>
                         </div>
                         <div className="text-center">
                           <div className="text-3xl font-bold">{completion}%</div>
-                          <div className="text-[10px] font-semibold uppercase tracking-widest text-black/60">concluído</div>
+                          <div className="text-[10px] font-semibold uppercase tracking-widest text-primary-foreground/60">concluído</div>
                         </div>
                       </div>
                     </div>
@@ -395,14 +395,14 @@ const PersonalPlan = () => {
                                 onClick={() => handleLessonClick(lesson, module)}
                                 className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all cursor-pointer ${
                                   isCompleted
-                                    ? "bg-lime-400/10 border-lime-400/30"
-                                    : "bg-white/5 border-white/10 hover:border-lime-400/50 hover:bg-white/10"
+                                    ? "bg-primary/10 border-primary/30"
+                                    : "bg-secondary border-border hover:border-primary/50 hover:bg-muted"
                                 }`}
                               >
                                 <div className="flex items-center gap-4 flex-1">
                                   <div
                                     className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                      isCompleted ? "bg-lime-400 text-black" : "bg-white/10 text-white/60"
+                                      isCompleted ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                                     }`}
                                   >
                                     {isCompleted ? (
@@ -413,14 +413,14 @@ const PersonalPlan = () => {
                                   </div>
 
                                   <div className="flex-1">
-                                    <h4 className="font-semibold text-white">{lesson.title}</h4>
+                                    <h4 className="font-semibold text-foreground">{lesson.title}</h4>
                                     <div className="flex items-center gap-4 mt-1 text-xs">
-                                      <span className="flex items-center gap-1 text-white/60">
+                                      <span className="flex items-center gap-1 text-muted-foreground">
                                         {getLessonIcon(lesson.lesson_type)}
                                         {lesson.lesson_type}
                                       </span>
                                       {lesson.duration_minutes && (
-                                        <span className="flex items-center gap-1 text-white/60">
+                                        <span className="flex items-center gap-1 text-muted-foreground">
                                           <Clock className="w-3 h-3" />
                                           {lesson.duration_minutes} min
                                         </span>
@@ -437,8 +437,8 @@ const PersonalPlan = () => {
                                   }}
                                   className={`font-semibold ${
                                     isCompleted
-                                      ? "bg-white/10 border border-white/20 hover:bg-white/20 text-white"
-                                      : "bg-lime-400 text-black hover:bg-lime-500"
+                                      ? "bg-muted border border-border hover:bg-muted/80 text-foreground"
+                                      : "bg-primary text-primary-foreground hover:bg-primary/90"
                                   }`}
                                 >
                                   {isCompleted ? "Revisar" : "Iniciar"}
@@ -450,23 +450,23 @@ const PersonalPlan = () => {
                       ) : null}
 
                       {module.resources && module.resources.length > 0 && (
-                        <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
+                        <div className="mt-6 pt-6 border-t border-border space-y-3">
                           {module.resources.map((resource) => (
                             <div
                               key={resource.id}
-                              className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10"
+                              className="flex items-center justify-between p-4 bg-secondary rounded-2xl border border-border"
                             >
                               <div className="flex items-center gap-3 flex-1">
-                                <BookOpen className="w-5 h-5 text-lime-400" />
+                                <BookOpen className="w-5 h-5 text-primary" />
                                 <div className="flex-1">
-                                  <p className="font-semibold text-white">{resource.title}</p>
-                                  <p className="text-xs text-white/60">{resource.description}</p>
+                                  <p className="font-semibold text-foreground">{resource.title}</p>
+                                  <p className="text-xs text-muted-foreground">{resource.description}</p>
                                 </div>
                               </div>
                               <Button
                                 size="sm"
                                 onClick={() => handleDownloadResource(resource)}
-                                className="bg-lime-400 text-black hover:bg-lime-500 font-semibold"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
                               >
                                 <Download className="w-4 h-4 mr-1" />
                                 Baixar
@@ -488,12 +488,12 @@ const PersonalPlan = () => {
         setSelectedLesson(null);
         setSelectedModule(null);
       }}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-[#000000] border-white/10">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background border-border">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold uppercase tracking-wide text-white">
+            <DialogTitle className="text-xl font-bold uppercase tracking-wide text-foreground">
               {selectedModule?.subtitle} - {selectedLesson?.title}
             </DialogTitle>
-            <DialogDescription className="text-white/60">
+            <DialogDescription className="text-muted-foreground">
               {selectedLesson?.lesson_type === "video" && "Vídeo"}
               {selectedLesson?.lesson_type === "audio" && "Áudio"}
               {selectedLesson?.lesson_type === "text" && "Conteúdo de texto"}
@@ -504,19 +504,19 @@ const PersonalPlan = () => {
           <div className="space-y-4">
             {/* Lesson Content */}
             {selectedLesson?.transcript ? (
-              <div className="prose prose-invert max-w-none">
-                <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
-                  <div className="whitespace-pre-wrap text-white/90 leading-relaxed">
+              <div className="prose prose-neutral dark:prose-invert max-w-none">
+                <div className="p-6 bg-card rounded-2xl border border-border">
+                  <div className="whitespace-pre-wrap text-foreground/90 leading-relaxed">
                     {selectedLesson.transcript}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="bg-white/5 rounded-2xl border border-white/10 p-8 flex items-center justify-center">
+              <div className="bg-card rounded-2xl border border-border p-8 flex items-center justify-center">
                 <div className="text-center">
-                  <FileText className="w-16 h-16 mx-auto mb-4 text-lime-400" />
-                  <p className="text-lg font-semibold text-white">Conteúdo em breve</p>
-                  <p className="text-sm text-white/60">Esta aula ainda não possui conteúdo disponível</p>
+                  <FileText className="w-16 h-16 mx-auto mb-4 text-primary" />
+                  <p className="text-lg font-semibold text-foreground">Conteúdo em breve</p>
+                  <p className="text-sm text-muted-foreground">Esta aula ainda não possui conteúdo disponível</p>
                 </div>
               </div>
             )}
@@ -524,7 +524,7 @@ const PersonalPlan = () => {
             <div className="flex gap-3">
               <Button
                 onClick={handleMarkComplete}
-                className="flex-1 bg-lime-400 text-black hover:bg-lime-500 font-semibold"
+                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
               >
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Marcar como Concluída
@@ -534,7 +534,7 @@ const PersonalPlan = () => {
                   setSelectedLesson(null);
                   setSelectedModule(null);
                 }}
-                className="bg-white/10 border border-white/20 hover:bg-white/20 text-white"
+                className="bg-muted border border-border hover:bg-muted/80 text-foreground"
               >
                 Fechar
               </Button>

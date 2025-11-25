@@ -44,7 +44,7 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
         aria-current={isActive ? "page" : undefined}
         className={cn(
           "flex items-center justify-center rounded-full p-3 transition-colors",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           !isDashboard && (isActive ? "text-primary" : "text-muted-foreground")
         )}
         whileTap={{ scale: 0.9 }}
