@@ -1,10 +1,10 @@
-﻿import { useMemo } from "react";
+import { useMemo } from "react";
 import { motion } from "motion/react";
 import { Calendar, TrendingUp, Target, Award, Flame, ListOrdered, Timer } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress as ProgressBar } from "@/components/ui/progress";
 import useProgress from "@/hooks/useProgress";
+import { getHabitIconWithFallback, HabitIconKey } from "@/components/icons/HabitIcons";
 
 const Progress = () => {
   const {
@@ -191,29 +191,37 @@ const Progress = () => {
                       Conclua seus hábitos para acompanhar as sequências aqui.
                     </p>
                   ) : (
-                    habitStreaks.map((streak, index) => (
-                      <div
-                        key={streak.habitId}
-                        className="flex items-center justify-between p-4 bg-secondary rounded-xl hover:bg-muted transition-colors border border-border"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="text-2xl">{streak.emoji}</div>
-                          <div>
-                            <p className="font-semibold text-foreground">{streak.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              Melhor: {streak.bestStreak} dias  –  Categoria: {streak.category}
-                            </p>
+                    habitStreaks.map((streak) => {
+                      const StreakIcon = getHabitIconWithFallback(
+                        streak.iconKey as HabitIconKey | null,
+                        streak.category
+                      );
+                      return (
+                        <div
+                          key={streak.habitId}
+                          className="flex items-center justify-between p-4 bg-secondary rounded-xl hover:bg-muted transition-colors border border-border"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
+                              <StreakIcon className="h-6 w-6 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-foreground">{streak.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Melhor: {streak.bestStreak} dias  –  {streak.category}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="flex items-center gap-1 justify-end">
+                              <span className="text-2xl font-bold text-primary">{streak.streak}</span>
+                              <Flame className="w-4 h-4 text-primary" />
+                            </div>
+                            <p className="text-xs text-muted-foreground">dias seguidos</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-1 justify-end">
-                            <span className="text-2xl font-bold text-primary">{streak.streak}</span>
-                            <Flame className="w-4 h-4 text-primary" />
-                          </div>
-                          <p className="text-xs text-muted-foreground">dias seguidos</p>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </Card>
@@ -259,21 +267,32 @@ const Progress = () => {
                   <p className="text-sm text-muted-foreground">Complete hábitos para ver o ranking.</p>
                 ) : (
                   <div className="space-y-2">
-                    {topHabits.map((habit, index) => (
-                      <div
-                        key={habit.habitId}
-                        className="flex items-center justify-between rounded-lg border border-border bg-secondary p-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-bold text-primary">#{index + 1}</span>
-                          <div>
-                            <p className="font-semibold text-foreground">{habit.name}</p>
-                            <p className="text-xs text-muted-foreground">{habit.category}</p>
+                    {topHabits.map((habit, index) => {
+                      const HabitIcon = getHabitIconWithFallback(
+                        habit.iconKey as HabitIconKey | null,
+                        habit.category
+                      );
+                      return (
+                        <div
+                          key={habit.habitId}
+                          className="flex items-center justify-between rounded-xl border border-border bg-secondary p-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                              <span className="text-xs font-bold text-primary">#{index + 1}</span>
+                            </div>
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+                              <HabitIcon className="h-5 w-5 text-foreground" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-foreground">{habit.name}</p>
+                              <p className="text-xs text-muted-foreground">{habit.category}</p>
+                            </div>
                           </div>
+                          <span className="text-sm font-bold text-primary">{habit.completions}x</span>
                         </div>
-                        <span className="text-sm font-bold text-foreground">{habit.completions}x</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </Card>

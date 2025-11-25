@@ -6,6 +6,7 @@ interface HabitRow {
   id: string;
   name: string;
   emoji: string | null;
+  icon_key: string | null;
   category: string;
   unit?: "none" | "steps" | "minutes" | "km" | "custom" | null;
   goal_value?: number | null;
@@ -35,7 +36,7 @@ interface WeeklySeriesPoint {
 interface HabitStreak {
   habitId: string;
   name: string;
-  emoji: string;
+  iconKey: string | null;
   streak: number;
   bestStreak: number;
   category: string;
@@ -54,7 +55,7 @@ interface ProgressData {
   habitStreaks: HabitStreak[];
   bestGlobalStreak: number;
   heatmap: { date: string; count: number }[];
-  topHabits: { habitId: string; name: string; completions: number; category: string }[];
+  topHabits: { habitId: string; name: string; iconKey: string | null; completions: number; category: string }[];
   dailyTrend: { date: string; count: number }[];
   weekdayDist: { weekday: number; label: string; count: number }[];
   hourDist: { hour: number; count: number }[];
@@ -90,7 +91,7 @@ const useProgress = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("habits")
-        .select("id, name, emoji, category, days_of_week, created_at, is_active, unit, goal_value, frequency_type, times_per_week, times_per_month, every_n_days")
+        .select("id, name, emoji, icon_key, category, days_of_week, created_at, is_active, unit, goal_value, frequency_type, times_per_week, times_per_month, every_n_days")
         .eq("is_active", true);
 
       if (error) throw error;
@@ -242,7 +243,7 @@ const useProgress = () => {
       streaks.push({
         habitId: habit.id,
         name: habit.name,
-        emoji: habit.emoji ?? "🔥",
+        iconKey: habit.icon_key,
         streak: currentStreak,
         bestStreak,
         category: habit.category,
@@ -270,6 +271,7 @@ const useProgress = () => {
       .map((h) => ({
         habitId: h.id,
         name: h.name,
+        iconKey: h.icon_key,
         completions: completionsCountByHabit.get(h.id) ?? 0,
         category: h.category,
       }))
