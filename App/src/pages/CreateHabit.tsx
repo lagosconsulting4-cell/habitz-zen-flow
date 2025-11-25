@@ -203,13 +203,9 @@ const CreateHabit = () => {
     return fallbackCategories;
   }, [catalogCategories]);
 
-  useEffect(() => {
-    if (catalogCategories.length > 0 && selectedCategory === fallbackCategories[0].id) {
-      setSelectedCategory(catalogCategories[0].id);
-      setSelectedColor(catalogCategories[0].color ?? null);
-      setSelectedIconKey(catalogCategories[0].icon_key ?? null);
-    }
-  }, [catalogCategories, selectedCategory]);
+  // REMOVIDO: useEffect que sobrescrevia selectedCategory com valores do catálogo
+  // Isso causava erro de constraint pois o catálogo pode ter IDs antigos
+  // Agora usamos sempre CATEGORY_DATA.id que tem os valores válidos
 
   // Seleciona a primeira categoria por padrão ao abrir
   useEffect(() => {
@@ -339,10 +335,12 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     try {
       setIsSaving(true);
       const days = [...selectedDays].sort((a, b) => a - b);
+      // Usa selectedCategoryData.id que sempre vem de CATEGORY_DATA com valores válidos
+      const categoryValue = selectedCategoryData?.id || selectedCategory;
       await createHabit({
         name: habitName.trim(),
         emoji: selectedEmoji,
-        category: selectedCategory,
+        category: categoryValue,
         period: selectedPeriod,
         days_of_week: days,
         color: selectedColor,
