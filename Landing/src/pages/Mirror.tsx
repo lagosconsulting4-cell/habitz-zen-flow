@@ -375,40 +375,43 @@ const Mirror = () => {
             <AnimatePresence>
               {showFinalCTA && (
                 <motion.div
-                  className="glass-card p-6 space-y-4 border-primary/30"
+                  className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary to-emerald-600 p-6 space-y-5 shadow-2xl shadow-primary/30"
                   initial={{ opacity: 0, y: 20, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={springTransition}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Sparkles className="w-6 h-6 text-primary" />
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                  <div className="absolute -top-20 -right-20 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+
+                  <div className="relative flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                      <Sparkles className="w-7 h-7 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg">E se pudesse ser diferente?</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <h3 className="font-bold text-xl text-white">E se pudesse ser diferente?</h3>
+                      <p className="text-sm text-white/80">
                         Criamos uma rotina sob medida para você
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="relative flex items-center gap-6 text-sm text-white/90">
                     <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-primary" />
-                      <span><strong className="text-foreground">7 min</strong>/dia</span>
+                      <Clock className="h-4 w-4 text-white" />
+                      <span><strong className="text-white">7 min</strong>/dia</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Zap className="h-4 w-4 text-primary" />
+                      <Zap className="h-4 w-4 text-white" />
                       <span>100% personalizada</span>
                     </div>
                   </div>
 
-                  <motion.div {...buttonHoverTap} className="pt-2">
+                  <motion.div {...buttonHoverTap} className="relative">
                     <Button
                       onClick={() => navigate("/offer")}
-                      variant="premium"
                       size="xl"
-                      className="w-full group"
+                      className="w-full group bg-white hover:bg-white/95 text-primary font-bold shadow-xl"
                     >
                       <Sparkles className="h-5 w-5 mr-2" />
                       <span>Ver minha rotina personalizada</span>
