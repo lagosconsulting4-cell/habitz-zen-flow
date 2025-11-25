@@ -14,6 +14,7 @@ const OnboardingFlow = lazy(() => import("./pages/OnboardingFlow"));
 const PersonalPlan = lazy(() => import("./pages/PersonalPlan"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const CreateHabit = lazy(() => import("./pages/CreateHabit"));
+const EditHabit = lazy(() => import("./pages/EditHabit"));
 const Progress = lazy(() => import("./pages/Progress"));
 const Profile = lazy(() => import("./pages/Profile"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -67,6 +68,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/create" element={<CreateHabit />} />
               <Route path="/habits" element={<MyHabits />} />
+              <Route path="/habits/edit/:id" element={<EditHabit />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/progress" element={<Progress />} />
               <Route path="/meditation" element={<Meditation />} />
