@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import NavigationBar from "@/components/NavigationBar";
 import { useGuided } from "@/hooks/useGuided";
 import { Target, CheckCircle2, Circle, Lock, Clock, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -207,8 +206,6 @@ const GuidedJourney = () => {
           })}
         </div>
       </motion.div>
-
-      <NavigationBar />
     </div>
   );
 };

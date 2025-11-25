@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import NavigationBar from "@/components/NavigationBar";
 import { Lightbulb, Clock, TrendingUp, Utensils, Target } from "lucide-react";
 import { routineTips, type RoutineTip } from "@/data/routine-tips";
 import { nutritionTips, type NutritionTip } from "@/data/nutrition-tips";
@@ -136,8 +135,6 @@ const Tips = () => {
           ))}
         </div>
       </motion.div>
-
-      <NavigationBar />
     </div>
   );
 };

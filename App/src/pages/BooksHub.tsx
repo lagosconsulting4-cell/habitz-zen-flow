@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import NavigationBar from "@/components/NavigationBar";
 import { Book, ExternalLink, Loader2 } from "lucide-react";
 import { useBooks } from "@/hooks/useSupabaseData";
 import { useNavigate } from "react-router-dom";
@@ -129,8 +128,6 @@ const BooksHub = () => {
           </div>
         )}
       </motion.div>
-
-      <NavigationBar />
     </div>
   );
 };

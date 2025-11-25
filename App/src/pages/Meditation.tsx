@@ -4,7 +4,6 @@ import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import NavigationBar from "@/components/NavigationBar";
 import { Brain, Clock, Volume2, Play, Pause, Loader2 } from "lucide-react";
 import useMeditations, { MeditationSession } from "@/hooks/useMeditations";
 import { isBonusEnabled } from "@/config/bonusFlags";
@@ -308,8 +307,6 @@ const Meditation = () => {
           </Card>
         </div>
       )}
-
-      <NavigationBar />
     </div>
   );
 };

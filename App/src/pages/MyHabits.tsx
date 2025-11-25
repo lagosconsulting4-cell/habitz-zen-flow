@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import NavigationBar from "@/components/NavigationBar";
 import { Toggle } from "@/components/ui/toggle";
 import {
   DropdownMenu,
@@ -1644,8 +1643,6 @@ const handleSave = async () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <NavigationBar />
 
       {/* Timer Modal */}
       {timerHabit && (

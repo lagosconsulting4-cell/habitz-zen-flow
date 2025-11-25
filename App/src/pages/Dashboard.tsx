@@ -1,10 +1,8 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Plus, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 import { DashboardHabitCard } from "@/components/DashboardHabitCard";
-import NavigationBar from "@/components/NavigationBar";
 import { TimerModal } from "@/components/timer";
 import { useHabits } from "@/hooks/useHabits";
 import type { Habit } from "@/components/DashboardHabitCard";
@@ -16,7 +14,6 @@ const isTimedHabit = (unit?: string | null): boolean => {
 
 const Dashboard = () => {
   const { habits, loading, toggleHabit, getHabitCompletionStatus } = useHabits();
-  const navigate = useNavigate();
 
   // Timer modal state
   const [timerHabit, setTimerHabit] = useState<Habit | null>(null);
@@ -170,28 +167,6 @@ const Dashboard = () => {
           </div>
         )}
       </motion.div>
-
-      {/* CTA Button - CRIAR ROTINA */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-        className="fixed bottom-24 left-0 right-0 flex justify-center px-4 z-10"
-      >
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => navigate("/create")}
-          className="flex items-center gap-2 px-8 py-4 rounded-full bg-[#1a1a1a] border border-lime-400/30 shadow-lg shadow-lime-400/10"
-        >
-          <Plus size={20} className="text-lime-400" />
-          <span className="text-sm font-semibold text-lime-400 tracking-wide">
-            CRIAR ROTINA
-          </span>
-        </motion.button>
-      </motion.div>
-
-      <NavigationBar isDarkMode={true} />
 
       {/* Timer Modal */}
       {timerHabit && (

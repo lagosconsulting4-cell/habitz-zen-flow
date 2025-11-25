@@ -20,7 +20,6 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import NavigationBar from "@/components/NavigationBar";
 import { supabase } from "@/integrations/supabase/client";
 import { usePremium } from "@/hooks/usePremium";
 import { useProfileInsights } from "@/hooks/useProfileInsights";
@@ -388,8 +387,6 @@ const Profile = () => {
           </Button>
         </motion.div>
       </motion.div>
-
-      <NavigationBar />
     </div>
   );
 };

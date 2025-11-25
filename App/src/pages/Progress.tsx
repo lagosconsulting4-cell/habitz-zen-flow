@@ -4,7 +4,6 @@ import { Calendar, TrendingUp, Target, Award, Flame, ListOrdered, Timer } from "
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress as ProgressBar } from "@/components/ui/progress";
-import NavigationBar from "@/components/NavigationBar";
 import useProgress from "@/hooks/useProgress";
 
 const Progress = () => {
@@ -338,8 +337,6 @@ const Progress = () => {
           </>
         )}
       </motion.div>
-
-      <NavigationBar />
     </div>
   );
 };
