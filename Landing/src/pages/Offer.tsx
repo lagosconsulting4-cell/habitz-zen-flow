@@ -781,26 +781,32 @@ const Offer = () => {
                 ))}
               </ul>
 
-              {/* CTA Button - PREMIUM */}
+              {/* CTA Button - SUPER PREMIUM com efeito de brilho */}
               <motion.div
-                {...buttonHoverTap}
                 className="relative group"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
               >
-                {/* Animated glow effect */}
-                <div className="absolute -inset-1 sm:-inset-1.5 bg-gradient-to-r from-primary via-emerald-400 to-teal-400 rounded-xl sm:rounded-2xl blur-md opacity-75 group-hover:opacity-100 transition-all duration-300 animate-pulse" />
-                <div className="absolute -inset-0.5 sm:-inset-1 bg-gradient-to-r from-primary via-emerald-500 to-teal-500 rounded-xl sm:rounded-2xl opacity-90" />
+                {/* Outer pulsing glow - AMARELO/LARANJA */}
+                <div className="absolute -inset-2 sm:-inset-3 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 rounded-2xl blur-xl opacity-60 group-hover:opacity-90 transition-all duration-500 animate-pulse" />
 
-                <Button
+                {/* Inner glow ring */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 rounded-xl opacity-100" />
+
+                <button
                   onClick={() => window.open("https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac", "_blank")}
-                  size="lg"
-                  className="relative w-full bg-gradient-to-r from-primary via-emerald-500 to-teal-500 hover:from-primary hover:via-emerald-400 hover:to-teal-400 text-white font-black text-base sm:text-xl md:text-2xl py-6 sm:py-7 md:py-8 rounded-xl shadow-2xl shadow-primary/50 transition-all duration-300 tracking-wide"
+                  className="relative w-full overflow-hidden bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:via-orange-400 hover:to-amber-400 text-white font-black text-base sm:text-xl md:text-2xl py-5 sm:py-6 md:py-7 px-6 sm:px-8 rounded-xl shadow-2xl shadow-orange-500/50 transition-all duration-300 tracking-wide flex items-center justify-center gap-2 sm:gap-3"
                 >
-                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mr-2 sm:mr-3 animate-pulse flex-shrink-0" />
-                  <span>QUERO MINHA ROTINA</span>
-                  <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 ml-2 sm:ml-3 group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0" />
-                </Button>
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12" />
+
+                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 animate-pulse flex-shrink-0" />
+                  <span className="relative z-10">QUERO MINHA ROTINA</span>
+                  <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0" />
+                </button>
               </motion.div>
 
               {/* Guarantee - DESTACADO */}
