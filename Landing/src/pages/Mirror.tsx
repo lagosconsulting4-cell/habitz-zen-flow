@@ -24,7 +24,8 @@ import {
   Zap,
 } from "lucide-react";
 import { buttonHoverTap, springTransition } from "@/hooks/useAnimations";
-import SiriOrb from "@/components/smoothui/siri-orb";
+
+// No SiriOrb import - using clean gradient backgrounds instead
 
 interface TimeBlock {
   id: string;
@@ -35,17 +36,8 @@ interface TimeBlock {
   description: string;
   emotion: string;
   emotionIcon: React.ElementType;
-  gradient: {
-    from: string;
-    via?: string;
-    to: string;
-  };
-  orbColors: {
-    bg: string;
-    c1: string;
-    c2: string;
-    c3: string;
-  };
+  // Natural sky gradient colors (top to bottom)
+  skyGradient: string;
   details: string[];
 }
 
@@ -60,17 +52,8 @@ const timeBlocks: TimeBlock[] = [
       "Acordou cansado. Pegou o celular antes de levantar. 40 minutos já se passaram e você nem saiu da cama.",
     emotion: "Culpa",
     emotionIcon: HeartCrack,
-    gradient: {
-      from: "from-amber-500/30",
-      via: "via-orange-400/20",
-      to: "to-yellow-500/10",
-    },
-    orbColors: {
-      bg: "oklch(15% 0.02 60)",
-      c1: "oklch(75% 0.15 70)",
-      c2: "oklch(70% 0.18 50)",
-      c3: "oklch(80% 0.12 80)",
-    },
+    // Dawn: soft pink, peach, warm yellow - early morning light
+    skyGradient: "from-rose-300/40 via-orange-200/30 to-yellow-100/20",
     details: [
       "Scrollou redes sociais por 40 minutos",
       "Pulou o café da manhã de novo",
@@ -87,17 +70,8 @@ const timeBlocks: TimeBlock[] = [
       "Prometeu começar depois do almoço. Está rolando o feed há 30 minutos enquanto a tarde escapa.",
     emotion: "Frustração",
     emotionIcon: AlertCircle,
-    gradient: {
-      from: "from-sky-500/30",
-      via: "via-blue-400/20",
-      to: "to-cyan-500/10",
-    },
-    orbColors: {
-      bg: "oklch(15% 0.02 220)",
-      c1: "oklch(70% 0.12 220)",
-      c2: "oklch(65% 0.15 200)",
-      c3: "oklch(75% 0.10 240)",
-    },
+    // Midday: bright yellow, warm white - strong sunlight
+    skyGradient: "from-yellow-200/40 via-amber-100/30 to-orange-50/20",
     details: [
       "Deixou tarefas importantes para depois",
       "Não conseguiu focar em nada produtivo",
@@ -114,17 +88,8 @@ const timeBlocks: TimeBlock[] = [
       "Olha pra trás e percebe: mais um dia perdido sem fazer o que realmente importa. De novo.",
     emotion: "Decepção profunda",
     emotionIcon: TrendingDown,
-    gradient: {
-      from: "from-orange-500/30",
-      via: "via-rose-400/20",
-      to: "to-red-500/10",
-    },
-    orbColors: {
-      bg: "oklch(12% 0.03 30)",
-      c1: "oklch(65% 0.18 30)",
-      c2: "oklch(60% 0.20 15)",
-      c3: "oklch(70% 0.15 45)",
-    },
+    // Sunset: orange, pink, warm tones - golden hour
+    skyGradient: "from-orange-400/40 via-rose-300/30 to-pink-200/20",
     details: [
       "Nenhuma meta foi concluída",
       "Sensação de tempo desperdiçado",
@@ -141,17 +106,8 @@ const timeBlocks: TimeBlock[] = [
       '"Amanhã vai ser diferente", você pensa. Mas lá no fundo, sabe que não será. Nunca é.',
     emotion: "Sensação de estar ficando pra trás",
     emotionIcon: Brain,
-    gradient: {
-      from: "from-indigo-500/30",
-      via: "via-purple-400/20",
-      to: "to-violet-500/10",
-    },
-    orbColors: {
-      bg: "oklch(8% 0.03 280)",
-      c1: "oklch(55% 0.15 280)",
-      c2: "oklch(50% 0.18 300)",
-      c3: "oklch(60% 0.12 260)",
-    },
+    // Night: deep dark tones, no purple - just darkness
+    skyGradient: "from-slate-900/60 via-slate-800/40 to-slate-700/20",
     details: [
       "Mente acelerada com arrependimentos",
       "Ansiedade sobre o amanhã",
@@ -190,35 +146,23 @@ const Mirror = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Dynamic gradient background */}
-      <motion.div
-        className={`absolute inset-0 bg-gradient-to-br ${currentBlock.gradient.from} ${currentBlock.gradient.via || ""} ${currentBlock.gradient.to} transition-all duration-1000`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        key={openItem}
-      />
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-3xl" />
-
-      {/* Animated SiriOrb background */}
+      {/* Dynamic sky gradient background - top to bottom */}
       <AnimatePresence mode="wait">
         <motion.div
           key={openItem}
-          className="absolute top-1/4 right-0 translate-x-1/3 opacity-40 pointer-events-none"
-          initial={{ opacity: 0, scale: 0.8, rotate: -20 }}
-          animate={{ opacity: 0.4, scale: 1, rotate: 0 }}
-          exit={{ opacity: 0, scale: 0.8, rotate: 20 }}
-          transition={{ duration: 1 }}
-        >
-          <SiriOrb
-            size="600px"
-            colors={currentBlock.orbColors}
-            animationDuration={25}
-          />
-        </motion.div>
+          className={`absolute inset-0 bg-gradient-to-b ${currentBlock.skyGradient}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+        />
       </AnimatePresence>
 
-      {/* Decorative elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-transparent via-transparent to-background/50 pointer-events-none" />
+      {/* Subtle overlay for content readability */}
+      <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
+
+      {/* Subtle light effect at top */}
+      <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col">
