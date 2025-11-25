@@ -120,7 +120,7 @@ body::before {
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(2, 6, 23, 0.2));
 }
 
-.image-banner[data-variant="habitz"]::after {
+.image-banner[data-variant="bora"]::after {
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.45), rgba(15, 23, 42, 0.75));
 }
 
