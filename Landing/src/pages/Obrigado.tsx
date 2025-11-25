@@ -10,7 +10,6 @@ import {
   Lock,
   ArrowRight,
   Sparkles,
-  MessageCircle,
   HelpCircle,
   Gift,
   Search,
@@ -18,8 +17,23 @@ import {
   AlertCircle,
   Loader2,
   PartyPopper,
+  Calendar,
+  Target,
+  Bell,
+  Trophy,
   type LucideIcon,
 } from "lucide-react";
+
+// WhatsApp Icon Component
+const WhatsAppIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+  >
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+);
 import {
   buttonHoverTap,
   springTransition,
@@ -84,35 +98,58 @@ const Confetti = () => {
 interface InfoCardProps {
   icon: LucideIcon;
   title: string;
-  items: string[];
+  items: (string | JSX.Element)[];
   index: number;
+  variant?: "default" | "success" | "warning";
 }
 
-const InfoCard = ({ icon: Icon, title, items, index }: InfoCardProps) => (
-  <motion.div
-    className="glass-card p-6 space-y-4"
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ delay: index * 0.1 }}
-    whileHover={{ scale: 1.02 }}
-  >
-    <div className="flex items-center gap-3">
-      <div className="icon-container icon-container-md">
-        <Icon className="h-5 w-5 text-primary" />
+const InfoCard = ({ icon: Icon, title, items, index, variant = "default" }: InfoCardProps) => {
+  const variants = {
+    default: {
+      bg: "bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 border-zinc-700/50",
+      icon: "bg-zinc-700/50 text-zinc-300",
+      check: "text-zinc-400"
+    },
+    success: {
+      bg: "bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-500/30",
+      icon: "bg-gradient-to-br from-emerald-500 to-teal-500 text-white",
+      check: "text-emerald-400"
+    },
+    warning: {
+      bg: "bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30",
+      icon: "bg-gradient-to-br from-amber-500 to-orange-500 text-white",
+      check: "text-amber-400"
+    }
+  };
+
+  const style = variants[variant];
+
+  return (
+    <motion.div
+      className={`rounded-2xl border p-6 space-y-4 ${style.bg}`}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.1 }}
+      whileHover={{ scale: 1.02 }}
+    >
+      <div className="flex items-center gap-3">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${style.icon}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+        <h3 className="font-bold text-lg text-foreground">{title}</h3>
       </div>
-      <h3 className="font-bold text-lg">{title}</h3>
-    </div>
-    <ul className="space-y-2 text-sm text-muted-foreground">
-      {items.map((item, i) => (
-        <li key={i} className="flex items-start gap-2">
-          <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-          <span>{item}</span>
-        </li>
-      ))}
-    </ul>
-  </motion.div>
-);
+      <ul className="space-y-3 text-sm text-muted-foreground">
+        {items.map((item, i) => (
+          <li key={i} className="flex items-start gap-2">
+            <CheckCircle className={`h-4 w-4 mt-0.5 flex-shrink-0 ${style.check}`} />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </motion.div>
+  );
+};
 
 const Obrigado = () => {
   const [email, setEmail] = useState("");
@@ -238,11 +275,11 @@ const Obrigado = () => {
       <header className="relative z-10 w-full py-6 px-6">
         <div className="max-w-4xl mx-auto">
           <motion.span
-            className="text-2xl font-bold gradient-text"
+            className="text-2xl font-black bg-gradient-to-r from-emerald-400 via-primary to-teal-400 bg-clip-text text-transparent"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            Habitz
+            BORA
           </motion.span>
         </div>
       </header>
@@ -363,7 +400,7 @@ const Obrigado = () => {
               </motion.div>
 
               <p className="text-xs text-muted-foreground text-center">
-                Ao criar a senha você concorda com os Termos de Uso e Política de Privacidade da Habitz.
+                Ao criar a senha você concorda com os Termos de Uso e Política de Privacidade do BORA.
               </p>
 
               {/* Feedback message */}
@@ -424,9 +461,10 @@ const Obrigado = () => {
             <InfoCard
               icon={Search}
               title="Não achou o e-mail?"
+              variant="warning"
               items={[
-                <>Procure por <strong className="text-foreground">"Habitz"</strong> ou <strong className="text-foreground">"Supabase"</strong> nas abas Promoções/Spam.</>,
-                <>Adicione <strong className="text-foreground">noreply@mail.app.supabase.io</strong> aos contatos.</>,
+                <>Procure por <strong className="text-foreground">"BORA"</strong> ou <strong className="text-foreground">"scalewithlumen"</strong> nas abas Promoções/Spam.</>,
+                <>Adicione <strong className="text-foreground">scalewithlumen@gmail.com</strong> aos contatos.</>,
                 "Se o pagamento foi via boleto/PIX, aguarde a confirmação do banco (pode levar até 20 min).",
               ]}
               index={0}
@@ -435,10 +473,12 @@ const Obrigado = () => {
             <InfoCard
               icon={Gift}
               title="O que já está liberado"
+              variant="success"
               items={[
-                "Plano guiado de 30 dias com os módulos completos.",
-                "Mini-hábitos personalizados e check-ins diários.",
-                "Materiais extras e lives dentro da Área de Membros.",
+                "Criação ilimitada de hábitos personalizados",
+                "Dashboard com progresso visual e streaks",
+                "Calendário de acompanhamento diário",
+                "Lembretes inteligentes e meditações guiadas",
               ]}
               index={1}
             />
@@ -466,18 +506,18 @@ const Obrigado = () => {
               </div>
               <div className="flex flex-col sm:flex-row items-center gap-3">
                 <motion.a
-                  href="https://api.whatsapp.com/send?phone=5511993371766&text=Ol%C3%A1!%20Preciso%20de%20ajuda%20para%20acessar%20minha%20conta%20Habitz."
+                  href="https://api.whatsapp.com/send?phone=5511993371766&text=Ol%C3%A1!%20Preciso%20de%20ajuda%20para%20acessar%20minha%20conta%20BORA."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
+                  className="inline-flex items-center gap-3 bg-[#25D366] text-white px-6 py-3.5 rounded-xl font-bold hover:bg-[#20bd5a] transition-all shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <MessageCircle className="h-5 w-5" />
+                  <WhatsAppIcon className="h-6 w-6" />
                   Falar no WhatsApp
                 </motion.a>
                 <span className="text-sm text-muted-foreground">
-                  ou escreva para <strong className="text-foreground">contato@habitz.life</strong>
+                  ou escreva para <strong className="text-foreground">scalewithlumen@gmail.com</strong>
                 </span>
               </div>
             </div>
@@ -494,7 +534,7 @@ const Obrigado = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
           >
-            © {new Date().getFullYear()} Habitz. Todos os direitos reservados.
+            © {new Date().getFullYear()} BORA. Todos os direitos reservados.
           </motion.p>
         </div>
       </footer>
