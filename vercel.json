@@ -3,24 +3,35 @@
   "buildCommand": "cd Landing && npm run build && cd ../App && npm run build && cd .. && node scripts/prepare-dist.cjs",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/obrigado", "destination": "/obrigado.html" },
+    {
+      "source": "/tdah/obrigado",
+      "destination": "/tdah/obrigado.html"
+    },
     {
       "source": "/app/:path((?!.*\\.).*)",
       "destination": "/app/index.html"
+    },
+    {
+      "source": "/:path((?!app|tdah|assets|audio|favicon).*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
     {
       "source": "/app/(.*)",
-      "headers": [ { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" } ]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
     },
     {
       "source": "/(.*).mp4",
-      "headers": [ { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" } ]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     },
     {
       "source": "/(.*).mp3",
-      "headers": [ { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" } ]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     }
   ]
 }
