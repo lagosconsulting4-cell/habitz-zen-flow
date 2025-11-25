@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { useTheme } from "next-themes";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NavigationBar from "@/components/NavigationBar";
 import { Toggle } from "@/components/ui/toggle";
@@ -37,11 +38,20 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useHabits, Habit } from "@/hooks/useHabits";
 import { TimerModal } from "@/components/timer";
 import { isTimedHabit } from "@/components/CircularHabitCard";
-import { Loader2, MoreVertical, Check, Copy, Edit, Trash2, Sparkles, Target, Clock, CheckCircle2, Calendar } from "lucide-react";
+import { Loader2, MoreVertical, Check, Copy, Edit, Trash2, Sparkles, Target, Clock, CheckCircle2, Calendar, Flame, TrendingUp, ArrowUpDown, Trophy, Zap, Star } from "lucide-react";
+import { WeeklyOverview } from "@/components/WeeklyOverview";
+import { StreakCelebration } from "@/components/StreakCelebration";
 import { HABIT_EMOJIS } from "@/data/habit-emojis";
 import type { HabitEmoji } from "@/data/habit-emojis";
 import { getHabitIcon, HabitIconKey } from "@/components/icons/HabitIcons";
@@ -161,7 +171,64 @@ const MyHabits = () => {
   const [notifications, setNotifications] = useState<HabitNotification[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
   const [timerHabit, setTimerHabit] = useState<Habit | null>(null);
+  const [sortBy, setSortBy] = useState<"name" | "streak" | "category" | "period">("name");
+  const [celebration, setCelebration] = useState<{
+    show: boolean;
+    type: "day_complete" | "streak_milestone" | "habit_complete";
+    habitName?: string;
+  }>({ show: false, type: "habit_complete" });
   const { prefs } = useAppPreferences();
+
+  // Calculate stats for today
+  const todayStats = useMemo(() => {
+    const today = new Date().getDay();
+    const activeHabits = habits.filter((h) => h.is_active);
+    const scheduledToday = activeHabits.filter((h) => h.days_of_week?.includes(today) ?? false);
+    const completedToday = scheduledToday.filter((h) => getHabitCompletionStatus(h.id));
+    const longestStreak = Math.max(0, ...activeHabits.map((h) => h.streak));
+    const avgStreak = activeHabits.length > 0
+      ? Math.round(activeHabits.reduce((sum, h) => sum + h.streak, 0) / activeHabits.length)
+      : 0;
+    const successRate = scheduledToday.length > 0
+      ? Math.round((completedToday.length / scheduledToday.length) * 100)
+      : 0;
+
+    return {
+      total: activeHabits.length,
+      scheduledToday: scheduledToday.length,
+      completedToday: completedToday.length,
+      longestStreak,
+      avgStreak,
+      successRate,
+    };
+  }, [habits, getHabitCompletionStatus]);
+
+  // Get completion data for any date (for WeeklyOverview)
+  const getCompletionForDate = (date: Date): { completed: number; total: number } => {
+    const dayOfWeek = date.getDay();
+    const activeHabits = habits.filter((h) => h.is_active);
+    const scheduledForDay = activeHabits.filter((h) => h.days_of_week?.includes(dayOfWeek) ?? false);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+
+    // For today, use actual completion status
+    if (checkDate.getTime() === today.getTime()) {
+      const completed = scheduledForDay.filter((h) => getHabitCompletionStatus(h.id)).length;
+      return { completed, total: scheduledForDay.length };
+    }
+
+    // For future dates, show only scheduled count
+    if (checkDate > today) {
+      return { completed: 0, total: scheduledForDay.length };
+    }
+
+    // For past dates, estimate based on streak (simplified)
+    // In a full implementation, you'd fetch historical completion data
+    return { completed: 0, total: scheduledForDay.length };
+  };
 
   // Check if habit is scheduled for today
   const isScheduledToday = (habit: Habit): boolean => {
@@ -178,7 +245,7 @@ const MyHabits = () => {
     const term = searchTerm.trim().toLowerCase();
     const today = new Date().getDay();
 
-    return habits
+    const filtered = habits
       .filter((habit) => {
         if (status === "today") {
           return habit.is_active && (habit.days_of_week?.includes(today) ?? false);
@@ -192,7 +259,23 @@ const MyHabits = () => {
       .filter((habit) =>
         selectedPeriods.length > 0 ? selectedPeriods.includes(habit.period) : true,
       );
-  }, [habits, status, searchTerm, selectedCategories, selectedPeriods]);
+
+    // Sort habits
+    return filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "streak":
+          return b.streak - a.streak;
+        case "category":
+          return a.category.localeCompare(b.category);
+        case "period":
+          const periodOrder = { morning: 0, afternoon: 1, evening: 2 };
+          return periodOrder[a.period] - periodOrder[b.period];
+        case "name":
+        default:
+          return a.name.localeCompare(b.name);
+      }
+    });
+  }, [habits, status, searchTerm, selectedCategories, selectedPeriods, sortBy]);
 
   const MAX_NOTIFICATIONS = 5;
 
@@ -493,7 +576,32 @@ const handleSave = async () => {
 
     try {
       await toggleHabit(habit.id);
-      toast({ title: completed ? "Desmarcado" : "Concluído!" });
+
+      // Show celebration if completing (not uncompleting)
+      if (!completed) {
+        // Check if this completes all habits for today
+        const today = new Date().getDay();
+        const scheduledToday = habits.filter(
+          (h) => h.is_active && (h.days_of_week?.includes(today) ?? false)
+        );
+        const willBeCompleted = scheduledToday.filter(
+          (h) => h.id === habit.id || getHabitCompletionStatus(h.id)
+        ).length;
+
+        if (willBeCompleted === scheduledToday.length && scheduledToday.length > 1) {
+          // All habits completed - show big celebration
+          setTimeout(() => {
+            setCelebration({ show: true, type: "day_complete" });
+          }, 300);
+        } else {
+          // Show small celebration for individual habit
+          setCelebration({ show: true, type: "habit_complete", habitName: habit.name });
+        }
+
+        toast({ title: "Concluído!" });
+      } else {
+        toast({ title: "Desmarcado" });
+      }
     } catch (error) {
       // toast handled no need
     }
@@ -545,6 +653,7 @@ const handleSave = async () => {
         transition={{ duration: 0.3 }}
         className="container mx-auto px-4 py-6 max-w-4xl"
       >
+        {/* Header */}
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground flex items-center gap-3 mb-2">
@@ -560,14 +669,149 @@ const handleSave = async () => {
           </Button>
         </div>
 
+        {/* Stats Summary Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          {/* Today's Progress Card - Larger */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0 }}
+            className="col-span-2 md:col-span-2"
+          >
+            <Card className={cn(
+              "rounded-2xl p-4 border transition-all duration-300 relative overflow-hidden",
+              isDarkMode
+                ? "bg-gradient-to-br from-lime-500/20 to-lime-600/10 border-lime-500/30"
+                : "bg-gradient-to-br from-lime-50 to-lime-100/50 border-lime-200"
+            )}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "p-2 rounded-xl",
+                    isDarkMode ? "bg-lime-500/20" : "bg-lime-500/10"
+                  )}>
+                    <Zap className={cn("w-5 h-5", isDarkMode ? "text-lime-400" : "text-lime-600")} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Progresso Hoje</p>
+                    <p className={cn("text-2xl font-bold", isDarkMode ? "text-lime-400" : "text-lime-600")}>
+                      {todayStats.completedToday}/{todayStats.scheduledToday}
+                    </p>
+                  </div>
+                </div>
+                <div className={cn(
+                  "text-4xl font-bold",
+                  todayStats.successRate === 100 ? "text-lime-500" : "text-muted-foreground/50"
+                )}>
+                  {todayStats.successRate}%
+                </div>
+              </div>
+              <Progress
+                value={todayStats.successRate}
+                className={cn("h-2", isDarkMode ? "bg-white/10" : "bg-lime-200/50")}
+              />
+              {todayStats.successRate === 100 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="absolute top-2 right-2"
+                >
+                  <Badge className="bg-lime-500 text-white text-xs">
+                    <Trophy className="w-3 h-3 mr-1" />
+                    Completo!
+                  </Badge>
+                </motion.div>
+              )}
+            </Card>
+          </motion.div>
+
+          {/* Streak Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            <Card className={cn(
+              "rounded-2xl p-4 border h-full transition-all duration-300",
+              isDarkMode
+                ? "bg-gradient-to-br from-orange-500/20 to-orange-600/10 border-orange-500/30"
+                : "bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200"
+            )}>
+              <div className="flex items-center gap-2 mb-2">
+                <div className={cn(
+                  "p-1.5 rounded-lg",
+                  isDarkMode ? "bg-orange-500/20" : "bg-orange-500/10"
+                )}>
+                  <Flame className={cn("w-4 h-4", isDarkMode ? "text-orange-400" : "text-orange-600")} />
+                </div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Maior Streak</p>
+              </div>
+              <p className={cn("text-2xl font-bold", isDarkMode ? "text-orange-400" : "text-orange-600")}>
+                {todayStats.longestStreak}
+                <span className="text-sm font-normal text-muted-foreground ml-1">dias</span>
+              </p>
+            </Card>
+          </motion.div>
+
+          {/* Total Habits Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
+          >
+            <Card className={cn(
+              "rounded-2xl p-4 border h-full transition-all duration-300",
+              isDarkMode
+                ? "bg-gradient-to-br from-blue-500/20 to-blue-600/10 border-blue-500/30"
+                : "bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200"
+            )}>
+              <div className="flex items-center gap-2 mb-2">
+                <div className={cn(
+                  "p-1.5 rounded-lg",
+                  isDarkMode ? "bg-blue-500/20" : "bg-blue-500/10"
+                )}>
+                  <Target className={cn("w-4 h-4", isDarkMode ? "text-blue-400" : "text-blue-600")} />
+                </div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Ativos</p>
+              </div>
+              <p className={cn("text-2xl font-bold", isDarkMode ? "text-blue-400" : "text-blue-600")}>
+                {todayStats.total}
+                <span className="text-sm font-normal text-muted-foreground ml-1">hábitos</span>
+              </p>
+            </Card>
+          </motion.div>
+
+          {/* Weekly Overview - Full Width */}
+          <WeeklyOverview
+            getCompletionForDate={getCompletionForDate}
+            isDarkMode={isDarkMode}
+            className="col-span-2 md:col-span-4"
+          />
+        </div>
+
         <Card className="rounded-2xl bg-card border border-border p-4 mb-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <Input
-              placeholder="Buscar hábito"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              className="md:max-w-sm bg-secondary border-border text-foreground placeholder:text-muted-foreground"
-            />
+            <div className="flex flex-col sm:flex-row gap-3 flex-1">
+              <Input
+                placeholder="Buscar hábito"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                className="md:max-w-sm bg-secondary border-border text-foreground placeholder:text-muted-foreground"
+              />
+              {/* Sorting Dropdown */}
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+                <SelectTrigger className="w-full sm:w-[160px] bg-secondary border-border">
+                  <ArrowUpDown className="w-4 h-4 mr-2 text-muted-foreground" />
+                  <SelectValue placeholder="Ordenar por" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Nome (A-Z)</SelectItem>
+                  <SelectItem value="streak">Maior Streak</SelectItem>
+                  <SelectItem value="category">Categoria</SelectItem>
+                  <SelectItem value="period">Período</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Tabs value={status} onValueChange={(value) => setStatus(value as typeof status)}>
               <TabsList className="grid grid-cols-3 rounded-full bg-muted p-1">
                 <TabsTrigger
@@ -641,42 +885,187 @@ const handleSave = async () => {
         </Card>
 
         {loading ? (
-          <Card className="rounded-2xl bg-card border border-border p-8 text-center">
-            <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+          <Card className="rounded-2xl bg-card border border-border p-12 text-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center gap-4"
+            >
+              <div className="relative">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                <div className="absolute inset-0 animate-ping opacity-20">
+                  <Loader2 className="h-10 w-10 text-primary" />
+                </div>
+              </div>
+              <p className="text-muted-foreground">Carregando seus hábitos...</p>
+            </motion.div>
           </Card>
         ) : filteredHabits.length === 0 ? (
-          <Card className="rounded-2xl bg-card border border-border p-8 text-center">
-            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-2">Nenhum hábito encontrado</h2>
-            <p className="text-sm text-muted-foreground">
-              Ajuste os filtros ou cadastre um novo hábito para começar.
-            </p>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <Card className={cn(
+              "rounded-2xl border p-8 text-center relative overflow-hidden",
+              isDarkMode
+                ? "bg-gradient-to-br from-card to-muted/30 border-border"
+                : "bg-gradient-to-br from-white to-slate-50 border-slate-200"
+            )}>
+              {/* Background decoration */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className={cn(
+                  "absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-10",
+                  isDarkMode ? "bg-primary" : "bg-lime-400"
+                )} />
+                <div className={cn(
+                  "absolute -bottom-16 -left-16 w-32 h-32 rounded-full opacity-10",
+                  isDarkMode ? "bg-blue-500" : "bg-blue-400"
+                )} />
+              </div>
+
+              <div className="relative z-10">
+                {status === "today" ? (
+                  <>
+                    <motion.div
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                      className="mb-4"
+                    >
+                      <div className={cn(
+                        "w-20 h-20 mx-auto rounded-full flex items-center justify-center",
+                        isDarkMode ? "bg-lime-500/20" : "bg-lime-100"
+                      )}>
+                        <Calendar className={cn("w-10 h-10", isDarkMode ? "text-lime-400" : "text-lime-600")} />
+                      </div>
+                    </motion.div>
+                    <h2 className="text-xl font-bold text-foreground mb-2">
+                      Nenhum hábito para hoje
+                    </h2>
+                    <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+                      Você não tem hábitos agendados para hoje. Que tal criar um novo ou ajustar a frequência dos existentes?
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
+                        <Link to="/create">
+                          <Target className="w-4 h-4 mr-2" />
+                          Criar novo hábito
+                        </Link>
+                      </Button>
+                      <Button variant="outline" onClick={() => setStatus("active")}>
+                        Ver todos os hábitos
+                      </Button>
+                    </div>
+                  </>
+                ) : status === "archived" ? (
+                  <>
+                    <motion.div
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                      className="mb-4"
+                    >
+                      <div className={cn(
+                        "w-20 h-20 mx-auto rounded-full flex items-center justify-center",
+                        isDarkMode ? "bg-muted" : "bg-slate-100"
+                      )}>
+                        <Trash2 className="w-10 h-10 text-muted-foreground" />
+                      </div>
+                    </motion.div>
+                    <h2 className="text-xl font-bold text-foreground mb-2">
+                      Nenhum hábito arquivado
+                    </h2>
+                    <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+                      Você não arquivou nenhum hábito ainda. Isso é bom! Continue mantendo seus hábitos ativos.
+                    </p>
+                    <Button variant="outline" onClick={() => setStatus("active")}>
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      Ver hábitos ativos
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <motion.div
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                      className="mb-4"
+                    >
+                      <div className={cn(
+                        "w-20 h-20 mx-auto rounded-full flex items-center justify-center",
+                        isDarkMode ? "bg-primary/20" : "bg-lime-100"
+                      )}>
+                        <Target className={cn("w-10 h-10", isDarkMode ? "text-primary" : "text-lime-600")} />
+                      </div>
+                    </motion.div>
+                    <h2 className="text-xl font-bold text-foreground mb-2">
+                      {searchTerm || selectedCategories.length > 0 || selectedPeriods.length > 0
+                        ? "Nenhum resultado encontrado"
+                        : "Comece sua jornada!"}
+                    </h2>
+                    <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+                      {searchTerm || selectedCategories.length > 0 || selectedPeriods.length > 0
+                        ? "Tente ajustar os filtros ou buscar por outro termo."
+                        : "Crie seu primeiro hábito e comece a construir uma rotina que transforma sua vida."}
+                    </p>
+                    {searchTerm || selectedCategories.length > 0 || selectedPeriods.length > 0 ? (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSearchTerm("");
+                          setSelectedCategories([]);
+                          setSelectedPeriods([]);
+                        }}
+                      >
+                        Limpar filtros
+                      </Button>
+                    ) : (
+                      <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
+                        <Link to="/create">
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Criar primeiro hábito
+                        </Link>
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
+            </Card>
+          </motion.div>
         ) : (
-          <div className="space-y-4">
-            {filteredHabits.map((habit, index) => {
-              const archived = !habit.is_active;
-              const completed = isCompletedToday(habit.id);
+          <AnimatePresence mode="popLayout">
+            <motion.div layout className="space-y-4">
+              {filteredHabits.map((habit, index) => {
+                const archived = !habit.is_active;
+                const completed = isCompletedToday(habit.id);
               const scheduledToday = isScheduledToday(habit);
               const isTimed = isTimedHabit(habit.unit) && habit.goal_value && habit.goal_value > 0;
 
               return (
               <motion.div
                 key={habit.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
+                layout
+                layoutId={habit.id}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                transition={{ duration: 0.3, delay: index * 0.03 }}
               >
               <Card className={cn(
-                "rounded-2xl bg-card border p-5 transition-all duration-200",
-                archived ? "border-destructive/30 shadow-lg opacity-60" : "border-border",
-                completed && !archived && "border-lime-500/50 bg-lime-500/5"
+                "rounded-2xl bg-card border p-5 transition-all duration-200 group cursor-pointer",
+                "hover:shadow-lg hover:scale-[1.01] hover:border-primary/30",
+                archived ? "border-destructive/30 shadow-lg opacity-60 hover:opacity-70" : "border-border",
+                completed && !archived && "border-lime-500/50 bg-lime-500/5 hover:bg-lime-500/10 hover:border-lime-500/70",
+                !completed && !archived && scheduledToday && "hover:bg-primary/5"
               )}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
                     {/* Emoji/Icon with completion indicator */}
                     <div className="relative">
                       <div className={cn(
-                        "text-3xl transition-all",
+                        "text-3xl transition-all duration-200 group-hover:scale-110",
                         completed && "opacity-50"
                       )}>
                         {habit.emoji}
@@ -811,12 +1200,14 @@ const handleSave = async () => {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+                  </div>
                 </div>
               </Card>
               </motion.div>
-            );
-          })}
-          </div>
+              );
+            })}
+            </motion.div>
+          </AnimatePresence>
         )}
       </motion.div>
 
@@ -1266,6 +1657,16 @@ const handleSave = async () => {
           isDarkMode={isDarkMode}
         />
       )}
+
+      {/* Streak Celebration */}
+      <StreakCelebration
+        show={celebration.show}
+        onDismiss={() => setCelebration({ ...celebration, show: false })}
+        streakDays={todayStats.longestStreak}
+        type={celebration.type}
+        habitName={celebration.habitName}
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 };
