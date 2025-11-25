@@ -42,7 +42,7 @@ const weekdays = [
   { id: 0, label: "Dom" },
 ];
 
-type Step = "select" | "details";
+type Step = "select" | "details" | "confirm";
 
 // Cor unificada para todas as categorias - verde lime premium
 const UNIFIED_COLOR = "#A3E635";
@@ -572,12 +572,19 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
+      ) : step === "confirm" ? (
+        <button
+          onClick={() => setStep("details")}
+          className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
       ) : (
         <div className="w-10" />
       )}
       <div className="text-center">
         <p className={`text-base font-semibold tracking-wide ${themeColors.headerText}`}>
-          {step === "select" ? "Nova Tarefa" : "Confirmar Tarefa"}
+          {step === "select" ? "Nova Tarefa" : step === "details" ? "Configurar Tarefa" : "Confirmar"}
         </p>
       </div>
       <button
@@ -819,11 +826,200 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         </div>
       </div>
 
-      {/* CTA Button */}
+      {/* CTA Button - Go to Confirm */}
       <div className="px-4 pt-4">
         <button
+          onClick={() => setStep("confirm")}
+          disabled={!habitName.trim()}
+          className="h-14 w-full rounded-xl text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: isDarkMode ? UNIFIED_COLOR : "#FFFFFF",
+            color: isDarkMode ? "#000000" : "#65A30D",
+            boxShadow: isDarkMode ? "0 4px 24px rgba(163, 230, 53, 0.3)" : "0 4px 24px rgba(255, 255, 255, 0.3)",
+          }}
+        >
+          CONTINUAR
+        </button>
+      </div>
+    </motion.div>
+  );
+
+  // Helper to format frequency text for confirmation
+  const getFrequencyText = () => {
+    if (frequencyType === "daily") return "Todos os dias";
+    if (frequencyType === "times_per_week" && timesPerWeek) return `${timesPerWeek}x por semana`;
+    if (frequencyType === "times_per_month" && timesPerMonth) return `${timesPerMonth}x por mês`;
+    if (frequencyType === "every_n_days" && everyNDays) return `A cada ${everyNDays} dias`;
+    if (frequencyType === "fixed_days") {
+      const sortedDays = [...selectedDays].sort((a, b) => {
+        const order = [1, 2, 3, 4, 5, 6, 0];
+        return order.indexOf(a) - order.indexOf(b);
+      });
+      return sortedDays.map((d) => weekdays.find((w) => w.id === d)?.label).join(", ");
+    }
+    return "Personalizado";
+  };
+
+  // Helper to format goal text for confirmation
+  const getGoalText = () => {
+    if (!goalValue || goalValue <= 0) return "Completar";
+    const unitLabels: Record<string, string> = {
+      none: "",
+      steps: "passos",
+      minutes: "minutos",
+      km: "km",
+      hours: "horas",
+      pages: "páginas",
+      liters: "litros",
+      custom: "unidades",
+    };
+    return `${goalValue} ${unitLabels[unit] || ""}`.trim();
+  };
+
+  const ConfirmStep = (
+    <motion.div
+      key="confirm"
+      initial={{ opacity: 0, x: 16 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -16 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="space-y-6 pb-6 pt-6"
+    >
+      {/* Hero Section - Larger icon and name */}
+      <div className="flex flex-col items-center gap-5 px-6">
+        {/* Large Hero Circle */}
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
+        >
+          <HeroCircle
+            iconKey={selectedTemplate?.iconKey ? (selectedTemplate.iconKey as any) : selectedCategoryData?.iconKey ?? null}
+            color={isDarkMode ? UNIFIED_COLOR : "#FFFFFF"}
+            isAutoTask={selectedTemplateAuto}
+            size="lg"
+          />
+        </motion.div>
+
+        {/* Habit Name */}
+        <motion.div
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.15, duration: 0.3 }}
+          className="text-center"
+        >
+          <h2 className={`text-2xl font-bold uppercase tracking-wide ${themeColors.bodyText}`}>
+            {habitName}
+          </h2>
+          {selectedCategoryData && (
+            <p className={`mt-1 text-sm ${themeColors.bodyTextSecondary}`}>
+              {selectedCategoryData.name}
+            </p>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Health Integration Notice */}
+      {selectedTemplateAuto && (
+        <motion.div
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
+          className={`mx-4 flex items-center gap-3 rounded-xl border p-3 ${themeColors.card}`}
+        >
+          <svg className={`h-5 w-5 flex-shrink-0 ${themeColors.healthIcon}`} fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+          </svg>
+          <p className={`text-sm ${themeColors.bodyTextSecondary}`}>
+            Conectado ao app Saúde
+          </p>
+        </motion.div>
+      )}
+
+      {/* Summary Cards */}
+      <motion.div
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.25, duration: 0.3 }}
+        className="space-y-3 px-4"
+      >
+        {/* Goal Summary */}
+        <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
+          <div className="flex items-center gap-3">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
+              <Target className={`h-5 w-5 ${themeColors.iconColor}`} />
+            </div>
+            <div>
+              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+                Meta
+              </p>
+              <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
+                {getGoalText()}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Frequency Summary */}
+        <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
+          <div className="flex items-center gap-3">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
+              <Calendar className={`h-5 w-5 ${themeColors.iconColor}`} />
+            </div>
+            <div>
+              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+                Frequência
+              </p>
+              <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
+                {getFrequencyText()}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Notifications Summary */}
+        <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
+          <div className="flex items-center gap-3">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
+              <Bell className={`h-5 w-5 ${themeColors.iconColor}`} />
+            </div>
+            <div>
+              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+                Notificações
+              </p>
+              <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
+                {prefs.notificationsEnabled ? "Ativadas" : "Desativadas"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Edit Button */}
+      <motion.div
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.3 }}
+        className="px-4"
+      >
+        <button
+          onClick={() => setStep("details")}
+          className={`w-full rounded-xl py-3 text-sm font-semibold transition-all duration-200 ${themeColors.buttonInactive}`}
+        >
+          Editar configurações
+        </button>
+      </motion.div>
+
+      {/* Save Button */}
+      <motion.div
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.35, duration: 0.3 }}
+        className="px-4 pt-2"
+      >
+        <button
           onClick={handleSave}
-          disabled={!habitName.trim() || isSaving}
+          disabled={isSaving}
           className="h-14 w-full rounded-xl text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             backgroundColor: isDarkMode ? UNIFIED_COLOR : "#FFFFFF",
@@ -833,7 +1029,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         >
           {isSaving ? "SALVANDO..." : "SALVAR TAREFA"}
         </button>
-      </div>
+      </motion.div>
     </motion.div>
   );
 
@@ -845,6 +1041,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
           <AnimatePresence mode="wait">
             {step === "select" && SelectStep}
             {step === "details" && DetailsStep}
+            {step === "confirm" && ConfirmStep}
           </AnimatePresence>
         </div>
       </div>
