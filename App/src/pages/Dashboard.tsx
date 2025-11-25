@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
+import { useTheme } from "next-themes";
 
 import { CircularHabitCard } from "@/components/CircularHabitCard";
 import { AddHabitCircle } from "@/components/AddHabitCircle";
@@ -11,6 +12,8 @@ import type { Habit } from "@/components/CircularHabitCard";
 const Dashboard = () => {
   const { habits, loading, toggleHabit, getHabitCompletionStatus } = useHabits();
   const navigate = useNavigate();
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
 
   // Filter habits for today
   const todayHabits = useMemo(() => {
@@ -79,22 +82,27 @@ const Dashboard = () => {
     await toggleHabit(habitId);
   };
 
+  // Light mode: fundo verde vibrante | Dark mode: fundo escuro
+  const bgClass = isDarkMode ? "bg-background" : "bg-primary";
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center transition-colors duration-300">
+      <div className={`min-h-screen ${bgClass} flex items-center justify-center transition-colors duration-300`}>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="text-foreground text-lg font-semibold">Carregando seus hábitos...</div>
+          <div className={`text-lg font-semibold ${isDarkMode ? "text-foreground" : "text-white"}`}>
+            Carregando seus hábitos...
+          </div>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-6 transition-colors duration-300">
+    <div className={`min-h-screen ${bgClass} pb-20 md:pb-6 transition-colors duration-300`}>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -109,8 +117,12 @@ const Dashboard = () => {
               transition={{ duration: 0.3 }}
               className="col-span-2 text-center py-8"
             >
-              <p className="text-muted-foreground text-sm mb-2">Nenhum hábito para hoje</p>
-              <p className="text-muted-foreground/60 text-xs">Adicione um hábito para começar</p>
+              <p className={`text-sm mb-2 ${isDarkMode ? "text-muted-foreground" : "text-white/80"}`}>
+                Nenhum hábito para hoje
+              </p>
+              <p className={`text-xs ${isDarkMode ? "text-muted-foreground/60" : "text-white/60"}`}>
+                Adicione um hábito para começar
+              </p>
             </motion.div>
           )}
 
@@ -129,6 +141,7 @@ const Dashboard = () => {
                 streakDays={habit.streak}
                 goalInfo={formatGoalInfo(habit as Habit)}
                 isFavorite={habit.is_favorite}
+                isDarkMode={isDarkMode}
               />
             </motion.div>
           ))}
@@ -138,12 +151,12 @@ const Dashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: todayHabits.length * 0.05 }}
           >
-            <AddHabitCircle />
+            <AddHabitCircle isDarkMode={isDarkMode} />
           </motion.div>
         </div>
       </motion.div>
 
-      <NavigationBar />
+      <NavigationBar isDarkMode={isDarkMode} />
     </div>
   );
 };

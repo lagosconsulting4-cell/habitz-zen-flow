@@ -6,9 +6,10 @@ import { cn } from "@/lib/utils";
 
 interface NavigationBarProps {
   onOpenMore?: () => void;
+  isDarkMode?: boolean;
 }
 
-const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
+const NavigationBar = ({ onOpenMore, isDarkMode = true }: NavigationBarProps = {}) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -32,9 +33,20 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
     onClick?: () => void;
   }) => {
     const isActive = path ? location.pathname === path : false;
-    const iconColor = isDashboard
-      ? (isActive ? limeGreen : "#ffffff80")
-      : (isActive ? "currentColor" : "currentColor");
+
+    // Cores para o Dashboard
+    let iconColor: string;
+    if (isDashboard) {
+      if (isDarkMode) {
+        // Dark mode: verde ativo, branco transparente inativo
+        iconColor = isActive ? limeGreen : "#ffffff80";
+      } else {
+        // Light mode (fundo verde): branco ativo, branco transparente inativo
+        iconColor = isActive ? "#FFFFFF" : "rgba(255, 255, 255, 0.6)";
+      }
+    } else {
+      iconColor = "currentColor";
+    }
 
     return (
       <motion.button
@@ -55,11 +67,24 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
     );
   };
 
-  const navBg = isDashboard
-    ? "bg-[#1a1a1a]"
-    : "bg-card/95 backdrop-blur-md border-t border-border/60";
+  // Background da navbar no Dashboard
+  let navBg: string;
+  let borderStyle: React.CSSProperties;
 
-  const borderStyle = isDashboard ? { borderTop: `2px solid ${limeGreen}` } : {};
+  if (isDashboard) {
+    if (isDarkMode) {
+      // Dark mode: fundo escuro com borda verde
+      navBg = "bg-[#1a1a1a]";
+      borderStyle = { borderTop: `2px solid ${limeGreen}` };
+    } else {
+      // Light mode (fundo verde): fundo escuro para contraste
+      navBg = "bg-[#1a1a1a]/90 backdrop-blur-md";
+      borderStyle = { borderTop: "2px solid rgba(255, 255, 255, 0.3)" };
+    }
+  } else {
+    navBg = "bg-card/95 backdrop-blur-md border-t border-border/60";
+    borderStyle = {};
+  }
 
   return (
     <nav

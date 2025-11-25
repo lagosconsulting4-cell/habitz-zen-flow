@@ -25,6 +25,7 @@ interface CircularHabitCardProps {
   goalInfo?: string;
   isFavorite?: boolean;
   className?: string;
+  isDarkMode?: boolean;
 }
 
 export const CircularHabitCard = ({
@@ -35,7 +36,8 @@ export const CircularHabitCard = ({
   streakDays,
   goalInfo,
   isFavorite,
-  className
+  className,
+  isDarkMode = true
 }: CircularHabitCardProps) => {
   // Always use Lucide icon - prefer icon_key, fallback to Target icon
   const Icon = getHabitIcon(habit.icon_key) || Target;
@@ -45,8 +47,34 @@ export const CircularHabitCard = ({
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
 
-  // Lime green from CreateHabit
+  // Cores adaptivas baseadas no tema
+  // Light mode: inspirado no app de referência (fundo colorido, ícones brancos, círculos escuros)
+  // Dark mode: fundo escuro, ícones verdes
   const limeGreen = "#A3E635";
+
+  // Light mode colors (sobre fundo verde)
+  const lightModeColors = {
+    iconDefault: "#FFFFFF", // Branco
+    iconCompleted: "#1a1a1a", // Escuro quando completo
+    progressStroke: "#FFFFFF", // Branco
+    bgCircle: "rgba(0, 0, 0, 0.25)", // Escuro translúcido
+    fillCompleted: "#FFFFFF", // Branco quando completo
+    textColor: "#FFFFFF",
+    textSecondary: "rgba(255, 255, 255, 0.8)",
+  };
+
+  // Dark mode colors (sobre fundo escuro)
+  const darkModeColors = {
+    iconDefault: limeGreen,
+    iconCompleted: "#000000",
+    progressStroke: limeGreen,
+    bgCircle: "#2a2a2a",
+    fillCompleted: limeGreen,
+    textColor: "#FFFFFF",
+    textSecondary: "rgba(255, 255, 255, 0.8)",
+  };
+
+  const colors = isDarkMode ? darkModeColors : lightModeColors;
 
   return (
     <motion.button
@@ -55,7 +83,8 @@ export const CircularHabitCard = ({
       onClick={onToggle}
       className={cn(
         "flex flex-col items-center gap-3 relative group",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-full",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 rounded-full",
+        isDarkMode ? "focus-visible:ring-offset-black" : "focus-visible:ring-offset-primary",
         className
       )}
       type="button"
@@ -67,7 +96,10 @@ export const CircularHabitCard = ({
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute -top-2 -left-2 bg-white rounded-full p-1.5 shadow-lg z-10"
+          className={cn(
+            "absolute -top-2 -left-2 rounded-full p-1.5 shadow-lg z-10",
+            isDarkMode ? "bg-white" : "bg-white"
+          )}
           aria-hidden="true"
         >
           <Heart size={16} fill="#EF4444" color="#EF4444" />
@@ -80,7 +112,12 @@ export const CircularHabitCard = ({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 15 }}
-          className="absolute -top-1 -right-1 bg-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-extrabold text-card shadow-lg z-10 border-2 border-background"
+          className={cn(
+            "absolute -top-1 -right-1 rounded-full w-8 h-8 flex items-center justify-center text-xs font-extrabold shadow-lg z-10 border-2",
+            isDarkMode
+              ? "bg-white text-card border-background"
+              : "bg-white text-primary border-primary/20"
+          )}
           aria-hidden="true"
         >
           {streakDays}
@@ -99,18 +136,18 @@ export const CircularHabitCard = ({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke="#2a2a2a"
+            stroke={colors.bgCircle}
             strokeWidth={strokeWidth}
             fill="transparent"
-            opacity={0.3}
+            opacity={isDarkMode ? 0.3 : 1}
           />
 
-          {/* Progress circle - Lime green */}
+          {/* Progress circle */}
           <motion.circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke={limeGreen}
+            stroke={colors.progressStroke}
             strokeWidth={strokeWidth}
             fill="transparent"
             strokeDasharray={circumference}
@@ -122,7 +159,7 @@ export const CircularHabitCard = ({
           />
         </svg>
 
-        {/* Inner filled circle when completed - lime green */}
+        {/* Inner filled circle when completed */}
         <motion.div
           initial={false}
           animate={{
@@ -131,10 +168,10 @@ export const CircularHabitCard = ({
           }}
           transition={{ duration: 0.3, delay: completed ? 0.15 : 0, type: "spring" }}
           className="absolute inset-0 m-2.5 rounded-full shadow-inner"
-          style={{ backgroundColor: completed ? limeGreen : "transparent" }}
+          style={{ backgroundColor: completed ? colors.fillCompleted : "transparent" }}
         />
 
-        {/* Icon - always Lucide, lime green or black when completed */}
+        {/* Icon */}
         <div className="absolute inset-0 flex items-center justify-center">
           <motion.div
             animate={{
@@ -144,7 +181,7 @@ export const CircularHabitCard = ({
           >
             <Icon
               size={52}
-              color={completed ? "#000000" : limeGreen}
+              color={completed ? colors.iconCompleted : colors.iconDefault}
               strokeWidth={2.5}
               className="drop-shadow-lg"
             />
@@ -154,11 +191,17 @@ export const CircularHabitCard = ({
 
       {/* Habit name */}
       <div className="text-center max-w-[140px]">
-        <p className="text-white font-extrabold text-sm uppercase tracking-wider leading-tight line-clamp-2 drop-shadow-md">
+        <p
+          className="font-extrabold text-sm uppercase tracking-wider leading-tight line-clamp-2 drop-shadow-md"
+          style={{ color: colors.textColor }}
+        >
           {habit.name}
         </p>
         {goalInfo && (
-          <p className="text-white/80 text-xs font-semibold mt-1.5 drop-shadow">
+          <p
+            className="text-xs font-semibold mt-1.5 drop-shadow"
+            style={{ color: colors.textSecondary }}
+          >
             {goalInfo}
           </p>
         )}
