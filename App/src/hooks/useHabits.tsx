@@ -54,6 +54,23 @@ export interface HabitNotificationPref {
   time_sensitive?: boolean;
 }
 
+// Valid database enum values for habit_unit
+type DatabaseHabitUnit = "none" | "steps" | "minutes" | "km" | "custom";
+
+// Map unsupported unit values to valid database enum values
+const mapUnitToDatabase = (unit?: string | null): DatabaseHabitUnit => {
+  if (!unit || unit === "none") return "none";
+
+  const validUnits: DatabaseHabitUnit[] = ["none", "steps", "minutes", "km", "custom"];
+  if (validUnits.includes(unit as DatabaseHabitUnit)) {
+    return unit as DatabaseHabitUnit;
+  }
+
+  // Map unsupported units to "custom"
+  // These include: hours, pages, liters, etc.
+  return "custom";
+};
+
 export const useHabits = () => {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,7 +155,8 @@ export const useHabits = () => {
             // Defaults for new schema fields if not provided
             color: habitData.color ?? null,
             icon_key: habitData.icon_key ?? null,
-            unit: habitData.unit ?? "none",
+            // Map unsupported unit values (hours, pages, liters) to "custom"
+            unit: mapUnitToDatabase(habitData.unit),
             goal_value: habitData.goal_value ?? null,
             frequency_type: habitData.frequency_type ?? "fixed_days",
             times_per_week: habitData.times_per_week ?? null,
@@ -193,9 +211,14 @@ export const useHabits = () => {
     >>
   ) => {
     try {
+      // Map unit to valid database value if present
+      const mappedUpdates = updates.unit !== undefined
+        ? { ...updates, unit: mapUnitToDatabase(updates.unit) }
+        : updates;
+
       const { data, error } = await supabase
         .from("habits")
-        .update({ ...updates })
+        .update({ ...mappedUpdates })
         .eq("id", habitId)
         .select()
         .single();
