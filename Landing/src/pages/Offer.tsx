@@ -409,20 +409,20 @@ const Offer = () => {
           </motion.div>
 
           <Tabs defaultValue="after" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8 h-14 sm:h-16 p-1 sm:p-1.5 bg-muted/50 rounded-2xl">
+            <TabsList className="grid w-full grid-cols-2 mb-8 h-14 sm:h-16 p-1.5 sm:p-2 bg-muted/50 rounded-2xl border border-border/50">
               <TabsTrigger
                 value="before"
-                className="text-xs sm:text-base font-semibold rounded-xl h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
+                className="text-xs sm:text-base font-semibold rounded-xl h-full transition-all duration-300 data-[state=active]:!bg-gradient-to-r data-[state=active]:!from-red-500 data-[state=active]:!to-rose-500 data-[state=active]:!text-white data-[state=active]:!shadow-lg data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
               >
-                <HeartCrack className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Sem o </span>BORA
+                <HeartCrack className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline">Sem o </span>BORA
               </TabsTrigger>
               <TabsTrigger
                 value="after"
-                className="text-xs sm:text-base font-semibold rounded-xl h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
+                className="text-xs sm:text-base font-semibold rounded-xl h-full transition-all duration-300 data-[state=active]:!bg-gradient-to-r data-[state=active]:!from-primary data-[state=active]:!to-emerald-500 data-[state=active]:!text-white data-[state=active]:!shadow-lg data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
               >
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Com o </span>BORA
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline">Com o </span>BORA
               </TabsTrigger>
             </TabsList>
 
