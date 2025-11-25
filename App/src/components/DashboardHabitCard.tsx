@@ -194,11 +194,6 @@ export const DashboardHabitCard = ({
       <h3 className="text-[10px] font-semibold text-center leading-tight line-clamp-2 px-1 tracking-wide">
         {habit.name.toUpperCase()}
       </h3>
-
-      {/* Progress Percentage */}
-      <p className="text-[9px] text-muted-foreground font-medium">
-        {Math.round(progress)} %
-      </p>
     </motion.button>
   );
 };
