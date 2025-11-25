@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,6 @@ import {
   Zap,
   Moon,
   CheckCircle,
-  BarChart3,
   Rocket,
   Unlock,
   Users,
@@ -37,13 +36,14 @@ import {
   Brain,
   Coffee,
   ArrowRight,
-  ChevronRight,
   Gift,
   Flame,
   Trophy,
   Calendar,
   Bell,
   LineChart,
+  Crown,
+  Check,
 } from "lucide-react";
 import { buttonHoverTap, springTransition } from "@/hooks/useAnimations";
 
@@ -388,33 +388,40 @@ const Offer = () => {
       </section>
 
       {/* ============ BEFORE/AFTER SECTION ============ */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto">
+      <section className="py-20 px-6 relative overflow-hidden">
+        {/* Subtle background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-muted/30 to-transparent" />
+
+        <div className="max-w-4xl mx-auto relative z-10">
           <motion.div
             className="text-center mb-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
+            <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/25">
+              <Zap className="w-3 h-3 mr-1" />
+              Transformação garantida
+            </Badge>
             <h2 className="text-3xl md:text-4xl font-bold">
-              A diferença que o <span className="text-primary">BORA</span> faz
+              A diferença que o <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">BORA</span> faz
             </h2>
           </motion.div>
 
           <Tabs defaultValue="after" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8 h-14">
+            <TabsList className="grid w-full grid-cols-2 mb-8 h-16 p-1.5 bg-muted/50 rounded-2xl">
               <TabsTrigger
                 value="before"
-                className="text-base data-[state=active]:bg-destructive/10 data-[state=active]:text-destructive"
+                className="text-base font-semibold rounded-xl h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
               >
-                <HeartCrack className="w-4 h-4 mr-2" />
+                <HeartCrack className="w-5 h-5 mr-2" />
                 Sem o BORA
               </TabsTrigger>
               <TabsTrigger
                 value="after"
-                className="text-base data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                className="text-base font-semibold rounded-xl h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
               >
-                <Sparkles className="w-4 h-4 mr-2" />
+                <Sparkles className="w-5 h-5 mr-2" />
                 Com o BORA
               </TabsTrigger>
             </TabsList>
@@ -422,24 +429,27 @@ const Offer = () => {
             <AnimatePresence mode="wait">
               <TabsContent value="before" className="mt-0">
                 <motion.div
-                  className="rounded-3xl bg-destructive/5 border-2 border-destructive/20 p-8 md:p-12"
+                  className="relative rounded-3xl bg-gradient-to-br from-red-500/10 via-card to-rose-500/10 border-2 border-red-500/30 p-8 md:p-12 overflow-hidden shadow-xl"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                 >
-                  <div className="grid md:grid-cols-2 gap-6">
+                  {/* Decorative gradient */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/20 rounded-full blur-[100px]" />
+
+                  <div className="grid md:grid-cols-2 gap-6 relative z-10">
                     {beforeProblems.map((item, index) => (
                       <motion.div
                         key={index}
-                        className="flex items-start gap-4 p-4 rounded-xl bg-background/50"
+                        className="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-br from-card to-red-500/5 border border-red-500/20 shadow-lg"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                       >
-                        <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center flex-shrink-0">
-                          <item.icon className="w-5 h-5 text-destructive" />
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-500/30">
+                          <item.icon className="w-6 h-6 text-white" />
                         </div>
-                        <span className="text-foreground font-medium pt-2">{item.text}</span>
+                        <span className="text-foreground font-medium text-lg pt-2">{item.text}</span>
                       </motion.div>
                     ))}
                   </div>
@@ -448,24 +458,29 @@ const Offer = () => {
 
               <TabsContent value="after" className="mt-0">
                 <motion.div
-                  className="rounded-3xl bg-primary/5 border-2 border-primary/20 p-8 md:p-12"
+                  className="relative rounded-3xl bg-gradient-to-br from-primary/10 via-card to-emerald-500/10 border-2 border-primary/30 p-8 md:p-12 overflow-hidden shadow-xl"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                 >
-                  <div className="grid md:grid-cols-2 gap-6">
+                  {/* Decorative gradient */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/20 rounded-full blur-[80px]" />
+
+                  <div className="grid md:grid-cols-2 gap-6 relative z-10">
                     {afterBenefits.map((item, index) => (
                       <motion.div
                         key={index}
-                        className="flex items-start gap-4 p-4 rounded-xl bg-background/50"
+                        className="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-br from-card to-primary/5 border border-primary/20 shadow-lg group hover:border-primary/40 transition-colors"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
+                        whileHover={{ scale: 1.02 }}
                       >
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <item.icon className="w-5 h-5 text-primary" />
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
+                          <item.icon className="w-6 h-6 text-white" />
                         </div>
-                        <span className="text-foreground font-medium pt-2">{item.text}</span>
+                        <span className="text-foreground font-medium text-lg pt-2">{item.text}</span>
                       </motion.div>
                     ))}
                   </div>
@@ -477,20 +492,25 @@ const Offer = () => {
       </section>
 
       {/* ============ TESTIMONIALS CAROUSEL ============ */}
-      <section className="py-20 px-6 bg-muted/30">
-        <div className="max-w-6xl mx-auto">
+      <section className="py-20 px-6 relative overflow-hidden">
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-emerald-500/5 to-transparent" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-[100px]" />
+        <div className="absolute bottom-20 right-10 w-72 h-72 bg-emerald-500/20 rounded-full blur-[100px]" />
+
+        <div className="max-w-6xl mx-auto relative z-10">
           <motion.div
             className="text-center mb-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
+            <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/25">
               <Users className="w-3 h-3 mr-1" />
               Histórias reais
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold">
-              Quem já <span className="text-primary">virou o jogo</span>
+              Quem já <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">virou o jogo</span>
             </h2>
           </motion.div>
 
@@ -500,37 +520,45 @@ const Offer = () => {
           >
             <CarouselContent className="-ml-4">
               {testimonials.map((testimonial, index) => (
-                <CarouselItem key={index} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                <CarouselItem key={index} className="pl-4 md:basis-1/2 lg:basis-1/2">
                   <motion.div
                     className="h-full"
-                    whileHover={{ y: -8 }}
+                    whileHover={{ y: -8, scale: 1.02 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <div className="bg-card rounded-3xl p-8 h-full shadow-lg border border-border/50 flex flex-col">
-                      {/* Rating */}
-                      <div className="flex gap-1 mb-4">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 text-primary fill-primary" />
+                    <div className="relative bg-gradient-to-br from-card via-card to-primary/5 rounded-3xl p-8 h-full shadow-xl border border-primary/20 flex flex-col overflow-hidden group">
+                      {/* Glow effect on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                      {/* Rating - ESTRELAS PREENCHIDAS */}
+                      <div className="flex gap-1 mb-4 relative z-10">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className="w-5 h-5 text-amber-400"
+                            fill={i < testimonial.rating ? "#fbbf24" : "transparent"}
+                            strokeWidth={i < testimonial.rating ? 0 : 1.5}
+                          />
                         ))}
                       </div>
 
                       {/* Quote */}
-                      <blockquote className="text-foreground leading-relaxed flex-grow mb-6">
+                      <blockquote className="text-foreground leading-relaxed flex-grow mb-6 text-lg relative z-10">
                         "{testimonial.quote}"
                       </blockquote>
 
                       {/* Author */}
-                      <div className="flex items-center gap-3 pt-4 border-t border-border/50">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
-                          <span className="text-white font-bold text-lg">
+                      <div className="flex items-center gap-4 pt-4 border-t border-primary/10 relative z-10">
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary via-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-primary/30">
+                          <span className="text-white font-bold text-xl">
                             {testimonial.avatar}
                           </span>
                         </div>
                         <div>
-                          <p className="font-bold text-foreground">
+                          <p className="font-bold text-foreground text-lg">
                             {testimonial.name}, {testimonial.age}
                           </p>
-                          <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                          <p className="text-sm text-primary font-medium">{testimonial.role}</p>
                         </div>
                       </div>
                     </div>
@@ -539,150 +567,280 @@ const Offer = () => {
               ))}
             </CarouselContent>
             <div className="flex justify-center gap-4 mt-8">
-              <CarouselPrevious className="static translate-y-0" />
-              <CarouselNext className="static translate-y-0" />
+              <CarouselPrevious className="static translate-y-0 bg-primary/10 border-primary/20 hover:bg-primary hover:text-white" />
+              <CarouselNext className="static translate-y-0 bg-primary/10 border-primary/20 hover:bg-primary hover:text-white" />
             </div>
           </Carousel>
         </div>
       </section>
 
       {/* ============ FEATURES BENTO GRID ============ */}
-      <section className="py-20 px-6">
-        <div className="max-w-5xl mx-auto">
+      <section className="py-20 px-6 relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent" />
+
+        <div className="max-w-5xl mx-auto relative z-10">
           <motion.div
             className="text-center mb-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
+            <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/25">
+              <Crown className="w-3 h-3 mr-1" />
+              Recursos exclusivos
+            </Badge>
             <h2 className="text-3xl md:text-4xl font-bold">
-              O que você vai ter no <span className="text-primary">BORA</span>
+              O que você vai ter no <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">BORA</span>
             </h2>
           </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Large feature card */}
+            {/* Large feature card - HERO CARD */}
             <motion.div
-              className="col-span-2 row-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary to-emerald-600 p-8 text-white"
+              className="col-span-2 row-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-emerald-500 to-teal-600 p-8 text-white shadow-2xl shadow-primary/30"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               whileHover={{ scale: 1.02 }}
             >
-              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-              <div className="relative z-10">
-                <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
-                  <Target className="w-8 h-8 text-white" />
+              {/* Animated glow */}
+              <div className="absolute top-0 right-0 w-60 h-60 bg-white/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-emerald-300/30 rounded-full blur-3xl" />
+
+              <div className="relative z-10 h-full flex flex-col justify-between">
+                <div>
+                  <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-6 shadow-lg">
+                    <Target className="w-10 h-10 text-white" />
+                  </div>
+                  <h3 className="text-3xl md:text-4xl font-bold mb-3">Rotina Sob Medida</h3>
+                  <p className="text-white/90 text-xl leading-relaxed">
+                    Criada especificamente para seus objetivos e estilo de vida. Nada genérico.
+                  </p>
                 </div>
-                <h3 className="text-2xl md:text-3xl font-bold mb-3">Rotina Sob Medida</h3>
-                <p className="text-white/80 text-lg">
-                  Criada especificamente para seus objetivos e estilo de vida. Nada genérico.
-                </p>
+
+                <div className="flex items-center gap-2 mt-6 text-white/80">
+                  <CheckCircle className="w-5 h-5" />
+                  <span>100% personalizada para você</span>
+                </div>
               </div>
             </motion.div>
 
-            {/* Small cards */}
-            {features.slice(1).map((feature, index) => (
-              <motion.div
-                key={index}
-                className={`${feature.size === "medium" ? "col-span-2" : ""} bg-card rounded-2xl p-6 border border-border/50 shadow-sm`}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -4, boxShadow: "0 10px 40px rgba(0,0,0,0.1)" }}
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                  <feature.icon className="w-6 h-6 text-primary" />
-                </div>
-                <h4 className="font-bold text-lg mb-1">{feature.title}</h4>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
-              </motion.div>
-            ))}
+            {/* Checklists card - TOP RIGHT */}
+            <motion.div
+              className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 via-card to-orange-500/10 rounded-2xl p-6 border border-amber-500/20 shadow-lg group"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              whileHover={{ y: -4, scale: 1.02 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mb-4 shadow-lg shadow-amber-500/30">
+                <Calendar className="w-7 h-7 text-white" />
+              </div>
+              <h4 className="font-bold text-xl mb-1">Checklists Diários</h4>
+              <p className="text-muted-foreground">Simples e práticos</p>
+            </motion.div>
+
+            {/* Progresso card */}
+            <motion.div
+              className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 via-card to-indigo-500/10 rounded-2xl p-6 border border-blue-500/20 shadow-lg group"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              whileHover={{ y: -4, scale: 1.02 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
+                <LineChart className="w-7 h-7 text-white" />
+              </div>
+              <h4 className="font-bold text-xl mb-1">Progresso Visual</h4>
+              <p className="text-muted-foreground">Veja sua evolução</p>
+            </motion.div>
+
+            {/* Lembretes card */}
+            <motion.div
+              className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 via-card to-pink-500/10 rounded-2xl p-6 border border-purple-500/20 shadow-lg group"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              whileHover={{ y: -4, scale: 1.02 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-4 shadow-lg shadow-purple-500/30">
+                <Bell className="w-7 h-7 text-white" />
+              </div>
+              <h4 className="font-bold text-xl mb-1">Lembretes Inteligentes</h4>
+              <p className="text-muted-foreground">No momento certo</p>
+            </motion.div>
+
+            {/* Transformação card */}
+            <motion.div
+              className="relative overflow-hidden bg-gradient-to-br from-rose-500/10 via-card to-red-500/10 rounded-2xl p-6 border border-rose-500/20 shadow-lg group"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              whileHover={{ y: -4, scale: 1.02 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-rose-500 to-red-500 flex items-center justify-center mb-4 shadow-lg shadow-rose-500/30">
+                <Rocket className="w-7 h-7 text-white" />
+              </div>
+              <h4 className="font-bold text-xl mb-1">Transformação Real</h4>
+              <p className="text-muted-foreground">Execução prática</p>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* ============ PRICING SECTION ============ */}
-      <section id="pricing" className="py-20 px-6 bg-gradient-to-b from-muted/30 to-background">
-        <div className="max-w-lg mx-auto">
+      <section id="pricing" className="py-24 px-6 relative overflow-hidden">
+        {/* Massive gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-emerald-500/5 to-background" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[150px]" />
+        <div className="absolute top-20 left-20 w-64 h-64 bg-emerald-500/20 rounded-full blur-[100px]" />
+        <div className="absolute bottom-20 right-20 w-64 h-64 bg-teal-500/20 rounded-full blur-[100px]" />
+
+        <div className="max-w-lg mx-auto relative z-10">
+          {/* Section title */}
           <motion.div
-            className="relative bg-card rounded-3xl p-8 md:p-10 shadow-2xl border-2 border-primary/20"
-            initial={{ opacity: 0, y: 40 }}
+            className="text-center mb-10"
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            {/* Badge */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-              <Badge className="bg-primary text-primary-foreground px-4 py-1.5 shadow-lg">
-                <Gift className="w-4 h-4 mr-1" />
-                Oferta Especial de Lançamento
-              </Badge>
-            </div>
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Comece sua <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">transformação</span>
+            </h2>
+          </motion.div>
 
-            {/* Price */}
-            <div className="text-center mb-8 pt-4">
-              <p className="text-muted-foreground line-through text-xl">R$ 97</p>
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-6xl font-bold text-primary">R$ 47</span>
+          <motion.div
+            className="relative"
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ type: "spring", duration: 0.8 }}
+          >
+            {/* Outer glow ring */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-emerald-500 to-teal-500 rounded-[2rem] blur-lg opacity-50 animate-pulse" />
+
+            {/* Main card */}
+            <div className="relative bg-gradient-to-br from-card via-card to-primary/5 rounded-3xl p-8 md:p-10 shadow-2xl border-2 border-primary/30 overflow-hidden">
+              {/* Inner decorative elements */}
+              <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl" />
+
+              {/* Badge - FIXED */}
+              <div className="flex justify-center mb-6">
+                <Badge className="bg-gradient-to-r from-primary to-emerald-500 text-white border-0 px-5 py-2 text-sm shadow-lg shadow-primary/30">
+                  <Gift className="w-4 h-4 mr-2" />
+                  Oferta Especial de Lançamento
+                </Badge>
               </div>
-              <p className="text-muted-foreground mt-1">pagamento único • acesso vitalício</p>
-            </div>
 
-            {/* Benefits list */}
-            <ul className="space-y-4 mb-8">
-              {pricingBenefits.map((benefit, index) => (
-                <motion.li
-                  key={index}
-                  className="flex items-center gap-3"
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-                  <span className="text-foreground">{benefit}</span>
-                </motion.li>
-              ))}
-            </ul>
+              {/* Price - DESTACADO */}
+              <div className="text-center mb-8 relative z-10">
+                <p className="text-muted-foreground line-through text-xl mb-2">R$ 97</p>
+                <div className="relative inline-block">
+                  <span className="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-emerald-500 to-teal-500">
+                    R$ 47
+                  </span>
+                  {/* Glow behind price */}
+                  <div className="absolute inset-0 text-7xl md:text-8xl font-black text-primary blur-2xl opacity-30">
+                    R$ 47
+                  </div>
+                </div>
+                <p className="text-muted-foreground mt-3 text-lg">
+                  pagamento único • <span className="text-primary font-semibold">acesso vitalício</span>
+                </p>
+              </div>
 
-            {/* CTA Button */}
-            <motion.div {...buttonHoverTap}>
-              <Button
-                onClick={() => navigate("/checkout")}
-                variant="premium"
-                size="2xl"
-                className="w-full group"
+              {/* Divider */}
+              <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent mb-8" />
+
+              {/* Benefits list - DESTACADO */}
+              <ul className="space-y-4 mb-8 relative z-10">
+                {pricingBenefits.map((benefit, index) => (
+                  <motion.li
+                    key={index}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                    </div>
+                    <span className="text-foreground font-medium">{benefit}</span>
+                  </motion.li>
+                ))}
+              </ul>
+
+              {/* CTA Button - PREMIUM */}
+              <motion.div
+                {...buttonHoverTap}
+                className="relative"
               >
-                <Unlock className="w-6 h-6 mr-2" />
-                Desbloquear Agora
-                <Sparkles className="w-5 h-5 ml-2" />
-              </Button>
-            </motion.div>
+                {/* Button glow */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-emerald-500 to-teal-500 rounded-2xl blur opacity-70 group-hover:opacity-100 transition-opacity animate-pulse" />
 
-            {/* Guarantee */}
-            <div className="flex items-center justify-center gap-2 mt-6 p-4 rounded-xl bg-primary/5 border border-primary/10">
-              <Shield className="w-5 h-5 text-primary" />
-              <span className="text-sm">
-                <strong className="text-foreground">Garantia de 7 dias</strong>
-                <span className="text-muted-foreground"> • Satisfação ou seu dinheiro de volta</span>
-              </span>
+                <Button
+                  onClick={() => navigate("/checkout")}
+                  size="2xl"
+                  className="relative w-full bg-gradient-to-r from-primary via-emerald-500 to-teal-500 hover:from-primary hover:via-emerald-600 hover:to-teal-600 text-white font-bold text-xl py-7 rounded-xl shadow-2xl shadow-primary/40 group"
+                >
+                  <Unlock className="w-6 h-6 mr-3" />
+                  Desbloquear Minha Rotina
+                  <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </motion.div>
+
+              {/* Guarantee - DESTACADO */}
+              <motion.div
+                className="mt-8 p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-primary/10 to-teal-500/10 border border-primary/20"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+              >
+                <div className="flex items-center justify-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-bold text-foreground text-lg">Garantia de 7 dias</p>
+                    <p className="text-muted-foreground">Satisfação ou seu dinheiro de volta</p>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* ============ FAQ SECTION ============ */}
-      <section className="py-20 px-6">
-        <div className="max-w-3xl mx-auto">
+      <section className="py-20 px-6 relative overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-muted/20 to-transparent" />
+
+        <div className="max-w-3xl mx-auto relative z-10">
           <motion.div
             className="text-center mb-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
+            <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/25">
+              <AlertCircle className="w-3 h-3 mr-1" />
+              Tire suas dúvidas
+            </Badge>
             <h2 className="text-3xl md:text-4xl font-bold">
-              Perguntas <span className="text-primary">frequentes</span>
+              Perguntas <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">frequentes</span>
             </h2>
           </motion.div>
 
@@ -697,12 +855,12 @@ const Offer = () => {
               >
                 <AccordionItem
                   value={`faq-${index}`}
-                  className="bg-card rounded-2xl border border-border/50 px-6 shadow-sm"
+                  className="bg-gradient-to-br from-card to-primary/5 rounded-2xl border border-primary/10 px-6 shadow-lg hover:border-primary/20 transition-colors data-[state=open]:border-primary/30 data-[state=open]:shadow-xl"
                 >
-                  <AccordionTrigger className="text-left font-semibold hover:no-underline py-5">
+                  <AccordionTrigger className="text-left font-semibold hover:no-underline py-5 text-lg">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-5">
+                  <AccordionContent className="text-muted-foreground pb-5 text-base leading-relaxed">
                     {faq.answer}
                   </AccordionContent>
                 </AccordionItem>
