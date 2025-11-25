@@ -40,7 +40,20 @@ export type HabitIconKey =
   | "no_smoke"
   | "no_alcohol"
   | "focus"
-  | "pause";
+  | "pause"
+  | "ban"
+  | "sunrise"
+  | "make_bed"
+  | "review"
+  | "no_sugar"
+  | "no_procrastination"
+  | "no_skip_meals"
+  | "leisure"
+  | "alarm"
+  | "breakfast"
+  | "social_media"
+  | "no_late_sleep"
+  | "active";
 
 type IconProps = SVGProps<SVGSVGElement>;
 
@@ -264,6 +277,91 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
   pause: createIcon([
     <rect key="1" x="6" y="4" width="4" height="16" rx="1" />,
     <rect key="2" x="14" y="4" width="4" height="16" rx="1" />,
+  ]),
+  // Ícone de proibido (círculo com barra diagonal) - para categoria "Evitar"
+  ban: createIcon([
+    <circle key="1" cx="12" cy="12" r="10" />,
+    <path key="2" d="M4.93 4.93l14.14 14.14" />,
+  ]),
+  // Nascer do sol - para acordar cedo
+  sunrise: createIcon([
+    <path key="1" d="M12 2v4" />,
+    <path key="2" d="M4.93 10.93l2.83-2.83" />,
+    <path key="3" d="M2 18h20" />,
+    <path key="4" d="M19.07 10.93l-2.83-2.83" />,
+    <path key="5" d="M6 18a6 6 0 0 1 12 0" />,
+  ]),
+  // Cama arrumada - para fazer a cama
+  make_bed: createIcon([
+    <path key="1" d="M3 20v-8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8" />,
+    <path key="2" d="M5 10V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4" />,
+    <path key="3" d="M3 16h18" />,
+  ]),
+  // Lupa/documento - para revisar objetivos
+  review: createIcon([
+    <circle key="1" cx="11" cy="11" r="6" />,
+    <path key="2" d="M21 21l-4.35-4.35" />,
+    <path key="3" d="M8 11h6" />,
+  ]),
+  // Doce/açúcar com X - para evitar açúcar/doces
+  no_sugar: createIcon([
+    <path key="1" d="M12 3c-3 0-5 2-5 5v2c0 3 2 5 5 5s5-2 5-5V8c0-3-2-5-5-5Z" />,
+    <path key="2" d="M9 17v2c0 1 1 2 3 2s3-1 3-2v-2" />,
+    <path key="3" d="M4 4l16 16" />,
+  ]),
+  // Relógio com X - para não procrastinar
+  no_procrastination: createIcon([
+    <circle key="1" cx="12" cy="12" r="10" />,
+    <path key="2" d="M12 6v4l2 2" />,
+    <path key="3" d="M4 4l16 16" />,
+  ]),
+  // Prato com garfo e X - para não pular refeições
+  no_skip_meals: createIcon([
+    <circle key="1" cx="12" cy="12" r="8" />,
+    <path key="2" d="M8 9v6" />,
+    <path key="3" d="M16 9v2c0 1-1 2-2 2h-2" />,
+    <path key="4" d="M4 4l16 16" />,
+  ]),
+  // Poltrona/relaxar - para tempo de lazer
+  leisure: createIcon([
+    <path key="1" d="M4 16V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8" />,
+    <path key="2" d="M2 14h20" />,
+    <path key="3" d="M6 14v6" />,
+    <path key="4" d="M18 14v6" />,
+    <path key="5" d="M8 10h8" />,
+  ]),
+  // Despertador - para acordar no horário
+  alarm: createIcon([
+    <circle key="1" cx="12" cy="13" r="8" />,
+    <path key="2" d="M12 9v4l2 2" />,
+    <path key="3" d="M5 3L2 6" />,
+    <path key="4" d="M22 6l-3-3" />,
+  ]),
+  // Café da manhã - para café da manhã saudável
+  breakfast: createIcon([
+    <path key="1" d="M6 8h8" />,
+    <path key="2" d="M6 8c0 4 2 6 4 6s4-2 4-6" />,
+    <path key="3" d="M14 8c2 0 4 1 4 3s-2 3-4 3" />,
+    <path key="4" d="M10 14v4" />,
+    <path key="5" d="M6 18h8" />,
+  ]),
+  // Celular/redes sociais - para limitar redes sociais
+  social_media: createIcon([
+    <rect key="1" x="5" y="2" width="14" height="20" rx="2" />,
+    <path key="2" d="M12 18h.01" />,
+    <path key="3" d="M9 6h6" />,
+  ]),
+  // Lua com X - para não dormir tarde
+  no_late_sleep: createIcon([
+    <path key="1" d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />,
+    <path key="2" d="M4 4l16 16" />,
+  ]),
+  // Pessoa ativa/em movimento - para não ficar sedentário
+  active: createIcon([
+    <circle key="1" cx="12" cy="5" r="2" />,
+    <path key="2" d="M12 7v5" />,
+    <path key="3" d="M9 20l3-8 3 8" />,
+    <path key="4" d="M7 11l5 1 5-1" />,
   ]),
 };
 
