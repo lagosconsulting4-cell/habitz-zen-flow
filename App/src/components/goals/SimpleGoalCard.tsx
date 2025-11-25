@@ -24,6 +24,7 @@ interface SimpleGoalCardProps {
   habitId: string;
   value: number | undefined;
   onChange: (value: number | undefined) => void;
+  isDarkMode?: boolean;
 }
 
 export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
@@ -31,6 +32,7 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
   habitId,
   value,
   onChange,
+  isDarkMode = true,
 }) => {
   const unitLabel = getUnitLabel(config.primaryUnit, config);
   const validation = value !== undefined ? validateGoalValue(value, habitId) : { isValid: true };
@@ -46,19 +48,38 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
     onChange(suggestedValue);
   };
 
+  // Cores adaptativas baseadas no tema
+  const cardClass = isDarkMode
+    ? "border-white/10 bg-white/5"
+    : "border-white/20 bg-black/10";
+  const iconBgClass = isDarkMode ? "bg-lime-400/10" : "bg-white/20";
+  const iconClass = isDarkMode ? "text-lime-400" : "text-white";
+  const labelClass = isDarkMode ? "text-white/40" : "text-white/70";
+  const valueClass = isDarkMode ? "text-white" : "text-white";
+  const borderClass = isDarkMode ? "border-white/10" : "border-white/20";
+  const inputClass = isDarkMode
+    ? "bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50"
+    : "bg-black/10 border-white/20 text-white placeholder:text-white/50 focus:border-white/50";
+  const unitLabelClass = isDarkMode ? "text-white/50" : "text-white/70";
+  const buttonActiveClass = isDarkMode ? "bg-lime-400 text-black" : "bg-white text-primary";
+  const buttonInactiveClass = isDarkMode
+    ? "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+    : "bg-black/10 text-white/80 hover:bg-black/15 hover:text-white";
+  const helpTextClass = isDarkMode ? "text-white/50" : "text-white/70";
+
   return (
-    <div className="mx-4 overflow-hidden rounded-2xl border border-border bg-card">
+    <div className={`mx-4 overflow-hidden rounded-2xl border ${cardClass}`}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
-            <Target className="h-6 w-6 text-primary" />
+          <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${iconBgClass}`}>
+            <Target className={`h-6 w-6 ${iconClass}`} />
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className={`text-[10px] font-bold uppercase tracking-widest ${labelClass}`}>
               META
             </p>
-            <p className="text-base font-semibold text-foreground">
+            <p className={`text-base font-semibold ${valueClass}`}>
               {value ? formatGoalValue(value, config.primaryUnit, config) : "Definir meta"}
             </p>
           </div>
@@ -69,7 +90,7 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
       </div>
 
       {/* Body */}
-      <div className="border-t border-border px-4 py-4 space-y-3">
+      <div className={`border-t px-4 py-4 space-y-3 ${borderClass}`}>
         {/* Input */}
         <div className="relative">
           <Input
@@ -80,10 +101,10 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
             onChange={(e) =>
               onChange(e.target.value ? Number(e.target.value) : undefined)
             }
-            className="w-full rounded-xl bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50 pr-16"
+            className={`w-full rounded-xl pr-16 ${inputClass}`}
             placeholder={`Ex: ${config.defaultValue || 10}`}
           />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+          <div className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none ${unitLabelClass}`}>
             {unitLabel}
           </div>
         </div>
@@ -98,8 +119,8 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
                 onClick={() => handleSuggestionClick(suggestion)}
                 className={`rounded-lg py-2.5 text-xs font-semibold transition-all duration-200 ${
                   value === suggestion
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                    ? buttonActiveClass
+                    : buttonInactiveClass
                 }`}
               >
                 {suggestion} {unitLabel}
@@ -114,7 +135,7 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
             <div className="flex-shrink-0 mt-0.5">
               <span className="text-xs">💡</span>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className={`text-xs leading-relaxed ${helpTextClass}`}>
               {config.helpText}
             </p>
           </div>

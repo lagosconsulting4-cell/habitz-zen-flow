@@ -40,6 +40,9 @@ interface SmartGoalCardProps {
 
   /** Callback quando unidade muda (apenas para advanced) */
   onUnitChange?: (unit: GoalUnit) => void;
+
+  /** Modo dark/light para estilização */
+  isDarkMode?: boolean;
 }
 
 export const SmartGoalCard: React.FC<SmartGoalCardProps> = ({
@@ -48,6 +51,7 @@ export const SmartGoalCard: React.FC<SmartGoalCardProps> = ({
   unit = "none",
   onChange,
   onUnitChange,
+  isDarkMode = true,
 }) => {
   const config = getGoalConfig(habitId);
 
@@ -59,7 +63,7 @@ export const SmartGoalCard: React.FC<SmartGoalCardProps> = ({
 
   // Binary: apenas mensagem informativa
   if (config.level === "binary") {
-    return <BinaryGoalCard config={config} />;
+    return <BinaryGoalCard config={config} isDarkMode={isDarkMode} />;
   }
 
   // Simple: sugestões rápidas
@@ -70,6 +74,7 @@ export const SmartGoalCard: React.FC<SmartGoalCardProps> = ({
         habitId={habitId}
         value={value}
         onChange={onChange}
+        isDarkMode={isDarkMode}
       />
     );
   }
@@ -89,6 +94,7 @@ export const SmartGoalCard: React.FC<SmartGoalCardProps> = ({
         unit={unit}
         onChange={onChange}
         onUnitChange={onUnitChange}
+        isDarkMode={isDarkMode}
       />
     );
   }
