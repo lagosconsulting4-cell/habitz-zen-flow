@@ -12,7 +12,7 @@
       "destination": "/app/index.html"
     },
     {
-      "source": "/:path((?!app|tdah|assets|audio|favicon).*)",
+      "source": "/:path((?!app|tdah|tiktok|assets|audio|favicon).*)",
       "destination": "/index.html"
     }
   ],

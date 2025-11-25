@@ -1,31 +1,43 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { copyFileSync, cpSync, existsSync, mkdirSync } from "fs";
+import { cpSync, existsSync, mkdirSync } from "fs";
 
-// Plugin para copiar a pasta tdah para o dist após o build
-const copyTdahPlugin = () => ({
-  name: "copy-tdah",
+const copyStaticDirsPlugin = (
+  directories: Array<{ source: string; destination?: string }> = [],
+) => ({
+  name: "copy-static-directories",
   closeBundle() {
-    const srcDir = path.resolve(__dirname, "tdah");
-    const destDir = path.resolve(__dirname, "dist", "tdah");
+    directories.forEach(({ source, destination }) => {
+      const srcDir = path.resolve(__dirname, source);
+      if (!existsSync(srcDir)) {
+        return;
+      }
 
-    if (existsSync(srcDir)) {
+      const destFolder = destination ?? source;
+      const destDir = path.resolve(__dirname, "dist", destFolder);
+
       if (!existsSync(destDir)) {
         mkdirSync(destDir, { recursive: true });
       }
+
       cpSync(srcDir, destDir, { recursive: true });
-      console.log("[vite] Pasta tdah copiada para dist/tdah");
-    }
+      console.log(`[vite] Pasta ${source} copiada para dist/${destFolder}`);
+    });
   },
 });
 
-export default defineConfig(({ mode }) => ({
+const staticDirectories = [
+  { source: "tdah" },
+  { source: "Hub", destination: "tiktok" },
+];
+
+export default defineConfig(() => ({
   server: {
     host: "::",
     port: 8080,
   },
-  plugins: [react(), copyTdahPlugin()],
+  plugins: [react(), copyStaticDirsPlugin(staticDirectories)],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
