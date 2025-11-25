@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { motion } from "motion/react";
 import {
   Calendar as CalendarIcon,
   TrendingUp,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import NavigationBar from "@/components/NavigationBar";
 import {
   Dialog,
   DialogContent,
@@ -131,11 +133,11 @@ const Calendar = () => {
   };
 
   const getCompletionColor = (rate: number) => {
-    if (rate >= 100) return "bg-success";
-    if (rate >= 75) return "bg-primary";
-    if (rate >= 50) return "bg-accent";
-    if (rate > 0) return "bg-muted";
-    return "bg-background";
+    if (rate >= 100) return "bg-lime-400";
+    if (rate >= 75) return "bg-lime-400/70";
+    if (rate >= 50) return "bg-lime-400/50";
+    if (rate > 0) return "bg-lime-400/30";
+    return "bg-transparent";
   };
 
   const selectedDateKey = selectedDate ? format(selectedDate, "yyyy-MM-dd") : null;
@@ -189,101 +191,99 @@ const Calendar = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      <div className="min-h-screen bg-[#000000] flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lime-400" />
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16">
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        <div className="flex items-center justify-between mb-8 animate-fade-in">
+    <div className="min-h-screen bg-[#000000] pb-20">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="container mx-auto px-4 py-6 max-w-4xl"
+      >
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <CalendarIcon className="w-8 h-8 text-primary" />
-              <span className="gradient-text">Calendario</span>
+            <h1 className="text-2xl font-bold uppercase tracking-wide text-white flex items-center gap-3">
+              <CalendarIcon className="w-8 h-8 text-lime-400" />
+              Calendário
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-white/60">
               Acompanhe seu progresso ao longo do tempo
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-slide-up">
-          <Card className="glass-card">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-primary/10 rounded-xl">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="font-light text-muted-foreground">Taxa mensal</p>
-                  <p className="text-2xl font-medium">
-                    {loadingMonthStats ? "--" : `${monthlyRate}%`}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-success/10 rounded-xl">
-                  <Award className="w-6 h-6 text-success" />
-                </div>
-                <div>
-                  <p className="font-light text-muted-foreground">Dias perfeitos</p>
-                  <p className="text-2xl font-medium">
-                    {loadingMonthStats ? "--" : monthlyStats.perfectDays}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-accent/10 rounded-xl">
-                  <Target className="w-6 h-6 text-accent" />
-                </div>
-                <div>
-                  <p className="font-light text-muted-foreground">Habitos completos</p>
-                  <p className="text-2xl font-medium">
-                    {loadingMonthStats ? "--" : monthlyStats.totalCompleted}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          {[
+            { icon: TrendingUp, value: loadingMonthStats ? "--" : `${monthlyRate}%`, label: "Taxa mensal" },
+            { icon: Award, value: loadingMonthStats ? "--" : monthlyStats.perfectDays, label: "Dias perfeitos" },
+            { icon: Target, value: loadingMonthStats ? "--" : monthlyStats.totalCompleted, label: "Habitos completos" }
+          ].map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <Card className="rounded-2xl bg-white/5 border border-white/10 p-4">
+                  <div className="text-center">
+                    <div className="p-3 bg-lime-400/10 rounded-xl mx-auto w-fit mb-3">
+                      <Icon className="w-6 h-6 text-lime-400" />
+                    </div>
+                    <p className="text-2xl font-bold text-white">{stat.value}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mt-1">
+                      {stat.label}
+                    </p>
+                  </div>
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
 
-        <Card className="glass-card mb-8 animate-slide-up" style={{ animationDelay: "200ms" }}>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl">
-                {format(currentDate, "MMMM yyyy", { locale: ptBR })}
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentDate(subMonths(currentDate, 1))}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentDate(addMonths(currentDate, 1))}
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+        >
+          <Card className="rounded-2xl bg-white/5 border border-white/10 mb-8">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-bold uppercase tracking-wide text-white">
+                  {format(currentDate, "MMMM yyyy", { locale: ptBR })}
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentDate(subMonths(currentDate, 1))}
+                    className="bg-white/5 border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-all duration-200"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentDate(addMonths(currentDate, 1))}
+                    className="bg-white/5 border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-all duration-200"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          </CardHeader>
+            </CardHeader>
           <CardContent>
             <div className="grid grid-cols-7 gap-1 mb-4">
               {weekdayLabels.map((day) => (
@@ -307,15 +307,15 @@ const Calendar = () => {
                     className={`
                       aspect-square p-2 rounded-lg text-sm font-medium relative
                       transition-all duration-200 hover:scale-105
-                      ${isCurrentMonth ? "text-foreground" : "text-muted-foreground"}
-                      ${isSelected ? "ring-2 ring-primary" : ""}
-                      ${isToday ? "bg-primary text-primary-foreground" : "hover:bg-muted/50"}
+                      ${isCurrentMonth ? "text-white" : "text-white/40"}
+                      ${isSelected ? "ring-2 ring-lime-400" : ""}
+                      ${isToday ? "bg-lime-400 text-black font-bold" : "hover:bg-white/10"}
                     `}
                   >
                     <span className="relative z-10">{format(day, "d")}</span>
                     {isCurrentMonth && completionRate > 0 && !isToday && (
                       <div
-                        className={`absolute inset-1 rounded-md opacity-30 ${getCompletionColor(completionRate)}`}
+                        className={`absolute inset-1 rounded-md ${getCompletionColor(completionRate)}`}
                       />
                     )}
                   </button>
@@ -324,21 +324,22 @@ const Calendar = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+        </motion.div>
+      </motion.div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg bg-[#000000] border-white/10">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-xl font-bold uppercase tracking-wide text-white">
               {selectedDate ? format(selectedDate, "dd 'de' MMMM", { locale: ptBR }) : ""}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-white/60">
               Visualize e atualize os habitos programados para este dia
             </DialogDescription>
           </DialogHeader>
 
           {selectedDayHabits.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-white/60">
               Nenhum habito foi programado para este dia.
             </p>
           ) : (
@@ -348,21 +349,24 @@ const Calendar = () => {
                 return (
                   <div
                     key={habit.id}
-                    className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/30 p-4"
+                    className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4"
                   >
                     <div>
-                      <p className="font-medium flex items-center gap-2">
+                      <p className="font-semibold text-white flex items-center gap-2">
                         <span className="text-xl">{habit.emoji}</span>
                         {habit.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mt-1">
                         {habit.category} • {habit.period === "morning" ? "Manha" : habit.period === "afternoon" ? "Tarde" : "Noite"}
                       </p>
                     </div>
                     <Button
-                      variant={isCompleted ? "secondary" : "outline"}
                       onClick={() => handleToggleHabit(habit.id)}
-                      className="flex items-center gap-2"
+                      className={`flex items-center gap-2 font-semibold transition-all duration-200 ${
+                        isCompleted
+                          ? "bg-lime-400 text-black hover:bg-lime-500"
+                          : "bg-white/5 border border-white/10 hover:bg-white/10 text-white"
+                      }`}
                     >
                       {isCompleted ? (
                         <>
@@ -383,6 +387,8 @@ const Calendar = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <NavigationBar />
     </div>
   );
 };

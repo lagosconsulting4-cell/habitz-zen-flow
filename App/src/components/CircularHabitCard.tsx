@@ -53,8 +53,14 @@ export const CircularHabitCard = ({
       whileHover={{ scale: 1.08 }}
       whileTap={{ scale: 0.92 }}
       onClick={onToggle}
-      className={cn("flex flex-col items-center gap-3 relative group", className)}
+      className={cn(
+        "flex flex-col items-center gap-3 relative group",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-full",
+        className
+      )}
       type="button"
+      aria-label={`${completed ? 'Desmarcar' : 'Marcar'} hábito ${habit.name}${streakDays ? `, sequência de ${streakDays} dias` : ''}`}
+      aria-pressed={completed}
     >
       {/* Favorite indicator */}
       {isFavorite && (
@@ -62,6 +68,7 @@ export const CircularHabitCard = ({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           className="absolute -top-2 -left-2 bg-white rounded-full p-1.5 shadow-lg z-10"
+          aria-hidden="true"
         >
           <Heart size={16} fill="#EF4444" color="#EF4444" />
         </motion.div>
@@ -74,6 +81,7 @@ export const CircularHabitCard = ({
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 15 }}
           className="absolute -top-1 -right-1 bg-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-extrabold text-card shadow-lg z-10 border-2 border-background"
+          aria-hidden="true"
         >
           {streakDays}
         </motion.div>

@@ -12,7 +12,8 @@ export const AddHabitCircle = () => {
       whileHover={{ scale: 1.08 }}
       whileTap={{ scale: 0.92 }}
       onClick={() => navigate("/create")}
-      className="flex flex-col items-center gap-3 group"
+      className="flex flex-col items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-full"
+      aria-label="Adicionar novo hábito"
     >
       <div
         className="rounded-full flex items-center justify-center bg-transparent transition-all duration-300 group-hover:shadow-xl"

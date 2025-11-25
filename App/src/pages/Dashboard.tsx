@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "motion/react";
 
 import { CircularHabitCard } from "@/components/CircularHabitCard";
 import { AddHabitCircle } from "@/components/AddHabitCircle";
@@ -80,31 +81,67 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[80vh]">
-        <div className="text-white text-lg font-medium">Carregando seus hábitos...</div>
+      <div className="min-h-screen bg-[#000000] flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="text-white text-lg font-semibold">Carregando seus hábitos...</div>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="pb-20 md:pb-6">
-      {/* Grid de hábitos */}
-      <div className="habits-grid">
-        {todayHabits.map((habit) => (
-          <CircularHabitCard
-            key={habit.id}
-            habit={habit as Habit}
-            progress={calculateProgress(habit as Habit)}
-            completed={isCompletedToday(habit.id)}
-            onToggle={() => handleToggle(habit.id)}
-            streakDays={habit.streak}
-            goalInfo={formatGoalInfo(habit as Habit)}
-            isFavorite={habit.is_favorite}
-          />
-        ))}
+    <div className="min-h-screen bg-[#000000] pb-20 md:pb-6">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        {/* Grid de hábitos */}
+        <div className="habits-grid">
+          {todayHabits.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="col-span-2 text-center py-8"
+            >
+              <p className="text-white/60 text-sm mb-2">Nenhum hábito para hoje</p>
+              <p className="text-white/40 text-xs">Adicione um hábito para começar</p>
+            </motion.div>
+          )}
 
-        <AddHabitCircle />
-      </div>
+          {todayHabits.map((habit, index) => (
+            <motion.div
+              key={habit.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+            >
+              <CircularHabitCard
+                habit={habit as Habit}
+                progress={calculateProgress(habit as Habit)}
+                completed={isCompletedToday(habit.id)}
+                onToggle={() => handleToggle(habit.id)}
+                streakDays={habit.streak}
+                goalInfo={formatGoalInfo(habit as Habit)}
+                isFavorite={habit.is_favorite}
+              />
+            </motion.div>
+          ))}
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: todayHabits.length * 0.05 }}
+          >
+            <AddHabitCircle />
+          </motion.div>
+        </div>
+      </motion.div>
 
       <NavigationBar />
     </div>

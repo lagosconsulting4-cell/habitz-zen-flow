@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NavigationBar from "@/components/NavigationBar";
 import { Toggle } from "@/components/ui/toggle";
 import {
   DropdownMenu,
@@ -36,7 +38,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { useHabits, Habit } from "@/hooks/useHabits";
-import { Loader2, MoreVertical, Check, Copy, Edit, Trash2, Sparkles } from "lucide-react";
+import { Loader2, MoreVertical, Check, Copy, Edit, Trash2, Sparkles, Target } from "lucide-react";
 import { HABIT_EMOJIS } from "@/data/habit-emojis";
 import type { HabitEmoji } from "@/data/habit-emojis";
 import { getHabitIcon } from "@/lib/habit-icons";
@@ -475,41 +477,47 @@ const handleSave = async () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="container mx-auto px-4 py-6 max-w-5xl">
+    <div className="min-h-screen bg-[#000000] pb-20">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="container mx-auto px-4 py-6 max-w-4xl"
+      >
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-light mb-1">
-              Meus <span className="font-medium gradient-text">Hábitos</span>
+            <h1 className="text-2xl font-bold uppercase tracking-wide text-white flex items-center gap-3 mb-2">
+              <Target className="w-8 h-8 text-lime-400" />
+              Meus Hábitos
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-white/60">
               Gerencie seus hábitos, agenda semanal e conclua tarefas do dia.
             </p>
           </div>
-          <Button asChild>
+          <Button asChild className="bg-lime-400 text-black hover:bg-lime-500 font-semibold">
             <Link to="/create">Adicionar novo hábito</Link>
           </Button>
         </div>
 
-        <Card className="glass-card p-4 mb-6">
+        <Card className="rounded-2xl bg-white/5 border border-white/10 p-4 mb-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <Input
               placeholder="Buscar hábito"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="md:max-w-sm"
+              className="md:max-w-sm bg-white/5 border-white/10 text-white placeholder:text-white/40"
             />
             <Tabs value={status} onValueChange={(value) => setStatus(value as typeof status)}>
-              <TabsList className="grid grid-cols-2 rounded-full bg-muted/50 p-1 shadow-inner">
+              <TabsList className="grid grid-cols-2 rounded-full bg-white/5 p-1">
                 <TabsTrigger
                   value="active"
-                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
+                  className="rounded-full px-4 py-1.5 text-sm font-medium text-white/60 transition-all data-[state=active]:bg-lime-400 data-[state=active]:text-black data-[state=active]:font-semibold"
                 >
                   Ativos
                 </TabsTrigger>
                 <TabsTrigger
                   value="archived"
-                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground data-[state=active]:shadow-lg"
+                  className="rounded-full px-4 py-1.5 text-sm font-medium text-white/60 transition-all data-[state=active]:bg-red-500 data-[state=active]:text-white data-[state=active]:font-semibold"
                 >
                   Arquivados
                 </TabsTrigger>
@@ -519,10 +527,14 @@ const handleSave = async () => {
 
           <div className="mt-4 flex flex-wrap gap-2">
             {uniqueCategories.map((category) => (
-              <Badge
+              <button
                 key={category}
-                variant={selectedCategories.includes(category) ? "default" : "outline"}
-                className="cursor-pointer"
+                type="button"
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
+                  selectedCategories.includes(category)
+                    ? "bg-lime-400 text-black"
+                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/10"
+                }`}
                 onClick={() =>
                   setSelectedCategories((prev) =>
                     prev.includes(category)
@@ -532,16 +544,20 @@ const handleSave = async () => {
                 }
               >
                 {categories.find((item) => item.id === category)?.label ?? category}
-              </Badge>
+              </button>
              ))}
           </div>
 
           <div className="mt-3 flex flex-wrap gap-2">
             {periods.map((period) => (
-              <Badge
+              <button
                 key={period.id}
-                variant={selectedPeriods.includes(period.id) ? "default" : "outline"}
-                className="cursor-pointer"
+                type="button"
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
+                  selectedPeriods.includes(period.id)
+                    ? "bg-lime-400 text-black"
+                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/10"
+                }`}
                 onClick={() =>
                   setSelectedPeriods((prev) =>
                     prev.includes(period.id)
@@ -551,44 +567,52 @@ const handleSave = async () => {
                 }
               >
                 {period.label}
-               </Badge>
+               </button>
              ))}
           </div>
         </Card>
 
         {loading ? (
-          <Card className="glass-card p-8 text-center">
-            <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+          <Card className="rounded-2xl bg-white/5 border border-white/10 p-8 text-center">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin text-lime-400" />
           </Card>
         ) : filteredHabits.length === 0 ? (
-          <Card className="glass-card p-8 text-center">
-            <h2 className="text-lg font-medium mb-2">Nenhum hábito encontrado</h2>
-            <p className="text-sm text-muted-foreground">
+          <Card className="rounded-2xl bg-white/5 border border-white/10 p-8 text-center">
+            <h2 className="text-lg font-bold uppercase tracking-wide text-white mb-2">Nenhum hábito encontrado</h2>
+            <p className="text-sm text-white/60">
               Ajuste os filtros ou cadastre um novo hábito para começar.
             </p>
           </Card>
         ) : (
           <div className="space-y-4">
-            {filteredHabits.map((habit) => {
+            {filteredHabits.map((habit, index) => {
               const archived = !habit.is_active;
 
               return (
-              <Card key={habit.id} className={cn("glass-card p-5 transition-colors duration-200", archived && "border-destructive/30 shadow-lg")}>
+              <motion.div
+                key={habit.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+              <Card className={cn("rounded-2xl bg-white/5 border p-5 transition-colors duration-200", archived ? "border-red-500/30 shadow-lg" : "border-white/10")}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
                     <div className="text-3xl">{habit.emoji}</div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-semibold">{habit.name}</h3>
+                        <h3 className="text-xl font-bold text-white">{habit.name}</h3>
                       </div>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                        <Badge variant="outline">{categories.find((item) => item.id === habit.category)?.label ?? habit.category}</Badge>
-                        <Badge variant="outline">
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/60">
+                        <span className="rounded-md px-2 py-1 bg-white/5 border border-white/10 font-medium">
+                          {categories.find((item) => item.id === habit.category)?.label ?? habit.category}
+                        </span>
+                        <span className="rounded-md px-2 py-1 bg-white/5 border border-white/10 font-medium">
                           {periods.find((period) => period.id === habit.period)?.label ?? habit.period}
-                        </Badge>
+                        </span>
                         <div className="flex items-center gap-1">
-                          <Sparkles className="h-3 w-3 text-orange-500" />
-                          <span>{habit.streak} dias de sequência</span>
+                          <Sparkles className="h-3 w-3 text-lime-400" />
+                          <span className="font-semibold">{habit.streak} dias de sequência</span>
                         </div>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-1">
@@ -597,10 +621,10 @@ const handleSave = async () => {
                           return (
                             <span
                               key={`${habit.id}-${label}`}
-                              className={`rounded-md px-2 py-1 text-xs font-medium transition ${
+                              className={`rounded-md px-2 py-1 text-xs font-semibold transition ${
                                 active
-                                  ? "bg-primary/15 text-primary"
-                                  : "bg-muted/40 text-muted-foreground"
+                                  ? "bg-lime-400/20 text-lime-400 border border-lime-400/30"
+                                  : "bg-white/5 text-white/40 border border-white/10"
                               }`}
                             >
                               {label}
@@ -612,7 +636,7 @@ const handleSave = async () => {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-9 w-9">
+                      <Button variant="ghost" size="icon" className="h-9 w-9 text-white hover:bg-white/10">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -637,11 +661,12 @@ const handleSave = async () => {
                   </DropdownMenu>
                 </div>
               </Card>
+              </motion.div>
             );
           })}
           </div>
         )}
-      </div>
+      </motion.div>
 
       <Sheet open={editSheetOpen} onOpenChange={setEditSheetOpen}>
         <SheetContent className="flex flex-col gap-6 sm:max-w-xl">
@@ -653,23 +678,24 @@ const handleSave = async () => {
           <ScrollArea className="flex-1 pr-4">
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Nome</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-white">Nome</label>
                 <Input
                   value={formState.name}
                   onChange={(event) => setFormState((prev) => ({ ...prev, name: event.target.value }))}
                   placeholder="Ex: Meditar 10 minutos"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Emoji</label>
-                <div className="grid grid-cols-6 gap-2">
+                <label className="text-sm font-semibold uppercase tracking-wide text-white">Emoji</label>
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                   {HABIT_EMOJIS.map((emoji) => (
                     <Button
                       key={emoji}
                       type="button"
                       variant={formState.emoji === emoji ? "default" : "outline"}
-                      className="h-10"
+                      className={`h-10 ${formState.emoji === emoji ? "bg-lime-400 text-black hover:bg-lime-500" : "bg-white/5 border-white/10 hover:bg-white/10"}`}
                       onClick={() => setFormState((prev) => ({ ...prev, emoji }))}
                     >
                       {emoji}
@@ -679,23 +705,27 @@ const handleSave = async () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Categoria</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-white">Categoria</label>
                 <div className="flex flex-wrap gap-2">
                   {categories.map((category) => (
-                    <Badge
+                    <button
                       key={category.id}
-                      variant={formState.category === category.id ? "default" : "outline"}
-                      className="cursor-pointer"
+                      type="button"
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
+                        formState.category === category.id
+                          ? "bg-lime-400 text-black"
+                          : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/10"
+                      }`}
                       onClick={() => setFormState((prev) => ({ ...prev, category: category.id }))}
                     >
                       {category.label}
-                    </Badge>
+                    </button>
                   ))}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Ícone</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-white">Ícone</label>
                 <div className="flex flex-wrap gap-2">
                   {iconKeys.map((key) => {
                     const Icon = getHabitIcon(key);
@@ -705,7 +735,7 @@ const handleSave = async () => {
                         type="button"
                         variant={formState.icon_key === key ? "default" : "outline"}
                         size="sm"
-                        className="gap-2"
+                        className={`gap-2 ${formState.icon_key === key ? "bg-lime-400 text-black hover:bg-lime-500" : "bg-white/5 border-white/10 hover:bg-white/10"}`}
                         onClick={() => setFormState((prev) => ({ ...prev, icon_key: key }))}
                       >
                         {Icon ? <Icon className="h-4 w-4" /> : "?"}
@@ -717,6 +747,7 @@ const handleSave = async () => {
                     type="button"
                     variant={!formState.icon_key ? "default" : "ghost"}
                     size="sm"
+                    className={!formState.icon_key ? "bg-lime-400 text-black hover:bg-lime-500" : "hover:bg-white/10"}
                     onClick={() => setFormState((prev) => ({ ...prev, icon_key: null }))}
                   >
                     Usar emoji
@@ -725,30 +756,31 @@ const handleSave = async () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Cor do hábito (opcional)</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-white">Cor do hábito (opcional)</label>
                 <Input
                   type="color"
                   value={formState.color ?? "#000000"}
                   onChange={(event) => setFormState((prev) => ({ ...prev, color: event.target.value || null }))}
-                  className="h-10 w-full"
+                  className="h-10 w-full bg-white/5 border-white/10"
                 />
                 <Input
                   type="text"
                   value={formState.color ?? ""}
                   onChange={(event) => setFormState((prev) => ({ ...prev, color: event.target.value || null }))}
                   placeholder="Ou digite ex: #34d399"
-                  className="mt-2"
+                  className="mt-2 bg-white/5 border-white/10 text-white placeholder:text-white/40"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Período</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-white">Período</label>
                 <div className="flex gap-2">
                   {periods.map((period) => (
                     <Button
                       key={period.id}
                       type="button"
                       variant={formState.period === period.id ? "default" : "outline"}
+                      className={formState.period === period.id ? "bg-lime-400 text-black hover:bg-lime-500 font-semibold" : "bg-white/5 border-white/10 hover:bg-white/10"}
                       onClick={() => setFormState((prev) => ({ ...prev, period: period.id as HabitFormState["period"] }))}
                     >
                       {period.label}
@@ -758,7 +790,7 @@ const handleSave = async () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Meta (opcional)</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-white">Meta (opcional)</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Input
                     type="number"
@@ -772,6 +804,7 @@ const handleSave = async () => {
                       }))
                     }
                     placeholder="Ex.: 5000"
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
                   />
                   <div className="flex flex-wrap gap-2">
                     {["none", "steps", "minutes", "km", "custom"].map((u) => (
@@ -780,6 +813,7 @@ const handleSave = async () => {
                         type="button"
                         variant={formState.unit === u ? "default" : "outline"}
                         size="sm"
+                        className={formState.unit === u ? "bg-lime-400 text-black hover:bg-lime-500 font-semibold" : "bg-white/5 border-white/10 hover:bg-white/10"}
                         onClick={() => setFormState((prev) => ({ ...prev, unit: u as HabitFormState["unit"] }))}
                       >
                         {u}
@@ -790,9 +824,9 @@ const handleSave = async () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Frequência</label>
+                <label className="text-sm font-semibold uppercase tracking-wide text-white">Frequência</label>
                 <select
-                  className="w-full rounded-md border px-3 py-2 text-sm"
+                  className="w-full rounded-md border px-3 py-2 text-sm bg-white/5 border-white/10 text-white"
                   value={formState.frequency_type ?? "fixed_days"}
                   onChange={(event) =>
                     setFormState((prev) => ({
@@ -861,7 +895,7 @@ const handleSave = async () => {
 
               {(formState.frequency_type === "fixed_days" || !formState.frequency_type) && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Dias da semana</label>
+                  <label className="text-sm font-semibold uppercase tracking-wide text-white">Dias da semana</label>
                   <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
                     {weekdayLabels.map((label, index) => {
                       const active = formState.days_of_week.includes(index);
@@ -870,7 +904,7 @@ const handleSave = async () => {
                           key={label}
                           pressed={active}
                           onPressedChange={() => handleToggleDay(index)}
-                          className={active ? "bg-primary/20 text-primary" : "bg-muted/40"}
+                          className={active ? "bg-lime-400/20 text-lime-400 border border-lime-400/30 data-[state=on]:bg-lime-400/20 data-[state=on]:text-lime-400" : "bg-white/5 text-white/60 border border-white/10"}
                         >
                           {label}
                         </Toggle>
@@ -1041,9 +1075,9 @@ const handleSave = async () => {
 
           <SheetFooter className="flex justify-between gap-3">
             <SheetClose asChild>
-              <Button variant="outline">Cancelar</Button>
+              <Button variant="outline" className="bg-white/5 border-white/10 hover:bg-white/10">Cancelar</Button>
             </SheetClose>
-            <Button onClick={handleSave} disabled={isSaving}>
+            <Button onClick={handleSave} disabled={isSaving} className="bg-lime-400 text-black hover:bg-lime-500 font-semibold">
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Salvar alterações
             </Button>
@@ -1067,6 +1101,8 @@ const handleSave = async () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <NavigationBar />
     </div>
   );
 };

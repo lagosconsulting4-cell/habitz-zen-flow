@@ -44,6 +44,7 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
         aria-current={isActive ? "page" : undefined}
         className={cn(
           "flex items-center justify-center rounded-full p-3 transition-colors",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
           !isDashboard && (isActive ? "text-primary" : "text-muted-foreground")
         )}
         whileTap={{ scale: 0.9 }}
@@ -61,16 +62,18 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps = {}) => {
   const borderStyle = isDashboard ? { borderTop: `2px solid ${limeGreen}` } : {};
 
   return (
-    <div
+    <nav
       className={cn("fixed inset-x-0 bottom-0 z-40 safe-area-bottom md:hidden", navBg)}
       style={borderStyle}
+      role="navigation"
+      aria-label="Navegação principal"
     >
       <div className="mx-auto grid w-full max-w-md grid-cols-3 items-center px-8 py-4">
         {renderButton({ label: "Config", icon: Settings, path: "/profile" })}
         {renderButton({ label: "Menu", icon: Grid3x3, onClick: onOpenMore })}
         {renderButton({ label: "Streaks", icon: TrendingUp, path: "/progress" })}
       </div>
-    </div>
+    </nav>
   );
 };
 

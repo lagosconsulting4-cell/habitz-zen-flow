@@ -1,29 +1,39 @@
-﻿import { Toaster } from "@/components/ui/toaster";
+﻿import { Suspense, lazy } from "react";
+import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import OnboardingFlow from "./pages/OnboardingFlow";
-import PersonalPlan from "./pages/PersonalPlan";
-import Dashboard from "./pages/Dashboard";
-import CreateHabit from "./pages/CreateHabit";
-import Progress from "./pages/Progress";
-import Profile from "./pages/Profile";
-import NotFound from "./pages/NotFound";
-import Meditation from "./pages/Meditation";
-import BooksHub from "./pages/BooksHub";
-import Tips from "./pages/Tips";
-import GuidedJourney from "./pages/GuidedJourney";
-import Auth from "./pages/Auth";
-import Calendar from "./pages/Calendar";
-import Pricing from "./pages/Pricing";
-import Thanks from "./pages/Thanks";
-import Cancel from "./pages/Cancel";
-import MyHabits from "./pages/MyHabits";
-import Bonus from "./pages/Bonus";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "@/layouts/ProtectedLayout";
 import ScrollToTop from "@/components/ScrollToTop";
+
+// Lazy load pages for better initial bundle size
+const OnboardingFlow = lazy(() => import("./pages/OnboardingFlow"));
+const PersonalPlan = lazy(() => import("./pages/PersonalPlan"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const CreateHabit = lazy(() => import("./pages/CreateHabit"));
+const Progress = lazy(() => import("./pages/Progress"));
+const Profile = lazy(() => import("./pages/Profile"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Meditation = lazy(() => import("./pages/Meditation"));
+const BooksHub = lazy(() => import("./pages/BooksHub"));
+const Tips = lazy(() => import("./pages/Tips"));
+const GuidedJourney = lazy(() => import("./pages/GuidedJourney"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Calendar = lazy(() => import("./pages/Calendar"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const Thanks = lazy(() => import("./pages/Thanks"));
+const Cancel = lazy(() => import("./pages/Cancel"));
+const MyHabits = lazy(() => import("./pages/MyHabits"));
+const Bonus = lazy(() => import("./pages/Bonus"));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen bg-[#000000] flex items-center justify-center">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lime-400" />
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -34,32 +44,34 @@ const App = () => (
       <Sonner />
       <BrowserRouter basename="/app">
         <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/thanks" element={<Thanks />} />
-          <Route path="/cancel" element={<Cancel />} />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/thanks" element={<Thanks />} />
+            <Route path="/cancel" element={<Cancel />} />
 
-          <Route element={<ProtectedRoute><ProtectedLayout /></ProtectedRoute>}>
-            <Route path="/onboarding" element={<OnboardingFlow />} />
-            <Route path="/plano" element={<PersonalPlan />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/create" element={<CreateHabit />} />
-            <Route path="/habits" element={<MyHabits />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/progress" element={<Progress />} />
-            <Route path="/meditation" element={<Meditation />} />
-            <Route path="/books" element={<BooksHub />} />
-            <Route path="/tips" element={<Tips />} />
-            <Route path="/guided" element={<GuidedJourney />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/bonus" element={<Bonus />} />
-          </Route>
+            <Route element={<ProtectedRoute><ProtectedLayout /></ProtectedRoute>}>
+              <Route path="/onboarding" element={<OnboardingFlow />} />
+              <Route path="/plano" element={<PersonalPlan />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/create" element={<CreateHabit />} />
+              <Route path="/habits" element={<MyHabits />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/progress" element={<Progress />} />
+              <Route path="/meditation" element={<Meditation />} />
+              <Route path="/books" element={<BooksHub />} />
+              <Route path="/tips" element={<Tips />} />
+              <Route path="/guided" element={<GuidedJourney />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/bonus" element={<Bonus />} />
+            </Route>
 
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

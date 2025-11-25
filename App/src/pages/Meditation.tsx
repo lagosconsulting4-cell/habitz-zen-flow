@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -111,110 +112,122 @@ const Meditation = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl font-light mb-2">
-            <span className="font-medium gradient-text">Meditacao</span> &amp; Respiracao
+    <div className="min-h-screen bg-[#000000] pb-20">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="container mx-auto px-4 py-6 max-w-4xl"
+      >
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold uppercase tracking-wide text-white flex items-center gap-3 mb-2">
+            <Brain className="w-8 h-8 text-lime-400" />
+            Meditação &amp; Respiração
           </h1>
-          <p className="text-muted-foreground font-light">
-            Tecnicas praticas para controle mental e foco
+          <p className="text-white/60">
+            Técnicas práticas para controle mental e foco
           </p>
         </div>
 
-        <div className="flex overflow-x-auto gap-2 mb-6 animate-slide-up">
+        <div className="flex overflow-x-auto gap-2 mb-6 pb-2">
           {categories.map((category) => (
-            <Button
+            <button
               key={category.value}
-              variant={selectedCategory === category.value ? "default" : "outline"}
-              size="sm"
               onClick={() => setSelectedCategory(category.value)}
-              className="whitespace-nowrap"
+              className={`whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                selectedCategory === category.value
+                  ? "bg-lime-400 text-black"
+                  : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+              }`}
             >
               {category.label}
-            </Button>
+            </button>
           ))}
         </div>
 
         {isLoading ? (
-          <Card className="glass-card p-8 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <Card className="rounded-2xl bg-white/5 border border-white/10 p-8 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 animate-spin text-lime-400" />
           </Card>
         ) : filteredSessions.length === 0 ? (
-          <Card className="glass-card p-8 text-center">
-            <h2 className="text-lg font-medium mb-2">Nenhuma sessão disponível</h2>
-            <p className="text-sm text-muted-foreground">
+          <Card className="rounded-2xl bg-white/5 border border-white/10 p-8 text-center">
+            <h2 className="text-lg font-semibold text-white mb-2">Nenhuma sessão disponível</h2>
+            <p className="text-sm text-white/60">
               Ajuste os filtros ou volte mais tarde para novas sessões.
             </p>
           </Card>
         ) : (
           <div className="space-y-4">
             {filteredSessions.map((session, index) => (
-              <Card
+              <motion.div
                 key={session.id}
-                className={`glass-card p-6 hover:shadow-elegant transition-all duration-300 animate-slide-up ${
-                  selectedSessionId === session.id ? "ring-2 ring-primary" : ""
-                }`}
-                style={{ animationDelay: `${index * 100}ms` }}
-                onClick={() => toggleSessionDetails(session.id)}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <Brain className="w-5 h-5 text-primary" />
+                <Card
+                  className={`rounded-2xl bg-white/5 border border-white/10 p-6 hover:border-lime-400/50 transition-all duration-300 cursor-pointer ${
+                    selectedSessionId === session.id ? "ring-2 ring-lime-400" : ""
+                  }`}
+                  onClick={() => toggleSessionDetails(session.id)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-lime-400/10 rounded-lg">
+                          <Brain className="w-5 h-5 text-lime-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg text-white">{session.title}</h3>
+                          {session.focus && (
+                            <p className="text-sm text-white/60">{session.focus}</p>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-medium text-lg">{session.title}</h3>
-                        {session.focus && (
-                          <p className="text-sm text-muted-foreground">{session.focus}</p>
-                        )}
+
+                      <p className="text-white/60 mb-4">{session.description}</p>
+
+                      <div className="flex items-center gap-4 text-sm text-white/60">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{session.duration_label}</span>
+                        </div>
+                        <Badge className="bg-lime-400/10 text-lime-400 border-lime-400/30 text-xs font-semibold">
+                          {session.category_label}
+                        </Badge>
                       </div>
                     </div>
 
-                    <p className="text-muted-foreground mb-4">{session.description}</p>
-
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{session.duration_label}</span>
-                      </div>
-                      <Badge variant="outline" className="text-xs">
-                        {session.category_label}
-                      </Badge>
-                    </div>
+                    <Button
+                      size="icon"
+                      className="bg-white/5 border border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-all duration-200"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void handlePlay(session);
+                      }}
+                    >
+                      {loadingAudioId === session.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : activeSessionId === session.id && isPlaying ? (
+                        <Pause className="w-4 h-4" />
+                      ) : (
+                        <Play className="w-4 h-4" />
+                      )}
+                    </Button>
                   </div>
 
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      void handlePlay(session);
-                    }}
-                  >
-                    {loadingAudioId === session.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : activeSessionId === session.id && isPlaying ? (
-                      <Pause className="w-4 h-4" />
-                    ) : (
-                      <Play className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-
                 {selectedSessionId === session.id && (
-                  <div className="mt-6 pt-6 border-top border-border/50 animate-fade-in">
+                  <div className="mt-6 pt-6 border-t border-white/10">
                     <div className="grid md:grid-cols-2 gap-6">
                       <div>
-                        <h4 className="font-medium mb-3">Passos:</h4>
+                        <h4 className="text-sm font-semibold uppercase tracking-widest text-white/40 mb-3">Passos:</h4>
                         <ol className="space-y-2">
                           {session.steps.map((step, stepIndex) => (
                             <li
                               key={`${session.id}-step-${stepIndex}`}
-                              className="text-sm text-muted-foreground flex items-start gap-2"
+                              className="text-sm text-white/60 flex items-start gap-2"
                             >
-                              <span className="w-5 h-5 bg-primary/10 text-primary rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 mt-0.5">
+                              <span className="w-5 h-5 bg-lime-400/10 text-lime-400 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">
                                 {stepIndex + 1}
                               </span>
                               {step}
@@ -223,19 +236,19 @@ const Meditation = () => {
                         </ol>
                       </div>
                       <div>
-                        <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <h4 className="text-sm font-semibold uppercase tracking-widest text-white/40 mb-3 flex items-center gap-2">
                           <Volume2 className="w-4 h-4" />
                           Sons ambiente
                         </h4>
                         <div className="flex flex-wrap gap-2">
                           {session.ambient_sounds.map((sound, soundIndex) => (
-                            <Badge key={`${session.id}-sound-${soundIndex}`} variant="secondary" className="text-xs">
+                            <Badge key={`${session.id}-sound-${soundIndex}`} className="bg-white/5 text-white/60 border-white/10 text-xs font-semibold">
                               {sound}
                             </Badge>
                           ))}
                         </div>
                         <Button
-                          className="w-full mt-4 bg-gradient-primary hover:shadow-elegant transition-all duration-300"
+                          className="w-full mt-4 bg-lime-400 text-black hover:bg-lime-500 font-semibold transition-all duration-300"
                           onClick={(event) => {
                             event.stopPropagation();
                             void handlePlay(session);
@@ -255,17 +268,18 @@ const Meditation = () => {
                   </div>
                 )}
               </Card>
+              </motion.div>
             ))}
           </div>
         )}
-      </div>
+      </motion.div>
 
       {activeSession && audioSrc && (
         <div className="pointer-events-none fixed inset-x-0 bottom-24 px-4 md:static md:mt-10 md:px-0">
-          <Card className="glass-card mx-auto flex max-w-3xl flex-col gap-3 p-4 shadow-medium pointer-events-auto md:flex-row md:items-center md:gap-4">
+          <Card className="rounded-2xl bg-white/5 border border-white/10 mx-auto flex max-w-3xl flex-col gap-3 p-4 pointer-events-auto md:flex-row md:items-center md:gap-4">
             <div className="md:w-1/3">
-              <p className="text-xs uppercase text-muted-foreground">Reproduzindo agora</p>
-              <p className="text-sm font-medium">{activeSession.title}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Reproduzindo agora</p>
+              <p className="text-sm font-semibold text-white">{activeSession.title}</p>
             </div>
             <div className="flex-1">
               <audio
@@ -277,7 +291,7 @@ const Meditation = () => {
               />
             </div>
             <Button
-              variant="ghost"
+              className="bg-lime-400 text-black hover:bg-lime-500 font-semibold"
               onClick={() => {
                 const audio = audioRef.current;
                 if (!audio) return;

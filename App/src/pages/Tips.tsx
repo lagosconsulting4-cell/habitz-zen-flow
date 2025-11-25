@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,86 +44,98 @@ const Tips = () => {
   const getImpactColor = (impact: TipItem["impact"]) => {
     switch (impact) {
       case "Alto":
-        return "text-green-600 bg-green-50 border-green-200";
+        return "bg-lime-400 text-black border-lime-400";
       case "Moderado":
-        return "text-yellow-600 bg-yellow-50 border-yellow-200";
+        return "bg-lime-400/30 text-lime-400 border-lime-400/30";
       case "Leve":
-        return "text-blue-600 bg-blue-50 border-blue-200";
+        return "bg-lime-400/10 text-lime-400 border-lime-400/30";
       default:
-        return "text-muted-foreground bg-muted border-muted";
+        return "bg-white/5 text-white/60 border-white/10";
     }
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl font-light mb-2">
-            <span className="font-medium gradient-text">Dicas</span> praticas
+    <div className="min-h-screen bg-[#000000] pb-20">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="container mx-auto px-4 py-6 max-w-4xl"
+      >
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold uppercase tracking-wide text-white flex items-center gap-3 mb-2">
+            <Lightbulb className="w-8 h-8 text-lime-400" />
+            Dicas Práticas
           </h1>
-          <p className="text-muted-foreground font-light">
-            Rotina e nutricao para desenvolvimento masculino
+          <p className="text-white/60">
+            Rotina e nutrição para desenvolvimento masculino
           </p>
         </div>
 
-        <div className="flex gap-2 mb-6 animate-slide-up">
-          <Button
-            variant={activeTab === "rotina" ? "default" : "outline"}
+        <div className="flex overflow-x-auto gap-2 mb-6 pb-2">
+          <button
             onClick={() => setActiveTab("rotina")}
-            className="flex items-center gap-2"
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+              activeTab === "rotina"
+                ? "bg-lime-400 text-black"
+                : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+            }`}
           >
             <Target className="w-4 h-4" />
-            Rotina & Habitos
-          </Button>
-          <Button
-            variant={activeTab === "nutricao" ? "default" : "outline"}
+            Rotina & Hábitos
+          </button>
+          <button
             onClick={() => setActiveTab("nutricao")}
-            className="flex items-center gap-2"
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+              activeTab === "nutricao"
+                ? "bg-lime-400 text-black"
+                : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+            }`}
           >
             <Utensils className="w-4 h-4" />
-            Nutricao
-          </Button>
+            Nutrição
+          </button>
         </div>
 
         <div className="space-y-4 mb-8">
           {tipsForTab.map((tip, index) => (
-            <Card
+            <motion.div
               key={tip.id}
-              className="glass-card p-6 hover:shadow-elegant transition-all duration-300 animate-slide-up"
-              style={{ animationDelay: `${index * 100}ms` }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
             >
-              <div className="flex items-start gap-3 mb-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  {getTabIcon(activeTab)}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-lg">{tip.title}</h3>
-                  <p className="text-sm text-muted-foreground">{getSecondaryLabel(tip)}</p>
-                </div>
-              </div>
-
-              <p className="text-muted-foreground mb-4">{tip.description}</p>
-
-              <div className="flex items-center gap-3 flex-wrap">
-                {isRoutineTip(tip) && (
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4" />
-                    <span>{tip.time_suggestion}</span>
+              <Card className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:border-lime-400/50 transition-all duration-300">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="p-2 bg-lime-400/10 rounded-lg">
+                    {getTabIcon(activeTab)}
                   </div>
-                )}
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg text-white">{tip.title}</h3>
+                    <p className="text-sm text-white/60">{getSecondaryLabel(tip)}</p>
+                  </div>
+                </div>
 
-                <Badge
-                  variant="outline"
-                  className={`text-xs border ${getImpactColor(tip.impact)}`}
-                >
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  Impacto {tip.impact}
-                </Badge>
-              </div>
-            </Card>
+                <p className="text-white/60 mb-4">{tip.description}</p>
+
+                <div className="flex items-center gap-3 flex-wrap">
+                  {isRoutineTip(tip) && (
+                    <div className="flex items-center gap-1 text-sm text-white/60">
+                      <Clock className="w-4 h-4" />
+                      <span>{tip.time_suggestion}</span>
+                    </div>
+                  )}
+
+                  <Badge className={`text-xs font-semibold ${getImpactColor(tip.impact)}`}>
+                    <TrendingUp className="w-3 h-3 mr-1" />
+                    Impacto {tip.impact}
+                  </Badge>
+                </div>
+              </Card>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       <NavigationBar />
     </div>
