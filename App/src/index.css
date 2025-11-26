@@ -418,3 +418,129 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   PWA MOBILE UTILITIES - Safe Areas & Touch Optimization
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Safe area CSS variables for iOS notch/home indicator */
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+}
+
+/* Utility classes for safe areas */
+.safe-area-top {
+  padding-top: var(--safe-area-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: var(--safe-area-bottom);
+}
+
+.safe-area-left {
+  padding-left: var(--safe-area-left);
+}
+
+.safe-area-right {
+  padding-right: var(--safe-area-right);
+}
+
+.safe-area-inset {
+  padding-top: var(--safe-area-top);
+  padding-right: var(--safe-area-right);
+  padding-bottom: var(--safe-area-bottom);
+  padding-left: var(--safe-area-left);
+}
+
+/* Margin variants */
+.mt-safe {
+  margin-top: var(--safe-area-top);
+}
+
+.mb-safe {
+  margin-bottom: var(--safe-area-bottom);
+}
+
+/* Min-height with safe area for full-height content */
+.min-h-screen-safe {
+  min-height: calc(100vh - var(--safe-area-top) - var(--safe-area-bottom));
+}
+
+.h-screen-safe {
+  height: calc(100vh - var(--safe-area-top) - var(--safe-area-bottom));
+}
+
+/* Bottom navigation with safe area */
+.bottom-nav-safe {
+  padding-bottom: max(16px, var(--safe-area-bottom));
+}
+
+/* Fixed bottom with safe area */
+.fixed-bottom-safe {
+  bottom: var(--safe-area-bottom);
+}
+
+/* Touch optimization - minimum 48x48px touch targets */
+.touch-target {
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.touch-target-sm {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Disable text selection for app-like feel */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Enable momentum scrolling on iOS */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent pull-to-refresh on fixed containers */
+.overscroll-none {
+  overscroll-behavior: none;
+}
+
+/* Standalone mode (PWA installed) specific styles */
+@media (display-mode: standalone) {
+  /* Hide browser-specific elements in PWA mode */
+  .hide-in-pwa {
+    display: none !important;
+  }
+
+  /* Adjust body for standalone mode */
+  body {
+    overscroll-behavior-y: none;
+  }
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Fix for iOS input zoom */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  /* Better tap highlight on iOS */
+  button,
+  a,
+  [role="button"] {
+    -webkit-tap-highlight-color: rgba(101, 163, 13, 0.1);
+  }
+}
+

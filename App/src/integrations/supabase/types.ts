@@ -450,6 +450,36 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          endpoint?: string
+          p256dh?: string
+          auth?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quotes: {
         Row: {
           author: string
@@ -703,27 +733,6 @@ export type Database = {
           session_id?: string
           meta?: Json | null
           created_at?: string | null
-        }
-        Relationships: []
-      }
-      tdah_archetypes: {
-        Row: {
-          id: string
-          title: string
-          description: string
-          primary_symptoms: Json
-        }
-        Insert: {
-          id: string
-          title: string
-          description: string
-          primary_symptoms: Json
-        }
-        Update: {
-          id?: string
-          title?: string
-          description?: string
-          primary_symptoms?: Json
         }
         Relationships: []
       }
