@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useAnimation, type PanInfo } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
+  Sparkles,
+  Trophy,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -32,6 +34,7 @@ import {
   staggerItem,
 } from "@/hooks/useAnimations";
 import SiriOrb from "@/components/smoothui/siri-orb";
+import { getQuizResult, saveQuizResult, type QuizResult } from "@/lib/quizScoring";
 
 interface Question {
   id: number;
@@ -159,6 +162,8 @@ const Quiz = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showMidFeedback, setShowMidFeedback] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [dragDirection, setDragDirection] = useState<"left" | "right" | null>(null);
   const controls = useAnimation();
 
@@ -184,9 +189,17 @@ const Quiz = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      navigate("/mirror");
+      // Calcular resultado e mostrar celebração
+      const result = getQuizResult(answers, questions);
+      setQuizResult(result);
+      saveQuizResult(result, answers);
+      setShowCelebration(true);
     }
-  }, [currentQuestion, showMidFeedback, navigate]);
+  }, [currentQuestion, showMidFeedback, answers]);
+
+  const handleGoToMirror = useCallback(() => {
+    navigate("/mirror");
+  }, [navigate]);
 
   const handlePrevious = useCallback(() => {
     if (currentQuestion > 0) {setCurrentQuestion(currentQuestion - 1);
@@ -226,6 +239,143 @@ const Quiz = () => {
     },
     []
   );
+
+  // Celebration screen after completing quiz
+  if (showCelebration && quizResult) {
+    const severityColors = {
+      leve: "from-emerald-500 to-teal-500",
+      moderado: "from-amber-500 to-orange-500",
+      severo: "from-red-500 to-rose-500",
+    };
+
+    return (
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        {/* Confetti-like particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={i}
+              className={`absolute w-3 h-3 rounded-full ${
+                i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-amber-400" : "bg-emerald-400"
+              }`}
+              initial={{
+                x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 400),
+                y: -20,
+                scale: Math.random() * 0.5 + 0.5,
+                opacity: 1,
+              }}
+              animate={{
+                y: typeof window !== "undefined" ? window.innerHeight + 20 : 800,
+                rotate: 360 * (Math.random() > 0.5 ? 1 : -1),
+                opacity: 0,
+              }}
+              transition={{
+                duration: Math.random() * 2 + 2,
+                delay: Math.random() * 0.5,
+                ease: "easeOut",
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-gradient-radial pointer-events-none" />
+        <div className={`absolute top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-br ${severityColors[quizResult.severity]} rounded-full blur-[150px] opacity-30`} />
+
+        <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
+          <motion.div
+            className="max-w-2xl w-full text-center space-y-8"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* Trophy icon with pulse */}
+            <motion.div
+              className={`w-24 h-24 mx-auto rounded-full bg-gradient-to-br ${severityColors[quizResult.severity]} flex items-center justify-center shadow-2xl`}
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ ...springTransition, delay: 0.2 }}
+            >
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Trophy className="h-12 w-12 text-white" />
+              </motion.div>
+            </motion.div>
+
+            {/* Score display */}
+            <motion.div
+              className="space-y-2"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <p className="text-sm uppercase tracking-wider text-muted-foreground">
+                Seu diagnóstico está pronto
+              </p>
+              <h2 className="text-4xl md:text-6xl font-black">
+                <span className={`bg-gradient-to-r ${severityColors[quizResult.severity]} bg-clip-text text-transparent`}>
+                  {quizResult.emoji} {quizResult.title}
+                </span>
+              </h2>
+            </motion.div>
+
+            {/* Score bar */}
+            <motion.div
+              className="max-w-md mx-auto space-y-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Seu score</span>
+                <span className="font-bold text-foreground">{quizResult.score}/{quizResult.maxScore}</span>
+              </div>
+              <div className="h-4 bg-muted rounded-full overflow-hidden">
+                <motion.div
+                  className={`h-full bg-gradient-to-r ${severityColors[quizResult.severity]} rounded-full`}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${quizResult.percentage}%` }}
+                  transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+                />
+              </div>
+            </motion.div>
+
+            {/* Description */}
+            <motion.p
+              className="text-lg text-muted-foreground max-w-xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              {quizResult.description}
+            </motion.p>
+
+            {/* CTA Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <motion.div {...buttonHoverTap}>
+                <Button
+                  onClick={handleGoToMirror}
+                  variant="premium"
+                  size="xl"
+                  className="group"
+                >
+                  <Sparkles className="h-5 w-5 mr-2 animate-pulse" />
+                  <span>Ver minha solução personalizada</span>
+                  <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   // Mid-quiz feedback screen
   if (showMidFeedback) {

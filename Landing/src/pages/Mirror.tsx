@@ -23,8 +23,11 @@ import {
   TrendingDown,
   Brain,
   Zap,
+  Flame,
+  Target,
 } from "lucide-react";
 import { buttonHoverTap, springTransition } from "@/hooks/useAnimations";
+import { getStoredQuizResult, type QuizResult } from "@/lib/quizScoring";
 
 // No SiriOrb import - using clean gradient backgrounds instead
 
@@ -158,9 +161,39 @@ const Mirror = () => {
   const [openItem, setOpenItem] = useState<string>("morning");
   const [visitedItems, setVisitedItems] = useState<Set<string>>(new Set(["morning"]));
   const [showFinalCTA, setShowFinalCTA] = useState(false);
+  const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
+
+  // Load quiz result from sessionStorage
+  useEffect(() => {
+    const result = getStoredQuizResult();
+    if (result) {
+      setQuizResult(result);
+    }
+  }, []);
 
   const currentBlock = timeBlocks.find((b) => b.id === openItem) || timeBlocks[0];
   const allVisited = visitedItems.size === timeBlocks.length;
+
+  // Personalização baseada no resultado do quiz
+  const getPersonalizedMessage = () => {
+    if (!quizResult) return null;
+    switch (quizResult.severity) {
+      case "severo":
+        return "Seu diagnóstico mostrou que sua rotina precisa de atenção urgente. Mas não se preocupe — temos a solução.";
+      case "moderado":
+        return "Você tem potencial, mas está deixando ele escapar. Vamos mudar isso juntos.";
+      case "leve":
+        return "Você está no caminho certo! Com pequenos ajustes, pode alcançar resultados extraordinários.";
+      default:
+        return null;
+    }
+  };
+
+  const severityConfig = {
+    leve: { color: "emerald", icon: Target, label: "Nível Leve" },
+    moderado: { color: "amber", icon: AlertCircle, label: "Nível Moderado" },
+    severo: { color: "red", icon: Flame, label: "Nível Urgente" },
+  };
 
   useEffect(() => {
     if (openItem) {
@@ -211,6 +244,47 @@ const Mirror = () => {
           transition={{ duration: 0.5 }}
         >
           <div className="max-w-2xl mx-auto text-center space-y-3">
+            {/* Quiz result badge */}
+            {quizResult && (
+              <motion.div
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full mb-2 ${
+                  quizResult.severity === "severo"
+                    ? "bg-red-500/10 border border-red-500/20"
+                    : quizResult.severity === "moderado"
+                    ? "bg-amber-500/10 border border-amber-500/20"
+                    : "bg-emerald-500/10 border border-emerald-500/20"
+                }`}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ ...springTransition, delay: 0.1 }}
+              >
+                {(() => {
+                  const config = severityConfig[quizResult.severity];
+                  const Icon = config.icon;
+                  return (
+                    <>
+                      <Icon className={`h-4 w-4 ${
+                        quizResult.severity === "severo"
+                          ? "text-red-500"
+                          : quizResult.severity === "moderado"
+                          ? "text-amber-500"
+                          : "text-emerald-500"
+                      }`} />
+                      <span className={`text-sm font-medium ${
+                        quizResult.severity === "severo"
+                          ? "text-red-500"
+                          : quizResult.severity === "moderado"
+                          ? "text-amber-500"
+                          : "text-emerald-500"
+                      }`}>
+                        {quizResult.emoji} {config.label} • Score: {quizResult.score}/{quizResult.maxScore}
+                      </span>
+                    </>
+                  );
+                })()}
+              </motion.div>
+            )}
+
             <motion.div
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-destructive/10 border border-destructive/20"
               initial={{ scale: 0 }}
@@ -228,7 +302,7 @@ const Mirror = () => {
               <span className="text-destructive">nada mudar</span>...
             </h1>
             <p className="text-muted-foreground text-sm">
-              Toque em cada momento do dia para ver seu reflexo
+              {getPersonalizedMessage() || "Toque em cada momento do dia para ver seu reflexo"}
             </p>
           </div>
         </motion.div>

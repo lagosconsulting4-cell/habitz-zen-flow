@@ -44,8 +44,10 @@ import {
   LineChart,
   Crown,
   Check,
+  BadgeCheck,
 } from "lucide-react";
 import { buttonHoverTap, springTransition } from "@/hooks/useAnimations";
+import { CountdownTimer } from "@/components/CountdownTimer";
 
 // ============ DATA ============
 
@@ -100,32 +102,36 @@ const testimonials = [
     age: 28,
     role: "Designer",
     avatar: "L",
-    quote: "O BORA foi o único que me fez manter uma rotina sem me sentir sobrecarregado. Em 2 semanas já estava acordando antes do alarme.",
+    quote: "Em 14 dias, passei de acordar às 10h para às 6h30 naturalmente. Minha produtividade aumentou 40% e finalmente entrego projetos no prazo.",
     rating: 5,
+    metric: "14 dias para acordar cedo",
   },
   {
     name: "Mariana Costa",
     age: 24,
     role: "Estudante",
     avatar: "M",
-    quote: "Achei que seria mais um app de hábitos. Me surpreendi. Em 7 dias já estava dormindo melhor e focando mais nos estudos.",
+    quote: "Completei 21 dias de streak consecutivos! Antes não conseguia manter nada por mais de 3 dias. Passei em 2 concursos estudando só 2h/dia com foco.",
     rating: 5,
+    metric: "21 dias de streak",
   },
   {
     name: "Rafael Silva",
     age: 32,
     role: "Empreendedor",
     avatar: "R",
-    quote: "Finalmente tenho clareza do que fazer todos os dias. Virei o jogo no meu negócio e na minha saúde ao mesmo tempo.",
+    quote: "Em 30 dias, perdi 4kg e dobrei o faturamento da empresa. O segredo foi ter clareza do que fazer a cada momento do dia.",
     rating: 5,
+    metric: "30 dias = -4kg + 2x faturamento",
   },
   {
     name: "Ana Paula",
     age: 29,
     role: "Médica",
     avatar: "A",
-    quote: "Com plantões loucos, achava impossível ter rotina. O BORA se adaptou à minha realidade. Incrível.",
+    quote: "Mesmo com plantões de 24h, mantenho 87% de consistência nos meus hábitos. O BORA se adapta quando minha rotina muda.",
     rating: 5,
+    metric: "87% de consistência",
   },
 ];
 
@@ -297,6 +303,16 @@ const Offer = () => {
             </div>
           </motion.div>
 
+          {/* Countdown Timer */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="pt-6"
+          >
+            <CountdownTimer variant="hero" />
+          </motion.div>
+
           {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -309,10 +325,10 @@ const Offer = () => {
                 onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
                 variant="premium"
                 size="lg"
-                className="group w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 py-3 sm:py-4"
+                className="group w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 py-3 sm:py-4 font-bold"
               >
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                Ver minha rotina personalizada
+                QUERO MINHA ROTINA
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>
@@ -530,6 +546,16 @@ const Offer = () => {
                       {/* Glow effect on hover */}
                       <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
+                      {/* Metric badge */}
+                      {testimonial.metric && (
+                        <div className="mb-3 relative z-10">
+                          <Badge className="bg-primary/20 text-primary border-primary/30 text-xs font-semibold">
+                            <BadgeCheck className="w-3 h-3 mr-1" />
+                            {testimonial.metric}
+                          </Badge>
+                        </div>
+                      )}
+
                       {/* Rating - ESTRELAS PREENCHIDAS */}
                       <div className="flex gap-1 mb-4 relative z-10">
                         {[...Array(5)].map((_, i) => (
@@ -697,6 +723,53 @@ const Offer = () => {
         </div>
       </section>
 
+      {/* ============ FAQ SECTION ============ */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-muted/20 to-transparent" />
+
+        <div className="max-w-3xl mx-auto relative z-10">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/25">
+              <AlertCircle className="w-3 h-3 mr-1" />
+              Tire suas dúvidas
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Perguntas <span className="text-primary font-extrabold">frequentes</span>
+            </h2>
+          </motion.div>
+
+          <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
+            {faqs.map((faq, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <AccordionItem
+                  value={`faq-${index}`}
+                  className="bg-gradient-to-br from-card to-primary/5 rounded-xl sm:rounded-2xl border border-primary/10 px-4 sm:px-6 shadow-lg hover:border-primary/20 transition-colors data-[state=open]:border-primary/30 data-[state=open]:shadow-xl"
+                >
+                  <AccordionTrigger className="text-left font-semibold hover:no-underline py-4 sm:py-5 text-sm sm:text-lg">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4 sm:pb-5 text-sm sm:text-base leading-relaxed">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              </motion.div>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
       {/* ============ PRICING SECTION ============ */}
       <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
         {/* Massive gradient background */}
@@ -735,11 +808,16 @@ const Offer = () => {
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl" />
 
               {/* Badge - FIXED */}
-              <div className="flex justify-center mb-6">
+              <div className="flex justify-center mb-4">
                 <Badge className="bg-gradient-to-r from-primary to-emerald-500 text-white border-0 px-5 py-2 text-sm shadow-lg shadow-primary/30">
                   <Gift className="w-4 h-4 mr-2" />
                   Oferta Especial de Lançamento
                 </Badge>
+              </div>
+
+              {/* Countdown in pricing */}
+              <div className="mb-6">
+                <CountdownTimer variant="pricing" />
               </div>
 
               {/* Price - DESTACADO */}
@@ -811,71 +889,27 @@ const Offer = () => {
 
               {/* Guarantee - DESTACADO */}
               <motion.div
-                className="mt-8 p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-primary/10 to-teal-500/10 border border-primary/20"
+                className="mt-8 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-primary/10 to-teal-500/10 border border-primary/20"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
               >
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-white" />
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30">
+                    <Shield className="w-7 h-7 text-white" />
                   </div>
-                  <div className="text-left">
-                    <p className="font-bold text-foreground text-lg">Garantia de 7 dias</p>
-                    <p className="text-muted-foreground">Satisfação ou seu dinheiro de volta</p>
+                  <div className="text-center sm:text-left">
+                    <p className="font-bold text-foreground text-lg">Garantia Incondicional de 7 dias</p>
+                    <p className="text-muted-foreground text-sm sm:text-base">
+                      Se em até 7 dias você não sentir que sua rotina está mais organizada,
+                      devolvemos <strong className="text-primary">100% do seu dinheiro</strong>. Sem perguntas.
+                    </p>
                   </div>
                 </div>
               </motion.div>
             </div>
           </motion.div>
-        </div>
-      </section>
-
-      {/* ============ FAQ SECTION ============ */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-muted/20 to-transparent" />
-
-        <div className="max-w-3xl mx-auto relative z-10">
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/25">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              Tire suas dúvidas
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Perguntas <span className="text-primary font-extrabold">frequentes</span>
-            </h2>
-          </motion.div>
-
-          <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
-            {faqs.map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <AccordionItem
-                  value={`faq-${index}`}
-                  className="bg-gradient-to-br from-card to-primary/5 rounded-xl sm:rounded-2xl border border-primary/10 px-4 sm:px-6 shadow-lg hover:border-primary/20 transition-colors data-[state=open]:border-primary/30 data-[state=open]:shadow-xl"
-                >
-                  <AccordionTrigger className="text-left font-semibold hover:no-underline py-4 sm:py-5 text-sm sm:text-lg">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-4 sm:pb-5 text-sm sm:text-base leading-relaxed">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              </motion.div>
-            ))}
-          </Accordion>
         </div>
       </section>
 
@@ -925,7 +959,7 @@ const Offer = () => {
                 className="bg-white hover:bg-gray-100 !text-emerald-600 font-black text-sm sm:text-lg md:text-xl shadow-2xl shadow-white/30 group px-4 sm:px-8 py-5 sm:py-6 w-full sm:w-auto border-0"
               >
                 <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 mr-2 animate-pulse flex-shrink-0 text-emerald-600" />
-                <span className="text-emerald-600">COMEÇAR TRANSFORMAÇÃO</span>
+                <span className="text-emerald-600">QUERO MINHA ROTINA</span>
                 <ArrowRight className="w-4 h-4 sm:w-6 sm:h-6 ml-2 group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0 text-emerald-600" />
               </Button>
             </motion.div>
