@@ -8,6 +8,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "@/layouts/ProtectedLayout";
 import ScrollToTop from "@/components/ScrollToTop";
 import { useTheme } from "@/hooks/useTheme";
+import { InstallPrompt, UpdatePrompt } from "@/components/pwa/InstallPrompt";
+import { OfflineIndicator } from "@/components/pwa/OfflineIndicator";
+import { useOfflineSync } from "@/hooks/useOfflineSync";
+import { useNotificationNavigation } from "@/hooks/useNotificationNavigation";
 
 // Lazy load pages for better initial bundle size
 const OnboardingFlow = lazy(() => import("./pages/OnboardingFlow"));
@@ -30,6 +34,7 @@ const Cancel = lazy(() => import("./pages/Cancel"));
 const MyHabits = lazy(() => import("./pages/MyHabits"));
 const Bonus = lazy(() => import("./pages/Bonus"));
 const Preview = lazy(() => import("./pages/Preview"));
+const CriarSenha = lazy(() => import("./pages/CriarSenha"));
 // Loading fallback component
 const PageLoader = () => (
   <div className="min-h-screen bg-background flex items-center justify-center transition-colors duration-300">
@@ -37,11 +42,42 @@ const PageLoader = () => (
   </div>
 );
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutos - dados frescos
+      gcTime: 30 * 60 * 1000, // 30 minutos - manter no cache
+      retry: (failureCount, error) => {
+        // Não tentar novamente se estiver offline
+        if (!navigator.onLine) return false;
+        return failureCount < 3;
+      },
+      refetchOnWindowFocus: false, // Evitar refetch excessivo
+    },
+    mutations: {
+      retry: (failureCount) => {
+        if (!navigator.onLine) return false;
+        return failureCount < 2;
+      },
+    },
+  },
+});
 
 const ThemeInitializer = () => {
   // Apenas para garantir que a classe de tema seja aplicada no carregamento
   useTheme();
+  return null;
+};
+
+// Componente para inicializar sincronização offline
+const OfflineSyncInitializer = () => {
+  useOfflineSync();
+  return null;
+};
+
+// Componente para lidar com navegação de notificações
+const NotificationNavigationHandler = () => {
+  useNotificationNavigation();
   return null;
 };
 
@@ -53,6 +89,12 @@ const App = () => (
       <BrowserRouter basename="/app">
         <ThemeInitializer />
         <ScrollToTop />
+        {/* PWA Components */}
+        <OfflineSyncInitializer />
+        <NotificationNavigationHandler />
+        <OfflineIndicator />
+        <UpdatePrompt />
+        <InstallPrompt />
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -61,6 +103,7 @@ const App = () => (
             <Route path="/thanks" element={<Thanks />} />
             <Route path="/cancel" element={<Cancel />} />
             <Route path="/preview" element={<Preview />} />
+            <Route path="/criar-senha" element={<CriarSenha />} />
 
             <Route element={<ProtectedRoute><ProtectedLayout /></ProtectedRoute>}>
               <Route path="/onboarding" element={<OnboardingFlow />} />
