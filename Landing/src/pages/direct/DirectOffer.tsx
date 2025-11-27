@@ -19,8 +19,7 @@ const DirectOffer = () => {
   const navigate = usePathAwareNavigate();
 
   const handleCTA = () => {
-    // TODO: Integrate with payment/checkout
-    window.location.href = "https://pay.kirvano.com/..."; // Replace with actual payment link
+    window.location.href = "https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac";
   };
 
   return (
