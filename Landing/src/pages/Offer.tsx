@@ -48,6 +48,8 @@ import {
 } from "lucide-react";
 import { buttonHoverTap, springTransition } from "@/hooks/useAnimations";
 import { CountdownTimer } from "@/components/CountdownTimer";
+import { ValueStack } from "@/components/ValueStack";
+import { BonusCards } from "@/components/BonusCards";
 
 // ============ DATA ============
 
@@ -180,6 +182,10 @@ const pricingBenefits = [
 
 const faqs = [
   {
+    question: "O que está incluso nos R$ 47?",
+    answer: "Você recebe TUDO: App BORA completo por 1 ano + Programa de 30 Dias (R$ 297) + Jornada Guiada 4 Semanas (R$ 197) + Meditações & Respiração (R$ 147) + Hub de Livros (R$ 97) + Dicas Práticas (R$ 67). São R$ 805 em valor por apenas R$ 47 — economia de 94%.",
+  },
+  {
     question: "Quanto tempo preciso dedicar por dia?",
     answer: "Apenas 7 minutos! Nosso método foi desenhado para se encaixar na rotina mais corrida. São micro-hábitos que geram macro resultados.",
   },
@@ -189,7 +195,7 @@ const faqs = [
   },
   {
     question: "E se eu não gostar?",
-    answer: "Oferecemos garantia de 7 dias. Se não sentir diferença na sua rotina, devolvemos 100% do seu investimento.",
+    answer: "Oferecemos garantia de 7 dias. Se não sentir diferença na sua rotina, devolvemos 100% do seu investimento. Sem perguntas, sem burocracia.",
   },
   {
     question: "Preciso baixar algum app?",
@@ -248,24 +254,24 @@ const Offer = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={springTransition}
           >
-            <Badge className="px-4 py-2 bg-primary/10 text-primary border-primary/20 text-sm">
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Sua rotina personalizada está pronta
+            <Badge className="px-4 py-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30 text-sm animate-pulse">
+              <Clock className="w-4 h-4 mr-2" />
+              Oferta expira em 48 horas
             </Badge>
           </motion.div>
 
           {/* Title */}
           <motion.h1
-            className="text-3xl md:text-5xl lg:text-7xl font-bold leading-tight px-2"
+            className="text-3xl md:text-5xl lg:text-6xl font-bold leading-tight px-2"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
           >
-            Em menos de{" "}
-            <span className="text-primary">7 minutos</span> por dia,
+            Transforme sua rotina em{" "}
+            <span className="text-primary">30 dias</span>
             <br />
             <span className="text-primary">
-              você vira o jogo
+              ou seu dinheiro de volta
             </span>
           </motion.h1>
 
@@ -276,10 +282,10 @@ const Offer = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            Baseado nas suas respostas, criamos um plano{" "}
-            <strong className="text-foreground">único para você</strong> sair da
-            estagnação e criar{" "}
-            <strong className="text-foreground">consistência real</strong>.
+            Chega de acordar sem energia. Chega de procrastinar.{" "}
+            <strong className="text-foreground">Seu plano personalizado</strong> vai
+            te dar clareza e consistência em{" "}
+            <strong className="text-foreground">apenas 7 minutos por dia</strong>.
           </motion.p>
 
           {/* Stats */}
@@ -335,73 +341,6 @@ const Offer = () => {
           </motion.div>
         </div>
       </motion.section>
-
-      {/* ============ TIMELINE SECTION ============ */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 bg-muted/30">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-              <Clock className="w-3 h-3 mr-1" />
-              Sua nova rotina
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Um dia na sua melhor versão
-            </h2>
-          </motion.div>
-
-          {/* Timeline */}
-          <div className="relative">
-            {/* Connection line */}
-            <div className="absolute top-1/2 left-0 right-0 h-1 bg-border rounded-full hidden md:block" />
-            <motion.div
-              className="absolute top-1/2 left-0 h-1 bg-gradient-to-r from-primary to-emerald-500 rounded-full hidden md:block"
-              initial={{ width: "0%" }}
-              whileInView={{ width: "100%" }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-            />
-
-            {/* Timeline items */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4">
-              {routineTimeline.map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="flex flex-col items-center text-center"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.15 }}
-                >
-                  <motion.div
-                    className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-4 shadow-lg`}
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    <item.icon className="w-10 h-10 text-white" />
-                  </motion.div>
-                  <span className="text-3xl font-bold text-foreground">{item.time}</span>
-                  <span className="text-sm font-medium text-primary">{item.label}</span>
-                  <span className="text-sm text-muted-foreground mt-1">{item.description}</span>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          <motion.p
-            className="text-center text-muted-foreground mt-12 flex items-center justify-center gap-2"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            <Clock className="w-4 h-4 text-primary" />
-            Cada momento leva menos de 2 minutos
-          </motion.p>
-        </div>
-      </section>
 
       {/* ============ BEFORE/AFTER SECTION ============ */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
@@ -507,6 +446,12 @@ const Offer = () => {
         </div>
       </section>
 
+      {/* ============ VALUE STACK SECTION ============ */}
+      <ValueStack />
+
+      {/* ============ BONUS CARDS SECTION ============ */}
+      <BonusCards />
+
       {/* ============ TESTIMONIALS CAROUSEL ============ */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
         {/* Gradient background */}
@@ -597,129 +542,6 @@ const Offer = () => {
               <CarouselNext className="static translate-y-0 bg-primary/10 border-primary/20 hover:bg-primary hover:text-white" />
             </div>
           </Carousel>
-        </div>
-      </section>
-
-      {/* ============ FEATURES BENTO GRID ============ */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
-        {/* Background decorations */}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent" />
-
-        <div className="max-w-5xl mx-auto relative z-10">
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/25">
-              <Crown className="w-3 h-3 mr-1" />
-              Recursos exclusivos
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold">
-              O que você vai ter no <span className="text-primary font-extrabold">BORA</span>
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-            {/* Large feature card - HERO CARD */}
-            <motion.div
-              className="col-span-2 row-span-2 relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary via-emerald-500 to-teal-600 p-5 sm:p-8 text-white shadow-2xl shadow-primary/30"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.02 }}
-            >
-              {/* Animated glow */}
-              <div className="absolute top-0 right-0 w-40 sm:w-60 h-40 sm:h-60 bg-white/20 rounded-full blur-3xl animate-pulse" />
-              <div className="absolute bottom-0 left-0 w-24 sm:w-40 h-24 sm:h-40 bg-emerald-300/30 rounded-full blur-3xl" />
-
-              <div className="relative z-10 h-full flex flex-col justify-between">
-                <div>
-                  <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 sm:mb-6 shadow-lg">
-                    <Target className="w-7 h-7 sm:w-10 sm:h-10 text-white" />
-                  </div>
-                  <h3 className="text-xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">Rotina Sob Medida</h3>
-                  <p className="text-white/90 text-sm sm:text-xl leading-relaxed">
-                    Criada especificamente para seus objetivos e estilo de vida. Nada genérico.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 mt-4 sm:mt-6 text-white/80 text-xs sm:text-base">
-                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                  <span>100% personalizada para você</span>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Checklists card - TOP RIGHT */}
-            <motion.div
-              className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 via-card to-orange-500/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-amber-500/20 shadow-lg group"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              whileHover={{ y: -4, scale: 1.02 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mb-3 sm:mb-4 shadow-lg shadow-amber-500/30">
-                <Calendar className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
-              </div>
-              <h4 className="font-bold text-sm sm:text-xl mb-1">Checklists Diários</h4>
-              <p className="text-muted-foreground text-xs sm:text-base">Simples e práticos</p>
-            </motion.div>
-
-            {/* Progresso card */}
-            <motion.div
-              className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 via-card to-indigo-500/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-blue-500/20 shadow-lg group"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              whileHover={{ y: -4, scale: 1.02 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center mb-3 sm:mb-4 shadow-lg shadow-blue-500/30">
-                <LineChart className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
-              </div>
-              <h4 className="font-bold text-sm sm:text-xl mb-1">Progresso Visual</h4>
-              <p className="text-muted-foreground text-xs sm:text-base">Veja sua evolução</p>
-            </motion.div>
-
-            {/* Lembretes card */}
-            <motion.div
-              className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 via-card to-pink-500/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-purple-500/20 shadow-lg group"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              whileHover={{ y: -4, scale: 1.02 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-3 sm:mb-4 shadow-lg shadow-purple-500/30">
-                <Bell className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
-              </div>
-              <h4 className="font-bold text-sm sm:text-xl mb-1">Lembretes</h4>
-              <p className="text-muted-foreground text-xs sm:text-base">No momento certo</p>
-            </motion.div>
-
-            {/* Transformação card */}
-            <motion.div
-              className="relative overflow-hidden bg-gradient-to-br from-rose-500/10 via-card to-red-500/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-rose-500/20 shadow-lg group"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
-              whileHover={{ y: -4, scale: 1.02 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-rose-500 to-red-500 flex items-center justify-center mb-3 sm:mb-4 shadow-lg shadow-rose-500/30">
-                <Rocket className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
-              </div>
-              <h4 className="font-bold text-sm sm:text-xl mb-1">Transformação</h4>
-              <p className="text-muted-foreground text-xs sm:text-base">Execução prática</p>
-            </motion.div>
-          </div>
         </div>
       </section>
 
@@ -822,7 +644,12 @@ const Offer = () => {
 
               {/* Price - DESTACADO */}
               <div className="text-center mb-8 relative z-10">
-                <p className="text-muted-foreground line-through text-lg sm:text-xl mb-2">R$ 97</p>
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <p className="text-muted-foreground line-through text-xl sm:text-2xl">R$ 805</p>
+                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs font-bold animate-pulse">
+                    -94%
+                  </Badge>
+                </div>
                 <div className="relative inline-block">
                   <span className="text-5xl sm:text-7xl md:text-8xl font-black text-primary">
                     R$ 47
@@ -833,31 +660,16 @@ const Offer = () => {
                   </div>
                 </div>
                 <p className="text-muted-foreground mt-3 text-sm sm:text-lg">
-                  pagamento anual • <span className="text-primary font-semibold">1 ano de acesso</span>
+                  pagamento único • <span className="text-primary font-semibold">1 ano de acesso completo</span>
                 </p>
               </div>
 
-              {/* Divider */}
-              <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent mb-8" />
-
-              {/* Benefits list - DESTACADO */}
-              <ul className="space-y-2 sm:space-y-4 mb-6 sm:mb-8 relative z-10">
-                {pricingBenefits.map((benefit, index) => (
-                  <motion.li
-                    key={index}
-                    className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg sm:rounded-xl bg-primary/5 border border-primary/10"
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" strokeWidth={3} />
-                    </div>
-                    <span className="text-foreground font-medium text-sm sm:text-base">{benefit}</span>
-                  </motion.li>
-                ))}
-              </ul>
+              {/* What's included summary */}
+              <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 mb-6 relative z-10">
+                <p className="text-center text-sm sm:text-base text-foreground">
+                  <span className="font-bold text-primary">Incluso:</span> App BORA + Programa 30 Dias + Jornada Guiada + Meditações + Hub de Livros + Dicas Práticas
+                </p>
+              </div>
 
               {/* CTA Button - SUPER PREMIUM com efeito de brilho */}
               <motion.div
