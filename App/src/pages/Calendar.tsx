@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { motion } from "motion/react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { motion, AnimatePresence, PanInfo } from "motion/react";
 import {
   Calendar as CalendarIcon,
   TrendingUp,
@@ -30,6 +30,9 @@ import {
   subMonths,
   startOfWeek,
   endOfWeek,
+  addDays,
+  subDays,
+  isToday as dateFnsIsToday,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useHabits } from "@/hooks/useHabits";
@@ -56,6 +59,16 @@ const Calendar = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [monthCompletions, setMonthCompletions] = useState<MonthCompletionMap>({});
   const [loadingMonthStats, setLoadingMonthStats] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<"left" | "right">("right");
+  const monthKey = format(currentDate, "yyyy-MM");
+
+  // Week strip - shows current week centered on today
+  const today = new Date();
+  const weekStart = startOfWeek(today, { weekStartsOn: 0 });
+  const weekDays = useMemo(
+    () => eachDayOfInterval({ start: weekStart, end: addDays(weekStart, 6) }),
+    [weekStart]
+  );
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -188,6 +201,46 @@ const Calendar = () => {
     ? Math.round((monthlyStats.totalCompleted / monthlyStats.totalPossible) * 100)
     : 0;
 
+  // Navigation handlers with direction tracking
+  const goToPreviousMonth = useCallback(() => {
+    setSlideDirection("right");
+    setCurrentDate(prev => subMonths(prev, 1));
+  }, []);
+
+  const goToNextMonth = useCallback(() => {
+    setSlideDirection("left");
+    setCurrentDate(prev => addMonths(prev, 1));
+  }, []);
+
+  // Swipe gesture handler
+  const handleDragEnd = useCallback(
+    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      const threshold = 50;
+      if (info.offset.x > threshold) {
+        goToPreviousMonth();
+      } else if (info.offset.x < -threshold) {
+        goToNextMonth();
+      }
+    },
+    [goToPreviousMonth, goToNextMonth]
+  );
+
+  // Animation variants for month transitions
+  const monthVariants = {
+    enter: (direction: "left" | "right") => ({
+      x: direction === "left" ? 100 : -100,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction: "left" | "right") => ({
+      x: direction === "left" ? -100 : 100,
+      opacity: 0,
+    }),
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center transition-colors duration-300">
@@ -210,7 +263,7 @@ const Calendar = () => {
         transition={{ duration: 0.3 }}
         className="container mx-auto px-4 py-6 max-w-4xl"
       >
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground flex items-center gap-3">
               <CalendarIcon className="w-8 h-8 text-primary" />
@@ -221,6 +274,62 @@ const Calendar = () => {
             </p>
           </div>
         </div>
+
+        {/* Week Strip - Quick Navigation */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mb-6"
+        >
+          <Card className="rounded-2xl bg-card border border-border p-3">
+            <div className="flex items-center justify-between gap-1">
+              {weekDays.map((day) => {
+                const dayRate = getCompletionRate(day);
+                const isSelected = selectedDate && isSameDay(day, selectedDate);
+                const isTodayDate = dateFnsIsToday(day);
+                const isPast = day < today && !isTodayDate;
+
+                return (
+                  <button
+                    key={day.toISOString()}
+                    onClick={() => handleSelectDate(day)}
+                    className={`
+                      flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-xl transition-all duration-200
+                      ${isSelected ? "bg-primary/20 ring-2 ring-primary" : "hover:bg-muted"}
+                    `}
+                  >
+                    <span className={`text-[10px] font-semibold uppercase ${
+                      isTodayDate ? "text-primary" : "text-muted-foreground"
+                    }`}>
+                      {format(day, "EEE", { locale: ptBR }).slice(0, 3)}
+                    </span>
+                    <span className={`
+                      w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold
+                      ${isTodayDate ? "bg-primary text-primary-foreground" : ""}
+                      ${isSelected && !isTodayDate ? "bg-primary/30 text-primary" : ""}
+                      ${!isTodayDate && !isSelected ? "text-foreground" : ""}
+                    `}>
+                      {format(day, "d")}
+                    </span>
+                    {/* Completion indicator */}
+                    <div className="flex gap-0.5">
+                      {dayRate >= 100 ? (
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      ) : dayRate > 0 ? (
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                      ) : isPast ? (
+                        <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/20" />
+                      ) : (
+                        <div className="w-1.5 h-1.5 rounded-full bg-transparent" />
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {[
@@ -257,72 +366,135 @@ const Calendar = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.15 }}
         >
-          <Card className="rounded-2xl bg-card border border-border mb-8">
+          <Card className="rounded-2xl bg-card border border-border mb-8 overflow-hidden">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-xl font-bold uppercase tracking-wide text-foreground">
-                  {format(currentDate, "MMMM yyyy", { locale: ptBR })}
-                </CardTitle>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentDate(subMonths(currentDate, 1))}
-                    className="bg-secondary border-border hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={goToPreviousMonth}
+                  className="h-10 w-10 p-0 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+                <AnimatePresence mode="wait" custom={slideDirection}>
+                  <motion.div
+                    key={monthKey}
+                    custom={slideDirection}
+                    initial={{ opacity: 0, y: slideDirection === "left" ? 10 : -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: slideDirection === "left" ? -10 : 10 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentDate(addMonths(currentDate, 1))}
-                    className="bg-secondary border-border hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+                    <CardTitle className="text-xl font-bold uppercase tracking-wide text-foreground text-center">
+                      {format(currentDate, "MMMM yyyy", { locale: ptBR })}
+                    </CardTitle>
+                  </motion.div>
+                </AnimatePresence>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={goToNextMonth}
+                  className="h-10 w-10 p-0 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </Button>
               </div>
             </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-7 gap-1 mb-4">
-              {weekdayLabels.map((day) => (
-                <div key={day} className="p-2 text-center text-sm font-medium text-muted-foreground">
-                  {day}
+            <CardContent>
+              {/* Swipe container */}
+              <motion.div
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.2}
+                onDragEnd={handleDragEnd}
+                className="touch-pan-y"
+              >
+                <div className="grid grid-cols-7 gap-1 mb-4">
+                  {weekdayLabels.map((day) => (
+                    <div key={day} className="p-2 text-center text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {day}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <div className="grid grid-cols-7 gap-1">
-              {calendarDays.map((day) => {
-                const completionRate = getCompletionRate(day);
-                const isCurrentMonth = isSameMonth(day, currentDate);
-                const isSelected = selectedDate && isSameDay(day, selectedDate);
-                const isToday = isSameDay(day, new Date());
-
-                return (
-                  <button
-                    key={day.toISOString()}
-                    onClick={() => handleSelectDate(day)}
-                    className={`
-                      aspect-square p-2 rounded-lg text-sm font-medium relative
-                      transition-all duration-200 hover:scale-105
-                      ${isCurrentMonth ? "text-foreground" : "text-muted-foreground/40"}
-                      ${isSelected ? "ring-2 ring-primary" : ""}
-                      ${isToday ? "bg-primary text-primary-foreground font-bold" : "hover:bg-muted"}
-                    `}
+                <AnimatePresence mode="wait" custom={slideDirection}>
+                  <motion.div
+                    key={monthKey}
+                    custom={slideDirection}
+                    variants={monthVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    className="grid grid-cols-7 gap-1"
                   >
-                    <span className="relative z-10">{format(day, "d")}</span>
-                    {isCurrentMonth && completionRate > 0 && !isToday && (
-                      <div
-                        className={`absolute inset-1 rounded-md ${getCompletionColor(completionRate)}`}
-                      />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+                    {calendarDays.map((day) => {
+                      const completionRate = getCompletionRate(day);
+                      const isCurrentMonth = isSameMonth(day, currentDate);
+                      const isSelected = selectedDate && isSameDay(day, selectedDate);
+                      const isTodayDate = dateFnsIsToday(day);
+
+                      return (
+                        <button
+                          key={day.toISOString()}
+                          onClick={() => handleSelectDate(day)}
+                          className={`
+                            aspect-square p-1 rounded-xl text-sm font-medium relative
+                            transition-all duration-200 hover:scale-105 active:scale-95
+                            ${isCurrentMonth ? "text-foreground" : "text-muted-foreground/30"}
+                            ${isSelected ? "ring-2 ring-primary ring-offset-2 ring-offset-card" : ""}
+                          `}
+                        >
+                          {/* Background completion indicator */}
+                          {isCurrentMonth && completionRate > 0 && !isTodayDate && (
+                            <div
+                              className={`absolute inset-1 rounded-lg transition-colors duration-200 ${getCompletionColor(completionRate)}`}
+                            />
+                          )}
+                          {/* Today highlight */}
+                          {isTodayDate && (
+                            <div className="absolute inset-1 rounded-lg bg-primary" />
+                          )}
+                          {/* Day number */}
+                          <span className={`
+                            relative z-10 flex items-center justify-center w-full h-full
+                            ${isTodayDate ? "text-primary-foreground font-bold" : ""}
+                          `}>
+                            {format(day, "d")}
+                          </span>
+                          {/* Perfect day indicator */}
+                          {isCurrentMonth && completionRate === 100 && !isTodayDate && (
+                            <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-primary rounded-full border-2 border-card z-20">
+                              <Check className="w-1.5 h-1.5 text-primary-foreground absolute top-0.5 left-0.5" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </motion.div>
+                </AnimatePresence>
+              </motion.div>
+
+              {/* Legend */}
+              <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-border">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-primary/30" />
+                  <span className="text-[10px] text-muted-foreground">Parcial</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-primary" />
+                  <span className="text-[10px] text-muted-foreground">Completo</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-primary flex items-center justify-center">
+                    <Check className="w-2 h-2 text-primary-foreground" />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground">Perfeito</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </motion.div>
 

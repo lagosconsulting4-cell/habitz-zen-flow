@@ -32,6 +32,10 @@ const NavigationBar = ({ onOpenMore }: NavigationBarProps) => {
 
   const handleNavigate = (path: string) => {
     if (location.pathname === path) return;
+    // Subtle haptic feedback on navigation
+    if ("vibrate" in navigator) {
+      navigator.vibrate(8);
+    }
     navigate(path);
   };
 

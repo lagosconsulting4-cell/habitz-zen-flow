@@ -1,12 +1,52 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import { Calendar, TrendingUp, Target, Award, Flame, ListOrdered, Timer } from "lucide-react";
+import { Calendar, TrendingUp, Target, Award, Flame, ListOrdered, Timer, Zap, Trophy } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import useProgress from "@/hooks/useProgress";
+import { useGamification, getLevelConfig } from "@/hooks/useGamification";
+import { useAuth } from "@/integrations/supabase/auth";
 import { getHabitIconWithFallback, HabitIconKey } from "@/components/icons/HabitIcons";
+import { cn } from "@/lib/utils";
+
+// Tier colors for gamification display
+const tierColors = {
+  bronze: {
+    bg: "from-amber-950/40 to-amber-900/30",
+    border: "border-amber-700/30",
+    text: "text-amber-400",
+    glow: "shadow-amber-500/20",
+    bar: "from-amber-600 to-amber-500",
+    ring: "stroke-amber-500",
+  },
+  prata: {
+    bg: "from-slate-900/40 to-slate-800/30",
+    border: "border-slate-600/30",
+    text: "text-slate-300",
+    glow: "shadow-slate-400/20",
+    bar: "from-slate-500 to-slate-400",
+    ring: "stroke-slate-400",
+  },
+  ouro: {
+    bg: "from-yellow-950/40 to-yellow-900/30",
+    border: "border-yellow-600/30",
+    text: "text-yellow-400",
+    glow: "shadow-yellow-500/20",
+    bar: "from-yellow-500 to-yellow-400",
+    ring: "stroke-yellow-500",
+  },
+  diamante: {
+    bg: "from-cyan-950/40 to-cyan-900/30",
+    border: "border-cyan-500/30",
+    text: "text-cyan-300",
+    glow: "shadow-cyan-400/20",
+    bar: "from-cyan-500 via-blue-400 to-cyan-400",
+    ring: "stroke-cyan-400",
+  },
+};
 
 const Progress = () => {
+  const { user } = useAuth();
   const {
     loading,
     weeklySeries,
@@ -22,7 +62,18 @@ const Progress = () => {
     consistencyAllTime,
   } = useProgress();
 
+  const {
+    progress: gamificationProgress,
+    currentLevelConfig,
+    currentLevelProgress,
+    xpToNextLevel,
+    loading: gamificationLoading,
+  } = useGamification(user?.id);
+
   const hasData = useMemo(() => weeklySeries.some((point) => point.scheduled > 0), [weeklySeries]);
+  const tierColor = currentLevelConfig ? tierColors[currentLevelConfig.tier] : tierColors.bronze;
+  const nextLevelConfig = currentLevelConfig ? getLevelConfig(currentLevelConfig.level + 1) : null;
+  const isMaxLevel = currentLevelConfig?.level === 10;
 
   if (loading) {
     return (
@@ -54,6 +105,141 @@ const Progress = () => {
             Acompanhe sua disciplina nos hábitos concluídos no dia a dia
           </p>
         </div>
+
+        {/* Gamification Hero Card */}
+        {gamificationProgress && !gamificationLoading && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="mb-8"
+          >
+            <Card
+              className={cn(
+                "rounded-2xl overflow-hidden border",
+                `bg-gradient-to-br ${tierColor.bg}`,
+                tierColor.border,
+                "backdrop-blur-sm"
+              )}
+            >
+              <div className="p-6">
+                <div className="flex items-center gap-6">
+                  {/* Progress Ring */}
+                  <div className="relative flex-shrink-0">
+                    <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+                      {/* Background circle */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="42"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        className="text-muted/20"
+                      />
+                      {/* Progress circle */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="42"
+                        fill="none"
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        className={tierColor.ring}
+                        strokeDasharray={`${(currentLevelProgress / 100) * 264} 264`}
+                        style={{
+                          filter: `drop-shadow(0 0 6px currentColor)`,
+                        }}
+                      />
+                    </svg>
+                    {/* Center content */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <Trophy className={cn("w-6 h-6 mb-0.5", tierColor.text)} />
+                      <span className={cn("text-lg font-bold", tierColor.text)}>
+                        {currentLevelConfig?.level || 1}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Level Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={cn("text-xl font-bold", tierColor.text)}>
+                        {currentLevelConfig?.name || "Bronze I"}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {isMaxLevel
+                        ? "Parabéns! Você alcançou o nível máximo!"
+                        : `${xpToNextLevel} XP para ${nextLevelConfig?.name}`}
+                    </p>
+
+                    {/* XP Progress Bar */}
+                    {!isMaxLevel && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted-foreground">Progresso</span>
+                          <span className={tierColor.text}>{currentLevelProgress}%</span>
+                        </div>
+                        <div className="h-2 bg-black/20 dark:bg-black/40 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${currentLevelProgress}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            className={cn(
+                              "h-full rounded-full",
+                              `bg-gradient-to-r ${tierColor.bar}`
+                            )}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Stats Row */}
+                <div className="grid grid-cols-4 gap-4 mt-6 pt-4 border-t border-white/10">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Zap className={cn("w-4 h-4", tierColor.text)} />
+                      <span className="text-lg font-bold text-foreground">
+                        {gamificationProgress.total_xp.toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide">XP Total</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Flame className="w-4 h-4 text-orange-500" />
+                      <span className="text-lg font-bold text-foreground">
+                        {gamificationProgress.current_streak}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Sequência</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Award className="w-4 h-4 text-primary" />
+                      <span className="text-lg font-bold text-foreground">
+                        {gamificationProgress.longest_streak}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Recorde</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Calendar className="w-4 h-4 text-green-500" />
+                      <span className="text-lg font-bold text-foreground">
+                        {gamificationProgress.perfect_days}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Dias Perfeitos</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        )}
 
         {!hasData ? (
           <Card className="rounded-2xl bg-card border border-border p-8 text-center">

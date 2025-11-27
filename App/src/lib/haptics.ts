@@ -6,8 +6,13 @@
  * iOS does not support Vibration API but we call it anyway (it will be ignored).
  */
 
+import { isHapticEnabled } from "./preferences";
+
 // Verificar suporte
 const isSupported = typeof navigator !== "undefined" && "vibrate" in navigator;
+
+// Check if haptic should trigger (supported + enabled in preferences)
+const shouldVibrate = () => isSupported && isHapticEnabled();
 
 /**
  * Haptic feedback patterns
@@ -17,7 +22,7 @@ export const haptic = {
    * Light tap - for small interactions like checkbox toggles
    */
   light: () => {
-    if (isSupported) {
+    if (shouldVibrate()) {
       navigator.vibrate(10);
     }
   },
@@ -26,7 +31,7 @@ export const haptic = {
    * Medium tap - for button presses and selections
    */
   medium: () => {
-    if (isSupported) {
+    if (shouldVibrate()) {
       navigator.vibrate(25);
     }
   },
@@ -35,7 +40,7 @@ export const haptic = {
    * Heavy tap - for important confirmations
    */
   heavy: () => {
-    if (isSupported) {
+    if (shouldVibrate()) {
       navigator.vibrate(50);
     }
   },
@@ -44,7 +49,7 @@ export const haptic = {
    * Success pattern - for completing tasks
    */
   success: () => {
-    if (isSupported) {
+    if (shouldVibrate()) {
       navigator.vibrate([10, 50, 10]);
     }
   },
@@ -53,7 +58,7 @@ export const haptic = {
    * Error pattern - for errors or warnings
    */
   error: () => {
-    if (isSupported) {
+    if (shouldVibrate()) {
       navigator.vibrate([50, 100, 50]);
     }
   },
@@ -62,7 +67,7 @@ export const haptic = {
    * Double tap - for selection or toggle
    */
   double: () => {
-    if (isSupported) {
+    if (shouldVibrate()) {
       navigator.vibrate([15, 30, 15]);
     }
   },
@@ -72,7 +77,7 @@ export const haptic = {
    * @param pattern - Array of vibration/pause durations in ms
    */
   custom: (pattern: number | number[]) => {
-    if (isSupported) {
+    if (shouldVibrate()) {
       navigator.vibrate(pattern);
     }
   },
@@ -95,7 +100,7 @@ export function triggerHaptic(
   type: keyof Omit<typeof haptic, "custom" | "stop"> = "light",
   condition = true
 ) {
-  if (condition && isSupported) {
+  if (condition && shouldVibrate()) {
     haptic[type]();
   }
 }

@@ -13,18 +13,25 @@ import {
   Sun,
   Moon,
   Monitor,
+  Volume2,
+  VolumeX,
+  Sparkles,
+  Vibrate,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
+import { sounds } from "@/lib/sounds";
 import { usePremium } from "@/hooks/usePremium";
 import { useProfileInsights } from "@/hooks/useProfileInsights";
 import { useAppPreferences } from "@/hooks/useAppPreferences";
 import { useTheme } from "@/hooks/useTheme";
+import { NotificationToggle } from "@/components/pwa/NotificationPermissionDialog";
 import { toast } from "sonner";
 
 const Profile = () => {
@@ -250,7 +257,7 @@ const Profile = () => {
           transition={{ duration: 0.3, delay: 0.2 }}
         >
           <Card className="rounded-2xl bg-card border border-border p-6">
-            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Configurações</h2>
+            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Aparencia</h2>
 
             <div className="space-y-4">
               {/* Theme Switcher */}
@@ -264,7 +271,7 @@ const Profile = () => {
                     <Monitor className="w-5 h-5 text-primary" />
                   )}
                   <div>
-                    <p className="font-semibold text-foreground">Aparência</p>
+                    <p className="font-semibold text-foreground">Tema</p>
                     <p className="text-sm text-muted-foreground">
                       Escolha o tema do aplicativo
                     </p>
@@ -301,26 +308,12 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Notifications */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Bell className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="font-semibold text-foreground">Notificações</p>
-                    <p className="text-sm text-muted-foreground">
-                      Lembretes dos seus hábitos (on/off global)
-                    </p>
-                  </div>
-                </div>
-                <Switch checked={prefs.notificationsEnabled} onCheckedChange={(checked) => setPreferences({ notificationsEnabled: checked })} />
-              </div>
-
               {/* Grid Order */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Badge className="bg-primary/10 text-primary font-semibold">Grid</Badge>
                   <div>
-                    <p className="font-semibold text-foreground">Ordenação do dia</p>
+                    <p className="font-semibold text-foreground">Ordenacao</p>
                     <p className="text-sm text-muted-foreground">
                       Pendentes primeiro ou por streak
                     </p>
@@ -345,27 +338,129 @@ const Profile = () => {
                   </Button>
                 </div>
               </div>
+            </div>
+          </Card>
+        </motion.div>
 
-              {/* Sound */}
+        {/* Sound & Feedback Settings */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.25 }}
+          className="mt-4"
+        >
+          <Card className="rounded-2xl bg-card border border-border p-6">
+            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Sons e Feedback</h2>
+
+            <div className="space-y-5">
+              {/* Sound Toggle + Volume */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {prefs.soundEnabled ? (
+                      <Volume2 className="w-5 h-5 text-primary" />
+                    ) : (
+                      <VolumeX className="w-5 h-5 text-muted-foreground" />
+                    )}
+                    <div>
+                      <p className="font-semibold text-foreground">Sons</p>
+                      <p className="text-sm text-muted-foreground">
+                        Efeitos sonoros ao completar habitos
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={prefs.soundEnabled}
+                    onCheckedChange={(checked) => setPreferences({ soundEnabled: checked })}
+                  />
+                </div>
+
+                {/* Volume Slider */}
+                {prefs.soundEnabled && (
+                  <div className="pl-8 pr-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-muted-foreground w-8">Vol</span>
+                      <Slider
+                        value={[prefs.soundVolume * 100]}
+                        onValueChange={([value]) => setPreferences({ soundVolume: value / 100 })}
+                        onValueCommit={() => sounds.complete()}
+                        max={100}
+                        step={10}
+                        className="flex-1"
+                      />
+                      <span className="text-xs text-muted-foreground w-8 text-right">
+                        {Math.round(prefs.soundVolume * 100)}%
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Haptic Feedback */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Badge className="bg-primary/10 text-primary font-semibold">Som</Badge>
+                  <Vibrate className={`w-5 h-5 ${prefs.hapticEnabled ? "text-primary" : "text-muted-foreground"}`} />
                   <div>
-                    <p className="font-semibold text-foreground">Som padrão</p>
+                    <p className="font-semibold text-foreground">Vibracao</p>
                     <p className="text-sm text-muted-foreground">
-                      Escolha o som base para lembretes
+                      Feedback tatil ao interagir
                     </p>
                   </div>
                 </div>
-                <select
-                  className="rounded-md border px-2 py-1 text-sm bg-secondary border-border text-foreground"
-                  value={prefs.defaultSound}
-                  onChange={(e) => setPreferences({ defaultSound: e.target.value as any })}
-                >
-                  <option value="default">Padrão</option>
-                  <option value="soft">Suave</option>
-                  <option value="bright">Vibrante</option>
-                </select>
+                <Switch
+                  checked={prefs.hapticEnabled}
+                  onCheckedChange={(checked) => {
+                    setPreferences({ hapticEnabled: checked });
+                    if (checked && "vibrate" in navigator) {
+                      navigator.vibrate(15);
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Celebrations */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Sparkles className={`w-5 h-5 ${prefs.celebrationsEnabled ? "text-primary" : "text-muted-foreground"}`} />
+                  <div>
+                    <p className="font-semibold text-foreground">Celebracoes</p>
+                    <p className="text-sm text-muted-foreground">
+                      Efeitos visuais ao completar
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={prefs.celebrationsEnabled}
+                  onCheckedChange={(checked) => setPreferences({ celebrationsEnabled: checked })}
+                />
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* Notifications Settings */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+          className="mt-4"
+        >
+          <Card className="rounded-2xl bg-card border border-border p-6">
+            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Notificacoes</h2>
+
+            <div className="space-y-4">
+              {/* Notifications */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Bell className="w-5 h-5 text-primary" />
+                  <div>
+                    <p className="font-semibold text-foreground">Lembretes</p>
+                    <p className="text-sm text-muted-foreground">
+                      Receba lembretes dos seus habitos
+                    </p>
+                  </div>
+                </div>
+                <NotificationToggle />
               </div>
             </div>
           </Card>
@@ -374,7 +469,7 @@ const Profile = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.25 }}
+          transition={{ duration: 0.3, delay: 0.35 }}
           className="mt-6"
         >
           <Button

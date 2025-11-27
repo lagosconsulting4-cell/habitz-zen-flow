@@ -169,7 +169,7 @@ const features = [
 ];
 
 const pricingBenefits = [
-  "Acesso vitalício ao app BORA",
+  "1 ano de acesso completo ao app BORA",
   "Rotina 100% personalizada",
   "Checklists diários inteligentes",
   "Acompanhamento de progresso",
@@ -833,7 +833,7 @@ const Offer = () => {
                   </div>
                 </div>
                 <p className="text-muted-foreground mt-3 text-sm sm:text-lg">
-                  pagamento único • <span className="text-primary font-semibold">acesso vitalício</span>
+                  pagamento anual • <span className="text-primary font-semibold">1 ano de acesso</span>
                 </p>
               </div>
 

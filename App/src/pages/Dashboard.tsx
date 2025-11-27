@@ -1,11 +1,23 @@
-import { useMemo, useState } from "react";
-import { motion } from "motion/react";
-import { Sparkles } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "motion/react";
+import { Sparkles, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DashboardSkeleton } from "@/components/ui/skeleton";
 
 import { DashboardHabitCard } from "@/components/DashboardHabitCard";
+import { RoutineCard } from "@/components/RoutineCard";
+import { XPBar } from "@/components/XPBar";
+import { LevelUpModal } from "@/components/LevelUpModal";
 import { TimerModal } from "@/components/timer";
+import { NotificationPermissionDialog } from "@/components/pwa/NotificationPermissionDialog";
+import { StreakToast } from "@/components/StreakToast";
+import { XPToast } from "@/components/XPToast";
 import { useHabits } from "@/hooks/useHabits";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/integrations/supabase/auth";
+import { useGamification } from "@/hooks/useGamification";
+import { celebrations } from "@/lib/celebrations";
 import type { Habit } from "@/components/DashboardHabitCard";
 
 // Helper to check if habit has time-based goal
@@ -14,12 +26,60 @@ const isTimedHabit = (unit?: string | null): boolean => {
 };
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { habits, loading, toggleHabit, getHabitCompletionStatus } = useHabits();
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
+  const { user } = useAuth();
+  const { awardHabitXP, awardStreakBonus, awardPerfectDayBonus } = useGamification(user?.id);
 
   // Timer modal state
   const [timerHabit, setTimerHabit] = useState<Habit | null>(null);
+
+  // Level up modal state
+  const [levelUpData, setLevelUpData] = useState<{
+    fromLevel: number;
+    toLevel: number;
+    totalXP: number;
+    unlockedItems?: Array<{
+      type: "icon" | "widget" | "meditation" | "template" | "journey";
+      id: string;
+      name: string;
+      description: string;
+      icon?: string;
+    }>;
+  } | null>(null);
+
+  // Streak toast state
+  const [streakMilestone, setStreakMilestone] = useState<number | null>(null);
+
+  // XP toast state
+  const [xpGained, setXPGained] = useState<{
+    amount: number;
+    habitId?: string;
+  } | null>(null);
+
+  // Listen for gamification events
+  useEffect(() => {
+    const handleLevelUp = (event: CustomEvent) => {
+      const { fromLevel, toLevel, totalXP, unlockedItems } = event.detail;
+      setLevelUpData({ fromLevel, toLevel, totalXP, unlockedItems });
+    };
+
+    const handleXPGained = (event: CustomEvent) => {
+      // Event dispatched from useGamification with totalXP and currentLevel
+      // We need to calculate the amount that was just added
+      // For now, we'll trigger the toast when habit is completed (handled below)
+    };
+
+    window.addEventListener("gamification:level-up", handleLevelUp as EventListener);
+    window.addEventListener("gamification:xp-gained", handleXPGained as EventListener);
+
+    return () => {
+      window.removeEventListener("gamification:level-up", handleLevelUp as EventListener);
+      window.removeEventListener("gamification:xp-gained", handleXPGained as EventListener);
+    };
+  }, []);
 
   // Filter habits for today
   const todayHabits = useMemo(() => {
@@ -56,40 +116,122 @@ const Dashboard = () => {
     return getHabitCompletionStatus(habitId);
   };
 
+  // Check if all today's habits are completed (Perfect Day)
+  const checkPerfectDay = (): boolean => {
+    if (todayHabits.length === 0) return false;
+    return todayHabits.every((habit) => getHabitCompletionStatus(habit.id));
+  };
+
   // Handle habit toggle - opens timer for timed habits
   const handleToggle = async (habit: Habit) => {
-    const isCompleted = getHabitCompletionStatus(habit.id);
+    const wasCompleted = getHabitCompletionStatus(habit.id);
 
     // If it's a timed habit and not completed, open timer
-    if (isTimedHabit(habit.unit) && !isCompleted && habit.goal_value && habit.goal_value > 0) {
+    if (isTimedHabit(habit.unit) && !wasCompleted && habit.goal_value && habit.goal_value > 0) {
       setTimerHabit(habit);
       return;
     }
 
-    // Otherwise, toggle directly
+    // Toggle the habit
     await toggleHabit(habit.id);
+
+    // If completing (not uncompleting), trigger celebration and award XP
+    if (!wasCompleted) {
+      // Trigger celebration effect on the habit card
+      const habitCardId = `habit-card-${habit.id}`;
+      celebrations.habitComplete(habitCardId);
+
+      // Award XP for habit completion
+      if (awardHabitXP) {
+        try {
+          await awardHabitXP(habit.id);
+          // Show XP toast (+10 XP for habit complete)
+          setXPGained({ amount: 10, habitId: habit.id });
+        } catch (error) {
+          console.error("Failed to award XP:", error);
+        }
+      }
+
+      // Check for streak milestones (3, 7, 30 days)
+      const newStreak = habit.streak + 1; // Optimistic - actual value comes from DB
+      if (awardStreakBonus && (newStreak === 3 || newStreak === 7 || newStreak === 30)) {
+        try {
+          await awardStreakBonus(newStreak);
+          // Show streak toast for milestone
+          setStreakMilestone(newStreak);
+        } catch (error) {
+          console.error("Failed to award streak bonus:", error);
+        }
+      }
+
+      // Check for Perfect Day (all habits completed)
+      // Need to wait a bit for state to update
+      setTimeout(() => {
+        if (checkPerfectDay() && awardPerfectDayBonus) {
+          try {
+            awardPerfectDayBonus();
+            // Show special celebration for perfect day
+            celebrations.perfectDay();
+          } catch (error) {
+            console.error("Failed to award perfect day bonus:", error);
+          }
+        }
+      }, 100);
+    }
   };
 
   // Handle timer completion
   const handleTimerComplete = async () => {
     if (timerHabit) {
       await toggleHabit(timerHabit.id);
+
+      // Trigger celebration for timed habit completion
+      const habitCardId = `habit-card-${timerHabit.id}`;
+      celebrations.habitComplete(habitCardId);
+
+      // Award XP for habit completion
+      if (awardHabitXP) {
+        try {
+          await awardHabitXP(timerHabit.id);
+          // Show XP toast (+10 XP for habit complete)
+          setXPGained({ amount: 10, habitId: timerHabit.id });
+        } catch (error) {
+          console.error("Failed to award XP:", error);
+        }
+      }
+
+      // Check for streak milestones (3, 7, 30 days)
+      const newStreak = timerHabit.streak + 1; // Optimistic
+      if (awardStreakBonus && (newStreak === 3 || newStreak === 7 || newStreak === 30)) {
+        try {
+          await awardStreakBonus(newStreak);
+          // Show streak toast for milestone
+          setStreakMilestone(newStreak);
+        } catch (error) {
+          console.error("Failed to award streak bonus:", error);
+        }
+      }
+
+      // Check for Perfect Day (all habits completed)
+      setTimeout(() => {
+        if (checkPerfectDay() && awardPerfectDayBonus) {
+          try {
+            awardPerfectDayBonus();
+            celebrations.perfectDay();
+          } catch (error) {
+            console.error("Failed to award perfect day bonus:", error);
+          }
+        }
+      }, 100);
+
       setTimerHabit(null);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="text-lg font-semibold text-foreground">
-            Carregando seus hábitos...
-          </div>
-        </motion.div>
+      <div className="min-h-screen bg-background flex flex-col">
+        <DashboardSkeleton />
       </div>
     );
   }
@@ -101,8 +243,19 @@ const Dashboard = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 px-4 pt-6 pb-32"
+        className="flex-1 px-4 pt-6 pb-32 space-y-6"
       >
+        {/* XP Bar - Shows gamification progress */}
+        <XPBar />
+
+        {/* Routine Card - Shows daily progress by period */}
+        {todayHabits.length > 0 && (
+          <RoutineCard
+            habits={todayHabits as Habit[]}
+            getHabitCompletionStatus={getHabitCompletionStatus}
+          />
+        )}
+
         {todayHabits.length === 0 ? (
           /* Empty State Premium */
           <motion.div
@@ -141,6 +294,21 @@ const Dashboard = () => {
                 Crie seu primeiro hábito e transforme sua rotina
               </p>
             </motion.div>
+
+            {/* CTA Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.3 }}
+            >
+              <Button
+                onClick={() => navigate("/create")}
+                className="h-14 px-8 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base shadow-lg shadow-primary/25 transition-all hover:scale-105 active:scale-95"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Criar primeiro hábito
+              </Button>
+            </motion.div>
           </motion.div>
         ) : (
           /* Grid de hábitos - 2 colunas */
@@ -173,6 +341,42 @@ const Dashboard = () => {
           onClose={() => setTimerHabit(null)}
           onComplete={handleTimerComplete}
           isDarkMode={isDarkMode}
+        />
+      )}
+
+      {/* Level Up Modal */}
+      {levelUpData && (
+        <LevelUpModal
+          isOpen={!!levelUpData}
+          onClose={() => setLevelUpData(null)}
+          fromLevel={levelUpData.fromLevel}
+          toLevel={levelUpData.toLevel}
+          totalXP={levelUpData.totalXP}
+          unlockedItems={levelUpData.unlockedItems}
+        />
+      )}
+
+      {/* Notification Permission Dialog - shows after first habit */}
+      {todayHabits.length > 0 && (
+        <NotificationPermissionDialog trigger="after-first-habit" />
+      )}
+
+      {/* Streak Milestone Toast */}
+      {streakMilestone && (
+        <StreakToast
+          streakDays={streakMilestone}
+          show={!!streakMilestone}
+          onClose={() => setStreakMilestone(null)}
+        />
+      )}
+
+      {/* XP Gained Toast */}
+      {xpGained && (
+        <XPToast
+          xpAmount={xpGained.amount}
+          show={!!xpGained}
+          onClose={() => setXPGained(null)}
+          targetElementId={xpGained.habitId ? `habit-card-${xpGained.habitId}` : undefined}
         />
       )}
     </div>

@@ -21,6 +21,33 @@ export default defineConfig(({ mode }) => {
       host: "::",
       port: 8080,
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // React core
+            "react-vendor": ["react", "react-dom", "react-router-dom"],
+            // UI/Animation libraries
+            "ui-vendor": ["framer-motion", "motion/react", "class-variance-authority", "clsx", "tailwind-merge"],
+            // Radix UI components
+            "radix-vendor": [
+              "@radix-ui/react-dialog",
+              "@radix-ui/react-dropdown-menu",
+              "@radix-ui/react-tabs",
+              "@radix-ui/react-switch",
+              "@radix-ui/react-slot",
+              "@radix-ui/react-label",
+              "@radix-ui/react-select",
+              "@radix-ui/react-progress",
+            ],
+            // Charts
+            "chart-vendor": ["recharts"],
+            // Data/State management
+            "data-vendor": ["@tanstack/react-query", "@supabase/supabase-js", "idb"],
+          },
+        },
+      },
+    },
     plugins: [
       react(),
       VitePWA({

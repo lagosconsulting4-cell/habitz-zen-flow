@@ -68,6 +68,7 @@ export const DashboardHabitCard = ({
 
   return (
     <motion.button
+      id={`habit-card-${habit.id}`}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.97 }}
       onClick={handleClick}

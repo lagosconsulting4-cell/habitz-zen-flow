@@ -1,6 +1,16 @@
-﻿import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import {
+  addToSyncQueue,
+  addCachedCompletion,
+  deleteCachedCompletion,
+  getCachedCompletionsByDate,
+  cacheHabits,
+  getCachedHabits,
+  cacheCompletions,
+  CachedHabit,
+} from "@/lib/offline-db";
 
 const emitProgressChange = (date?: string) => {
   window.dispatchEvent(
@@ -79,21 +89,78 @@ export const useHabits = () => {
   const { toast } = useToast();
 
   const fetchHabits = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from("habits")
-        .select("*")
-        .order("created_at", { ascending: true });
+    const isOnline = navigator.onLine;
 
-      if (error) throw error;
-      setHabits((data || []) as Habit[]);
+    try {
+      if (isOnline) {
+        // ONLINE: Fetch from Supabase and cache
+        const { data, error } = await supabase
+          .from("habits")
+          .select("*")
+          .order("created_at", { ascending: true });
+
+        if (error) throw error;
+
+        const habitsData = (data || []) as Habit[];
+        setHabits(habitsData);
+
+        // Cache habits for offline use
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user && habitsData.length > 0) {
+          await cacheHabits(
+            habitsData.map((h) => ({
+              id: h.id,
+              user_id: h.user_id,
+              name: h.name,
+              emoji: h.emoji,
+              category: h.category,
+              period: h.period,
+              streak: h.streak,
+              is_active: h.is_active,
+              created_at: h.created_at,
+              updated_at: h.updated_at,
+            }))
+          );
+        }
+      } else {
+        // OFFLINE: Load from IndexedDB cache
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          const cached = await getCachedHabits(user.id);
+          // Map cached habits to full Habit type
+          const habitsData = cached.map((c: CachedHabit) => ({
+            ...c,
+            days_of_week: [0, 1, 2, 3, 4, 5, 6], // Default, will be synced when online
+          })) as Habit[];
+          setHabits(habitsData);
+        }
+      }
     } catch (error) {
       console.error("Error fetching habits:", error);
-      toast({
-        title: "Erro",
-        description: "Nao foi possivel carregar seus habitos",
-        variant: "destructive",
-      });
+      // Try loading from cache on error
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          const cached = await getCachedHabits(user.id);
+          const habitsData = cached.map((c: CachedHabit) => ({
+            ...c,
+            days_of_week: [0, 1, 2, 3, 4, 5, 6],
+          })) as Habit[];
+          setHabits(habitsData);
+        }
+      } catch {
+        toast({
+          title: "Erro",
+          description: "Nao foi possivel carregar seus habitos",
+          variant: "destructive",
+        });
+      }
     }
   // Intentionally no dependencies to keep function identity stable and
   // avoid re-triggering the initial load effect in a loop if `toast` changes.
@@ -101,22 +168,68 @@ export const useHabits = () => {
   }, []);
 
   const fetchCompletionsForDate = useCallback(async (date: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("habit_completions")
-        .select("*")
-        .eq("completed_at", date);
+    const isOnline = navigator.onLine;
 
-      if (error) throw error;
-      setCompletions(data || []);
-      setCompletionsDate(date);
-      return data || [];
+    try {
+      if (isOnline) {
+        // ONLINE: Fetch from Supabase
+        const { data, error } = await supabase
+          .from("habit_completions")
+          .select("*")
+          .eq("completed_at", date);
+
+        if (error) throw error;
+        setCompletions(data || []);
+        setCompletionsDate(date);
+
+        // Cache completions for offline use
+        if (data && data.length > 0) {
+          await cacheCompletions(
+            data.map((c) => ({
+              id: c.id,
+              habit_id: c.habit_id,
+              user_id: c.user_id,
+              completed_at: c.completed_at,
+              created_at: c.created_at,
+            }))
+          );
+        }
+
+        return data || [];
+      } else {
+        // OFFLINE: Load from IndexedDB cache
+        const cachedCompletions = await getCachedCompletionsByDate(date);
+        const mapped = cachedCompletions.map((c) => ({
+          id: c.id,
+          habit_id: c.habit_id,
+          user_id: c.user_id,
+          completed_at: c.completed_at,
+          created_at: c.created_at,
+        }));
+        setCompletions(mapped);
+        setCompletionsDate(date);
+        return mapped;
+      }
     } catch (error) {
       console.error("Error fetching completions:", error);
-      // Fail gracefully: keep UI responsive instead of hanging in loading state
-      setCompletions([]);
-      setCompletionsDate(date);
-      return [];
+      // Fail gracefully: try loading from cache
+      try {
+        const cachedCompletions = await getCachedCompletionsByDate(date);
+        const mapped = cachedCompletions.map((c) => ({
+          id: c.id,
+          habit_id: c.habit_id,
+          user_id: c.user_id,
+          completed_at: c.completed_at,
+          created_at: c.created_at,
+        }));
+        setCompletions(mapped);
+        setCompletionsDate(date);
+        return mapped;
+      } catch {
+        setCompletions([]);
+        setCompletionsDate(date);
+        return [];
+      }
     }
   }, []);
 
@@ -335,45 +448,114 @@ export const useHabits = () => {
       return;
     }
 
+    // Check if currently online
+    const isOnline = navigator.onLine;
+
+    // Check if completion exists locally first
+    const existingCompletion = completions.find(
+      (c) => c.habit_id === habitId && c.completed_at === targetDate
+    );
+
     try {
-      const { data: existingCompletion, error: existingError } = await supabase
-        .from("habit_completions")
-        .select("*")
-        .eq("habit_id", habitId)
-        .eq("completed_at", targetDate)
-        .maybeSingle();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
-      if (existingError && existingError.code !== "PGRST116") {
-        throw existingError;
-      }
-
-      if (existingCompletion) {
-        const { error } = await supabase
+      if (isOnline) {
+        // ONLINE: Normal flow with Supabase
+        const { data: serverCompletion, error: existingError } = await supabase
           .from("habit_completions")
-          .delete()
-          .eq("id", existingCompletion.id);
+          .select("*")
+          .eq("habit_id", habitId)
+          .eq("completed_at", targetDate)
+          .maybeSingle();
 
-        if (error) throw error;
+        if (existingError && existingError.code !== "PGRST116") {
+          throw existingError;
+        }
+
+        if (serverCompletion) {
+          const { error } = await supabase
+            .from("habit_completions")
+            .delete()
+            .eq("id", serverCompletion.id);
+
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from("habit_completions")
+            .insert([
+              {
+                habit_id: habitId,
+                user_id: user.id,
+                completed_at: targetDate,
+              },
+            ]);
+
+          if (error) throw error;
+        }
+
+        await fetchCompletionsForDate(targetDate);
       } else {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) throw new Error("User not authenticated");
+        // OFFLINE: Optimistic UI + sync queue
+        const tempId = crypto.randomUUID();
 
-        const { error } = await supabase
-          .from("habit_completions")
-          .insert([
-            {
+        if (existingCompletion) {
+          // Remove completion optimistically
+          setCompletions((prev) => prev.filter((c) => c.id !== existingCompletion.id));
+
+          // Add to sync queue
+          await addToSyncQueue({
+            type: "delete_completion",
+            payload: { id: existingCompletion.id },
+          });
+
+          // Update local IndexedDB cache
+          await deleteCachedCompletion(existingCompletion.id);
+
+          toast({
+            title: "Marcado como pendente",
+            description: "Sera sincronizado quando voltar online",
+          });
+        } else {
+          // Create completion optimistically
+          const newCompletion: HabitCompletion = {
+            id: tempId,
+            habit_id: habitId,
+            user_id: user.id,
+            completed_at: targetDate,
+            created_at: new Date().toISOString(),
+          };
+
+          setCompletions((prev) => [...prev, newCompletion]);
+
+          // Add to sync queue
+          await addToSyncQueue({
+            type: "create_completion",
+            payload: {
               habit_id: habitId,
               user_id: user.id,
               completed_at: targetDate,
             },
-          ]);
+          });
 
-        if (error) throw error;
+          // Update local IndexedDB cache
+          await addCachedCompletion({
+            id: tempId,
+            habit_id: habitId,
+            user_id: user.id,
+            completed_at: targetDate,
+            created_at: new Date().toISOString(),
+          });
+
+          toast({
+            title: "Habito concluido!",
+            description: "Sera sincronizado quando voltar online",
+          });
+        }
       }
 
-      await fetchCompletionsForDate(targetDate);
       emitProgressChange(targetDate);
 
       const habit = habits.find((h) => h.id === habitId);
@@ -382,7 +564,14 @@ export const useHabits = () => {
       if (habit && targetDate === today) {
         const increment = !existingCompletion;
         const newStreak = Math.max(0, habit.streak + (increment ? 1 : -1));
-        await updateHabitStreak(habitId, newStreak);
+        if (isOnline) {
+          await updateHabitStreak(habitId, newStreak);
+        } else {
+          // Update streak locally for optimistic UI
+          setHabits((prev) =>
+            prev.map((h) => (h.id === habitId ? { ...h, streak: newStreak } : h))
+          );
+        }
       }
     } catch (error) {
       console.error("Error toggling habit:", error);
@@ -413,10 +602,48 @@ export const useHabits = () => {
 
   const getHabitsForDate = (date: Date) => {
     const weekday = date.getDay();
+    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
     return habits.filter((habit) => {
       if (!habit.is_active) return false;
-      if (!habit.days_of_week.includes(weekday)) return false;
-      return new Date(habit.created_at) <= date;
+
+      const createdAt = new Date(habit.created_at);
+      const createdDateOnly = new Date(createdAt.getFullYear(), createdAt.getMonth(), createdAt.getDate());
+      if (createdDateOnly > dateOnly) return false;
+
+      const frequencyType = habit.frequency_type ?? "fixed_days";
+
+      switch (frequencyType) {
+        case "daily":
+          // Show every day
+          return true;
+
+        case "fixed_days":
+          // Check if today is in days_of_week
+          return habit.days_of_week.includes(weekday);
+
+        case "times_per_week":
+          // Show every day - user decides when to complete N times per week
+          // The UI/Dashboard can show progress like "2/3 this week"
+          return true;
+
+        case "times_per_month":
+          // Show every day - user decides when to complete N times per month
+          return true;
+
+        case "every_n_days": {
+          // Calculate if today is a day to show this habit
+          const everyN = habit.every_n_days ?? 1;
+          const daysSinceCreation = Math.floor(
+            (dateOnly.getTime() - createdDateOnly.getTime()) / (1000 * 60 * 60 * 24)
+          );
+          return daysSinceCreation % everyN === 0;
+        }
+
+        default:
+          // Fallback to fixed_days behavior
+          return habit.days_of_week.includes(weekday);
+      }
     });
   };
 

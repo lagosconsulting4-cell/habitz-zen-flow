@@ -12,9 +12,11 @@ import { InstallPrompt, UpdatePrompt } from "@/components/pwa/InstallPrompt";
 import { OfflineIndicator } from "@/components/pwa/OfflineIndicator";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useNotificationNavigation } from "@/hooks/useNotificationNavigation";
+import { AuthProvider } from "@/integrations/supabase/auth";
 
 // Lazy load pages for better initial bundle size
 const OnboardingFlow = lazy(() => import("./pages/OnboardingFlow"));
+const NewOnboardingFlow = lazy(() => import("./components/onboarding/NewOnboardingFlow"));
 const PersonalPlan = lazy(() => import("./pages/PersonalPlan"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const CreateHabit = lazy(() => import("./pages/CreateHabit"));
@@ -83,10 +85,11 @@ const NotificationNavigationHandler = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter basename="/app">
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter basename="/app">
         <ThemeInitializer />
         <ScrollToTop />
         {/* PWA Components */}
@@ -107,6 +110,7 @@ const App = () => (
 
             <Route element={<ProtectedRoute><ProtectedLayout /></ProtectedRoute>}>
               <Route path="/onboarding" element={<OnboardingFlow />} />
+              <Route path="/onboarding-new" element={<NewOnboardingFlow />} />
               <Route path="/plano" element={<PersonalPlan />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/create" element={<CreateHabit />} />
@@ -127,7 +131,8 @@ const App = () => (
           </Routes>
         </Suspense>
       </BrowserRouter>
-    </TooltipProvider>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

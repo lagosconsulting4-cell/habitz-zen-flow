@@ -8,6 +8,8 @@ import {
   Calendar,
   Bell,
   BellRing,
+  Clock,
+  Sun,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTheme } from "@/hooks/useTheme";
@@ -135,7 +137,6 @@ const CATEGORY_DATA: Array<{
       { id: "meal_prep", name: "Preparar Refeições", iconKey: "meal", default_unit: "custom", default_goal_value: 3, default_frequency_type: "times_per_week", default_times_per_week: 1 },
       { id: "eat_protein", name: "Comer Proteína", iconKey: "protein", default_unit: "custom", default_goal_value: 3, default_frequency_type: "daily" },
       { id: "take_vitamins", name: "Tomar Vitaminas", iconKey: "vitamins", default_unit: "none", default_frequency_type: "daily" },
-      { id: "avoid_fast_food", name: "Evitar Fast Food", iconKey: "no_fast_food", default_unit: "none", default_frequency_type: "daily" },
     ],
   },
   {
@@ -147,11 +148,8 @@ const CATEGORY_DATA: Array<{
     tasks: [
       { id: "pomodoro", name: "Pomodoro de Trabalho", iconKey: "focus", default_unit: "custom", default_goal_value: 4, default_frequency_type: "times_per_week", default_times_per_week: 5 },
       { id: "deep_focus", name: "Tempo de Foco Profundo", iconKey: "deep_work", default_unit: "hours", default_goal_value: 2, default_frequency_type: "daily" },
-      { id: "family_time", name: "Tempo com Família", iconKey: "family", default_unit: "hours", default_goal_value: 1, default_frequency_type: "daily" },
-      { id: "leisure_time", name: "Tempo de Lazer", iconKey: "leisure", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "daily" },
       { id: "sleep_on_time", name: "Dormir no Horário", iconKey: "bed", default_unit: "none", default_frequency_type: "daily" },
       { id: "wake_on_time", name: "Acordar no Horário", iconKey: "alarm", default_unit: "none", default_frequency_type: "daily" },
-      { id: "regular_breaks", name: "Fazer Pausas Regulares", iconKey: "pause", default_unit: "custom", default_goal_value: 8, default_frequency_type: "daily" },
       { id: "screen_free_time", name: "Tempo Sem Telas", iconKey: "no_screens", default_unit: "hours", default_goal_value: 1, default_frequency_type: "daily" },
     ],
   },
@@ -163,10 +161,8 @@ const CATEGORY_DATA: Array<{
     colorToken: UNIFIED_COLOR,
     tasks: [
       { id: "no_smoking", name: "Não Fumar", iconKey: "no_smoke", default_unit: "none", default_frequency_type: "daily" },
-      { id: "no_alcohol", name: "Não Beber Álcool", iconKey: "no_alcohol", default_unit: "none", default_frequency_type: "daily" },
       { id: "no_sweets", name: "Não Comer Doces", iconKey: "no_sugar", default_unit: "none", default_frequency_type: "daily" },
       { id: "limit_social_media", name: "Limitar Redes Sociais", iconKey: "social_media", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "daily" },
-      { id: "no_procrastination", name: "Não Procrastinar", iconKey: "no_procrastination", default_unit: "none", default_frequency_type: "daily" },
       { id: "no_skip_meals", name: "Não Pular Refeições", iconKey: "no_skip_meals", default_unit: "custom", default_goal_value: 3, default_frequency_type: "daily" },
       { id: "no_late_sleep", name: "Não Dormir Tarde", iconKey: "no_late_sleep", default_unit: "none", default_frequency_type: "daily" },
       { id: "no_sedentary", name: "Não Ficar Sedentário", iconKey: "active", default_unit: "custom", default_goal_value: 8, default_frequency_type: "daily" },
@@ -192,6 +188,7 @@ const CreateHabit = () => {
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [notificationSound, setNotificationSound] = useState<"default" | "soft" | "bright">("default");
+  const [reminderTime, setReminderTime] = useState<string>("08:00");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string; iconKey?: HabitIconKey } | null>(null);
@@ -426,7 +423,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         notification_pref: notificationsEnabled
           ? {
               reminder_enabled: true,
-              reminder_time: "08:00",
+              reminder_time: reminderTime,
               sound: notificationSound,
               time_sensitive: false,
             }
@@ -563,6 +560,81 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     }
     setStep("details");
   };
+
+  // Stepper configuration
+  const steps: Array<{ id: Step; label: string; icon: typeof Target }> = [
+    { id: "select", label: "Escolher", icon: Target },
+    { id: "details", label: "Configurar", icon: Calendar },
+    { id: "confirm", label: "Confirmar", icon: Bell },
+  ];
+
+  const currentStepIndex = steps.findIndex(s => s.id === step);
+
+  const StepperIndicator = (
+    <div className="px-6 py-3">
+      <div className="flex items-center justify-between">
+        {steps.map((s, index) => {
+          const StepIcon = s.icon;
+          const isActive = index === currentStepIndex;
+          const isCompleted = index < currentStepIndex;
+          const isLast = index === steps.length - 1;
+
+          return (
+            <div key={s.id} className="flex items-center flex-1">
+              {/* Step Circle */}
+              <div className="flex flex-col items-center gap-1.5">
+                <motion.div
+                  animate={{
+                    scale: isActive ? 1.1 : 1,
+                    backgroundColor: isActive || isCompleted
+                      ? (isDarkMode ? UNIFIED_COLOR : "#FFFFFF")
+                      : (isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"),
+                  }}
+                  transition={{ duration: 0.2 }}
+                  className="flex h-10 w-10 items-center justify-center rounded-full"
+                >
+                  <StepIcon
+                    className="h-5 w-5 transition-colors duration-200"
+                    style={{
+                      color: isActive || isCompleted
+                        ? (isDarkMode ? "#000000" : "#65A30D")
+                        : (isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.6)")
+                    }}
+                  />
+                </motion.div>
+                <span
+                  className={`text-[10px] font-semibold uppercase tracking-wide transition-colors duration-200 ${
+                    isActive
+                      ? themeColors.bodyText
+                      : isCompleted
+                        ? themeColors.bodyTextSecondary
+                        : themeColors.bodyTextMuted
+                  }`}
+                >
+                  {s.label}
+                </span>
+              </div>
+
+              {/* Connector Line */}
+              {!isLast && (
+                <div className="flex-1 mx-2">
+                  <motion.div
+                    className="h-0.5 rounded-full"
+                    animate={{
+                      backgroundColor: isCompleted
+                        ? (isDarkMode ? UNIFIED_COLOR : "#FFFFFF")
+                        : (isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"),
+                    }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 
   const HeaderBar = (
     <div className={`flex items-center justify-between px-4 py-4 border-b ${themeColors.headerBorder}`}>
@@ -745,6 +817,102 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         </p>
       </div>
 
+      {/* Live Preview Card */}
+      <div className="px-4">
+        <Label className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+          PREVIEW
+        </Label>
+        <motion.div
+          layout
+          className={`mt-2 overflow-hidden rounded-2xl border-2 ${themeColors.card}`}
+          style={{
+            borderColor: isDarkMode ? UNIFIED_COLOR : "rgba(255,255,255,0.4)",
+          }}
+        >
+          <div className="p-4">
+            {/* Mini Dashboard Card Preview */}
+            <div className="flex items-center gap-3">
+              {/* Icon */}
+              <motion.div
+                layout
+                className="flex h-12 w-12 items-center justify-center rounded-xl"
+                style={{
+                  backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "rgba(255,255,255,0.2)",
+                }}
+              >
+                {(() => {
+                  const PreviewIcon = selectedTemplate?.iconKey
+                    ? getHabitIcon(selectedTemplate.iconKey as any)
+                    : selectedCategoryData?.iconKey
+                      ? getHabitIcon(selectedCategoryData.iconKey)
+                      : null;
+                  return PreviewIcon ? (
+                    <PreviewIcon
+                      className="h-6 w-6"
+                      style={{ color: isDarkMode ? UNIFIED_COLOR : "#FFFFFF" }}
+                    />
+                  ) : (
+                    <Target className="h-6 w-6" style={{ color: isDarkMode ? UNIFIED_COLOR : "#FFFFFF" }} />
+                  );
+                })()}
+              </motion.div>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <motion.p
+                  layout
+                  className={`text-sm font-bold truncate ${themeColors.bodyText}`}
+                >
+                  {habitName || "Nome do hábito"}
+                </motion.p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className={`text-xs ${themeColors.bodyTextSecondary}`}>
+                    {goalValue && goalValue > 0 ? `${goalValue} ${unit !== "none" ? unit : ""}` : "Completar"}
+                  </span>
+                  <span className={`text-xs ${themeColors.bodyTextMuted}`}>•</span>
+                  <span className={`text-xs ${themeColors.bodyTextSecondary}`}>
+                    {frequencyType === "daily" ? "Diário" : `${selectedDays.length} dias`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Checkbox Preview */}
+              <div
+                className="flex h-8 w-8 items-center justify-center rounded-full border-2"
+                style={{
+                  borderColor: isDarkMode ? UNIFIED_COLOR : "rgba(255,255,255,0.5)",
+                }}
+              />
+            </div>
+
+            {/* Period Badge */}
+            <div className="mt-3 flex items-center gap-2">
+              <span
+                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase"
+                style={{
+                  backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "rgba(255,255,255,0.2)",
+                  color: isDarkMode ? UNIFIED_COLOR : "#FFFFFF",
+                }}
+              >
+                {periods.find(p => p.id === selectedPeriod)?.emoji}{" "}
+                {periods.find(p => p.id === selectedPeriod)?.name}
+              </span>
+              {notificationsEnabled && (
+                <span
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold"
+                  style={{
+                    backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "rgba(255,255,255,0.2)",
+                    color: isDarkMode ? UNIFIED_COLOR : "#FFFFFF",
+                  }}
+                >
+                  <Bell className="h-3 w-3" /> {reminderTime}
+                </span>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
       {/* Smart Goal Card - Metas inteligentes baseadas no hábito */}
       {selectedTemplateId && (
         <SmartGoalCard
@@ -798,59 +966,116 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         </div>
       </div>
 
-      {/* Notifications Card */}
-    <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
-      <div className="flex items-center justify-between px-4 py-4">
-        <div className="flex items-center gap-3">
-          <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
-            <Bell className={`h-6 w-6 ${themeColors.iconColor}`} />
-          </div>
-          <div>
-            <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-              Notificações
-            </p>
-            <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {notificationsEnabled ? "Ativadas" : "Desativadas"}
-            </p>
-          </div>
-        </div>
-        <Switch
-          checked={notificationsEnabled}
-          onCheckedChange={(checked) => setNotificationsEnabled(checked)}
-          className="data-[state=checked]:bg-primary"
-        />
-      </div>
-
-      {notificationsEnabled && (
-        <div className="px-4 pb-4 space-y-3">
-          <div className="rounded-xl border border-border/60 bg-muted/10 p-3">
-            <div className="flex items-center gap-3">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-full ${themeColors.iconBg}`}>
-                <BellRing className={`h-5 w-5 ${themeColors.iconColor}`} />
-              </div>
-              <div className="flex-1">
-                <p className={`text-xs font-semibold ${themeColors.bodyText}`}>Som da notificação</p>
-                <Select value={notificationSound} onValueChange={(val) => setNotificationSound(val as typeof notificationSound)}>
-                  <SelectTrigger className={`mt-2 h-11 w-full rounded-lg ${themeColors.input}`}>
-                    <SelectValue placeholder="Escolha um som" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    {soundOptions.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{opt.label}</span>
-                          <span className="text-xs text-muted-foreground">{opt.description}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+      {/* Period Selector Card */}
+      <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
+        <div className="flex items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
+              <Sun className={`h-6 w-6 ${themeColors.iconColor}`} />
+            </div>
+            <div>
+              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+                Período do Dia
+              </p>
+              <p className={`text-base font-semibold ${themeColors.bodyText}`}>
+                {periods.find(p => p.id === selectedPeriod)?.emoji} {periods.find(p => p.id === selectedPeriod)?.name}
+              </p>
             </div>
           </div>
         </div>
-      )}
-    </div>
+        <div className={`border-t px-4 py-4 ${themeColors.headerBorder}`}>
+          <div className="grid grid-cols-3 gap-2">
+            {periods.map((period) => (
+              <button
+                key={period.id}
+                type="button"
+                onClick={() => setSelectedPeriod(period.id)}
+                className={`flex flex-col items-center gap-1 rounded-xl py-3 text-center transition-all duration-200 ${
+                  selectedPeriod === period.id
+                    ? themeColors.buttonActive
+                    : themeColors.buttonInactive
+                }`}
+              >
+                <span className="text-lg">{period.emoji}</span>
+                <span className="text-xs font-semibold">{period.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Notifications Card */}
+      <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
+        <div className="flex items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
+              <Bell className={`h-6 w-6 ${themeColors.iconColor}`} />
+            </div>
+            <div>
+              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+                Notificações
+              </p>
+              <p className={`text-base font-semibold ${themeColors.bodyText}`}>
+                {notificationsEnabled ? "Ativadas" : "Desativadas"}
+              </p>
+            </div>
+          </div>
+          <Switch
+            checked={notificationsEnabled}
+            onCheckedChange={(checked) => setNotificationsEnabled(checked)}
+            className="data-[state=checked]:bg-primary"
+          />
+        </div>
+
+        {notificationsEnabled && (
+          <div className={`border-t px-4 py-4 space-y-3 ${themeColors.headerBorder}`}>
+            {/* Time Picker */}
+            <div className="rounded-xl border border-border/60 bg-muted/10 p-3">
+              <div className="flex items-center gap-3">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${themeColors.iconBg}`}>
+                  <Clock className={`h-5 w-5 ${themeColors.iconColor}`} />
+                </div>
+                <div className="flex-1">
+                  <p className={`text-xs font-semibold ${themeColors.bodyText}`}>Horário do lembrete</p>
+                  <input
+                    type="time"
+                    value={reminderTime}
+                    onChange={(e) => setReminderTime(e.target.value)}
+                    className={`mt-2 h-11 w-full rounded-lg px-3 ${themeColors.input}`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Sound Selector */}
+            <div className="rounded-xl border border-border/60 bg-muted/10 p-3">
+              <div className="flex items-center gap-3">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${themeColors.iconBg}`}>
+                  <BellRing className={`h-5 w-5 ${themeColors.iconColor}`} />
+                </div>
+                <div className="flex-1">
+                  <p className={`text-xs font-semibold ${themeColors.bodyText}`}>Som da notificação</p>
+                  <Select value={notificationSound} onValueChange={(val) => setNotificationSound(val as typeof notificationSound)}>
+                    <SelectTrigger className={`mt-2 h-11 w-full rounded-lg ${themeColors.input}`}>
+                      <SelectValue placeholder="Escolha um som" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {soundOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{opt.label}</span>
+                            <span className="text-xs text-muted-foreground">{opt.description}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* CTA Button - Go to Confirm */}
       <div className="px-4 pt-4">
@@ -1000,6 +1225,23 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
           </div>
         </div>
 
+        {/* Period Summary */}
+        <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
+          <div className="flex items-center gap-3">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
+              <Sun className={`h-5 w-5 ${themeColors.iconColor}`} />
+            </div>
+            <div>
+              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+                Período
+              </p>
+              <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
+                {periods.find(p => p.id === selectedPeriod)?.emoji} {periods.find(p => p.id === selectedPeriod)?.name}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Notifications Summary */}
         <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
           <div className="flex items-center gap-3">
@@ -1011,7 +1253,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                 Notificações
               </p>
               <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
-                {notificationsEnabled ? `Ativadas • Som: ${soundOptions.find((s) => s.value === notificationSound)?.label ?? "Padrão"}` : "Desativadas"}
+                {notificationsEnabled ? `${reminderTime} • ${soundOptions.find((s) => s.value === notificationSound)?.label ?? "Padrão"}` : "Desativadas"}
               </p>
             </div>
           </div>
@@ -1060,7 +1302,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     <div className={`fixed inset-0 z-50 flex items-start justify-center transition-colors duration-300 ${themeColors.overlay}`}>
       <div className={`mt-4 w-full max-w-md overflow-hidden rounded-3xl shadow-2xl animate-fade-in transition-colors duration-300 ${themeColors.container}`} style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)' }}>
         {HeaderBar}
-        <div className="overflow-y-auto overscroll-contain scrollbar-hide" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 6rem)' }}>
+        {StepperIndicator}
+        <div className="overflow-y-auto overscroll-contain scrollbar-hide" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 10rem)' }}>
           <AnimatePresence mode="wait">
             {step === "select" && SelectStep}
             {step === "details" && DetailsStep}
