@@ -10,12 +10,16 @@ import { motion, AnimatePresence } from "motion/react";
 import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 
+export type XPToastType = "habit" | "streak" | "perfect_day";
+
 export interface XPToastProps {
   xpAmount: number;
   show: boolean;
   onClose: () => void;
   /** Optional element ID to position the toast relative to */
   targetElementId?: string;
+  /** Type of XP gain - affects color and icon */
+  type?: XPToastType;
 }
 
 export const XPToast = ({
@@ -23,6 +27,7 @@ export const XPToast = ({
   show,
   onClose,
   targetElementId,
+  type = "habit",
 }: XPToastProps) => {
   const [visible, setVisible] = useState(show);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
@@ -53,14 +58,19 @@ export const XPToast = ({
     }
   }, [show, onClose, targetElementId]);
 
-  // Color based on XP amount
-  const getColorClasses = (xp: number) => {
-    if (xp >= 50) return "from-yellow-400 to-amber-500"; // Perfect day, big bonus
-    if (xp >= 20) return "from-purple-400 to-purple-500"; // Streak bonus
+  // Color based on type and XP amount
+  const getColorClasses = (xp: number, xpType: XPToastType) => {
+    // Type-based colors (priority)
+    if (xpType === "perfect_day") return "from-yellow-400 to-amber-500";
+    if (xpType === "streak") return "from-purple-400 to-purple-500";
+
+    // Fallback: amount-based colors (for backwards compatibility)
+    if (xp >= 50) return "from-yellow-400 to-amber-500"; // Big bonus (streak_30)
+    if (xp >= 15) return "from-purple-400 to-purple-500"; // Medium bonus (streak_7)
     return "from-lime-400 to-lime-500"; // Regular habit XP
   };
 
-  const colorClasses = getColorClasses(xpAmount);
+  const colorClasses = getColorClasses(xpAmount, type);
 
   return (
     <AnimatePresence>

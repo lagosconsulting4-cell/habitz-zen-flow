@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X, Play, Pause, RotateCcw, Check, SkipForward } from "lucide-react";
 import confetti from "canvas-confetti";
 

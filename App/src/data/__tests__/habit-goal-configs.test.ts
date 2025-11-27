@@ -14,9 +14,9 @@ import {
 } from "../habit-goal-configs";
 
 describe("HABIT_GOAL_CONFIGS", () => {
-  it("deve ter exatamente 44 configurações de hábitos", () => {
+  it("deve ter exatamente 49 configurações de hábitos", () => {
     const count = Object.keys(HABIT_GOAL_CONFIGS).length;
-    expect(count).toBe(44);
+    expect(count).toBe(49);
   });
 
   it("todas as configs devem ter level e primaryUnit definidos", () => {
@@ -142,8 +142,8 @@ describe("getConfigStats", () => {
   it("deve retornar estatísticas corretas", () => {
     const stats = getConfigStats();
 
-    expect(stats.total).toBe(44);
-    expect(stats.binary + stats.simple + stats.advanced).toBe(44);
+    expect(stats.total).toBe(49);
+    expect(stats.binary + stats.simple + stats.advanced).toBe(49);
     expect(stats.binary).toBeGreaterThan(0);
     expect(stats.simple).toBeGreaterThan(0);
     expect(stats.advanced).toBeGreaterThan(0);
@@ -153,7 +153,7 @@ describe("getConfigStats", () => {
     const stats = getConfigStats();
 
     expect(stats.withSuggestions).toBeGreaterThan(20); // maioria dos simple + advanced
-    expect(stats.withHelpText).toBe(44); // todos devem ter
+    expect(stats.withHelpText).toBe(49); // todos devem ter
     expect(stats.withValidation).toBeGreaterThan(25); // maioria dos numéricos
   });
 });

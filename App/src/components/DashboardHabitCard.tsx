@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useState, useEffect, useCallback } from "react";
 import { getHabitIconWithFallback } from "@/components/icons/HabitIcons";
 import { cn } from "@/lib/utils";

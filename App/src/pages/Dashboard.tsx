@@ -16,7 +16,7 @@ import { XPToast } from "@/components/XPToast";
 import { useHabits } from "@/hooks/useHabits";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/integrations/supabase/auth";
-import { useGamification } from "@/hooks/useGamification";
+import { useGamification, XP_VALUES } from "@/hooks/useGamification";
 import { celebrations } from "@/lib/celebrations";
 import type { Habit } from "@/components/DashboardHabitCard";
 
@@ -53,11 +53,30 @@ const Dashboard = () => {
   // Streak toast state
   const [streakMilestone, setStreakMilestone] = useState<number | null>(null);
 
-  // XP toast state
+  // XP toast state - supports queued toasts for multiple XP gains
   const [xpGained, setXPGained] = useState<{
     amount: number;
     habitId?: string;
+    type?: "habit" | "streak" | "perfect_day";
   } | null>(null);
+
+  // Queue for multiple XP toasts (habit + streak bonus)
+  const [xpToastQueue, setXpToastQueue] = useState<
+    Array<{
+      amount: number;
+      habitId?: string;
+      type?: "habit" | "streak" | "perfect_day";
+    }>
+  >([]);
+
+  // Process XP toast queue
+  useEffect(() => {
+    if (xpToastQueue.length > 0 && !xpGained) {
+      const [next, ...rest] = xpToastQueue;
+      setXPGained(next);
+      setXpToastQueue(rest);
+    }
+  }, [xpToastQueue, xpGained]);
 
   // Listen for gamification events
   useEffect(() => {
@@ -122,6 +141,15 @@ const Dashboard = () => {
     return todayHabits.every((habit) => getHabitCompletionStatus(habit.id));
   };
 
+  // Helper to add XP toast to queue
+  const queueXpToast = (toast: {
+    amount: number;
+    habitId?: string;
+    type?: "habit" | "streak" | "perfect_day";
+  }) => {
+    setXpToastQueue((prev) => [...prev, toast]);
+  };
+
   // Handle habit toggle - opens timer for timed habits
   const handleToggle = async (habit: Habit) => {
     const wasCompleted = getHabitCompletionStatus(habit.id);
@@ -145,8 +173,12 @@ const Dashboard = () => {
       if (awardHabitXP) {
         try {
           await awardHabitXP(habit.id);
-          // Show XP toast (+10 XP for habit complete)
-          setXPGained({ amount: 10, habitId: habit.id });
+          // Show XP toast with correct value (+10 XP)
+          queueXpToast({
+            amount: XP_VALUES.HABIT_COMPLETE,
+            habitId: habit.id,
+            type: "habit",
+          });
         } catch (error) {
           console.error("Failed to award XP:", error);
         }
@@ -157,26 +189,48 @@ const Dashboard = () => {
       if (awardStreakBonus && (newStreak === 3 || newStreak === 7 || newStreak === 30)) {
         try {
           await awardStreakBonus(newStreak);
-          // Show streak toast for milestone
+          // Show streak milestone toast
           setStreakMilestone(newStreak);
+
+          // Queue XP toast for streak bonus (shown after habit toast)
+          const streakXpAmount =
+            newStreak === 3
+              ? XP_VALUES.STREAK_BONUS_3
+              : newStreak === 7
+                ? XP_VALUES.STREAK_BONUS_7
+                : XP_VALUES.STREAK_BONUS_30;
+          queueXpToast({
+            amount: streakXpAmount,
+            type: "streak",
+          });
         } catch (error) {
           console.error("Failed to award streak bonus:", error);
         }
       }
 
       // Check for Perfect Day (all habits completed)
-      // Need to wait a bit for state to update
-      setTimeout(() => {
-        if (checkPerfectDay() && awardPerfectDayBonus) {
+      // Use requestAnimationFrame to ensure state is updated
+      requestAnimationFrame(() => {
+        // Need to re-check completion status after state update
+        const allCompleted = todayHabits.every(
+          (h) => h.id === habit.id || getHabitCompletionStatus(h.id)
+        );
+
+        if (allCompleted && awardPerfectDayBonus) {
           try {
             awardPerfectDayBonus();
             // Show special celebration for perfect day
             celebrations.perfectDay();
+            // Queue XP toast for perfect day bonus
+            queueXpToast({
+              amount: XP_VALUES.PERFECT_DAY,
+              type: "perfect_day",
+            });
           } catch (error) {
             console.error("Failed to award perfect day bonus:", error);
           }
         }
-      }, 100);
+      });
     }
   };
 
@@ -193,8 +247,12 @@ const Dashboard = () => {
       if (awardHabitXP) {
         try {
           await awardHabitXP(timerHabit.id);
-          // Show XP toast (+10 XP for habit complete)
-          setXPGained({ amount: 10, habitId: timerHabit.id });
+          // Show XP toast with correct value (+10 XP)
+          queueXpToast({
+            amount: XP_VALUES.HABIT_COMPLETE,
+            habitId: timerHabit.id,
+            type: "habit",
+          });
         } catch (error) {
           console.error("Failed to award XP:", error);
         }
@@ -205,24 +263,47 @@ const Dashboard = () => {
       if (awardStreakBonus && (newStreak === 3 || newStreak === 7 || newStreak === 30)) {
         try {
           await awardStreakBonus(newStreak);
-          // Show streak toast for milestone
+          // Show streak milestone toast
           setStreakMilestone(newStreak);
+
+          // Queue XP toast for streak bonus
+          const streakXpAmount =
+            newStreak === 3
+              ? XP_VALUES.STREAK_BONUS_3
+              : newStreak === 7
+                ? XP_VALUES.STREAK_BONUS_7
+                : XP_VALUES.STREAK_BONUS_30;
+          queueXpToast({
+            amount: streakXpAmount,
+            type: "streak",
+          });
         } catch (error) {
           console.error("Failed to award streak bonus:", error);
         }
       }
 
       // Check for Perfect Day (all habits completed)
-      setTimeout(() => {
-        if (checkPerfectDay() && awardPerfectDayBonus) {
+      // Use requestAnimationFrame to ensure state is updated
+      const currentHabit = timerHabit;
+      requestAnimationFrame(() => {
+        const allCompleted = todayHabits.every(
+          (h) => h.id === currentHabit.id || getHabitCompletionStatus(h.id)
+        );
+
+        if (allCompleted && awardPerfectDayBonus) {
           try {
             awardPerfectDayBonus();
             celebrations.perfectDay();
+            // Queue XP toast for perfect day bonus
+            queueXpToast({
+              amount: XP_VALUES.PERFECT_DAY,
+              type: "perfect_day",
+            });
           } catch (error) {
             console.error("Failed to award perfect day bonus:", error);
           }
         }
-      }, 100);
+      });
 
       setTimerHabit(null);
     }
@@ -377,6 +458,7 @@ const Dashboard = () => {
           show={!!xpGained}
           onClose={() => setXPGained(null)}
           targetElementId={xpGained.habitId ? `habit-card-${xpGained.habitId}` : undefined}
+          type={xpGained.type}
         />
       )}
     </div>

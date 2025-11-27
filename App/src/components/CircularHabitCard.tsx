@@ -1,7 +1,8 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Heart, Clock, Check, Flame } from "lucide-react";
 import { getHabitIconWithFallback } from "@/components/icons/HabitIcons";
 import { cn } from "@/lib/utils";
+import { haptic } from "@/lib/haptics";
 import { useState, useEffect, useCallback } from "react";
 
 // Helper to check if habit has time-based goal
@@ -62,10 +63,8 @@ export const CircularHabitCard = ({
       // Acabou de completar - trigger celebração
       setShowCelebration(true);
 
-      // Haptic feedback sutil
-      if ("vibrate" in navigator) {
-        navigator.vibrate([15, 50, 25]);
-      }
+      // Haptic feedback para sucesso
+      haptic.success();
 
       // Remove celebração após animação
       const timer = setTimeout(() => {
@@ -74,10 +73,8 @@ export const CircularHabitCard = ({
 
       return () => clearTimeout(timer);
     } else if (!completed && wasCompleted) {
-      // Desfez - haptic sutil
-      if ("vibrate" in navigator) {
-        navigator.vibrate(10);
-      }
+      // Desfez - haptic leve
+      haptic.light();
     }
     setWasCompleted(completed);
   }, [completed, wasCompleted]);
