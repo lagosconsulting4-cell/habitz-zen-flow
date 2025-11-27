@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { usePathAwareNavigate } from "@/contexts/PathPrefixContext";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { HeroCircle } from "@/components/HeroCircle";
@@ -20,7 +21,12 @@ import {
 } from "@/hooks/useAnimations";
 
 const Index = () => {
-  const navigate = useNavigate();
+  const navigate = usePathAwareNavigate();
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">

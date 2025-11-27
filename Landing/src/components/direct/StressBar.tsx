@@ -4,18 +4,70 @@ import { AlertTriangle, Zap, Heart } from "lucide-react";
 
 interface StressBarProps {
   stressLevel: number; // 0-150%
-  phase: "dor" | "colapso" | "transicao" | "bora" | "comparison";
+  phase: "dor" | "colapso" | "transicao" | "bora" | "comparison" | "mirror";
   visible?: boolean;
   inline?: boolean; // When true, renders as inline element instead of fixed header
   label?: string; // Custom label override
   compact?: boolean; // Smaller version for side-by-side comparison
 }
 
+// Mirror phase: 3-level emoji system (Bom/Moderado/Urgente)
+const getMirrorStatus = (level: number) => {
+  if (level >= 100) {
+    return {
+      label: "COLAPSO!",
+      emoji: "🔥",
+      color: "from-red-600 to-red-500",
+      bgColor: "bg-red-500/20",
+      textColor: "text-red-400",
+      icon: AlertTriangle,
+      pulse: true,
+    };
+  }
+  if (level > 80) {
+    return {
+      label: "Crítico",
+      emoji: "🔥",
+      color: "from-red-500 to-orange-500",
+      bgColor: "bg-red-500/20",
+      textColor: "text-red-400",
+      icon: AlertTriangle,
+      pulse: true,
+    };
+  }
+  if (level > 40) {
+    return {
+      label: "Atenção",
+      emoji: "😰",
+      color: "from-amber-500 to-yellow-500",
+      bgColor: "bg-amber-500/20",
+      textColor: "text-amber-400",
+      icon: Zap,
+      pulse: false,
+    };
+  }
+  return {
+    label: "Sob Controle",
+    emoji: "😌",
+    color: "from-emerald-500 to-green-400",
+    bgColor: "bg-emerald-500/20",
+    textColor: "text-emerald-400",
+    icon: Heart,
+    pulse: false,
+  };
+};
+
 // Get status based on stress level
 const getStatus = (level: number, phase: string) => {
+  // Use simplified 3-level system for mirror phase
+  if (phase === "mirror") {
+    return getMirrorStatus(level);
+  }
+
   if (phase === "colapso" || level >= 100) {
     return {
       label: "COLAPSO",
+      emoji: "🔥",
       color: "from-red-600 to-red-500",
       bgColor: "bg-red-500/20",
       textColor: "text-red-400",
@@ -26,6 +78,7 @@ const getStatus = (level: number, phase: string) => {
   if (phase === "bora" || level <= 30) {
     return {
       label: "EM PAZ",
+      emoji: "😌",
       color: "from-green-500 to-emerald-400",
       bgColor: "bg-green-500/20",
       textColor: "text-green-400",
@@ -36,6 +89,7 @@ const getStatus = (level: number, phase: string) => {
   if (level >= 70) {
     return {
       label: "URGENTE",
+      emoji: "🔥",
       color: "from-red-500 to-orange-500",
       bgColor: "bg-red-500/20",
       textColor: "text-red-400",
@@ -46,6 +100,7 @@ const getStatus = (level: number, phase: string) => {
   if (level >= 40) {
     return {
       label: "ALERTA",
+      emoji: "😰",
       color: "from-orange-500 to-yellow-500",
       bgColor: "bg-orange-500/20",
       textColor: "text-orange-400",
@@ -55,6 +110,7 @@ const getStatus = (level: number, phase: string) => {
   }
   return {
     label: "MODERADO",
+    emoji: "😐",
     color: "from-yellow-500 to-green-400",
     bgColor: "bg-yellow-500/20",
     textColor: "text-yellow-400",
@@ -173,6 +229,9 @@ const StressBar: React.FC<StressBarProps> = ({
     );
   }
 
+  // Show emoji for mirror phase, icon for others
+  const showEmoji = phase === "mirror";
+
   // Default fixed header version
   return (
     <AnimatePresence>
@@ -183,13 +242,14 @@ const StressBar: React.FC<StressBarProps> = ({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
           transition={{ type: "spring", damping: 20, stiffness: 300 }}
+          style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
         >
           <div className="max-w-md mx-auto px-4 py-3">
             {/* Status row */}
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <motion.div
-                  className={`p-1.5 rounded-lg ${status.bgColor}`}
+                  className={`p-1.5 rounded-lg ${status.bgColor} ${showEmoji ? "text-xl" : ""}`}
                   animate={status.pulse ? { scale: [1, 1.1, 1] } : {}}
                   transition={
                     status.pulse
@@ -197,7 +257,11 @@ const StressBar: React.FC<StressBarProps> = ({
                       : {}
                   }
                 >
-                  <Icon className={`w-4 h-4 ${status.textColor}`} />
+                  {showEmoji ? (
+                    <span role="img" aria-label={status.label}>{status.emoji}</span>
+                  ) : (
+                    <Icon className={`w-4 h-4 ${status.textColor}`} />
+                  )}
                 </motion.div>
                 <span className="text-sm font-medium text-foreground">
                   {customLabel || "Nível de Estresse"}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { usePathAwareNavigate } from "@/contexts/PathPrefixContext";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -143,6 +143,11 @@ const AnimatedCounter = ({ value, suffix = "" }: { value: number; suffix?: strin
 
 const DirectOffer = () => {
   const navigate = usePathAwareNavigate();
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
 
   const handleCTA = () => {
     window.location.href = "https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac";

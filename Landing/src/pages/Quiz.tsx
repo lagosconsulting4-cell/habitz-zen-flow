@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { usePathAwareNavigate } from "@/contexts/PathPrefixContext";
 import { motion, AnimatePresence, useAnimation, type PanInfo } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -30,8 +30,6 @@ import {
   fadeInUp,
   buttonHoverTap,
   springTransition,
-  staggerContainer,
-  staggerItem,
 } from "@/hooks/useAnimations";
 import SiriOrb from "@/components/smoothui/siri-orb";
 import { getQuizResult, saveQuizResult, type QuizResult } from "@/lib/quizScoring";
@@ -158,7 +156,7 @@ const questions: Question[] = [
 
 
 const Quiz = () => {
-  const navigate = useNavigate();
+  const navigate = usePathAwareNavigate();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showMidFeedback, setShowMidFeedback] = useState(false);
@@ -166,6 +164,11 @@ const Quiz = () => {
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [dragDirection, setDragDirection] = useState<"left" | "right" | null>(null);
   const controls = useAnimation();
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const hasCurrentAnswer = answers[currentQuestion] !== undefined;
@@ -602,80 +605,58 @@ const Quiz = () => {
               </h2>
             </div>
 
-            {/* Options with enhanced micro-animations */}
+            {/* Options - simplified animations to prevent blinking */}
             <RadioGroup
               value={answers[currentQuestion]}
               onValueChange={handleAnswer}
               className="space-y-3"
             >
-              <motion.div
-                variants={staggerContainer}
-                initial="initial"
-                animate="animate"
-                className="space-y-3"
-              >
+              <div className="space-y-3">
                 {currentQ.options.map((option, index) => {
                   const isSelected = answers[currentQuestion] === option;
 
                   return (
                     <motion.div
-                      key={option}
-                      variants={staggerItem}
-                      whileHover={{ scale: 1.02, y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                      layout
+                      key={`${currentQuestion}-${option}`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.2 }}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
                     >
-                      <motion.div
-                        className={`quiz-option-card ${
+                      <div
+                        className={`quiz-option-card min-h-[56px] ${
                           isSelected ? "selected" : ""
                         }`}
                         onClick={() => handleAnswer(option)}
-                        animate={isSelected ? {
-                          scale: [1, 1.02, 1],
-                          transition: { duration: 0.3 }
-                        } : {}}
                       >
                         <div className="flex items-center gap-4">
-                          <motion.div
-                            animate={isSelected ? {
-                              scale: [1, 1.2, 1],
-                              transition: { duration: 0.3 }
-                            } : {}}
-                          >
-                            <RadioGroupItem
-                              value={option}
-                              id={`option-${index}`}
-                              className="border-2"
-                            />
-                          </motion.div>
+                          <RadioGroupItem
+                            value={option}
+                            id={`option-${currentQuestion}-${index}`}
+                            className="border-2"
+                          />
                           <Label
-                            htmlFor={`option-${index}`}
+                            htmlFor={`option-${currentQuestion}-${index}`}
                             className="text-base md:text-lg cursor-pointer flex-1 leading-relaxed"
                           >
                             {option}
                           </Label>
-                          <AnimatePresence mode="wait">
-                            {isSelected && (
-                              <motion.div
-                                initial={{ scale: 0, rotate: -180 }}
-                                animate={{ scale: 1, rotate: 0 }}
-                                exit={{ scale: 0, rotate: 180 }}
-                                transition={{
-                                  type: "spring",
-                                  stiffness: 300,
-                                  damping: 20
-                                }}
-                              >
-                                <CheckCircle className="h-5 w-5 text-primary" />
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
+                          {isSelected && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                            >
+                              <CheckCircle className="h-5 w-5 text-primary" />
+                            </motion.div>
+                          )}
                         </div>
-                      </motion.div>
+                      </div>
                     </motion.div>
                   );
                 })}
-              </motion.div>
+              </div>
             </RadioGroup>
 
             {/* Next button with swipe hint */}
