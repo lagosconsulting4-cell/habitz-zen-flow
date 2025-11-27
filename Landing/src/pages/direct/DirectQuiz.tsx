@@ -208,27 +208,27 @@ const DirectQuiz = () => {
     const stressLevel = calculateStressLevel();
 
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 sm:p-6">
         <motion.div
-          className="max-w-md w-full text-center space-y-8"
+          className="max-w-md w-full text-center space-y-6 sm:space-y-8"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
           {/* Alert Badge */}
           <motion.div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/20 border border-red-500/30 text-red-400"
+            className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-red-500/20 border border-red-500/30 text-red-400"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
             <AlertTriangle className="h-4 w-4" />
-            <span className="font-bold text-sm">RESULTADO: URGENTE</span>
+            <span className="font-bold text-xs sm:text-sm">RESULTADO: URGENTE</span>
           </motion.div>
 
           {/* Stress Level Circle */}
           <motion.div
-            className="relative mx-auto w-40 h-40"
+            className="relative mx-auto w-32 h-32 sm:w-40 sm:h-40"
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
@@ -268,7 +268,7 @@ const DirectQuiz = () => {
             {/* Center content */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <motion.span
-                className="text-4xl font-bold text-red-400"
+                className="text-3xl sm:text-4xl font-bold text-red-400"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.2 }}
@@ -276,7 +276,7 @@ const DirectQuiz = () => {
                 {stressLevel}%
               </motion.span>
               <motion.span
-                className="text-sm text-muted-foreground"
+                className="text-xs sm:text-sm text-muted-foreground"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.4 }}
@@ -288,16 +288,16 @@ const DirectQuiz = () => {
 
           {/* Result Message */}
           <motion.div
-            className="space-y-4"
+            className="space-y-3 sm:space-y-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
           >
-            <h2 className="text-2xl font-bold text-foreground">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">
               Sua mente está em{" "}
               <span className="text-red-400">estado de alerta</span>
             </h2>
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
               Seu nível de sobrecarga mental está <strong>acima da média</strong>.
               Isso significa que você está operando no limite — e seu corpo
               está pedindo socorro.
@@ -306,12 +306,12 @@ const DirectQuiz = () => {
 
           {/* Warning Box */}
           <motion.div
-            className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 space-y-2"
+            className="bg-red-500/10 border border-red-500/20 rounded-2xl p-3 sm:p-4 space-y-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1 }}
           >
-            <p className="text-sm text-red-400 font-medium">
+            <p className="text-xs sm:text-sm text-red-400 font-medium">
               ⚠️ Se você não agir agora, o estresse crônico pode causar:
             </p>
             <ul className="text-xs text-muted-foreground space-y-1 text-left pl-4">
@@ -331,9 +331,9 @@ const DirectQuiz = () => {
             <Button
               onClick={handleResultContinue}
               size="2xl"
-              className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/25"
+              className="w-full min-h-[48px] bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/25"
             >
-              <span className="font-bold">VER MEU DIAGNÓSTICO COMPLETO</span>
+              <span className="font-bold text-sm sm:text-base">VER MEU DIAGNÓSTICO COMPLETO</span>
               <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </motion.div>
@@ -373,9 +373,9 @@ const DirectQuiz = () => {
       </div>
 
       {/* Question content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
         <motion.div
-          className="max-w-md w-full space-y-8"
+          className="max-w-md w-full space-y-6 sm:space-y-8"
           key={question.id}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -383,11 +383,11 @@ const DirectQuiz = () => {
           transition={{ duration: 0.3 }}
         >
           {/* Question */}
-          <div className="text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-orange-500/10 border border-orange-500/30">
-              <Brain className="w-6 h-6 text-orange-400" />
+          <div className="text-center space-y-3 sm:space-y-4">
+            <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-500/10 border border-orange-500/30">
+              <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />
             </div>
-            <h2 className="text-xl md:text-2xl font-bold text-foreground leading-tight">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
               {question.question}
             </h2>
           </div>
@@ -440,7 +440,7 @@ const DirectQuiz = () => {
               <Button
                 variant="outline"
                 onClick={handlePrevious}
-                className="flex-1"
+                className="flex-1 min-h-[44px]"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar
@@ -449,7 +449,7 @@ const DirectQuiz = () => {
             <Button
               onClick={handleNext}
               disabled={selectedOption === null}
-              className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white ${
+              className={`flex-1 min-h-[44px] bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white ${
                 currentQuestion === 0 ? "w-full" : ""
               }`}
             >

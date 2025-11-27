@@ -4,8 +4,11 @@ import { AlertTriangle, Zap, Heart } from "lucide-react";
 
 interface StressBarProps {
   stressLevel: number; // 0-150%
-  phase: "dor" | "colapso" | "transicao" | "bora";
+  phase: "dor" | "colapso" | "transicao" | "bora" | "comparison";
   visible?: boolean;
+  inline?: boolean; // When true, renders as inline element instead of fixed header
+  label?: string; // Custom label override
+  compact?: boolean; // Smaller version for side-by-side comparison
 }
 
 // Get status based on stress level
@@ -64,12 +67,113 @@ const StressBar: React.FC<StressBarProps> = ({
   stressLevel,
   phase,
   visible = true,
+  inline = false,
+  label: customLabel,
+  compact = false,
 }) => {
   const status = getStatus(stressLevel, phase);
   const Icon = status.icon;
   const displayLevel = Math.min(stressLevel, 150); // Cap at 150% for display
   const barWidth = Math.min(stressLevel, 100); // Cap bar at 100%
 
+  // Compact inline version for side-by-side comparison
+  if (compact) {
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">
+            {customLabel || "Nível de estresse"}
+          </span>
+          <span className={`text-lg font-bold ${status.textColor}`}>
+            {displayLevel}%
+          </span>
+        </div>
+        <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+          <motion.div
+            className={`h-full rounded-full bg-gradient-to-r ${status.color}`}
+            initial={{ width: "0%" }}
+            animate={{ width: `${barWidth}%` }}
+            transition={{ delay: 0.3, duration: 1, ease: "easeOut" }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Inline version (embedded in page, not fixed)
+  if (inline) {
+    return (
+      <AnimatePresence>
+        {visible && (
+          <motion.div
+            className="w-full bg-background/80 backdrop-blur-sm border border-border/50 rounded-xl shadow-sm"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="px-4 py-3">
+              {/* Status row */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <motion.div
+                    className={`p-1.5 rounded-lg ${status.bgColor}`}
+                    animate={status.pulse ? { scale: [1, 1.1, 1] } : {}}
+                    transition={
+                      status.pulse
+                        ? { duration: 1, repeat: Infinity, ease: "easeInOut" }
+                        : {}
+                    }
+                  >
+                    <Icon className={`w-4 h-4 ${status.textColor}`} />
+                  </motion.div>
+                  <span className="text-sm font-medium text-foreground">
+                    {customLabel || "Nível de Estresse"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <motion.span
+                    className={`text-lg font-bold ${status.textColor}`}
+                    key={stressLevel}
+                    initial={{ scale: 1.2, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {displayLevel}%
+                  </motion.span>
+                  <span
+                    className={`text-xs font-semibold px-2 py-0.5 rounded-full ${status.bgColor} ${status.textColor}`}
+                  >
+                    {status.label}
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="relative h-2 bg-muted/30 rounded-full overflow-hidden">
+                {stressLevel >= 100 && (
+                  <motion.div
+                    className="absolute inset-0 bg-red-500/30 rounded-full"
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                )}
+                <motion.div
+                  className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${status.color}`}
+                  initial={{ width: "0%" }}
+                  animate={{ width: `${barWidth}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
+
+  // Default fixed header version
   return (
     <AnimatePresence>
       {visible && (
@@ -96,7 +200,7 @@ const StressBar: React.FC<StressBarProps> = ({
                   <Icon className={`w-4 h-4 ${status.textColor}`} />
                 </motion.div>
                 <span className="text-sm font-medium text-foreground">
-                  Nível de Estresse
+                  {customLabel || "Nível de Estresse"}
                 </span>
               </div>
 

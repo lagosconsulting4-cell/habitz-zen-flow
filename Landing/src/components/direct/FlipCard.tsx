@@ -1,7 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, RotateCcw } from "lucide-react";
 
+// Content structure for the card
+export interface CardContent {
+  time: string;
+  title: string;
+  emoji: string;
+  description: string;
+  stressChange: string;
+}
+
+// Original data structure (kept for compatibility)
 export interface FlipCardData {
   id: number;
   time: string;
@@ -9,197 +21,223 @@ export interface FlipCardData {
   dor: {
     emoji: string;
     text: string;
-    stress: string; // e.g., "+12%"
+    stress: string;
   };
   bora: {
     emoji: string;
     text: string;
-    stress: string; // e.g., "-15%"
+    stress: string;
   };
 }
 
 interface FlipCardProps {
-  data: FlipCardData;
+  content: CardContent;
+  phase: "dor" | "bora";
   isFlipped: boolean;
   onFlip: () => void;
-  autoFlip?: boolean;
+  onNext: () => void;
+  isLastCard?: boolean;
   className?: string;
 }
 
 const FlipCard: React.FC<FlipCardProps> = ({
-  data,
+  content,
+  phase,
   isFlipped,
   onFlip,
-  autoFlip = false,
+  onNext,
+  isLastCard = false,
   className,
 }) => {
-  const [localFlipped, setLocalFlipped] = useState(false);
-  const shouldFlip = autoFlip ? localFlipped : isFlipped;
+  const isDor = phase === "dor";
 
-  const handleClick = () => {
-    if (autoFlip) {
-      setLocalFlipped(!localFlipped);
-    }
-    onFlip();
-  };
-
-  // Vibrate on flip (if supported)
-  React.useEffect(() => {
-    if (shouldFlip && typeof window !== "undefined" && "vibrate" in navigator) {
+  // Haptic feedback on flip
+  useEffect(() => {
+    if (isFlipped && typeof window !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate(50);
     }
-  }, [shouldFlip]);
+  }, [isFlipped]);
+
+  // Color scheme based on phase
+  const colors = isDor
+    ? {
+        gradient: "from-red-500/10 via-orange-500/5 to-transparent",
+        border: "border-red-500/30",
+        text: "text-red-400",
+        badge: "bg-red-500/20 text-red-400 border-red-500/30",
+        button: "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600",
+        hint: "text-red-400/60",
+      }
+    : {
+        gradient: "from-green-500/10 via-emerald-500/5 to-transparent",
+        border: "border-green-500/30",
+        text: "text-green-400",
+        badge: "bg-green-500/20 text-green-400 border-green-500/30",
+        button: "bg-gradient-to-r from-green-500 to-emerald-400 hover:from-green-600 hover:to-emerald-500",
+        hint: "text-green-400/60",
+      };
 
   return (
     <div
       className={cn(
-        "relative w-full max-w-[320px] h-[280px] cursor-pointer select-none",
+        // Responsive sizing - mobile first
+        "relative w-full max-w-[90vw] sm:max-w-[320px]",
+        "h-[280px] sm:h-[300px]",
+        "cursor-pointer select-none",
         "[perspective:1000px]",
         className
       )}
-      onClick={handleClick}
     >
       <motion.div
         className="relative w-full h-full [transform-style:preserve-3d]"
-        animate={{ rotateY: shouldFlip ? 180 : 0 }}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ duration: 0.6, type: "spring", stiffness: 200, damping: 20 }}
       >
-        {/* FRONT - DOR (Pain) */}
+        {/* FRONT - CAPA (Preview) */}
         <div
           className={cn(
             "absolute inset-0 w-full h-full rounded-2xl",
             "[backface-visibility:hidden]",
-            "bg-gradient-to-br from-red-500/10 via-orange-500/5 to-transparent",
-            "border-2 border-red-500/30",
-            "shadow-lg",
-            "overflow-hidden"
+            `bg-gradient-to-br ${colors.gradient}`,
+            `border-2 ${colors.border}`,
+            "shadow-lg overflow-hidden"
           )}
+          onClick={!isFlipped ? onFlip : undefined}
         >
           {/* Background pattern */}
           <div className="absolute inset-0 bg-dots opacity-20" />
 
           {/* Content */}
-          <div className="relative h-full p-6 flex flex-col justify-between">
+          <div className="relative h-full p-4 sm:p-6 flex flex-col justify-between">
             {/* Header */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-mono font-semibold text-red-400">
-                  {data.time}
+            <div className="flex items-center justify-between">
+              <span className={`text-base sm:text-lg font-mono font-bold ${colors.text}`}>
+                {content.time}
+              </span>
+              <div className={`px-2 sm:px-3 py-1 rounded-full border ${colors.badge}`}>
+                <span className="text-xs font-bold uppercase">
+                  {isDor ? "DOR" : "BORA"}
                 </span>
-                <motion.span
-                  className="text-xs font-bold px-2 py-1 rounded-full bg-red-500/20 text-red-400"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  {data.dor.stress}
-                </motion.span>
               </div>
-              <h3 className="text-lg font-bold text-foreground">{data.title}</h3>
             </div>
 
-            {/* Center - Emoji */}
-            <div className="flex items-center justify-center">
+            {/* Center - Emoji + Title */}
+            <div className="flex flex-col items-center justify-center flex-1 space-y-3">
               <motion.div
-                className="text-6xl"
-                animate={{ scale: [1, 1.1, 1] }}
+                className="text-5xl sm:text-6xl"
+                animate={{ scale: [1, 1.08, 1] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
-                {data.dor.emoji}
+                {content.emoji}
+              </motion.div>
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground text-center">
+                {content.title}
+              </h3>
+            </div>
+
+            {/* CTA Hint */}
+            <div className="flex items-center justify-center gap-2">
+              <motion.div
+                className={`flex items-center gap-2 px-4 py-2 rounded-full bg-background/50 ${colors.hint}`}
+                animate={{ scale: [1, 1.02, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span className="text-sm font-medium">Toque para detalhes</span>
               </motion.div>
             </div>
-
-            {/* Description */}
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {data.dor.text}
-              </p>
-              <div className="flex items-center justify-center gap-2 text-xs text-red-400/60">
-                <span>Toque para ver a solução</span>
-                <motion.span
-                  animate={{ rotate: [0, 180] }}
-                  transition={{ duration: 1, repeat: Infinity, repeatDelay: 1 }}
-                >
-                  ↻
-                </motion.span>
-              </div>
-            </div>
-          </div>
-
-          {/* DOR label */}
-          <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30">
-            <span className="text-xs font-bold text-red-400">DOR</span>
           </div>
         </div>
 
-        {/* BACK - BORA (Solution) */}
+        {/* BACK - DETALHAMENTO */}
         <div
           className={cn(
             "absolute inset-0 w-full h-full rounded-2xl",
             "[backface-visibility:hidden] [transform:rotateY(180deg)]",
-            "bg-gradient-to-br from-green-500/10 via-emerald-500/5 to-transparent",
-            "border-2 border-green-500/30",
-            "shadow-lg",
-            "overflow-hidden"
+            `bg-gradient-to-br ${colors.gradient}`,
+            `border-2 ${colors.border}`,
+            "shadow-lg overflow-hidden"
           )}
         >
           {/* Background pattern */}
           <div className="absolute inset-0 bg-dots opacity-20" />
 
           {/* Content */}
-          <div className="relative h-full p-6 flex flex-col justify-between">
+          <div className="relative h-full p-4 sm:p-6 flex flex-col justify-between">
             {/* Header */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-mono font-semibold text-green-400">
-                  {data.time}
-                </span>
-                <motion.span
-                  className="text-xs font-bold px-2 py-1 rounded-full bg-green-500/20 text-green-400"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  {data.bora.stress}
-                </motion.span>
-              </div>
-              <h3 className="text-lg font-bold text-foreground">{data.title}</h3>
-            </div>
-
-            {/* Center - Emoji */}
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-between">
+              <span className={`text-base sm:text-lg font-mono font-bold ${colors.text}`}>
+                {content.time}
+              </span>
               <motion.div
-                className="text-6xl"
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className={`px-3 py-1 rounded-full ${colors.badge}`}
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
               >
-                {data.bora.emoji}
+                <span className="text-sm sm:text-base font-bold">
+                  {content.stressChange}
+                </span>
               </motion.div>
             </div>
 
-            {/* Description */}
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {data.bora.text}
-              </p>
-              <div className="flex items-center justify-center gap-2 text-xs text-green-400/60">
-                <span>Toque para voltar</span>
-                <motion.span
-                  animate={{ rotate: [0, -180] }}
-                  transition={{ duration: 1, repeat: Infinity, repeatDelay: 1 }}
-                >
-                  ↻
-                </motion.span>
-              </div>
-            </div>
-          </div>
+            {/* Title */}
+            <h3 className={`text-lg sm:text-xl font-bold ${colors.text} text-center mt-2`}>
+              {content.title}
+            </h3>
 
-          {/* BORA label */}
-          <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30">
-            <span className="text-xs font-bold text-green-400">BORA</span>
+            {/* Description */}
+            <div className="flex-1 flex items-center justify-center py-4">
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed text-center max-w-[280px]">
+                {content.description}
+              </p>
+            </div>
+
+            {/* Action Button */}
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onNext();
+              }}
+              className={`w-full min-h-[48px] ${colors.button} text-white font-semibold`}
+            >
+              <span>
+                {isLastCard
+                  ? isDor
+                    ? "Ver o Colapso"
+                    : "Comparar Caminhos"
+                  : "Próximo Momento"}
+              </span>
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+
+            {/* Tap to flip back hint */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onFlip();
+              }}
+              className={`mt-3 flex items-center justify-center gap-2 ${colors.hint} text-xs hover:opacity-80 transition-opacity`}
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Voltar para capa</span>
+            </button>
           </div>
         </div>
       </motion.div>
     </div>
   );
+};
+
+// Helper function to get content from card data based on phase
+export const getCardContent = (card: FlipCardData, phase: "dor" | "bora"): CardContent => {
+  const data = phase === "dor" ? card.dor : card.bora;
+  return {
+    time: card.time,
+    title: card.title,
+    emoji: data.emoji,
+    description: data.text,
+    stressChange: data.stress,
+  };
 };
 
 // Export the 8 moments data

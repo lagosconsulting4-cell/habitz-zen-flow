@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { Sparkles, ArrowRight, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import StressBar from "./StressBar";
 
 interface TransicaoScreenProps {
   onContinue: () => void;
@@ -9,7 +10,9 @@ interface TransicaoScreenProps {
 
 const TransicaoScreen: React.FC<TransicaoScreenProps> = ({ onContinue }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-purple-950/10 to-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-background via-purple-950/10 to-background flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+      {/* StressBar at top - showing current state before transformation */}
+      <StressBar stressLevel={150} phase="transicao" visible={true} />
       {/* Background light rays */}
       <motion.div
         className="absolute inset-0"
@@ -21,14 +24,14 @@ const TransicaoScreen: React.FC<TransicaoScreenProps> = ({ onContinue }) => {
       </motion.div>
 
       <motion.div
-        className="max-w-md w-full text-center space-y-8 relative z-10"
+        className="max-w-md w-full text-center space-y-6 sm:space-y-8 relative z-10 pt-16 sm:pt-20"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         {/* Transition icon */}
         <motion.div
-          className="relative mx-auto w-24 h-24"
+          className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24"
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: "spring", duration: 1, delay: 0.2 }}
@@ -42,7 +45,7 @@ const TransicaoScreen: React.FC<TransicaoScreenProps> = ({ onContinue }) => {
 
           {/* Icon container */}
           <div className="absolute inset-0 flex items-center justify-center rounded-full bg-gradient-to-br from-purple-500/20 via-blue-500/10 to-green-500/20 border-2 border-purple-500/40">
-            <Sparkles className="w-12 h-12 text-purple-400" />
+            <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-purple-400" />
           </div>
         </motion.div>
 
@@ -59,15 +62,15 @@ const TransicaoScreen: React.FC<TransicaoScreenProps> = ({ onContinue }) => {
 
         {/* Title */}
         <motion.div
-          className="space-y-3"
+          className="space-y-2 sm:space-y-3"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
             E se fosse diferente?
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-base sm:text-lg text-muted-foreground">
             Você acabou de ver como está vivendo.
             <br />
             Agora veja como <span className="text-purple-400 font-semibold">poderia</span> ser.
