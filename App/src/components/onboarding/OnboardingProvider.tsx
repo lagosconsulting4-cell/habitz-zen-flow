@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
 import { useGamification } from "@/hooks/useGamification";
+import { generateRecommendations } from "./generateRecommendations";
 
 // ============================================================================
 // TYPES
@@ -25,11 +26,14 @@ export interface RecommendedHabit {
   color: string;
   period: "morning" | "afternoon" | "evening";
   suggested_time: string; // HH:mm format
-  default_goal_value?: number;
-  default_unit?: string;
-  default_frequency_type?: string;
-  reason: string; // Why this habit was recommended
+  duration?: number; // Minutes to complete
+  goal_value?: number;
+  goal_unit?: "none" | "minutes" | "hours" | "times" | "pages" | "ml" | "steps";
+  frequency_type?: "fixed_days" | "times_per_week" | "daily";
+  frequency_days?: number[]; // Days of week (0-6)
   priority: number; // 1-10 (higher = more important)
+  recommendation_score?: number; // Algorithm score
+  recommendation_sources?: string[]; // Why this habit was recommended
 }
 
 export interface TimeSlots {
@@ -133,7 +137,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const totalSteps = 10;
+  const totalSteps = 11;
 
   // ============================================================================
   // NAVIGATION
@@ -186,6 +190,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         return weekDays.length > 0;
       case 9: // Preview
         return selectedHabitIds.size >= 3;
+      case 10: // Celebration (auto-submits)
+        return true;
       default:
         return false;
     }
@@ -272,63 +278,40 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   }, []);
 
   // ============================================================================
-  // ROUTINE GENERATION (Placeholder - will be implemented in Sprint 3)
+  // ROUTINE GENERATION - 4-Layer Smart Algorithm
   // ============================================================================
 
   const generateRoutine = useCallback(async () => {
+    // Validate required data
+    if (!objective || !timeAvailable || !workSchedule || !energyPeak) {
+      console.error("Missing required onboarding data for routine generation");
+      return;
+    }
+
     setIsGeneratingRoutine(true);
     try {
-      // TODO: Implement 4-layer recommendation algorithm in Sprint 3
-      // For now, just generate some dummy habits
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Add artificial delay for better UX (shows loading state)
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      const dummyHabits: RecommendedHabit[] = [
-        {
-          id: "habit-1",
-          template_id: "wake_early",
-          name: "Acordar Cedo",
-          category: "productivity",
-          icon: "🌅",
-          color: "bg-orange-500",
-          period: "morning",
-          suggested_time: "06:00",
-          reason: "Baseado no seu objetivo de produtividade",
-          priority: 10,
-        },
-        {
-          id: "habit-2",
-          template_id: "meditation",
-          name: "Meditação",
-          category: "mental",
-          icon: "🧘",
-          color: "bg-purple-500",
-          period: "morning",
-          suggested_time: "07:00",
-          reason: "Ajuda com ansiedade e foco",
-          priority: 9,
-        },
-        {
-          id: "habit-3",
-          template_id: "exercise",
-          name: "Exercícios",
-          category: "health",
-          icon: "💪",
-          color: "bg-green-500",
-          period: "evening",
-          suggested_time: "19:00",
-          reason: "Melhora saúde e bem-estar",
-          priority: 8,
-        },
-      ];
+      // Generate recommendations using the 4-layer algorithm
+      const recommendations = generateRecommendations({
+        objective,
+        challenges,
+        timeAvailable,
+        workSchedule,
+        energyPeak,
+        weekDays,
+      });
 
-      setRecommendedHabits(dummyHabits);
-      setSelectedHabitIds(new Set(dummyHabits.map((h) => h.id)));
+      // Set recommended habits and select all by default
+      setRecommendedHabits(recommendations);
+      setSelectedHabitIds(new Set(recommendations.map((h) => h.id)));
     } catch (error) {
       console.error("Failed to generate routine:", error);
     } finally {
       setIsGeneratingRoutine(false);
     }
-  }, [objective, challenges, timeAvailable, workSchedule]);
+  }, [objective, challenges, timeAvailable, workSchedule, energyPeak, weekDays]);
 
   // ============================================================================
   // SUBMISSION
@@ -352,10 +335,10 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
           name: habit.name,
           icon: habit.icon,
           color: habit.color,
-          goal_value: habit.default_goal_value,
-          unit: habit.default_unit || "none",
-          frequency_type: habit.default_frequency_type || "fixed_days",
-          days_of_week: weekDays,
+          goal_value: habit.goal_value,
+          unit: habit.goal_unit || "none",
+          frequency_type: habit.frequency_type || "fixed_days",
+          days_of_week: habit.frequency_days || weekDays,
           reminder_time: habit.suggested_time,
           is_active: true,
         });

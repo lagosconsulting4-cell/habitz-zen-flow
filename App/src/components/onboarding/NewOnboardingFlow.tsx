@@ -14,7 +14,8 @@ import { TimeAvailableStep } from "./steps/TimeAvailableStep";
 import { ObjectiveStep } from "./steps/ObjectiveStep";
 import { ChallengesStep } from "./steps/ChallengesStep";
 import { WeekDaysStep } from "./steps/WeekDaysStep";
-// import { RoutinePreviewStep } from "./steps/RoutinePreviewStep"; // Sprint 4
+import { RoutinePreviewStep } from "./steps/RoutinePreviewStep";
+import { CelebrationStep } from "./steps/CelebrationStep";
 
 /**
  * OnboardingFlow Content Component
@@ -30,7 +31,7 @@ const OnboardingFlowContent = () => {
     }
   }, [currentStep, generateRoutine]);
 
-  // All 10 steps
+  // All 11 steps
   const steps = [
     <WelcomeStep key="welcome" />,
     <AgeStep key="age" />,
@@ -41,14 +42,8 @@ const OnboardingFlowContent = () => {
     <ObjectiveStep key="objective" />,
     <ChallengesStep key="challenges" />,
     <WeekDaysStep key="weekdays" />,
-    // Preview step - to be implemented in Sprint 4
-    <div key="preview" className="flex items-center justify-center min-h-[500px] text-muted-foreground">
-      <div className="text-center">
-        <p className="text-xl font-bold mb-2">Routine Preview Step</p>
-        <p className="text-sm">To be implemented in Sprint 4</p>
-        <p className="text-xs mt-4">Click "Concluir" to test habit creation</p>
-      </div>
-    </div>,
+    <RoutinePreviewStep key="preview" />,
+    <CelebrationStep key="celebration" />,
   ];
 
   return (

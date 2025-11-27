@@ -42,3 +42,5 @@ export { TimeAvailableStep } from "./steps/TimeAvailableStep";
 export { ObjectiveStep } from "./steps/ObjectiveStep";
 export { ChallengesStep } from "./steps/ChallengesStep";
 export { WeekDaysStep } from "./steps/WeekDaysStep";
+export { RoutinePreviewStep } from "./steps/RoutinePreviewStep";
+export { CelebrationStep } from "./steps/CelebrationStep";
