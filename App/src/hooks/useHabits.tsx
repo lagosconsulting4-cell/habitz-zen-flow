@@ -514,8 +514,6 @@ export const useHabits = () => {
           // Ignore duplicate key errors (23505) - means completion already exists
           if (error && error.code !== "23505") throw error;
         }
-
-        await fetchCompletionsForDate(targetDate);
       } else {
         // OFFLINE: Optimistic UI + sync queue
         const tempId = crypto.randomUUID();
@@ -679,6 +677,17 @@ export const useHabits = () => {
     return completions.some((c) => c.habit_id === habitId);
   };
 
+  // Optimistic update methods for immediate UI feedback
+  const addCompletionOptimistic = useCallback((completion: HabitCompletion) => {
+    setCompletions(prev => [...prev, completion]);
+  }, []);
+
+  const removeCompletionOptimistic = useCallback((habitId: string, date: string) => {
+    setCompletions(prev =>
+      prev.filter(c => !(c.habit_id === habitId && c.completed_at === date))
+    );
+  }, []);
+
   return {
     habits,
     loading,
@@ -695,6 +704,8 @@ export const useHabits = () => {
     fetchCompletionsForDate,
     completions,
     completionsDate,
+    addCompletionOptimistic,
+    removeCompletionOptimistic,
     saveCompletionNote: async (habitId: string, date: string, note: string) => {
       try {
         const { error } = await supabase

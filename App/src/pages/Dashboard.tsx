@@ -26,7 +26,7 @@ const isTimedHabit = (unit?: string | null): boolean => {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { habits, loading, toggleHabit, getHabitCompletionStatus } = useHabits();
+  const { habits, loading, toggleHabit, getHabitCompletionStatus, addCompletionOptimistic, removeCompletionOptimistic } = useHabits();
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const { user } = useAuth();
@@ -152,6 +152,7 @@ const Dashboard = () => {
   // Handle habit toggle - opens timer for timed habits
   const handleToggle = async (habit: Habit) => {
     const wasCompleted = getHabitCompletionStatus(habit.id);
+    const targetDate = new Date().toISOString().split("T")[0];
 
     // If it's a timed habit and not completed, open timer
     if (isTimedHabit(habit.unit) && !wasCompleted && habit.goal_value && habit.goal_value > 0) {
@@ -159,130 +160,159 @@ const Dashboard = () => {
       return;
     }
 
-    // Toggle the habit
-    await toggleHabit(habit.id);
+    // OPTIMISTIC: Create completion object immediately
+    const optimisticCompletion = {
+      id: crypto.randomUUID(),
+      habit_id: habit.id,
+      user_id: user?.id || "",
+      completed_at: targetDate,
+      created_at: new Date().toISOString(),
+    };
 
-    // If completing (not uncompleting), trigger celebration and award XP
+    // If completing (not uncompleting), trigger celebration IMMEDIATELY
     if (!wasCompleted) {
-      // Trigger celebration effect on the habit card
+      // Add completion optimistically
+      addCompletionOptimistic(optimisticCompletion);
+
+      // Trigger celebration effect on the habit card IMMEDIATELY
       const habitCardId = `habit-card-${habit.id}`;
       celebrations.habitComplete(habitCardId);
 
-      // Award XP for habit completion
-      if (awardHabitXP) {
-        try {
-          await awardHabitXP(habit.id);
-          // Show XP toast with correct value (+10 XP)
-          queueXpToast({
-            amount: XP_VALUES.HABIT_COMPLETE,
-            habitId: habit.id,
-            type: "habit",
-          });
-        } catch (error) {
-          console.error("Failed to award XP:", error);
-        }
-      }
+      // Queue XP toast IMMEDIATELY (will show after brief delay)
+      queueXpToast({
+        amount: XP_VALUES.HABIT_COMPLETE,
+        habitId: habit.id,
+        type: "habit",
+      });
 
       // Check for streak milestones (3, 7, 30 days)
       const newStreak = habit.streak + 1; // Optimistic - actual value comes from DB
       if (awardStreakBonus && (newStreak === 3 || newStreak === 7 || newStreak === 30)) {
-        try {
-          await awardStreakBonus(newStreak);
-          // Show streak milestone toast
-          setStreakMilestone(newStreak);
-
-          // Queue XP toast for streak bonus (shown after habit toast)
-          const streakXpAmount =
-            newStreak === 3
-              ? XP_VALUES.STREAK_BONUS_3
-              : newStreak === 7
-                ? XP_VALUES.STREAK_BONUS_7
-                : XP_VALUES.STREAK_BONUS_30;
-          queueXpToast({
-            amount: streakXpAmount,
-            type: "streak",
-          });
-        } catch (error) {
-          console.error("Failed to award streak bonus:", error);
-        }
+        // Queue streak milestone IMMEDIATELY
+        setStreakMilestone(newStreak);
+        const streakXpAmount =
+          newStreak === 3
+            ? XP_VALUES.STREAK_BONUS_3
+            : newStreak === 7
+              ? XP_VALUES.STREAK_BONUS_7
+              : XP_VALUES.STREAK_BONUS_30;
+        queueXpToast({
+          amount: streakXpAmount,
+          type: "streak",
+        });
       }
 
       // Check for Perfect Day (all habits completed)
       // Use requestAnimationFrame to ensure state is updated
       requestAnimationFrame(() => {
-        // Need to re-check completion status after state update
+        // Need to re-check completion status after optimistic update
         const allCompleted = todayHabits.every(
           (h) => h.id === habit.id || getHabitCompletionStatus(h.id)
         );
 
         if (allCompleted && awardPerfectDayBonus) {
-          try {
-            awardPerfectDayBonus();
-            // Show special celebration for perfect day
-            celebrations.perfectDay();
-            // Queue XP toast for perfect day bonus
-            queueXpToast({
-              amount: XP_VALUES.PERFECT_DAY,
-              type: "perfect_day",
-            });
-          } catch (error) {
-            console.error("Failed to award perfect day bonus:", error);
-          }
+          // Show special celebration for perfect day
+          celebrations.perfectDay();
+          // Queue XP toast for perfect day bonus
+          queueXpToast({
+            amount: XP_VALUES.PERFECT_DAY,
+            type: "perfect_day",
+          });
         }
       });
+    } else {
+      // Remove completion optimistically
+      removeCompletionOptimistic(habit.id, targetDate);
+    }
+
+    // BACKGROUND: Sync with backend (non-blocking)
+    try {
+      await toggleHabit(habit.id);
+
+      // Backend awards XP/streak
+      if (!wasCompleted && awardHabitXP) {
+        try {
+          await awardHabitXP(habit.id);
+        } catch (error) {
+          console.error("Failed to award XP:", error);
+        }
+      }
+
+      if (!wasCompleted && awardStreakBonus) {
+        const newStreak = habit.streak + 1;
+        if (newStreak === 3 || newStreak === 7 || newStreak === 30) {
+          try {
+            await awardStreakBonus(newStreak);
+          } catch (error) {
+            console.error("Failed to award streak bonus:", error);
+          }
+        }
+      }
+
+      if (!wasCompleted && awardPerfectDayBonus) {
+        try {
+          await awardPerfectDayBonus();
+        } catch (error) {
+          console.error("Failed to award perfect day bonus:", error);
+        }
+      }
+    } catch (error) {
+      console.error("Toggle sync failed:", error);
+      // ROLLBACK: Revert optimistic update on error
+      if (!wasCompleted) {
+        removeCompletionOptimistic(habit.id, targetDate);
+      } else {
+        addCompletionOptimistic(optimisticCompletion);
+      }
     }
   };
 
   // Handle timer completion
   const handleTimerComplete = async () => {
     if (timerHabit) {
-      await toggleHabit(timerHabit.id);
+      const targetDate = new Date().toISOString().split("T")[0];
+      const habitId = timerHabit.id;
+      const habitCardId = `habit-card-${habitId}`;
 
-      // Trigger celebration for timed habit completion
-      const habitCardId = `habit-card-${timerHabit.id}`;
+      // OPTIMISTIC: Create completion object immediately
+      const optimisticCompletion = {
+        id: crypto.randomUUID(),
+        habit_id: habitId,
+        user_id: user?.id || "",
+        completed_at: targetDate,
+        created_at: new Date().toISOString(),
+      };
+
+      // OPTIMISTIC: Add completion immediately
+      addCompletionOptimistic(optimisticCompletion);
+
+      // IMMEDIATE: Trigger celebration
       celebrations.habitComplete(habitCardId);
 
-      // Award XP for habit completion
-      if (awardHabitXP) {
-        try {
-          await awardHabitXP(timerHabit.id);
-          // Show XP toast with correct value (+10 XP)
-          queueXpToast({
-            amount: XP_VALUES.HABIT_COMPLETE,
-            habitId: timerHabit.id,
-            type: "habit",
-          });
-        } catch (error) {
-          console.error("Failed to award XP:", error);
-        }
-      }
+      // IMMEDIATE: Queue XP toast
+      queueXpToast({
+        amount: XP_VALUES.HABIT_COMPLETE,
+        habitId: habitId,
+        type: "habit",
+      });
 
-      // Check for streak milestones (3, 7, 30 days)
-      const newStreak = timerHabit.streak + 1; // Optimistic
+      // IMMEDIATE: Check for streak milestones
+      const newStreak = timerHabit.streak + 1;
       if (awardStreakBonus && (newStreak === 3 || newStreak === 7 || newStreak === 30)) {
-        try {
-          await awardStreakBonus(newStreak);
-          // Show streak milestone toast
-          setStreakMilestone(newStreak);
-
-          // Queue XP toast for streak bonus
-          const streakXpAmount =
-            newStreak === 3
-              ? XP_VALUES.STREAK_BONUS_3
-              : newStreak === 7
-                ? XP_VALUES.STREAK_BONUS_7
-                : XP_VALUES.STREAK_BONUS_30;
-          queueXpToast({
-            amount: streakXpAmount,
-            type: "streak",
-          });
-        } catch (error) {
-          console.error("Failed to award streak bonus:", error);
-        }
+        setStreakMilestone(newStreak);
+        const streakXpAmount =
+          newStreak === 3
+            ? XP_VALUES.STREAK_BONUS_3
+            : newStreak === 7
+              ? XP_VALUES.STREAK_BONUS_7
+              : XP_VALUES.STREAK_BONUS_30;
+        queueXpToast({
+          amount: streakXpAmount,
+          type: "streak",
+        });
       }
 
-      // Check for Perfect Day (all habits completed)
-      // Use requestAnimationFrame to ensure state is updated
+      // IMMEDIATE: Check for Perfect Day
       const currentHabit = timerHabit;
       requestAnimationFrame(() => {
         const allCompleted = todayHabits.every(
@@ -290,21 +320,30 @@ const Dashboard = () => {
         );
 
         if (allCompleted && awardPerfectDayBonus) {
-          try {
-            awardPerfectDayBonus();
-            celebrations.perfectDay();
-            // Queue XP toast for perfect day bonus
-            queueXpToast({
-              amount: XP_VALUES.PERFECT_DAY,
-              type: "perfect_day",
-            });
-          } catch (error) {
-            console.error("Failed to award perfect day bonus:", error);
-          }
+          celebrations.perfectDay();
+          queueXpToast({
+            amount: XP_VALUES.PERFECT_DAY,
+            type: "perfect_day",
+          });
         }
       });
 
+      // IMMEDIATE: Close modal
       setTimerHabit(null);
+
+      // BACKGROUND: Sync with backend (non-blocking)
+      Promise.all([
+        toggleHabit(habitId),
+        awardHabitXP ? awardHabitXP(habitId) : Promise.resolve(),
+        awardStreakBonus && (newStreak === 3 || newStreak === 7 || newStreak === 30)
+          ? awardStreakBonus(newStreak)
+          : Promise.resolve(),
+        awardPerfectDayBonus ? awardPerfectDayBonus() : Promise.resolve(),
+      ]).catch((error) => {
+        console.error("Timer completion sync failed:", error);
+        // ROLLBACK: Revert optimistic update on error
+        removeCompletionOptimistic(habitId, targetDate);
+      });
     }
   };
 
@@ -323,7 +362,7 @@ const Dashboard = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 px-4 pt-4 pb-32 space-y-5"
+        className="flex-1 px-4 pt-1 pb-32 space-y-5"
       >
         {/* Routine Card - Shows daily progress by period */}
         {todayHabits.length > 0 && (

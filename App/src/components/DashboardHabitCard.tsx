@@ -86,7 +86,7 @@ const DashboardHabitCardComponent = ({
         // Dark mode: transparent background
         "dark:bg-transparent dark:border-transparent",
         "text-foreground",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70",
+        "focus-visible:outline-none focus-visible:ring-0",
         "transition-all duration-200",
         className
       )}
