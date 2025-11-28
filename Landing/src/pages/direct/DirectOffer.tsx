@@ -164,84 +164,109 @@ const DirectOffer = () => {
         <div className="absolute top-0 right-0 w-48 md:w-96 h-48 md:h-96 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-48 md:w-96 h-48 md:h-96 bg-emerald-500/10 rounded-full blur-3xl" />
 
-        <motion.div
-          className="relative z-10 w-full max-w-4xl mx-auto text-center space-y-8"
-          variants={staggerContainer}
-          initial="initial"
-          animate="animate"
-        >
-          {/* Badge */}
-          <motion.div variants={staggerItem}>
-            <Badge className="px-4 py-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30 text-sm animate-pulse">
-              <Clock className="w-4 h-4 mr-2" />
-              Oferta expira em 15 minutos
-            </Badge>
-          </motion.div>
+        <div className="relative z-10 w-full max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left side - Text content */}
+            <motion.div
+              className="text-center lg:text-left space-y-6"
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+            >
+              {/* Badge */}
+              <motion.div variants={staggerItem} className="flex justify-center lg:justify-start">
+                <Badge className="px-4 py-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30 text-sm animate-pulse">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Oferta expira em 15 minutos
+                </Badge>
+              </motion.div>
 
-          {/* Title */}
-          <motion.h1
-            className="text-3xl md:text-5xl lg:text-6xl font-bold leading-tight px-2"
-            variants={staggerItem}
-          >
-            Transforme sua rotina em{" "}
-            <span className="text-primary">30 dias</span>
-            <br />
-            <span className="text-primary">
-              ou seu dinheiro de volta
-            </span>
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p
-            className="text-base md:text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto px-2"
-            variants={staggerItem}
-          >
-            Chega de acordar sem energia. Chega de procrastinar.{" "}
-            <strong className="text-foreground">Seu plano personalizado</strong> vai
-            te dar clareza e consistência em{" "}
-            <strong className="text-foreground">apenas 7 minutos por dia</strong>.
-          </motion.p>
-
-          {/* Stats */}
-          <motion.div
-            className="flex flex-wrap justify-center gap-4 md:gap-16 pt-8"
-            variants={staggerItem}
-          >
-            <div className="text-center min-w-[80px]">
-              <AnimatedCounter value={7} />
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">minutos/dia</p>
-            </div>
-            <div className="text-center min-w-[100px]">
-              <AnimatedCounter value={5000} suffix="+" />
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">vidas transformadas</p>
-            </div>
-            <div className="text-center min-w-[80px]">
-              <AnimatedCounter value={94} suffix="%" />
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">mantêm a rotina</p>
-            </div>
-          </motion.div>
-
-          {/* Countdown Timer */}
-          <motion.div variants={staggerItem} className="pt-6">
-            <CountdownTimer variant="hero" />
-          </motion.div>
-
-          {/* CTA */}
-          <motion.div variants={staggerItem} className="pt-4 px-2">
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button
-                onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
-                variant="premium"
-                size="lg"
-                className="group w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 py-3 sm:py-4 font-bold"
+              {/* Title */}
+              <motion.h1
+                className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight"
+                variants={staggerItem}
               >
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                QUERO MINHA ROTINA
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+                Transforme sua rotina em{" "}
+                <span className="text-primary">30 dias</span>
+                <br />
+                <span className="text-primary">
+                  ou seu dinheiro de volta
+                </span>
+              </motion.h1>
+
+              {/* Subtitle */}
+              <motion.p
+                className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0"
+                variants={staggerItem}
+              >
+                Chega de acordar sem energia. Chega de procrastinar.{" "}
+                <strong className="text-foreground">Seu plano personalizado</strong> vai
+                te dar clareza e consistência em{" "}
+                <strong className="text-foreground">apenas 7 minutos por dia</strong>.
+              </motion.p>
+
+              {/* Stats */}
+              <motion.div
+                className="flex flex-wrap justify-center lg:justify-start gap-4 md:gap-8 pt-4"
+                variants={staggerItem}
+              >
+                <div className="text-center">
+                  <AnimatedCounter value={7} />
+                  <p className="text-xs md:text-sm text-muted-foreground mt-1">minutos/dia</p>
+                </div>
+                <div className="text-center">
+                  <AnimatedCounter value={5000} suffix="+" />
+                  <p className="text-xs md:text-sm text-muted-foreground mt-1">vidas transformadas</p>
+                </div>
+                <div className="text-center">
+                  <AnimatedCounter value={94} suffix="%" />
+                  <p className="text-xs md:text-sm text-muted-foreground mt-1">mantêm a rotina</p>
+                </div>
+              </motion.div>
+
+              {/* Countdown Timer */}
+              <motion.div variants={staggerItem} className="pt-2">
+                <CountdownTimer variant="hero" />
+              </motion.div>
+
+              {/* CTA */}
+              <motion.div variants={staggerItem} className="pt-2 flex justify-center lg:justify-start">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
+                    variant="premium"
+                    size="lg"
+                    className="group w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 py-3 sm:py-4 font-bold"
+                  >
+                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                    QUERO MINHA ROTINA
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </motion.div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        </motion.div>
+
+            {/* Right side - App Mockup */}
+            <motion.div
+              className="relative flex justify-center lg:justify-end order-first lg:order-last"
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.8, type: "spring" }}
+            >
+              {/* Glow effect behind mockup */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-emerald-500/20 to-transparent rounded-full blur-[80px] scale-75" />
+
+              {/* Mockup image */}
+              <motion.img
+                src="/images/lp/mockup-app-vertical.png"
+                alt="App BORA - Mockup"
+                className="relative z-10 w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[380px] h-auto drop-shadow-2xl"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* ============ BEFORE/AFTER SECTION ============ */}
@@ -291,21 +316,38 @@ const DirectOffer = () => {
                   exit={{ opacity: 0, x: -20 }}
                 >
                   <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/20 rounded-full blur-[100px]" />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 relative z-10">
-                    {beforeProblems.map((item, index) => (
-                      <motion.div
-                        key={index}
-                        className="flex items-start gap-3 sm:gap-4 p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-card to-red-500/5 border border-red-500/20 shadow-lg"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                      >
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-500/30">
-                          <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                        </div>
-                        <span className="text-foreground font-medium text-sm sm:text-lg pt-1 sm:pt-2">{item.text}</span>
-                      </motion.div>
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 relative z-10">
+                    {/* Problems grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                      {beforeProblems.map((item, index) => (
+                        <motion.div
+                          key={index}
+                          className="flex items-start gap-3 sm:gap-4 p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-card to-red-500/5 border border-red-500/20 shadow-lg"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                        >
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-500/30">
+                            <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                          </div>
+                          <span className="text-foreground font-medium text-sm sm:text-lg pt-1 sm:pt-2">{item.text}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* Character illustration */}
+                    <motion.div
+                      className="hidden md:flex items-center justify-center"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <img
+                        src="/images/lp/personagem_triste.png"
+                        alt="Pessoa estressada"
+                        className="w-40 lg:w-48 h-auto drop-shadow-lg"
+                      />
+                    </motion.div>
                   </div>
                 </motion.div>
               </TabsContent>
@@ -319,22 +361,39 @@ const DirectOffer = () => {
                 >
                   <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
                   <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/20 rounded-full blur-[80px]" />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 relative z-10">
-                    {afterBenefits.map((item, index) => (
-                      <motion.div
-                        key={index}
-                        className="flex items-start gap-3 sm:gap-4 p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-card to-primary/5 border border-primary/20 shadow-lg group hover:border-primary/40 transition-colors"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        whileHover={{ scale: 1.02 }}
-                      >
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
-                          <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                        </div>
-                        <span className="text-foreground font-medium text-sm sm:text-lg pt-1 sm:pt-2">{item.text}</span>
-                      </motion.div>
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 relative z-10">
+                    {/* Benefits grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                      {afterBenefits.map((item, index) => (
+                        <motion.div
+                          key={index}
+                          className="flex items-start gap-3 sm:gap-4 p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-card to-primary/5 border border-primary/20 shadow-lg group hover:border-primary/40 transition-colors"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
+                            <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                          </div>
+                          <span className="text-foreground font-medium text-sm sm:text-lg pt-1 sm:pt-2">{item.text}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* Character illustration - meditating */}
+                    <motion.div
+                      className="hidden md:flex items-center justify-center"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <img
+                        src="/images/lp/meditação_personagem.png"
+                        alt="Pessoa em paz meditando"
+                        className="w-40 lg:w-48 h-auto drop-shadow-lg"
+                      />
+                    </motion.div>
                   </div>
                 </motion.div>
               </TabsContent>
