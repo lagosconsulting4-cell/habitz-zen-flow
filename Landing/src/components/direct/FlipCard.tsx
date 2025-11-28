@@ -56,8 +56,8 @@ const FlipCard: React.FC<FlipCardProps> = ({
     <div
       className={cn(
         // Responsive sizing - mobile first
-        "relative w-full max-w-[90vw] sm:max-w-[320px]",
-        "h-[280px] sm:h-[300px]",
+        "relative w-full max-w-[90vw] sm:max-w-[340px]",
+        "h-[300px] sm:h-[340px]",
         "cursor-pointer select-none",
         "[perspective:1000px]",
         className
@@ -100,11 +100,14 @@ const FlipCard: React.FC<FlipCardProps> = ({
             </div>
 
             {/* Center - Emoji + Title */}
-            <div className="flex flex-col items-center justify-center flex-1 space-y-3">
+            <div className="flex flex-col items-center justify-center flex-1 space-y-2">
               {content.image ? (
                 <motion.div
-                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-background/40 border border-white/10 overflow-hidden shadow-inner"
-                  animate={{ scale: [1, 1.04, 1] }}
+                  className={cn(
+                    "w-28 h-28 sm:w-36 sm:h-36 overflow-hidden",
+                    isDor ? "drop-shadow-[0_0_15px_rgba(239,68,68,0.3)]" : "drop-shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+                  )}
+                  animate={{ scale: [1, 1.03, 1] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <img
@@ -116,8 +119,11 @@ const FlipCard: React.FC<FlipCardProps> = ({
                 </motion.div>
               ) : (
                 <motion.div
-                  className="text-5xl sm:text-6xl"
-                  animate={{ scale: [1, 1.08, 1] }}
+                  className={cn(
+                    "text-6xl sm:text-7xl",
+                    isDor ? "drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]" : "drop-shadow-[0_0_15px_rgba(34,197,94,0.4)]"
+                  )}
+                  animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 >
                   {content.emoji}
