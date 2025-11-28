@@ -26,7 +26,7 @@ const MILESTONE_MESSAGES: Record<number, string> = {
 // Milestone colors
 const MILESTONE_COLORS: Record<number, string> = {
   3: "from-orange-500 to-red-500",
-  7: "from-purple-500 to-pink-500",
+  7: "from-lime-400 to-lime-500",
   30: "from-yellow-500 to-amber-500",
 };
 

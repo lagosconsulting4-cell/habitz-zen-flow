@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -87,6 +87,9 @@ export const useHabits = () => {
   const [completions, setCompletions] = useState<HabitCompletion[]>([]);
   const [completionsDate, setCompletionsDate] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Debounce ref to prevent double-click race conditions
+  const toggleInProgressRef = useRef<Set<string>>(new Set());
 
   const fetchHabits = useCallback(async () => {
     const isOnline = navigator.onLine;
@@ -441,12 +444,22 @@ export const useHabits = () => {
 
   const toggleHabit = async (habitId: string, date?: string) => {
     const targetDate = date ?? new Date().toISOString().split("T")[0];
+    const toggleKey = `${habitId}-${targetDate}`;
+
+    // Debounce: prevent double-clicks causing race conditions
+    if (toggleInProgressRef.current.has(toggleKey)) {
+      return; // Toggle already in progress for this habit/date
+    }
+
     // Prevent toggling archived habits defensively
     const targetHabit = habits.find((h) => h.id === habitId);
     if (targetHabit && !targetHabit.is_active) {
       toast({ title: "Habito arquivado", description: "Reative o habito para marcá-lo como concluído.", variant: "destructive" });
       return;
     }
+
+    // Mark toggle as in progress
+    toggleInProgressRef.current.add(toggleKey);
 
     // Check if currently online
     const isOnline = navigator.onLine;
@@ -483,17 +496,23 @@ export const useHabits = () => {
 
           if (error) throw error;
         } else {
+          // Use UPSERT to prevent duplicate key constraint violations
           const { error } = await supabase
             .from("habit_completions")
-            .insert([
+            .upsert(
               {
                 habit_id: habitId,
                 user_id: user.id,
                 completed_at: targetDate,
               },
-            ]);
+              {
+                onConflict: "habit_id,user_id,completed_at",
+                ignoreDuplicates: true,
+              }
+            );
 
-          if (error) throw error;
+          // Ignore duplicate key errors (23505) - means completion already exists
+          if (error && error.code !== "23505") throw error;
         }
 
         await fetchCompletionsForDate(targetDate);
@@ -580,6 +599,9 @@ export const useHabits = () => {
         description: "Nao foi possivel atualizar o habito",
         variant: "destructive",
       });
+    } finally {
+      // Always clean up the debounce lock
+      toggleInProgressRef.current.delete(toggleKey);
     }
   };
 

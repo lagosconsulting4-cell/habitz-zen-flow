@@ -323,7 +323,7 @@ const Dashboard = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 px-4 pt-6 pb-32 space-y-6"
+        className="flex-1 px-4 pt-4 pb-32 space-y-5"
       >
         {/* Routine Card - Shows daily progress by period */}
         {todayHabits.length > 0 && (

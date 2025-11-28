@@ -65,7 +65,7 @@ export const triggerHaptic = (
  */
 export const createGlowPulse = (
   elementId: string,
-  color: string = "rgba(139, 92, 246, 0.6)", // Default purple
+  color: string = "rgba(163, 230, 53, 0.6)", // Default lime
   duration: number = 1000
 ): (() => void) => {
   const element = document.getElementById(elementId);
@@ -121,7 +121,7 @@ export const createSubtleParticles = (
 ): (() => void) => {
   const {
     count = 12,
-    colors = ["#8B5CF6", "#A78BFA", "#C4B5FD"],
+    colors = ["#A3E635", "#84CC16", "#65A30D"],
     duration = 2000,
   } = config;
 
@@ -333,7 +333,7 @@ export const celebrate = (
     // Glow pulse
     if (finalConfig.glow) {
       const glowColors = {
-        "habit-complete": "rgba(139, 92, 246, 0.6)", // Purple
+        "habit-complete": "rgba(163, 230, 53, 0.6)", // Lime
         "level-up": "rgba(234, 179, 8, 0.7)", // Gold
         "streak-milestone": "rgba(249, 115, 22, 0.6)", // Orange
         "perfect-day": "rgba(34, 197, 94, 0.6)", // Green
@@ -360,7 +360,7 @@ export const celebrate = (
         "streak-milestone": ["#F97316", "#FB923C", "#FDBA74"],
         "perfect-day": ["#22C55E", "#4ADE80", "#86EFAC"],
         unlock: ["#3B82F6", "#60A5FA", "#93C5FD"],
-        "habit-complete": ["#8B5CF6", "#A78BFA", "#C4B5FD"],
+        "habit-complete": ["#A3E635", "#84CC16", "#65A30D"],
       };
       cleanups.push(
         createSubtleParticles(elementId, {
