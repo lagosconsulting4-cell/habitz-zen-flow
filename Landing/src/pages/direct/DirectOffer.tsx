@@ -864,6 +864,31 @@ const DirectOffer = () => {
           </div>
         </motion.div>
       </section>
+
+      {/* ============ APP MOCKUP SHOWCASE ============ */}
+      <section className="py-12 sm:py-16 px-4 sm:px-6">
+        <motion.div
+          className="max-w-4xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <motion.div
+            className="relative"
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <img
+              src="/images/lp/mockup-horizontal.png"
+              alt="App BORA - Telas do aplicativo"
+              className="w-full h-auto rounded-2xl"
+              loading="lazy"
+            />
+            {/* Glow effect behind mockup */}
+            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/20 via-emerald-500/20 to-primary/20 blur-3xl opacity-50 scale-110" />
+          </motion.div>
+        </motion.div>
+      </section>
     </div>
   );
 };
