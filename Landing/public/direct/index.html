@@ -15,6 +15,12 @@
     document.head.appendChild(a);
   </script>
   <!-- End Pixel Tracking -->
+  <!-- Resource Hints for Performance -->
+  <link rel="dns-prefetch" href="https://cdn.utmify.com.br">
+  <link rel="preconnect" href="https://cdn.utmify.com.br" crossorigin>
+  <link rel="preload" href="/direct/images/logo.webp" as="image">
+  <link rel="preload" href="/direct/style.css" as="style">
+  <link rel="preload" href="/direct/audio/fernanda.mp3" as="audio">
   <link rel="stylesheet" href="/direct/style.css">
 </head>
 <body>
@@ -637,6 +643,6 @@
   </main>
   <!-- Botão fixo apenas na última etapa -->
   <button class="fixed-bottom-btn" style="display:none;">🔒 Quero meu plano de calma e foco por R$47</button>
-  <script src="/direct/script.js"></script>
+  <script src="/direct/script.js" defer></script>
 </body>
 </html> 
