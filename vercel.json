@@ -2,15 +2,9 @@
   "installCommand": "cd Landing && npm install && cd ../App && npm install",
   "buildCommand": "cd Landing && npm run build && cd ../App && npm run build && cd .. && node scripts/prepare-dist.cjs",
   "outputDirectory": "dist",
+  "cleanUrls": false,
+  "trailingSlash": false,
   "rewrites": [
-    {
-      "source": "/direct",
-      "destination": "/direct/index.html"
-    },
-    {
-      "source": "/direct/:path*",
-      "destination": "/direct/:path*"
-    },
     {
       "source": "/tdah/obrigado",
       "destination": "/tdah/obrigado.html"
@@ -20,7 +14,11 @@
       "destination": "/app/index.html"
     },
     {
-      "source": "/:path((?!app|tdah|tiktok|assets|audio|favicon|direct|antigo).*)",
+      "source": "/antigo/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/:path((?!app|tdah|tiktok|assets|audio|favicon|direct).*)",
       "destination": "/index.html"
     }
   ],
