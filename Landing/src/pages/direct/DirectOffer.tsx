@@ -832,6 +832,23 @@ const DirectOffer = () => {
             Cada dia que passa é um dia a menos na sua transformação.
           </p>
 
+          {/* APP MOCKUP */}
+          <motion.div
+            className="relative mb-8"
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <img
+              src="/images/lp/mockup-horizontal.png"
+              alt="App BORA - Telas do aplicativo"
+              className="w-full h-auto rounded-2xl"
+              loading="lazy"
+            />
+            {/* Glow effect behind mockup */}
+            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/20 via-emerald-500/20 to-primary/20 blur-3xl opacity-50 scale-110" />
+          </motion.div>
+
+          {/* CTA Button - Mobile optimized */}
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -840,11 +857,11 @@ const DirectOffer = () => {
               onClick={handleCTA}
               variant="premium"
               size="lg"
-              className="group text-base sm:text-lg px-8 py-5 font-bold"
+              className="group w-full sm:w-auto text-sm sm:text-lg px-6 sm:px-8 py-5 font-bold flex items-center justify-center gap-2"
             >
-              <Sparkles className="w-5 h-5 mr-2" />
-              COMEÇAR AGORA POR 11x R$5,17
-              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+              <span className="whitespace-nowrap">COMEÇAR POR 11x R$5,17</span>
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
             </Button>
           </motion.div>
 
@@ -862,31 +879,6 @@ const DirectOffer = () => {
               <span>Resultados rápidos</span>
             </div>
           </div>
-        </motion.div>
-      </section>
-
-      {/* ============ APP MOCKUP SHOWCASE ============ */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6">
-        <motion.div
-          className="max-w-4xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <motion.div
-            className="relative"
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <img
-              src="/images/lp/mockup-horizontal.png"
-              alt="App BORA - Telas do aplicativo"
-              className="w-full h-auto rounded-2xl"
-              loading="lazy"
-            />
-            {/* Glow effect behind mockup */}
-            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/20 via-emerald-500/20 to-primary/20 blur-3xl opacity-50 scale-110" />
-          </motion.div>
         </motion.div>
       </section>
     </div>
