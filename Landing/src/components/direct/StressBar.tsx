@@ -1,123 +1,16 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { AlertTriangle, Zap, Heart } from "lucide-react";
+
+import { getStressStatus, type StressPhase } from "@/components/direct/stress-status";
 
 interface StressBarProps {
   stressLevel: number; // 0-150%
-  phase: "dor" | "colapso" | "transicao" | "bora" | "comparison" | "mirror";
+  phase: StressPhase;
   visible?: boolean;
   inline?: boolean; // When true, renders as inline element instead of fixed header
   label?: string; // Custom label override
   compact?: boolean; // Smaller version for side-by-side comparison
 }
-
-// Mirror phase: 3-level emoji system (Bom/Moderado/Urgente)
-const getMirrorStatus = (level: number) => {
-  if (level >= 100) {
-    return {
-      label: "COLAPSO!",
-      emoji: "🔥",
-      color: "from-red-600 to-red-500",
-      bgColor: "bg-red-500/20",
-      textColor: "text-red-400",
-      icon: AlertTriangle,
-      pulse: true,
-    };
-  }
-  if (level > 80) {
-    return {
-      label: "Crítico",
-      emoji: "🔥",
-      color: "from-red-500 to-orange-500",
-      bgColor: "bg-red-500/20",
-      textColor: "text-red-400",
-      icon: AlertTriangle,
-      pulse: true,
-    };
-  }
-  if (level > 40) {
-    return {
-      label: "Atenção",
-      emoji: "😰",
-      color: "from-amber-500 to-yellow-500",
-      bgColor: "bg-amber-500/20",
-      textColor: "text-amber-400",
-      icon: Zap,
-      pulse: false,
-    };
-  }
-  return {
-    label: "Sob Controle",
-    emoji: "😌",
-    color: "from-emerald-500 to-green-400",
-    bgColor: "bg-emerald-500/20",
-    textColor: "text-emerald-400",
-    icon: Heart,
-    pulse: false,
-  };
-};
-
-// Get status based on stress level
-const getStatus = (level: number, phase: string) => {
-  // Use simplified 3-level system for mirror phase
-  if (phase === "mirror") {
-    return getMirrorStatus(level);
-  }
-
-  if (phase === "colapso" || level >= 100) {
-    return {
-      label: "COLAPSO",
-      emoji: "🔥",
-      color: "from-red-600 to-red-500",
-      bgColor: "bg-red-500/20",
-      textColor: "text-red-400",
-      icon: AlertTriangle,
-      pulse: true,
-    };
-  }
-  if (phase === "bora" || level <= 30) {
-    return {
-      label: "EM PAZ",
-      emoji: "😌",
-      color: "from-green-500 to-emerald-400",
-      bgColor: "bg-green-500/20",
-      textColor: "text-green-400",
-      icon: Heart,
-      pulse: false,
-    };
-  }
-  if (level >= 70) {
-    return {
-      label: "URGENTE",
-      emoji: "🔥",
-      color: "from-red-500 to-orange-500",
-      bgColor: "bg-red-500/20",
-      textColor: "text-red-400",
-      icon: AlertTriangle,
-      pulse: true,
-    };
-  }
-  if (level >= 40) {
-    return {
-      label: "ALERTA",
-      emoji: "😰",
-      color: "from-orange-500 to-yellow-500",
-      bgColor: "bg-orange-500/20",
-      textColor: "text-orange-400",
-      icon: Zap,
-      pulse: false,
-    };
-  }
-  return {
-    label: "MODERADO",
-    emoji: "😐",
-    color: "from-yellow-500 to-green-400",
-    bgColor: "bg-yellow-500/20",
-    textColor: "text-yellow-400",
-    icon: Zap,
-    pulse: false,
-  };
-};
 
 const StressBar: React.FC<StressBarProps> = ({
   stressLevel,
@@ -127,7 +20,7 @@ const StressBar: React.FC<StressBarProps> = ({
   label: customLabel,
   compact = false,
 }) => {
-  const status = getStatus(stressLevel, phase);
+  const status = getStressStatus(stressLevel, phase);
   const Icon = status.icon;
   const displayLevel = Math.min(stressLevel, 150); // Cap at 150% for display
   const barWidth = Math.min(stressLevel, 100); // Cap bar at 100%

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+ˇ˛import React, { useEffect } from "react";
 import { usePathAwareNavigate } from "@/contexts/PathPrefixContext";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -43,16 +43,16 @@ import { CountdownTimer } from "@/components/CountdownTimer";
 // ============ DATA ============
 
 const beforeProblems = [
-  { icon: AlertCircle, text: "Acordar sem energia ou motiva√ß√£o" },
+  { icon: AlertCircle, text: "Acordar sem energia ou motiva%∫%˙o" },
   { icon: TrendingDown, text: "Procrastinar tarefas importantes" },
   { icon: Brain, text: "Mente sobrecarregada e ansiosa" },
-  { icon: HeartCrack, text: "Dormir com sensa√ß√£o de fracasso" },
+  { icon: HeartCrack, text: "Dormir com sensa%∫%˙o de fracasso" },
 ];
 
 const afterBenefits = [
   { icon: Zap, text: "Despertar com clareza e energia" },
   { icon: Target, text: "Foco nas prioridades certas" },
-  { icon: Flame, text: "Consist√™ncia sem esfor√ßo" },
+  { icon: Flame, text: "Consist%¨ncia sem esfor%∫o" },
   { icon: Trophy, text: "Orgulho real das suas conquistas" },
 ];
 
@@ -61,8 +61,8 @@ const testimonials = [
     name: "Lucas Mendes",
     age: 28,
     role: "Designer",
-    avatar: "L",
-    quote: "Em 14 dias, passei de acordar √†s 10h para √†s 6h30 naturalmente. Minha produtividade aumentou 40% e finalmente entrego projetos no prazo.",
+    photo: "https://i.ibb.co/xtXmcTS3/Gemini-Generated-Image-ixzgp8ixzgp8ixzg.png",
+    quote: "Em 14 dias, passei de acordar %·s 10h para %·s 6h30 naturalmente. Minha produtividade aumentou 40% e finalmente entrego projetos no prazo.",
     rating: 5,
     metric: "14 dias para acordar cedo",
   },
@@ -70,8 +70,8 @@ const testimonials = [
     name: "Mariana Costa",
     age: 24,
     role: "Estudante",
-    avatar: "M",
-    quote: "Completei 21 dias de streak consecutivos! Antes n√£o conseguia manter nada por mais de 3 dias. Passei em 2 concursos estudando s√≥ 2h/dia com foco.",
+    photo: "https://i.ibb.co/TMPp1Kw1/Gemini-Generated-Image-200v6k200v6k200v.png",
+    quote: "Completei 21 dias de streak consecutivos! Antes n%˙o conseguia manter nada por mais de 3 dias. Passei em 2 concursos estudando s%% 2h/dia com foco.",
     rating: 5,
     metric: "21 dias de streak",
   },
@@ -79,7 +79,7 @@ const testimonials = [
     name: "Rafael Silva",
     age: 32,
     role: "Empreendedor",
-    avatar: "R",
+    photo: "https://i.ibb.co/Rkx7XcKT/Gemini-Generated-Image-vy66g8vy66g8vy66.png",
     quote: "Em 30 dias, perdi 4kg e dobrei o faturamento da empresa. O segredo foi ter clareza do que fazer a cada momento do dia.",
     rating: 5,
     metric: "30 dias = -4kg + 2x faturamento",
@@ -87,20 +87,20 @@ const testimonials = [
   {
     name: "Ana Paula",
     age: 29,
-    role: "M√©dica",
-    avatar: "A",
-    quote: "Mesmo com plant√µes de 24h, mantenho 87% de consist√™ncia nos meus h√°bitos. O BORA se adapta quando minha rotina muda.",
+    role: "M%Ædica",
+    photo: "https://i.ibb.co/7t5yRpDd/Gemini-Generated-Image-i7pejzi7pejzi7pe.png",
+    quote: "Mesmo com plant%¡es de 24h, mantenho 87% de consist%¨ncia nos meus h%Ìbitos. O BORA se adapta quando minha rotina muda.",
     rating: 5,
-    metric: "87% de consist√™ncia",
+    metric: "87% de consist%¨ncia",
   },
 ];
 
-// Consolidated bonus data for "O Que Voc√™ Recebe" section
+// Consolidated bonus data for "O Que Voc%¨ Recebe" section
 const bonusItems = [
   {
     id: 1,
     title: "Programa 30 Dias",
-    subtitle: "Transforma√ß√£o completa",
+    subtitle: "Transforma%∫%˙o completa",
     value: 297,
     image: "/images/lp/programa_completo_bonus_capa.png",
   },
@@ -113,10 +113,10 @@ const bonusItems = [
   },
   {
     id: 3,
-    title: "Medita√ß√µes & Respira√ß√£o",
+    title: "Medita%∫%¡es & Respira%∫%˙o",
     subtitle: "Acalme sua mente",
     value: 147,
-    image: "/images/lp/medita√ß√µes_bonus_capa.png",
+    image: "/images/lp/medita%∫%¡es_bonus_capa.png",
   },
   {
     id: 4,
@@ -127,7 +127,7 @@ const bonusItems = [
   },
   {
     id: 5,
-    title: "27 Dicas Pr√°ticas",
+    title: "27 Dicas Pr%Ìticas",
     subtitle: "Hacks de produtividade",
     value: 67,
     image: "/images/lp/dicas_praticas_hack_bonus_capa.png",
@@ -137,19 +137,19 @@ const bonusItems = [
 const faqs = [
   {
     question: "Quanto tempo preciso dedicar por dia?",
-    answer: "Apenas 7 minutos! Nosso m√©todo foi desenhado para se encaixar na rotina mais corrida. S√£o micro-h√°bitos que geram macro resultados.",
+    answer: "Apenas 7 minutos! Nosso m%Ætodo foi desenhado para se encaixar na rotina mais corrida. S%˙o micro-h%Ìbitos que geram macro resultados.",
   },
   {
-    question: "Funciona mesmo se eu j√° tentei de tudo?",
-    answer: "Sim! O BORA √© diferente porque n√£o tenta mudar tudo de uma vez. Come√ßamos com pequenas vit√≥rias que criam momentum para mudan√ßas maiores.",
+    question: "Funciona mesmo se eu j%Ì tentei de tudo?",
+    answer: "Sim! O BORA %Æ diferente porque n%˙o tenta mudar tudo de uma vez. Come%∫amos com pequenas vit%%rias que criam momentum para mudan%∫as maiores.",
   },
   {
-    question: "E se eu n√£o gostar?",
-    answer: "Oferecemos garantia de 7 dias. Se n√£o sentir diferen√ßa na sua rotina, devolvemos 100% do seu investimento. Sem perguntas, sem burocracia.",
+    question: "E se eu n%˙o gostar?",
+    answer: "Oferecemos garantia de 7 dias. Se n%˙o sentir diferen%∫a na sua rotina, devolvemos 100% do seu investimento. Sem perguntas, sem burocracia.",
   },
   {
     question: "Preciso baixar algum app?",
-    answer: "N√£o precisa baixar nada! O BORA funciona direto do seu celular pelo navegador. Voc√™ pode salvar na tela inicial como um app e usar offline.",
+    answer: "N%˙o precisa baixar nada! O BORA funciona direto do seu celular pelo navegador. Voc%¨ pode salvar na tela inicial como um app e usar offline.",
   },
 ];
 
@@ -230,7 +230,7 @@ const DirectOffer = () => {
               >
                 Chega de acordar sem energia. Chega de procrastinar.{" "}
                 <strong className="text-foreground">Seu plano personalizado</strong> vai
-                te dar clareza e consist√™ncia em{" "}
+                te dar clareza e consist%¨ncia em{" "}
                 <strong className="text-foreground">apenas 7 minutos por dia</strong>.
               </motion.p>
 
@@ -249,7 +249,7 @@ const DirectOffer = () => {
                 </div>
                 <div className="text-center">
                   <AnimatedCounter value={94} suffix="%" />
-                  <p className="text-xs md:text-sm text-muted-foreground mt-1">mant√™m a rotina</p>
+                  <p className="text-xs md:text-sm text-muted-foreground mt-1">mant%¨m a rotina</p>
                 </div>
               </motion.div>
 
@@ -311,10 +311,10 @@ const DirectOffer = () => {
           >
             <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/25">
               <Zap className="w-3 h-3 mr-1" />
-              Transforma√ß√£o garantida
+              Transforma%∫%˙o garantida
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold">
-              A diferen√ßa que o <span className="text-primary font-extrabold">BORA</span> faz
+              A diferen%∫a que o <span className="text-primary font-extrabold">BORA</span> faz
             </h2>
           </motion.div>
 
@@ -418,7 +418,7 @@ const DirectOffer = () => {
                       transition={{ delay: 0.3 }}
                     >
                       <img
-                        src="/images/lp/medita√ß√£o_personagem.png"
+                        src="/images/lp/medita%∫%˙o_personagem.png"
                         alt="Pessoa em paz meditando"
                         className="w-40 lg:w-48 h-auto drop-shadow-lg"
                       />
@@ -431,7 +431,7 @@ const DirectOffer = () => {
         </div>
       </section>
 
-      {/* ============ O QUE VOC√ä RECEBE - CONSOLIDATED ============ */}
+      {/* ============ O QUE VOC%Ë RECEBE - CONSOLIDATED ============ */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
         {/* Background neutro escuro */}
         <div className="absolute inset-0 bg-gradient-to-b from-muted/20 via-background to-muted/30" />
@@ -439,7 +439,7 @@ const DirectOffer = () => {
         <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-amber-500/10 rounded-full blur-[120px]" />
 
         <div className="max-w-5xl mx-auto relative z-10">
-          {/* Header com valor total BEM VIS√çVEL */}
+          {/* Header com valor total BEM VIS%ÏVEL */}
           <motion.div
             className="text-center mb-10"
             initial={{ opacity: 0, y: 20 }}
@@ -462,7 +462,7 @@ const DirectOffer = () => {
             </div>
           </motion.div>
 
-          {/* Grid de b√¥nus com capas */}
+          {/* Grid de b%$%nus com capas */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-10">
             {bonusItems.map((bonus, index) => (
               <motion.div
@@ -501,7 +501,7 @@ const DirectOffer = () => {
                         R$ {bonus.value}
                       </span>
                       <span className="text-primary text-xs font-bold">
-                        GR√ÅTIS
+                        GR%¸TIS
                       </span>
                     </div>
                   </div>
@@ -521,7 +521,7 @@ const DirectOffer = () => {
             <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-primary/10 border border-primary/20 mb-6">
               <CheckCircle2 className="w-5 h-5 text-primary" />
               <span className="text-foreground font-medium">
-                <strong className="text-primary">R$ 805</strong> em valor ‚Üí Por apenas{" "}
+                <strong className="text-primary">R$ 805</strong> em valor ‘Â∆ Por apenas{" "}
                 <strong className="text-primary">R$ 47</strong>
               </span>
             </div>
@@ -557,10 +557,10 @@ const DirectOffer = () => {
           >
             <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/25">
               <Users className="w-3 h-3 mr-1" />
-              Hist√≥rias reais
+              Hist%%rias reais
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold">
-              Quem j√° <span className="text-primary font-extrabold">virou o jogo</span>
+              Quem j%Ì <span className="text-primary font-extrabold">virou o jogo</span>
             </h2>
           </motion.div>
 
@@ -601,10 +601,21 @@ const DirectOffer = () => {
                       </blockquote>
 
                       <div className="flex items-center gap-4 pt-4 border-t border-primary/10 relative z-10">
-                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary via-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-primary/30">
-                          <span className="text-white font-bold text-xl">
-                            {testimonial.avatar}
-                          </span>
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary via-emerald-500 to-teal-500 p-0.5 shadow-lg shadow-primary/30">
+                          {testimonial.photo ? (
+                            <img
+                              src={testimonial.photo}
+                              alt={`Foto de ${testimonial.name}`}
+                              className="w-full h-full rounded-full object-cover border border-white/20"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full rounded-full bg-gradient-to-br from-primary via-emerald-500 to-teal-500 flex items-center justify-center">
+                              <span className="text-white font-bold text-xl">
+                                {testimonial.name.charAt(0)}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <p className="font-bold text-foreground text-lg">
@@ -639,7 +650,7 @@ const DirectOffer = () => {
           >
             <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/25">
               <AlertCircle className="w-3 h-3 mr-1" />
-              Tire suas d√∫vidas
+              Tire suas d%Q%vidas
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold">
               Perguntas <span className="text-primary font-extrabold">frequentes</span>
@@ -674,7 +685,7 @@ const DirectOffer = () => {
 
       {/* ============ PRICING SECTION ============ */}
       <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
-        {/* Background laranja/dourado para destacar convers√£o */}
+        {/* Background laranja/dourado para destacar convers%˙o */}
         <div className="absolute inset-0 bg-gradient-to-b from-amber-500/10 via-orange-500/5 to-background" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-500/15 rounded-full blur-[150px]" />
         <div className="absolute top-20 right-20 w-64 h-64 bg-orange-500/20 rounded-full blur-[100px]" />
@@ -728,14 +739,14 @@ const DirectOffer = () => {
                   </Badge>
                 </motion.div>
 
-                {/* Pre√ßo antigo riscado */}
+                {/* Pre%∫o antigo riscado */}
                 <div className="mb-2">
                   <span className="text-muted-foreground line-through text-2xl sm:text-3xl">
                     De R$ 805
                   </span>
                 </div>
 
-                {/* Pre√ßo novo MEGA destaque */}
+                {/* Pre%∫o novo MEGA destaque */}
                 <div className="relative inline-block mb-2">
                   <motion.span
                     className="text-6xl sm:text-7xl md:text-8xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent"
@@ -745,14 +756,14 @@ const DirectOffer = () => {
                   >
                     R$ 47
                   </motion.span>
-                  {/* Glow atr√°s do pre√ßo */}
+                  {/* Glow atr%Ìs do pre%∫o */}
                   <div className="absolute inset-0 text-6xl sm:text-7xl md:text-8xl font-black text-amber-400 blur-2xl opacity-40">
                     R$ 47
                   </div>
                 </div>
 
                 <p className="text-muted-foreground text-sm sm:text-base">
-                  pagamento √∫nico ‚Ä¢ <span className="text-amber-400 font-semibold">1 ano de acesso</span>
+                  pagamento %Q%nico ‘«Û <span className="text-amber-400 font-semibold">1 ano de acesso</span>
                 </p>
               </div>
 
@@ -760,7 +771,7 @@ const DirectOffer = () => {
               <div className="space-y-2 mb-6 relative z-10">
                 {[
                   "App BORA completo",
-                  "Todos os 5 b√¥nus inclusos (R$ 805 em valor)",
+                  "Todos os 5 b%$%nus inclusos (R$ 805 em valor)",
                   "1 ano de acesso",
                   "Garantia 7 dias",
                 ].map((item, index) => (
@@ -812,10 +823,10 @@ const DirectOffer = () => {
           viewport={{ once: true }}
         >
           <h2 className="text-2xl sm:text-3xl font-bold mb-4">
-            N√£o deixe para depois
+            N%˙o deixe para depois
           </h2>
           <p className="text-muted-foreground mb-6 text-sm sm:text-base">
-            Cada dia que passa √© um dia a menos na sua transforma√ß√£o.
+            Cada dia que passa %Æ um dia a menos na sua transforma%∫%˙o.
           </p>
 
           <motion.div
@@ -829,7 +840,7 @@ const DirectOffer = () => {
               className="group text-base sm:text-lg px-8 py-5 font-bold"
             >
               <Sparkles className="w-5 h-5 mr-2" />
-              COME√áAR AGORA POR R$ 47
+              COME%ÁAR AGORA POR R$ 47
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </motion.div>
@@ -845,7 +856,7 @@ const DirectOffer = () => {
             </div>
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-primary" />
-              <span>Resultados r√°pidos</span>
+              <span>Resultados r%Ìpidos</span>
             </div>
           </div>
         </motion.div>

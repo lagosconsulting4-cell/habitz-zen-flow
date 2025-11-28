@@ -2,17 +2,19 @@ import React from "react";
 import { motion } from "motion/react";
 import { Sparkles, ArrowRight, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import StressBar from "./StressBar";
 
 interface TransicaoScreenProps {
   onContinue: () => void;
 }
 
+const transitionPreviewImages = {
+  before: "/images/mirror/bixo-7.png",
+  after: "/images/mirror/bixo-5.png",
+};
+
 const TransicaoScreen: React.FC<TransicaoScreenProps> = ({ onContinue }) => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-purple-950/10 to-background flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden">
-      {/* StressBar at top - showing current state before transformation */}
-      <StressBar stressLevel={150} phase="transicao" visible={true} />
       {/* Background light rays */}
       <motion.div
         className="absolute inset-0"
@@ -105,25 +107,43 @@ const TransicaoScreen: React.FC<TransicaoScreenProps> = ({ onContinue }) => {
           </p>
         </motion.div>
 
-        {/* Transformation preview */}
-        <motion.div
-          className="grid grid-cols-2 gap-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-        >
-          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 space-y-2">
-            <div className="text-2xl">😫</div>
-            <div className="text-xs text-red-400 font-semibold">ANTES</div>
-            <div className="text-xs text-muted-foreground">Estresse: 150%</div>
-          </div>
-          <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 space-y-2">
-            <div className="text-2xl">🌅</div>
-            <div className="text-xs text-green-400 font-semibold">DEPOIS</div>
-            <div className="text-xs text-muted-foreground">Estresse: 12%</div>
-          </div>
-        </motion.div>
-
+        {/* Transformation preview */}
+        <motion.div
+          className="grid grid-cols-2 gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+        >
+          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 space-y-2">
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-background/40 border border-red-500/30 overflow-hidden flex items-center justify-center">
+              <img
+                src={transitionPreviewImages.before}
+                alt="Seu estado atual"
+                className="w-full h-full object-contain"
+                loading="lazy"
+              />
+            </div>
+            <div className="text-xs text-red-400 font-semibold text-center uppercase tracking-wide">
+              ANTES
+            </div>
+            <div className="text-xs text-muted-foreground text-center">Estresse: 150%</div>
+          </div>
+          <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 space-y-2">
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-background/40 border border-green-500/30 overflow-hidden flex items-center justify-center">
+              <img
+                src={transitionPreviewImages.after}
+                alt="Seu novo dia"
+                className="w-full h-full object-contain"
+                loading="lazy"
+              />
+            </div>
+            <div className="text-xs text-green-400 font-semibold text-center uppercase tracking-wide">
+              DEPOIS
+            </div>
+            <div className="text-xs text-muted-foreground text-center">Estresse: 12%</div>
+          </div>
+        </motion.div>
+
         {/* CTA */}
         <motion.div
           className="pt-4"

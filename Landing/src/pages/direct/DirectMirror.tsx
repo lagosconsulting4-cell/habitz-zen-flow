@@ -1,14 +1,20 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { usePathAwareNavigate } from "@/contexts/PathPrefixContext";
 import { motion, AnimatePresence } from "motion/react";
-import StressBar from "@/components/direct/StressBar";
-import FlipCard, { flipCardsData, getCardContent } from "@/components/direct/FlipCard";
+import StressBar, { getStressStatus } from "@/components/direct/StressBar";
+import FlipCard from "@/components/direct/FlipCard";
+import { flipCardsData, getCardContent } from "@/components/direct/flip-card-data";
 import ColapsoScreen from "@/components/direct/ColapsoScreen";
 import TransicaoScreen from "@/components/direct/TransicaoScreen";
 import TwoPathsComparison from "@/components/direct/TwoPathsComparison";
 
 // Mirror phases state machine
 type MirrorPhase = "dor" | "colapso" | "transicao" | "bora" | "comparison";
+
+const STRESS_CURVES = {
+  dor: [0, 18, 42, 68, 94, 118, 136, 150],
+  bora: [150, 120, 92, 68, 48, 30, 18, 12],
+} as const;
 
 const DirectMirror = () => {
   const navigate = usePathAwareNavigate();
@@ -26,28 +32,25 @@ const DirectMirror = () => {
     });
   }, []);
 
-  // Calculate stress based on phase and cards
-  // DOR: 0% → 150% progressively (8 cards = ~19% per card)
-  // BORA: 150% → 12% progressively
+  // Calculate stress usando curvas customizadas para uma transi??o mais fluida
+
   useEffect(() => {
-    if (phase === "dor") {
-      // DOR phase: accumulate stress from 0% to 150%
-      // 8 cards total, stress increases as user progresses
-      const totalCards = flipCardsData.length; // 8
-      const maxStress = 150;
-      const stressPerCard = maxStress / (totalCards - 1); // ~21.4% per card
-      const calculatedStress = currentCardIndex * stressPerCard;
-      setStressLevel(Math.round(Math.min(calculatedStress, maxStress)));
-    } else if (phase === "bora") {
-      // BORA phase: reduce stress from 150% to 12%
-      const totalCards = flipCardsData.length;
-      const startStress = 150;
-      const endStress = 12;
-      const stressReduction = (startStress - endStress) / (totalCards - 1);
-      const calculatedStress = startStress - (currentCardIndex * stressReduction);
-      setStressLevel(Math.round(Math.max(calculatedStress, endStress)));
+
+    if (phase === "dor" || phase === "bora") {
+
+      const curve = STRESS_CURVES[phase];
+
+      const fallback = curve[curve.length - 1];
+
+      const nextValue = curve[currentCardIndex] ?? fallback;
+
+      setStressLevel(nextValue);
+
     }
+
   }, [phase, currentCardIndex]);
+
+
 
   // Handle card flip
   const handleFlip = useCallback(() => {
@@ -110,9 +113,8 @@ const DirectMirror = () => {
   const cardContent = getCardContent(currentCard, phase as "dor" | "bora");
   const isDorPhase = phase === "dor";
   const isLastCard = currentCardIndex === flipCardsData.length - 1;
-
-  // Progress dots
-  const progressDots = Array.from({ length: flipCardsData.length }, (_, i) => i);
+  const stressStatus = getStressStatus(stressLevel, phase);
+  const progressPercent = Math.min(((currentCardIndex + 1) / flipCardsData.length) * 100, 100);
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -125,44 +127,36 @@ const DirectMirror = () => {
 
       {/* Main content */}
       <div className="pt-20 pb-8 px-4 sm:px-6">
-        <div className="max-w-md mx-auto space-y-6">
+        <div className="max-w-md mx-auto space-y-6 flex flex-col items-center">
           {/* Phase indicator */}
           <motion.div
-            className="text-center space-y-2"
+            className="w-full text-center flex flex-col items-center space-y-3"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className={`inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full border ${
-              isDorPhase
-                ? "bg-red-500/10 border-red-500/30 text-red-400"
-                : "bg-green-500/10 border-green-500/30 text-green-400"
-            }`}>
-              <span className="font-semibold text-sm">
+            <div
+              className={`inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-full border text-xs sm:text-sm font-semibold ${stressStatus.bgColor} ${stressStatus.borderColor} ${stressStatus.textColor}`}
+            >
+              <span>
                 {isDorPhase ? "Seu Dia Atual" : "Seu Novo Dia"}
               </span>
             </div>
           </motion.div>
 
-          {/* Progress dots */}
-          <div className="flex items-center justify-center gap-2">
-            {progressDots.map((_, index) => (
+          {/* Progress bar */}
+          <div className="w-full flex flex-col items-center gap-2">
+            <div className="w-full max-w-xs h-2 bg-muted/40 border border-border/60 rounded-full overflow-hidden">
               <motion.div
-                key={index}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === currentCardIndex
-                    ? isDorPhase
-                      ? "w-6 bg-red-400"
-                      : "w-6 bg-green-400"
-                    : index < currentCardIndex
-                    ? isDorPhase
-                      ? "bg-red-400/60"
-                      : "bg-green-400/60"
-                    : "bg-muted"
-                }`}
-                initial={{ scale: 0.8 }}
-                animate={{ scale: index === currentCardIndex ? 1 : 0.8 }}
+                className={`h-full rounded-full bg-gradient-to-r ${stressStatus.color}`}
+                initial={{ width: "0%" }}
+                animate={{ width: `${progressPercent}%` }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
               />
-            ))}
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{currentCardIndex + 1}/{flipCardsData.length}</span>
+              <span className={stressStatus.textColor}>{Math.round(progressPercent)}%</span>
+            </div>
           </div>
 
           {/* Card Display */}
@@ -189,16 +183,12 @@ const DirectMirror = () => {
           {/* Phase hints - only on first card */}
           {currentCardIndex === 0 && (
             <motion.div
-              className={`rounded-xl p-3 sm:p-4 text-center border ${
-                isDorPhase
-                  ? "bg-red-500/10 border-red-500/20"
-                  : "bg-green-500/10 border-green-500/20"
-              }`}
+              className={`rounded-xl p-3 sm:p-4 text-center border ${stressStatus.borderColor} ${stressStatus.bgColor}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <p className={`text-xs sm:text-sm ${isDorPhase ? "text-red-400" : "text-green-400"}`}>
+              <p className={`text-xs sm:text-sm ${stressStatus.textColor}`}>
                 {isDorPhase
                   ? "💡 Estes são os 8 momentos do seu dia. Toque no card para ver os detalhes de cada momento."
                   : "✨ Agora veja como seria seu dia com o Sistema BORA. Mesmos momentos, escolhas diferentes."}

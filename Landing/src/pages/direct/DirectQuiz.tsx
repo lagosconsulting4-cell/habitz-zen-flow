@@ -127,12 +127,30 @@ const DirectQuiz = () => {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
-  // Scroll to top on mount - using requestAnimationFrame to ensure DOM is ready
-  useEffect(() => {
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, behavior: "instant" });
+  const scrollToTop = useCallback((behavior: ScrollBehavior = "auto") => {
+    if (typeof window === "undefined") return;
+
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior });
     });
   }, []);
+
+  // Scroll to top on mount
+  useEffect(() => {
+    scrollToTop();
+  }, [scrollToTop]);
+
+  // Scroll when phase changes to ensure each screen starts at the top
+  useEffect(() => {
+    scrollToTop("smooth");
+  }, [phase, scrollToTop]);
+
+  // Keep question transitions anchored at the top on mobile devices
+  useEffect(() => {
+    if (phase === "questions") {
+      scrollToTop("smooth");
+    }
+  }, [currentQuestion, phase, scrollToTop]);
 
   // Calculate stress percentage (fixed at 78% as per spec, but we still track answers)
   const calculateStressLevel = useCallback(() => {

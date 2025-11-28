@@ -3,32 +3,7 @@ import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, RotateCcw } from "lucide-react";
-
-// Content structure for the card
-export interface CardContent {
-  time: string;
-  title: string;
-  emoji: string;
-  description: string;
-  stressChange: string;
-}
-
-// Original data structure (kept for compatibility)
-export interface FlipCardData {
-  id: number;
-  time: string;
-  title: string;
-  dor: {
-    emoji: string;
-    text: string;
-    stress: string;
-  };
-  bora: {
-    emoji: string;
-    text: string;
-    stress: string;
-  };
-}
+import type { CardContent } from "@/components/direct/flip-card-data";
 
 interface FlipCardProps {
   content: CardContent;
@@ -100,9 +75,12 @@ const FlipCard: React.FC<FlipCardProps> = ({
             "[backface-visibility:hidden]",
             `bg-gradient-to-br ${colors.gradient}`,
             `border-2 ${colors.border}`,
-            "shadow-lg overflow-hidden"
+            "shadow-lg overflow-hidden transition-opacity duration-300",
+            isFlipped && "opacity-0"
           )}
           onClick={!isFlipped ? onFlip : undefined}
+          aria-hidden={isFlipped}
+          style={{ backfaceVisibility: "hidden" }}
         >
           {/* Background pattern */}
           <div className="absolute inset-0 bg-dots opacity-20" />
@@ -123,13 +101,28 @@ const FlipCard: React.FC<FlipCardProps> = ({
 
             {/* Center - Emoji + Title */}
             <div className="flex flex-col items-center justify-center flex-1 space-y-3">
-              <motion.div
-                className="text-5xl sm:text-6xl"
-                animate={{ scale: [1, 1.08, 1] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              >
-                {content.emoji}
-              </motion.div>
+              {content.image ? (
+                <motion.div
+                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-background/40 border border-white/10 overflow-hidden shadow-inner"
+                  animate={{ scale: [1, 1.04, 1] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <img
+                    src={content.image}
+                    alt={content.title}
+                    className="w-full h-full object-contain"
+                    loading="lazy"
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="text-5xl sm:text-6xl"
+                  animate={{ scale: [1, 1.08, 1] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  {content.emoji}
+                </motion.div>
+              )}
               <h3 className="text-xl sm:text-2xl font-bold text-foreground text-center">
                 {content.title}
               </h3>
@@ -156,8 +149,11 @@ const FlipCard: React.FC<FlipCardProps> = ({
             "[backface-visibility:hidden] [transform:rotateY(180deg)]",
             `bg-gradient-to-br ${colors.gradient}`,
             `border-2 ${colors.border}`,
-            "shadow-lg overflow-hidden"
+            "shadow-lg overflow-hidden transition-opacity duration-300",
+            !isFlipped && "opacity-0"
           )}
+          aria-hidden={!isFlipped}
+          style={{ backfaceVisibility: "hidden" }}
         >
           {/* Background pattern */}
           <div className="absolute inset-0 bg-dots opacity-20" />
@@ -209,159 +205,11 @@ const FlipCard: React.FC<FlipCardProps> = ({
               </span>
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-
-            {/* Small flip back icon - top corner for accessibility */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onFlip();
-              }}
-              className={`absolute top-3 right-3 p-2 rounded-full bg-background/50 backdrop-blur-sm ${colors.hint} hover:bg-background/70 transition-all`}
-              aria-label="Voltar para capa"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </motion.div>
     </div>
   );
 };
-
-// Helper function to get content from card data based on phase
-export const getCardContent = (card: FlipCardData, phase: "dor" | "bora"): CardContent => {
-  const data = phase === "dor" ? card.dor : card.bora;
-  return {
-    time: card.time,
-    title: card.title,
-    emoji: data.emoji,
-    description: data.text,
-    stressChange: data.stress,
-  };
-};
-
-// Export the 8 moments data
-export const flipCardsData: FlipCardData[] = [
-  {
-    id: 1,
-    time: "06:00",
-    title: "Acordar",
-    dor: {
-      emoji: "😫",
-      text: "Alarme toca. Você já está exausto antes de levantar.",
-      stress: "+12%",
-    },
-    bora: {
-      emoji: "🌅",
-      text: "Respira fundo. Luz natural. Corpo desperta com calma.",
-      stress: "-15%",
-    },
-  },
-  {
-    id: 2,
-    time: "08:00",
-    title: "Começar o Dia",
-    dor: {
-      emoji: "🤯",
-      text: "Trânsito, notificações, já atrasado. Caos mental.",
-      stress: "+18%",
-    },
-    bora: {
-      emoji: "☕",
-      text: "Ritual matinal. Café com calma. Foco na primeira tarefa.",
-      stress: "-10%",
-    },
-  },
-  {
-    id: 3,
-    time: "12:00",
-    title: "Meio do Dia",
-    dor: {
-      emoji: "😵‍💫",
-      text: "Reuniões sem parar. Almoço correndo. Cansaço batendo.",
-      stress: "+22%",
-    },
-    bora: {
-      emoji: "🍃",
-      text: "Pausa consciente. Refeição tranquila. Energia renovada.",
-      stress: "-12%",
-    },
-  },
-  {
-    id: 4,
-    time: "15:00",
-    title: "Tarde",
-    dor: {
-      emoji: "😩",
-      text: "Procrastinação. Tarefas acumulando. Culpa crescendo.",
-      stress: "+25%",
-    },
-    bora: {
-      emoji: "🎯",
-      text: "Foco no essencial. Progresso visível. Sensação de controle.",
-      stress: "-18%",
-    },
-  },
-  {
-    id: 5,
-    time: "18:00",
-    title: "Fim do Expediente",
-    dor: {
-      emoji: "😓",
-      text: "Sentimento de fracasso. Nada foi concluído. Leva trabalho pra casa.",
-      stress: "+20%",
-    },
-    bora: {
-      emoji: "✨",
-      text: "Dia produtivo. Tarefas concluídas. Desconexão tranquila.",
-      stress: "-14%",
-    },
-  },
-  {
-    id: 6,
-    time: "20:00",
-    title: "Noite",
-    dor: {
-      emoji: "📱",
-      text: "Scroll infinito. Tempo passa. Vazio aumenta.",
-      stress: "+15%",
-    },
-    bora: {
-      emoji: "🌙",
-      text: "Tempo de qualidade. Conexões reais. Presença plena.",
-      stress: "-16%",
-    },
-  },
-  {
-    id: 7,
-    time: "22:00",
-    title: "Antes de Dormir",
-    dor: {
-      emoji: "😰",
-      text: "Mente acelerada. Preocupações girando. Insônia chegando.",
-      stress: "+28%",
-    },
-    bora: {
-      emoji: "🛌",
-      text: "Ritual de sono. Mente tranquila. Corpo relaxado.",
-      stress: "-20%",
-    },
-  },
-  {
-    id: 8,
-    time: "00:00",
-    title: "Madrugada",
-    dor: {
-      emoji: "😱",
-      text: "Acordado. Ansiedade. Amanhã será pior ainda.",
-      stress: "+30%",
-    },
-    bora: {
-      emoji: "💤",
-      text: "Sono profundo. Recuperação total. Energia renovada.",
-      stress: "-25%",
-    },
-  },
-];
 
 export default FlipCard;
