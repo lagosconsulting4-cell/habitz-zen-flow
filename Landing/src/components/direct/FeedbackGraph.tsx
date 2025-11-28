@@ -125,14 +125,14 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
                 dataKey="label"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                tick={{ fill: "#a1a1aa", fontSize: 12 }}
               />
               <YAxis
                 domain={[0, 100]}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(value) => `${value}%`}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                tick={{ fill: "#a1a1aa", fontSize: 12 }}
                 width={40}
               />
               <ChartTooltip
@@ -162,8 +162,9 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
                 <LabelList
                   dataKey="value"
                   position="top"
-                  className="fill-foreground font-bold"
+                  fill="#ffffff"
                   fontSize={14}
+                  fontWeight="bold"
                   formatter={(value: number) => `${value}%`}
                 />
               </Bar>
