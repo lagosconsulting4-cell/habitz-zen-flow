@@ -244,12 +244,12 @@ const StressBar: React.FC<StressBarProps> = ({
           transition={{ type: "spring", damping: 20, stiffness: 300 }}
           style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
         >
-          <div className="max-w-md mx-auto px-4 py-3">
-            {/* Status row */}
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
+          <div className="max-w-md mx-auto px-3 sm:px-4 py-2 sm:py-3">
+            {/* Status row - more compact on mobile */}
+            <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <motion.div
-                  className={`p-1.5 rounded-lg ${status.bgColor} ${showEmoji ? "text-xl" : ""}`}
+                  className={`p-1 sm:p-1.5 rounded-lg ${status.bgColor} ${showEmoji ? "text-lg sm:text-xl" : ""}`}
                   animate={status.pulse ? { scale: [1, 1.1, 1] } : {}}
                   transition={
                     status.pulse
@@ -260,26 +260,26 @@ const StressBar: React.FC<StressBarProps> = ({
                   {showEmoji ? (
                     <span role="img" aria-label={status.label}>{status.emoji}</span>
                   ) : (
-                    <Icon className={`w-4 h-4 ${status.textColor}`} />
+                    <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${status.textColor}`} />
                   )}
                 </motion.div>
-                <span className="text-sm font-medium text-foreground">
-                  {customLabel || "Nível de Estresse"}
+                <span className="text-xs sm:text-sm font-medium text-foreground hidden xs:inline">
+                  {customLabel || "Estresse"}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <motion.span
-                  className={`text-lg font-bold ${status.textColor}`}
+                  className={`text-base sm:text-lg font-bold ${status.textColor}`}
                   key={stressLevel}
                   initial={{ scale: 1.2, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {displayLevel}%
+                  {Math.round(displayLevel)}%
                 </motion.span>
                 <span
-                  className={`text-xs font-semibold px-2 py-0.5 rounded-full ${status.bgColor} ${status.textColor}`}
+                  className={`text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full ${status.bgColor} ${status.textColor}`}
                 >
                   {status.label}
                 </span>

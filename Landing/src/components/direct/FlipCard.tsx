@@ -192,13 +192,13 @@ const FlipCard: React.FC<FlipCardProps> = ({
               </p>
             </div>
 
-            {/* Action Button */}
+            {/* Action Button - High visibility with stronger shadow */}
             <Button
               onClick={(e) => {
                 e.stopPropagation();
                 onNext();
               }}
-              className={`w-full min-h-[48px] ${colors.button} text-white font-semibold`}
+              className={`w-full min-h-[52px] ${colors.button} text-white font-bold text-base shadow-lg ${isDor ? "shadow-red-500/30" : "shadow-green-500/30"}`}
             >
               <span>
                 {isLastCard
@@ -210,16 +210,16 @@ const FlipCard: React.FC<FlipCardProps> = ({
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
 
-            {/* Tap to flip back hint */}
+            {/* Small flip back icon - top corner for accessibility */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onFlip();
               }}
-              className={`mt-3 flex items-center justify-center gap-2 ${colors.hint} text-xs hover:opacity-80 transition-opacity`}
+              className={`absolute top-3 right-3 p-2 rounded-full bg-background/50 backdrop-blur-sm ${colors.hint} hover:bg-background/70 transition-all`}
+              aria-label="Voltar para capa"
             >
-              <RotateCcw className="w-3 h-3" />
-              <span>Voltar para capa</span>
+              <RotateCcw className="w-4 h-4" />
             </button>
           </div>
         </div>

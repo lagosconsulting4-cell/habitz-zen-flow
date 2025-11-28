@@ -37,7 +37,7 @@ const DirectMirror = () => {
       const maxStress = 150;
       const stressPerCard = maxStress / (totalCards - 1); // ~21.4% per card
       const calculatedStress = currentCardIndex * stressPerCard;
-      setStressLevel(Math.min(calculatedStress, maxStress));
+      setStressLevel(Math.round(Math.min(calculatedStress, maxStress)));
     } else if (phase === "bora") {
       // BORA phase: reduce stress from 150% to 12%
       const totalCards = flipCardsData.length;
@@ -45,7 +45,7 @@ const DirectMirror = () => {
       const endStress = 12;
       const stressReduction = (startStress - endStress) / (totalCards - 1);
       const calculatedStress = startStress - (currentCardIndex * stressReduction);
-      setStressLevel(Math.max(calculatedStress, endStress));
+      setStressLevel(Math.round(Math.max(calculatedStress, endStress)));
     }
   }, [phase, currentCardIndex]);
 
@@ -205,25 +205,6 @@ const DirectMirror = () => {
               </p>
             </motion.div>
           )}
-
-          {/* Current stress indicator */}
-          <motion.div
-            className="text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
-              isDorPhase
-                ? "bg-red-500/10 text-red-400"
-                : "bg-green-500/10 text-green-400"
-            }`}>
-              <span>{isDorPhase ? "📈" : "📉"}</span>
-              <span>
-                Nível de estresse: <strong>{Math.round(stressLevel)}%</strong>
-              </span>
-            </div>
-          </motion.div>
         </div>
       </div>
     </div>
