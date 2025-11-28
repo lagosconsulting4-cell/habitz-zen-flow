@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { usePathAwareNavigate } from "@/contexts/PathPrefixContext";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -126,6 +126,13 @@ const DirectQuiz = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+
+  // Scroll to top on mount - using requestAnimationFrame to ensure DOM is ready
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
+  }, []);
 
   // Calculate stress percentage (fixed at 78% as per spec, but we still track answers)
   const calculateStressLevel = useCallback(() => {

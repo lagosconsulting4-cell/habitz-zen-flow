@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { usePathAwareNavigate } from "@/contexts/PathPrefixContext";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,13 @@ import {
 
 const DirectIndex = () => {
   const navigate = usePathAwareNavigate();
+
+  // Scroll to top on mount - using requestAnimationFrame to ensure DOM is ready
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">

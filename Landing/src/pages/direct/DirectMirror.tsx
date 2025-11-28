@@ -19,6 +19,13 @@ const DirectMirror = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [stressLevel, setStressLevel] = useState(78); // Starts at quiz result (78%)
 
+  // Scroll to top on mount - using requestAnimationFrame to ensure DOM is ready
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
+  }, []);
+
   // Calculate stress based on phase and cards
   useEffect(() => {
     if (phase === "dor") {
