@@ -29,39 +29,39 @@ import {
 
 const spotlightPeople = [
   {
-    id: "H1",
-    name: "Helena",
-    description: "Empreendedora, 29",
+    id: "Lucas",
+    name: "Lucas",
+    description: "Engenheiro, 27",
     image: "https://i.ibb.co/wNvR7F3m/Gemini-Generated-Image-ut4kzyut4kzyut4k.png",
   },
   {
-    id: "H2",
-    name: "Mariana",
-    description: "Designer, 31",
+    id: "Felipe",
+    name: "Felipe",
+    description: "Pai solo, 35",
     image: "https://i.ibb.co/0pWzqSL6/Gemini-Generated-Image-he7bqrhe7bqrhe7b.png",
   },
   {
-    id: "M1",
-    name: "Lucas",
-    description: "Engenheiro, 27",
+    id: "Helena",
+    name: "Helena",
+    description: "Empreendedora, 29",
     image: "https://i.ibb.co/r2YSQFS2/Gemini-Generated-Image-6u974r6u974r6u97.png",
   },
   {
-    id: "M2",
-    name: "Felipe",
-    description: "Pai solo, 35",
+    id: "Mariana",
+    name: "Mariana",
+    description: "Designer, 31",
     image: "https://i.ibb.co/nqcNvfhD/Gemini-Generated-Image-7t1mu67t1mu67t1m.png",
   },
   {
-    id: "M3",
+    id: "Rafael",
     name: "Rafael",
     description: "Veterano do mercado financeiro",
     image: "https://i.ibb.co/fYnD0RYg/Gemini-Generated-Image-o8l6fto8l6fto8l6.png",
   },
   {
-    id: "H3",
+    id: "Bianca",
     name: "Bianca",
-    description: "MÇ¸e de gÇ¦meos, 33",
+    description: "Mãe de gêmeos, 33",
     image: "https://i.ibb.co/qL8BJzRq/Gemini-Generated-Image-ix0fkeix0fkeix0f.png",
   },
 ];
@@ -136,14 +136,13 @@ const DirectIndex = () => {
 
             <div className="max-w-2xl mx-auto space-y-4">
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                Você vive no piloto automático — entre obrigações, prazos e preocupações
-                que parecem não ter fim.
+                Você vive no piloto automático — obrigações, prazos e preocupações que nunca param.
               </p>
               <p className="text-base md:text-lg text-muted-foreground/80 leading-relaxed">
-                Acordar cansado, dormir culpado. E no meio disso tudo, a pergunta que não cala:
+                Acordar cansado, dormir culpado. No meio disso, a pergunta que insiste em voltar:
               </p>
               <p className="text-lg md:text-xl text-foreground font-medium italic">
-                "Por que eu ainda não consegui organizar minha vida?"
+                "Por que eu ainda não encontro tempo para mim?"
               </p>
             </div>
           </motion.div>
@@ -193,38 +192,6 @@ const DirectIndex = () => {
             </p>
           </motion.div>
 
-          {/* Social proof - Reframed for urgency */}
-          <motion.div
-            className="pt-8 border-t border-border/30"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2 }}
-          >
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              {/* Avatar stack */}
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500/30 to-orange-500/10 border-2 border-background flex items-center justify-center"
-                  >
-                    <span className="text-xs font-bold text-orange-400/70">
-                      {String.fromCharCode(64 + i)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Users className="h-4 w-4 text-orange-400" />
-                <span>
-                  <strong className="text-foreground">80%</strong> dos brasileiros
-                  sofrem com sobrecarga mental
-                </span>
-              </div>
-            </div>
-          </motion.div>
-
           {/* People carousel */}
           <motion.div
             className="mt-12 space-y-6 text-left"
@@ -232,7 +199,7 @@ const DirectIndex = () => {
           >
             <div className="max-w-3xl mx-auto text-center space-y-3">
               <p className="text-sm uppercase tracking-[0.25em] text-orange-400/80">
-                InspiraÇõÇœes reais
+                Inspirações reais
               </p>
               <h2 className="text-2xl md:text-3xl font-semibold text-foreground leading-tight">
                 Gente de carne e osso que decidiu sair do modo sobrevivência

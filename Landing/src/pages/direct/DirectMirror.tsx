@@ -33,7 +33,7 @@ const DirectMirror = () => {
     });
   }, []);
 
-  // Calculate stress usando curvas customizadas para uma transi??o mais fluida
+  // Calculate stress usando curvas customizadas para uma transição mais fluida
 
   useEffect(() => {
 
