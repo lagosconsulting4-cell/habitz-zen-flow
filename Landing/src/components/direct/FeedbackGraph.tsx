@@ -104,9 +104,9 @@ const renderDot = ({
 
 const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 sm:p-6">
       <motion.div
-        className="max-w-md w-full space-y-8"
+        className="w-full max-w-3xl space-y-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -149,8 +149,8 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
           transition={{ delay: 0.5 }}
           className="rounded-2xl border border-border/40 bg-muted/20 p-4"
         >
-          <ChartContainer config={chartConfig} className="h-64 w-full">
-            <LineChart data={chartData} margin={{ top: 16, right: 8, left: 8, bottom: 8 }}>
+          <ChartContainer config={chartConfig} className="h-56 w-full sm:h-64">
+            <LineChart data={chartData} margin={{ top: 16, right: 16, left: 8, bottom: 8 }}>
               <defs>
                 <linearGradient id="stressLine" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#22c55e" />
@@ -158,23 +158,30 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
                   <stop offset="100%" stopColor="#dc2626" />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="4 4" vertical={false} />
-              <XAxis dataKey="label" axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="hsl(var(--muted)/0.4)" />
+              <XAxis
+                dataKey="label"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+              />
               <YAxis
                 domain={[0, 100]}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(value) => `${value}%`}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
               />
               <ChartTooltip
                 cursor={{ strokeDasharray: "4 4" }}
                 content={
                   <ChartTooltipContent
                     labelKey="label"
+                    className="text-xs sm:text-sm"
                     formatter={(value) => (
-                      <div className="flex w-full items-center justify-between">
+                      <div className="flex w-full items-center justify-between text-foreground">
                         <span className="text-muted-foreground">Porcentagem</span>
-                        <span className="font-semibold">{value}%</span>
+                        <span className="font-semibold text-foreground">{value}%</span>
                       </div>
                     )}
                   />

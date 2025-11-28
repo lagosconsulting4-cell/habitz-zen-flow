@@ -12,6 +12,13 @@ import {
   BatteryLow,
 } from "lucide-react";
 import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import {
   fadeInUp,
   fadeIn,
   buttonHoverTap,
@@ -19,6 +26,45 @@ import {
   staggerItem,
   floatAnimation,
 } from "@/hooks/useAnimations";
+
+const spotlightPeople = [
+  {
+    id: "H1",
+    name: "Helena",
+    description: "Empreendedora, 29",
+    image: "https://i.ibb.co/wNvR7F3m/Gemini-Generated-Image-ut4kzyut4kzyut4k.png",
+  },
+  {
+    id: "H2",
+    name: "Mariana",
+    description: "Designer, 31",
+    image: "https://i.ibb.co/0pWzqSL6/Gemini-Generated-Image-he7bqrhe7bqrhe7b.png",
+  },
+  {
+    id: "M1",
+    name: "Lucas",
+    description: "Engenheiro, 27",
+    image: "https://i.ibb.co/r2YSQFS2/Gemini-Generated-Image-6u974r6u974r6u97.png",
+  },
+  {
+    id: "M2",
+    name: "Felipe",
+    description: "Pai solo, 35",
+    image: "https://i.ibb.co/nqcNvfhD/Gemini-Generated-Image-7t1mu67t1mu67t1m.png",
+  },
+  {
+    id: "M3",
+    name: "Rafael",
+    description: "Veterano do mercado financeiro",
+    image: "https://i.ibb.co/fYnD0RYg/Gemini-Generated-Image-o8l6fto8l6fto8l6.png",
+  },
+  {
+    id: "H3",
+    name: "Bianca",
+    description: "MÇ¸e de gÇ¦meos, 33",
+    image: "https://i.ibb.co/qL8BJzRq/Gemini-Generated-Image-ix0fkeix0fkeix0f.png",
+  },
+];
 
 const DirectIndex = () => {
   const navigate = usePathAwareNavigate();
@@ -177,6 +223,65 @@ const DirectIndex = () => {
                 </span>
               </div>
             </div>
+          </motion.div>
+
+          {/* People carousel */}
+          <motion.div
+            className="mt-12 space-y-6 text-left"
+            variants={staggerItem}
+          >
+            <div className="max-w-3xl mx-auto text-center space-y-3">
+              <p className="text-sm uppercase tracking-[0.25em] text-orange-400/80">
+                InspiraÇõÇœes reais
+              </p>
+              <h2 className="text-2xl md:text-3xl font-semibold text-foreground leading-tight">
+                Gente de carne e osso que decidiu sair do modo sobrevivência
+              </h2>
+              <p className="text-sm md:text-base text-muted-foreground">
+                Cada um deles carregava uma história de esgotamento. Hoje, estão construindo
+                rotinas com mais calma, energia e presença.
+              </p>
+            </div>
+
+            <Carousel
+              className="w-full max-w-5xl mx-auto"
+              opts={{ align: "start" }}
+            >
+              <CarouselContent>
+                {spotlightPeople.map((person) => (
+                  <CarouselItem
+                    key={person.id}
+                    className="basis-full sm:basis-1/2 lg:basis-1/3"
+                  >
+                    <div className="h-full bg-background/80 border border-border/40 rounded-3xl p-6 shadow-lg flex flex-col items-center text-center space-y-4">
+                      <div className="w-32 h-32 rounded-2xl overflow-hidden border border-border/50 shadow-inner">
+                        <img
+                          src={person.image}
+                          alt={`Foto de ${person.name}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-lg font-semibold text-foreground">
+                          {person.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {person.description}
+                        </p>
+                      </div>
+                      <p className="text-sm text-muted-foreground/90 leading-relaxed">
+                        "Achei que burnout era sobre trabalho demais. Descobri que era sobre
+                        <span className="font-semibold text-foreground"> ignorar meu corpo </span>
+                        e minha mente."
+                      </p>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden sm:flex" />
+              <CarouselNext className="hidden sm:flex" />
+            </Carousel>
           </motion.div>
         </motion.div>
       </div>

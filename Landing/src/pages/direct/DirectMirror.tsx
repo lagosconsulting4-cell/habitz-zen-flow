@@ -128,7 +128,7 @@ const DirectMirror = () => {
 
       {/* Main content */}
       <div className="pt-20 pb-8 px-4 sm:px-6">
-        <div className="max-w-md mx-auto space-y-6 flex flex-col items-center">
+        <div className="w-full max-w-md mx-auto space-y-6 flex flex-col items-center text-center">
           {/* Phase indicator */}
           <motion.div
             className="w-full text-center flex flex-col items-center space-y-3"
@@ -143,22 +143,6 @@ const DirectMirror = () => {
               </span>
             </div>
           </motion.div>
-
-          {/* Progress bar */}
-          <div className="w-full flex flex-col items-center gap-2">
-            <div className="w-full max-w-xs h-2 bg-muted/40 border border-border/60 rounded-full overflow-hidden">
-              <motion.div
-                className={`h-full rounded-full bg-gradient-to-r ${stressStatus.color}`}
-                initial={{ width: "0%" }}
-                animate={{ width: `${progressPercent}%` }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-              />
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>{currentCardIndex + 1}/{flipCardsData.length}</span>
-              <span className={stressStatus.textColor}>{Math.round(progressPercent)}%</span>
-            </div>
-          </div>
 
           {/* Card Display */}
           <AnimatePresence mode="wait">
@@ -184,15 +168,15 @@ const DirectMirror = () => {
           {/* Phase hints - only on first card */}
           {currentCardIndex === 0 && (
             <motion.div
-              className={`rounded-xl p-3 sm:p-4 text-center border ${stressStatus.borderColor} ${stressStatus.bgColor}`}
+              className={`rounded-xl p-3 sm:p-4 text-center border ${isDorPhase ? `${stressStatus.borderColor} ${stressStatus.bgColor}` : 'border-emerald-500/40 bg-emerald-500/10'}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <p className={`text-xs sm:text-sm ${stressStatus.textColor}`}>
+              <p className={`text-xs sm:text-sm ${isDorPhase ? stressStatus.textColor : 'text-emerald-400'}`}>
                 {isDorPhase
-                  ? "💡 Estes são os 8 momentos do seu dia. Toque no card para ver os detalhes de cada momento."
-                  : "✨ Agora veja como seria seu dia com o Sistema BORA. Mesmos momentos, escolhas diferentes."}
+                  ? "Estes sao os 8 momentos do seu dia. Toque no card para ver os detalhes de cada momento."
+                  : "Agora veja como seria seu dia com o Sistema BORA. Mesmos momentos, escolhas diferentes."}
               </p>
             </motion.div>
           )}
