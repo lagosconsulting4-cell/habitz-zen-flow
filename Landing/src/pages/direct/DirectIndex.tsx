@@ -56,13 +56,13 @@ const spotlightPeople = [
     id: "Rafael",
     name: "Rafael",
     description: "Veterano do mercado financeiro",
-    image: "https://i.ibb.co/fYnD0RYg/Gemini-Generated-Image-o8l6fto8l6fto8l6.png",
+    image: "https://i.ibb.co/qL8BJzRq/Gemini-Generated-Image-ix0fkeix0fkeix0f.png",
   },
   {
     id: "Bianca",
     name: "Bianca",
     description: "Mãe de gêmeos, 33",
-    image: "https://i.ibb.co/qL8BJzRq/Gemini-Generated-Image-ix0fkeix0fkeix0f.png",
+    image: "https://i.ibb.co/fYnD0RYg/Gemini-Generated-Image-o8l6fto8l6fto8l6.png",
   },
 ];
 
