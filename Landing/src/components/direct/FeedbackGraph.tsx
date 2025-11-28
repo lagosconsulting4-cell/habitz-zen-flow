@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, TrendingDown, AlertTriangle } from "lucide-react";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -53,11 +53,11 @@ const chartConfig = {
   },
   voce: {
     label: "Você",
-    color: "hsl(8, 88%, 60%)",
+    color: "hsl(0, 84%, 60%)",
   },
   brasil: {
     label: "Brasileiro médio",
-    color: "hsl(32, 95%, 60%)",
+    color: "hsl(45, 93%, 47%)",
   },
   saudavel: {
     label: "Nível saudável",
@@ -70,37 +70,6 @@ const chartData = comparisonData.map((item) => ({
   value: item.value,
   fillKey: item.fillKey,
 }));
-
-type ChartDatum = (typeof chartData)[number];
-
-const dotColorMap: Record<string, string> = {
-  voce: "var(--color-voce)",
-  brasil: "var(--color-brasil)",
-  saudavel: "var(--color-saudavel)",
-};
-
-const renderDot = ({
-  cx,
-  cy,
-  payload,
-}: {
-  cx?: number;
-  cy?: number;
-  payload?: ChartDatum;
-}) => {
-  if (typeof cx !== "number" || typeof cy !== "number" || !payload) {
-    return null;
-  }
-
-  const color = dotColorMap[payload.fillKey] ?? "var(--color-voce)";
-
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={7} fill="hsl(var(--background))" stroke={color} strokeWidth={3} />
-      <circle cx={cx} cy={cy} r={4} fill={color} />
-    </g>
-  );
-};
 
 const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
   return (
@@ -149,15 +118,8 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
           transition={{ delay: 0.5 }}
           className="rounded-2xl border border-border/40 bg-muted/20 p-4"
         >
-          <ChartContainer config={chartConfig} className="h-56 w-full sm:h-64">
-            <LineChart data={chartData} margin={{ top: 16, right: 16, left: 8, bottom: 8 }}>
-              <defs>
-                <linearGradient id="stressLine" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#22c55e" />
-                  <stop offset="50%" stopColor="#f97316" />
-                  <stop offset="100%" stopColor="#dc2626" />
-                </linearGradient>
-              </defs>
+          <ChartContainer config={chartConfig} className="h-64 w-full sm:h-72">
+            <BarChart data={chartData} margin={{ top: 32, right: 20, left: 8, bottom: 8 }}>
               <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="hsl(var(--muted)/0.4)" />
               <XAxis
                 dataKey="label"
@@ -171,33 +133,41 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
                 tickLine={false}
                 tickFormatter={(value) => `${value}%`}
                 tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                width={40}
               />
               <ChartTooltip
-                cursor={{ strokeDasharray: "4 4" }}
+                cursor={{ fill: "hsl(var(--muted)/0.2)" }}
                 content={
                   <ChartTooltipContent
                     labelKey="label"
                     className="text-xs sm:text-sm"
                     formatter={(value) => (
                       <div className="flex w-full items-center justify-between text-foreground">
-                        <span className="text-muted-foreground">Porcentagem</span>
+                        <span className="text-muted-foreground">Nível</span>
                         <span className="font-semibold text-foreground">{value}%</span>
                       </div>
                     )}
                   />
                 }
               />
-              <Line
-                type="monotone"
+              <Bar
                 dataKey="value"
-                stroke="url(#stressLine)"
-                strokeWidth={4}
-                dot={renderDot}
-                activeDot={{ r: 9 }}
-                isAnimationActive
-                animationDuration={900}
-              />
-            </LineChart>
+                radius={[8, 8, 0, 0]}
+                animationDuration={800}
+                animationBegin={200}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={`var(--color-${entry.fillKey})`} />
+                ))}
+                <LabelList
+                  dataKey="value"
+                  position="top"
+                  className="fill-foreground font-bold"
+                  fontSize={14}
+                  formatter={(value: number) => `${value}%`}
+                />
+              </Bar>
+            </BarChart>
           </ChartContainer>
         </motion.div>
 
