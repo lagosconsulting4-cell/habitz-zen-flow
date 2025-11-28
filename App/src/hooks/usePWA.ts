@@ -176,20 +176,11 @@ export function usePWA(): UsePWAReturn {
 // Hook auxiliar para verificar se deve mostrar prompt iOS
 export function useIOSInstallPrompt(): {
   shouldShow: boolean;
-  dismiss: () => void;
 } {
   const { isIOS, isStandalone } = usePWA();
-  const [dismissed, setDismissed] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return localStorage.getItem("pwa-ios-prompt-dismissed") === "true";
-  });
 
-  const shouldShow = isIOS && !isStandalone && !dismissed;
+  // Mostrar sempre que for iOS e não estiver instalado
+  const shouldShow = isIOS && !isStandalone;
 
-  const dismiss = useCallback(() => {
-    setDismissed(true);
-    localStorage.setItem("pwa-ios-prompt-dismissed", "true");
-  }, []);
-
-  return { shouldShow, dismiss };
+  return { shouldShow };
 }

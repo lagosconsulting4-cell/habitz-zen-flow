@@ -1,146 +1,196 @@
 import { useState } from "react";
-import { X, Share, Plus, Download, ChevronRight } from "lucide-react";
+import { Smartphone, Share, Plus, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { usePWA, useIOSInstallPrompt } from "@/hooks/usePWA";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { usePWA } from "@/hooks/usePWA";
 import { cn } from "@/lib/utils";
 
-interface InstallPromptProps {
-  className?: string;
-}
-
-export function InstallPrompt({ className }: InstallPromptProps) {
-  const { isInstallable, isInstalled, isIOS, promptInstall } = usePWA();
-  const { shouldShow: shouldShowIOS, dismiss: dismissIOS } = useIOSInstallPrompt();
+export function InstallPrompt() {
+  const { isInstalled, isInstallable, isIOS, promptInstall } = usePWA();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [snap, setSnap] = useState<number | string | null>(0.2);
   const [isLoading, setIsLoading] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
 
-  // Se já instalado ou dispensado, não mostrar
-  if (isInstalled || dismissed) return null;
+  // ÚNICA condição para esconder: app instalado
+  if (isInstalled) return null;
 
-  // Android/Chrome - mostrar prompt nativo
-  if (isInstallable) {
-    const handleInstall = async () => {
-      setIsLoading(true);
-      const success = await promptInstall();
-      setIsLoading(false);
-      if (!success) {
-        // Se recusou, podemos esconder o banner por um tempo
-        setDismissed(true);
-        sessionStorage.setItem("pwa-prompt-dismissed", "true");
-      }
-    };
+  // Mostrar para iOS (sempre) ou Android (quando installable)
+  const shouldShow = isIOS || isInstallable;
+  if (!shouldShow) return null;
 
-    return (
-      <div
+  const isExpanded = snap === 0.6;
+
+  const handleInstall = async () => {
+    setIsLoading(true);
+    await promptInstall();
+    setIsLoading(false);
+  };
+
+  return (
+    <>
+      {/* FAB - 100% persistente */}
+      <button
+        onClick={() => {
+          setDrawerOpen(true);
+          setSnap(0.2);
+        }}
         className={cn(
-          "fixed bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 duration-300",
-          className
+          "fixed bottom-24 right-4 z-50",
+          "w-16 h-16 rounded-full",
+          "bg-gradient-to-br from-primary via-primary to-primary/80",
+          "text-primary-foreground",
+          "shadow-xl hover:shadow-2xl",
+          "flex items-center justify-center",
+          "transition-all duration-300",
+          "hover:scale-110 active:scale-95",
+          "ring-4 ring-primary/20 hover:ring-primary/30",
+          "group relative overflow-hidden"
         )}
+        aria-label="Instalar app"
       >
-        <div className="bg-card border border-border rounded-2xl p-4 shadow-lg">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Download className="w-6 h-6 text-primary" />
+        {/* Glow effect */}
+        <div className="absolute inset-0 rounded-full bg-white/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {/* Icon with animation */}
+        <Smartphone className="w-7 h-7 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+
+        {/* Pulse animation ring */}
+        <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
+      </button>
+
+      {/* Drawer com snap points */}
+      <Drawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        snapPoints={[0.2, 0.6]}
+        activeSnapPoint={snap}
+        setActiveSnapPoint={setSnap}
+      >
+        <DrawerContent className="border-t-4 border-primary/20">
+          <DrawerHeader className="pb-2">
+            <DrawerTitle className="text-xl font-bold flex items-center gap-2">
+              {isExpanded ? (
+                <>
+                  <span className="text-2xl">📱</span>
+                  <span>Instale o Bora no seu celular</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl">📱</span>
+                  <span>Instale o Bora</span>
+                </>
+              )}
+            </DrawerTitle>
+            {isExpanded && (
+              <DrawerDescription className="text-base">
+                Acesso rápido, funciona offline e muito mais!
+              </DrawerDescription>
+            )}
+          </DrawerHeader>
+
+          {/* Conteúdo só aparece quando expandido */}
+          {isExpanded && (
+            <div className="px-4 pb-6 space-y-6">
+              {/* Video Tutorial - MP4 autoplay loop */}
+              <div className="relative rounded-xl overflow-hidden shadow-2xl ring-2 ring-primary/10">
+                <video
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-auto max-h-72 object-contain bg-gradient-to-br from-muted/50 to-muted"
+                >
+                  <source src="/videos/install-tutorial.mp4" type="video/mp4" />
+                  Seu navegador não suporta vídeo.
+                </video>
+                {/* Play indicator overlay */}
+                <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full text-xs text-white flex items-center gap-1">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  Tutorial
+                </div>
+              </div>
+
+              {/* Instruções iOS */}
+              {isIOS && (
+                <div className="space-y-3 bg-muted/50 rounded-xl p-4 border border-border/50">
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-primary rounded-full" />
+                    Como instalar
+                  </h3>
+                  <IOSStep
+                    step={1}
+                    icon={<Share className="w-4 h-4" />}
+                    text='Toque no botão "Compartilhar"'
+                  />
+                  <IOSStep
+                    step={2}
+                    icon={<Plus className="w-4 h-4" />}
+                    text='Selecione "Adicionar à Tela Inicial"'
+                  />
+                  <IOSStep
+                    step={3}
+                    icon={<ChevronRight className="w-4 h-4" />}
+                    text='Toque em "Adicionar"'
+                  />
+                </div>
+              )}
+
+              {/* Botão de instalação Android */}
+              {isInstallable && !isIOS && (
+                <DrawerFooter className="px-0 pt-2">
+                  <Button
+                    onClick={handleInstall}
+                    disabled={isLoading}
+                    size="lg"
+                    className="w-full h-14 text-base font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 relative overflow-hidden group"
+                  >
+                    {/* Animated background */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+
+                    {/* Content */}
+                    <span className="relative z-10 flex items-center gap-2">
+                      {isLoading ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Instalando...
+                        </>
+                      ) : (
+                        <>
+                          <Smartphone className="w-5 h-5" />
+                          Instalar Agora
+                        </>
+                      )}
+                    </span>
+                  </Button>
+                </DrawerFooter>
+              )}
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground">Instalar Bora</h3>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Adicione à tela inicial para acesso rápido
+          )}
+
+          {/* Estado minimizado - hint para expandir */}
+          {!isExpanded && (
+            <div className="px-4 pb-4 text-center">
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
+                <ChevronRight className="w-4 h-4 rotate-90 animate-bounce" />
+                <span>Arraste para cima para ver o tutorial</span>
+                <ChevronRight className="w-4 h-4 rotate-90 animate-bounce" />
+              </div>
+              <p className="text-xs text-muted-foreground/70">
+                Acesso rápido • Funciona offline • Notificações
               </p>
             </div>
-            <button
-              onClick={() => setDismissed(true)}
-              className="flex-shrink-0 p-1 rounded-full hover:bg-muted transition-colors"
-            >
-              <X className="w-4 h-4 text-muted-foreground" />
-            </button>
-          </div>
-          <div className="mt-4 flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex-1"
-              onClick={() => setDismissed(true)}
-            >
-              Agora não
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              className="flex-1"
-              onClick={handleInstall}
-              disabled={isLoading}
-            >
-              {isLoading ? "Instalando..." : "Instalar"}
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // iOS - mostrar instruções
-  if (isIOS && shouldShowIOS) {
-    return (
-      <div
-        className={cn(
-          "fixed bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 duration-300",
-          className
-        )}
-      >
-        <div className="bg-card border border-border rounded-2xl p-4 shadow-lg">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Plus className="w-6 h-6 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground">
-                Adicionar à Tela Inicial
-              </h3>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Para a melhor experiência no iPhone
-              </p>
-            </div>
-            <button
-              onClick={dismissIOS}
-              className="flex-shrink-0 p-1 rounded-full hover:bg-muted transition-colors"
-            >
-              <X className="w-4 h-4 text-muted-foreground" />
-            </button>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            <IOSStep
-              step={1}
-              icon={<Share className="w-4 h-4" />}
-              text='Toque no botão "Compartilhar"'
-            />
-            <IOSStep
-              step={2}
-              icon={<Plus className="w-4 h-4" />}
-              text='Selecione "Adicionar à Tela Inicial"'
-            />
-            <IOSStep
-              step={3}
-              icon={<ChevronRight className="w-4 h-4" />}
-              text='Toque em "Adicionar"'
-            />
-          </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full mt-4"
-            onClick={dismissIOS}
-          >
-            Entendi
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
+          )}
+        </DrawerContent>
+      </Drawer>
+    </>
+  );
 }
 
 interface IOSStepProps {
@@ -151,14 +201,14 @@ interface IOSStepProps {
 
 function IOSStep({ step, icon, text }: IOSStepProps) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold">
+    <div className="flex items-center gap-3 group hover:scale-[1.02] transition-transform duration-200">
+      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground flex items-center justify-center text-xs font-bold shadow-md group-hover:shadow-lg transition-shadow">
         {step}
       </div>
-      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+      <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center text-muted-foreground border border-border/50 group-hover:border-primary/30 transition-colors">
         {icon}
       </div>
-      <span className="text-sm text-foreground">{text}</span>
+      <span className="text-sm text-foreground font-medium group-hover:text-primary transition-colors">{text}</span>
     </div>
   );
 }
