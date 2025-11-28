@@ -74,7 +74,8 @@ export const getStressStatus = (level: number, phase: StressPhase): StressStatus
     return getMirrorStatus(level);
   }
 
-  if (phase === "colapso" || level >= 100) {
+  // COLAPSO only for colapso phase or dor phase with level >= 100
+  if (phase === "colapso" || (phase !== "bora" && level >= 100)) {
     return {
       label: "COLAPSO",
       emoji: EMOJI_COLLAPSE,
@@ -85,21 +86,12 @@ export const getStressStatus = (level: number, phase: StressPhase): StressStatus
       pulse: true,
     };
   }
-  if (phase === "bora" || level <= 30) {
-    return {
-      label: "EM PAZ",
-      emoji: EMOJI_CALM,
-      color: "from-green-500 to-emerald-400",
-      bgColor: "bg-green-500/20",
-      borderColor: "border-emerald-500/40",
-      textColor: "text-green-400",
-      icon: Heart,
-      pulse: false,
-    };
-  }
+
+  // For both phases, use level-based thresholds
+  // This ensures yellow/amber intermediate state is shown during stress reduction
   if (level >= 70) {
     return {
-      label: "URGENTE",
+      label: phase === "bora" ? "ALTO" : "URGENTE",
       emoji: EMOJI_COLLAPSE,
       color: "from-red-500 to-orange-500",
       bgColor: "bg-red-500/20",
@@ -111,7 +103,7 @@ export const getStressStatus = (level: number, phase: StressPhase): StressStatus
   }
   if (level >= 40) {
     return {
-      label: "ALERTA",
+      label: phase === "bora" ? "MODERADO" : "ALERTA",
       emoji: EMOJI_ALERT,
       color: "from-orange-500 to-yellow-500",
       bgColor: "bg-orange-500/20",
@@ -121,14 +113,16 @@ export const getStressStatus = (level: number, phase: StressPhase): StressStatus
       pulse: false,
     };
   }
+
+  // Low stress - green for both phases
   return {
-    label: "MODERADO",
-    emoji: EMOJI_FOCUS,
-    color: "from-yellow-500 to-green-400",
-    bgColor: "bg-yellow-500/20",
-    borderColor: "border-yellow-500/40",
-    textColor: "text-yellow-400",
-    icon: Zap,
+    label: "EM PAZ",
+    emoji: EMOJI_CALM,
+    color: "from-green-500 to-emerald-400",
+    bgColor: "bg-green-500/20",
+    borderColor: "border-emerald-500/40",
+    textColor: "text-green-400",
+    icon: Heart,
     pulse: false,
   };
 };
