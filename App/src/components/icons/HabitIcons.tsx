@@ -64,10 +64,11 @@ const createIcon = (paths: JSX.Element[], viewBox = "0 0 24 24") => (props: Icon
 );
 
 export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element> = {
+  // REDESIGNED: Geometric running figure - Streaks style
   run: createIcon([
-    <path key="1" d="M13.5 5.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0Z" />,
-    <path key="2" d="m10 20 2-6 3-2 2 3" />,
-    <path key="3" d="m6.5 16 3.5 1 2-6-3-1-1.5 3" />,
+    <circle key="1" cx="12" cy="5" r="2" />,
+    <path key="2" d="M12 7v7" />,
+    <path key="3" d="M8 14l4-2 4 4" />,
   ]),
   cycle: createIcon([
     <circle key="1" cx="6" cy="18" r="3" />,
@@ -100,12 +101,12 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
   gratitude: createIcon([
     <path key="1" d="M12 21s-5-3.5-7-7a4 4 0 1 1 7-3 4 4 0 1 1 7 3c-2 3.5-7 7-7 7Z" />,
   ]),
+  // REDESIGNED: Clean fork and knife - Streaks style
   meal: createIcon([
     <path key="1" d="M7 4v16" />,
-    <path key="2" d="M11 4v5" />,
-    <path key="3" d="M11 15v5" />,
-    <path key="4" d="M17 4c0 4-2 4-2 8 0 2 2 2 2 4" />,
-    <path key="5" d="M15 4h4" />,
+    <path key="2" d="M4 4v7l3-1" />,
+    <path key="3" d="M10 4v7l-3-1" />,
+    <path key="4" d="M17 4v8l3 8h-6l3-8Z" />,
   ]),
   water: createIcon([
     <path key="1" d="M12 3s4 5 4 9a4 4 0 0 1-8 0c0-4 4-9 4-9Z" />,
@@ -126,11 +127,11 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
     <path key="2" d="M8 19h8" />,
     <path key="3" d="M3 3 21 21" />,
   ]),
+  // REDESIGNED: Clipboard with checkmark - Streaks style
   plan: createIcon([
     <rect key="1" x="6" y="4" width="12" height="16" rx="2" />,
-    <path key="2" d="M9 8h6" />,
-    <path key="3" d="M9 12h6" />,
-    <path key="4" d="M9 16h4" />,
+    <path key="2" d="M9 2h6v2H9Z" />,
+    <path key="3" d="M9 10l2 2 4-4" />,
   ]),
   deep_work: createIcon([
     <path key="1" d="M4 8h16" />,
@@ -237,9 +238,10 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
     <path key="2" d="M12 8v8" />,
     <path key="3" d="M8 12h8" />,
   ]),
+  // IMPROVED: Clock with clearer 10:10 position - Streaks style
   clock: createIcon([
     <circle key="1" cx="12" cy="12" r="10" />,
-    <path key="2" d="M12 6v6l4 2" />,
+    <path key="2" d="M12 6v6l3 3" />,
   ]),
   bed: createIcon([
     <path key="1" d="M3 18v4" />,
@@ -278,10 +280,10 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
     <rect key="1" x="6" y="4" width="4" height="16" rx="1" />,
     <rect key="2" x="14" y="4" width="4" height="16" rx="1" />,
   ]),
-  // Ícone de proibido (círculo com barra diagonal) - para categoria "Evitar"
+  // IMPROVED: Prohibition symbol - Streaks style
   ban: createIcon([
     <circle key="1" cx="12" cy="12" r="10" />,
-    <path key="2" d="M4.93 4.93l14.14 14.14" />,
+    <path key="2" d="M5 5l14 14" />,
   ]),
   // Nascer do sol - para acordar cedo
   sunrise: createIcon([

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habitz Icons Preview - Streaks Style Redesign</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 40px 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.light {
+      background-color: #FAFAFA;
+      color: #1A1A1A;
+    }
+
+    body.dark {
+      background-color: #000000;
+      color: #FFFFFF;
+    }
+
+    .header {
+      max-width: 1400px;
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      opacity: 0.6;
+      margin-bottom: 24px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: rgba(128, 128, 128, 0.1);
+    }
+
+    .control-label {
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0.8;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button.active {
+      background-color: #A3E635;
+      color: #000;
+    }
+
+    button:not(.active) {
+      background-color: rgba(128, 128, 128, 0.2);
+      color: inherit;
+    }
+
+    button:hover:not(.active) {
+      background-color: rgba(128, 128, 128, 0.3);
+    }
+
+    .grid-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 24px;
+    }
+
+    .icon-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-circles {
+      display: flex;
+      gap: 12px;
+    }
+
+    .icon-circle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .icon-circle:hover {
+      transform: scale(1.05);
+    }
+
+    .icon-circle.category {
+      background-color: #2C2C2E;
+    }
+
+    .icon-circle.habit {
+      background-color: #A3E635;
+    }
+
+    .icon-circle svg {
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .icon-circle.category svg {
+      color: #FFFFFF;
+    }
+
+    .icon-circle.habit svg {
+      color: #000000;
+    }
+
+    .icon-name {
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      opacity: 0.7;
+      font-family: 'Courier New', monospace;
+    }
+
+    .stats {
+      max-width: 1400px;
+      margin: 0 auto 32px;
+      padding: 16px;
+      border-radius: 8px;
+      background: rgba(128, 128, 128, 0.1);
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #A3E635;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.6;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Size variations */
+    .size-30 .icon-circle { width: 52px; height: 52px; }
+    .size-30 .icon-circle svg { width: 30px; height: 30px; }
+
+    .size-52 .icon-circle { width: 74px; height: 74px; }
+    .size-52 .icon-circle svg { width: 52px; height: 52px; }
+
+    @media (max-width: 768px) {
+      .icon-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body class="dark size-30">
+  <div class="header">
+    <h1>Habitz Icons Preview</h1>
+    <p class="subtitle">Sistema de Iconografia - Estilo Minimalista Geométrico (Streaks)</p>
+
+    <div class="controls">
+      <div class="control-group">
+        <span class="control-label">Modo:</span>
+        <button class="active" onclick="setMode('dark')">Dark</button>
+        <button onclick="setMode('light')">Light</button>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label">Tamanho:</span>
+        <button class="active" onclick="setSize('30')">30px (Dashboard)</button>
+        <button onclick="setSize('52')">52px (Circular)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">56</div>
+      <div class="stat-label">Total de Ícones</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">5</div>
+      <div class="stat-label">Categorias</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">2.2px</div>
+      <div class="stat-label">Stroke Weight</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">24×24</div>
+      <div class="stat-label">Grid Base</div>
+    </div>
+  </div>
+
+  <div class="grid-container">
+    <div class="section">
+      <h2 class="section-title">⭐ Categorias (Priority 1)</h2>
+      <div class="icon-grid" id="categories"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">✅ Manter (Streaks-ready)</h2>
+      <div class="icon-grid" id="keep"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">⚠️ Melhorar (Refinamento)</h2>
+      <div class="icon-grid" id="improve"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">❌ Redesenhar (Prioridade Alta)</h2>
+      <div class="icon-grid" id="redesign"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">🔄 Todos os Ícones (A-Z)</h2>
+      <div class="icon-grid" id="all"></div>
+    </div>
+  </div>
+
+  <script>
+    // Icon definitions (replace with actual SVG paths from HabitIcons.tsx)
+    const icons = {
+      // Categories (Priority 1)
+      categories: ['run', 'meal', 'plan', 'clock', 'ban'],
+
+      // Keep (Streaks-ready)
+      keep: ['water', 'heart', 'target'],
+
+      // Improve
+      improve: ['activity_rings', 'book', 'sleep', 'organize'],
+
+      // Redesign
+      redesign: [
+        'meditate', 'cycle', 'swim', 'stretch', 'yoga', 'active',
+        'deep_work', 'call_family', 'detox', 'burn_energy',
+        'no_fast_food', 'no_screens', 'no_smoke', 'no_alcohol',
+        'no_sugar', 'no_procrastination', 'no_skip_meals', 'no_late_sleep'
+      ],
+
+      // All icons alphabetically
+      all: [
+        'active', 'activity_rings', 'alarm', 'ban', 'bed', 'book', 'breakfast',
+        'burn_energy', 'call_family', 'checklist', 'clock', 'cycle', 'deep_work',
+        'detox', 'exercise_minutes', 'family', 'focus', 'fruits', 'gratitude',
+        'heart', 'journal', 'leisure', 'make_bed', 'meal', 'meditate',
+        'no_alcohol', 'no_fast_food', 'no_late_sleep', 'no_procrastination',
+        'no_screens', 'no_skip_meals', 'no_smoke', 'no_sugar', 'organize',
+        'pause', 'plan', 'protein', 'review', 'run', 'sleep', 'social_media',
+        'stairs', 'stand_hours', 'strength', 'stretch', 'study', 'sunrise',
+        'swim', 'target', 'vegetables', 'vitamins', 'water', 'yoga'
+      ]
+    };
+
+    // Simplified SVG paths (placeholders - replace with actual paths)
+    const iconPaths = {
+      run: '<circle cx="12" cy="6" r="2"/><path d="M12 8v6"/><path d="M8 14l4-2l4 4"/>',
+      water: '<path d="M12 3s4 5 4 9a4 4 0 0 1-8 0c0-4 4-9 4-9Z"/>',
+      heart: '<path d="M12 21s-5-3.5-7-7a4 4 0 1 1 7-3 4 4 0 1 1 7 3c-2 3.5-7 7-7 7Z"/>',
+      clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+      target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+      // Add more icons as they are redesigned...
+    };
+
+    function createIconElement(iconName) {
+      const paths = iconPaths[iconName] || '<circle cx="12" cy="12" r="8"/>';
+
+      return `
+        <div class="icon-item">
+          <div class="icon-circles">
+            <div class="icon-circle category" title="Category context">
+              <svg viewBox="0 0 24 24">${paths}</svg>
+            </div>
+            <div class="icon-circle habit" title="Habit context">
+              <svg viewBox="0 0 24 24">${paths}</svg>
+            </div>
+          </div>
+          <div class="icon-name">${iconName}</div>
+        </div>
+      `;
+    }
+
+    function renderIcons() {
+      Object.keys(icons).forEach(section => {
+        const container = document.getElementById(section);
+        if (container) {
+          container.innerHTML = icons[section].map(createIconElement).join('');
+        }
+      });
+    }
+
+    function setMode(mode) {
+      document.body.className = document.body.className.replace(/light|dark/, mode);
+      document.querySelectorAll('.controls button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+
+    function setSize(size) {
+      const className = `size-${size}`;
+      document.body.className = document.body.className.replace(/size-\d+/, className);
+      document.querySelectorAll('.controls button').forEach(btn => {
+        if (btn.textContent.includes(size + 'px')) {
+          btn.classList.add('active');
+        } else if (btn.textContent.includes('px')) {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    // Initialize
+    renderIcons();
+  </script>
+</body>
+</html>
