@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { usePathAwareNavigate } from "@/contexts/PathPrefixContext";
 import { motion, AnimatePresence } from "motion/react";
-import StressBar, { getStressStatus } from "@/components/direct/StressBar";
+import StressBar from "@/components/direct/StressBar";
+import { getStressStatus } from "@/components/direct/stress-status";
 import FlipCard from "@/components/direct/FlipCard";
 import { flipCardsData, getCardContent } from "@/components/direct/flip-card-data";
 import ColapsoScreen from "@/components/direct/ColapsoScreen";
