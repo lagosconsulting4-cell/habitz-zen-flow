@@ -226,36 +226,13 @@ const Dashboard = () => {
     }
 
     // BACKGROUND: Sync with backend (non-blocking)
+    // RPC function now handles: completion toggle, XP award, and streak update atomically
     try {
       await toggleHabit(habit.id);
 
-      // Backend awards XP/streak
-      if (!wasCompleted && awardHabitXP) {
-        try {
-          await awardHabitXP(habit.id);
-        } catch (error) {
-          console.error("Failed to award XP:", error);
-        }
-      }
-
-      if (!wasCompleted && awardStreakBonus) {
-        const newStreak = habit.streak + 1;
-        if (newStreak === 3 || newStreak === 7 || newStreak === 30) {
-          try {
-            await awardStreakBonus(newStreak);
-          } catch (error) {
-            console.error("Failed to award streak bonus:", error);
-          }
-        }
-      }
-
-      if (!wasCompleted && awardPerfectDayBonus) {
-        try {
-          await awardPerfectDayBonus();
-        } catch (error) {
-          console.error("Failed to award perfect day bonus:", error);
-        }
-      }
+      // Note: XP and streak awards are now handled atomically in the RPC function
+      // The calls below (awardStreakBonus, awardPerfectDayBonus) may be for additional
+      // bonuses or UI side effects, but XP awards are already handled by RPC
     } catch (error) {
       console.error("Toggle sync failed:", error);
       // ROLLBACK: Revert optimistic update on error
@@ -332,14 +309,8 @@ const Dashboard = () => {
       setTimerHabit(null);
 
       // BACKGROUND: Sync with backend (non-blocking)
-      Promise.all([
-        toggleHabit(habitId),
-        awardHabitXP ? awardHabitXP(habitId) : Promise.resolve(),
-        awardStreakBonus && (newStreak === 3 || newStreak === 7 || newStreak === 30)
-          ? awardStreakBonus(newStreak)
-          : Promise.resolve(),
-        awardPerfectDayBonus ? awardPerfectDayBonus() : Promise.resolve(),
-      ]).catch((error) => {
+      // RPC function handles: completion toggle, XP award, and streak update atomically
+      toggleHabit(habitId).catch((error) => {
         console.error("Timer completion sync failed:", error);
         // ROLLBACK: Revert optimistic update on error
         removeCompletionOptimistic(habitId, targetDate);

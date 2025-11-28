@@ -364,7 +364,7 @@ const Offer = () => {
 
               {/* Mockup image */}
               <motion.img
-                src="/images/lp/mockup-app-vertical.png"
+                src="/images/lp/mockup-app-vertical.webp"
                 alt="App BORA - Mockup"
                 className="relative z-10 w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[380px] h-auto drop-shadow-2xl"
                 animate={{ y: [0, -10, 0] }}
@@ -452,7 +452,7 @@ const Offer = () => {
                       transition={{ delay: 0.3 }}
                     >
                       <img
-                        src="/images/lp/personagem_triste.png"
+                        src="/images/lp/personagem_triste.webp"
                         alt="Pessoa estressada"
                         className="w-40 lg:w-48 h-auto drop-shadow-lg"
                       />
@@ -500,7 +500,7 @@ const Offer = () => {
                       transition={{ delay: 0.3 }}
                     >
                       <img
-                        src="/images/lp/meditação_personagem.png"
+                        src="/images/lp/meditação_personagem.webp"
                         alt="Pessoa em paz meditando"
                         className="w-40 lg:w-48 h-auto drop-shadow-lg"
                       />

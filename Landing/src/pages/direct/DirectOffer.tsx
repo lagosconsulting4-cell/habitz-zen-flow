@@ -102,35 +102,35 @@ const bonusItems = [
     title: "Programa 30 Dias",
     subtitle: "Transformação completa",
     value: 297,
-    image: "/images/lp/programa_completo_bonus_capa.png",
+    image: "/images/lp/programa_completo_bonus_capa.webp",
   },
   {
     id: 2,
     title: "Jornada Guiada",
     subtitle: "4 semanas de acompanhamento",
     value: 197,
-    image: "/images/lp/jornada_guiada_bonus_capa.png",
+    image: "/images/lp/jornada_guiada_bonus_capa.webp",
   },
   {
     id: 3,
     title: "Meditações & Respiração",
     subtitle: "Acalme sua mente",
     value: 147,
-    image: "/images/lp/meditações_bonus_capa.png",
+    image: "/images/lp/meditações_bonus_capa.webp",
   },
   {
     id: 4,
     title: "Hub de Livros",
     subtitle: "Biblioteca de desenvolvimento",
     value: 97,
-    image: "/images/lp/hub_de_livros_bonus_capa.png",
+    image: "/images/lp/hub_de_livros_bonus_capa.webp",
   },
   {
     id: 5,
     title: "27 Dicas Práticas",
     subtitle: "Hacks de produtividade",
     value: 67,
-    image: "/images/lp/dicas_praticas_hack_bonus_capa.png",
+    image: "/images/lp/dicas_praticas_hack_bonus_capa.webp",
   },
 ];
 
@@ -287,7 +287,7 @@ const DirectOffer = () => {
 
               {/* Mockup image */}
               <motion.img
-                src="/images/lp/mockup-app-vertical.png"
+                src="/images/lp/mockup-app-vertical.webp"
                 alt="App BORA - Mockup"
                 className="relative z-10 w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[380px] h-auto drop-shadow-2xl"
                 animate={{ y: [0, -10, 0] }}
@@ -372,7 +372,7 @@ const DirectOffer = () => {
                       transition={{ delay: 0.3 }}
                     >
                       <img
-                        src="/images/lp/personagem_triste.png"
+                        src="/images/lp/personagem_triste.webp"
                         alt="Pessoa estressada"
                         className="w-40 lg:w-48 h-auto drop-shadow-lg"
                       />
@@ -418,7 +418,7 @@ const DirectOffer = () => {
                       transition={{ delay: 0.3 }}
                     >
                       <img
-                        src="/images/lp/meditação_personagem.png"
+                        src="/images/lp/meditação_personagem.webp"
                         alt="Pessoa em paz meditando"
                         className="w-40 lg:w-48 h-auto drop-shadow-lg"
                       />
@@ -839,7 +839,7 @@ const DirectOffer = () => {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
             <img
-              src="/images/lp/mockup-horizontal.png"
+              src="/images/lp/mockup-horizontal.webp"
               alt="App BORA - Telas do aplicativo"
               className="w-full h-auto rounded-2xl"
               loading="lazy"

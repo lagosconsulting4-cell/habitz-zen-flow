@@ -1,8 +1,7 @@
 {
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/quiz-saude", "destination": "/index.html" },
-    { "source": "/quiz-saude/", "destination": "/index.html" },
-    { "source": "/quiz-saude/:path*", "destination": "/:path*" }
-  ]
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "devCommand": "npm run dev"
 }

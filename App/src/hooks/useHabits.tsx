@@ -476,43 +476,45 @@ export const useHabits = () => {
       if (!user) throw new Error("User not authenticated");
 
       if (isOnline) {
-        // ONLINE: Normal flow with Supabase
-        const { data: serverCompletion, error: existingError } = await supabase
-          .from("habit_completions")
-          .select("*")
-          .eq("habit_id", habitId)
-          .eq("completed_at", targetDate)
-          .maybeSingle();
+        // ONLINE: Use atomic RPC for batched operation
+        // Replaces 8+ sequential queries with 1 atomic operation
+        const { data, error } = await supabase.rpc("complete_habit_atomic", {
+          p_user_id: user.id,
+          p_habit_id: habitId,
+          p_completed_at: targetDate,
+          p_xp_amount: 10,
+          p_increment_streak: true,
+        });
 
-        if (existingError && existingError.code !== "PGRST116") {
-          throw existingError;
-        }
+        if (error) throw error;
 
-        if (serverCompletion) {
-          const { error } = await supabase
-            .from("habit_completions")
-            .delete()
-            .eq("id", serverCompletion.id);
-
-          if (error) throw error;
-        } else {
-          // Use UPSERT to prevent duplicate key constraint violations
-          const { error } = await supabase
-            .from("habit_completions")
-            .upsert(
-              {
-                habit_id: habitId,
-                user_id: user.id,
-                completed_at: targetDate,
-              },
-              {
-                onConflict: "habit_id,user_id,completed_at",
-                ignoreDuplicates: true,
-              }
+        // Update local state based on RPC response
+        if (data && data.completion_id) {
+          if (!existingCompletion) {
+            // Adding completion
+            const newCompletion: HabitCompletion = {
+              id: data.completion_id,
+              habit_id: habitId,
+              user_id: user.id,
+              completed_at: targetDate,
+              created_at: new Date().toISOString(),
+            };
+            setCompletions((prev) => [...prev, newCompletion]);
+          } else {
+            // Removing completion
+            setCompletions((prev) =>
+              prev.filter((c) => c.id !== existingCompletion.id)
             );
+          }
 
-          // Ignore duplicate key errors (23505) - means completion already exists
-          if (error && error.code !== "23505") throw error;
+          // Update streak from RPC response
+          if (data.new_streak !== undefined) {
+            setHabits((prev) =>
+              prev.map((h) =>
+                h.id === habitId ? { ...h, streak: data.new_streak } : h
+              )
+            );
+          }
         }
       } else {
         // OFFLINE: Optimistic UI + sync queue
@@ -578,17 +580,14 @@ export const useHabits = () => {
       const habit = habits.find((h) => h.id === habitId);
       const today = new Date().toISOString().split("T")[0];
 
-      if (habit && targetDate === today) {
+      if (habit && targetDate === today && !isOnline) {
+        // For offline: Calculate and update streak locally
+        // For online: RPC already updated streak
         const increment = !existingCompletion;
         const newStreak = Math.max(0, habit.streak + (increment ? 1 : -1));
-        if (isOnline) {
-          await updateHabitStreak(habitId, newStreak);
-        } else {
-          // Update streak locally for optimistic UI
-          setHabits((prev) =>
-            prev.map((h) => (h.id === habitId ? { ...h, streak: newStreak } : h))
-          );
-        }
+        setHabits((prev) =>
+          prev.map((h) => (h.id === habitId ? { ...h, streak: newStreak } : h))
+        );
       }
     } catch (error) {
       console.error("Error toggling habit:", error);

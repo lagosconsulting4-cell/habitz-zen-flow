@@ -24,7 +24,7 @@ const bonusDetails = [
     title: "Programa de 30 Dias",
     value: 297,
     icon: Calendar,
-    coverImage: "/images/lp/programa_completo_bonus_capa.png",
+    coverImage: "/images/lp/programa_completo_bonus_capa.webp",
     gradient: "from-primary via-emerald-500 to-teal-500",
     shadowColor: "shadow-primary/30",
     description:
@@ -42,7 +42,7 @@ const bonusDetails = [
     title: "Jornada Guiada 4 Semanas",
     value: 197,
     icon: Flame,
-    coverImage: "/images/lp/jornada_guiada_bonus_capa.png",
+    coverImage: "/images/lp/jornada_guiada_bonus_capa.webp",
     gradient: "from-orange-500 via-amber-500 to-yellow-500",
     shadowColor: "shadow-orange-500/30",
     description:
@@ -60,7 +60,7 @@ const bonusDetails = [
     title: "Meditações & Respiração",
     value: 147,
     icon: Brain,
-    coverImage: "/images/lp/meditações_bonus_capa.png",
+    coverImage: "/images/lp/meditações_bonus_capa.webp",
     gradient: "from-purple-500 via-violet-500 to-indigo-500",
     shadowColor: "shadow-purple-500/30",
     description:
@@ -78,7 +78,7 @@ const bonusDetails = [
     title: "Hub de Livros",
     value: 97,
     icon: Library,
-    coverImage: "/images/lp/hub_de_livros_bonus_capa.png",
+    coverImage: "/images/lp/hub_de_livros_bonus_capa.webp",
     gradient: "from-blue-500 via-cyan-500 to-teal-500",
     shadowColor: "shadow-blue-500/30",
     description:
@@ -96,7 +96,7 @@ const bonusDetails = [
     title: "Dicas Práticas",
     value: 67,
     icon: Lightbulb,
-    coverImage: "/images/lp/dicas_praticas_hack_bonus_capa.png",
+    coverImage: "/images/lp/dicas_praticas_hack_bonus_capa.webp",
     gradient: "from-rose-500 via-pink-500 to-fuchsia-500",
     shadowColor: "shadow-rose-500/30",
     description:
