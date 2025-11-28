@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, TrendingDown, AlertTriangle } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -16,48 +16,51 @@ interface FeedbackGraphProps {
 // Comparison data: User (78%) vs Average Brazilian (42%) vs Healthy (20%)
 const comparisonData = [
   {
-    label: "VocÇ¦",
+    label: "Você",
     value: 78,
     color: "from-red-500 to-orange-500",
     bgColor: "bg-red-500/20",
     textColor: "text-red-400",
     status: "URGENTE",
+    helper: "Seu nível atual",
     fillKey: "voce",
   },
   {
-    label: "Brasileiro MÇ¸dio",
+    label: "Brasileiro médio",
     value: 42,
     color: "from-yellow-500 to-orange-400",
     bgColor: "bg-yellow-500/20",
     textColor: "text-yellow-400",
     status: "ALERTA",
+    helper: "Referência nacional",
     fillKey: "brasil",
   },
   {
-    label: "NÇðvel SaudÇ­vel",
+    label: "Nível saudável",
     value: 20,
     color: "from-green-500 to-emerald-400",
     bgColor: "bg-green-500/20",
     textColor: "text-green-400",
     status: "IDEAL",
+    helper: "Faixa segura",
     fillKey: "saudavel",
   },
 ];
 
 const chartConfig = {
   value: {
-    label: "NÇðvel de estresse",
+    label: "Nível de estresse",
   },
   voce: {
-    label: "VocÇ¦",
+    label: "Você",
     color: "hsl(8, 88%, 60%)",
   },
   brasil: {
-    label: "Brasileiro MÇ¸dio",
+    label: "Brasileiro médio",
     color: "hsl(32, 95%, 60%)",
   },
   saudavel: {
-    label: "NÇðvel SaudÇ­vel",
+    label: "Nível saudável",
     color: "hsl(142, 70%, 45%)",
   },
 };
@@ -67,6 +70,37 @@ const chartData = comparisonData.map((item) => ({
   value: item.value,
   fillKey: item.fillKey,
 }));
+
+type ChartDatum = (typeof chartData)[number];
+
+const dotColorMap: Record<string, string> = {
+  voce: "var(--color-voce)",
+  brasil: "var(--color-brasil)",
+  saudavel: "var(--color-saudavel)",
+};
+
+const renderDot = ({
+  cx,
+  cy,
+  payload,
+}: {
+  cx?: number;
+  cy?: number;
+  payload?: ChartDatum;
+}) => {
+  if (typeof cx !== "number" || typeof cy !== "number" || !payload) {
+    return null;
+  }
+
+  const color = dotColorMap[payload.fillKey] ?? "var(--color-voce)";
+
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={7} fill="hsl(var(--background))" stroke={color} strokeWidth={3} />
+      <circle cx={cx} cy={cy} r={4} fill={color} />
+    </g>
+  );
+};
 
 const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
   return (
@@ -86,7 +120,7 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
             transition={{ delay: 0.2 }}
           >
             <TrendingDown className="h-4 w-4" />
-            <span className="font-semibold text-sm">AnÇ­lise Parcial</span>
+            <span className="font-semibold text-sm">Análise Parcial</span>
           </motion.div>
 
           <motion.h2
@@ -104,7 +138,7 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            Veja como vocÇ¦ estÇ­ em relaÇõÇœo a outros brasileiros
+            Veja como você está em relação a outros brasileiros
           </motion.p>
         </div>
 
@@ -116,46 +150,47 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
           className="rounded-2xl border border-border/40 bg-muted/20 p-4"
         >
           <ChartContainer config={chartConfig} className="h-64 w-full">
-            <BarChart
-              data={chartData}
-              margin={{ top: 16, bottom: 8, left: 0, right: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis
-                dataKey="label"
+            <LineChart data={chartData} margin={{ top: 16, right: 8, left: 8, bottom: 8 }}>
+              <defs>
+                <linearGradient id="stressLine" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#22c55e" />
+                  <stop offset="50%" stopColor="#f97316" />
+                  <stop offset="100%" stopColor="#dc2626" />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="4 4" vertical={false} />
+              <XAxis dataKey="label" axisLine={false} tickLine={false} />
+              <YAxis
+                domain={[0, 100]}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={(value) => value}
+                tickFormatter={(value) => `${value}%`}
               />
               <ChartTooltip
-                cursor={{ fill: "hsl(var(--muted))", opacity: 0.25 }}
+                cursor={{ strokeDasharray: "4 4" }}
                 content={
                   <ChartTooltipContent
                     labelKey="label"
-                    nameKey="label"
-                    formatter={(value, name) => (
-                      <div className="flex w-full items-center justify-between text-foreground">
-                        <span className="text-xs font-medium">{name}</span>
-                        <span className="font-mono font-semibold">{value}%</span>
+                    formatter={(value) => (
+                      <div className="flex w-full items-center justify-between">
+                        <span className="text-muted-foreground">Porcentagem</span>
+                        <span className="font-semibold">{value}%</span>
                       </div>
                     )}
                   />
                 }
               />
-              <Bar
+              <Line
+                type="monotone"
                 dataKey="value"
-                radius={[8, 8, 0, 0]}
+                stroke="url(#stressLine)"
+                strokeWidth={4}
+                dot={renderDot}
+                activeDot={{ r: 9 }}
                 isAnimationActive
                 animationDuration={900}
-              >
-                {chartData.map((item) => (
-                  <Cell
-                    key={item.label}
-                    fill={`var(--color-${item.fillKey})`}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
+              />
+            </LineChart>
           </ChartContainer>
         </motion.div>
 
@@ -166,39 +201,21 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
         >
-          {comparisonData.map((item, index) => (
+          {comparisonData.map((item) => (
             <div
               key={item.label}
               className="flex items-center justify-between rounded-2xl border border-border/40 bg-background/50 p-3"
             >
               <div className="flex items-center gap-3">
-                <div
-                  className={`h-2 w-2 rounded-full bg-gradient-to-r ${item.color}`}
-                />
+                <div className={`h-2 w-2 rounded-full bg-gradient-to-r ${item.color}`} />
                 <div className="flex flex-col">
-                  <span
-                    className={`text-sm font-medium ${
-                      index === 0 ? "text-foreground" : "text-muted-foreground"
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {item.status === "IDEAL"
-                      ? "Faixa segura"
-                      : index === 0
-                      ? "Seu nÇðvel atual"
-                      : "ReferÇõÇœo nacional"}
-                  </span>
+                  <span className="text-sm font-medium text-foreground">{item.label}</span>
+                  <span className="text-xs text-muted-foreground">{item.helper}</span>
                 </div>
               </div>
               <div className="flex flex-col items-end">
-                <span className={`text-base font-bold ${item.textColor}`}>
-                  {item.value}%
-                </span>
-                <span
-                  className={`text-[10px] mt-1 px-2 py-0.5 rounded-full ${item.bgColor} ${item.textColor}`}
-                >
+                <span className={`text-base font-bold ${item.textColor}`}>{item.value}%</span>
+                <span className={`text-[10px] mt-1 px-2 py-0.5 rounded-full ${item.bgColor} ${item.textColor}`}>
                   {item.status}
                 </span>
               </div>
@@ -218,13 +235,10 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
               <AlertTriangle className="w-5 h-5 text-red-400" />
             </div>
             <div className="space-y-1">
-              <h3 className="font-semibold text-foreground">
-                VocÇ¦ estÇ­ 36% acima da mÇ¸dia
-              </h3>
+              <h3 className="font-semibold text-foreground">Você está 36% acima da média</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Seu nÇðvel de estresse mental Ç¸ significativamente maior que o
-                brasileiro mÇ¸dio. Isso indica que sua mente estÇ­ operando em
-                estado de sobrecarga constante.
+                Seu nível de estresse mental está significativamente maior do que o restante do país. Isso indica
+                que sua mente está operando em sobrecarga constante.
               </p>
             </div>
           </div>
@@ -239,15 +253,11 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
         >
           <div className="bg-muted/30 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-orange-400">4x</div>
-            <div className="text-xs text-muted-foreground">
-              Mais chances de burnout
-            </div>
+            <div className="text-xs text-muted-foreground">Mais chances de burnout</div>
           </div>
           <div className="bg-muted/30 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-orange-400">58%</div>
-            <div className="text-xs text-muted-foreground">
-              Queda na produtividade
-            </div>
+            <div className="text-xs text-muted-foreground">Queda na produtividade</div>
           </div>
         </motion.div>
 
@@ -262,11 +272,11 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
             size="lg"
             className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/25"
           >
-            <span className="font-semibold">Continuar DiagnÇüstico</span>
+            <span className="font-semibold">Continuar diagnóstico</span>
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
           <p className="text-xs text-muted-foreground text-center mt-3">
-            Faltam apenas 5 perguntas para seu resultado completo
+            Faltam apenas 5 perguntas para concluir seu resultado
           </p>
         </motion.div>
       </motion.div>

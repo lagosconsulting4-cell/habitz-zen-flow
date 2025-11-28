@@ -2,7 +2,6 @@ import React, { useState, useCallback, useEffect } from "react";
 import { usePathAwareNavigate } from "@/contexts/PathPrefixContext";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import {
   ArrowRight,
   ArrowLeft,
