@@ -46,13 +46,13 @@ export const flipCardsData: FlipCardData[] = [
       emoji: "😩",
       text: "Alarme toca. Você já está exausto antes de levantar.",
       stress: "+12%",
-      image: "/images/mirror/bixo-7.png",
+      image: "/images/mirror/bruno-falci-12.png",
     },
     bora: {
       emoji: "😌",
       text: "Respira fundo. Luz natural. Corpo desperta com calma.",
       stress: "-15%",
-      image: "/images/mirror/bixo-3.png",
+      image: "/images/mirror/feliz.png",
     },
   },
   {
@@ -63,13 +63,13 @@ export const flipCardsData: FlipCardData[] = [
       emoji: "😣",
       text: "Trânsito, notificações, já atrasado. Caos mental.",
       stress: "+18%",
-      image: "/images/mirror/bixo-1.png",
+      image: "/images/mirror/bruno-falci-10.png",
     },
     bora: {
       emoji: "😊",
       text: "Ritual matinal. Café com calma. Foco na primeira tarefa.",
       stress: "-10%",
-      image: "/images/mirror/bixo-4.png",
+      image: "/images/mirror/feliz.png",
     },
   },
   {
@@ -80,13 +80,13 @@ export const flipCardsData: FlipCardData[] = [
       emoji: "😵‍💫",
       text: "Reuniões sem parar. Almoço correndo. Cansaço batendo.",
       stress: "+22%",
-      image: "/images/mirror/bixo-2.png",
+      image: "/images/mirror/bruno-falci-13.png",
     },
     bora: {
       emoji: "😎",
       text: "Pausa consciente. Refeição tranquila. Energia renovada.",
       stress: "-12%",
-      image: "/images/mirror/bixo-5.png",
+      image: "/images/mirror/feliz.png",
     },
   },
   {
@@ -103,7 +103,7 @@ export const flipCardsData: FlipCardData[] = [
       emoji: "🚀",
       text: "Foco no essencial. Progresso visível. Sensação de controle.",
       stress: "-18%",
-      image: "/images/mirror/bixo-6.png",
+      image: "/images/mirror/feliz.png",
     },
   },
   {
@@ -114,13 +114,13 @@ export const flipCardsData: FlipCardData[] = [
       emoji: "😞",
       text: "Sentimento de fracasso. Nada foi concluído. Leva trabalho pra casa.",
       stress: "+20%",
-      image: "/images/mirror/bixo-4.png",
+      image: "/images/mirror/bruno-falci-10.png",
     },
     bora: {
       emoji: "🎉",
       text: "Dia produtivo. Tarefas concluídas. Desconexão tranquila.",
       stress: "-14%",
-      image: "/images/mirror/bixo-8.png",
+      image: "/images/mirror/feliz.png",
     },
   },
   {
@@ -137,7 +137,7 @@ export const flipCardsData: FlipCardData[] = [
       emoji: "💫",
       text: "Tempo de qualidade. Conexões reais. Presença plena.",
       stress: "-16%",
-      image: "/images/mirror/bixo-2.png",
+      image: "/images/mirror/feliz.png",
     },
   },
   {
@@ -154,7 +154,7 @@ export const flipCardsData: FlipCardData[] = [
       emoji: "🛌",
       text: "Ritual de sono. Mente tranquila. Corpo relaxado.",
       stress: "-20%",
-      image: "/images/mirror/bixo-1.png",
+      image: "/images/mirror/feliz.png",
     },
   },
   {
@@ -165,13 +165,13 @@ export const flipCardsData: FlipCardData[] = [
       emoji: "😰",
       text: "Acordado. Ansiedade. Amanhã será pior ainda.",
       stress: "+30%",
-      image: "/images/mirror/bixo-8.png",
+      image: "/images/mirror/bruno-falci-12.png",
     },
     bora: {
       emoji: "🌙",
       text: "Sono profundo. Recuperação total. Energia renovada.",
       stress: "-25%",
-      image: "/images/mirror/bixo-7.png",
+      image: "/images/mirror/feliz.png",
     },
   },
 ];

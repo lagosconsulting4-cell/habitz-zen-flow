@@ -8,8 +8,8 @@ interface TransicaoScreenProps {
 }
 
 const transitionPreviewImages = {
-  before: "/images/mirror/bixo-7.png",
-  after: "/images/mirror/bixo-5.png",
+  before: "/images/mirror/bruno-falci-10.png",
+  after: "/images/mirror/feliz.png",
 };
 
 const TransicaoScreen: React.FC<TransicaoScreenProps> = ({ onContinue }) => {
