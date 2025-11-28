@@ -63,36 +63,43 @@ const createIcon = (paths: JSX.Element[], viewBox = "0 0 24 24") => (props: Icon
   </svg>
 );
 
+// Filled icon factory for solid/filled style icons
+const createFilledIcon = (paths: JSX.Element[], viewBox = "0 0 24 24") => (props: IconProps) => (
+  <svg viewBox={viewBox} fill="currentColor" {...props}>
+    {paths}
+  </svg>
+);
+
 export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element> = {
-  // REDESIGNED: Geometric running figure - Streaks style
-  run: createIcon([
-    <circle key="1" cx="12" cy="5" r="2" />,
-    <path key="2" d="M12 7v7" />,
-    <path key="3" d="M8 14l4-2 4 4" />,
+  // REDESIGNED: Running person - Filled style (Heroicons-inspired)
+  run: createFilledIcon([
+    <path key="1" d="M15 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />,
+    <path key="2" d="M14 8c-.6 0-1 .4-1 1v3l-2 1c-.5.2-.7.8-.5 1.2.2.5.8.7 1.2.5l2.3-1V19c0 .6.4 1 1 1s1-.4 1-1v-6l2 3c.3.4.9.5 1.3.2.4-.3.5-.9.2-1.3l-3-4.5c-.2-.3-.5-.4-.8-.4H14Z" />,
+    <path key="3" d="M10 14c-.3-.4-.9-.5-1.3-.2-.4.3-.5.9-.2 1.3L10 17v3c0 .6.4 1 1 1s1-.4 1-1v-3.4c0-.2 0-.4-.1-.6L10 14Z" />,
   ]),
-  // REDESIGNED: Geometric bicycle - Streaks style
-  cycle: createIcon([
+  // REDESIGNED: Cycling - Filled style (Heroicons-inspired)
+  cycle: createFilledIcon([
     <circle key="1" cx="7" cy="17" r="3" />,
     <circle key="2" cx="17" cy="17" r="3" />,
-    <path key="3" d="M7 17h10" />,
-    <path key="4" d="M12 8l-3 9M12 8l3 9" />,
+    <circle key="3" cx="13" cy="6" r="2" />,
+    <path key="4" d="M12 9c-.3 0-.5.1-.7.3l-3 4c-.3.4-.2 1 .2 1.3.4.3 1 .2 1.3-.2l2.2-2.9V17c0 .6.4 1 1 1s1-.4 1-1v-6.5l1.8 2.7c.3.4.9.5 1.3.2.4-.3.5-.9.2-1.3l-3-4.5c-.2-.2-.5-.3-.8-.3h-1.5Z" />,
   ]),
-  // REDESIGNED: Geometric swimming - Streaks style
-  swim: createIcon([
-    <circle key="1" cx="8" cy="6" r="2" />,
-    <path key="2" d="M8 8c2 2 6 2 8 0" />,
-    <path key="3" d="M4 14c2-1 4-1 6 0s4 1 6 0 4-1 6 0" />,
-    <path key="4" d="M4 18c2-1 4-1 6 0s4 1 6 0 4-1 6 0" />,
+  // REDESIGNED: Swimming - Filled style (Heroicons-inspired)
+  swim: createFilledIcon([
+    <circle key="1" cx="9" cy="6" r="2" />,
+    <path key="2" d="M7 9c-.3 0-.6.2-.8.4-.2.3-.2.7 0 1l3 4c.2.3.5.4.8.4h4c.3 0 .6-.1.8-.4l2-2.7c.3-.4.2-1-.2-1.3-.4-.3-1-.2-1.3.2L13.6 13H11l-2.2-2.9c-.2-.3-.5-.4-.8-.4H7Z" />,
+    <path key="3" d="M3.5 16c-.3 0-.5.2-.5.5s.2.5.5.5c.8 0 1.5.3 2.2.7.7.4 1.5.8 2.3.8s1.6-.4 2.3-.8c.7-.4 1.4-.7 2.2-.7s1.5.3 2.2.7c.7.4 1.5.8 2.3.8s1.6-.4 2.3-.8c.7-.4 1.4-.7 2.2-.7.3 0 .5-.2.5-.5s-.2-.5-.5-.5c-.8 0-1.6.4-2.3.8-.7.4-1.4.7-2.2.7s-1.5-.3-2.2-.7c-.7-.4-1.5-.8-2.3-.8s-1.6.4-2.3.8c-.7.4-1.4.7-2.2.7s-1.5-.3-2.2-.7c-.7-.4-1.5-.8-2.3-.8Z" />,
+    <path key="4" d="M3.5 19c-.3 0-.5.2-.5.5s.2.5.5.5c.8 0 1.5.3 2.2.7.7.4 1.5.8 2.3.8s1.6-.4 2.3-.8c.7-.4 1.4-.7 2.2-.7s1.5.3 2.2.7c.7.4 1.5.8 2.3.8s1.6-.4 2.3-.8c.7-.4 1.4-.7 2.2-.7.3 0 .5-.2.5-.5s-.2-.5-.5-.5c-.8 0-1.6.4-2.3.8-.7.4-1.4.7-2.2.7s-1.5-.3-2.2-.7c-.7-.4-1.5-.8-2.3-.8s-1.6.4-2.3.8c-.7.4-1.4.7-2.2.7s-1.5-.3-2.2-.7c-.7-.4-1.5-.8-2.3-.8Z" />,
   ]),
   // REDESIGNED: Stairs - cleaner steps
   stairs: createIcon([
     <path key="1" d="M6 18h3v-4h3v-4h3v-4h3" />,
   ]),
-  // REDESIGNED: Zen meditation - Streaks style
-  meditate: createIcon([
-    <circle key="1" cx="12" cy="7" r="2.5" />,
-    <path key="2" d="M12 10v4" />,
-    <path key="3" d="M7 15a5 5 0 0 1 10 0" />,
+  // REDESIGNED: Meditation - Filled lotus position (Heroicons-inspired)
+  meditate: createFilledIcon([
+    <circle key="1" cx="12" cy="5" r="2" />,
+    <path key="2" d="M10 8c-.6 0-1 .4-1 1v4c0 .4.2.7.5.9l2 1.3V19c0 .6.4 1 1 1s1-.4 1-1v-3.8l2-1.3c.3-.2.5-.5.5-.9V9c0-.6-.4-1-1-1h-4Z" />,
+    <path key="3" d="M7 15c-.3 0-.6.2-.8.4-.2.3-.2.7 0 1 .2.3.5.4.8.4h2.5c.3 0 .5-.2.5-.5v-1c0-.2-.1-.3-.3-.4L7 15ZM17 15l-2.7.9c-.2.1-.3.2-.3.4v1c0 .3.2.5.5.5H17c.3 0 .6-.1.8-.4.2-.3.2-.7 0-1-.2-.2-.5-.4-.8-.4Z" />,
   ]),
   // REDESIGNED: Journal - book with pen
   journal: createIcon([
@@ -114,11 +121,11 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
   water: createIcon([
     <path key="1" d="M12 3s4 5 4 9a4 4 0 0 1-8 0c0-4 4-9 4-9Z" />,
   ]),
-  // REDESIGNED: No fast food - consistent slash pattern
-  no_fast_food: createIcon([
-    <path key="1" d="M8 8h8v8H8z" />,
-    <path key="2" d="M12 8v8" />,
-    <path key="3" d="M5 5l14 14" />,
+  // REDESIGNED: No fast food - Filled style with slash (Heroicons-inspired)
+  no_fast_food: createFilledIcon([
+    <path key="1" fillRule="evenodd" d="M6 3h6v2H9v2h3a4 4 0 0 1 0 8H6V3Zm3 10h3a2 2 0 1 0 0-4H9v4Z" clipRule="evenodd" />,
+    <path key="2" d="M15 6h3v9h-3V6Z" />,
+    <path key="3" fillRule="evenodd" d="M3.3 2.3c.4-.4 1-.4 1.4 0l16 16c.4.4.4 1 0 1.4-.4.4-1 .4-1.4 0l-16-16c-.4-.4-.4-1 0-1.4Z" clipRule="evenodd" />,
   ]),
   // REDESIGNED: Sleep - crescent moon clean
   sleep: createIcon([
@@ -136,10 +143,9 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
     <path key="2" d="M9 2h6v2H9Z" />,
     <path key="3" d="M9 10l2 2 4-4" />,
   ]),
-  // REDESIGNED: Focus/deep work - target symbol
-  deep_work: createIcon([
-    <circle key="1" cx="12" cy="12" r="8" />,
-    <circle key="2" cx="12" cy="12" r="3" />,
+  // REDESIGNED: Deep work - Head with headphones and brain (inspired by AI-generated design)
+  deep_work: createFilledIcon([
+    <path key="1" fillRule="evenodd" d="M12 2C8.7 2 6 4.7 6 8v3c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2v1c0 2.2 1.8 4 4 4h4c2.2 0 4-1.8 4-4v-1c1.1 0 2-.9 2-2v-2c0-1.1-.9-2-2-2V8c0-3.3-2.7-6-6-6Zm-2 6c0-.6.4-1 1-1s1 .4 1 1v2c0 .6-.4 1-1 1s-1-.4-1-1V8Zm4 0c0-.6.4-1 1-1s1 .4 1 1v2c0 .6-.4 1-1 1s-1-.4-1-1V8Z" clipRule="evenodd" />,
   ]),
   // REDESIGNED: Phone call - simple geometric phone
   call_family: createIcon([
@@ -147,10 +153,10 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
     <circle key="2" cx="12" cy="17" r="1" />,
     <path key="3" d="M9 7h6" />,
   ]),
-  // REDESIGNED: Detox/cleanse - droplet with sparkle
-  detox: createIcon([
-    <path key="1" d="M12 3s4 5 4 9a4 4 0 0 1-8 0c0-4 4-9 4-9Z" />,
-    <path key="2" d="M12 8l1 1-1 1-1-1z" />,
+  // REDESIGNED: Detox - Leaves with droplet (inspired by AI-generated design)
+  detox: createFilledIcon([
+    <path key="1" d="M7 3c-.3 0-.5.2-.5.5 0 2.5 1 4.5 2.5 5.5-1.5 1-2.5 3-2.5 5.5 0 .3.2.5.5.5s.5-.2.5-.5c0-2 .8-3.8 2-4.8.5-.4 1-.9 1.3-1.4.3.5.8 1 1.3 1.4 1.2 1 2 2.8 2 4.8 0 .3.2.5.5.5s.5-.2.5-.5c0-2.5-1-4.5-2.5-5.5C13.5 8 14.5 6 14.5 3.5c0-.3-.2-.5-.5-.5s-.5.2-.5.5c0 2-.8 3.8-2 4.8-1.2-1-2-2.8-2-4.8 0-.3-.2-.5-.5-.5Z" />,
+    <path key="2" d="M10 17c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2Z" />,
   ]),
   heart: createIcon([
     <path key="1" d="M12 21s-5-3.5-7-7a4 4 0 1 1 7-3 4 4 0 1 1 7 3c-2 3.5-7 7-7 7Z" />,
@@ -171,22 +177,25 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
     <circle key="1" cx="12" cy="12" r="10" />,
     <path key="2" d="M12 6v6l4 2" />,
   ]),
-  // REDESIGNED: Burn energy - flame simplified
-  burn_energy: createIcon([
-    <path key="1" d="M12 3s-4 4-4 8c0 3 2 6 4 6s4-3 4-6c0-4-4-8-4-8Z" />,
-    <path key="2" d="M10 10a2 2 0 0 1 4 0" />,
+  // REDESIGNED: Burn energy - Dumbbell (inspired by AI-generated design)
+  burn_energy: createFilledIcon([
+    <path key="1" d="M4 10h2v4H4c-1.1 0-2-.9-2-2s.9-2 2-2ZM18 10h2c1.1 0 2 .9 2 2s-.9 2-2 2h-2v-4Z" />,
+    <rect key="2" x="6" y="11" width="12" height="2" rx="1" />,
+    <rect key="3" x="6" y="9" width="2" height="6" rx="1" />,
+    <rect key="4" x="16" y="9" width="2" height="6" rx="1" />,
   ]),
-  // REDESIGNED: Geometric stretch - Streaks style
-  stretch: createIcon([
+  // REDESIGNED: Stretch - Filled arms up (Heroicons-inspired)
+  stretch: createFilledIcon([
     <circle key="1" cx="12" cy="5" r="2" />,
-    <path key="2" d="M12 7v6" />,
-    <path key="3" d="M6 10l6 3 6-3" />,
+    <path key="2" d="M10 8c-.6 0-1 .4-1 1v10c0 .6.4 1 1 1s1-.4 1-1v-9h2v9c0 .6.4 1 1 1s1-.4 1-1V9c0-.6-.4-1-1-1h-4Z" />,
+    <path key="3" d="M7.3 9.3c-.4.4-.4 1 0 1.4l2 2c.4.4 1 .4 1.4 0 .4-.4.4-1 0-1.4l-2-2c-.4-.4-1-.4-1.4 0ZM16.7 9.3c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l2 2c.4.4 1 .4 1.4 0 .4-.4.4-1 0-1.4l-2-2Z" />,
   ]),
-  // REDESIGNED: Yoga balance pose - Streaks style
-  yoga: createIcon([
+  // REDESIGNED: Yoga - Filled lotus pose (Heroicons-inspired)
+  yoga: createFilledIcon([
     <circle key="1" cx="12" cy="5" r="2" />,
-    <path key="2" d="M7 13h10" />,
-    <path key="3" d="M12 7v6" />,
+    <path key="2" d="M10 8c-.6 0-1 .4-1 1v3c0 .3.1.5.3.7l2 2c.2.2.4.3.7.3s.5-.1.7-.3l2-2c.2-.2.3-.4.3-.7V9c0-.6-.4-1-1-1h-4Z" />,
+    <path key="3" d="M6 15c-.3 0-.6.1-.7.3l-2 2c-.4.4-.4 1 0 1.4.4.4 1 .4 1.4 0l1.6-1.6c.2-.2.3-.4.3-.7v-.9c0-.3-.3-.5-.6-.5ZM18 15c-.3 0-.6.2-.6.5v.9c0 .3.1.5.3.7l1.6 1.6c.4.4 1 .4 1.4 0 .4-.4.4-1 0-1.4l-2-2c-.1-.2-.4-.3-.7-.3Z" />,
+    <path key="4" d="M11 16c0-.6-.4-1-1-1s-1 .4-1 1v3c0 .6.4 1 1 1s1-.4 1-1v-3ZM15 16c0-.6-.4-1-1-1s-1 .4-1 1v3c0 .6.4 1 1 1s1-.4 1-1v-3Z" />,
   ]),
   // REDESIGNED: Strength - dumbbell clean
   strength: createIcon([
@@ -220,26 +229,29 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
     <circle key="2" cx="12" cy="12" r="6" />,
     <circle key="3" cx="12" cy="12" r="2" />,
   ]),
-  // REDESIGNED: Fruits - apple simplified
-  fruits: createIcon([
-    <circle key="1" cx="12" cy="13" r="6" />,
-    <path key="2" d="M12 7v2" />,
-    <path key="3" d="M10 6c0-2 1-3 2-3s2 1 2 3" />,
+  // REDESIGNED: Fruits - Grapes filled (inspired by AI-generated design)
+  fruits: createFilledIcon([
+    <circle key="1" cx="8" cy="10" r="2.5" />,
+    <circle key="2" cx="13" cy="10" r="2.5" />,
+    <circle key="3" cx="10.5" cy="14" r="2.5" />,
+    <circle key="4" cx="8" cy="18" r="2" />,
+    <circle key="5" cx="13" cy="18" r="2" />,
+    <path key="6" d="M10.5 3c-.6 0-1 .4-1 1v3.5c0 .3.2.5.5.5s.5-.2.5-.5V4.5c.3-.3.6-.5 1-.5h.5c.3 0 .5-.2.5-.5s-.2-.5-.5-.5h-1Z" />,
   ]),
-  // REDESIGNED: Vegetables - carrot simplified
-  vegetables: createIcon([
-    <path key="1" d="M12 4v2" />,
-    <path key="2" d="M9 6l3-2 3 2c1 1 2 4 0 10l-3 4-3-4c-2-6-1-9 0-10Z" />,
+  // REDESIGNED: Vegetables - Carrot, broccoli, tomato (inspired by AI-generated design)
+  vegetables: createFilledIcon([
+    <path key="1" d="M6 3c-.6 0-1 .4-1 1v2c0 1.7 1.3 3 3 3V3H6ZM10 3v6c1.7 0 3-1.3 3-3V4c0-.6-.4-1-1-1h-2Z" />,
+    <path key="2" d="M7.5 10c-.3 0-.5.2-.5.5V16l1.5 4c.2.5.6.8 1.1.8h1.8c.5 0 .9-.3 1.1-.8L14 16v-5.5c0-.3-.2-.5-.5-.5h-6Z" />,
+    <circle key="3" cx="18" cy="15" r="3" />,
+    <path key="4" d="M18 11c-.3 0-.5.2-.5.5v1c0 .3.2.5.5.5s.5-.2.5-.5v-1c0-.3-.2-.5-.5-.5Z" />,
   ]),
-  // REDESIGNED: Protein - drumstick simplified
-  protein: createIcon([
-    <circle key="1" cx="15" cy="8" r="3" />,
-    <path key="2" d="M12 11l-4 8c-1 2 0 3 2 3h4" />,
+  // REDESIGNED: Protein - Steak/meat (inspired by AI-generated design)
+  protein: createFilledIcon([
+    <path key="1" fillRule="evenodd" d="M8 6c-2.2 0-4 1.8-4 4v4c0 2.2 1.8 4 4 4h8c2.2 0 4-1.8 4-4v-4c0-2.2-1.8-4-4-4H8Zm2 4c-.6 0-1 .4-1 1s.4 1 1 1 1-.4 1-1-.4-1-1-1Zm4 2c-.6 0-1 .4-1 1s.4 1 1 1 1-.4 1-1-.4-1-1-1Z" clipRule="evenodd" />,
   ]),
-  // REDESIGNED: Vitamins - pill simplified
-  vitamins: createIcon([
-    <rect key="1" x="7" y="7" width="10" height="10" rx="5" />,
-    <path key="2" d="M7 12h10" />,
+  // REDESIGNED: Vitamins - Filled pill (Heroicons-inspired)
+  vitamins: createFilledIcon([
+    <path key="1" fillRule="evenodd" d="M15.6 3.6c2.3 2.3 2.3 6.1 0 8.5l-4.2 4.2c-2.3 2.3-6.1 2.3-8.5 0-2.3-2.3-2.3-6.1 0-8.5l4.2-4.2c2.3-2.3 6.1-2.3 8.5 0ZM7 7v10l-2.8-2.8c-1.6-1.6-1.6-4.1 0-5.7L7 7Zm10 10V7l2.8 2.8c1.6 1.6 1.6 4.1 0 5.7L17 17Z" clipRule="evenodd" />,
   ]),
   // IMPROVED: Clock with clearer 10:10 position - Streaks style
   clock: createIcon([
@@ -289,21 +301,20 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
     <path key="2" d="M12 2v4M12 16v4M2 12h4M18 12h4" />,
     <path key="3" d="M2 20h20" />,
   ]),
-  // REDESIGNED: Make bed - bed with checkmark
-  make_bed: createIcon([
-    <rect key="1" x="4" y="10" width="16" height="8" rx="1" />,
-    <path key="2" d="M8 6l2 2 4-4" />,
+  // REDESIGNED: Make bed - Filled bed (Heroicons-inspired)
+  make_bed: createFilledIcon([
+    <path key="1" d="M3 11c0-.6.4-1 1-1h2V9c0-1.1.9-2 2-2h3c1.1 0 2 .9 2 2v1h2V9c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v1h1c.6 0 1 .4 1 1v6c0 .6-.4 1-1 1h-1v2c0 .6-.4 1-1 1s-1-.4-1-1v-2H5v2c0 .6-.4 1-1 1s-1-.4-1-1v-2H3c-.6 0-1-.4-1-1v-6Z" />,
   ]),
   // REDESIGNED: Review - document with checkmark
   review: createIcon([
     <rect key="1" x="6" y="4" width="12" height="16" rx="1" />,
     <path key="2" d="M9 10l2 2 4-4" />,
   ]),
-  // REDESIGNED: No sugar - consistent slash pattern
-  no_sugar: createIcon([
-    <rect key="1" x="9" y="6" width="6" height="8" rx="3" />,
-    <path key="2" d="M10 16v2c0 1 1 2 2 2s2-1 2-2v-2" />,
-    <path key="3" d="M5 5l14 14" />,
+  // REDESIGNED: No sugar - Filled style with slash (Heroicons-inspired)
+  no_sugar: createFilledIcon([
+    <path key="1" d="M8 4h8v8H8V4Zm2 2v4h4V6h-4Z" />,
+    <path key="2" d="M10 14h4l1 4c.2.8-.3 1.5-1 1.7-.8.2-1.5-.3-1.7-1L11 15l-1.3 3.7c-.2.7-.9 1.2-1.7 1-.7-.2-1.2-.9-1-1.7l1-4Z" />,
+    <path key="3" fillRule="evenodd" d="M3.3 2.3c.4-.4 1-.4 1.4 0l16 16c.4.4.4 1 0 1.4-.4.4-1 .4-1.4 0l-16-16c-.4-.4-.4-1 0-1.4Z" clipRule="evenodd" />,
   ]),
   // REDESIGNED: No procrastination - consistent slash pattern
   no_procrastination: createIcon([
@@ -311,12 +322,12 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
     <path key="2" d="M12 8v4l3 2" />,
     <path key="3" d="M5 5l14 14" />,
   ]),
-  // REDESIGNED: No skip meals - consistent slash pattern
-  no_skip_meals: createIcon([
-    <circle key="1" cx="12" cy="12" r="7" />,
-    <path key="2" d="M9 10v4" />,
-    <path key="3" d="M15 10v4" />,
-    <path key="4" d="M5 5l14 14" />,
+  // REDESIGNED: No skip meals - Filled style with slash (Heroicons-inspired)
+  no_skip_meals: createFilledIcon([
+    <path key="1" d="M7 4v8c0 .6.4 1 1 1s1-.4 1-1V4c0-.6-.4-1-1-1s-1 .4-1 1ZM4 4v5c0 1.1.9 2 2 2V4c0-.6-.4-1-1-1s-1 .4-1 1Z" />,
+    <path key="2" d="M11 4v8c0 .6.4 1 1 1s1-.4 1-1V4c0-.6-.4-1-1-1s-1 .4-1 1Z" />,
+    <path key="3" d="M15 4h3c.6 0 1 .4 1 1v6l-2 8c-.1.5-.6.8-1.1.8s-1-.4-1.1-.8l-2-8V5c0-.6.4-1 1-1h1.2Z" />,
+    <path key="4" fillRule="evenodd" d="M3.3 2.3c.4-.4 1-.4 1.4 0l16 16c.4.4.4 1 0 1.4-.4.4-1 .4-1.4 0l-16-16c-.4-.4-.4-1 0-1.4Z" clipRule="evenodd" />,
   ]),
   // REDESIGNED: Leisure/relaxation - couch simplified
   leisure: createIcon([
@@ -335,23 +346,23 @@ export const HabitIcons: Record<HabitIconKey, (props: IconProps) => JSX.Element>
     <path key="2" d="M16 12h2v2h-2" />,
     <path key="3" d="M8 16v2h6v-2" />,
   ]),
-  // REDESIGNED: Social media - phone with notification
-  social_media: createIcon([
-    <rect key="1" x="6" y="3" width="12" height="18" rx="2" />,
-    <circle key="2" cx="15" cy="6" r="2" />,
-    <circle key="3" cx="12" cy="18" r="1" />,
+  // REDESIGNED: Social media - Thumbs up with chat (Heroicons-inspired)
+  social_media: createFilledIcon([
+    <path key="1" d="M7 22V11H4c-.6 0-1-.4-1-1V8c0-.6.4-1 1-1h4.4l1.4-3.5c.2-.5.8-.8 1.3-.6.5.2.8.8.6 1.3L10.6 7H15c1.7 0 3 1.3 3 3v1c0 .4-.1.8-.3 1.1L15.3 18c-.3.6-.9 1-1.6 1H8c-.6 0-1-.4-1-1Z" />,
+    <path key="2" d="M16 2h3c.6 0 1 .4 1 1v3c0 .6-.4 1-1 1h-3c-.6 0-1-.4-1-1V3c0-.6.4-1 1-1Z" />,
   ]),
   // REDESIGNED: No late sleep - consistent slash pattern
   no_late_sleep: createIcon([
     <path key="1" d="M12 4a6 6 0 0 0 8 8 8 8 0 1 1-8-8Z" />,
     <path key="2" d="M5 5l14 14" />,
   ]),
-  // REDESIGNED: Active movement - Streaks style
-  active: createIcon([
+  // REDESIGNED: Active - Weightlifting (inspired by AI-generated design)
+  active: createFilledIcon([
     <circle key="1" cx="12" cy="5" r="2" />,
-    <path key="2" d="M12 7v6" />,
-    <path key="3" d="M9 13l3 8 3-8" />,
-    <path key="4" d="M7 11l5 1 5-1" />,
+    <path key="2" d="M7 8c-.6 0-1 .4-1 1s.4 1 1 1h10c.6 0 1-.4 1-1s-.4-1-1-1H7Z" />,
+    <rect key="3" x="3" y="8" width="2" height="2" rx="1" />,
+    <rect key="4" x="19" y="8" width="2" height="2" rx="1" />,
+    <path key="5" d="M10 11c-.6 0-1 .4-1 1v7c0 .6.4 1 1 1s1-.4 1-1v-7c0-.6-.4-1-1-1ZM14 11c-.6 0-1 .4-1 1v7c0 .6.4 1 1 1s1-.4 1-1v-7c0-.6-.4-1-1-1Z" />,
   ]),
 };
 
