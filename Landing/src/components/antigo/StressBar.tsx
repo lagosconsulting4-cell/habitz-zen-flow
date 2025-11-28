@@ -1,7 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 
-import { getStressStatus, type StressPhase } from "@/components/direct/stress-status";
+import { getStressStatus, type StressPhase } from "@/components/antigo/stress-status";
 
 interface StressBarProps {
   stressLevel: number; // 0-150%

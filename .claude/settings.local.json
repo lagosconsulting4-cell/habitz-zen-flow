@@ -14,7 +14,11 @@
       "WebSearch",
       "Bash(git checkout:*)",
       "Bash(if not exist \"Doc\" mkdir \"Doc\")",
-      "Bash(npm run dev)"
+      "Bash(npm run dev)",
+      "Bash(git clone:*)",
+      "Bash(python -m http.server:*)",
+      "Bash(mkdir:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []

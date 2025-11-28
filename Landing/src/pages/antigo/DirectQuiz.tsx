@@ -9,8 +9,8 @@ import {
   AlertTriangle,
   CheckCircle2,
 } from "lucide-react";
-import QuizLoadingScreen from "@/components/direct/QuizLoadingScreen";
-import FeedbackGraph from "@/components/direct/FeedbackGraph";
+import QuizLoadingScreen from "@/components/antigo/QuizLoadingScreen";
+import FeedbackGraph from "@/components/antigo/FeedbackGraph";
 
 // Quiz questions data - 10 questions as specified
 const quizQuestions = [

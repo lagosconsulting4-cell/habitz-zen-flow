@@ -24,7 +24,7 @@ import {
   Zap,
 } from "lucide-react";
 import { buttonHoverTap, springTransition } from "@/hooks/useAnimations";
-import StressBar from "@/components/direct/StressBar";
+import StressBar from "@/components/antigo/StressBar";
 
 // No SiriOrb import - using clean gradient backgrounds instead
 

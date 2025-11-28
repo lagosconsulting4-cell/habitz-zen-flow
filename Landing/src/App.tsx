@@ -14,11 +14,11 @@ const Offer = lazy(() => import("./pages/Offer"));
 const Obrigado = lazy(() => import("./pages/Obrigado"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Direct flow components (A/B variant) - lazy loaded
-const DirectIndex = lazy(() => import("./pages/direct/DirectIndex"));
-const DirectQuiz = lazy(() => import("./pages/direct/DirectQuiz"));
-const DirectMirror = lazy(() => import("./pages/direct/DirectMirror"));
-const DirectOffer = lazy(() => import("./pages/direct/DirectOffer"));
+// Antigo flow components (A/B variant) - lazy loaded
+const AntigoIndex = lazy(() => import("./pages/antigo/DirectIndex"));
+const AntigoQuiz = lazy(() => import("./pages/antigo/DirectQuiz"));
+const AntigoMirror = lazy(() => import("./pages/antigo/DirectMirror"));
+const AntigoOffer = lazy(() => import("./pages/antigo/DirectOffer"));
 
 // Bora landing page - single page optimized for conversion
 const BoraLanding = lazy(() => import("./pages/bora/BoraLanding"));
@@ -85,43 +85,43 @@ const App = () => (
               }
             />
 
-            {/* Direct Flow (A/B Variant) - New landing page with urgency messaging */}
+            {/* Antigo Flow (A/B Variant) - Previous landing page */}
             <Route
-              path="/direct"
+              path="/antigo"
               element={
-                <PathPrefixProvider prefix="/direct">
-                  <DirectIndex />
+                <PathPrefixProvider prefix="/antigo">
+                  <AntigoIndex />
                 </PathPrefixProvider>
               }
             />
             <Route
-              path="/direct/quiz"
+              path="/antigo/quiz"
               element={
-                <PathPrefixProvider prefix="/direct">
-                  <DirectQuiz />
+                <PathPrefixProvider prefix="/antigo">
+                  <AntigoQuiz />
                 </PathPrefixProvider>
               }
             />
             <Route
-              path="/direct/mirror"
+              path="/antigo/mirror"
               element={
-                <PathPrefixProvider prefix="/direct">
-                  <DirectMirror />
+                <PathPrefixProvider prefix="/antigo">
+                  <AntigoMirror />
                 </PathPrefixProvider>
               }
             />
             <Route
-              path="/direct/offer"
+              path="/antigo/offer"
               element={
-                <PathPrefixProvider prefix="/direct">
-                  <DirectOffer />
+                <PathPrefixProvider prefix="/antigo">
+                  <AntigoOffer />
                 </PathPrefixProvider>
               }
             />
             <Route
-              path="/direct/obrigado"
+              path="/antigo/obrigado"
               element={
-                <PathPrefixProvider prefix="/direct">
+                <PathPrefixProvider prefix="/antigo">
                   <Obrigado />
                 </PathPrefixProvider>
               }

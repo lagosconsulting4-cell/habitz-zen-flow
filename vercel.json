@@ -4,6 +4,14 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/direct",
+      "destination": "/direct/index.html"
+    },
+    {
+      "source": "/direct/:path*",
+      "destination": "/direct/:path*"
+    },
+    {
       "source": "/tdah/obrigado",
       "destination": "/tdah/obrigado.html"
     },
@@ -12,7 +20,7 @@
       "destination": "/app/index.html"
     },
     {
-      "source": "/:path((?!app|tdah|tiktok|assets|audio|favicon).*)",
+      "source": "/:path((?!app|tdah|tiktok|assets|audio|favicon|direct|antigo).*)",
       "destination": "/index.html"
     }
   ],

@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { usePathAwareNavigate } from "@/contexts/PathPrefixContext";
 import { motion, AnimatePresence } from "motion/react";
-import StressBar from "@/components/direct/StressBar";
-import { getStressStatus } from "@/components/direct/stress-status";
-import FlipCard from "@/components/direct/FlipCard";
-import { flipCardsData, getCardContent } from "@/components/direct/flip-card-data";
-import ColapsoScreen from "@/components/direct/ColapsoScreen";
-import TransicaoScreen from "@/components/direct/TransicaoScreen";
-import TwoPathsComparison from "@/components/direct/TwoPathsComparison";
+import StressBar from "@/components/antigo/StressBar";
+import { getStressStatus } from "@/components/antigo/stress-status";
+import FlipCard from "@/components/antigo/FlipCard";
+import { flipCardsData, getCardContent } from "@/components/antigo/flip-card-data";
+import ColapsoScreen from "@/components/antigo/ColapsoScreen";
+import TransicaoScreen from "@/components/antigo/TransicaoScreen";
+import TwoPathsComparison from "@/components/antigo/TwoPathsComparison";
 
 // Mirror phases state machine
 type MirrorPhase = "dor" | "colapso" | "transicao" | "bora" | "comparison";

@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, RotateCcw } from "lucide-react";
-import type { CardContent } from "@/components/direct/flip-card-data";
+import type { CardContent } from "@/components/antigo/flip-card-data";
 
 interface FlipCardProps {
   content: CardContent;
