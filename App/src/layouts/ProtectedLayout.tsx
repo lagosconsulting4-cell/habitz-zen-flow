@@ -19,12 +19,13 @@ const ProtectedLayout = () => {
   const containerWidth = isDashboard || isCreate ? "max-w-4xl" : "max-w-6xl";
   const bottomPadding = shouldHideNav ? "pb-8" : "pb-24 md:pb-16";
   const backgroundClass = isDashboard ? "bg-background" : "bg-background";
+  const topPadding = isDashboard ? "pt-0" : "pt-4"; // No padding for dashboard, flush with top
 
   return (
     <div className={`relative min-h-screen ${backgroundClass}`}>
       <MoreMenu open={moreOpen} onOpenChange={setMoreOpen} />
 
-      <div className={`mx-auto flex w-full ${containerWidth} flex-col gap-6 px-4 pt-4 md:flex-row md:px-8 ${bottomPadding}`}>
+      <div className={`mx-auto flex w-full ${containerWidth} flex-col gap-6 px-4 ${topPadding} md:flex-row md:px-8 ${bottomPadding}`}>
         {showSidebar && <AppSidebar onOpenMore={() => setMoreOpen(true)} />}
         <main className="flex-1">
           <Outlet />

@@ -11,7 +11,10 @@
       "Bash(dir \"c:\\Users\\bruno\\Documents\\Black\\Habitz\\Prod\\App\\public\\sounds\")",
       "Bash(dir:*)",
       "Bash(git commit:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git checkout:*)",
+      "Bash(if not exist \"Doc\" mkdir \"Doc\")",
+      "Bash(npm run dev)"
     ],
     "deny": [],
     "ask": []
