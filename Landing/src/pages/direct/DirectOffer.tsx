@@ -39,8 +39,6 @@ import {
 } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/hooks/useAnimations";
 import { CountdownTimer } from "@/components/CountdownTimer";
-import { ValueStack } from "@/components/ValueStack";
-import { BonusCards } from "@/components/BonusCards";
 
 // ============ DATA ============
 
@@ -97,11 +95,46 @@ const testimonials = [
   },
 ];
 
-const faqs = [
+// Consolidated bonus data for "O Que Você Recebe" section
+const bonusItems = [
   {
-    question: "O que está incluso nos R$ 47?",
-    answer: "Você recebe TUDO: App BORA completo por 1 ano + Programa de 30 Dias (R$ 297) + Jornada Guiada 4 Semanas (R$ 197) + Meditações & Respiração (R$ 147) + Hub de Livros (R$ 97) + Dicas Práticas (R$ 67). São R$ 805 em valor por apenas R$ 47 — economia de 94%.",
+    id: 1,
+    title: "Programa 30 Dias",
+    subtitle: "Transformação completa",
+    value: 297,
+    image: "/images/lp/programa_completo_bonus_capa.png",
   },
+  {
+    id: 2,
+    title: "Jornada Guiada",
+    subtitle: "4 semanas de acompanhamento",
+    value: 197,
+    image: "/images/lp/jornada_guiada_bonus_capa.png",
+  },
+  {
+    id: 3,
+    title: "Meditações & Respiração",
+    subtitle: "Acalme sua mente",
+    value: 147,
+    image: "/images/lp/meditações_bonus_capa.png",
+  },
+  {
+    id: 4,
+    title: "Hub de Livros",
+    subtitle: "Biblioteca de desenvolvimento",
+    value: 97,
+    image: "/images/lp/hub_de_livros_bonus_capa.png",
+  },
+  {
+    id: 5,
+    title: "27 Dicas Práticas",
+    subtitle: "Hacks de produtividade",
+    value: 67,
+    image: "/images/lp/dicas_praticas_hack_bonus_capa.png",
+  },
+];
+
+const faqs = [
   {
     question: "Quanto tempo preciso dedicar por dia?",
     answer: "Apenas 7 minutos! Nosso método foi desenhado para se encaixar na rotina mais corrida. São micro-hábitos que geram macro resultados.",
@@ -116,11 +149,7 @@ const faqs = [
   },
   {
     question: "Preciso baixar algum app?",
-    answer: "Não precisa baixar nada! O BORA funciona direto do seu celular pelo navegador. Você pode salvar na tela inicial como um app e usar offline. Acesso imediato após a compra.",
-  },
-  {
-    question: "Como funciona a personalização?",
-    answer: "Baseado nas suas respostas do quiz, criamos uma rotina única para você. O sistema aprende com seu uso e se adapta ao longo do tempo.",
+    answer: "Não precisa baixar nada! O BORA funciona direto do seu celular pelo navegador. Você pode salvar na tela inicial como um app e usar offline.",
   },
 ];
 
@@ -402,11 +431,116 @@ const DirectOffer = () => {
         </div>
       </section>
 
-      {/* ============ VALUE STACK SECTION ============ */}
-      <ValueStack />
+      {/* ============ O QUE VOCÊ RECEBE - CONSOLIDATED ============ */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
+        {/* Background neutro escuro */}
+        <div className="absolute inset-0 bg-gradient-to-b from-muted/20 via-background to-muted/30" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-amber-500/10 rounded-full blur-[120px]" />
 
-      {/* ============ BONUS CARDS SECTION ============ */}
-      <BonusCards />
+        <div className="max-w-5xl mx-auto relative z-10">
+          {/* Header com valor total BEM VISÍVEL */}
+          <motion.div
+            className="text-center mb-10"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Badge className="mb-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-lg shadow-amber-500/30">
+              <Gift className="w-3 h-3 mr-1" />
+              Pacote Completo
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Tudo isso por apenas{" "}
+              <span className="text-primary font-extrabold">R$ 47</span>
+            </h2>
+            <div className="flex items-center justify-center gap-3 text-lg sm:text-xl">
+              <span className="line-through text-muted-foreground">R$ 805</span>
+              <Badge className="bg-red-500 text-white border-0 text-sm font-bold px-3 py-1 animate-pulse">
+                94% OFF
+              </Badge>
+            </div>
+          </motion.div>
+
+          {/* Grid de bônus com capas */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-10">
+            {bonusItems.map((bonus, index) => (
+              <motion.div
+                key={bonus.id}
+                className="group relative rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/50 transition-all duration-300"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -5, scale: 1.02 }}
+              >
+                {/* Imagem da capa */}
+                <div className="aspect-[3/4] relative overflow-hidden">
+                  <img
+                    src={bonus.image}
+                    alt={bonus.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  {/* Overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                  {/* Badge "INCLUSO" */}
+                  <div className="absolute top-2 right-2">
+                    <Badge className="bg-primary text-white border-0 text-[10px] sm:text-xs font-bold px-2 py-0.5">
+                      INCLUSO
+                    </Badge>
+                  </div>
+
+                  {/* Info no bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <p className="text-white font-bold text-sm sm:text-base leading-tight mb-1">
+                      {bonus.title}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white/60 text-xs line-through">
+                        R$ {bonus.value}
+                      </span>
+                      <span className="text-primary text-xs font-bold">
+                        GRÁTIS
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Valor total e CTA */}
+          <motion.div
+            className="text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-primary/10 border border-primary/20 mb-6">
+              <CheckCircle2 className="w-5 h-5 text-primary" />
+              <span className="text-foreground font-medium">
+                <strong className="text-primary">R$ 805</strong> em valor → Por apenas{" "}
+                <strong className="text-primary">R$ 47</strong>
+              </span>
+            </div>
+
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
+                variant="premium"
+                size="lg"
+                className="group text-base px-8 py-4 font-bold"
+              >
+                <Sparkles className="w-5 h-5 mr-2" />
+                GARANTIR MINHA VAGA
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* ============ TESTIMONIALS CAROUSEL ============ */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
@@ -540,20 +674,24 @@ const DirectOffer = () => {
 
       {/* ============ PRICING SECTION ============ */}
       <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-emerald-500/5 to-background" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[150px]" />
-        <div className="absolute top-20 left-20 w-64 h-64 bg-emerald-500/20 rounded-full blur-[100px]" />
-        <div className="absolute bottom-20 right-20 w-64 h-64 bg-teal-500/20 rounded-full blur-[100px]" />
+        {/* Background laranja/dourado para destacar conversão */}
+        <div className="absolute inset-0 bg-gradient-to-b from-amber-500/10 via-orange-500/5 to-background" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-500/15 rounded-full blur-[150px]" />
+        <div className="absolute top-20 right-20 w-64 h-64 bg-orange-500/20 rounded-full blur-[100px]" />
 
         <div className="max-w-lg mx-auto relative z-10">
           <motion.div
-            className="text-center mb-10"
+            className="text-center mb-8"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
+            <Badge className="mb-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-lg shadow-amber-500/30 text-sm px-4 py-2">
+              <Clock className="w-4 h-4 mr-2" />
+              Oferta por tempo limitado
+            </Badge>
             <h2 className="text-3xl md:text-4xl font-bold">
-              Comece sua <span className="text-primary font-extrabold">transformação</span>
+              Garanta sua <span className="text-amber-500 font-extrabold">vaga agora</span>
             </h2>
           </motion.div>
 
@@ -564,58 +702,82 @@ const DirectOffer = () => {
             viewport={{ once: true }}
             transition={{ type: "spring", duration: 0.8 }}
           >
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-emerald-500 to-teal-500 rounded-[2rem] blur-lg opacity-50 animate-pulse" />
+            {/* Glow dourado pulsante */}
+            <div className="absolute -inset-2 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 rounded-[2rem] blur-xl opacity-50 animate-pulse" />
 
-            <div className="relative bg-gradient-to-br from-card via-card to-primary/5 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 shadow-2xl border-2 border-primary/30 overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl" />
+            <div className="relative bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-950/30 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 shadow-2xl border-2 border-amber-500/40 overflow-hidden">
+              {/* Decorative elements */}
+              <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl" />
 
-              <div className="flex justify-center mb-4">
-                <Badge className="bg-gradient-to-r from-primary to-emerald-500 text-white border-0 px-5 py-2 text-sm shadow-lg shadow-primary/30">
-                  <Gift className="w-4 h-4 mr-2" />
-                  Oferta Especial de Lançamento
-                </Badge>
-              </div>
-
+              {/* Timer */}
               <div className="mb-6">
                 <CountdownTimer variant="pricing" />
               </div>
 
-              <div className="text-center mb-8 relative z-10">
-                <div className="flex items-center justify-center gap-3 mb-2">
-                  <p className="text-muted-foreground line-through text-xl sm:text-2xl">R$ 805</p>
-                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs font-bold animate-pulse">
-                    -94%
+              {/* MEGA DESCONTO - Destacado */}
+              <div className="text-center mb-6 relative z-10">
+                {/* Badge 94% OFF gigante */}
+                <motion.div
+                  className="inline-flex mb-4"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Badge className="bg-gradient-to-r from-red-500 to-rose-500 text-white border-0 text-xl sm:text-2xl font-black px-6 py-3 shadow-xl shadow-red-500/40">
+                    94% OFF
                   </Badge>
-                </div>
-                <div className="relative inline-block">
-                  <span className="text-5xl sm:text-7xl md:text-8xl font-black text-primary">
-                    R$ 47
+                </motion.div>
+
+                {/* Preço antigo riscado */}
+                <div className="mb-2">
+                  <span className="text-muted-foreground line-through text-2xl sm:text-3xl">
+                    De R$ 805
                   </span>
-                  <div className="absolute inset-0 text-5xl sm:text-7xl md:text-8xl font-black text-primary blur-2xl opacity-30">
+                </div>
+
+                {/* Preço novo MEGA destaque */}
+                <div className="relative inline-block mb-2">
+                  <motion.span
+                    className="text-6xl sm:text-7xl md:text-8xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent"
+                    animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    style={{ backgroundSize: "200% 200%" }}
+                  >
+                    R$ 47
+                  </motion.span>
+                  {/* Glow atrás do preço */}
+                  <div className="absolute inset-0 text-6xl sm:text-7xl md:text-8xl font-black text-amber-400 blur-2xl opacity-40">
                     R$ 47
                   </div>
                 </div>
-                <p className="text-muted-foreground mt-3 text-sm sm:text-lg">
-                  pagamento único • <span className="text-primary font-semibold">1 ano de acesso completo</span>
+
+                <p className="text-muted-foreground text-sm sm:text-base">
+                  pagamento único • <span className="text-amber-400 font-semibold">1 ano de acesso</span>
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 mb-6 relative z-10">
-                <p className="text-center text-sm sm:text-base text-foreground">
-                  <span className="font-bold text-primary">Incluso:</span> App BORA + Programa 30 Dias + Jornada Guiada + Meditações + Hub de Livros + Dicas Práticas
-                </p>
+              {/* Checklist compacto */}
+              <div className="space-y-2 mb-6 relative z-10">
+                {[
+                  "App BORA completo",
+                  "Todos os 5 bônus inclusos (R$ 805 em valor)",
+                  "1 ano de acesso",
+                  "Garantia 7 dias",
+                ].map((item, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                    <span className="text-sm sm:text-base text-foreground">{item}</span>
+                  </div>
+                ))}
               </div>
 
+              {/* CTA Button - Laranja/Dourado */}
               <motion.div
-                className="relative group"
+                className="relative group mb-6"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
               >
-                <div className="absolute -inset-2 sm:-inset-3 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 rounded-2xl blur-xl opacity-60 group-hover:opacity-90 transition-all duration-500 animate-pulse" />
+                <div className="absolute -inset-2 sm:-inset-3 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 rounded-2xl blur-xl opacity-70 group-hover:opacity-100 transition-all duration-500 animate-pulse" />
                 <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 rounded-xl opacity-100" />
 
                 <button
@@ -629,93 +791,61 @@ const DirectOffer = () => {
                 </button>
               </motion.div>
 
-              <motion.div
-                className="mt-8 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-primary/10 to-teal-500/10 border border-primary/20"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.3 }}
-              >
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30">
-                    <Shield className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="text-center sm:text-left">
-                    <p className="font-bold text-foreground text-lg">Garantia Incondicional de 7 dias</p>
-                    <p className="text-muted-foreground text-sm sm:text-base">
-                      Se em até 7 dias você não sentir que sua rotina está mais organizada,
-                      devolvemos <strong className="text-primary">100% do seu dinheiro</strong>. Sem perguntas.
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
+              {/* Garantia dentro do card */}
+              <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground relative z-10">
+                <Shield className="w-5 h-5 text-primary" />
+                <span>
+                  <strong className="text-foreground">Garantia 7 dias</strong> - 100% do seu dinheiro de volta
+                </span>
+              </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* ============ FINAL CTA ============ */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6">
+      {/* ============ FINAL CTA - Simplificado ============ */}
+      <section className="py-12 sm:py-16 px-4 sm:px-6">
         <motion.div
-          className="max-w-3xl mx-auto relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary via-primary to-emerald-600 p-6 sm:p-10 md:p-16 text-center shadow-2xl"
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          className="max-w-2xl mx-auto text-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-24 sm:w-48 h-24 sm:h-48 bg-emerald-300/20 rounded-full blur-3xl" />
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+            Não deixe para depois
+          </h2>
+          <p className="text-muted-foreground mb-6 text-sm sm:text-base">
+            Cada dia que passa é um dia a menos na sua transformação.
+          </p>
 
-          <div className="relative z-10 space-y-4 sm:space-y-6">
-            <motion.div
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ type: "spring", stiffness: 200 }}
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Button
+              onClick={handleCTA}
+              variant="premium"
+              size="lg"
+              className="group text-base sm:text-lg px-8 py-5 font-bold"
             >
-              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-xl sm:rounded-2xl bg-white/20 flex items-center justify-center mb-4 sm:mb-6">
-                <Rocket className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-              </div>
-            </motion.div>
+              <Sparkles className="w-5 h-5 mr-2" />
+              COMEÇAR AGORA POR R$ 47
+              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </motion.div>
 
-            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white leading-tight">
-              Sua nova rotina está pronta
-              <br />
-              <span className="text-white/90">para começar agora.</span>
-            </h2>
-
-            <p className="text-base sm:text-xl text-white/80 max-w-xl mx-auto px-2">
-              Junte-se a mais de 5.000 pessoas que já transformaram suas vidas com apenas 7 minutos por dia.
-            </p>
-
-            <motion.div
-              className="pt-2 sm:pt-4"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button
-                onClick={handleCTA}
-                size="lg"
-                className="bg-white hover:bg-gray-100 !text-emerald-600 font-black text-sm sm:text-lg md:text-xl shadow-2xl shadow-white/30 group px-4 sm:px-8 py-5 sm:py-6 w-full sm:w-auto border-0"
-              >
-                <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 mr-2 animate-pulse flex-shrink-0 text-emerald-600" />
-                <span className="text-emerald-600">QUERO MINHA ROTINA</span>
-                <ArrowRight className="w-4 h-4 sm:w-6 sm:h-6 ml-2 group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0 text-emerald-600" />
-              </Button>
-            </motion.div>
-
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-4 sm:pt-6 text-white/80 text-xs sm:text-base">
-              <div className="flex items-center gap-1 sm:gap-2">
-                <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span>Garantia 7 dias</span>
-              </div>
-              <div className="flex items-center gap-1 sm:gap-2">
-                <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span>Acesso imediato</span>
-              </div>
-              <div className="flex items-center gap-1 sm:gap-2">
-                <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span>Resultados 7 dias</span>
-              </div>
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-6 text-muted-foreground text-xs sm:text-sm">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-primary" />
+              <span>Garantia 7 dias</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary" />
+              <span>Acesso imediato</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-primary" />
+              <span>Resultados rápidos</span>
             </div>
           </div>
         </motion.div>

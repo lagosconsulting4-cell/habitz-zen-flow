@@ -9,8 +9,7 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? Deno.env.get("PROJECT_URL");
 const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SERVICE_ROLE_KEY");
-const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-const appUrl = (Deno.env.get("APP_URL") ?? "https://habitz.life/app").replace(/\/$/, "");
+const n8nWebhookUrl = Deno.env.get("N8N_WEBHOOK_URL") ?? "https://n8n-evo-n8n.harxon.easypanel.host/webhook/bora-welcome";
 
 const parseAmountInCents = (input: unknown): number => {
   if (typeof input === "number") return Math.round(input * 100);
@@ -124,18 +123,47 @@ serve(async (req) => {
       existingUser = newUser.user;
     }
 
-    if (anonKey) {
-      const publicClient = createClient(supabaseUrl, anonKey);
-      const { error: emailError } = await publicClient.auth.resetPasswordForEmail(customerEmail, {
-        redirectTo: `${appUrl}/auth?type=recovery`,
+    // Chamar N8N webhook para enviar email de boas-vindas com token
+    const n8nPayload = {
+      event: "SALE_APPROVED",
+      Product: {
+        name: productNames,
+      },
+      Customer: {
+        email: customerEmail,
+        full_name: customerName,
+        first_name: customerName.split(" ")[0],
+        id: customerId,
+      },
+      sale_id: saleId,
+      total_price: totalPriceStr,
+      payment_method: paymentMethod,
+      user_id: userId,
+      is_new_user: isNewUser,
+      timestamp: new Date().toISOString(),
+    };
+
+    console.log("[kirvano-webhook] 📤 Enviando para N8N webhook:", n8nWebhookUrl);
+    console.log("[kirvano-webhook] 📦 Payload N8N:", JSON.stringify(n8nPayload, null, 2));
+
+    try {
+      const n8nResponse = await fetch(n8nWebhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(n8nPayload),
       });
-      if (emailError) {
-        console.error("[kirvano-webhook] ⚠️ Erro ao enviar email:", emailError);
+
+      if (n8nResponse.ok) {
+        const n8nResult = await n8nResponse.json().catch(() => ({}));
+        console.log("[kirvano-webhook] ✅ N8N webhook executado com sucesso");
+        console.log("[kirvano-webhook] 📨 Resposta N8N:", JSON.stringify(n8nResult));
       } else {
-        console.log("[kirvano-webhook] ✉️ Email de acesso enviado para:", customerEmail);
+        const errorText = await n8nResponse.text().catch(() => "");
+        console.error(`[kirvano-webhook] ⚠️ Erro N8N (${n8nResponse.status}):`, errorText);
       }
-    } else {
-      console.warn("[kirvano-webhook] ⚠️ SUPABASE_ANON_KEY não configurada; email não enviado");
+    } catch (n8nError) {
+      console.error("[kirvano-webhook] ⚠️ Erro ao chamar N8N:", n8nError);
+      // Não lança erro - o webhook principal deve continuar mesmo se o N8N falhar
     }
 
     const { error: purchaseError } = await adminClient.from("purchases").upsert(
