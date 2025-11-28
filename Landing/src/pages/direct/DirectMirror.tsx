@@ -127,8 +127,8 @@ const DirectMirror = () => {
       />
 
       {/* Main content */}
-      <div className="pt-20 pb-8 px-4 sm:px-6">
-        <div className="w-full max-w-md mx-auto space-y-6 flex flex-col items-center text-center">
+      <div className="min-h-screen flex flex-col pt-20 pb-8 px-4 sm:px-6">
+        <div className="flex-1 w-full max-w-md mx-auto space-y-6 flex flex-col items-center justify-center text-center">
           {/* Phase indicator */}
           <motion.div
             className="w-full text-center flex flex-col items-center space-y-3"
