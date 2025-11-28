@@ -76,7 +76,7 @@ const FlipCard: React.FC<FlipCardProps> = ({
             `bg-gradient-to-br ${colors.gradient}`,
             `border-2 ${colors.border}`,
             "shadow-lg overflow-hidden transition-opacity duration-300",
-            isFlipped && "opacity-0"
+            isFlipped && "opacity-0 pointer-events-none"
           )}
           onClick={!isFlipped ? onFlip : undefined}
           aria-hidden={isFlipped}
@@ -150,10 +150,11 @@ const FlipCard: React.FC<FlipCardProps> = ({
             `bg-gradient-to-br ${colors.gradient}`,
             `border-2 ${colors.border}`,
             "shadow-lg overflow-hidden transition-opacity duration-300",
-            !isFlipped && "opacity-0"
+            !isFlipped && "opacity-0 pointer-events-none"
           )}
           aria-hidden={!isFlipped}
           style={{ backfaceVisibility: "hidden" }}
+          onClick={isFlipped ? onFlip : undefined}
         >
           {/* Background pattern */}
           <div className="absolute inset-0 bg-dots opacity-20" />
