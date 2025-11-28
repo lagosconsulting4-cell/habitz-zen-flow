@@ -234,9 +234,11 @@ const Offer = () => {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
 
-  // Scroll to top on mount
+  // Scroll to top on mount - using requestAnimationFrame to ensure DOM is ready
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
   }, []);
 
   return (

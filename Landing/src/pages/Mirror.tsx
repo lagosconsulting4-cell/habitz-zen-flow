@@ -192,9 +192,11 @@ const Mirror = () => {
   const [stressLevel, setStressLevel] = useState(0);
   const [showFinalCTA, setShowFinalCTA] = useState(false);
 
-  // Scroll to top on mount
+  // Scroll to top on mount - using requestAnimationFrame to ensure DOM is ready
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
   }, []);
 
   const currentBlock = openItem

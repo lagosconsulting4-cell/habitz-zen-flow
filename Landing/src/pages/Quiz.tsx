@@ -165,9 +165,11 @@ const Quiz = () => {
   const [dragDirection, setDragDirection] = useState<"left" | "right" | null>(null);
   const controls = useAnimation();
 
-  // Scroll to top on mount
+  // Scroll to top on mount - using requestAnimationFrame to ensure DOM is ready
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
   }, []);
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
@@ -518,49 +520,6 @@ const Quiz = () => {
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.7, ease: "easeOut" }}
             />
-          </div>
-
-          {/* Step indicators with checks */}
-          <div className="flex justify-between items-center">
-            {questions.map((_, index) => {
-              const isCompleted = index < currentQuestion;
-              const isCurrent = index === currentQuestion;
-
-              return (
-                <motion.div
-                  key={index}
-                  className={`
-                    w-8 h-8 rounded-full flex items-center justify-center
-                    transition-all duration-300 border-2
-                    ${isCompleted
-                      ? "bg-primary border-primary"
-                      : isCurrent
-                        ? "border-primary bg-primary/20"
-                        : "border-muted bg-transparent"
-                    }
-                  `}
-                  initial={false}
-                  animate={{
-                    scale: isCurrent ? 1.15 : 1,
-                  }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                >
-                  {isCompleted ? (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                    >
-                      <CheckCircle className="w-5 h-5 text-primary-foreground" />
-                    </motion.div>
-                  ) : (
-                    <span className={`text-xs font-bold ${isCurrent ? "text-primary" : "text-muted-foreground"}`}>
-                      {index + 1}
-                    </span>
-                  )}
-                </motion.div>
-              );
-            })}
           </div>
 
           {/* Back button only */}

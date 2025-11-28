@@ -144,9 +144,11 @@ const AnimatedCounter = ({ value, suffix = "" }: { value: number; suffix?: strin
 const DirectOffer = () => {
   const navigate = usePathAwareNavigate();
 
-  // Scroll to top on mount
+  // Scroll to top on mount - using requestAnimationFrame to ensure DOM is ready
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
   }, []);
 
   const handleCTA = () => {
