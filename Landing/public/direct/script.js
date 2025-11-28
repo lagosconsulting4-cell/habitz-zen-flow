@@ -727,7 +727,7 @@ function redirectToCheckout() {
   const leadEventId = createFbEventId();
   trackFbEvent('Lead', { eventID: leadEventId });
   rememberFbEventId(leadEventId, 'Lead');
-  window.location.href = 'https://pay.kirvano.com/bd2c4f4d-587a-4a3f-a6db-77fe0ef16923'; // Coloque aqui o link do seu checkout
+  window.location.href = 'https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac'; // Coloque aqui o link do seu checkout
 }
 
 // Seleciona todos os botões de checkout

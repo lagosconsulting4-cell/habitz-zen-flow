@@ -516,11 +516,7 @@ ul {
 .ready-box,
 .profile-box,
 .exclusive-box,
-.course-benefits-box,
-.offer-section,
-.faq-section,
 .exclusive-benefits-box,
-.exclusive-chamada-box,
 .exclusive-discount-box,
 .faq-offer-discount-box,
 .faq-extra-offer {
@@ -529,6 +525,23 @@ ul {
   border: 1px solid var(--card-border);
   padding: 1.35rem;
   box-shadow: var(--shadow-soft);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+/* Simplified containers - minimal styling, no card appearance */
+.exclusive-chamada-box {
+  padding: 1rem 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.course-benefits-box,
+.offer-section,
+.faq-section {
+  padding: 1.5rem 0;
   overflow-wrap: anywhere;
   word-break: break-word;
   line-height: 1.5;
@@ -544,14 +557,14 @@ ul {
 }
 
 .yellow-box {
-  background: linear-gradient(135deg, #fff7db, #ffeac3);
-  border-color: rgba(247, 185, 85, 0.6);
+  background: rgba(255, 247, 219, 0.5);
+  border-color: rgba(247, 185, 85, 0.3);
   color: #6b3c00;
 }
 
 .green-box {
-  background: linear-gradient(135deg, #e7fbf3, #d6f3e8);
-  border-color: rgba(54, 191, 158, 0.5);
+  background: rgba(231, 251, 243, 0.4);
+  border-color: rgba(54, 191, 158, 0.3);
   color: #0f3c32;
 }
 
