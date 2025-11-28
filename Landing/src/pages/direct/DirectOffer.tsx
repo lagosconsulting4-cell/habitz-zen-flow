@@ -172,7 +172,7 @@ const DirectOffer = () => {
           <motion.div variants={staggerItem}>
             <Badge className="px-4 py-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30 text-sm animate-pulse">
               <Clock className="w-4 h-4 mr-2" />
-              Oferta expira em 48 horas
+              Oferta expira em 15 minutos
             </Badge>
           </motion.div>
 

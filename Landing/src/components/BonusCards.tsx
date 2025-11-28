@@ -17,34 +17,36 @@ import {
   Trophy,
 } from "lucide-react";
 
-// Dados detalhados dos bônus
+// Dados detalhados dos bônus com capas ilustradas
 const bonusDetails = [
   {
     id: 1,
     title: "Programa de 30 Dias",
     value: 297,
     icon: Calendar,
+    coverImage: "/images/lp/programa_completo_bonus_capa.png",
     gradient: "from-primary via-emerald-500 to-teal-500",
     shadowColor: "shadow-primary/30",
     description:
-      "Jornada completa de transformação com 7 módulos progressivos. Conteúdo disponível em vídeo, áudio e e-book para você aprender do seu jeito.",
+      "Jornada completa de transformação com 7 módulos progressivos. Conteúdo disponível em vídeo, áudio e e-book.",
     features: [
       { icon: Play, text: "28 aulas em vídeo HD" },
-      { icon: Headphones, text: "Versão em áudio para ouvir anywhere" },
+      { icon: Headphones, text: "Versão em áudio" },
       { icon: FileText, text: "E-books complementares" },
       { icon: Target, text: "Exercícios práticos diários" },
     ],
-    highlight: "Acesso vitalício",
+    highlight: "1 ano de acesso",
   },
   {
     id: 2,
     title: "Jornada Guiada 4 Semanas",
     value: 197,
     icon: Flame,
+    coverImage: "/images/lp/jornada_guiada_bonus_capa.png",
     gradient: "from-orange-500 via-amber-500 to-yellow-500",
     shadowColor: "shadow-orange-500/30",
     description:
-      "Roteiro dia a dia do que fazer. Nada de ficar perdido. Cada manhã você sabe exatamente qual é sua missão.",
+      "Roteiro dia a dia do que fazer. Cada manhã você sabe exatamente qual é sua missão.",
     features: [
       { icon: Clock, text: "28 dias estruturados" },
       { icon: Target, text: "Missões diárias claras" },
@@ -58,10 +60,11 @@ const bonusDetails = [
     title: "Meditações & Respiração",
     value: 147,
     icon: Brain,
+    coverImage: "/images/lp/meditações_bonus_capa.png",
     gradient: "from-purple-500 via-violet-500 to-indigo-500",
     shadowColor: "shadow-purple-500/30",
     description:
-      "10 técnicas de respiração e meditação usadas por Navy SEALs, CEOs e atletas de elite para foco extremo e controle emocional.",
+      "10 técnicas de respiração e meditação para foco extremo e controle emocional.",
     features: [
       { icon: Headphones, text: "Áudios guiados em português" },
       { icon: Clock, text: "De 3 a 15 minutos" },
@@ -75,10 +78,11 @@ const bonusDetails = [
     title: "Hub de Livros",
     value: 97,
     icon: Library,
+    coverImage: "/images/lp/hub_de_livros_bonus_capa.png",
     gradient: "from-blue-500 via-cyan-500 to-teal-500",
     shadowColor: "shadow-blue-500/30",
     description:
-      "Biblioteca curada com os melhores livros de produtividade, hábitos e mentalidade. Resumos executivos + insights práticos.",
+      "Biblioteca curada com os melhores livros de produtividade, hábitos e mentalidade.",
     features: [
       { icon: BookOpen, text: "Curadoria de especialistas" },
       { icon: FileText, text: "Resumos executivos" },
@@ -92,10 +96,11 @@ const bonusDetails = [
     title: "Dicas Práticas",
     value: 67,
     icon: Lightbulb,
+    coverImage: "/images/lp/dicas_praticas_hack_bonus_capa.png",
     gradient: "from-rose-500 via-pink-500 to-fuchsia-500",
     shadowColor: "shadow-rose-500/30",
     description:
-      "27 hacks comprovados de rotina, sono, alimentação e energia. Pequenas mudanças que geram resultados enormes.",
+      "27 hacks comprovados de rotina, sono, alimentação e energia.",
     features: [
       { icon: Zap, text: "27 dicas actionáveis" },
       { icon: Clock, text: "Aplicáveis em 5 minutos" },
@@ -140,60 +145,67 @@ export const BonusCards = () => {
               transition={{ delay: index * 0.1 }}
               whileHover={{ y: -8 }}
             >
-              {/* Card */}
+              {/* Card com imagem de capa */}
               <div className="relative h-full bg-gradient-to-br from-card via-card to-primary/5 rounded-2xl border border-primary/20 overflow-hidden shadow-lg hover:border-primary/40 transition-all duration-300">
-                {/* Top gradient bar */}
-                <div
-                  className={`h-2 bg-gradient-to-r ${bonus.gradient}`}
-                />
+                {/* Cover Image */}
+                <div className="relative h-40 sm:h-48 overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${bonus.gradient} opacity-20`} />
+                  <img
+                    src={bonus.coverImage}
+                    alt={bonus.title}
+                    className="w-full h-full object-cover object-center"
+                  />
+                  {/* Overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+
+                  {/* Price badges overlay */}
+                  <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                    <span className="text-xs text-white/80 line-through bg-black/30 px-2 py-0.5 rounded">
+                      R$ {bonus.value}
+                    </span>
+                    <Badge className="bg-primary text-white border-0 font-bold shadow-lg">
+                      GRÁTIS
+                    </Badge>
+                  </div>
+                </div>
 
                 {/* Content */}
-                <div className="p-6">
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-4">
+                <div className="p-5 sm:p-6">
+                  {/* Title with icon */}
+                  <div className="flex items-center gap-3 mb-3">
                     <div
-                      className={`w-14 h-14 rounded-xl bg-gradient-to-br ${bonus.gradient} flex items-center justify-center shadow-lg ${bonus.shadowColor}`}
+                      className={`w-10 h-10 rounded-lg bg-gradient-to-br ${bonus.gradient} flex items-center justify-center shadow-md ${bonus.shadowColor} flex-shrink-0`}
                     >
-                      <bonus.icon className="w-7 h-7 text-white" />
+                      <bonus.icon className="w-5 h-5 text-white" />
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground line-through">
-                        R$ {bonus.value}
-                      </p>
-                      <Badge className="bg-primary/20 text-primary border-primary/30 font-bold">
-                        GRÁTIS
-                      </Badge>
-                    </div>
+                    <h3 className="font-bold text-lg leading-tight">{bonus.title}</h3>
                   </div>
-
-                  {/* Title */}
-                  <h3 className="font-bold text-xl mb-2">{bonus.title}</h3>
 
                   {/* Description */}
                   <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
                     {bonus.description}
                   </p>
 
-                  {/* Features */}
-                  <div className="space-y-2 mb-4">
+                  {/* Features - 2 columns on larger cards */}
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-2 mb-4">
                     {bonus.features.map((feature, i) => (
                       <div
                         key={i}
-                        className="flex items-center gap-2 text-sm"
+                        className="flex items-center gap-1.5 text-xs"
                       >
-                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <feature.icon className="w-3 h-3 text-primary" />
+                        <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <feature.icon className="w-2.5 h-2.5 text-primary" />
                         </div>
-                        <span className="text-foreground">{feature.text}</span>
+                        <span className="text-foreground/80 truncate">{feature.text}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Highlight badge */}
-                  <div className="pt-4 border-t border-primary/10">
+                  <div className="pt-3 border-t border-primary/10">
                     <Badge
                       variant="outline"
-                      className="bg-primary/5 text-primary border-primary/20"
+                      className="bg-primary/5 text-primary border-primary/20 text-xs"
                     >
                       <Check className="w-3 h-3 mr-1" />
                       {bonus.highlight}

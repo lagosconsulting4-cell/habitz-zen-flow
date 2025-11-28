@@ -16,7 +16,7 @@ interface CountdownTimerProps {
 }
 
 const STORAGE_KEY = "bora_offer_expires";
-const OFFER_DURATION_MS = 48 * 60 * 60 * 1000; // 48 hours
+const OFFER_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
 const getOrCreateExpireTime = (): number => {
   if (typeof window === "undefined") return Date.now() + OFFER_DURATION_MS;
