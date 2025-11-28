@@ -17,7 +17,7 @@ const DirectMirror = () => {
   const [phase, setPhase] = useState<MirrorPhase>("dor");
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [stressLevel, setStressLevel] = useState(78); // Starts at quiz result (78%)
+  const [stressLevel, setStressLevel] = useState(0); // Starts at 0% - progressive
 
   // Scroll to top on mount - using requestAnimationFrame to ensure DOM is ready
   useEffect(() => {
@@ -27,19 +27,25 @@ const DirectMirror = () => {
   }, []);
 
   // Calculate stress based on phase and cards
+  // DOR: 0% → 150% progressively (8 cards = ~19% per card)
+  // BORA: 150% → 12% progressively
   useEffect(() => {
     if (phase === "dor") {
-      // DOR phase: accumulate stress as user progresses through cards
-      const baseStress = 78;
-      const stressPerCard = 9;
-      const calculatedStress = baseStress + (currentCardIndex * stressPerCard);
-      setStressLevel(Math.min(calculatedStress, 150));
+      // DOR phase: accumulate stress from 0% to 150%
+      // 8 cards total, stress increases as user progresses
+      const totalCards = flipCardsData.length; // 8
+      const maxStress = 150;
+      const stressPerCard = maxStress / (totalCards - 1); // ~21.4% per card
+      const calculatedStress = currentCardIndex * stressPerCard;
+      setStressLevel(Math.min(calculatedStress, maxStress));
     } else if (phase === "bora") {
-      // BORA phase: reduce stress as user progresses through cards
+      // BORA phase: reduce stress from 150% to 12%
+      const totalCards = flipCardsData.length;
       const startStress = 150;
-      const stressReduction = 17.25;
+      const endStress = 12;
+      const stressReduction = (startStress - endStress) / (totalCards - 1);
       const calculatedStress = startStress - (currentCardIndex * stressReduction);
-      setStressLevel(Math.max(calculatedStress, 12));
+      setStressLevel(Math.max(calculatedStress, endStress));
     }
   }, [phase, currentCardIndex]);
 

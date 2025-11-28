@@ -399,9 +399,9 @@ const DirectQuiz = () => {
             </h2>
           </div>
 
-          {/* Options */}
+          {/* Options - no stagger animation to prevent blinking */}
           <div className="space-y-3">
-            {question.options.map((option, index) => (
+            {question.options.map((option) => (
               <motion.button
                 key={option.value}
                 onClick={() => handleOptionSelect(option.value)}
@@ -410,9 +410,7 @@ const DirectQuiz = () => {
                     ? "border-orange-500 bg-orange-500/10"
                     : "border-border/50 bg-muted/30 hover:border-orange-500/50 hover:bg-muted/50"
                 }`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="flex items-center gap-3">
