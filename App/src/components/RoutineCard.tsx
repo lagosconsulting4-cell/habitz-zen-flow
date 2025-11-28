@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown, Sunrise, Sun, Moon, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getHabitIconWithFallback } from "@/components/icons/HabitIcons";
 import type { Habit } from "@/components/DashboardHabitCard";
 
 interface RoutineCardProps {
@@ -13,7 +14,6 @@ interface RoutineCardProps {
 interface PeriodData {
   id: "morning" | "afternoon" | "evening";
   name: string;
-  emoji: string;
   icon: typeof Sunrise;
   habits: Habit[];
   completed: number;
@@ -49,7 +49,6 @@ export const RoutineCard = ({
       {
         id: "morning" as const,
         name: "Manhã",
-        emoji: "🌅",
         icon: Sunrise,
         habits: periodMap.morning,
         completed: periodMap.morning.filter((h) => getHabitCompletionStatus(h.id)).length,
@@ -61,7 +60,6 @@ export const RoutineCard = ({
       {
         id: "afternoon" as const,
         name: "Tarde",
-        emoji: "☀️",
         icon: Sun,
         habits: periodMap.afternoon,
         completed: periodMap.afternoon.filter((h) => getHabitCompletionStatus(h.id)).length,
@@ -73,7 +71,6 @@ export const RoutineCard = ({
       {
         id: "evening" as const,
         name: "Noite",
-        emoji: "🌙",
         icon: Moon,
         habits: periodMap.evening,
         completed: periodMap.evening.filter((h) => getHabitCompletionStatus(h.id)).length,
@@ -206,9 +203,6 @@ export const RoutineCard = ({
                       <span className="text-sm font-semibold text-foreground">
                         {period.name}
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        {period.emoji}
-                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-medium text-muted-foreground">
@@ -237,15 +231,16 @@ export const RoutineCard = ({
                     <div className="mt-2 space-y-1">
                       {period.habits.map((habit) => {
                         const isCompleted = getHabitCompletionStatus(habit.id);
+                        const HabitIcon = getHabitIconWithFallback(habit.icon_key, habit.category);
                         return (
                           <div
                             key={habit.id}
                             className="flex items-center gap-2 text-xs"
                           >
-                            <div
+                            <HabitIcon
                               className={cn(
-                                "w-1.5 h-1.5 rounded-full",
-                                isCompleted ? "bg-primary" : "bg-muted-foreground/30"
+                                "w-3.5 h-3.5 flex-shrink-0",
+                                isCompleted ? "text-primary" : "text-muted-foreground"
                               )}
                             />
                             <span
@@ -256,7 +251,7 @@ export const RoutineCard = ({
                                   : "text-foreground"
                               )}
                             >
-                              {habit.emoji} {habit.name}
+                              {habit.name}
                             </span>
                           </div>
                         );

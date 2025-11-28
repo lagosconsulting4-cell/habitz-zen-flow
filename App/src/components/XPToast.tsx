@@ -48,26 +48,29 @@ export const XPToast = ({
         }
       }
 
-      // Auto-dismiss after 2 seconds
+      // Auto-dismiss after 1.2s (shorter, more elegant)
       const timer = setTimeout(() => {
         setVisible(false);
-        setTimeout(onClose, 500); // Wait for animation
-      }, 2000);
+        setTimeout(onClose, 300); // Wait for animation
+      }, 900);
 
       return () => clearTimeout(timer);
     }
   }, [show, onClose, targetElementId]);
 
-  // Color based on type and XP amount
+  // Color based on type - all lime/green palette (no purple)
   const getColorClasses = (xp: number, xpType: XPToastType) => {
-    // Type-based colors (priority)
+    // Perfect day: golden accent
     if (xpType === "perfect_day") return "from-yellow-400 to-amber-500";
-    if (xpType === "streak") return "from-purple-400 to-purple-500";
 
-    // Fallback: amount-based colors (for backwards compatibility)
-    if (xp >= 50) return "from-yellow-400 to-amber-500"; // Big bonus (streak_30)
-    if (xp >= 15) return "from-purple-400 to-purple-500"; // Medium bonus (streak_7)
-    return "from-lime-400 to-lime-500"; // Regular habit XP
+    // Streak bonus: brighter lime
+    if (xpType === "streak") return "from-lime-300 to-lime-500";
+
+    // Big bonus (streak_30): golden
+    if (xp >= 50) return "from-yellow-400 to-amber-500";
+
+    // All other XP: consistent lime green
+    return "from-lime-400 to-lime-500";
   };
 
   const colorClasses = getColorClasses(xpAmount, type);
@@ -92,13 +95,13 @@ export const XPToast = ({
           }
         >
           <motion.div
-            initial={{ opacity: 0, y: 0, scale: 0.8 }}
-            animate={{ opacity: 1, y: -60, scale: 1 }}
-            exit={{ opacity: 0, y: -80, scale: 0.9 }}
+            initial={{ opacity: 0, y: 0, scale: 0.9 }}
+            animate={{ opacity: 1, y: -20, scale: 1 }}
+            exit={{ opacity: 0, y: -30, scale: 0.95 }}
             transition={{
-              duration: 0.5,
+              duration: 0.2,
               ease: "easeOut",
-              y: { duration: 2 },
+              y: { duration: 0.8, ease: "easeOut" },
             }}
           >
             <div

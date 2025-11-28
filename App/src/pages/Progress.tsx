@@ -9,39 +9,43 @@ import { useAuth } from "@/integrations/supabase/auth";
 import { getHabitIconWithFallback, HabitIconKey } from "@/components/icons/HabitIcons";
 import { cn } from "@/lib/utils";
 
-// Tier colors for gamification display
+// Tier colors for gamification display - Premium metallic palette
 const tierColors = {
   bronze: {
-    bg: "from-amber-950/40 to-amber-900/30",
-    border: "border-amber-700/30",
-    text: "text-amber-400",
-    glow: "shadow-amber-500/20",
-    bar: "from-amber-600 to-amber-500",
-    ring: "stroke-amber-500",
+    // Redesigned: Cool silver/platinum instead of warm bronze
+    bg: "from-zinc-900/50 to-neutral-900/40",
+    border: "border-zinc-600/40",
+    text: "text-zinc-300",
+    glow: "shadow-zinc-400/25",
+    bar: "from-zinc-400 via-neutral-300 to-zinc-400",
+    ring: "stroke-zinc-400",
   },
   prata: {
-    bg: "from-slate-900/40 to-slate-800/30",
-    border: "border-slate-600/30",
-    text: "text-slate-300",
-    glow: "shadow-slate-400/20",
-    bar: "from-slate-500 to-slate-400",
-    ring: "stroke-slate-400",
+    // Enhanced silver with subtle shine
+    bg: "from-slate-900/50 to-slate-800/40",
+    border: "border-slate-500/40",
+    text: "text-slate-200",
+    glow: "shadow-slate-300/30",
+    bar: "from-slate-400 via-slate-300 to-slate-400",
+    ring: "stroke-slate-300",
   },
   ouro: {
-    bg: "from-yellow-950/40 to-yellow-900/30",
-    border: "border-yellow-600/30",
-    text: "text-yellow-400",
-    glow: "shadow-yellow-500/20",
-    bar: "from-yellow-500 to-yellow-400",
-    ring: "stroke-yellow-500",
+    // Premium gold with warm glow
+    bg: "from-yellow-950/50 to-amber-950/40",
+    border: "border-yellow-500/40",
+    text: "text-yellow-300",
+    glow: "shadow-yellow-400/30",
+    bar: "from-yellow-400 via-amber-300 to-yellow-400",
+    ring: "stroke-yellow-400",
   },
   diamante: {
-    bg: "from-cyan-950/40 to-cyan-900/30",
-    border: "border-cyan-500/30",
-    text: "text-cyan-300",
-    glow: "shadow-cyan-400/20",
-    bar: "from-cyan-500 via-blue-400 to-cyan-400",
-    ring: "stroke-cyan-400",
+    // Brilliant diamond with ice blue shimmer
+    bg: "from-cyan-950/50 to-blue-950/40",
+    border: "border-cyan-400/40",
+    text: "text-cyan-200",
+    glow: "shadow-cyan-300/35",
+    bar: "from-cyan-400 via-blue-300 to-cyan-300",
+    ring: "stroke-cyan-300",
   },
 };
 
@@ -106,7 +110,7 @@ const Progress = () => {
           </p>
         </div>
 
-        {/* Gamification Hero Card */}
+        {/* Gamification Hero Card - Premium Design */}
         {gamificationProgress && !gamificationLoading && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -116,12 +120,22 @@ const Progress = () => {
           >
             <Card
               className={cn(
-                "rounded-2xl overflow-hidden border",
+                "rounded-2xl overflow-hidden border relative",
                 `bg-gradient-to-br ${tierColor.bg}`,
                 tierColor.border,
-                "backdrop-blur-sm"
+                "backdrop-blur-sm",
+                `shadow-lg ${tierColor.glow}`
               )}
             >
+              {/* Shimmer overlay for premium effect */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div
+                  className="absolute inset-0 -translate-x-full animate-[shimmer_3s_infinite]"
+                  style={{
+                    background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
+                  }}
+                />
+              </div>
               <div className="p-6">
                 <div className="flex items-center gap-6">
                   {/* Progress Ring */}

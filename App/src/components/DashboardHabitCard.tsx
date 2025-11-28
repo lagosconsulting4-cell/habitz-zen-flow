@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { getHabitIconWithFallback } from "@/components/icons/HabitIcons";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +25,17 @@ interface DashboardHabitCardProps {
   className?: string;
 }
 
-export const DashboardHabitCard = ({
+// Progress ring constants - defined outside to avoid recalculation
+const RING_SIZE = 116;
+const STROKE_WIDTH = 8;
+const RADIUS = (RING_SIZE - STROKE_WIDTH) / 2;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
+// Mini ring constants for streak badge
+const MINI_RING_RADIUS = 11;
+const MINI_RING_CIRCUMFERENCE = 2 * Math.PI * MINI_RING_RADIUS;
+
+const DashboardHabitCardComponent = ({
   habit,
   progress,
   completed,
@@ -33,14 +43,11 @@ export const DashboardHabitCard = ({
   streakDays,
   className,
 }: DashboardHabitCardProps) => {
-  const Icon = getHabitIconWithFallback(habit.icon_key, habit.category);
+  const Icon = useMemo(() => getHabitIconWithFallback(habit.icon_key, habit.category), [habit.icon_key, habit.category]);
 
-  // Progress ring dimensions
-  const ringSize = 116;
-  const strokeWidth = 8;
-  const radius = (ringSize - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (progress / 100) * circumference;
+  // Memoized progress offset calculation
+  const offset = useMemo(() => CIRCUMFERENCE - (progress / 100) * CIRCUMFERENCE, [progress]);
+  const miniOffset = useMemo(() => MINI_RING_CIRCUMFERENCE - (progress / 100) * MINI_RING_CIRCUMFERENCE, [progress]);
 
   // Celebration state
   const [showCelebration, setShowCelebration] = useState(false);
@@ -106,7 +113,7 @@ export const DashboardHabitCard = ({
               <circle
                 cx={14}
                 cy={14}
-                r={11}
+                r={MINI_RING_RADIUS}
                 className="stroke-primary/20"
                 strokeWidth={2}
                 fill="transparent"
@@ -114,12 +121,12 @@ export const DashboardHabitCard = ({
               <circle
                 cx={14}
                 cy={14}
-                r={11}
+                r={MINI_RING_RADIUS}
                 className="stroke-primary"
                 strokeWidth={2}
                 fill="transparent"
-                strokeDasharray={2 * Math.PI * 11}
-                strokeDashoffset={2 * Math.PI * 11 - (progress / 100) * 2 * Math.PI * 11}
+                strokeDasharray={MINI_RING_CIRCUMFERENCE}
+                strokeDashoffset={miniOffset}
                 strokeLinecap="round"
               />
             </svg>
@@ -134,31 +141,31 @@ export const DashboardHabitCard = ({
       <div className="relative mb-1 w-[116px] h-[116px]">
         {/* Progress Ring SVG */}
         <svg
-          width={ringSize}
-          height={ringSize}
+          width={RING_SIZE}
+          height={RING_SIZE}
           className="transform -rotate-90 absolute inset-0"
         >
           {/* Background circle */}
           <circle
-            cx={ringSize / 2}
-            cy={ringSize / 2}
-            r={radius}
+            cx={RING_SIZE / 2}
+            cy={RING_SIZE / 2}
+            r={RADIUS}
             className="stroke-primary/10 dark:stroke-primary/15"
-            strokeWidth={strokeWidth}
+            strokeWidth={STROKE_WIDTH}
             fill="transparent"
           />
           {/* Progress circle */}
           <motion.circle
-            cx={ringSize / 2}
-            cy={ringSize / 2}
-            r={radius}
+            cx={RING_SIZE / 2}
+            cy={RING_SIZE / 2}
+            r={RADIUS}
             className="stroke-primary"
-            strokeWidth={strokeWidth}
+            strokeWidth={STROKE_WIDTH}
             fill="transparent"
-            strokeDasharray={circumference}
+            strokeDasharray={CIRCUMFERENCE}
             initial={false}
             animate={{ strokeDashoffset: offset }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             strokeLinecap="round"
           />
         </svg>
@@ -191,5 +198,18 @@ export const DashboardHabitCard = ({
     </motion.button>
   );
 };
+
+// Memoized component to prevent unnecessary re-renders
+export const DashboardHabitCard = React.memo(DashboardHabitCardComponent, (prevProps, nextProps) => {
+  // Custom comparison - only re-render if these props change
+  return (
+    prevProps.habit.id === nextProps.habit.id &&
+    prevProps.progress === nextProps.progress &&
+    prevProps.completed === nextProps.completed &&
+    prevProps.streakDays === nextProps.streakDays &&
+    prevProps.habit.icon_key === nextProps.habit.icon_key &&
+    prevProps.habit.name === nextProps.habit.name
+  );
+});
 
 export default DashboardHabitCard;

@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 interface TreeVisualizationProps {
@@ -392,24 +392,23 @@ export const TreeVisualization = ({
       className={cn("relative flex flex-col items-center", className)}
       style={{ width: size, height: size }}
     >
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={stage}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          transition={{ duration: 0.3 }}
-          className="w-full h-full"
-        >
-          <TreeComponent colors={colors} />
-        </motion.div>
-      </AnimatePresence>
+      {/* Removed AnimatePresence to prevent duplication effect during transitions */}
+      <motion.div
+        key={stage}
+        initial={false}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="w-full h-full"
+      >
+        <TreeComponent colors={colors} />
+      </motion.div>
 
-      {/* Stage label */}
+      {/* Stage label with smooth transition */}
       <motion.p
         key={`label-${stage}`}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={false}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
         className={cn(
           "absolute -bottom-6 text-xs font-medium",
           isDarkMode ? "text-lime-400" : "text-primary"

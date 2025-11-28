@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Sparkles, Plus } from "lucide-react";
@@ -7,7 +7,6 @@ import { DashboardSkeleton } from "@/components/ui/skeleton";
 
 import { DashboardHabitCard } from "@/components/DashboardHabitCard";
 import { RoutineCard } from "@/components/RoutineCard";
-import { XPBar } from "@/components/XPBar";
 import { LevelUpModal } from "@/components/LevelUpModal";
 import { TimerModal } from "@/components/timer";
 import { NotificationPermissionDialog } from "@/components/pwa/NotificationPermissionDialog";
@@ -117,8 +116,8 @@ const Dashboard = () => {
     });
   }, [habits]);
 
-  // Calculate progress for each habit (0-100)
-  const calculateProgress = (habit: Habit): number => {
+  // Calculate progress for each habit (0-100) - memoized
+  const calculateProgress = useCallback((habit: Habit): number => {
     const completed = getHabitCompletionStatus(habit.id);
 
     // If has numeric goal
@@ -128,12 +127,12 @@ const Dashboard = () => {
 
     // Binary completion
     return completed ? 100 : 0;
-  };
+  }, [getHabitCompletionStatus]);
 
-  // Check if habit is completed today
-  const isCompletedToday = (habitId: string): boolean => {
+  // Check if habit is completed today - memoized
+  const isCompletedToday = useCallback((habitId: string): boolean => {
     return getHabitCompletionStatus(habitId);
-  };
+  }, [getHabitCompletionStatus]);
 
   // Check if all today's habits are completed (Perfect Day)
   const checkPerfectDay = (): boolean => {
@@ -326,9 +325,6 @@ const Dashboard = () => {
         transition={{ duration: 0.3 }}
         className="flex-1 px-4 pt-6 pb-32 space-y-6"
       >
-        {/* XP Bar - Shows gamification progress */}
-        <XPBar />
-
         {/* Routine Card - Shows daily progress by period */}
         {todayHabits.length > 0 && (
           <RoutineCard
@@ -397,9 +393,12 @@ const Dashboard = () => {
             {todayHabits.map((habit, index) => (
               <motion.div
                 key={habit.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
+                transition={{
+                  duration: 0.15,
+                  delay: Math.min(index * 0.03, 0.15) // Cap at 150ms
+                }}
               >
                 <DashboardHabitCard
                   habit={habit as Habit}

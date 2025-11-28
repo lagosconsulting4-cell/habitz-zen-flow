@@ -52,12 +52,18 @@ export const TimerModal = ({
     targetSeconds,
     onComplete: () => {
       setShowCelebration(true);
-      // Fire confetti
+      // Haptic feedback for completion
+      if ("vibrate" in navigator) {
+        navigator.vibrate([50, 50, 100]);
+      }
+      // Elegant confetti - reduced particles for better performance
       confetti({
-        particleCount: 100,
-        spread: 70,
+        particleCount: 40,
+        spread: 60,
         origin: { y: 0.6 },
-        colors: ["#A3E635", "#84CC16", "#65A30D", "#FEF08A", "#FBBF24"],
+        colors: ["#A3E635", "#84CC16", "#65A30D"],
+        gravity: 1.2,
+        scalar: 0.9,
       });
     },
   });
@@ -280,7 +286,7 @@ export const TimerModal = ({
           )}
         </motion.div>
 
-        {/* Celebration overlay */}
+        {/* Celebration overlay - elegant glow effect instead of emoji */}
         <AnimatePresence>
           {showCelebration && (
             <motion.div
@@ -289,13 +295,21 @@ export const TimerModal = ({
               exit={{ opacity: 0 }}
               className="absolute inset-0 pointer-events-none flex items-center justify-center"
             >
+              {/* Radial glow effect */}
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: [0.5, 1.5, 1.2], opacity: [0, 0.4, 0] }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+                className="absolute w-64 h-64 rounded-full bg-lime-400/30 blur-3xl"
+              />
+              {/* Check icon */}
               <motion.div
                 initial={{ scale: 0 }}
-                animate={{ scale: [0, 1.2, 1] }}
-                transition={{ duration: 0.5 }}
-                className="text-8xl"
+                animate={{ scale: [0, 1.15, 1] }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="w-20 h-20 rounded-full bg-lime-400 flex items-center justify-center shadow-lg shadow-lime-500/40"
               >
-                🌳
+                <Check size={40} className="text-black" strokeWidth={3} />
               </motion.div>
             </motion.div>
           )}
