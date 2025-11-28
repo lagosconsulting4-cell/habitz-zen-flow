@@ -23,6 +23,9 @@ const AntigoOffer = lazy(() => import("./pages/antigo/DirectOffer"));
 // Bora landing page - single page optimized for conversion
 const BoraLanding = lazy(() => import("./pages/bora/BoraLanding"));
 
+// Direct landing page - TDAH quiz (28 steps SPA)
+const DirectIndex = lazy(() => import("./pages/direct/DirectIndex"));
+
 const queryClient = new QueryClient();
 
 // Loading fallback component
@@ -133,6 +136,16 @@ const App = () => (
               element={
                 <PathPrefixProvider prefix="/bora">
                   <BoraLanding />
+                </PathPrefixProvider>
+              }
+            />
+
+            {/* Direct Landing Page - TDAH Quiz (28 steps SPA) */}
+            <Route
+              path="/direct"
+              element={
+                <PathPrefixProvider prefix="/direct">
+                  <DirectIndex />
                 </PathPrefixProvider>
               }
             />
