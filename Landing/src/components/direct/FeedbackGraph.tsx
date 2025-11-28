@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, TrendingDown, AlertTriangle } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, Cell, LabelList } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -116,25 +116,9 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="rounded-2xl border border-border/40 bg-muted/20 p-4"
         >
-          <ChartContainer config={chartConfig} className="h-64 w-full sm:h-72">
-            <BarChart data={chartData} margin={{ top: 32, right: 20, left: 8, bottom: 8 }}>
-              <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="hsl(var(--muted)/0.4)" />
-              <XAxis
-                dataKey="label"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "#ffffff", fontSize: 12 }}
-              />
-              <YAxis
-                domain={[0, 100]}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(value) => `${value}%`}
-                tick={{ fill: "#ffffff", fontSize: 12 }}
-                width={40}
-              />
+          <ChartContainer config={chartConfig} className="h-72 w-full sm:h-80">
+            <BarChart data={chartData} margin={{ top: 32, right: 16, left: 16, bottom: 8 }}>
               <ChartTooltip
                 cursor={{ fill: "hsl(var(--muted)/0.2)" }}
                 content={
@@ -163,9 +147,16 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
                   dataKey="value"
                   position="top"
                   fill="#ffffff"
-                  fontSize={14}
+                  fontSize={16}
                   fontWeight="bold"
                   formatter={(value: number) => `${value}%`}
+                />
+                <LabelList
+                  dataKey="label"
+                  position="bottom"
+                  fill="#ffffff"
+                  fontSize={12}
+                  offset={12}
                 />
               </Bar>
             </BarChart>
