@@ -452,7 +452,7 @@ const DirectOffer = () => {
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Tudo isso por apenas{" "}
-              <span className="text-primary font-extrabold">R$ 47</span>
+              <span className="text-primary font-extrabold">11x de R$5,17</span>
             </h2>
             <div className="flex items-center justify-center gap-3 text-lg sm:text-xl">
               <span className="line-through text-muted-foreground">R$ 805</span>
@@ -522,7 +522,7 @@ const DirectOffer = () => {
               <CheckCircle2 className="w-5 h-5 text-primary" />
               <span className="text-foreground font-medium">
                 <strong className="text-primary">R$ 805</strong> em valor → Por apenas{" "}
-                <strong className="text-primary">R$ 47</strong>
+                <strong className="text-primary">11x R$5,17</strong>
               </span>
             </div>
 
@@ -748,22 +748,25 @@ const DirectOffer = () => {
 
                 {/* Preço novo MEGA destaque */}
                 <div className="relative inline-block mb-2">
-                  <motion.span
-                    className="text-6xl sm:text-7xl md:text-8xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent"
-                    animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                    style={{ backgroundSize: "200% 200%" }}
-                  >
-                    R$ 47
-                  </motion.span>
+                  <div className="flex flex-col items-center">
+                    <span className="text-xl sm:text-2xl font-bold text-amber-400/80 mb-1">11x de</span>
+                    <motion.span
+                      className="text-6xl sm:text-7xl md:text-8xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent"
+                      animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                      style={{ backgroundSize: "200% 200%" }}
+                    >
+                      R$5,17
+                    </motion.span>
+                  </div>
                   {/* Glow atrás do preço */}
-                  <div className="absolute inset-0 text-6xl sm:text-7xl md:text-8xl font-black text-amber-400 blur-2xl opacity-40">
-                    R$ 47
+                  <div className="absolute inset-0 flex items-center justify-center text-6xl sm:text-7xl md:text-8xl font-black text-amber-400 blur-2xl opacity-40">
+                    R$5,17
                   </div>
                 </div>
 
                 <p className="text-muted-foreground text-sm sm:text-base">
-                  pagamento único • <span className="text-amber-400 font-semibold">1 ano de acesso</span>
+                  ou R$47 à vista • <span className="text-amber-400 font-semibold">1 ano de acesso</span>
                 </p>
               </div>
 
@@ -840,7 +843,7 @@ const DirectOffer = () => {
               className="group text-base sm:text-lg px-8 py-5 font-bold"
             >
               <Sparkles className="w-5 h-5 mr-2" />
-              COMEÇAR AGORA POR R$ 47
+              COMEÇAR AGORA POR 11x R$5,17
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </motion.div>
