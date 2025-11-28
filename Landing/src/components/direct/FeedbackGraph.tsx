@@ -125,14 +125,14 @@ const FeedbackGraph: React.FC<FeedbackGraphProps> = ({ onContinue }) => {
                 dataKey="label"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "#a1a1aa", fontSize: 12 }}
+                tick={{ fill: "#ffffff", fontSize: 12 }}
               />
               <YAxis
                 domain={[0, 100]}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(value) => `${value}%`}
-                tick={{ fill: "#a1a1aa", fontSize: 12 }}
+                tick={{ fill: "#ffffff", fontSize: 12 }}
                 width={40}
               />
               <ChartTooltip
