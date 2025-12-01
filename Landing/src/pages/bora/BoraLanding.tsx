@@ -40,6 +40,10 @@ import {
   Bell,
   Menu,
   X,
+  Lock,
+  Sun,
+  Heart,
+  ChevronRight,
 } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/hooks/useAnimations";
 
@@ -275,17 +279,17 @@ const BoraLanding = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           {/* Logo */}
           <a href="#" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-[#A3E635] flex items-center justify-center shadow-md shadow-[#A3E635]/20">
+              <Sparkles className="w-5 h-5 text-slate-900" />
             </div>
-            <span className="text-xl font-bold text-foreground">BORA</span>
+            <span className="text-xl font-bold text-slate-900">BORA</span>
           </a>
 
           {/* CTA Button */}
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               onClick={scrollToPricing}
-              className="bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 text-white font-semibold px-6 py-2 rounded-full shadow-lg shadow-primary/25"
+              className="bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 font-semibold px-6 py-2 rounded-full shadow-lg shadow-[#A3E635]/25"
             >
               Começar agora
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -295,24 +299,29 @@ const BoraLanding = () => {
       </motion.header>
 
       {/* ============ HERO SECTION ============ */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 md:px-6 pt-24 pb-16 w-full">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-emerald-50/30" />
-        <div className="absolute top-20 right-0 w-48 md:w-[500px] h-48 md:h-[500px] bg-primary/10 rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 left-0 w-48 md:w-[400px] h-48 md:h-[400px] bg-emerald-500/10 rounded-full blur-[100px]" />
+      <section className="relative min-h-screen flex items-center justify-center px-4 md:px-6 pt-24 pb-16 w-full overflow-hidden">
+        {/* Background - Clean white with subtle green accents */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#A3E635]/5 to-white" />
+
+        {/* Dot pattern background */}
+        <div className="absolute inset-0 bg-[radial-gradient(#A3E635_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.15]" />
+
+        {/* Glow orbs with Bora Green */}
+        <div className="absolute top-20 right-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-[#A3E635]/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[250px] md:w-[400px] h-[250px] md:h-[400px] bg-[#A3E635]/15 rounded-full blur-[100px]" />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            {/* Left side - Text content (7 cols) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            {/* Left side - Text content */}
             <motion.div
-              className="lg:col-span-7 text-center lg:text-left space-y-6"
+              className="text-center lg:text-left space-y-6"
               variants={staggerContainer}
               initial="initial"
               animate="animate"
             >
               {/* Badge */}
               <motion.div variants={staggerItem} className="flex justify-center lg:justify-start">
-                <Badge className="px-4 py-2 bg-primary/10 text-primary border-primary/20 text-sm font-medium">
+                <Badge className="px-4 py-2 bg-[#A3E635] text-slate-900 border-0 text-sm font-semibold shadow-lg shadow-[#A3E635]/30">
                   <Sparkles className="w-4 h-4 mr-2" />
                   Transforme sua rotina em 30 dias
                 </Badge>
@@ -320,12 +329,15 @@ const BoraLanding = () => {
 
               {/* Title with gradient */}
               <motion.h1
-                className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-slate-900"
+                className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.1] text-slate-900"
                 variants={staggerItem}
               >
                 Sua rotina personalizada{" "}
-                <span className="bg-gradient-to-r from-primary to-teal-500 bg-clip-text text-transparent">
+                <span className="text-[#A3E635] relative">
                   em 7 minutos por dia
+                  <svg className="absolute -bottom-2 left-0 w-full h-3 text-[#A3E635]/30" viewBox="0 0 200 12" preserveAspectRatio="none">
+                    <path d="M0,8 Q50,0 100,8 T200,8" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round"/>
+                  </svg>
                 </span>
               </motion.h1>
 
@@ -336,78 +348,151 @@ const BoraLanding = () => {
               >
                 Chega de acordar sem energia. Chega de procrastinar.{" "}
                 <strong className="text-slate-900">Seu plano personalizado</strong> vai
-                te dar clareza e consistência — <strong className="text-primary">ou seu dinheiro de volta</strong>.
+                te dar clareza e consistência — <strong className="text-[#A3E635]">ou seu dinheiro de volta</strong>.
               </motion.p>
 
-              {/* Stats */}
+              {/* Stats with Bora Green */}
               <motion.div
-                className="flex flex-wrap justify-center lg:justify-start gap-6 md:gap-10 pt-4"
+                className="flex flex-wrap justify-center lg:justify-start gap-8 pt-4"
                 variants={staggerItem}
               >
-                <div className="text-center">
-                  <AnimatedCounter value={7} />
-                  <p className="text-sm text-slate-500 mt-1">minutos/dia</p>
-                </div>
-                <div className="text-center">
-                  <AnimatedCounter value={5000} suffix="+" />
-                  <p className="text-sm text-slate-500 mt-1">vidas transformadas</p>
-                </div>
-                <div className="text-center">
-                  <AnimatedCounter value={94} suffix="%" />
-                  <p className="text-sm text-slate-500 mt-1">mantêm a rotina</p>
-                </div>
+                {[
+                  { value: 7, label: "minutos/dia" },
+                  { value: 5000, suffix: "+", label: "vidas transformadas" },
+                  { value: 94, suffix: "%", label: "mantêm a rotina" },
+                ].map((stat, i) => (
+                  <div key={i} className="text-center lg:text-left">
+                    <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#A3E635]">
+                      {stat.value.toLocaleString()}{stat.suffix || ""}
+                    </span>
+                    <p className="text-sm text-slate-500 mt-1">{stat.label}</p>
+                  </div>
+                ))}
               </motion.div>
 
               {/* CTA */}
-              <motion.div variants={staggerItem} className="pt-4 flex justify-center lg:justify-start">
+              <motion.div variants={staggerItem} className="pt-4 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     onClick={scrollToPricing}
                     size="lg"
-                    className="group bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 text-white text-base sm:text-lg px-8 py-6 rounded-full font-bold shadow-xl shadow-primary/30"
+                    className="group bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 text-base sm:text-lg px-8 py-6 rounded-full font-bold shadow-xl shadow-[#A3E635]/30"
                   >
                     <Sparkles className="w-5 h-5 mr-2" />
                     QUERO MINHA ROTINA
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </motion.div>
+                <p className="text-sm text-slate-500 flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-[#A3E635]" />
+                  Garantia de 7 dias
+                </p>
               </motion.div>
             </motion.div>
 
-            {/* Right side - App Mockup (5 cols) */}
+            {/* Right side - 3D Mockup Composition */}
             <motion.div
-              className="lg:col-span-5 relative flex justify-center lg:justify-end order-first lg:order-last"
-              initial={{ opacity: 0, scale: 0.8, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="relative flex justify-center lg:justify-end order-first lg:order-last min-h-[400px] md:min-h-[500px]"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.8, type: "spring" }}
             >
-              {/* Glow effect behind mockup */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-emerald-500/20 to-transparent rounded-full blur-[80px] scale-75" />
+              {/* Central glow */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#A3E635]/25 rounded-full blur-[100px]" />
 
-              {/* Mockup image */}
-              <motion.img
-                src="/images/lp/mockup-app-vertical.webp"
-                alt="App BORA - Mockup"
-                className="relative z-10 w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[380px] h-auto drop-shadow-2xl"
-                animate={{ y: [0, -15, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              />
+              {/* 3D Mockup composition with perspective */}
+              <div className="relative w-full max-w-[500px] h-[450px] md:h-[520px]" style={{ perspective: "1000px" }}>
+                {/* Back left mockup */}
+                <motion.div
+                  className="absolute left-0 md:-left-8 top-12 z-10"
+                  initial={{ opacity: 0, x: -50, rotateY: 15 }}
+                  animate={{ opacity: 1, x: 0, rotateY: 15 }}
+                  transition={{ delay: 0.5, duration: 0.8 }}
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  <img
+                    src="/images/lp/mockup-app-vertical.webp"
+                    alt="App BORA - Rotina"
+                    className="w-[160px] md:w-[200px] h-auto rounded-3xl shadow-2xl shadow-black/20 border-4 border-white/50"
+                  />
+                </motion.div>
 
-              {/* Decorative elements */}
-              <motion.div
-                className="absolute -top-4 -right-4 w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-primary/20"
-                animate={{ rotate: [0, 5, 0, -5, 0] }}
-                transition={{ duration: 6, repeat: Infinity }}
-              >
-                <CheckCircle2 className="w-8 h-8 text-primary" />
-              </motion.div>
-              <motion.div
-                className="absolute -bottom-4 -left-4 w-14 h-14 bg-amber-500/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-amber-500/20"
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 3, repeat: Infinity, delay: 1 }}
-              >
-                <Flame className="w-7 h-7 text-amber-500" />
-              </motion.div>
+                {/* Center main mockup */}
+                <motion.div
+                  className="absolute left-1/2 -translate-x-1/2 top-0 z-30"
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <div className="relative">
+                    <img
+                      src="/images/lp/mockup-app-vertical.webp"
+                      alt="App BORA - Dashboard"
+                      className="w-[200px] md:w-[260px] h-auto rounded-3xl shadow-2xl shadow-[#A3E635]/30 border-4 border-white"
+                    />
+                    {/* Glow ring around main mockup */}
+                    <div className="absolute -inset-2 bg-gradient-to-r from-[#A3E635]/50 via-emerald-400/30 to-[#A3E635]/50 rounded-[2rem] blur-xl -z-10 opacity-60" />
+                  </div>
+                </motion.div>
+
+                {/* Back right mockup */}
+                <motion.div
+                  className="absolute right-0 md:-right-8 top-12 z-10"
+                  initial={{ opacity: 0, x: 50, rotateY: -15 }}
+                  animate={{ opacity: 1, x: 0, rotateY: -15 }}
+                  transition={{ delay: 0.6, duration: 0.8 }}
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  <img
+                    src="/images/lp/mockup-horizontal.webp"
+                    alt="App BORA - Progresso"
+                    className="w-[160px] md:w-[200px] h-auto rounded-3xl shadow-2xl shadow-black/20 border-4 border-white/50"
+                  />
+                </motion.div>
+
+                {/* Floating notification cards */}
+                <motion.div
+                  className="absolute -top-4 right-4 md:right-0 z-40 bg-white rounded-2xl p-3 shadow-xl border border-[#A3E635]/20"
+                  animate={{ y: [0, -8, 0], rotate: [0, 2, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-[#A3E635] rounded-xl flex items-center justify-center">
+                      <CheckCircle2 className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-900">+23 hábitos</p>
+                      <p className="text-[10px] text-slate-500">completados hoje</p>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Floating streak card */}
+                <motion.div
+                  className="absolute bottom-16 -left-4 md:left-0 z-40 bg-white rounded-2xl p-3 shadow-xl border border-amber-500/20"
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 2.5, repeat: Infinity, delay: 1 }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center">
+                      <Flame className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-900">14 dias</p>
+                      <p className="text-[10px] text-slate-500">de streak 🔥</p>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Character image */}
+                <motion.img
+                  src="/images/lp/personagem-feliz.png"
+                  alt="Personagem feliz"
+                  className="absolute -bottom-8 right-8 w-32 md:w-40 h-auto z-20 drop-shadow-lg"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                />
+              </div>
             </motion.div>
           </div>
         </div>
@@ -422,12 +507,12 @@ const BoraLanding = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
+            <Badge className="mb-4 bg-[#A3E635] text-slate-900 border-0 shadow-lg shadow-[#A3E635]/30">
               <Zap className="w-3 h-3 mr-1" />
               Por que funciona
             </Badge>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
-              O BORA é <span className="text-primary">diferente</span>
+              O BORA é <span className="text-[#A3E635]">diferente</span>
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               Três pilares que fazem a transformação acontecer
@@ -445,7 +530,7 @@ const BoraLanding = () => {
                 transition={{ delay: index * 0.15 }}
               >
                 {/* Glassmorphism card */}
-                <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-primary/30 overflow-hidden">
+                <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-[#A3E635]/30 overflow-hidden">
                   {/* Background glow on hover */}
                   <div className={`absolute -top-20 -right-20 w-40 h-40 ${pillar.bgGlow} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
@@ -474,67 +559,307 @@ const BoraLanding = () => {
         </div>
       </section>
 
-      {/* ============ FEATURES BENTO GRID ============ */}
-      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-slate-50">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[150px]" />
+      {/* ============ DAILY TIMELINE SECTION ============ */}
+      <section className="py-24 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-b from-white via-slate-50/50 to-white">
+        {/* Background subtle effects */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#A3E635]/5 rounded-full blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-[#A3E635]/5 rounded-full blur-[120px]" />
 
-        <div className="max-w-6xl mx-auto relative z-10">
+        <div className="max-w-5xl mx-auto relative z-10">
           <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-              <Rocket className="w-3 h-3 mr-1" />
-              Funcionalidades
+            <Badge className="mb-4 bg-[#A3E635] text-slate-900 border-0 shadow-lg shadow-[#A3E635]/30">
+              <Clock className="w-3 h-3 mr-1" />
+              Um dia usando o BORA
             </Badge>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
-              O que o BORA faz <span className="text-primary">por você</span>
+              Sua jornada de <span className="text-[#A3E635]">transformação</span>
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Tudo que você precisa para transformar sua rotina
+              Veja como 7 minutos por dia mudam tudo
             </p>
           </motion.div>
 
-          {/* Bento Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[180px]">
-            {features.map((feature, index) => {
-              const sizeClass = feature.size === "large"
-                ? "col-span-2 row-span-2"
-                : feature.size === "medium"
-                ? "col-span-2 row-span-1"
-                : "col-span-1 row-span-1";
+          {/* Timeline */}
+          <div className="relative">
+            {/* Central line */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-[#A3E635]/20 via-[#A3E635] to-[#A3E635]/20 hidden md:block" />
 
-              return (
-                <motion.div
-                  key={feature.title}
-                  className={`group relative ${sizeClass}`}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <div className="h-full bg-white rounded-2xl p-6 border border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 flex flex-col justify-between overflow-hidden">
-                    {/* Background glow */}
-                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            {/* Timeline items */}
+            {[
+              {
+                time: "06:00",
+                title: "Despertar",
+                description: "Rotina matinal de 7 minutos que energiza seu dia",
+                character: "/images/lp/personagem-manha.png",
+                mood: "energizado",
+                features: ["3 micro-hábitos", "Checklist matinal", "Lembrete suave"],
+              },
+              {
+                time: "12:00",
+                title: "Meio do Dia",
+                description: "Check-in rápido para manter o foco e a produtividade",
+                character: "/images/lp/personagem-meio-dia.png",
+                mood: "focado",
+                features: ["Pausa consciente", "Revisão de tarefas", "Momento de gratidão"],
+              },
+              {
+                time: "18:00",
+                title: "Fim do Expediente",
+                description: "Revisão do progresso e celebração das conquistas do dia",
+                character: "/images/lp/personagem-tarde.png",
+                mood: "realizado",
+                features: ["Streak atualizado", "Progresso visual", "Recompensas desbloqueadas"],
+              },
+              {
+                time: "22:00",
+                title: "Noite",
+                description: "Preparação para um sono restaurador e planejamento do próximo dia",
+                character: "/images/lp/personagem-noite.png",
+                mood: "tranquilo",
+                features: ["Meditação guiada", "Reflexão do dia", "Rotina de sono"],
+              },
+            ].map((item, index) => (
+              <motion.div
+                key={item.time}
+                className={`relative flex items-center gap-8 mb-12 last:mb-0 ${
+                  index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+                }`}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 }}
+              >
+                {/* Time badge - center on desktop */}
+                <div className="absolute left-1/2 transform -translate-x-1/2 hidden md:flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-[#A3E635] flex items-center justify-center shadow-lg shadow-[#A3E635]/30 z-10">
+                    <span className="text-sm font-bold text-slate-900">{item.time}</span>
+                  </div>
+                </div>
 
-                    <div className="relative z-10">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
-                        <feature.icon className="w-6 h-6 text-white" />
+                {/* Content card */}
+                <div className={`flex-1 ${index % 2 === 0 ? "md:pr-16" : "md:pl-16"}`}>
+                  <motion.div
+                    className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-[#A3E635]/30"
+                    whileHover={{ y: -5 }}
+                  >
+                    {/* Mobile time badge */}
+                    <div className="flex items-center gap-3 mb-4 md:hidden">
+                      <div className="w-12 h-12 rounded-full bg-[#A3E635] flex items-center justify-center shadow-lg">
+                        <span className="text-xs font-bold text-slate-900">{item.time}</span>
                       </div>
-                      <h3 className={`font-bold text-slate-900 mb-2 ${feature.size === "large" ? "text-2xl" : "text-lg"}`}>
-                        {feature.title}
-                      </h3>
-                      <p className={`text-slate-600 ${feature.size === "large" ? "text-base" : "text-sm"}`}>
-                        {feature.description}
-                      </p>
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-900">{item.title}</h3>
+                        <Badge className="bg-[#A3E635]/10 text-[#A3E635] border-[#A3E635]/20 text-xs">
+                          {item.mood}
+                        </Badge>
+                      </div>
                     </div>
+
+                    {/* Desktop header */}
+                    <div className="hidden md:block mb-4">
+                      <h3 className="text-2xl font-bold text-slate-900 mb-1">{item.title}</h3>
+                      <Badge className="bg-[#A3E635]/10 text-[#A3E635] border-[#A3E635]/20 text-sm">
+                        {item.mood}
+                      </Badge>
+                    </div>
+
+                    <p className="text-slate-600 mb-4">{item.description}</p>
+
+                    {/* Features list */}
+                    <div className="flex flex-wrap gap-2">
+                      {item.features.map((feature) => (
+                        <span
+                          key={feature}
+                          className="px-3 py-1 bg-slate-100 text-slate-700 text-sm rounded-full"
+                        >
+                          {feature}
+                        </span>
+                      ))}
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Character image */}
+                <div className={`hidden md:flex flex-1 items-center justify-center ${index % 2 === 0 ? "md:pl-16" : "md:pr-16"}`}>
+                  <motion.img
+                    src={item.character}
+                    alt={`Personagem ${item.mood}`}
+                    className="w-40 h-auto drop-shadow-lg"
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
+                  />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* CTA after timeline */}
+          <motion.div
+            className="text-center mt-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <p className="text-slate-600 mb-6">
+              <strong className="text-[#A3E635]">7 minutos</strong> que transformam as outras <strong>23 horas e 53 minutos</strong> do seu dia
+            </p>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                onClick={scrollToPricing}
+                className="bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 font-bold px-8 py-6 rounded-full shadow-xl shadow-[#A3E635]/30"
+              >
+                <Sparkles className="w-5 h-5 mr-2" />
+                COMEÇAR MINHA TRANSFORMAÇÃO
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ============ INTERACTIVE QUIZ SECTION ============ */}
+      <section className="py-24 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-b from-[#A3E635]/5 via-white to-[#A3E635]/10">
+        {/* Background immersive effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#A3E635]/20 via-transparent to-transparent" />
+        </div>
+
+        <div className="relative z-10 max-w-4xl mx-auto">
+          {/* Header */}
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Badge className="bg-[#A3E635] text-slate-900 border-0 mb-4 shadow-lg shadow-[#A3E635]/30">
+              <Sparkles className="w-4 h-4 mr-2" />
+              Experimente agora
+            </Badge>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+              Descubra sua <span className="text-[#A3E635]">rotina ideal</span>
+            </h2>
+            <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+              Responda 3 perguntas rápidas e veja uma prévia do seu plano personalizado
+            </p>
+          </motion.div>
+
+          {/* Quiz Container */}
+          <motion.div
+            className="bg-white/80 backdrop-blur-xl rounded-3xl border-2 border-[#A3E635]/30 shadow-2xl shadow-[#A3E635]/10 overflow-hidden"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            {/* Progress bar */}
+            <div className="px-8 pt-8">
+              <div className="flex gap-2">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="h-2 flex-1 rounded-full bg-[#A3E635]"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Quiz Result Preview (Static for demo) */}
+            <div className="p-8 md:p-12">
+              {/* Result Header */}
+              <div className="text-center mb-8">
+                <motion.div
+                  className="w-20 h-20 mx-auto bg-[#A3E635] rounded-full flex items-center justify-center mb-4"
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ type: "spring", delay: 0.2 }}
+                >
+                  <CheckCircle2 className="w-10 h-10 text-white" />
+                </motion.div>
+                <h3 className="text-2xl font-bold text-slate-900">Sua rotina está pronta!</h3>
+                <p className="text-slate-600">Baseado no seu perfil, criamos um plano para você</p>
+              </div>
+
+              {/* Routine Preview (partially locked) */}
+              <div className="space-y-4">
+                {/* Unlocked item */}
+                <motion.div
+                  className="p-4 bg-[#A3E635]/10 rounded-xl border border-[#A3E635]/30"
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[#A3E635] rounded-xl flex items-center justify-center">
+                      <Sun className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-900">Rotina Matinal</p>
+                      <p className="text-sm text-slate-600">3 hábitos • 7 min/dia</p>
+                    </div>
+                    <CheckCircle2 className="w-6 h-6 text-[#A3E635]" />
                   </div>
                 </motion.div>
-              );
-            })}
-          </div>
+
+                {/* Locked items */}
+                {[
+                  { icon: Calendar, title: "Checklist Diário", subtitle: "Personalizado para você" },
+                  { icon: LineChart, title: "Progresso Semanal", subtitle: "Gráficos e métricas" },
+                  { icon: Brain, title: "Meditações Guiadas", subtitle: "Acalme sua mente" },
+                ].map((item, index) => (
+                  <motion.div
+                    key={item.title}
+                    className="p-4 bg-slate-100 rounded-xl border border-slate-200 relative overflow-hidden opacity-60"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 0.6, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.4 + index * 0.1 }}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-slate-300 rounded-xl flex items-center justify-center">
+                        <item.icon className="w-6 h-6 text-slate-500" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-slate-500">{item.title}</p>
+                        <p className="text-sm text-slate-400">{item.subtitle}</p>
+                      </div>
+                      <Lock className="w-6 h-6 text-slate-400" />
+                    </div>
+                    {/* Lock overlay gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* CTA to unlock */}
+              <div className="mt-8 text-center">
+                <p className="text-sm text-slate-500 mb-4 flex items-center justify-center gap-2">
+                  <Lock className="w-4 h-4" />
+                  Desbloqueie todas as funcionalidades
+                </p>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    onClick={scrollToPricing}
+                    size="lg"
+                    className="bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 font-bold text-lg px-8 py-6 rounded-full shadow-xl shadow-[#A3E635]/30"
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    DESBLOQUEAR ROTINA COMPLETA
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </motion.div>
+                <p className="text-xs text-slate-400 mt-3">
+                  Por apenas 11x de R$5,17 • Garantia de 7 dias
+                </p>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -1089,12 +1414,19 @@ const BoraLanding = () => {
                 </button>
               </motion.div>
 
-              {/* Guarantee */}
-              <div className="flex items-center justify-center gap-3 text-sm text-slate-400 relative z-10">
-                <Shield className="w-5 h-5 text-primary" />
-                <span>
-                  <strong className="text-white">Garantia 7 dias</strong> - 100% do seu dinheiro de volta
-                </span>
+              {/* Premium Guarantee Seal */}
+              <div className="relative z-10 mt-2">
+                <div className="flex items-center gap-4 p-4 bg-[#A3E635]/10 rounded-2xl border border-[#A3E635]/30">
+                  <div className="flex-shrink-0 w-16 h-16 rounded-full bg-[#A3E635] flex items-center justify-center shadow-lg shadow-[#A3E635]/30">
+                    <Shield className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-bold text-white text-lg">Garantia Incondicional de 7 Dias</p>
+                    <p className="text-sm text-slate-400">
+                      100% do seu dinheiro de volta, sem perguntas. Risco zero.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -1167,22 +1499,22 @@ const BoraLanding = () => {
       </section>
 
       {/* ============ FOOTER ============ */}
-      <footer className="py-12 px-4 sm:px-6 bg-slate-900 border-t border-slate-800">
+      <footer className="py-12 px-4 sm:px-6 bg-slate-800 border-t-4 border-[#A3E635]">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-[#A3E635] flex items-center justify-center shadow-lg shadow-[#A3E635]/30">
+                <Sparkles className="w-5 h-5 text-slate-900" />
               </div>
               <span className="text-xl font-bold text-white">BORA</span>
             </div>
 
             {/* Links */}
             <div className="flex items-center gap-6 text-sm text-slate-400">
-              <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
-              <a href="#" className="hover:text-white transition-colors">Política de Privacidade</a>
-              <a href="#" className="hover:text-white transition-colors">Contato</a>
+              <a href="#" className="hover:text-[#A3E635] transition-colors">Termos de Uso</a>
+              <a href="#" className="hover:text-[#A3E635] transition-colors">Política de Privacidade</a>
+              <a href="#" className="hover:text-[#A3E635] transition-colors">Contato</a>
             </div>
 
             {/* Copyright */}
