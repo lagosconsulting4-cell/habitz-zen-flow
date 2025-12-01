@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habitz Icons Preview - Streaks Style Redesign</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 40px 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.light {
+      background-color: #FAFAFA;
+      color: #1A1A1A;
+    }
+
+    body.dark {
+      background-color: #000000;
+      color: #FFFFFF;
+    }
+
+    .header {
+      max-width: 1400px;
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      opacity: 0.6;
+      margin-bottom: 24px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: rgba(128, 128, 128, 0.1);
+    }
+
+    .control-label {
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0.8;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button.active {
+      background-color: #A3E635;
+      color: #000;
+    }
+
+    button:not(.active) {
+      background-color: rgba(128, 128, 128, 0.2);
+      color: inherit;
+    }
+
+    button:hover:not(.active) {
+      background-color: rgba(128, 128, 128, 0.3);
+    }
+
+    .grid-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 24px;
+    }
+
+    .icon-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-circles {
+      display: flex;
+      gap: 12px;
+    }
+
+    .icon-circle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .icon-circle:hover {
+      transform: scale(1.05);
+    }
+
+    .icon-circle.category {
+      background-color: #2C2C2E;
+    }
+
+    .icon-circle.habit {
+      background-color: #A3E635;
+    }
+
+    /* Support both filled and stroke icons */
+    .icon-circle svg {
+      color: currentColor;
+    }
+
+    /* Stroke icons (default) */
+    .icon-circle svg[data-style="stroke"] {
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    /* Filled icons */
+    .icon-circle svg[data-style="filled"] {
+      fill: currentColor;
+      stroke: none;
+    }
+
+    .icon-circle.category svg {
+      color: #FFFFFF;
+    }
+
+    .icon-circle.habit svg {
+      color: #000000;
+    }
+
+    .icon-name {
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      opacity: 0.7;
+      font-family: 'Courier New', monospace;
+    }
+
+    .stats {
+      max-width: 1400px;
+      margin: 0 auto 32px;
+      padding: 16px;
+      border-radius: 8px;
+      background: rgba(128, 128, 128, 0.1);
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #A3E635;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.6;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Size variations */
+    .size-30 .icon-circle { width: 52px; height: 52px; }
+    .size-30 .icon-circle svg { width: 30px; height: 30px; }
+
+    .size-52 .icon-circle { width: 74px; height: 74px; }
+    .size-52 .icon-circle svg { width: 52px; height: 52px; }
+
+    @media (max-width: 768px) {
+      .icon-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body class="dark size-30">
+  <div class="header">
+    <h1>Habitz Icons Preview</h1>
+    <p class="subtitle">Sistema de Iconografia - Heroicons Filled + Stroke Styles</p>
+
+    <div class="controls">
+      <div class="control-group">
+        <span class="control-label">Modo:</span>
+        <button class="active" data-mode="dark" onclick="setMode('dark', this)">Dark</button>
+        <button data-mode="light" onclick="setMode('light', this)">Light</button>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label">Tamanho:</span>
+        <button class="active" data-size="30" onclick="setSize('30', this)">30px (Dashboard)</button>
+        <button data-size="52" onclick="setSize('52', this)">52px (Circular)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value" id="stat-total">--</div>
+      <div class="stat-label">Total de Ícones</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="stat-filled">--</div>
+      <div class="stat-label">Filled (Heroicons)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="stat-stroke">--</div>
+      <div class="stat-label">Stroke (Outline)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">24×24</div>
+      <div class="stat-label">Grid Base</div>
+    </div>
+  </div>
+
+  <div class="grid-container">
+    <div class="section">
+      <h2 class="section-title">⭐ Categorias (5 principais)</h2>
+      <div class="icon-grid" id="categories"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">🧘 Stick Figures (6 ícones)</h2>
+      <div class="icon-grid" id="stick_figures"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">🚫 Padrão No_* (8 proibições)</h2>
+      <div class="icon-grid" id="no_pattern"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">💪 Saúde & Bem-estar (10 ícones)</h2>
+      <div class="icon-grid" id="health"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">🎯 Produtividade & Foco (8 ícones)</h2>
+      <div class="icon-grid" id="productivity"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">🥗 Alimentação (5 ícones)</h2>
+      <div class="icon-grid" id="nutrition"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">🏠 Rotinas Diárias (10 ícones)</h2>
+      <div class="icon-grid" id="routines"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">📋 Outros (1 ícone)</h2>
+      <div class="icon-grid" id="misc"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">🔄 Todos os 56 Ícones (A-Z)</h2>
+      <div class="icon-grid" id="all"></div>
+    </div>
+  </div>
+
+  <script>
+    const ICON_GROUPS = {
+      categories: ['run','meal','plan','clock','ban'],
+      stick_figures: ['cycle','swim','meditate','stretch','yoga','active'],
+      no_pattern: ['no_fast_food','no_screens','no_sugar','no_procrastination','no_skip_meals','no_late_sleep','no_smoke','no_alcohol'],
+      health: ['water','heart','activity_rings','stand_hours','exercise_minutes','burn_energy','strength','sleep','gratitude','detox'],
+      productivity: ['deep_work','focus','checklist','organize','review','study','book','journal'],
+      nutrition: ['fruits','vegetables','protein','vitamins','breakfast'],
+      routines: ['sunrise','alarm','make_bed','bed','stairs','pause','leisure','call_family','family','social_media'],
+      misc: ['target'],
+      all: ['active','activity_rings','alarm','ban','bed','book','breakfast','burn_energy','call_family','checklist','clock','cycle','deep_work','detox','exercise_minutes','family','focus','fruits','gratitude','heart','journal','leisure','make_bed','meal','meditate','no_alcohol','no_fast_food','no_late_sleep','no_procrastination','no_screens','no_skip_meals','no_smoke','no_sugar','organize','pause','plan','protein','review','run','sleep','social_media','stairs','stand_hours','strength','stretch','study','sunrise','swim','target','vegetables','vitamins','water','yoga']
+    };
+
+    const DEFAULT_ICON = 'activity_rings';
+    const statsEls = {
+      total: document.getElementById('stat-total'),
+      filled: document.getElementById('stat-filled'),
+      stroke: document.getElementById('stat-stroke'),
+    };
+
+    let iconMarkupMap = {};
+
+    function createIconElement(iconName) {
+      const markup = iconMarkupMap[iconName] || iconMarkupMap[DEFAULT_ICON];
+
+      if (!markup) {
+        return `<div class="icon-item"><div class="icon-circles"><div class="icon-circle category">?</div><div class="icon-circle habit">?</div></div><div class="icon-name">${iconName}</div></div>`;
+      }
+
+      return `
+        <div class="icon-item">
+          <div class="icon-circles">
+            <div class="icon-circle category" title="Category context">${markup}</div>
+            <div class="icon-circle habit" title="Habit context">${markup}</div>
+          </div>
+          <div class="icon-name">${iconName}</div>
+        </div>
+      `;
+    }
+
+    function renderIcons() {
+      Object.entries(ICON_GROUPS).forEach(([section, values]) => {
+        const container = document.getElementById(section);
+        if (container) {
+          container.innerHTML = values.map(createIconElement).join('');
+        }
+      });
+    }
+
+    function updateStats(total, filled) {
+      statsEls.total.textContent = total;
+      statsEls.filled.textContent = filled;
+      statsEls.stroke.textContent = total - filled;
+    }
+
+    function setMode(mode, button) {
+      document.body.classList.remove('light', 'dark');
+      document.body.classList.add(mode);
+      document.querySelectorAll('[data-mode]').forEach((btn) => {
+        btn.classList.toggle('active', btn === button);
+      });
+    }
+
+    function setSize(size, button) {
+      document.body.className = document.body.className.replace(/size-\d+/, `size-${size}`);
+      document.querySelectorAll('[data-size]').forEach((btn) => {
+        btn.classList.toggle('active', btn === button);
+      });
+    }
+
+    async function bootstrapPreview() {
+      try {
+        const response = await fetch('icon-preview-data.json?cache=' + Date.now());
+        const data = await response.json();
+        iconMarkupMap = Object.fromEntries(data.icons.map(({ key, markup }) => [key, markup]));
+        const filled = data.icons.filter(({ markup }) => markup.includes('data-style="filled"')).length;
+        updateStats(data.total, filled);
+        renderIcons();
+      } catch (error) {
+        console.error('Failed to load icon data', error);
+        const container = document.querySelector('.grid-container');
+        if (container) {
+          container.innerHTML = '<p>Não foi possível carregar os ícones. Execute <code>npm run icons:dump</code> em <code>App/</code> antes de abrir este preview.</p>';
+        }
+      }
+    }
+
+    bootstrapPreview();
+  </script>
+</body>
+</html>
+

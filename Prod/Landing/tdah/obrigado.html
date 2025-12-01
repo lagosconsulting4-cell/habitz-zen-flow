@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Habitz | Acesso Liberado</title>
+    <!-- Meta Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '4250939241809903');
+      fbq('track', 'PageView');
+      fbq('track', 'Lead');
+    </script>
+    <!-- End Meta Pixel Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./obrigado.css" />
+  </head>
+  <body
+    class="thank-body"
+    data-password-endpoint="https://jbucnphyrziaxupdsnbn.supabase.co/functions/v1/create-password-direct"
+    data-app-url="https://habitz.life/app"
+    data-members-area-url="https://app.kirvano.com/"
+  >
+    <header class="thank-header">
+      <img src="assets/images/logo.webp" alt="Habitz" class="brand-logo" />
+    </header>
+    <noscript>
+      <img
+        height="1"
+        width="1"
+        style="display:none"
+        src="https://www.facebook.com/tr?id=4250939241809903&ev=PageView&noscript=1"
+        alt="pixel"
+      />
+    </noscript>
+
+    <main class="thank-wrapper">
+      <section class="thank-card">
+        <span class="badge badge--success">Pagamento confirmado</span>
+        <h1>Crie sua senha e entre agora mesmo</h1>
+        <p class="lead">
+          Em menos de dois minutos você já consegue acessar o app. Basta usar o e-mail da compra, criar uma senha segura e pronto.
+          <strong>Esse processo vale para compras feitas pela Kirvano.</strong>
+        </p>
+
+        <div class="instant-access-card">
+          <div>
+            <h2>🚀 Acesso instantâneo</h2>
+            <p>
+              Digite o e-mail usado no checkout, crie uma senha de pelo menos 6 caracteres e clique em “Liberar acesso”.
+            </p>
+          </div>
+          <form id="instant-access-form" class="instant-access-form">
+            <div class="form-group">
+              <label for="user-email">E-mail da compra</label>
+              <input
+                type="email"
+                id="user-email"
+                name="email"
+                placeholder="voce@email.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="user-password">Crie sua senha (mínimo 6 caracteres)</label>
+              <input
+                type="password"
+                id="user-password"
+                name="password"
+                minlength="6"
+                placeholder="••••••••"
+                autocomplete="new-password"
+                required
+              />
+            </div>
+            <button type="submit" class="primary-btn" id="instant-access-btn">
+              Liberar acesso
+            </button>
+            <p class="helper-text">
+              Ao criar a senha você concorda com os Termos de Uso e Política de Privacidade da Habitz.
+            </p>
+            <div id="instant-access-feedback" class="instant-access-feedback" role="status" aria-live="polite"></div>
+          </form>
+        </div>
+
+        <div class="split-actions">
+          <a class="secondary-btn" id="members-area-btn" target="_blank" rel="noopener">
+            Ir para a Área de Membros da Kirvano
+          </a>
+          <button class="ghost-btn" id="resend-email-btn" type="button">
+            Reenviar link de acesso por e-mail
+          </button>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-box">
+            <h3>Não achou o e-mail?</h3>
+            <ul>
+              <li>Procure por <strong>"Habitz"</strong> ou <strong>"Supabase"</strong> nas abas Promoções/Spam.</li>
+              <li>Adicione <strong>noreply@mail.app.supabase.io</strong> aos contatos.</li>
+              <li>Se o pagamento foi via boleto/PIX, aguarde a confirmação do banco (pode levar até 20 min).</li>
+            </ul>
+          </div>
+          <div class="info-box">
+            <h3>O que já está liberado</h3>
+            <ul>
+              <li>Plano guiado de 30 dias com os módulos completos.</li>
+              <li>Mini-hábitos personalizados e check-ins diários.</li>
+              <li>Materiais extras e lives dentro da Área de Membros.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="support-card">
+          <div>
+            <h3>Precisa de ajuda?</h3>
+            <p>Atendemos em horário comercial via WhatsApp ou e-mail.</p>
+          </div>
+          <div class="support-actions">
+            <a
+              class="whatsapp-btn"
+              href="https://api.whatsapp.com/send?phone=5511993371766&text=Ol%C3%A1!%20Preciso%20de%20ajuda%20para%20acessar%20minha%20conta%20Habitz."
+              target="_blank"
+              rel="noopener"
+            >
+              Falar no WhatsApp
+            </a>
+            <p class="support-email">ou escreva para <strong>contato@habitz.life</strong></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="thank-footer">
+      <p>© <span id="year"></span> Habitz. Todos os direitos reservados.</p>
+    </footer>
+
+    <script type="module" src="./obrigado.js"></script>
+  </body>
+</html>

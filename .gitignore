@@ -1,8 +1,0 @@
-node_modules/
-dist/
-App/node_modules/
-App/dist/
-Landing/node_modules/
-Landing/dist/
-.env
-.DS_Store

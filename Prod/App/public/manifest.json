@@ -1,0 +1,123 @@
+{
+  "name": "Bora - Desenvolva seus melhores hábitos",
+  "short_name": "Bora",
+  "description": "Uma jornada de desenvolvimento pessoal feita especialmente para jovens. Crie hábitos incríveis com design minimalista.",
+  "id": "/app",
+  "start_url": "/app/?source=pwa",
+  "scope": "/app/",
+  "display": "standalone",
+  "display_override": ["standalone"],
+  "orientation": "portrait-primary",
+  "theme_color": "#65A30D",
+  "background_color": "#000000",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["productivity", "lifestyle", "health"],
+
+  "icons": [
+    {
+      "src": "/app/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/app/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Início",
+      "description": "Ver seu progresso de hoje",
+      "url": "/app/dashboard?source=shortcut",
+      "icons": [{ "src": "/app/icons/shortcut-dashboard.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Novo Hábito",
+      "short_name": "Criar",
+      "description": "Adicionar um novo hábito",
+      "url": "/app/create?source=shortcut",
+      "icons": [{ "src": "/app/icons/shortcut-create.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Meditação",
+      "short_name": "Meditar",
+      "description": "Iniciar sessão de meditação",
+      "url": "/app/meditation?source=shortcut",
+      "icons": [{ "src": "/app/icons/shortcut-meditation.png", "sizes": "96x96" }]
+    }
+  ],
+
+  "screenshots": [
+    {
+      "src": "/app/screenshots/mobile-dashboard.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard com seus hábitos do dia"
+    },
+    {
+      "src": "/app/screenshots/mobile-habits.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Gerencie todos os seus hábitos"
+    }
+  ],
+
+  "related_applications": [],
+  "prefer_related_applications": false
+}

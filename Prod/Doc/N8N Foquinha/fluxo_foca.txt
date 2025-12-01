@@ -1,0 +1,3370 @@
+{
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "@devlikeapro/n8n-nodes-waha.wahaTrigger",
+      "typeVersion": 202502,
+      "position": [
+        -2912,
+        -112
+      ],
+      "id": "e8bbbe04-85a9-42e8-9c1a-f353f205e31f",
+      "name": "WAHA Trigger",
+      "webhookId": "0f958080-92ba-4f90-8bad-935a84ec5df0",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1\nFROM public.messages\nWHERE wa_message_id = $1::text\nLIMIT 1;",
+        "additionalFields": {
+          "queryParams": "={{ ($json.messageId || '') }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        -2352,
+        -96
+      ],
+      "id": "1887140b-198d-49f5-a53d-063f4bdffd89",
+      "name": "PG - Deduplicate Message",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('Normalize Payload').item.json.text_in }} ",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "id": "has-text-check"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1584,
+        32
+      ],
+      "id": "436bf162-5096-450d-a4b5-6e42794218f3",
+      "name": "Has Text?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "flow-onboarding",
+              "name": "flow",
+              "value": "onboarding",
+              "type": "string"
+            },
+            {
+              "id": "36951f22-1a46-42ed-b5a5-bdd6e90dabcd",
+              "name": "whatsapp_id",
+              "value": "={{ $json.chatId }}",
+              "type": "string"
+            },
+            {
+              "id": "256b15c4-aeef-4a30-931d-902752c4300f",
+              "name": "phone_e164",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "2c472846-c969-4990-bea6-f396730aed1d",
+              "name": "preferred_name",
+              "value": "={{ $json.profile_name }}",
+              "type": "string"
+            },
+            {
+              "id": "16464aed-aa2b-4019-bd27-678eeedf3f9b",
+              "name": "timezone",
+              "value": "={{ $json.user.timezone || $env.TIMEZONE_DEFAULT || 'America/Sao_Paulo' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -544,
+        -720
+      ],
+      "id": "616a463c-99fb-411c-b90f-5b365216cb54",
+      "name": "Prepare Onboarding Payload"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        4288,
+        96
+      ],
+      "id": "60d6cecb-ff6b-4ae3-9a2d-2a9ddc117fa5",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.rows;\nlet rows;\nif (Array.isArray(raw)) {\nrows = raw;\n} else if (typeof raw === 'string') {\ntry { rows = JSON.parse(raw); } catch { rows = []; }\n} else {\nrows = [];\n}\n\nconst user = rows[0] || null;\nconst ctx = $items('Normalize Payload', 0, 0)?.[0]?.json || {};\n\nconst rawStatus = user?.onboarding_status ?? 'pending';\nconst onboardingStatus = (typeof rawStatus === 'string' ? rawStatus.toLowerCase().trim() : 'pending');\nconst isComplete = onboardingStatus === 'complete';\nconst needsOnboarding = !user || !isComplete;\n\nreturn [{\njson: {\n...ctx,\nuser: user || {},\nuserId: user?.id || null,\nonboardingStatus,\nisComplete,\nneedsOnboarding,\nflow: needsOnboarding ? 'onboarding' : 'conversation',\n},\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1248,
+        416
+      ],
+      "id": "1d7e9d36-c180-4f57-a4c7-965f60a24280",
+      "name": "Build User Context1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.needsOnboarding }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "id": "needs-onboarding-check"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -976,
+        416
+      ],
+      "id": "f8a4bec6-47ec-4261-b6b9-b7d2cf0945c0",
+      "name": "Route Onboarding?1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c9f26195-7225-4a1a-81cd-f9ae8a77fd25",
+              "leftValue": "={{ Array.isArray($json.rows) ? $json.rows.length : 0 }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2080,
+        -80
+      ],
+      "id": "28936c6a-0da2-44b3-a1a5-c4bf1a0961bc",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Seen",
+        "session": "={{ $('Normalize Payload').item.json.session }}",
+        "chatId": "={{ $('Normalize Payload').item.json.chatId }}",
+        "messageId": "={{ $('Normalize Payload').item.json.messageId }}",
+        "participant": "",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        -1744,
+        -176
+      ],
+      "id": "496fc19e-5ebd-4ed7-a4e3-80c12e2acdfb",
+      "name": "Send Seen",
+      "credentials": {
+        "wahaApi": {
+          "id": "lbXxZOSj8RzUPOQh",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.payload || $json;\nconst from = payload.from || $json.from || '';\nconst body = (payload.body || $json.body || '').trim();\nconst waMessageId = payload.id || $json.id || '';\n\nconst normalized = {\n  session: $json.session || $env.WAHA_SESSION || 'default',\n  chatId: from,\n  phone: from.replace('@c.us', '').replace(/\\D/g, ''),\n  text_in: body,\n  messageId: waMessageId,\n  profile_name: payload.pushName || $json.pushName || '',\n  timestamp: $json.timestamp || new Date().toISOString(),\n};\n\nnormalized.dedupeKey = `${normalized.chatId}:${normalized.messageId || normalized.timestamp}`;\n\nreturn [{\n  json: {\n    ...normalized,\n    raw: $json\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2560,
+        -96
+      ],
+      "id": "8c5ff76d-d71c-42ba-a629-0e25a78b69ca",
+      "name": "Normalize Payload"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.user_preferences (\n  user_id,\n  planner_delivery_weekday,\n  planner_delivery_hour,\n  check_in_window_start,\n  check_in_window_end,\n  proactive_frequency,\n  proactive_opt_out,\n  created_at,\n  updated_at\n)\nVALUES (\n  $1::uuid,\n  COALESCE($2::int, 0),\n  COALESCE($3::int, 16),\n  COALESCE(NULLIF($4::text, ''), '19:00')::time,\n  COALESCE(NULLIF($5::text, ''), '21:00')::time,\n  COALESCE(NULLIF($6::text, ''), 'weekly'),\n  COALESCE($7::boolean, false),\n  NOW(),\n  NOW()\n)\nON CONFLICT (user_id) DO UPDATE\nSET planner_delivery_weekday = COALESCE(EXCLUDED.planner_delivery_weekday, user_preferences.planner_delivery_weekday),\n    planner_delivery_hour = COALESCE(EXCLUDED.planner_delivery_hour, user_preferences.planner_delivery_hour),\n    check_in_window_start = COALESCE(EXCLUDED.check_in_window_start, user_preferences.check_in_window_start),\n    check_in_window_end = COALESCE(EXCLUDED.check_in_window_end, user_preferences.check_in_window_end),\n    proactive_frequency = COALESCE(EXCLUDED.proactive_frequency, user_preferences.proactive_frequency),\n    proactive_opt_out = COALESCE(EXCLUDED.proactive_opt_out, user_preferences.proactive_opt_out),\n    updated_at = NOW()\nRETURNING user_id;",
+        "additionalFields": {
+          "queryParams": "=user_id,planner_delivery_weekday,planner_delivery_hour,check_in_window_start,check_in_window_end,proactive_frequency,proactive_opt_out"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -800
+      ],
+      "id": "cd72d474-f421-4640-87eb-7e0cf5372402",
+      "name": "PG - Upsert Preferences",
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $items('Onboarding Logic')[0]?.json ?? {};\n\nconst {\n  onboardingPayloadJson, // só serviu para o UPDATE\n  needsUpdate,           // já consumido pelo IF\n  ...rest\n} = payload;\n\nconst nextStatusEffective =\n  rest.nextStatus ?? rest.onboardingStatus ?? 'collecting_goals';\n\nconst statusToStep = (status) => {\n  switch (status) {\n    case 'collecting_goals':\n      return 'goals';\n    case 'collecting_routine':\n      return 'routine';\n    case 'collecting_preferences':\n      return 'preferences';\n    case 'complete':\n      return 'complete';\n    default:\n      return 'goals';\n  }\n};\n\nconst promptForStatus = (status, displayName) => {\n  switch (status) {\n    case 'collecting_goals':\n      return `Oi ${displayName}! Para montar sua rotina ideal, preciso conhecer você melhor. Qual é sua meta principal agora?`;\n    case 'collecting_routine':\n      return `Entendi! E como é sua rotina atual? Que hábitos você já tem?`;\n    case 'collecting_preferences':\n      return `Perfeito! Por último: em que horário você prefere receber lembretes e check-ins? (Ex: manhã, tarde, noite)`;\n    case 'complete':\n      return `Obrigada, ${displayName}! Anotei tudo. Se quiser ajustar algo depois, é só me avisar.`;\n    default:\n      return `Oi ${displayName}! Para montar sua rotina ideal, preciso conhecer você melhor. Qual é sua meta principal agora?`;\n  }\n};\n\nconst displayName =\n  rest.user?.preferred_name || rest.profile_name || 'amiga';\n\nreturn [\n  {\n    json: {\n      ...rest,\n      onboardingStatus: nextStatusEffective,\n      step: statusToStep(nextStatusEffective),\n      promptText: promptForStatus(nextStatusEffective, displayName),\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        -896
+      ],
+      "id": "9b240a04-1cfc-460d-aa87-72e52653f14a",
+      "name": "Context After Update"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "result-status",
+              "name": "status",
+              "value": "sent",
+              "type": "string"
+            },
+            {
+              "id": "result-flow",
+              "name": "flow",
+              "value": "onboarding",
+              "type": "string"
+            },
+            {
+              "id": "result-user",
+              "name": "userId",
+              "value": "={{ $('set_guardar').item.json.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "result-message",
+              "name": "conversation_id",
+              "value": "={{ $('set_guardar').item.json.conversation_id }}",
+              "type": "string"
+            },
+            {
+              "id": "8b1db406-a0e4-4c56-8bfe-a22ba380b2d8",
+              "name": "inbound_message_id",
+              "value": "={{ $('set_guardar').item.json.inbound_message_id }}",
+              "type": "string"
+            },
+            {
+              "id": "45252476-b34c-46c4-9e8b-3014b20479bb",
+              "name": "outbound_message_id",
+              "value": "={{ $('set_guardar').item.json.outbound_message_id }}",
+              "type": "string"
+            },
+            {
+              "id": "4410952c-7f63-47f2-9fed-85a35b60b4e6",
+              "name": "text_in ",
+              "value": "={{ $('set_guardar').item.json.text_in }}",
+              "type": "string"
+            },
+            {
+              "id": "b9093fce-5bfd-43e7-bf96-e78f170e6bb2",
+              "name": "ai_output ",
+              "value": "={{ $('set_guardar').item.json.ai_output }}",
+              "type": "string"
+            },
+            {
+              "id": "dd533b5b-21a2-4fd8-9112-5cf54a6fd2ab",
+              "name": "sent_at ",
+              "value": "={{ $('Send Onboarding Message1').item.json.messageTimestamp }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3376,
+        -848
+      ],
+      "id": "700cc664-d63a-41f6-ac17-fb8aa3c5bd3d",
+      "name": "Set Flow Result"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.needsUpdate }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "id": "needs-update-check"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        -736
+      ],
+      "id": "8ea9a0fb-352d-426c-8a9b-bdba68bc9dc6",
+      "name": "Should Update?1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ai-output",
+              "name": "ai_output",
+              "value": "={{ $json.message?.content || $json.text || $items('Onboarding Logic')[0].json.promptText || 'Oi! Como posso te ajudar?' }}",
+              "type": "string"
+            },
+            {
+              "id": "98f8a20c-d3f6-440c-a294-b3901a3ad404",
+              "name": "user_id",
+              "value": "={{ $('Onboarding Logic').item.json.user_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2240,
+        -720
+      ],
+      "id": "284e8c67-951d-44b7-a91a-4c1f4becba0e",
+      "name": "Prepare Onboarding Response1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.messages (\n  conversation_id,\n  user_id,\n  direction,\n  wa_message_id,\n  body,\n  created_at\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  'inbound',\n  $3::text,\n  $4::text,\n  NOW()\n  )\nON CONFLICT (wa_message_id) DO NOTHING;",
+        "additionalFields": {
+          "queryParams": "=conversation_id,user_id,inbound_message_id,text_in"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        3104,
+        -1040
+      ],
+      "id": "014b87ee-eab4-4992-b3e0-767b65b21c9b",
+      "name": "PG - Save Inbound Message1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Build User Context1').item.json.session }}",
+        "chatId": "={{ $('Build User Context1').item.json.chatId }}",
+        "text": "={{ $('Prepare Onboarding Response1').item.json.ai_output }}",
+        "linkPreview": false,
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        2672,
+        -800
+      ],
+      "id": "1989fe33-27be-47af-ba4d-5f40e79af8dc",
+      "name": "Send Onboarding Message1",
+      "executeOnce": true,
+      "credentials": {
+        "wahaApi": {
+          "id": "lbXxZOSj8RzUPOQh",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.users (\n  whatsapp_id, phone_e164, preferred_name,\n  onboarding_status, timezone, locale,\n  created_at, updated_at\n)\nVALUES (\n  $1::text,\n  $2::text,\n  NULLIF($3::text, ''),\n  'collecting_goals',\n  COALESCE(NULLIF($4::text, ''), 'America/Sao_Paulo'),\n  'pt-BR',\n  NOW(),\n  NOW()\n)\nON CONFLICT (whatsapp_id) DO UPDATE\nSET preferred_name = COALESCE(EXCLUDED.preferred_name, users.preferred_name),\n    updated_at = NOW()\nRETURNING id, whatsapp_id, phone_e164, preferred_name,\n          onboarding_status, onboarding_payload, timezone, locale;",
+        "additionalFields": {
+          "queryParams": "=whatsapp_id,phone_e164,preferred_name,timezone"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        304,
+        -800
+      ],
+      "id": "b46a05c5-1837-481d-baf7-39ef2a4b5899",
+      "name": "PG - Upsert User (Onboarding)",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c81f676d-a028-4a94-a473-1d60eb6a4cd7",
+              "name": "user_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        -800
+      ],
+      "id": "a78e45f9-c50c-43c2-88dd-b262eae84aee",
+      "name": "user_id_convert"
+    },
+    {
+      "parameters": {
+        "jsCode": "const original = $items('Prepare Onboarding Payload')[0]?.json ?? {};\nconst ctx = { ...original, ...$json };\n\nconst rawText = ctx.text_in ?? ctx.text ?? '';\nconst text = typeof rawText === 'string' ? rawText.trim() : '';\n\nconst isWhatsAppReceipt =\n  ctx.raw?.message?.status !== undefined ||\n  ctx.raw?.status !== undefined;\n\nconst isInboundUserMsg = Boolean(text) && ctx.fromMe !== true && !isWhatsAppReceipt;\n\n// Preferir o resultado FLAT do upsert; fallback para o SELECT com rows\nconst userFromUpsert = $items('PG - Upsert User (Onboarding)')?.[0]?.json || null;\nconst loadedRows = $items('PG - Load User1')?.[0]?.json?.rows;\nconst userFromLoad = Array.isArray(loadedRows) && loadedRows.length > 0 ? loadedRows[0] : null;\nconst userDb = userFromUpsert || userFromLoad || {};\n\nconst resolvedUserId = userDb.id ?? ctx.user_id ?? ctx.userId ?? null;\n\n// Normaliza payload existente (string ou objeto)\nlet existingPayload = userDb.onboarding_payload;\nif (typeof existingPayload === 'string') {\n  try { existingPayload = JSON.parse(existingPayload); } catch { existingPayload = undefined; }\n}\nconst onboardingPayload = (existingPayload && typeof existingPayload === 'object')\n  ? { ...existingPayload }\n  : { goals: [], routine: [], preferences: [] };\n\nconst onboardingStatus = userDb.onboarding_status ?? 'collecting_goals';\nconst displayName = userDb.preferred_name || ctx.profile_name || 'amiga';\n\nconst pushEntry = (key) => {\n  if (!Array.isArray(onboardingPayload[key])) onboardingPayload[key] = [];\n  if (isInboundUserMsg && text) {\n    onboardingPayload[key].push({ text, at: new Date().toISOString() });\n  }\n};\n\nlet currentStatus = onboardingStatus;\nlet nextStatus = onboardingStatus;\n\nswitch (onboardingStatus) {\n  case 'pending':\n  case 'collecting_goals':\n    currentStatus = 'collecting_goals';\n    nextStatus = 'collecting_routine';\n    pushEntry('goals');\n    break;\n  case 'collecting_routine':\n    currentStatus = 'collecting_routine';\n    nextStatus = 'collecting_preferences';\n    pushEntry('routine');\n    break;\n  case 'collecting_preferences':\n    currentStatus = 'collecting_preferences';\n    nextStatus = 'complete';\n    pushEntry('preferences');\n    break;\n  case 'complete':\n    currentStatus = 'complete';\n    nextStatus = 'complete';\n    break;\n  default:\n    currentStatus = 'collecting_goals';\n    nextStatus = 'collecting_routine';\n    break;\n}\n\nconst statusForPrompt = isInboundUserMsg ? nextStatus : currentStatus;\n\nconst statusToStep = (status) => {\n  switch (status) {\n    case 'collecting_goals': return 'goals';\n    case 'collecting_routine': return 'routine';\n    case 'collecting_preferences': return 'preferences';\n    case 'complete': return 'complete';\n    default: return 'goals';\n  }\n};\n\nconst promptForStatus = (status, name) => {\n  switch (status) {\n    case 'collecting_goals':\n      return `Oi ${name}! Para montar sua rotina ideal, preciso conhecer você melhor. Qual é sua meta principal agora?`;\n    case 'collecting_routine':\n      return `Entendi! E como é sua rotina atual? Que hábitos você já tem?`;\n    case 'collecting_preferences':\n      return `Perfeito! Por último: em que horário você prefere receber lembretes e check-ins? (Ex: manhã, tarde, noite)`;\n    case 'complete':\n      return `Obrigada, ${name}! Anotei tudo. Se quiser ajustar algo depois, é só me avisar.`;\n    default:\n      return `Oi ${name}! Para montar sua rotina ideal, preciso conhecer você melhor. Qual é sua meta principal agora?`;\n  }\n};\n\nconst promptText = promptForStatus(statusForPrompt, displayName);\n\nreturn [\n  {\n    json: {\n      ...ctx,\n      user: userDb,\n      user_id: resolvedUserId,\n      userId: resolvedUserId,\n      onboardingStatus,                 // status atual no banco\n      nextStatus,                       // próximo status calculado\n      step: statusToStep(statusForPrompt),\n      onboardingPayload,\n      onboardingPayloadJson: JSON.stringify(onboardingPayload),\n      promptText,\n      inboundText: text,\n      needsUpdate: isInboundUserMsg,    // gate para o UPDATE\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        -800
+      ],
+      "id": "ab90eff6-251a-4ca9-9e15-e33724a0aff5",
+      "name": "Onboarding Logic"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE public.users\nSET onboarding_payload = $1::jsonb,\n    onboarding_status = $2::text,\n    updated_at = NOW()\nWHERE id = $3::uuid\nRETURNING id;",
+        "additionalFields": {
+          "queryParams": "=onboardingPayloadJson,nextStatus,user_id"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        -896
+      ],
+      "id": "e0dcd544-bb86-4c97-93e0-e2d2cbdae3fc",
+      "name": "PG - Update Onboarding",
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.messages (\n  conversation_id,\n  user_id,\n  direction,\n  wa_message_id,\n  body,\n  created_at\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  'outbound',\n  $3::text,\n  $4::text,\n  NOW()\n)\nON CONFLICT (wa_message_id) DO NOTHING;",
+        "additionalFields": {
+          "queryParams": "=conversation_id,user_id,outbound_message_id,ai_output"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        2992,
+        -800
+      ],
+      "id": "0f7e27a8-4e1a-476b-a2a3-d8491d43b3f0",
+      "name": "PG - Save Outbound Message",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.conversations (\n  user_id,\n  conversation_type,\n  channel,\n  started_at\n)\nVALUES (\n  $1::uuid,\n  'onboarding',\n  'whatsapp',\n  NOW()\n)\nON CONFLICT (user_id, conversation_type, channel)\nDO UPDATE SET started_at = public.conversations.started_at\nRETURNING id;",
+        "additionalFields": {
+          "queryParams": "user_id"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        2448,
+        -736
+      ],
+      "id": "ebfbb1b7-c4c0-42c2-bc8c-8fc2940c9ffb",
+      "name": "PG – Ensure Conversation",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "55c2ca5e-0a97-40cc-b4fa-4f577256cba7",
+              "name": "user_id",
+              "value": "={{ $('PG - Upsert Preferences').item.json.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "13afdd78-eded-4a6d-bb1e-9e937020ccd1",
+              "name": "ai_output",
+              "value": "={{ $('Prepare Onboarding Response1').item.json.ai_output }}",
+              "type": "string"
+            },
+            {
+              "id": "530ddb8b-2a33-4c90-b67c-069eed5c9231",
+              "name": "conversation_id",
+              "value": "={{ $('PG – Ensure Conversation').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "c915d5ad-6852-4aa7-91c2-e0cf6c2b01e0",
+              "name": "text_in",
+              "value": "={{ $('Normalize Payload').item.json.text_in }}",
+              "type": "string"
+            },
+            {
+              "id": "db323d03-9684-495e-88fa-24d3669780c0",
+              "name": "inbound_message_id",
+              "value": "={{ $('Normalize Payload').item.json.messageId }}",
+              "type": "string"
+            },
+            {
+              "id": "342dafa8-9376-465c-b78e-bb3ace166fe4",
+              "name": "outbound_message_id",
+              "value": "={{ $json.key.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2832,
+        -1008
+      ],
+      "id": "2b9bf9d6-9e6b-4b3d-9be9-39c817f3b39d",
+      "name": "set_guardar",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Você é Foquinha, uma assistente pessoal empática, confidente e organizada. Sua missão é ajudar a usuária a criar hábitos sustentáveis e reduzir stress.\n\nREGRAS DE ESTILO\n1) Use 1–2 frases curtas (≤ 280 caracteres).\n2) Tom caloroso, profissional e encorajador; jamais culpabilize.\n3) Reconheça esforços antes de sugerir próximo passo.\n4) Se notar sobrecarga, ofereça ajustar/pausar metas.\n5) Cite hábitos ou objetivos pelo nome quando possível.\n6) Não repita a mesma pergunta ou formulação em mensagens consecutivas.\n\nCONTEXTO DISPONÍVEL\n- step ∈ {welcome, goals, routine, preferences, conversation, complete}\n- onboardingPayload.goals[], .routine[], .preferences[] (histórico de respostas)\n- text_in (mensagem atual), preferred_name/profile_name\n\nOBJETIVO DO ONBOARDING\nConduza as etapas goals → routine → preferences, coletando apenas o próximo dado que falta em cada momento. Nunca refaça perguntas cujas respostas já estejam no payload.\n\nPOLÍTICA ANTI-REPETIÇÃO\n- Se o slot atual já estiver respondido de forma útil, avance.\n- Se a resposta for ambígua, ofereça duas opções objetivas (“manhã ou noite?”) em vez de repetir a pergunta.\n- Aproveite informações espontâneas fora de ordem: registre mentalmente e siga para o próximo slot faltante.\n\nLÓGICA POR ETAPA (slots e ordem; faça só uma pergunta por vez)\nA) welcome\n  • Cumprimente pelo nome (se houver) e explique que vai começar pelo objetivo principal.\n  • Em seguida, trate como etapa goals.\n\nB) goals\n  1. goal_principal (string curta).\n  2. detalhe útil: medida (min/dia, x vezes/semana) OU prazo (mês/data).\n  Assim que tiver (1) e (2), confirme em 1 frase e avance para routine.\n\nC) routine (colete pelo menos duas informações distintas)\n  1. horário típico de acordar/dormir (faixa).\n  2. período mais livre (manhã/tarde/noite).\n  3. hábitos existentes relevantes.\n  Ao registrar duas peças claras, confirme em 1 frase e avance para preferences.\n\nD) preferences\n  1. janela de check-in (manhã/tarde/noite ou intervalo, ex.: 19:00–21:00).\n  2. frequência (diária, semanal, dias úteis etc.).\n  3. dia específico, se frequência for semanal.\n  4. hora preferida aproximada.\n  5. se deseja receber mensagens proativas (sim/não).\n  Quando já tiver janela + frequência e, se necessário, o dia, confirme em 1 frase e entre em conversation.\n\nTRANSIÇÃO E ENCERRAMENTO\n- Ao concluir uma etapa, confirme resumidamente (1 frase com 1–2 pontos-chave) e já introduza a próxima pergunta.\n- Em step = conversation (ou complete), não faça perguntas de onboarding: responda acolhendo a mensagem e ofereça um micro-passo alinhado aos objetivos coletados. Pode usar perguntas de escolha (“Preferimos focar no hábito A ou B hoje?”).\n\nRESPOSTA\n- Retorne apenas o texto para a usuária (sem JSON).\n- Use o nome dela sempre que disponível.\n- Máximo de 2 frases; no máximo 1 pergunta por resposta, e somente quando ainda faltar algum dado de onboarding.\n- Se text_in estiver vazio (primeira interação), inicie a etapa goals sem aguardar conteúdo da usuária.",
+              "role": "system"
+            },
+            {
+              "content": "={{`Contexto do onboarding\nEtapa atual: ${$json.step}\nJá coletado — Goals: ${JSON.stringify(($json.onboardingPayload?.goals || []).slice(-3))}\nJá coletado — Rotina: ${JSON.stringify(($json.onboardingPayload?.routine || []).slice(-3))}\nJá coletado — Preferências: ${JSON.stringify(($json.onboardingPayload?.preferences || []).slice(-3))}\nUsuária: ${$json.preferred_name || $json.profile_name || 'amiga'}\nMensagem da usuária: ${$json.text_in || 'Primeira interação'}\n\nResponda acolhendo. Se a etapa atual já tiver dados suficientes, confirme em 1 frase e avance para a próxima (ou para \"conversation\"/\"complete\" quando finalizar preferences). Se ainda faltar informação, faça apenas a próxima pergunta necessária, sem repetir o que já foi respondido.`}}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 320,
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1952,
+        -720
+      ],
+      "id": "8b4022cd-7930-4b02-aaa9-a79a29dea279",
+      "name": "AI - Onboarding Reply",
+      "credentials": {
+        "openAiApi": {
+          "id": "5x2HWXhBb9hPP0jQ",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "conv-id",
+              "name": "conversation_id",
+              "type": "string",
+              "value": "={{ $('PG - Ensure Conversation (Chat)').item.json.id }}"
+            },
+            {
+              "id": "conv-user-id",
+              "name": "user_id",
+              "type": "string",
+              "value": "={{ $('Parse Conversation Response1').item.json.user.id }}"
+            },
+            {
+              "id": "conv-outbound-id",
+              "name": "outbound_message_id",
+              "type": "string",
+              "value": "={{ $json.key?.id || $json.id || '' }}"
+            },
+            {
+              "id": "conv-inbound-id",
+              "name": "inbound_message_id",
+              "type": "string",
+              "value": "={{ $items('Prepare Conversation Payload1')[0].json.inbound_message_id || '' }}"
+            },
+            {
+              "id": "conv-text-in",
+              "name": "text_in",
+              "type": "string",
+              "value": "={{ $items('Prepare Conversation Payload1')[0].json.text_in || '' }}"
+            },
+            {
+              "id": "conv-ai-output",
+              "name": "ai_output",
+              "type": "string",
+              "value": "={{ $items('Prepare Conversation Response1')[0].json.ai_output }}"
+            },
+            {
+              "id": "conv-reply-text",
+              "name": "reply_text",
+              "type": "string",
+              "value": "={{ $items('Prepare Conversation Response1')[0].json.reply_text }}"
+            },
+            {
+              "id": "conv-followup",
+              "name": "follow_up",
+              "type": "json",
+              "value": "={{ $items('Prepare Conversation Response1')[0].json.follow_up || null }}"
+            },
+            {
+              "id": "conv-habit-action",
+              "name": "habit_action",
+              "type": "json",
+              "value": "={{ $items('Prepare Conversation Response1')[0].json.habit_action || { type: 'none' } }}"
+            },
+            {
+              "id": "conv-sent-at",
+              "name": "sent_at",
+              "type": "string",
+              "value": "={{ $json.messageTimestamp || $json.timestamp || new Date().toISOString() }}"
+            },
+            {
+              "id": "575cedc8-bde4-4008-8eb6-b9e1f34a27b7",
+              "name": "change_request_id",
+              "value": "={{ $json.change_request_id || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "866b6175-d283-4c41-a312-08dc5847e895",
+      "name": "Set Conversation Log",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2944,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.messages (\n  conversation_id,\n  user_id,\n  direction,\n  wa_message_id,\n  body,\n  change_request_id,\n  created_at\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  'outbound',\n  $3::text,\n  $4::text,\n  NULLIF($5::text, '')::uuid,\n  NOW()\n)\nON CONFLICT (wa_message_id) DO NOTHING;",
+        "additionalFields": {
+          "queryParams": "={{ [\n  $json.conversation_id,\n  $json.user_id,\n  $json.outbound_message_id,\n  $json.reply_text || $json.ai_output || '',\n  $json.change_request_id || ''\n] }}"
+        }
+      },
+      "id": "e17d6b24-553b-4c99-8bf3-6597c3d85a62",
+      "name": "PG - Save Outbound Message (Conversation)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        2592,
+        928
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE public.users\nSET last_interaction_at = NOW(),\n    last_outbound_message_at = NOW(),\n    updated_at = NOW()\nWHERE id = $1::uuid;",
+        "additionalFields": {
+          "queryParams": "={{ $items('Prepare Conversation Payload1')[0].json.user_id    || $items('Prepare Conversation Payload1')[0].json.user?.id    || $items('Prepare Conversation Payload1')[0].json.userId    || '' }}"
+        }
+      },
+      "id": "687bfa5d-2d56-462d-8fe9-b9a15075f7e5",
+      "name": "PG - Update Touchpoints",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        3696,
+        656
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "result-status",
+              "name": "status",
+              "type": "string",
+              "value": "sent"
+            },
+            {
+              "id": "result-flow",
+              "name": "flow",
+              "type": "string",
+              "value": "conversation"
+            },
+            {
+              "id": "result-user",
+              "name": "userId",
+              "type": "string",
+              "value": "={{ $json.user_id }}"
+            },
+            {
+              "id": "result-conv",
+              "name": "conversation_id",
+              "type": "string",
+              "value": "={{ $json.conversation_id }}"
+            },
+            {
+              "id": "result-inbound",
+              "name": "inbound_message_id",
+              "type": "string",
+              "value": "={{ $json.inbound_message_id }}"
+            },
+            {
+              "id": "result-outbound",
+              "name": "outbound_message_id",
+              "type": "string",
+              "value": "={{ $json.outbound_message_id }}"
+            },
+            {
+              "id": "result-text-in",
+              "name": "text_in",
+              "type": "string",
+              "value": "={{ $json.text_in }}"
+            },
+            {
+              "id": "result-ai",
+              "name": "ai_output",
+              "type": "string",
+              "value": "={{ $json.ai_output }}"
+            },
+            {
+              "id": "result-reply",
+              "name": "reply_text",
+              "type": "string",
+              "value": "={{ $json.reply_text }}"
+            },
+            {
+              "id": "result-followup",
+              "name": "follow_up",
+              "type": "json",
+              "value": "={{ $json.follow_up }}"
+            },
+            {
+              "id": "result-habit",
+              "name": "habit_action",
+              "type": "json",
+              "value": "={{ $json.habit_action }}"
+            },
+            {
+              "id": "result-sent",
+              "name": "sent_at",
+              "type": "string",
+              "value": "={{ $json.sent_at }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "c8d0c803-41ff-4f68-a155-1d4797df1bc2",
+      "name": "Set Flow Result (Conversation)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3936,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "flow-conversation",
+              "name": "flow",
+              "type": "string",
+              "value": "conversation"
+            },
+            {
+              "id": "ensure-user-id",
+              "name": "user_id",
+              "type": "string",
+              "value": "={{ $json.user?.id || $json.user_id || $json.userId || '' }}"
+            },
+            {
+              "id": "ensure-session",
+              "name": "session",
+              "type": "string",
+              "value": "={{ $json.session || $env.WAHA_SESSION || 'default' }}"
+            },
+            {
+              "id": "copy-inbound-id",
+              "name": "inbound_message_id",
+              "type": "string",
+              "value": "={{ $json.messageId || $json.message?.id || '' }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "c431e0e4-f298-49be-b823-3a16b4c6d043",
+      "name": "Prepare Conversation Payload1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -544,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $items('Prepare Conversation Payload1', 0, 0)?.[0]?.json ?? {};\nconst ctx = $json.context ?? {};\nconst habits = Array.isArray(ctx.habits) ? ctx.habits : [];\nconst recentLogs = Array.isArray(ctx.recent_logs) ? ctx.recent_logs : [];\n\nconst habitSummary = habits.slice(0, 8)\n  .map((h) => `- ${h.title || 'Sem título'} (${h.cadence || h.custom_cadence || 'cadência indefinida'})`)\n  .join('\\n');\n\nconst logSummary = recentLogs.slice(0, 5)\n  .map((l) => `${l.occurred_on}: ${l.status || 'sem status'} - ${l.habit_title || 'habito desconhecido'}`)\n  .join('\\n');\n\nconst contextParts = [\n  habitSummary ? `Hábitos ativos:\\n${habitSummary}` : 'Sem hábitos ativos',\n  logSummary   ? `Registros recentes:\\n${logSummary}` : 'Sem registros recentes',\n];\n\nreturn [\n  {\n    json: {\n      ...payload,\n      habits,\n      recentLogs,\n      contextText: contextParts.join('\\n\\n'),\n    },\n  },\n];"
+      },
+      "id": "7175ee4b-13d0-41fc-8b6f-a56088c7f8d5",
+      "name": "Build Conversation Context1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.message?.content ?? $json.text ?? '{\"reply\":\"Estou aqui para te apoiar!\",\"habit_action\":{\"type\":\"none\"}}';\nlet parsed;\ntry {\n  parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;\n} catch (error) {\n  parsed = { reply: typeof raw === 'string' ? raw : 'Estou aqui para te apoiar!', follow_up_question: null, habit_action: { type: 'none' } };\n}\nconst base = $items('Build Conversation Context1')[0]?.json ?? {};\nreturn [{\n  json: {\n    ...base,\n    ai_output: (parsed.reply || '').trim() || 'Estou aqui para te apoiar!',\n    follow_up: parsed.follow_up_question || null,\n    habit_action: parsed.habit_action || { type: 'none' }\n  }\n}];"
+      },
+      "id": "03e84ad4-74e4-4fba-bb3d-bbc81c3df46d",
+      "name": "Parse Conversation Response1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "reply-text",
+              "name": "reply_text",
+              "type": "string",
+              "value": "={{ ($json.ai_output || '').trim()\n   + ($json.follow_up ? '\\n\\n' + $json.follow_up : '')\n   || 'Beleza, combinado' }}"
+            },
+            {
+              "id": "prop-user-id",
+              "name": "user_id",
+              "type": "string",
+              "value": "={{ $json.user_id || $json.userId || $json.user?.id || '' }}"
+            },
+            {
+              "id": "c2f8db41-a472-494a-8a60-6c7ed3f94939",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "2090ef52-5b0d-49f4-9fb9-4644b23f0f63",
+      "name": "Prepare Conversation Response1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2256,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COALESCE(json_agg(row_to_json(u)), '[]'::json) AS rows\nFROM (\nSELECT id, whatsapp_id, phone_e164, full_name, preferred_name,\nonboarding_status, onboarding_payload, timezone, locale,\ncreated_at, updated_at, last_interaction_at, last_outbound_message_at, tags\nFROM public.users\nWHERE whatsapp_id = $1::text\nOR phone_e164 = $1::text\nOR whatsapp_id = (regexp_replace($1::text, '[^0-9]', '', 'g') || '@c.us')\nOR phone_e164 = regexp_replace($1::text, '[^0-9]', '', 'g')\nORDER BY updated_at DESC\nLIMIT 1\n) u;",
+        "options": {
+          "queryReplacement": "={{ $('Normalize Payload').item.json.chatId }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1552,
+        304
+      ],
+      "id": "71eb025d-80ce-4119-af0c-8588df4e37eb",
+      "name": "PG - Load User1",
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, habit_id, request_type, requested_change\nFROM public.habit_change_requests\nWHERE user_id = $1::uuid AND status = 'pending'\nORDER BY requested_at DESC\nLIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ $json.user_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -480,
+        1024
+      ],
+      "id": "9f01321f-b3ae-4e88-8aed-f81507ee1df2",
+      "name": "PG - Load Pending Change",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ed8555eb-f3ee-4d98-9c08-a7acc9b1591a",
+              "leftValue": "={{ $json.confirmAction }}",
+              "rightValue": "none",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        1216
+      ],
+      "id": "8a36626d-1aeb-49c5-8b3a-8ecc7be583f2",
+      "name": "if-has-confirm-001"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ed8555eb-f3ee-4d98-9c08-a7acc9b1591a",
+              "leftValue": "={{ $json.confirmAction }}",
+              "rightValue": "apply",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        1040
+      ],
+      "id": "74fd4e69-3be2-4928-8f0a-98e7720fced9",
+      "name": "Confirm Apply?"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH req AS (\n  SELECT id, habit_id, request_type, requested_change\n  FROM public.habit_change_requests\n  WHERE id = $1::uuid\n), upd AS (\n  UPDATE public.habits h\n  SET\n    cadence = COALESCE(req.requested_change->>'new_cadence', h.cadence),\n    custom_cadence = CASE\n      WHEN (req.requested_change ? 'custom_days')\n        THEN jsonb_build_object('days', req.requested_change->'custom_days')\n      ELSE h.custom_cadence\n    END,\n    target_metric = COALESCE(req.requested_change->'target_metric', h.target_metric),\n    archived_at = CASE req.request_type\n      WHEN 'archive' THEN NOW()\n      WHEN 'resume' THEN NULL\n      ELSE h.archived_at\n    END,\n    updated_at = NOW()\n  FROM req\n  WHERE h.id = req.habit_id\n  RETURNING h.title\n)\nUPDATE public.habit_change_requests\nSET status = 'applied', processed_at = NOW()\nWHERE id = $1::uuid\nRETURNING (SELECT title FROM upd) AS habit_title;",
+        "options": {
+          "queryReplacement": "={{ [$json.pending.id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        576,
+        992
+      ],
+      "id": "425d5db0-6f81-4496-9650-c07b1dcc704b",
+      "name": "PG - Apply Habit Change",
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "reply-text",
+              "name": "reply_text",
+              "type": "string",
+              "value": "={{ `Prontinho, ajustei \"${$json.habit_title || $items('Parse Conversation Response1')[0].json.habit_action.habit_title || 'seu hábito'}\" como combinamos. Qualquer outra coisa é só me falar. :)` }}\n"
+            },
+            {
+              "id": "prop-user-id",
+              "name": "follow_up",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "7dcaeb0c-4f4a-4431-b3d3-505a5687cf26",
+              "name": "change_request_id",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "119d3223-f372-4f80-967a-44202b8b10b2",
+      "name": "Set Confirm Reply",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE public.habit_change_requests\\nSET status = 'rejected', processed_at = NOW()\\nWHERE id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.pending.id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        496,
+        1280
+      ],
+      "id": "4d0710ba-7674-41e3-906c-d14d65741c06",
+      "name": "PG - Reject Habit Change",
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "reply-text",
+              "name": "reply_text",
+              "type": "string",
+              "value": "={{ `Claro, mantemos tudo como estava. Se quiser mexer em algo depois, é só me chamar.` }}"
+            },
+            {
+              "id": "prop-user-id",
+              "name": "follow_up",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "7dcaeb0c-4f4a-4431-b3d3-505a5687cf26",
+              "name": "change_request_id",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "b5267ea4-2f55-4210-9f2b-b46269832974",
+      "name": "Set Reject Reply",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        864,
+        1232
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ed8555eb-f3ee-4d98-9c08-a7acc9b1591a",
+              "leftValue": "={{ $json.habit_action?.type || 'none' }}",
+              "rightValue": "none",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        112
+      ],
+      "id": "75cc9ad9-94a2-4d12-a721-64ccd53acd72",
+      "name": "Has Habit Action?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ed8555eb-f3ee-4d98-9c08-a7acc9b1591a",
+              "leftValue": "={{ $json.id ? 1 : 0 }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1456,
+        -112
+      ],
+      "id": "c833cc34-eb50-4b15-a52a-a59c7409638d",
+      "name": "Habit Found?1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "reply-text",
+              "name": "reply_text",
+              "type": "string",
+              "value": "={{ 'Não encontrei um hábito com esse nome.\\nSe quiser, posso criar agora. Como você quer chamar esse novo hábito?' }}"
+            },
+            {
+              "id": "prop-user-id",
+              "name": "follow_up",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "08aa1b98-f9a3-4c1a-980b-0269df108198",
+              "name": "change_request_id",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "33272074-48cd-4fa5-b312-43ed5d955777",
+      "name": "Set Clarify Habit",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1552,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "reply-text",
+              "name": "reply_text",
+              "type": "string",
+              "value": "={{ `Quer que eu ${$items('Parse Conversation Response1')[0].json.habit_action.type === 'archive' ? 'arquive' : ($items('Parse Conversation Response1')[0].json.habit_action.type === 'resume' ? 'retome' : 'ajuste')} o hábito \"${$json.rows?.[0]?.title || $items('Parse Conversation Response1')[0].json.habit_action.habit_title || 'esse hábito'}\"? Responda CONFIRMAR ou CANCELAR.` }}"
+            },
+            {
+              "id": "prop-user-id",
+              "name": "follow_up",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "08aa1b98-f9a3-4c1a-980b-0269df108198",
+              "name": "change_request_id",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "69fe2dfc-1716-4896-afdf-4a4b55024c90",
+      "name": "Set Change Confirmation",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1872,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.habit_change_requests\n  (habit_id, user_id, request_type, requested_change, status, processed_by)\nVALUES\n  ($1::uuid, $2::uuid, $3::text, $4::jsonb, 'pending', 'automation')\nRETURNING id;",
+        "additionalFields": {
+          "queryParams": "=habit_change_habit_id, habit_change_user_id, habit_change_type, habit_change_details"
+        }
+      },
+      "id": "ffc10d70-c19e-49c2-983a-cadec57b9da4",
+      "name": "PG - Insert Change Request2",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        -48
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ed8555eb-f3ee-4d98-9c08-a7acc9b1591a",
+              "leftValue": "={{ $json.habit_action?.type || 'none' }}",
+              "rightValue": "create",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        224
+      ],
+      "id": "a02103b6-db3b-47bd-a0a7-a19d2779f3c1",
+      "name": "Has Create Action?"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH cte AS (\n  SELECT\n    (now() AT TIME ZONE COALESCE(u.timezone, 'America/Sao_Paulo')) AS local_now,\n    up.check_in_window_start AS start_t\n  FROM public.users u\n  LEFT JOIN public.user_preferences up ON up.user_id = u.id\n  WHERE u.id = $1::uuid\n)\nINSERT INTO public.check_ins (user_id, scheduled_for, status, created_at, updated_at)\nSELECT\n  $1::uuid,\n  CASE\n    WHEN local_now::time <= start_t\n      THEN ((date_trunc('day', local_now) + start_t) AT TIME ZONE COALESCE((SELECT timezone FROM public.users WHERE id=$1::uuid), 'America/Sao_Paulo'))\n    ELSE ((date_trunc('day', local_now) + interval '1 day' + start_t) AT TIME ZONE COALESCE((SELECT timezone FROM public.users WHERE id=$1::uuid), 'America/Sao_Paulo'))\n  END,\n  'scheduled',\n  NOW(), NOW()\nFROM cte\nWHERE start_t IS NOT NULL\n  AND NOT EXISTS (\n    SELECT 1\n    FROM public.check_ins ci\n    WHERE ci.user_id = $1::uuid\n      AND ci.status IN ('scheduled','sent')\n      AND date_trunc('day', ci.scheduled_for AT TIME ZONE COALESCE((SELECT timezone FROM public.users WHERE id=$1::uuid), 'America/Sao_Paulo'))\n          = date_trunc('day', (CASE\n             WHEN (SELECT local_now FROM cte)::time <= (SELECT start_t FROM cte)\n               THEN (SELECT local_now FROM cte)\n             ELSE (SELECT local_now FROM cte) + interval '1 day'\n           END))\n  );\n",
+        "additionalFields": {
+          "queryParams": "={{ \n  ($items('Prepare Conversation Payload1')[0].json.user_id\n    || $items('Prepare Conversation Payload1')[0].json.user?.id\n    || $items('Prepare Conversation Payload1')[0].json.userId\n    || '')\n }}"
+        }
+      },
+      "id": "2cc393e9-6de9-4cdd-976c-5f6ddc19abb3",
+      "name": "PG - Seed First Check-in",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        -240
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ `Dados da usuária: nome=${$json.user?.preferred_name || 'sem nome'}; timezone=${$json.user?.timezone || 'America/Sao_Paulo'}; contexto:\n${$json.contextText || 'Sem contexto'}\n\nMensagem da usuária:\n${$json.text_in || 'Sem texto.'}` }}"
+            },
+            {
+              "content": "Você é Foquinha, uma assistente pessoal empática, confidente e organizada. Sua missão é apoiar a usuária a manter hábitos saudáveis sem gerar pressão.\n\nSAÍDA OBRIGATÓRIA (JSON puro, sem texto extra):\n{\n  \"reply\": string,                         // máx. 2 frases (pt-BR)\n  \"follow_up_question\": string | null,     // 1 pergunta objetiva ou null\n  \"habit_action\": {\n    \"type\": \"none\" | \"create\" | \"adjust\" | \"archive\" | \"resume\",\n    \"habit_title\": string,                 // use o título citado; \"desconhecido\" se não souber\n    \"details\": object                      // sempre objeto ({} se vazio)\n  }\n}\n\n- Nunca inclua chaves adicionais. Nunca retorne \"details\" nulo.\n\nTOM E ESTILO\n- Acolha primeiro, reconhecendo o esforço ou sentimento da usuária.\n- Até duas frases curtas em “reply”; calorosas e profissionais, sem julgamentos.\n- Varie a formulação das perguntas; evite repetir frase idêntica em mensagens consecutivas.\n- Cite hábitos/objetivos pelo nome exato que constar no contexto ou na fala atual.\n\nUSO DO CONTEXTO\n- Leia com atenção a lista “Hábitos ativos” e “Hábitos arquivados” presente no contexto. \n- Sempre tente casar pedidos de ajuste/retomada com esses títulos antes de pedir confirmação.\n- Se a usuária mencionar “voltar”, “manter”, “ajustar” etc., identifique qual hábito já existente faz sentido. Só use “desconhecido” quando realmente não houver referência clara a nenhum hábito listado.\n- Se vários hábitos puderem corresponder, proponha uma pergunta objetiva para escolher entre eles.\n\nREGRAS DE DECISÃO (habit_action)\n- \"none\": quando nenhuma alteração operacional é necessária.\n- \"adjust\": pedidos de mudar cadência, duração, nome ou uma pausa temporária com data.\n- \"create\": pedidos para criação de hábito. Ao criar, preencha em details\n  • new_habit_title (se diferente de habit_title)\n  • new_cadence: \"daily\" | \"weekly\" | \"weekdays\" | \"custom\"\n  • custom_days: [\"seg\",\"ter\",\"qua\",\"qui\",\"sex\",\"sab\",\"dom\"] (se custom)\n  • target_metric: {\"unit\":\"min\"|\"times\", \"value\": number} (quando aplicável)\n  • motivation: string (se fornecida)\n- \"archive\": encerrar/pausar indefinidamente.\n- \"resume\": retomar hábito arquivado (se vier nova cadência, use \"adjust\").\n- \"adjust\" também para retomadas com nova cadência/detalhe (ex.: retomar e definir 5x/semana).\n\nFOLLOW_UP_QUESTION (uma por vez)\n- Só pergunte se faltar dado essencial para concluir a intenção.\n- Prefira perguntas objetivas, com opções quando isso simplificar a resposta.\n- Exemplos:\n  • adjust sem cadência -> “Prefere manter diária ou semanal?”\n  • weekly sem dias -> “Quais dias? Seg, qua e sex ou outro combo?”\n  • hábito ambíguo -> “Está falando do hábito X ou do hábito Y?”\n\nOUTRAS REGRAS\n- Se notar sinais de sobrecarga, ofereça alternativas gentis (reduzir metas, pausar).\n- Se várias informações surgirem espontaneamente, utilize tudo o que for útil sem pedir de novo.\n- Se criar ou ajustar hábito, preencha os campos details correspondentes (new_cadence, custom_days, target_metric, resume_date, new_habit_title etc.).\n- Reconheça o esforço primeiro.\n- Mantenha JSON válido, chaves na ordem definida, details sempre objeto (mesmo que vazio).\n\nVALIDAÇÃO FINAL\n- Garanta JSON válido, chaves na ordem definida e “details” sempre como objeto.\n- Resposta sempre em português brasileiro.",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        336,
+        672
+      ],
+      "id": "e70ad1c4-2289-4be0-bad6-da166a2da51f",
+      "name": "AI - Conversation Reply",
+      "credentials": {
+        "openAiApi": {
+          "id": "5x2HWXhBb9hPP0jQ",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtHour": 16
+            }
+          ]
+        }
+      },
+      "id": "3959d089-d3b2-48b8-8020-6550023a4f51",
+      "name": "Weekly Planner Cron",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -128,
+        1920
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COALESCE(json_agg(row_to_json(u)), '[]'::json) AS rows\nFROM (\n SELECT u.id, u.whatsapp_id, u.preferred_name, u.timezone,\n up.planner_delivery_weekday, up.planner_delivery_hour,\n up.proactive_opt_out, up.proactive_frequency\n FROM public.users u\n LEFT JOIN public.user_preferences up ON up.user_id = u.id\n WHERE u.onboarding_status = 'complete'\n AND (up.proactive_opt_out IS NULL OR up.proactive_opt_out = false)\n AND (up.proactive_frequency IS NULL OR up.proactive_frequency IN ('weekly','daily','weekdays'))\n AND NOT EXISTS (\n SELECT 1 FROM public.weekly_planners wp\n WHERE wp.user_id = u.id\n AND wp.reference_week && daterange(date_trunc('week', now())::date, (date_trunc('week', now()) + interval '7 days')::date, '[]')\n AND wp.status IN ('generated','sent')\n )\n) u;",
+        "additionalFields": {}
+      },
+      "id": "ec2d171f-dc98-4f74-9054-dcb1e857636d",
+      "name": "PG - Planner Eligible Users",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        272,
+        1920
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "rows",
+        "options": {}
+      },
+      "id": "6f698611-6999-4645-805b-f0b88619ba35",
+      "name": "Split Planner Users",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        672,
+        1920
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH local_now AS (SELECT now() AT TIME ZONE $1 AS ln)\nSELECT\n CASE\n WHEN ((date_trunc('week', ln)::date + $2::int) + make_interval(hours => $3::int)) > ln\n THEN (((date_trunc('week', ln)::date + $2::int) + make_interval(hours => $3::int)) AT TIME ZONE $1)\n ELSE ((((date_trunc('week', ln)::date + 7 + $2::int) + make_interval(hours => $3::int)) AT TIME ZONE $1))\n END AS target_utc\nFROM local_now;",
+        "additionalFields": {
+          "queryParams": "={{ [$json.timezone || 'America/Sao_Paulo', $json.planner_delivery_weekday || 0, $json.planner_delivery_hour || 18] }}"
+        }
+      },
+      "id": "c546fa09-eb81-4eb3-a3e4-f7c215040d81",
+      "name": "PG - Compute Planner Target UTC",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        864,
+        1920
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "b1233433-6c73-4f97-b555-95696414b81a",
+      "name": "Wait Until Delivery",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        1920
+      ],
+      "webhookId": "c7661dff-f890-40f1-9f7a-7382f446c6a6"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT (COUNT(*) >= COALESCE($2::int,1)) AS quota_reached\nFROM public.messages m\nJOIN public.conversations c ON c.id = m.conversation_id\nJOIN public.users u ON u.id = m.user_id\nWHERE m.user_id = $1::uuid\n AND m.direction = 'outbound'\n AND c.conversation_type IN ('planner','check_in')\n AND (m.created_at AT TIME ZONE u.timezone)::date = (NOW() AT TIME ZONE u.timezone)::date;",
+        "additionalFields": {
+          "queryParams": "={{ [ $items('Split Planner Users')[$itemIndex].json.id, Number($env.MAX_OUTBOUND_PER_DAY || 1) ] }}"
+        }
+      },
+      "id": "480dd871-e422-4e86-97e4-2a9216c74448",
+      "name": "PG - Has Proactive Today? (Planner)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        1920
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ Boolean($json.quota_reached) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and",
+          "options": {
+            "version": 2,
+            "typeValidation": "strict"
+          }
+        },
+        "options": {}
+      },
+      "id": "7b7dc332-6bc4-45ca-a230-a3230a6027ab",
+      "name": "Quota Reached? (Planner)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        1920
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.weekly_planners (user_id, reference_week, generated_at, delivered_at, message_body, status, delivery_channel, summary)\nVALUES ($1::uuid, daterange(date_trunc('week', now())::date, (date_trunc('week', now()) + interval '7 days')::date, '[]'), NOW(), NULL, 'quota excedida', 'skipped', 'whatsapp', NULL)\nRETURNING id;",
+        "additionalFields": {
+          "queryParams": "={{ [ $items('Split Planner Users')[$itemIndex].json.id ] }}"
+        }
+      },
+      "id": "6056a017-d3b5-492e-b155-5d89a954ceb1",
+      "name": "PG - Insert Planner Skipped",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        1808
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Você é Foquinha. Gere um planner semanal em texto claro, pt-BR, com até 6 tópicos e um tom encorajador.",
+              "role": "system"
+            },
+            {
+              "content": "={{ Usuária: ${$items('Split Planner Users')[$itemIndex].json.preferred_name || 'amiga'}; Gere um planner conciso com celebrações e foco da semana. }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 550,
+          "temperature": 0.3
+        }
+      },
+      "id": "856547d0-ca06-448e-91e6-49d5b5ada173",
+      "name": "AI - Generate Planner",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1664,
+        2064
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "5x2HWXhBb9hPP0jQ",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $env.WAHA_SESSION || 'default' }}",
+        "chatId": "={{ $items('Split Planner Users')[$itemIndex].json.whatsapp_id || '' }}",
+        "text": "={{ Oi ${$items('Split Planner Users')[$itemIndex].json.preferred_name || 'amiga'}! Aqui está seu planner da semana:\n\n${$items('AI - Generate Planner')[$itemIndex].json.message?.content || $items('AI - Generate Planner')[$itemIndex].json.text || 'Seguimos juntas nesta nova semana!'} }}",
+        "linkPreview": false,
+        "requestOptions": {}
+      },
+      "id": "0aa0db3f-ede1-46df-aa68-2d966d09ff7b",
+      "name": "Send Weekly Planner",
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        2192,
+        2064
+      ],
+      "credentials": {
+        "wahaApi": {
+          "id": "lbXxZOSj8RzUPOQh",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.conversations (user_id, conversation_type, channel, started_at) VALUES ($1::uuid, 'planner', 'whatsapp', NOW()) RETURNING id;",
+        "additionalFields": {
+          "queryParams": "={{ [ $items('Split Planner Users')[$itemIndex].json.id ] }}"
+        }
+      },
+      "id": "a52a7461-d62f-4ea5-abed-47eec0387c42",
+      "name": "PG - Create Conversation (Planner)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        2528,
+        2064
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.messages (conversation_id, user_id, direction, wa_message_id, body, created_at) VALUES ($1::uuid, $2::uuid, 'outbound', $3::text, $4::text, NOW());",
+        "additionalFields": {
+          "queryParams": "={{ [ $json.id, $items('Split Planner Users')[$itemIndex].json.id, ($items('Send Weekly Planner')[$itemIndex].json.key?.id || $items('Send Weekly Planner')[$itemIndex].json.id || ''), ($items('Send Weekly Planner')[$itemIndex].json.text || '') ] }}"
+        }
+      },
+      "id": "548d9bb9-f818-4d10-9e89-77cddfcb7859",
+      "name": "PG - Save Outbound Message (Planner)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        2736,
+        2064
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.weekly_planners (user_id, reference_week, generated_at, delivered_at, message_body, status, delivery_channel) VALUES ($1::uuid, daterange(date_trunc('week', now())::date, (date_trunc('week', now()) + interval '7 days')::date, '[]'), NOW(), NOW(), $2::text, 'sent', 'whatsapp') RETURNING id;",
+        "additionalFields": {
+          "queryParams": "={{ [ $items('Split Planner Users')[$itemIndex].json.id, ($items('AI - Generate Planner')[$itemIndex].json.message?.content || $items('AI - Generate Planner')[$itemIndex].json.text || '') ] }}"
+        }
+      },
+      "id": "5ef4e15c-c8ee-45d1-839e-5c79c331a2c7",
+      "name": "PG - Insert Weekly Planner (Sent)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        2928,
+        2064
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "61d20c43-1379-47b6-84f3-6e4e32969991",
+      "name": "Check-in Cron",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -128,
+        2624
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COALESCE(json_agg(row_to_json(ci)), '[]'::json) AS rows\nFROM (\n  SELECT ci.id, ci.user_id, ci.scheduled_for,\n         u.whatsapp_id, u.preferred_name, u.timezone,\n         up.check_in_window_start, up.check_in_window_end, up.proactive_opt_out\n  FROM public.check_ins ci\n  JOIN public.users u ON u.id = ci.user_id\n  LEFT JOIN public.user_preferences up ON up.user_id = u.id\n  WHERE ci.status = 'scheduled'\n    AND (up.proactive_opt_out IS NULL OR up.proactive_opt_out = false)\n    AND ci.scheduled_for <= NOW() + INTERVAL '30 minutes'\n  ORDER BY ci.scheduled_for ASC\n  LIMIT 50\n) ci;",
+        "additionalFields": {}
+      },
+      "id": "163fb657-7bbf-4b78-935b-cb8fa87d0d8e",
+      "name": "PG - Pending Check-ins",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        272,
+        2624
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "rows",
+        "options": {}
+      },
+      "id": "f7a076ce-6576-4c04-9691-8c8d2e3b37d0",
+      "name": "Split Check-ins",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        672,
+        2624
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH cte AS (\n  SELECT (now() AT TIME ZONE $1) AS local_now, $2::time AS start_t, $3::time AS end_t\n)\nSELECT\n  (local_now::time >= start_t AND local_now::time <= end_t) AS in_window,\n  CASE\n    WHEN local_now::time < start_t THEN ((date_trunc('day', local_now) + start_t) AT TIME ZONE $1)\n    WHEN local_now::time > end_t THEN ((date_trunc('day', local_now) + interval '1 day' + start_t) AT TIME ZONE $1)\n    ELSE NULL\n  END AS target_utc\nFROM cte;",
+        "additionalFields": {
+          "queryParams": "={{ [ $json.timezone || 'America/Sao_Paulo', $json.check_in_window_start || '19:00', $json.check_in_window_end || '21:00' ] }}"
+        }
+      },
+      "id": "facc9415-b029-41b4-b835-056097a1f04f",
+      "name": "PG - Compute Window (UTC)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        864,
+        2624
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ Boolean($json.in_window) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and",
+          "options": {
+            "version": 2,
+            "typeValidation": "strict"
+          }
+        },
+        "options": {}
+      },
+      "id": "364bf9ae-86d0-45e5-9e9d-d825bdbdf41b",
+      "name": "In Window?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1072,
+        2624
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "5d0b12cc-213c-4408-bfe5-3894b34682d5",
+      "name": "Wait Window Start",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        2880
+      ],
+      "webhookId": "239300c3-5b3e-4bc3-ad43-ea9cb0235172"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT (COUNT(*) >= COALESCE($2::int,1)) AS quota_reached\nFROM public.messages m\nJOIN public.conversations c ON c.id = m.conversation_id\nJOIN public.users u ON u.id = m.user_id\nWHERE m.user_id = $1::uuid\n  AND m.direction = 'outbound'\n  AND c.conversation_type IN ('planner','check_in')\n  AND (m.created_at AT TIME ZONE u.timezone)::date = (NOW() AT TIME ZONE u.timezone)::date;",
+        "additionalFields": {
+          "queryParams": "={{ [ $items('Split Check-ins')[$itemIndex].json.user_id, Number($env.MAX_OUTBOUND_PER_DAY || 1) ] }}"
+        }
+      },
+      "id": "9cd8d1cb-d03e-47cb-a198-cf047f18422e",
+      "name": "PG - Has Proactive Today? (Check-in)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        2672
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ Boolean($json.quota_reached) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and",
+          "options": {
+            "version": 2,
+            "typeValidation": "strict"
+          }
+        },
+        "options": {}
+      },
+      "id": "d737f9c9-a5c3-41af-be3b-f801a0305008",
+      "name": "Quota Reached? (Check-in)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1504,
+        2832
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE public.check_ins SET status = 'skipped', updated_at = NOW() WHERE id = $1::uuid RETURNING id;",
+        "additionalFields": {
+          "queryParams": "={{ [ $items('Split Check-ins')[$itemIndex].json.id ] }}"
+        }
+      },
+      "id": "ed5f3e34-5b35-40f7-91e0-43656885879e",
+      "name": "PG - Mark Check-in Skipped (Quota)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        2640
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Você é Foquinha. Gere um check-in em até 2 frases, pt-BR, com opções explícitas: OK, PAUSAR, AJUSTAR.",
+              "role": "system"
+            },
+            {
+              "content": "={{ `Nome: ${$items('Split Check-ins')[$itemIndex].json.preferred_name || 'amiga'}. Mensagem acolhedora e objetiva.` }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 220,
+          "temperature": 0.5
+        }
+      },
+      "id": "d641779b-9ded-4f57-beac-8b5cb25ba750",
+      "name": "AI - Generate Check-in",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1664,
+        2880
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "5x2HWXhBb9hPP0jQ",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $env.WAHA_SESSION || 'default' }}",
+        "chatId": "={{ $items('Split Check-ins')[$itemIndex].json.whatsapp_id || '' }}",
+        "text": "={{ $items('AI - Generate Check-in')[$itemIndex].json.message?.content || $items('AI - Generate Check-in')[$itemIndex].json.text || 'Oi! Como você se sentiu com seus hábitos hoje? Responda com OK, PAUSAR ou AJUSTAR.' }}",
+        "linkPreview": false,
+        "requestOptions": {}
+      },
+      "id": "296e3c54-f292-498d-a7a4-e79057a8a635",
+      "name": "Send Check-in",
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        1984,
+        2880
+      ],
+      "credentials": {
+        "wahaApi": {
+          "id": "lbXxZOSj8RzUPOQh",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE public.check_ins SET status = 'sent', delivered_at = NOW(), updated_at = NOW() WHERE id = $1::uuid RETURNING id;",
+        "additionalFields": {
+          "queryParams": "={{ [ $items('Split Check-ins')[$itemIndex].json.id ] }}"
+        }
+      },
+      "id": "d5dcc48d-7cce-4297-83b9-4c2e52a37bf8",
+      "name": "PG - Mark Check-in Sent",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        2192,
+        2880
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.conversations (user_id, conversation_type, channel, started_at) VALUES ($1::uuid, 'check_in', 'whatsapp', NOW()) RETURNING id;",
+        "additionalFields": {
+          "queryParams": "={{ [ $items('Split Check-ins')[$itemIndex].json.user_id ] }}"
+        }
+      },
+      "id": "47c131ea-2c40-4700-9fb0-13cdc17292e3",
+      "name": "PG - Create Conversation (Check-in)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        2464,
+        2864
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.messages (conversation_id, user_id, direction, wa_message_id, body, created_at) VALUES ($1::uuid, $2::uuid, 'outbound', $3::text, $4::text, NOW());",
+        "additionalFields": {
+          "queryParams": "={{ [ $json.id, $items('Split Check-ins')[$itemIndex].json.user_id, ($items('Send Check-in')[$itemIndex].json.key?.id || $items('Send Check-in')[$itemIndex].json.id || ''), ($items('Send Check-in')[$itemIndex].json.text || '') ] }}"
+        }
+      },
+      "id": "09b4db4c-a140-4806-9c41-0357fa6e2980",
+      "name": "PG - Save Outbound Message (Check-in)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        2656,
+        2864
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.habits (\n  user_id, title, cadence, motivation, created_at, updated_at\n)\nVALUES (\n  $1::uuid,\n  NULLIF($2::text, ''),\n  COALESCE(NULLIF($3::text, ''), 'daily'),\n  NULLIF($4::text, ''),\n  NOW(), NOW()\n)\nRETURNING id, title;",
+        "options": {
+          "queryReplacement": "={{ [   ($items('Prepare Conversation Payload1')[0].json.user_id     || $items('Prepare Conversation Payload1')[0].json.user?.id     || $items('Prepare Conversation Payload1')[0].json.userId     || ''),   ($json.habit_action?.details?.new_habit_title || $json.habit_action?.habit_title || 'Novo hábito'),   ($json.habit_action?.details?.new_cadence || $json.habit_action?.details?.cadence || ''),   ($json.habit_action?.details?.motivation || '') ] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        880,
+        -112
+      ],
+      "id": "77de1d63-0f0f-4edb-b56e-68986acb57bb",
+      "name": "PG - Insert Habit (Create)",
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.conversations (\n  user_id,\n  conversation_type,\n  channel,\n  started_at\n)\nVALUES (\n  $1::uuid,\n  'general',        -- antes estava 'conversation'\n  'whatsapp',\n  NOW()\n)\nON CONFLICT (user_id, conversation_type, channel)\nDO UPDATE SET started_at = public.conversations.started_at\nRETURNING id;",
+        "options": {
+          "queryReplacement": "={{ $items('Prepare Conversation Payload1')[0].json.user_id    || $items('Prepare Conversation Payload1')[0].json.user?.id    || $items('Prepare Conversation Payload1')[0].json.userId    || '' }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2432,
+        288
+      ],
+      "id": "c441cc6b-38e9-4186-b748-a1a3d1384e29",
+      "name": "PG - Ensure Conversation (Chat)",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0ef6e476-c1cf-4c84-84a6-2e53679e917d",
+              "name": "ai_output",
+              "value": "={{ `Prontinho! Criei o hábito \"${$items(\"PG - Insert Habit (Create)\")[0].json.title || $json.habit_action?.habit_title || 'seu hábito'}\". Quer ajustar a cadência ou manter assim por enquanto?` }}",
+              "type": "string"
+            },
+            {
+              "id": "ffb3c771-6469-4e35-a8de-70fb318b7c53",
+              "name": "reply_text",
+              "value": "={{ `Prontinho! Criei o hábito \"${$items(\"PG - Insert Habit (Create)\")[0].json.title || $json.habit_action?.habit_title || 'seu hábito'}\". Quer ajustar a cadência ou manter assim por enquanto?` }}",
+              "type": "string"
+            },
+            {
+              "id": "1a9685dc-1c7f-4ecf-8ba3-9ec821df9f3f",
+              "name": "follow_up",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1744,
+        -240
+      ],
+      "id": "1b1a5c22-3de7-4839-b34a-e85213779217",
+      "name": "Set Created Reply"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Prepare Conversation Payload1').item.json.session }}",
+        "chatId": "={{ $('Prepare Conversation Payload1').item.json.chatId }}",
+        "text": "={{$json.reply_text || ($json.ai_output || '').trim() || 'Beleza, combinado.'}}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        2704,
+        480
+      ],
+      "id": "3dd3938f-0cfa-49e9-bae4-403760143419",
+      "name": "Send a text message",
+      "credentials": {
+        "wahaApi": {
+          "id": "lbXxZOSj8RzUPOQh",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.messages (\n  conversation_id,\n  user_id,\n  direction,\n  wa_message_id,\n  body,\n  created_at\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  'inbound',\n  $3::text,\n  $4::text,\n  NOW()\n)\nON CONFLICT (wa_message_id) DO NOTHING;",
+        "options": {
+          "queryReplacement": "={{ [  $json.conversation_id,  $json.user_id,  $json.inbound_message_id,  $json.text_in,] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3520,
+        304
+      ],
+      "id": "709b2aa6-6532-4917-b887-e62a061d388d",
+      "name": "PG - Save Inbound Message (Conversation)",
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.messages (\n  conversation_id,\n  user_id,\n  direction,\n  wa_message_id,\n  body,\n  change_request_id,\n  created_at\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  'outbound',\n  $3::text,\n  $4::text,\n  NULLIF($5::text, '')::uuid,\n  NOW()\n)\nON CONFLICT (wa_message_id) DO NOTHING;",
+        "options": {
+          "queryReplacement": "={{ [\n  $json.conversation_id,\n  $json.user_id,\n  $json.outbound_message_id,\n  $json.reply_text || $json.ai_output || '',\n  $json.change_request_id || ''\n] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3136,
+        752
+      ],
+      "id": "a3dbafd0-5614-4b5c-8411-2cc41da3b798",
+      "name": "PG - Save Outbound Message (Conversation)1",
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT json_build_object(\n  'habits', COALESCE(h.habits, '[]'::json),\n  'recent_logs', COALESCE(l.logs, '[]'::json)\n) AS context\nFROM (\n  SELECT COALESCE(json_agg(row_to_json(h)), '[]'::json) AS habits\n  FROM (\n    SELECT id, title, motivation, cadence, custom_cadence,\n           category, target_metric, created_at, updated_at, archived_at\n    FROM public.habits\n    WHERE user_id = $1::uuid\n      AND archived_at IS NULL\n    ORDER BY created_at ASC\n    LIMIT 12\n  ) h\n) h\nCROSS JOIN (\n  SELECT COALESCE(json_agg(row_to_json(hl)), '[]'::json) AS logs\n  FROM (\n    SELECT hl.id, hl.habit_id, hl.occurred_on, hl.status,\n           hl.energy_level, hl.note,\n           h.title AS habit_title\n    FROM public.habit_logs hl\n    JOIN public.habits h ON h.id = hl.habit_id\n    WHERE hl.user_id = $1::uuid\n    ORDER BY hl.occurred_on DESC\n    LIMIT 15\n  ) hl\n) l;",
+        "options": {
+          "queryReplacement": "={{ $json.user_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -224,
+        720
+      ],
+      "id": "1adcb940-7341-42c2-8311-803f2538efdc",
+      "name": "PG - Load Conversation Context1",
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const pending = ($json.rows || [])[0] || null;\nconst base = $items('Prepare Conversation Payload1')[0]?.json || {};\nconst text = (base.text_in || '').trim().toLowerCase();\nconst isConfirm = pending && ['confirmar', 'confirmo', 'ok', 'sim'].includes(text);\nconst isCancel = pending && ['cancelar', 'cancel', 'nao', 'não'].includes(text);\n\nreturn [{\n  json: {\n    ...base,\n    pending,\n    confirmAction: isConfirm ? 'apply' : (isCancel ? 'reject' : 'none')\n  }\n}];"
+      },
+      "id": "d097401e-f3e5-42c7-ab72-6f4d50b518b3",
+      "name": "Check Pending Confirmation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, title\nFROM public.habits\nWHERE user_id = $1::uuid\n  AND (CASE WHEN $3::text = 'resume' THEN archived_at IS NOT NULL ELSE archived_at IS NULL END)\n  AND lower(title) LIKE '%' || lower($2::text) || '%'\nORDER BY created_at ASC\nLIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ [  $items('Parse Conversation Response1')[0].json.user_id,  $items('Parse Conversation Response1')[0].json.habit_action.habit_title || '',  $items('Parse Conversation Response1')[0].json.habit_action.type || 'adjust'] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1088,
+        -32
+      ],
+      "id": "ab5074f6-c952-4520-bc4f-aa59ac77b966",
+      "name": "PG - Find Habit",
+      "credentials": {
+        "postgres": {
+          "id": "CL6MMUrhl3vvzWkO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e54114c3-1f7c-4836-a0c5-1514dc4ccee6",
+              "name": "habit_change_habit_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "bf96369d-c77a-4569-aa10-fddf6e1c419e",
+              "name": "habit_change_user_id",
+              "value": "={{ $items('Parse Conversation Response1')[$itemIndex].json.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "d93987a0-3d1c-4b8b-ade3-f68872fc5ade",
+              "name": "habit_change_type",
+              "value": "={{ $items('Parse Conversation Response1')[$itemIndex].json.habit_action?.type }}",
+              "type": "string"
+            },
+            {
+              "id": "3c06b0c4-b7dc-4b13-9fb2-8e0d9bb5b426",
+              "name": "habit_change_details",
+              "value": "={{ $items('Parse Conversation Response1')[$itemIndex].json.habit_action?.details }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        -144
+      ],
+      "id": "77988ce4-7e86-4b93-9252-103191ff3a14",
+      "name": "Prepare Habit Change Payload"
+    }
+  ],
+  "connections": {
+    "WAHA Trigger": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Normalize Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Deduplicate Message": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Text?": {
+      "main": [
+        [
+          {
+            "node": "PG - Load User1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Prepare Onboarding Payload": {
+      "main": [
+        [
+          {
+            "node": "PG - Upsert User (Onboarding)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build User Context1": {
+      "main": [
+        [
+          {
+            "node": "Route Onboarding?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Onboarding?1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Onboarding Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Conversation Payload1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send Seen",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Send Seen": {
+      "main": [
+        [
+          {
+            "node": "Has Text?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Payload": {
+      "main": [
+        [
+          {
+            "node": "PG - Deduplicate Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Upsert Preferences": {
+      "main": [
+        [
+          {
+            "node": "Onboarding Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Context After Update": {
+      "main": [
+        [
+          {
+            "node": "AI - Onboarding Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Flow Result": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Update?1": {
+      "main": [
+        [
+          {
+            "node": "PG - Update Onboarding",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI - Onboarding Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Onboarding Response1": {
+      "main": [
+        [
+          {
+            "node": "PG – Ensure Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Save Inbound Message1": {
+      "main": [
+        [
+          {
+            "node": "Set Flow Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Onboarding Message1": {
+      "main": [
+        [
+          {
+            "node": "set_guardar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Upsert User (Onboarding)": {
+      "main": [
+        [
+          {
+            "node": "user_id_convert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "user_id_convert": {
+      "main": [
+        [
+          {
+            "node": "PG - Upsert Preferences",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Onboarding Logic": {
+      "main": [
+        [
+          {
+            "node": "Should Update?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Update Onboarding": {
+      "main": [
+        [
+          {
+            "node": "Context After Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Save Outbound Message": {
+      "main": [
+        [
+          {
+            "node": "Set Flow Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG – Ensure Conversation": {
+      "main": [
+        [
+          {
+            "node": "Send Onboarding Message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_guardar": {
+      "main": [
+        [
+          {
+            "node": "PG - Save Inbound Message1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PG - Save Outbound Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI - Onboarding Reply": {
+      "main": [
+        [
+          {
+            "node": "Prepare Onboarding Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Conversation Log": {
+      "main": [
+        [
+          {
+            "node": "Set Flow Result (Conversation)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PG - Save Inbound Message (Conversation)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PG - Save Outbound Message (Conversation)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Save Outbound Message (Conversation)": {
+      "main": [
+        []
+      ]
+    },
+    "PG - Update Touchpoints": {
+      "main": [
+        [
+          {
+            "node": "Set Flow Result (Conversation)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Flow Result (Conversation)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Conversation Payload1": {
+      "main": [
+        [
+          {
+            "node": "PG - Load Pending Change",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PG - Load Conversation Context1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Conversation Context1": {
+      "main": [
+        [
+          {
+            "node": "AI - Conversation Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Conversation Response1": {
+      "main": [
+        [
+          {
+            "node": "Has Create Action?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Conversation Response1": {
+      "main": [
+        [
+          {
+            "node": "PG - Ensure Conversation (Chat)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Load User1": {
+      "main": [
+        [
+          {
+            "node": "Build User Context1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Load Pending Change": {
+      "main": [
+        [
+          {
+            "node": "Check Pending Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if-has-confirm-001": {
+      "main": [
+        [
+          {
+            "node": "Confirm Apply?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Confirm Apply?": {
+      "main": [
+        [
+          {
+            "node": "PG - Apply Habit Change",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PG - Reject Habit Change",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Apply Habit Change": {
+      "main": [
+        [
+          {
+            "node": "Set Confirm Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Confirm Reply": {
+      "main": [
+        [
+          {
+            "node": "Prepare Conversation Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Reject Habit Change": {
+      "main": [
+        [
+          {
+            "node": "Set Reject Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Reject Reply": {
+      "main": [
+        [
+          {
+            "node": "Prepare Conversation Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Habit Action?": {
+      "main": [
+        [
+          {
+            "node": "PG - Find Habit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Conversation Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Habit Found?1": {
+      "main": [
+        [
+          {
+            "node": "PG - Insert Change Request2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Clarify Habit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Clarify Habit": {
+      "main": [
+        [
+          {
+            "node": "Prepare Conversation Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Change Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Prepare Conversation Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Insert Change Request2": {
+      "main": [
+        [
+          {
+            "node": "Set Change Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Create Action?": {
+      "main": [
+        [
+          {
+            "node": "PG - Insert Habit (Create)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Has Habit Action?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Seed First Check-in": {
+      "main": [
+        [
+          {
+            "node": "Set Created Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI - Conversation Reply": {
+      "main": [
+        [
+          {
+            "node": "Parse Conversation Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekly Planner Cron": {
+      "main": [
+        [
+          {
+            "node": "PG - Planner Eligible Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Planner Eligible Users": {
+      "main": [
+        [
+          {
+            "node": "Split Planner Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Planner Users": {
+      "main": [
+        [
+          {
+            "node": "PG - Compute Planner Target UTC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Compute Planner Target UTC": {
+      "main": [
+        [
+          {
+            "node": "Wait Until Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Until Delivery": {
+      "main": [
+        [
+          {
+            "node": "PG - Has Proactive Today? (Planner)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Has Proactive Today? (Planner)": {
+      "main": [
+        [
+          {
+            "node": "Quota Reached? (Planner)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quota Reached? (Planner)": {
+      "main": [
+        [
+          {
+            "node": "PG - Insert Planner Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI - Generate Planner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI - Generate Planner": {
+      "main": [
+        [
+          {
+            "node": "Send Weekly Planner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Weekly Planner": {
+      "main": [
+        [
+          {
+            "node": "PG - Create Conversation (Planner)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Create Conversation (Planner)": {
+      "main": [
+        [
+          {
+            "node": "PG - Save Outbound Message (Planner)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PG - Insert Weekly Planner (Sent)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check-in Cron": {
+      "main": [
+        [
+          {
+            "node": "PG - Pending Check-ins",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Pending Check-ins": {
+      "main": [
+        [
+          {
+            "node": "Split Check-ins",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Check-ins": {
+      "main": [
+        [
+          {
+            "node": "PG - Compute Window (UTC)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Compute Window (UTC)": {
+      "main": [
+        [
+          {
+            "node": "In Window?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "In Window?": {
+      "main": [
+        [
+          {
+            "node": "PG - Has Proactive Today? (Check-in)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Window Start",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Window Start": {
+      "main": [
+        [
+          {
+            "node": "PG - Has Proactive Today? (Check-in)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Has Proactive Today? (Check-in)": {
+      "main": [
+        [
+          {
+            "node": "Quota Reached? (Check-in)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quota Reached? (Check-in)": {
+      "main": [
+        [
+          {
+            "node": "PG - Mark Check-in Skipped (Quota)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI - Generate Check-in",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI - Generate Check-in": {
+      "main": [
+        [
+          {
+            "node": "Send Check-in",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Check-in": {
+      "main": [
+        [
+          {
+            "node": "PG - Mark Check-in Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Mark Check-in Sent": {
+      "main": [
+        [
+          {
+            "node": "PG - Create Conversation (Check-in)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Create Conversation (Check-in)": {
+      "main": [
+        [
+          {
+            "node": "PG - Save Outbound Message (Check-in)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Insert Habit (Create)": {
+      "main": [
+        [
+          {
+            "node": "PG - Seed First Check-in",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Ensure Conversation (Chat)": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Created Reply": {
+      "main": [
+        [
+          {
+            "node": "Prepare Conversation Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Set Conversation Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Save Inbound Message (Conversation)": {
+      "main": [
+        [
+          {
+            "node": "PG - Update Touchpoints",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Save Outbound Message (Conversation)1": {
+      "main": [
+        [
+          {
+            "node": "PG - Update Touchpoints",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Load Conversation Context1": {
+      "main": [
+        [
+          {
+            "node": "Build Conversation Context1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Pending Confirmation": {
+      "main": [
+        [
+          {
+            "node": "if-has-confirm-001",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PG - Find Habit": {
+      "main": [
+        [
+          {
+            "node": "Prepare Habit Change Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Habit Change Payload": {
+      "main": [
+        [
+          {
+            "node": "Habit Found?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "11c31a52b5a57f34ea7cbe7a89aa6fd64f93811614901abfa44230e5c4e425f1"
+  }
+}

@@ -1,26 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(if not exist \"App\\public\\videos\" mkdir \"App\\public\\videos\")",
-      "Skill(example-skills:frontend-design)",
-      "Bash(npm run build:*)",
-      "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nperf(dashboard): optimize UX/UI with performance improvements and visual polish\n\n- Add React.memo to DashboardHabitCard with custom comparison\n- Move SVG constants outside component to avoid recalculation\n- Use useMemo for progress offset calculations\n- Add useCallback for handlers in Dashboard\n- Cap staggered animation delay at 150ms max\n- Remove XPBar from Dashboard home (moved to Progress page)\n- Replace purple colors with lime palette in XPToast\n- Reduce XP toast animation duration to 0.9s\n- Remove emojis from RoutineCard, use HabitIcon system\n- Redesign Progress page with premium metallic tier colors\n- Add shimmer effect to gamification hero card\n- Fix tree duplication by removing AnimatePresence mode=\"wait\"\n- Reduce confetti particles from 100 to 40\n- Replace emoji celebration with elegant glow + check icon\n- Add haptic feedback on timer completion\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push:*)",
-      "Bash(find:*)",
-      "Bash(dir \"c:\\Users\\bruno\\Documents\\Black\\Habitz\\Prod\\App\\public\\sounds\")",
-      "Bash(dir:*)",
-      "Bash(git commit:*)",
-      "WebSearch",
-      "Bash(git checkout:*)",
-      "Bash(if not exist \"Doc\" mkdir \"Doc\")",
-      "Bash(npm run dev)",
-      "Bash(git clone:*)",
-      "Bash(python -m http.server:*)",
-      "Bash(mkdir:*)",
-      "Bash(git rm:*)"
-    ],
-    "deny": [],
-    "ask": []
-  }
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "shadcn"
+  ]
 }

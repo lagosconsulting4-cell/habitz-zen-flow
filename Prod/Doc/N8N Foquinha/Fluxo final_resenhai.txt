@@ -1,0 +1,1452 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const message = $json.messages?.[0] || $json;\n\n// Capturar texto OU caption (quando vem com imagem)\nconst textContent = message.caption?.body || message.text?.body || '';\n\nreturn {\n  json: {\n    from: message.from || '',\n    text: textContent,\n    messageId: message.id || '',\n    hasMedia: ['image', 'video', 'document'].includes(message.type),\n    mediaId: message.image?.id || message.video?.id || message.document?.id || null,\n    timestamp: new Date().toISOString(),\n    raw: $json\n  }\n};"
+      },
+      "id": "5ad6a387-c0cb-4b5e-98d3-9a5949107fb7",
+      "name": "Extract Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1648,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO users (user_id, phone_number, onboarding_complete, created_at, last_interaction_at)\nVALUES ($1::text, $2::text, TRUE, NOW(), NOW())\nON CONFLICT (user_id)\nDO UPDATE SET\n  phone_number = EXCLUDED.phone_number,\n  last_interaction_at = NOW()\nRETURNING *;",
+        "options": {
+          "queryReplacement": "={{ [$json.from, $json.from] }}"
+        }
+      },
+      "id": "6b2e9a00-0a58-434e-92a6-528e5d62af12",
+      "name": "Upsert User1",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -1088,
+        352
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  conversation_id,\n  conversation_name,\n  context_data,\n  created_at,\n  last_updated_at\nFROM conversations\nWHERE user_id = $1::text\n  AND is_active = TRUE\nLIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ [$items('Upsert User1')[0].json.user_id] }}"
+        }
+      },
+      "id": "bb1b8b8d-e9e1-4b64-90e9-0ea664a059cd",
+      "name": "Get Active Conversation1",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -816,
+        336
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  direction,\n  content_text,\n  created_at\nFROM messages\nWHERE conversation_id = $1::uuid\nORDER BY created_at DESC\nLIMIT 10;",
+        "options": {
+          "queryReplacement": "={{ [$items('Merge Conversation Data')[0].json.conversation_id] }}"
+        }
+      },
+      "id": "424263c9-be46-49d0-a912-aa55b91f6cf1",
+      "name": "Get History",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1632,
+        48
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const user = $items('Upsert User1')[0].json;\nconst conversation = $items('Merge Conversation Data')[0].json;\nconst historyResult = $items('Get History');\n\n// ✅ NOVO: Buscar contexto validado\nlet contextData = {};\ntry {\n  const validateContext = $items('Validate Context');\n  if (validateContext && validateContext.length > 0) {\n    contextData = validateContext[0].json.context_data || {};\n    console.log('✅ Contexto carregado:', Object.keys(contextData).length, 'parâmetros');\n  }\n} catch (error) {\n  console.log('⚠️ Nenhum contexto encontrado');\n}\n\n// ✅ CORRIGIDO: Detectar se veio do fluxo de mídia ou texto normal\nlet newMessage;\ntry {\n  const mergedData = $items('Merge Vision + Text');\n  if (mergedData && mergedData.length > 0) {\n    newMessage = mergedData[0].json;\n    console.log('✅ Usando dados do Merge Vision + Text (mídia processada)');\n  } else {\n    newMessage = $items('Extract Data')[0].json;\n    console.log('✅ Usando dados do Extract Data (texto normal)');\n  }\n} catch (error) {\n  newMessage = $items('Extract Data')[0].json;\n  console.log('⚠️ Erro ao buscar dados, usando Extract Data');\n}\n\n// ✅ CORRIGIDO: Filtrar histórico válido\nconst history = historyResult.filter(msg => msg.content_text && msg.content_text !== 'null').reverse();\n\nconsole.log('📝 Histórico válido:', history.length, 'mensagens');\n\n// ✅ NOVO: Montar ficha contextual\nlet contextInfo = '';\nif (Object.keys(contextData).length > 0) {\n  contextInfo = `📋 FICHA CONTEXTUAL:\\n`;\n  if (contextData.nome_dela) contextInfo += `• Nome dela: ${contextData.nome_dela}\\n`;\n  if (contextData.onde_conheceu) contextInfo += `• Onde conheceu: ${contextData.onde_conheceu}\\n`;\n  if (contextData.idade_aproximada) contextInfo += `• Idade: ${contextData.idade_aproximada}\\n`;\n  if (contextData.personalidade) contextInfo += `• Personalidade: ${contextData.personalidade}\\n`;\n  if (contextData.status_relacao) contextInfo += `• Status: ${contextData.status_relacao}\\n`;\n  if (contextData.nivel_interesse) contextInfo += `• Nível de interesse: ${contextData.nivel_interesse}\\n`;\n  contextInfo += `\\n---\\n\\n`;\n  console.log('✅ Ficha contextual montada');\n}\n\n// Preparar mensagem do usuário\nlet userMessage = '';\n\nif (newMessage.hasMedia && newMessage.mediaId) {\n  if (newMessage.text && newMessage.text.includes('[IMAGEM ENVIADA]')) {\n    userMessage = newMessage.text;\n    console.log('✅ Usando análise de Vision AI');\n  } else {\n    userMessage = `${newMessage.text || 'O usuário enviou uma imagem.'}\\n\\nImagem: https://graph.facebook.com/v21.0/${newMessage.mediaId}`;\n  }\n} else {\n  userMessage = newMessage.text || newMessage.message_text || 'Mensagem vazia';\n}\n\n// Se tem histórico válido, adicionar contexto\nif (history.length > 0) {\n  const contextSummary = history.map((msg, i) => {\n    const role = msg.direction === 'inbound' ? 'Usuário' : 'Você';\n    return `${role}: ${msg.content_text}`;\n  }).join('\\n');\n  \n  userMessage = `HISTÓRICO RECENTE:\\n${contextSummary}\\n\\n---\\n\\nNOVA MENSAGEM:\\n${userMessage}`;\n}\n\n// ✅ NOVO: Prepender ficha contextual\nif (contextInfo) {\n  userMessage = `${contextInfo}${userMessage}`;\n}\n\nreturn {\n  json: {\n    user_message: userMessage,\n    user_id: user.user_id,\n    phone_number: user.phone_number,\n    conversation_id: conversation.conversation_id,\n    thread_id: conversation.context_data?.thread_id || null,\n    metadata: {\n      timestamp: newMessage.timestamp,\n      messageId: newMessage.messageId\n    }\n  }\n};"
+      },
+      "id": "3078e7b9-7247-4d0d-b932-64c70950f072",
+      "name": "Prepare Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ASSISTANTS API - Com Detecção Natural de Intenções\n  // ⚠️ CONFIGURE AQUI:\n  const OPENAI_API_KEY = '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';\n  const ASSISTANT_ID = 'asst_xqf5ATmwrR01Lhyyp9sT89J0';\n\n  if (!OPENAI_API_KEY || OPENAI_API_KEY === 'sk-proj-COLE_SUA_API_KEY_AQUI') {\n    throw new Error('❌ OPENAI_API_KEY não configurada!');\n  }\n\n  const prepareContext = $input.first().json;\n  const userMessage = prepareContext.user_message;\n  let threadId = prepareContext.thread_id;\n\n  // Função auxiliar para requests\n  async function openaiRequest(endpoint, method, body = null) {\n    const options = {\n      method: method,\n      url: `https://api.openai.com/v1${endpoint}`,\n      headers: {\n        'Authorization': `Bearer ${OPENAI_API_KEY}`,\n        'Content-Type': 'application/json',\n        'OpenAI-Beta': 'assistants=v2'\n      },\n      json: true\n    };\n    if (body) options.body = body;\n\n    try {\n      const response = await this.helpers.httpRequest(options);\n      return response;\n    } catch (error) {\n      console.error('❌ OpenAI API Error:', error.message);\n      console.error('❌ Error details:', JSON.stringify(error, null, 2));\n      throw new Error(`OpenAI API Error: ${error.message}`);\n    }\n  }\n\n  console.log('🚀 Iniciando Assistants API...');\n\n  try {\n    // PASSO 1: Criar ou usar Thread\n    if (!threadId) {\n      console.log('📝 Criando novo thread...');\n      const thread = await openaiRequest('/threads', 'POST', {});\n      threadId = thread.id;\n      console.log('✅ Thread criado:', threadId);\n    } else {\n      console.log('♻️ Usando thread existente:', threadId);\n    }\n\n    // PASSO 2: Adicionar mensagem\n    console.log('💬 Adicionando mensagem...');\n    await openaiRequest(`/threads/${threadId}/messages`, 'POST', {\n      role: 'user',\n      content: userMessage\n    });\n\n    // PASSO 3: Criar Run\n    console.log('⚡ Criando run...');\n    const run = await openaiRequest(`/threads/${threadId}/runs`, 'POST', {\n      assistant_id: ASSISTANT_ID\n    });\n    const runId = run.id;\n    console.log('✅ Run criado:', runId);\n\n    // PASSO 4: Polling\n    console.log('⏳ Aguardando processamento...');\n    let runStatus = 'queued';\n    let attempts = 0;\n    const maxAttempts = 60;\n    let lastRunData = null;\n\n    while (['queued', 'in_progress'].includes(runStatus) && attempts < maxAttempts) {\n      await new Promise(resolve => setTimeout(resolve, 1000));\n      const runCheck = await openaiRequest(`/threads/${threadId}/runs/${runId}`, 'GET');\n      runStatus = runCheck.status;\n      lastRunData = runCheck;\n      console.log(`⏱️ Status (${attempts + 1}s):`, runStatus);\n      attempts++;\n    }\n\n    // PASSO 5: Verificar status final\n    if (runStatus !== 'completed') {\n      console.error('❌ Run não completou!');\n      console.error('📊 Status final:', runStatus);\n      console.error('📦 Run data:', JSON.stringify(lastRunData, null, 2));\n      \n      // Retornar erro detalhado\n      return {\n        json: {\n          error: `Run falhou com status: ${runStatus}`,\n          runStatus: runStatus,\n          runId: runId,\n          threadId: threadId,\n          attempts: attempts,\n          lastError: lastRunData?.last_error || null,\n          failedAt: lastRunData?.failed_at || null,\n          user_id: prepareContext.user_id,\n          phone_number: prepareContext.phone_number,\n          conversation_id: prepareContext.conversation_id\n        }\n      };\n    }\n\n    // PASSO 6: Buscar resposta\n    console.log('🎉 Resposta recebida! Calculando métricas...');\n\n    const messagesResponse = await openaiRequest(`/threads/${threadId}/messages?limit=1`, 'GET');\n    const assistantMessage = messagesResponse.data[0];\n    const responseText = assistantMessage.content[0].text.value;\n\n    // Calcular tokens (estimativa)\n    const tokensUsed = Math.ceil((userMessage.length + responseText.length) / 4);\n\n    // Calcular custo (GPT-4O: $5/1M input, $15/1M output)\n    const costUsd = (tokensUsed / 1000000) * 10; // Média simplificada\n\n    return {\n      json: {\n        response_text: responseText,\n        thread_id: threadId,\n        run_id: runId,\n        user_id: prepareContext.user_id,\n        phone_number: prepareContext.phone_number,\n        conversation_id: prepareContext.conversation_id,\n        original_message: userMessage,\n        processing_time: attempts,\n        model: 'gpt-4o-assistant',\n        tokens_used: tokensUsed,\n        cost_usd: costUsd,\n        agent_response_raw: assistantMessage\n      }\n    };\n  } catch (error) {\n    console.error('❌ Erro fatal:', error.message);\n    console.error('❌ Stack:', error.stack);\n    \n    return {\n      json: {\n        error: error.message,\n        errorType: error.name,\n        user_id: prepareContext.user_id,\n        phone_number: prepareContext.phone_number,\n        conversation_id: prepareContext.conversation_id\n      }\n    };\n  }"
+      },
+      "id": "ada8cdc5-8ba7-448c-be12-2a519436c8de",
+      "name": "Call Assistants API",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        80
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// PARSE RESPONSE - Detecta intenções na resposta\n  const assistantData = $json;\n\n  console.log('🔍 Analisando resposta...');\n  console.log('📦 assistantData recebido:', JSON.stringify(assistantData, null, 2));\n\n  // Validação: garantir que response_text existe\n  let responseText = assistantData.response_text || '';\n\n  if (!responseText) {\n    console.log('⚠️ AVISO: response_text está vazio ou undefined');\n    console.log('📦 Dados recebidos:', Object.keys(assistantData));\n\n    // Tentar alternativas\n    if (assistantData.text) {\n      responseText = assistantData.text;\n      console.log('✅ Usando assistantData.text como fallback');\n    } else if (assistantData.content) {\n      responseText = assistantData.content;\n      console.log('✅ Usando assistantData.content como fallback');\n    } else {\n      // Última alternativa: resposta vazia\n      responseText = 'Erro ao processar resposta';\n      console.log('❌ Nenhuma resposta encontrada, usando fallback de erro');\n    }\n  }\n\n  // Regex: [INTENT:ACTION:ARG]\n  const intentRegex = /^\\[INTENT:(\\w+)(?::([^\\]]+))?\\]\\s*/;\n  const match = responseText.match(intentRegex);\n\n  let intent = 'normal_response';\n  let intentArg = null;\n  let cleanResponse = responseText;\n\n  if (match) {\n    intent = match[1].toLowerCase();\n    intentArg = match[2] || null;\n    cleanResponse = responseText.replace(intentRegex, '').trim();\n    console.log(`🎯 Intenção: ${intent}${intentArg ? ` (${intentArg})` : ''}`);\n  } else {\n    console.log('💬 Resposta normal');\n  }\n\n  return {\n    json: {\n      response_text: cleanResponse,\n      original_response: responseText,\n      intent: intent,\n      intent_arg: intentArg,\n      thread_id: assistantData.thread_id || null,\n      run_id: assistantData.run_id || null,\n      user_id: assistantData.user_id || null,\n      phone_number: assistantData.phone_number || null,\n      conversation_id: assistantData.conversation_id || null,\n      original_message: assistantData.original_message || null,\n      processing_time: assistantData.processing_time || 0,\n      requires_db_action: intent !== 'normal_response'\n    }\n  };"
+      },
+      "id": "89198b46-25c9-4671-b689-d3e38bdf4ffd",
+      "name": "Parse Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2416,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- CORRIGIDO: Evitar modificar mesma linha duas vezes\nWITH renamed AS (\n  -- ETAPA 1: Tentar renomear conversa genérica ativa\n  UPDATE conversations\n  SET conversation_name = $2::text, last_updated_at = NOW()\n  WHERE conversation_id = (\n    SELECT conversation_id \n    FROM conversations\n    WHERE user_id = $1::text\n      AND is_active = true\n      AND (conversation_name = 'Conversa 1' \n           OR conversation_name LIKE 'Conversa %' \n           OR conversation_name = 'Mago Chat')\n    LIMIT 1\n  )\n  RETURNING conversation_id, conversation_name\n),\ndeactivated AS (\n  -- ETAPA 2: Se não renomeou, desativar todas as conversas ativas\n  UPDATE conversations \n  SET is_active = false \n  WHERE user_id = $1::text \n    AND is_active = true\n    AND NOT EXISTS (SELECT 1 FROM renamed)\n  RETURNING true as done\n),\nreactivated AS (\n  -- ETAPA 3: Se não renomeou, tentar reativar conversa existente inativa\n  UPDATE conversations\n  SET is_active = true, last_updated_at = NOW()\n  WHERE user_id = $1::text\n    AND conversation_name = $2::text\n    AND is_active = false\n    AND NOT EXISTS (SELECT 1 FROM renamed)\n  RETURNING conversation_id, conversation_name\n),\ncreated AS (\n  -- ETAPA 4: Se não renomeou E não reativou, criar nova conversa\n  INSERT INTO conversations (user_id, conversation_name, is_active, created_at, last_updated_at)\n  SELECT $1::text, $2::text, true, NOW(), NOW()\n  WHERE NOT EXISTS (SELECT 1 FROM renamed)\n    AND NOT EXISTS (SELECT 1 FROM reactivated)\n  RETURNING conversation_id, conversation_name\n)\n-- Retornar resultado (apenas uma CTE terá dados)\nSELECT conversation_id, conversation_name FROM renamed\nUNION ALL\nSELECT conversation_id, conversation_name FROM reactivated\nUNION ALL\nSELECT conversation_id, conversation_name FROM created\nLIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ [$json.user_id, $json.intent_arg] }}"
+        }
+      },
+      "id": "436f1264-a0ed-4e98-9233-5fe1667da7e4",
+      "name": "Create Conversation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        4128,
+        -512
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Desativar todas\nUPDATE conversations SET is_active = false WHERE user_id = $1::text;\n\n-- Ativar selecionada\nUPDATE conversations\n  SET is_active = true, last_updated_at = NOW()\n  WHERE user_id = $1::text AND LOWER(conversation_name) = LOWER($2)\nRETURNING conversation_id, name;",
+        "options": {
+          "queryReplacement": "={{ [$json.user_id, $json.intent_arg] }}"
+        }
+      },
+      "id": "4de76d4a-7906-4962-8f69-2062910e2ba0",
+      "name": "Switch Conversation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        4128,
+        -352
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT conversation_name, is_active, last_updated_at,\n  (SELECT COUNT(*) FROM messages WHERE conversation_id = conversations.conversation_id) as message_count\nFROM conversations\nWHERE user_id = $1::text\nORDER BY updated_at DESC\nLIMIT 20;",
+        "options": {
+          "queryReplacement": "={{ [$json.user_id] }}"
+        }
+      },
+      "id": "401d7636-d664-4659-b459-c2f1ea4777eb",
+      "name": "List Conversations",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        4128,
+        -192
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Deletar mensagens\nDELETE FROM messages WHERE conversation_id = $1::uuid;\n\n-- Limpar thread_id\nUPDATE conversations\nSET context_data = jsonb_set(\n  COALESCE(context_data, '{}'::jsonb),\n  '{thread_id}',\n  'null'::jsonb\n)\nWHERE conversation_id = $1::uuid\nRETURNING conversation_id;",
+        "options": {
+          "queryReplacement": "={{ [$json.conversation_id] }}"
+        }
+      },
+      "id": "af7d5649-0441-4d4b-90e8-e41f677c13b1",
+      "name": "Clear History",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        4112,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Atualizar thread_id E contexto extraído\nUPDATE conversations\nSET context_data = \n  CASE \n    -- Se tem contexto extraído, fazer merge completo\n    WHEN $3::jsonb IS NOT NULL THEN \n      COALESCE(context_data, '{}'::jsonb) || \n      jsonb_build_object('thread_id', $2::text) || \n      $3::jsonb\n    -- Senão, apenas atualizar thread_id\n    ELSE \n      jsonb_set(\n        COALESCE(context_data, '{}'::jsonb),\n        '{thread_id}',\n        to_jsonb($2::text)\n      )\n  END,\n  last_updated_at = NOW()\nWHERE conversation_id = $1::uuid\nRETURNING conversation_id, context_data;",
+        "options": {
+          "queryReplacement": "={{ [\n  $json.conversation_id,\n  $json.thread_id,\n  (() => {\n    try {\n      const extracted = $items('Try Extract Context');\n      if (extracted && extracted.length > 0) {\n        return extracted[0].json.extracted_context;\n      }\n    } catch (e) {}\n    return null;\n  })()\n] }}"
+        }
+      },
+      "id": "5575aa18-31cd-4d6c-95a1-477e78bd0f6c",
+      "name": "Update Thread ID",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        4512,
+        16
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO messages (\n    user_id,\n    conversation_id,\n    wa_message_id,\n    direction,\n    content_text,\n    tokens_used,\n    model_used,\n    cost_usd,\n    agent_response_raw,\n    created_at\n  )\n  VALUES (\n    $1::text, $2::uuid, $3::text, 'outbound', $4::text,\n    $5::int, $6::text, $7::numeric, $8::jsonb,\n    NOW()\n  );",
+        "options": {
+          "queryReplacement": "={{ [\n    $json.user_id,\n    $json.conversation_id,\n    'out_' + $now.toMillis(),\n    $json.response_text,\n    $json.tokens_used,\n    $json.model,\n    $json.cost_usd,\n    $json.agent_response_raw\n  ] }}"
+        }
+      },
+      "id": "966c58c8-edbc-4c81-a8f8-e8da1f02547f",
+      "name": "Save Outbound Message",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        4960,
+        16
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "817613928107132",
+        "recipientPhoneNumber": "={{ $items('Parse Response')[0].json.phone_number }}",
+        "textBody": "={{ $items('Parse Response')[0].json.response_text }}",
+        "additionalFields": {}
+      },
+      "id": "c9879086-e337-4723-9912-48d41b2f8eea",
+      "name": "Send Response",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        5184,
+        16
+      ],
+      "webhookId": "c2be7f2d-3de4-4051-8fcd-994a92fa6d29",
+      "retryOnFail": true,
+      "executeOnce": true,
+      "credentials": {
+        "whatsAppApi": {
+          "id": "WBVfQrvbl9ifDSqa",
+          "name": "Mago_sent"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "create",
+                    "id": "100b10bf-18b9-4937-a1bc-ad4bc5bb2e98"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "switch",
+                    "id": "541e15df-1ea1-47dc-b416-c37b14404231"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "list",
+                    "id": "27657f85-34d2-4202-bc1e-44ae315aaf0e"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "clear",
+                    "id": "a973f089-dc81-4117-9d2f-74729238a99f"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "normal_response",
+                    "id": "e29adc72-64ce-4f98-9a41-8db45f68e5a8"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9ccaf636-d141-4da0-9efb-2684f7a7d4e3",
+      "name": "Route by Intent1",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        3584,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-media-check",
+              "leftValue": "={{ $json.hasMedia }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "60698a7e-5181-48f8-9d3e-02eab7cb13bb",
+      "name": "Check Media?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1376,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v21.0/{{ $json.mediaId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {}
+      },
+      "id": "4476bd68-a4b1-4f04-a18e-1491c381c406",
+      "name": "Get Media URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1264,
+        80
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "WBVfQrvbl9ifDSqa",
+          "name": "Mago_sent"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "efb14ef5-2f51-492c-b7f1-fcbaa554432e",
+      "name": "Download Media File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1088,
+        80
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "WBVfQrvbl9ifDSqa",
+          "name": "Mago_sent"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "Você é um especialista em analisar prints de conversa.\n\n🎯 MISSÃO: Extrair o conteúdo da imagem para ajudar o usuário.\n\n📸 A IMAGEM PODE SER:\n1. **Print de conversa** → Extraia o diálogo completo\n2. **Stories/Post** → Descreva o conteúdo\n\n## SE FOR PRINT DE CONVERSA:\n- Extraia TODO o diálogo visível\n- Inclua horários, emojis\n- Transcreva LITERALMENTE\n\n## SE FOR STORIES/POST:\n- Descreva o que foi postado\n- Identifique o tema\n- Extraia texto visível\n\nRetorne JSON válido:\n{\n  \"content_type\": \"conversa|stories|post|foto\",\n  \"content_description\": \"descrição breve\",\n  \"history\": \"diálogo completo OU descrição\",\n  \"context\": \"contexto adicional\"\n}",
+        "inputType": "base64",
+        "options": {
+          "detail": "auto",
+          "maxTokens": 1500
+        }
+      },
+      "id": "8449ce00-7fe9-4df4-a878-2b41316077e3",
+      "name": "Vision Extract",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -912,
+        80
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "QhLXMfrwtfPZ5YTs",
+          "name": "OpenAi_Trendly_N8N"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const visionData = $json;\nconst extractData = $items('Extract Data')[0].json;\n\nconsole.log('🔍 Vision Data recebido:', JSON.stringify(visionData, null, 2));\n\n// Parsear resposta da Vision AI\nlet analysis = {};\n\n// Tentar múltiplos caminhos possíveis\nlet rawContent = null;\n\nif (visionData.content) {\n  rawContent = visionData.content;\n  console.log('✅ Encontrado em visionData.content');\n} else if (visionData.message?.content) {\n  rawContent = visionData.message.content;\n  console.log('✅ Encontrado em visionData.message.content');\n} else if (visionData.text) {\n  rawContent = visionData.text;\n  console.log('✅ Encontrado em visionData.text');\n}\n\nconsole.log('📄 Raw content:', typeof rawContent, rawContent);\n\n// Parsear se for string, ou usar diretamente se for objeto\ntry {\n  if (rawContent) {\n    if (typeof rawContent === 'string') {\n      // Tentar parsear JSON da string\n      const jsonMatch = rawContent.match(/\\{[\\s\\S]*\\}/);\n      if (jsonMatch) {\n        analysis = JSON.parse(jsonMatch[0]);\n        console.log('✅ JSON parseado com sucesso');\n      } else {\n        console.log('⚠️ Nenhum JSON encontrado na string');\n      }\n    } else if (typeof rawContent === 'object') {\n      // Já é objeto, usar diretamente\n      analysis = rawContent;\n      console.log('✅ Usando objeto diretamente');\n    }\n  } else {\n    console.log('❌ Raw content está vazio');\n  }\n} catch (error) {\n  console.log('❌ Erro ao parsear:', error.message);\n  analysis = { content_type: 'unknown', history: 'Erro ao processar imagem' };\n}\n\nconsole.log('📊 Analysis final:', JSON.stringify(analysis, null, 2));\n\n// Criar estrutura do print\nconst printData = {\n  content_type: analysis.content_type || 'foto',\n  ocr: analysis.history || analysis.content_description || '',\n  mediaId: extractData.mediaId,\n  timestamp: new Date().toISOString(),\n  content_description: analysis.content_description || '',\n  context: analysis.context || ''\n};\n\nreturn {\n  json: {\n    user_id: extractData.from,\n    phone_number: extractData.from,\n    print_data: printData,\n    analysis: analysis\n  }\n};"
+      },
+      "id": "2412ee4b-2ba6-4a08-97b4-12d3fffc94f8",
+      "name": "Parse Vision Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const visionAnalysis = $items('Parse Vision Output')[0].json;\nconst extractData = $items('Extract Data')[0].json;\n\nconsole.log('🔀 Merging Vision + User Text...');\n\n// Montar mensagem completa com análise da imagem + texto do usuário\nconst userText = extractData.text || '';\nconst visionContext = visionAnalysis.analysis?.history || visionAnalysis.analysis?.content_description || '';\n\nlet combinedMessage = '';\n\nif (userText && visionContext) {\n  // Tem texto E análise da imagem\n  combinedMessage = `[IMAGEM ENVIADA]\\n${visionContext}\\n\\n[MENSAGEM DO USUÁRIO]\\n${userText}`;\n} else if (visionContext) {\n  // Só imagem, sem texto\n  combinedMessage = `[IMAGEM ENVIADA]\\n${visionContext}`;\n} else if (userText) {\n  // Fallback: só texto (não deveria acontecer neste fluxo)\n  combinedMessage = userText;\n} else {\n  combinedMessage = 'O usuário enviou uma imagem.';\n}\n\nconsole.log('✅ Combined message:', combinedMessage);\n\nreturn {\n  json: {\n    from: extractData.from,\n    text: combinedMessage,\n    messageId: extractData.messageId,\n    hasMedia: true,\n    mediaId: extractData.mediaId,\n    timestamp: extractData.timestamp,\n    visionAnalysis: visionAnalysis.analysis,\n    printData: visionAnalysis.print_data\n  }\n};"
+      },
+      "id": "c6e9b7c8-b12d-4815-8b98-1a7b2d40720e",
+      "name": "Merge Vision + Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1920,
+        320
+      ],
+      "id": "cc159d74-00be-40ff-8176-96ae2f11e87e",
+      "name": "WhatsApp Trigger",
+      "webhookId": "c0f80115-7eda-4711-ba5f-bc0237a1c664",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "brDKSuF8Ei7izKlA",
+          "name": "Mago_OAuth_trigger"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO messages (\n    user_id,\n    conversation_id,\n    wa_message_id,\n    direction,\n    content_text,\n    media_url,\n    created_at\n  )\n  VALUES ($1::text, $2::uuid, $3::text, 'inbound', $4::text, $5::text, NOW())\nON CONFLICT (wa_message_id) DO NOTHING;",
+        "options": {
+          "queryReplacement": "={{ [\n    $json.user_id,\n    $json.conversation_id,\n    $items('Extract Data')[0].json.messageId,\n    $json.original_message,\n    $items('Extract Data')[0].json.hasMedia ? 'https://graph.facebook.com/v21.0/' + $items('Extract Data')[0].json.mediaId : null\n  ] }}"
+        }
+      },
+      "id": "0069f0bc-0cb1-46df-9a6e-dc927b99a8b2",
+      "name": "Save Inbound Message",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        4736,
+        16
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  param_key::text as param_key,\n  param_value,\n  is_complete,\n  confidence,\n  updated_at\nFROM context_checklist\nWHERE conversation_id = $1::uuid\nORDER BY updated_at DESC;",
+        "options": {
+          "queryReplacement": "={{ [$json.conversation_id] }}"
+        }
+      },
+      "id": "814f7bfc-8148-423a-a955-bdef97cc048e",
+      "name": "Get Context Checklist",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        192,
+        320
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const checklist = $input.all();\nconst conversation = $items('Merge Conversation Data')[0].json;\nconst newMessage = $items('Extract Data')[0].json;\n\nconst requiredParams = ['nome_dela', 'onde_conheceu'];\nconst contextData = {};\nlet missingParams = [];\n\nconsole.log('📋 Checklist recebido:', checklist.length, 'items');\n\nfor (const item of checklist) {\n  if (item.json.is_complete) {\n    contextData[item.json.param_key] = item.json.param_value;\n    console.log('✅', item.json.param_key, '=', item.json.param_value);\n  }\n}\n\nfor (const param of requiredParams) {\n  if (!contextData[param]) {\n    missingParams.push(param);\n  }\n}\n\nconst hasMinimalContext = missingParams.length === 0;\n\nconsole.log('🎯 Contexto completo?', hasMinimalContext);\nconsole.log('⚠️ Faltando:', missingParams);\n\nreturn {\n  json: {\n    has_minimal_context: hasMinimalContext,\n    missing_params: missingParams,\n    context_data: contextData,\n    conversation_id: conversation.conversation_id,\n    user_id: conversation.user_id || $items('Upsert User1')[0].json.user_id,\n    phone_number: $items('Upsert User1')[0].json.phone_number,\n    new_message: newMessage.text,\n    messageId: newMessage.messageId,\n    hasMedia: newMessage.hasMedia,\n    mediaId: newMessage.mediaId\n  }\n};"
+      },
+      "id": "987e5e21-a387-42f7-a728-0b6b7b76f5c0",
+      "name": "Validate Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-minimal-context-check",
+              "leftValue": "={{ $json.has_minimal_context }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ec09d0dc-4b9e-4f85-9c46-12c4e0cffdb7",
+      "name": "Has Context?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const OPENAI_API_KEY = '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';\n\nconst validate = $json;\nconst userMessage = validate.new_message;\nconst conversationId = validate.conversation_id;\n\nconsole.log('🔍 Tentando extrair contexto da mensagem do usuário...');\nconsole.log('📝 Mensagem:', userMessage);\n\n// Definir TODOS os parâmetros possíveis para extração\nconst allParams = [\n  'nome_dela', 'onde_conheceu', 'idade_aproximada', 'cidade', 'profissao',\n  'interesses', 'personalidade', 'estilo_conversa',\n  'nivel_interesse', 'status_relacao', 'disponibilidade',\n  'ultima_interacao_tipo', 'proximo_passo', 'historico_encontros',\n  'green_flags', 'red_flags', 'yellow_flags',\n  'temperatura_conversa', 'momento_escalacao', 'tipo_abordagem'\n];\n\nconst extractionPrompt = `Você é um extrator de contexto sobre relacionamentos.\n\nExtraia o MÁXIMO de informações possível da mensagem do usuário sobre a mulher que ele está conversando.\n\nMensagem: \"${userMessage}\"\n\nParâmetros disponíveis:\n${allParams.join(', ')}\n\nRetorne JSON com APENAS os campos que conseguir extrair. Se não conseguir extrair nada, retorne {}.\n\nExemplos:\n- \"Conheci a Maria no Tinder\" → {\"nome_dela\": \"Maria\", \"onde_conheceu\": \"Tinder\"}\n- \"Ela tem 25 anos e é médica\" → {\"idade_aproximada\": \"25\", \"profissao\": \"médica\"}\n- \"Ela respondeu super rápido e tá animada\" → {\"nivel_interesse\": \"Alto\", \"temperatura_conversa\": \"Quente\"}\n\nRetorne APENAS JSON válido:`;\n\ntry {\n  const response = await this.helpers.httpRequest({\n    method: 'POST',\n    url: 'https://api.openai.com/v1/chat/completions',\n    headers: {\n      'Authorization': `Bearer ${OPENAI_API_KEY}`,\n      'Content-Type': 'application/json'\n    },\n    body: {\n      model: 'gpt-4o-mini',\n      messages: [\n        { role: 'system', content: 'Você extrai informações estruturadas. Retorne APENAS JSON válido.' },\n        { role: 'user', content: extractionPrompt }\n      ],\n      response_format: { type: 'json_object' },\n      temperature: 0.3\n    },\n    json: true\n  });\n\n  const extracted = JSON.parse(response.choices[0].message.content);\n  const extractedCount = Object.keys(extracted).length;\n  \n  console.log('✅ Extraído:', extracted);\n  console.log('📊 Total:', extractedCount, 'parâmetros');\n\n  return {\n    json: {\n      extracted_context: extracted,\n      extracted_count: extractedCount,\n      conversation_id: conversationId,\n      had_extraction: extractedCount > 0,\n      has_minimal_context: validate.has_minimal_context,\n      missing_params: validate.missing_params,\n      context_data: validate.context_data,\n      user_id: validate.user_id,\n      phone_number: validate.phone_number\n    }\n  };\n} catch (error) {\n  console.log('❌ Erro na extração:', error.message);\n  return {\n    json: {\n      extracted_context: {},\n      extracted_count: 0,\n      conversation_id: conversationId,\n      had_extraction: false,\n      has_minimal_context: validate.has_minimal_context,\n      missing_params: validate.missing_params,\n      context_data: validate.context_data,\n      user_id: validate.user_id,\n      phone_number: validate.phone_number,\n      error: error.message\n    }\n  };\n}"
+      },
+      "id": "e69b9dee-7934-462c-b781-f5739dde0d4f",
+      "name": "Try Extract Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const extracted = $json.extracted_context;\nconst conversationId = $json.conversation_id;\n\nconsole.log('💾 Preparando para salvar contexto...');\n\nif ($json.extracted_count === 0) {\n  console.log('⚠️ Nada para salvar, pulando');\n  return {\n    json: {\n      ...$json,\n      param_keys: [],\n      param_values: [],\n      should_save: false\n    }\n  };\n}\n\n// Preparar arrays para UPSERT\nconst paramKeys = [];\nconst paramValues = [];\n\nfor (const [key, value] of Object.entries(extracted)) {\n  if (value && value !== '') {\n    paramKeys.push(key);\n    paramValues.push(String(value));\n    console.log(`✅ ${key} = ${value}`);\n  }\n}\n\nreturn {\n  json: {\n    ...$json,\n    param_keys: paramKeys,\n    param_values: paramValues,\n    should_save: paramKeys.length > 0\n  }\n};"
+      },
+      "id": "01642fb0-cf4e-4a1c-92cc-4832071faabc",
+      "name": "Save Extracted Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "should-save-check",
+              "leftValue": "={{ $json.should_save }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "32c935a7-897a-4a75-aafd-da34aefae254",
+      "name": "Should Save?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        944,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO context_checklist (\n  conversation_id,\n  param_key,\n  param_value,\n  is_complete,\n  confidence,\n  updated_at\n)\nSELECT \n  $1::uuid,\n  unnest($2::context_param_key[]),\n  unnest($3::text[]),\n  true,\n  1.0,\n  NOW()\nON CONFLICT (conversation_id, param_key) \nDO UPDATE SET\n  param_value = EXCLUDED.param_value,\n  is_complete = true,\n  confidence = 1.0,\n  updated_at = NOW()\nRETURNING *;",
+        "options": {
+          "queryReplacement": "={{ [\n  $json.conversation_id,\n  $json.param_keys,\n  $json.param_values\n] }}"
+        }
+      },
+      "id": "e84a4c5c-ed10-435d-a7f8-ae8e633c5922",
+      "name": "Upsert Context to DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1344,
+        48
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "merge-context-paths",
+      "name": "Merge Context Paths",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1504,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// AUTO DETECT NEW CONVERSATION\n// Detecta automaticamente quando usuário menciona novo nome de mulher\n\nconst parseResponse = $json;\nlet intent = parseResponse.intent;\nlet intentArg = parseResponse.intent_arg;\n\nconsole.log('🔍 Auto-detect: Intent atual =', intent);\n\n// Se já detectou uma intenção, não fazer nada\nif (intent !== 'normal_response') {\n  console.log('✅ Intenção já detectada:', intent);\n  return { json: parseResponse };\n}\n\n// Tentar buscar contexto extraído\ntry {\n  const extractedContext = $items('Try Extract Context');\n  if (!extractedContext || extractedContext.length === 0) {\n    console.log('⚠️ Nenhum contexto extraído disponível');\n    return { json: parseResponse };\n  }\n\n  const contextData = extractedContext[0].json;\n  const extractedNome = contextData.extracted_context?.nome_dela;\n\n  if (!extractedNome) {\n    console.log('⚠️ Nenhum nome_dela extraído');\n    return { json: parseResponse };\n  }\n\n  // Buscar conversa ativa atual\n  const activeConversation = $items('Get Active Conversation1');\n  if (!activeConversation || activeConversation.length === 0) {\n    console.log('✅ Nenhuma conversa ativa, criar nova:', extractedNome);\n    intent = 'create';\n    intentArg = extractedNome;\n  } else {\n    const currentConvName = activeConversation[0].json.conversation_name;\n    \n    // Comparar nomes (case insensitive)\n    if (currentConvName.toLowerCase() !== extractedNome.toLowerCase()) {\n      console.log('🎯 NOVA CONVERSA DETECTADA!');\n      console.log('   Conversa atual:', currentConvName);\n      console.log('   Nome extraído:', extractedNome);\n      intent = 'create';\n      intentArg = extractedNome;\n    } else {\n      console.log('✅ Nome corresponde à conversa ativa:', currentConvName);\n    }\n  }\n} catch (error) {\n  console.log('❌ Erro ao buscar contexto:', error.message);\n}\n\nreturn {\n  json: {\n    ...parseResponse,\n    intent: intent,\n    intent_arg: intentArg,\n    auto_detected: intent !== parseResponse.intent\n  }\n};"
+      },
+      "id": "auto-detect-conversation",
+      "name": "Auto Detect New Conversation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2704,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-conv-id",
+              "leftValue": "={{ $json.conversation_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-has-conversation",
+      "name": "Check Has Conversation",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -624,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO conversations (user_id, conversation_name, is_active, created_at, last_updated_at)\nVALUES ($1::text, 'Mago Chat', true, NOW(), NOW())\nRETURNING conversation_id, conversation_name, \n         jsonb_build_object() as context_data, \n         created_at, last_updated_at;",
+        "options": {
+          "queryReplacement": "={{ [$items('Upsert User1')[0].json.user_id] }}"
+        }
+      },
+      "id": "create-first-conversation",
+      "name": "Create First Conversation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -320,
+        368
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "cIbXoLAbmkMiiHDQ",
+          "name": "Mago da Sedulção"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "id": "merge-conversation-data",
+      "name": "Merge Conversation Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -96,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json.response_text;\nconst MAX_CHARS_PER_MESSAGE = 4000;\n\nconsole.log('✂️ Iniciando split da resposta...');\nconsole.log('📏 Tamanho original:', response.length, 'caracteres');\n\nif (response.length <= MAX_CHARS_PER_MESSAGE && !response.includes('\\n\\n')) {\n  console.log('✅ Resposta curta, não precisa quebrar');\n  return [{ json: { ...$json, response_text: response, chunk_index: 1, total_chunks: 1, is_last_chunk: true } }];\n}\n\nconst isQuestion = response.includes('?') && response.length < 500;\nif (isQuestion) {\n  console.log('❓ É uma pergunta curta, não quebrar');\n  return [{ json: { ...$json, response_text: response, chunk_index: 1, total_chunks: 1, is_last_chunk: true } }];\n}\n\nconst chunks = [];\nconst sectionRegex = /(?=###\\s+\\d+️⃣|^\\d+️⃣)/gm;\nlet sections = response.split(sectionRegex).filter(s => s.trim());\n\nif (sections.length <= 1) {\n  sections = response.split(/\\n\\n+/);\n}\n\nconsole.log('📦 Encontradas', sections.length, 'seções/parágrafos');\n\nfor (const section of sections) {\n  const trimmed = section.trim();\n  if (!trimmed) continue;\n  \n  if (trimmed.length <= MAX_CHARS_PER_MESSAGE) {\n    chunks.push(trimmed);\n    console.log(`  ✅ Chunk ${chunks.length}: ${trimmed.length} chars`);\n  } else {\n    console.log(`  ⚠️ Seção muito longa (${trimmed.length} chars), quebrando em sentenças...`);\n    const sentences = trimmed.match(/[^.!?]+[.!?]+[\\s\\n]*/g) || [trimmed];\n    let currentChunk = '';\n    for (const sentence of sentences) {\n      if ((currentChunk + sentence).length <= MAX_CHARS_PER_MESSAGE) {\n        currentChunk += sentence;\n      } else {\n        if (currentChunk) {\n          chunks.push(currentChunk.trim());\n          console.log(`  ✅ Chunk ${chunks.length}: ${currentChunk.length} chars`);\n        }\n        currentChunk = sentence;\n      }\n    }\n    if (currentChunk) {\n      chunks.push(currentChunk.trim());\n      console.log(`  ✅ Chunk ${chunks.length}: ${currentChunk.length} chars`);\n    }\n  }\n}\n\nconsole.log(`\\n🎯 Split completo: ${chunks.length} mensagens`);\n\nreturn chunks.map((chunk, index) => ({ json: { ...$json, response_text: chunk, chunk_index: index + 1, total_chunks: chunks.length, is_last_chunk: index === chunks.length - 1, original_response_length: response.length } }));"
+      },
+      "id": "split-response-text",
+      "name": "Split Response Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3040,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "split-in-batches-messages",
+      "name": "Split In Batches Messages",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3296,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * 2) + 1 }}"
+      },
+      "id": "wait-between-messages",
+      "name": "Wait Between Messages",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4736,
+        624
+      ],
+      "webhookId": "48df2ccd-3e56-43e1-807d-c4fb44ec9f34"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "is-last-chunk-check",
+              "leftValue": "={{ $json.is_last_chunk }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-if-last-chunk-node",
+      "name": "Is Last Chunk?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        5408,
+        192
+      ]
+    }
+  ],
+  "connections": {
+    "Extract Data": {
+      "main": [
+        [
+          {
+            "node": "Check Media?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert User1": {
+      "main": [
+        [
+          {
+            "node": "Get Active Conversation1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Active Conversation1": {
+      "main": [
+        [
+          {
+            "node": "Check Has Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get History": {
+      "main": [
+        [
+          {
+            "node": "Prepare Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Context": {
+      "main": [
+        [
+          {
+            "node": "Call Assistants API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Assistants API": {
+      "main": [
+        [
+          {
+            "node": "Parse Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Response": {
+      "main": [
+        [
+          {
+            "node": "Auto Detect New Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Conversation": {
+      "main": [
+        [
+          {
+            "node": "Update Thread ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Conversation": {
+      "main": [
+        [
+          {
+            "node": "Update Thread ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Conversations": {
+      "main": [
+        [
+          {
+            "node": "Update Thread ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear History": {
+      "main": [
+        [
+          {
+            "node": "Update Thread ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Thread ID": {
+      "main": [
+        [
+          {
+            "node": "Save Inbound Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Outbound Message": {
+      "main": [
+        [
+          {
+            "node": "Send Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Response": {
+      "main": [
+        [
+          {
+            "node": "Is Last Chunk?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Intent1": {
+      "main": [
+        [
+          {
+            "node": "Create Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "List Conversations",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Clear History",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Thread ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Media?": {
+      "main": [
+        [
+          {
+            "node": "Get Media URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upsert User1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Media URL": {
+      "main": [
+        [
+          {
+            "node": "Download Media File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Media File": {
+      "main": [
+        [
+          {
+            "node": "Vision Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vision Extract": {
+      "main": [
+        [
+          {
+            "node": "Parse Vision Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Vision Output": {
+      "main": [
+        [
+          {
+            "node": "Merge Vision + Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Vision + Text": {
+      "main": [
+        [
+          {
+            "node": "Upsert User1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Inbound Message": {
+      "main": [
+        [
+          {
+            "node": "Save Outbound Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Context Checklist": {
+      "main": [
+        [
+          {
+            "node": "Validate Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Context": {
+      "main": [
+        [
+          {
+            "node": "Has Context?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Try Extract Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Context?": {
+      "main": [
+        [
+          {
+            "node": "Merge Context Paths",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge Context Paths",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Try Extract Context": {
+      "main": [
+        [
+          {
+            "node": "Save Extracted Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Extracted Context": {
+      "main": [
+        [
+          {
+            "node": "Should Save?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Save?": {
+      "main": [
+        [
+          {
+            "node": "Upsert Context to DB",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge Context Paths",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Upsert Context to DB": {
+      "main": [
+        [
+          {
+            "node": "Merge Context Paths",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge Context Paths": {
+      "main": [
+        [
+          {
+            "node": "Get History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto Detect New Conversation": {
+      "main": [
+        [
+          {
+            "node": "Split Response Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Has Conversation": {
+      "main": [
+        [
+          {
+            "node": "Merge Conversation Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create First Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create First Conversation": {
+      "main": [
+        [
+          {
+            "node": "Merge Conversation Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Conversation Data": {
+      "main": [
+        [
+          {
+            "node": "Get Context Checklist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Response Text": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches Messages": {
+      "main": [
+        [
+          {
+            "node": "Route by Intent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Between Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Between Messages": {
+      "main": [
+        [
+          {
+            "node": "Send Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Last Chunk?": {
+      "main": [
+        [
+          {
+            "node": "Save Inbound Message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split In Batches Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "48ffbd75ae0f0b5efb1130b649995efd7362529efac47a8dcb0d071631994a5b"
+  }
+}

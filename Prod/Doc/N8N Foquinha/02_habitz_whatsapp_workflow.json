@@ -1,0 +1,643 @@
+{
+  "name": "Habitz WhatsApp - Foquinha",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["messages"],
+        "options": {}
+      },
+      "id": "whatsapp-trigger",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [0, 300],
+      "webhookId": "habitz-foquinha-webhook",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "CONFIGURE_AQUI",
+          "name": "WhatsApp Trigger API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract Data - Extrair dados da mensagem WhatsApp\nconst message = $json.messages?.[0] || $json;\nconst textContent = message.caption?.body || message.text?.body || '';\n\nreturn {\n  json: {\n    phone: message.from || '',\n    text: textContent,\n    messageId: message.id || '',\n    timestamp: new Date().toISOString(),\n    raw: $json\n  }\n};"
+      },
+      "id": "extract-data",
+      "name": "Extract Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  p.id as profile_id,\n  p.user_id,\n  p.display_name,\n  p.phone,\n  p.is_premium\nFROM profiles p\nWHERE p.phone = $1\nLIMIT 1;",
+        "queryReplacement": "={{ [$json.phone] }}"
+      },
+      "id": "get-user-by-phone",
+      "name": "Get User by Phone",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [440, 300],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "CONFIGURE_AQUI",
+          "name": "Habitz Supabase"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "user-exists-check",
+              "leftValue": "={{ $json.user_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-user-exists",
+      "name": "User Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Usuário não encontrado - preparar mensagem de erro\nconst extractData = $items('Extract Data')[0].json;\n\nreturn {\n  json: {\n    phone: extractData.phone,\n    response_text: `Oi! Sou o Foquinha, assistente do Habitz.\n\nParece que seu número ainda não está vinculado a uma conta do Habitz.\n\nPor favor, entre em contato com o suporte para vincular seu WhatsApp à sua conta do app.`,\n    intent: 'error',\n    user_not_found: true\n  }\n};"
+      },
+      "id": "user-not-found",
+      "name": "User Not Found Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 480]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  h.id,\n  h.name,\n  h.emoji,\n  h.category,\n  h.period,\n  h.streak,\n  h.is_active,\n  h.days_of_week,\n  CASE\n    WHEN EXISTS (\n      SELECT 1 FROM habit_completions hc\n      WHERE hc.habit_id = h.id\n      AND hc.completed_at = CURRENT_DATE\n    ) THEN true\n    ELSE false\n  END as completed_today\nFROM habits h\nWHERE h.user_id = $1::uuid\n  AND h.is_active = true\nORDER BY\n  CASE h.period\n    WHEN 'morning' THEN 1\n    WHEN 'afternoon' THEN 2\n    WHEN 'evening' THEN 3\n  END;",
+        "queryReplacement": "={{ [$items('Get User by Phone')[0].json.user_id] }}"
+      },
+      "id": "get-user-habits",
+      "name": "Get User Habits",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [880, 180],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "CONFIGURE_AQUI",
+          "name": "Habitz Supabase"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare Context - Preparar contexto para a IA\nconst user = $items('Get User by Phone')[0].json;\nconst habits = $items('Get User Habits');\nconst message = $items('Extract Data')[0].json;\n\n// Formatar lista de hábitos para contexto\nconst habitsList = habits.map(h => {\n  const status = h.json.completed_today ? '✅' : '⬜';\n  const emoji = h.json.emoji || '📌';\n  const periodLabel = h.json.period === 'morning' ? 'manhã' : h.json.period === 'afternoon' ? 'tarde' : 'noite';\n  return `${status} ${emoji} ${h.json.name} (${periodLabel}) [ID: ${h.json.id.slice(0,8)}] - Streak: ${h.json.streak} dias`;\n}).join('\\n');\n\nconst currentHour = new Date().getHours();\nconst currentPeriod = currentHour < 12 ? 'morning' : currentHour < 18 ? 'afternoon' : 'evening';\nconst periodLabel = currentPeriod === 'morning' ? 'manhã' : currentPeriod === 'afternoon' ? 'tarde' : 'noite';\n\nreturn {\n  json: {\n    user_message: message.text,\n    user_id: user.user_id,\n    user_name: user.display_name || 'Usuário',\n    phone: message.phone,\n    habits_context: habitsList || 'Nenhum hábito cadastrado ainda.',\n    habits_count: habits.length,\n    current_period: currentPeriod,\n    current_period_label: periodLabel,\n    habits_raw: habits.map(h => h.json)\n  }\n};"
+      },
+      "id": "prepare-context",
+      "name": "Prepare Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 180]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Call OpenAI API - Chamar GPT-4o para processar mensagem\n// ⚠️ CONFIGURE SUA API KEY AQUI:\nconst OPENAI_API_KEY = 'sk-proj-COLE_SUA_API_KEY_AQUI';\n\nif (!OPENAI_API_KEY || OPENAI_API_KEY === 'sk-proj-COLE_SUA_API_KEY_AQUI') {\n  throw new Error('❌ OPENAI_API_KEY não configurada! Edite o node Call OpenAI API.');\n}\n\nconst context = $input.first().json;\n\nconst systemPrompt = `Você é o Foquinha, assistente de hábitos do app Habitz. Seja amigável, objetivo e use emojis moderadamente.\n\nCONTEXTO DO USUÁRIO:\n- Nome: ${context.user_name}\n- Período atual: ${context.current_period_label}\n- Total de hábitos ativos: ${context.habits_count}\n\nHÁBITOS DO USUÁRIO:\n${context.habits_context}\n\nSUAS CAPACIDADES:\n1. LISTAR hábitos do dia\n2. MARCAR hábito como concluído\n3. CRIAR novo hábito (nome + período: morning/afternoon/evening)\n4. EDITAR hábito (nome ou período)\n5. DESATIVAR hábito\n\nFORMATO DE RESPOSTA:\nSempre inicie sua resposta com uma TAG de intenção no formato:\n[INTENT:ação:argumentos_json]\n\nTAGS DISPONÍVEIS:\n- [INTENT:list_habits] - Listar hábitos\n- [INTENT:complete_habit:{\"habit_id\":\"uuid_completo\"}] - Marcar como concluído\n- [INTENT:create_habit:{\"name\":\"nome\",\"period\":\"morning|afternoon|evening\"}] - Criar hábito\n- [INTENT:edit_habit:{\"habit_id\":\"uuid_completo\",\"name\":\"novo_nome\",\"period\":\"novo_periodo\"}] - Editar\n- [INTENT:deactivate_habit:{\"habit_id\":\"uuid_completo\"}] - Desativar\n- [INTENT:normal] - Resposta normal sem ação no banco\n\nREGRAS IMPORTANTES:\n1. Se o usuário pedir para concluir um hábito, identifique qual pelo nome/contexto e use o UUID COMPLETO\n2. Para criar hábito, extraia nome e período (default: morning se não especificado)\n3. Sempre confirme a ação realizada na mensagem de forma amigável\n4. Se não conseguir identificar o hábito, pergunte ao usuário qual ele quer\n5. Use o UUID COMPLETO do hábito (não o ID parcial de 8 caracteres)\n6. Para período, traduza: manhã=morning, tarde=afternoon, noite=evening\n7. Execute ações direto, sem pedir confirmação\n\nEXEMPLOS:\n\nUsuário: \"fiz meditação\"\nResposta: [INTENT:complete_habit:{\"habit_id\":\"uuid-completo-aqui\"}]\nMandou bem! Marquei \"Meditar\" como concluído! 🎉 Seu streak agora é de X dias!\n\nUsuário: \"quero criar o hábito de ler 30 minutos de manhã\"\nResposta: [INTENT:create_habit:{\"name\":\"Ler 30 minutos\",\"period\":\"morning\"}]\nPronto! Criei o hábito \"Ler 30 minutos\" para suas manhãs! 📚 Bora começar?\n\nUsuário: \"quais são meus hábitos?\"\nResposta: [INTENT:list_habits]\nAqui estão seus hábitos de hoje:\\n\\n${context.habits_context}\\n\\nQual você quer marcar como feito?\n\nUsuário: \"oi, tudo bem?\"\nResposta: [INTENT:normal]\nOi! Tudo ótimo por aqui! 🦊 Como posso te ajudar com seus hábitos hoje?`;\n\ntry {\n  const response = await this.helpers.httpRequest({\n    method: 'POST',\n    url: 'https://api.openai.com/v1/chat/completions',\n    headers: {\n      'Authorization': `Bearer ${OPENAI_API_KEY}`,\n      'Content-Type': 'application/json'\n    },\n    body: {\n      model: 'gpt-4o',\n      messages: [\n        { role: 'system', content: systemPrompt },\n        { role: 'user', content: context.user_message }\n      ],\n      temperature: 0.7,\n      max_tokens: 500\n    },\n    json: true\n  });\n\n  const responseText = response.choices[0].message.content;\n  const tokensUsed = response.usage?.total_tokens || 0;\n\n  return {\n    json: {\n      response_text: responseText,\n      tokens_used: tokensUsed,\n      ...context\n    }\n  };\n} catch (error) {\n  console.error('❌ OpenAI API Error:', error.message);\n  return {\n    json: {\n      response_text: '[INTENT:normal]\\nDesculpe, tive um probleminha técnico. Pode repetir?',\n      error: error.message,\n      ...context\n    }\n  };\n}"
+      },
+      "id": "call-openai-api",
+      "name": "Call OpenAI API",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 180],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 1000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Response & Intent - Extrair intenção da resposta\nconst data = $json;\nconst responseText = data.response_text || '';\n\n// Regex para extrair intent - captura JSON com nested objects\nconst intentRegex = /^\\[INTENT:(\\w+)(?::(\\{.*?\\}))?\\]/;\nconst match = responseText.match(intentRegex);\n\nlet intent = 'normal';\nlet intentData = {};\nlet cleanResponse = responseText;\n\nif (match) {\n  intent = match[1];\n  if (match[2]) {\n    try {\n      intentData = JSON.parse(match[2]);\n      console.log('✅ Intent data parseado:', intentData);\n    } catch (e) {\n      console.log('❌ Erro ao parsear intent data:', e.message);\n      console.log('Raw data:', match[2]);\n    }\n  }\n  cleanResponse = responseText.replace(intentRegex, '').trim();\n}\n\nconsole.log('🎯 Intent detectado:', intent);\nconsole.log('📦 Intent data:', JSON.stringify(intentData));\n\nreturn {\n  json: {\n    intent,\n    intent_data: intentData,\n    response_text: cleanResponse,\n    user_id: data.user_id,\n    user_name: data.user_name,\n    phone: data.phone,\n    habits_raw: data.habits_raw,\n    habits_count: data.habits_count\n  }\n};"
+      },
+      "id": "parse-response",
+      "name": "Parse Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1540, 180]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "complete_habit",
+                    "id": "intent-complete"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "output": 0
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "create_habit",
+                    "id": "intent-create"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "output": 1
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "edit_habit",
+                    "id": "intent-edit"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "output": 2
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "deactivate_habit",
+                    "id": "intent-deactivate"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "output": 3
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "list_habits",
+                    "id": "intent-list"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "output": 4
+            }
+          ],
+          "fallbackOutput": 5
+        },
+        "options": {}
+      },
+      "id": "route-by-intent",
+      "name": "Route by Intent",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [1760, 180]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Inserir completion\nINSERT INTO habit_completions (habit_id, user_id, completed_at, created_at)\nVALUES ($1::uuid, $2::uuid, CURRENT_DATE, NOW())\nON CONFLICT DO NOTHING;\n\n-- Atualizar streak\nUPDATE habits\nSET streak = streak + 1, updated_at = NOW()\nWHERE id = $1::uuid\n  AND NOT EXISTS (\n    SELECT 1 FROM habit_completions\n    WHERE habit_id = $1::uuid AND completed_at = CURRENT_DATE - INTERVAL '1 day'\n  );\n\n-- Retornar hábito atualizado\nSELECT * FROM habits WHERE id = $1::uuid;",
+        "queryReplacement": "={{ [$json.intent_data.habit_id, $json.user_id] }}"
+      },
+      "id": "complete-habit",
+      "name": "Complete Habit",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [2000, -100],
+      "credentials": {
+        "postgres": {
+          "id": "CONFIGURE_AQUI",
+          "name": "Habitz Supabase"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO habits (\n  user_id, name, emoji, category, period,\n  streak, is_active, days_of_week, frequency_type, created_at, updated_at\n)\nVALUES (\n  $1::uuid,\n  $2::text,\n  '📌',\n  'productivity',\n  $3::text,\n  0,\n  true,\n  ARRAY[0,1,2,3,4,5,6],\n  'daily',\n  NOW(),\n  NOW()\n)\nRETURNING *;",
+        "queryReplacement": "={{ [$json.user_id, $json.intent_data.name, $json.intent_data.period || 'morning'] }}"
+      },
+      "id": "create-habit",
+      "name": "Create Habit",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [2000, 60],
+      "credentials": {
+        "postgres": {
+          "id": "CONFIGURE_AQUI",
+          "name": "Habitz Supabase"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE habits\nSET\n  name = COALESCE(NULLIF($2::text, ''), name),\n  period = COALESCE(NULLIF($3::text, ''), period),\n  updated_at = NOW()\nWHERE id = $1::uuid\nRETURNING *;",
+        "queryReplacement": "={{ [$json.intent_data.habit_id, $json.intent_data.name || '', $json.intent_data.period || ''] }}"
+      },
+      "id": "edit-habit",
+      "name": "Edit Habit",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [2000, 220],
+      "credentials": {
+        "postgres": {
+          "id": "CONFIGURE_AQUI",
+          "name": "Habitz Supabase"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE habits\nSET is_active = false, updated_at = NOW()\nWHERE id = $1::uuid\nRETURNING *;",
+        "queryReplacement": "={{ [$json.intent_data.habit_id] }}"
+      },
+      "id": "deactivate-habit",
+      "name": "Deactivate Habit",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [2000, 380],
+      "credentials": {
+        "postgres": {
+          "id": "CONFIGURE_AQUI",
+          "name": "Habitz Supabase"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// List Habits - Apenas passa os dados, a resposta já foi montada pela IA\nreturn {\n  json: {\n    ...$json,\n    db_action: 'list_habits',\n    db_success: true\n  }\n};"
+      },
+      "id": "list-habits-passthrough",
+      "name": "List Habits (Passthrough)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 540]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normal Response - Resposta sem ação no banco\nreturn {\n  json: {\n    ...$json,\n    db_action: 'normal',\n    db_success: true\n  }\n};"
+      },
+      "id": "normal-response-passthrough",
+      "name": "Normal Response (Passthrough)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 700]
+    },
+    {
+      "parameters": {
+        "numberInputs": 7
+      },
+      "id": "merge-results",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [2280, 300]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "CONFIGURE_SEU_PHONE_NUMBER_ID",
+        "recipientPhoneNumber": "={{ $json.phone }}",
+        "textBody": "={{ $json.response_text }}",
+        "additionalFields": {}
+      },
+      "id": "send-whatsapp-response",
+      "name": "Send WhatsApp Response",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [2500, 300],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "CONFIGURE_AQUI",
+          "name": "WhatsApp Business API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Data": {
+      "main": [
+        [
+          {
+            "node": "Get User by Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User by Phone": {
+      "main": [
+        [
+          {
+            "node": "User Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User Exists?": {
+      "main": [
+        [
+          {
+            "node": "Get User Habits",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "User Not Found Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User Not Found Response": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 6
+          }
+        ]
+      ]
+    },
+    "Get User Habits": {
+      "main": [
+        [
+          {
+            "node": "Prepare Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Context": {
+      "main": [
+        [
+          {
+            "node": "Call OpenAI API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call OpenAI API": {
+      "main": [
+        [
+          {
+            "node": "Parse Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Response": {
+      "main": [
+        [
+          {
+            "node": "Route by Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Intent": {
+      "main": [
+        [
+          {
+            "node": "Complete Habit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Habit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Habit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Deactivate Habit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "List Habits (Passthrough)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Normal Response (Passthrough)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Complete Habit": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Habit": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Habit": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Deactivate Habit": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "List Habits (Passthrough)": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Normal Response (Passthrough)": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

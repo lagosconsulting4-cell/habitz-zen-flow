@@ -1,0 +1,13 @@
+# Ignore editor and system artefacts
+.DS_Store
+Thumbs.db
+
+# Vercel local folder
+.vercel
+
+# Node / tooling caches
+node_modules/
+npm-debug.log*
+pnpm-lock.yaml
+package-lock.json
+yarn.lock

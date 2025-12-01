@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz TDAH</title>
+  <!-- Meta Pixel Code -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '4250939241809903');
+    fbq('track', 'PageView');
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=4250939241809903&ev=PageView&noscript=1" />
+  </noscript>
+  <!-- End Meta Pixel Code -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="quiz-container" role="main">
+    <!-- Etapa 1 -->
+    <section class="step step-1 active">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <div class="progress-bar"><div class="progress" style="width: 5%"></div></div>
+      <h1>Descubra se você sofre de TDAH! <span class="emoji">🔍</span></h1>
+      <p class="desc">Com apenas alguns cliques, você terá uma análise exclusiva e prática para entender melhor o seu perfil.</p>
+      <p class="subtitle"><strong>Escolha uma opção para começar sua jornada de autoconhecimento!</strong> <span class="emoji">🌟</span></p>
+      <div class="gender-options">
+        <button class="gender-btn"><img src="IMG/img1.webp" alt="Mulher"><span>Mulher</span></button>
+        <button class="gender-btn"><img src="IMG/img2.webp" alt="Homem"><span>Homem</span></button>
+      </div>
+      <div class="other-options">
+        <button class="other-btn">Outros</button>
+        <button class="other-btn">Prefiro não informar</button>
+      </div>
+    </section>
+    <!-- Etapa 2 -->
+    <section class="step step-2">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 15%"></div></div>
+      <h2>Qual é a sua idade?</h2>
+      <p class="desc">Isso nos ajudará a obter uma resposta mais precisa com base na sua faixa etária</p>
+      <div class="age-options">
+        <button class="age-btn">18-35</button>
+        <button class="age-btn">36-45</button>
+        <button class="age-btn">46-55</button>
+        <button class="age-btn">56-64</button>
+        <button class="age-btn">65+</button>
+      </div>
+    </section>
+    <!-- Etapa 3 -->
+    <section class="step step-3">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 20%"></div></div>
+      <h2>Você costuma ter baixa motivação para iniciar alguma tarefa?</h2>
+      <p class="desc">A seguir responda a sequência de perguntas para analisarmos o seu nível de TDAH</p>
+      <div class="motivation-options">
+        <button class="motivation-btn">Sempre estou motivado</button>
+        <button class="motivation-btn">Depende da situação</button>
+        <button class="motivation-btn">Não, geralmente estou motivado</button>
+        <button class="motivation-btn">Sim, muitas vezes</button>
+      </div>
+    </section>
+    <!-- Etapa 4 -->
+    <section class="step step-4">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 30%"></div></div>
+      <h2>Você costuma ter muitos pensamentos acelerados?</h2>
+      <div class="thoughts-options">
+        <button class="thoughts-btn">Sim, frequentemente <span class="emoji">😟</span></button>
+        <button class="thoughts-btn">As vezes, depende <span class="emoji">😯</span></button>
+        <button class="thoughts-btn">Não, geralmente controlo <span class="emoji">😌</span></button>
+        <button class="thoughts-btn">Raramente, tenho a mente tranquila <span class="emoji">😊</span></button>
+      </div>
+    </section>
+    <!-- Etapa 5 -->
+    <section class="step step-5">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 40%"></div></div>
+      <h2>Você tem mudanças constantes de humor?</h2>
+      <div class="humor-container">
+        <img src="IMG/img3.webp" alt="Humor" class="humor-img">
+        <div class="humor-options">
+          <button class="humor-btn">Sim, frequentemente</button>
+          <button class="humor-btn">Às vezes, depende</button>
+          <button class="humor-btn">Não, geralmente sou estável</button>
+          <button class="humor-btn">Raramente, meu humor é consistente</button>
+        </div>
+      </div>
+    </section>
+    <!-- Etapa 6 -->
+    <section class="step step-6">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 50%"></div></div>
+      <h2>Você geralmente tem a autoestima baixa?</h2>
+      <div class="esteem-options">
+        <button class="esteem-btn">Sim, frequentemente <span class="emoji">😟</span></button>
+        <button class="esteem-btn">As vezes, depende <span class="emoji">😯</span></button>
+        <button class="esteem-btn">Não, geralmente tenho uma autoestima saudável <span class="emoji">😌</span></button>
+        <button class="esteem-btn">Raramente, minha autoestima é alta <span class="emoji">😊</span></button>
+      </div>
+    </section>
+    <!-- Etapa 7 -->
+    <section class="step step-7">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 60%"></div></div>
+      <h2>Com que frequência você costuma esquecer das coisas?</h2>
+      <div class="forget-options">
+        <button class="forget-btn">Muitas vezes</button>
+        <button class="forget-btn">Às vezes</button>
+        <button class="forget-btn">Raramente</button>
+        <button class="forget-btn">Nunca</button>
+      </div>
+      <img src="IMG/img4.webp" alt="Esquecimento" class="forget-img">
+    </section>
+    <!-- Etapa 8 -->
+    <section class="step step-8">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 70%"></div></div>
+      <h2>Com que frequência você esquece palavras ou expressões durante uma conversa?</h2>
+      <div class="words-options">
+        <button class="words-btn">Com muita frequência <span class="emoji">😟</span></button>
+        <button class="words-btn">Às vezes <span class="emoji">😯</span></button>
+        <button class="words-btn">Raramente <span class="emoji">😌</span></button>
+        <button class="words-btn">Nunca <span class="emoji">😊</span></button>
+      </div>
+    </section>
+    <!-- Etapa 9 -->
+    <section class="step step-9">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 80%"></div></div>
+      <h2>Com que frequência você se distrai com atividades ou barulhos ao seu redor?</h2>
+      <div class="distract-options">
+        <button class="distract-btn">Com muita frequência</button>
+        <button class="distract-btn">Às vezes, depende da situação</button>
+        <button class="distract-btn">Raramente, mantenho o foco</button>
+        <button class="distract-btn">Nunca, consigo me concentrar bem</button>
+      </div>
+      <img src="IMG/img5.webp" alt="Distração" class="distract-img">
+    </section>
+    <!-- Etapa 10 -->
+    <section class="step step-10">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 90%"></div></div>
+      <h2>Qual das opções abaixo mais te distrai e te faz perder o foco?</h2>
+      <div class="distract2-options">
+        <button class="distract2-btn">Redes sociais <span class="emoji">📱</span></button>
+        <button class="distract2-btn">Notificações do celular <span class="emoji">⚠️</span></button>
+        <button class="distract2-btn">Assistir TV ou vídeos <span class="emoji">📺</span></button>
+        <button class="distract2-btn">Pessoas conversando ao seu redor <span class="emoji">🗣️</span></button>
+        <button class="distract2-btn">Pensamentos frequentes sobre preocupações pessoais <span class="emoji">🧠</span></button>
+        <button class="distract2-btn">Todas as opções <span class="emoji">📈</span></button>
+      </div>
+    </section>
+    <!-- Etapa 11 -->
+    <section class="step step-11">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 95%"></div></div>
+      <h2>Você se sente sobrecarregado ao realizar tarefas complexas que exigem muito de você?</h2>
+      <div class="overload-container">
+        <img src="IMG/img6.webp" alt="Sobrecarregado" class="overload-img">
+        <div class="overload-options">
+          <button class="overload-btn">Sim, sempre</button>
+          <button class="overload-btn">Às vezes, depende</button>
+          <button class="overload-btn">Raramente</button>
+          <button class="overload-btn">Nunca</button>
+        </div>
+      </div>
+    </section>
+    <!-- Etapa 12 -->
+    <section class="step step-12">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 100%"></div></div>
+      <h2>Como você costuma lidar com o estresse?</h2>
+      <div class="stress-container">
+        <div class="stress-options">
+          <button class="stress-btn">Me afasto das pessoas</button>
+          <button class="stress-btn">Assisto vídeos compulsivamente</button>
+          <button class="stress-btn">Busco conforto na comida</button>
+          <button class="stress-btn">Outras formas</button>
+        </div>
+        <img src="IMG/img7.webp" alt="Estresse" class="stress-img">
+      </div>
+    </section>
+    <!-- Etapa 13 -->
+    <section class="step step-13">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 100%"></div></div>
+      <h2>Com que frequência você interrompe outras pessoas durante as conversas?</h2>
+      <div class="interrupt-options">
+        <button class="interrupt-btn">Sempre</button>
+        <button class="interrupt-btn">Quase sempre</button>
+        <button class="interrupt-btn">Depende do meu humor</button>
+        <button class="interrupt-btn">Raramente</button>
+        <button class="interrupt-btn">Nunca</button>
+      </div>
+    </section>
+    <!-- Etapa 14 -->
+    <section class="step step-14">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 100%"></div></div>
+      <h2>Com que frequência você se pega perdido em pensamentos distantes enquanto está fazendo algo?</h2>
+      <div class="lost-options">
+        <button class="lost-btn">O tempo todo <span class="emoji">😔</span></button>
+        <button class="lost-btn">Quase sempre <span class="emoji">😟</span></button>
+        <button class="lost-btn">Raramente <span class="emoji">😌</span></button>
+        <button class="lost-btn">Nunca <span class="emoji">🕶️</span></button>
+      </div>
+    </section>
+    <!-- Etapa 15 -->
+    <section class="step step-15">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 100%"></div></div>
+      <h2>Com que frequência você costuma esquecer onde deixou as coisas?</h2>
+      <div class="where-options">
+        <button class="where-btn">O tempo todo</button>
+        <button class="where-btn">Quase sempre</button>
+        <button class="where-btn">Raramente</button>
+        <button class="where-btn">Nunca</button>
+      </div>
+      <img src="IMG/img8.webp" alt="Esquecendo coisas" class="where-img">
+    </section>
+    <!-- Etapa 16: Mensagem motivacional -->
+    <section class="step step-16">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <h2 class="motiv-title">O TDAH não precisa impedir você de alcançar seus objetivos</h2>
+      <p class="motiv-desc">Ao avaliar suas respostas neste questionário, poderemos determinar seu tipo de TDAH e elaborar um plano de ação para ajudar você a manter o foco e alcançar seus objetivos.</p>
+      <img src="IMG/img9.webp" alt="Meditação" class="motiv-img">
+      <button class="motiv-btn">Continuar</button>
+    </section>
+    <!-- Etapa 17: Comer ou comprar -->
+    <section class="step step-17">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 100%"></div></div>
+      <h2>Comer ou comprar coisas melhora seu humor?</h2>
+      <div class="mood-options">
+        <button class="mood-btn">Apenas comer melhora <span class="emoji">🍔</span></button>
+        <button class="mood-btn">Apenas comprar melhora <span class="emoji">🛍️</span></button>
+        <button class="mood-btn">As duas opções melhora <span class="emoji">😍</span></button>
+        <button class="mood-btn">Nenhuma opção melhora <span class="emoji">🚫</span></button>
+      </div>
+    </section>
+    <!-- Etapa 18: Prioridades -->
+    <section class="step step-18">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 100%"></div></div>
+      <h2>Se pudéssemos tratar o TDAH, qual dessas áreas você gostaria de priorizar?</h2>
+      <div class="priority-options">
+        <button class="priority-btn">Melhorar a auto-estima <span class="emoji">💪</span></button>
+        <button class="priority-btn">Ter mais controle sobre sua vida <span class="emoji">😌</span></button>
+        <button class="priority-btn">Aprender a se concentrar por mais tempo <span class="emoji">📺</span></button>
+        <button class="priority-btn">Acabar com a procrastinação <span class="emoji">⚠️</span></button>
+        <button class="priority-btn">Todas as opções <span class="emoji">🔥</span></button>
+      </div>
+    </section>
+    <!-- Etapa 19: Mensagem final/plano -->
+    <section class="step step-19">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <h2 class="plan-title">Vamos criar um plano especialmente para você,</h2>
+      <p class="plan-desc">desenvolvido por um grupo de <strong>psicólogos cognitivos</strong>. As pesquisas comprovam que nossas ações refletem nossos pensamentos e emoções.<br><br>Ao trabalhar os fatores emocionais que influenciam o TDAH, podemos reduzir os sintomas e aumentar sua produtividade de forma eficaz.</p>
+      <img src="IMG/img10.webp" alt="Plano" class="plan-img">
+      <button class="plan-btn">Continuar</button>
+    </section>
+    <!-- Etapa 20: Plano personalizado - pergunta -->
+    <section class="step step-20">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 100%"></div></div>
+      <h2>Você sabia que um plano personalizado pode transformar sua forma de lidar com o TDAH?</h2>
+      <div class="personalized-options">
+        <button class="personalized-btn"><span class="emoji success">✅</span>Sim, quero descobrir como!</button>
+        <button class="personalized-btn"><span class="emoji">😯</span>Não, mas quero aprender mais.</button>
+      </div>
+    </section>
+    <!-- Etapa 21: Carrossel de depoimentos/por que ter plano -->
+    <section class="step step-21">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <h2 class="carousel-title">Por que ter um plano personalizado?</h2>
+      <p class="carousel-desc">Um plano personalizado foca nas suas necessidades específicas, ajudando a melhorar a concentração, reduzir a procrastinação e organizar sua rotina. Imagine como seria superar esses desafios diariamente!</p>
+      <div class="carousel-container">
+        <div class="carousel-track">
+          <img src="IMG/img11.webp" alt="Comentário 1" class="carousel-img active">
+          <img src="IMG/img12.webp" alt="Comentário 2" class="carousel-img">
+          <img src="IMG/img14.webp" alt="Comentário 3" class="carousel-img">
+        </div>
+      </div>
+      <div class="carousel-dots">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+      <button class="carousel-btn">Continuar</button>
+    </section>
+    <!-- Etapa 22: Guia para superar desafios -->
+    <section class="step step-22">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 100%"></div></div>
+      <h2>Você já pensou em como seria ter um guia para superar os desafios do TDAH?</h2>
+      <div class="guide-options">
+        <button class="guide-btn"><span class="emoji">💡</span>Sim, sempre quis algo assim!</button>
+        <button class="guide-btn"><span class="emoji">🤷‍♂️</span>Ainda não, mas parece interessante.</button>
+      </div>
+    </section>
+    <!-- Etapa 23: Tudo em um único lugar -->
+    <section class="step step-23">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <h2 class="unique-title">Tudo em um único lugar!</h2>
+      <p class="unique-desc">Seu <strong>plano</strong> não é apenas um guia; é um <strong>programa completo</strong> que ajuda você a <strong>transformar seu dia a dia</strong>, com ferramentas práticas e apoio contínuo para enfrentar os desafios do TDAH.</p>
+      <div class="unique-imgs">
+        <img src="IMG/img16.webp" alt="Personagem" class="unique-person">
+        <img src="IMG/img17.webp" alt="Dashboard" class="unique-dashboard">
+      </div>
+      <button class="unique-btn">Continuar</button>
+    </section>
+    <!-- Etapa 24: Como seria sua vida -->
+    <section class="step step-24">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-bar"><div class="progress" style="width: 100%"></div></div>
+      <h2>Como seria sua vida se você pudesse controlar os sintomas do TDAH?</h2>
+      <div class="life-options">
+        <button class="life-btn"><span class="emoji">✨</span>Muito melhor, mais organizada</button>
+        <button class="life-btn"><span class="emoji">😌</span>Com menos stress e mais clareza</button>
+        <button class="life-btn"><span class="emoji">🎯</span>Finalmente atingindo meus objetivos</button>
+      </div>
+    </section>
+    <!-- Etapa 25: Vida mais organizada -->
+    <section class="step step-25">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <h2 class="organized-title">Vida mais Organizada</h2>
+      <p class="organized-desc"><strong>Isso é possível!</strong> Nosso plano foi desenhado para <strong>transformar essas respostas em realidade</strong>, ajudando você a ter mais equilíbrio, sucesso e controle no dia a dia.</p>
+      <img src="IMG/img18.webp" alt="Alongamento" class="organized-img">
+      <button class="organized-btn">Continuar</button>
+    </section>
+    <!-- Etapa 26: Carregando plano -->
+    <section class="step step-26">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <div class="progress-loading" role="status" aria-live="polite" aria-atomic="true">
+        <span class="progress-label">Carregando aguarde...</span>
+        <span class="progress-value" aria-live="polite">0%</span>
+        <div class="progress-bar">
+          <div class="progress" style="width: 0%"></div>
+        </div>
+      </div>
+      <h2 class="loading-title">Preparando...</h2>
+      <p class="loading-desc">O nosso grupo de psicólogos estão preparando o seu plano exclusivo e personalizado.</p>
+      <div class="audio-experience">Experiência de quem já está transformando sua vida</div>
+      <div class="audio-message">
+        <div class="audio-info">
+          <span class="nome">Fernanda</span>
+          
+        </div>
+        <div class="audio-body">
+          <span class="audio-icon">
+            <svg class="play-svg" width="28" height="28" viewBox="0 0 448 512"><path fill="#007f4d" d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"></path></svg>
+          </span>
+          <div class="waveform"></div>
+          <span class="tempo">00:35</span>
+          <img class="avatar" src="IMG/perfil.webp" alt="Avatar">
+        </div>
+        <audio id="audio-player" src="IMG/audio.mp3" style="display:none;"></audio>
+      </div>
+      <div class="ready-box">
+        <div class="content text break-words py-2" style="word-break: break-word;">
+          <p class="ql-align-center"><strong class="ql-size-large">Agora imagine você</strong><strong> </strong></p>
+          <p class="ql-align-center"><strong>﻿alcançando esses mesmos resultados. </strong></p>
+          <p class="ql-align-center">Sua análise está pronta! Descubra seu plano personalizado agora.</p>
+        </div>
+        <button class="ready-btn" style="display:none;">Continuar</button>
+      </div>
+    </section>
+    <!-- Etapa 27: Análise inicial do perfil -->
+    <section class="step step-27">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <h2 class="profile-title">Análise inicial do seu perfil</h2>
+      <div class="profile-box yellow-box">
+        <div class="profile-type"><b>Seu Tipo de TDAH:</b> <i>Combinado</i></div>
+        <div class="profile-symptoms">Estes são alguns dos sintomas que você sente?</div>
+        <ul class="profile-list">
+          <li><span class="check">✔</span> <span class="symptom">Mudanças de humor</span></li>
+          <li><span class="check">✔</span> <span class="symptom">Ansiedade</span></li>
+          <li><span class="check">✔</span> <span class="symptom">Desatenção</span></li>
+          <li><span class="check">✔</span> <span class="symptom">Desorganização</span></li>
+          <li><span class="check">✔</span> <span class="symptom">Fadiga emocional</span></li>
+        </ul>
+        <div class="profile-others">Entre outros...</div>
+      </div>
+      <div class="profile-box green-box">
+        Agora é hora de agir e conquistar seus objetivos.
+      </div>
+      <div class="profile-row">
+        <div class="profile-graph-box">
+          <div class="profile-graph-circle">
+            <span class="profile-graph-percent">94%</span>
+          </div>
+          <div class="profile-graph-label">Chances de Melhora</div>
+        </div>
+      </div>
+      <div class="profile-metrics">
+        <div class="profile-metric metric-tdah">
+          <div class="metric-bar metric-bar-red" style="height: 85%"><span class="metric-value">85%</span></div>
+          <div class="metric-label">NÍVEL DE TDAH</div>
+          <div class="metric-desc">Sua jornada de evolução começa aqui</div>
+        </div>
+        <div class="profile-metric metric-confidence">
+          <div class="metric-bar metric-bar-blue" style="height: 30%"><span class="metric-value">30%</span></div>
+          <div class="metric-label">AUTO CONFIANÇA</div>
+          <div class="metric-desc">Confiança abalada</div>
+        </div>
+        <div class="profile-metric metric-chance">
+          <div class="metric-bar metric-bar-green" style="height: 94%"><span class="metric-value">94%</span></div>
+          <div class="metric-label">CHANCES DE MELHORA</div>
+          <div class="metric-desc">Grandes chances de melhora</div>
+        </div>
+      </div>
+      <div class="profile-box green-box profile-ready">
+        <b>Você está pronto para transformar sua vida?</b></b><br>
+        Parabéns por chegar até aqui! Seu plano personalizado está pronto e pode ser o primeiro passo para superar os desafios do TDAH. Clique no botão abaixo e veja como você pode começar a transformar sua rotina hoje mesmo.
+        <div class="profile-ready-desc"><i>Seu plano está pronto e exclusivo para você!</i></div>
+      </div>
+      <button class="profile-btn">Continuar</button>
+    </section>
+    <!-- Etapa 28: Plano Exclusivo Antes/Depois -->
+    <section class="step step-28">
+      <img src="IMG/logo.webp" alt="Logo TDAH" class="logo">
+      <button class="back-btn" type="button" aria-label="Voltar">&#8592; Voltar</button>
+      <h2 class="exclusive-title">Conheça agora o seu<br>Plano Exclusivo</h2>
+      <div class="exclusive-row">
+        <div class="exclusive-col">
+          <div class="exclusive-card">
+            <img src="IMG/img19.webp" alt="Antes" class="exclusive-img">
+          </div>
+        </div>
+        <div class="exclusive-col">
+          <div class="exclusive-card">
+            <img src="IMG/img20.webp" alt="Depois" class="exclusive-img">
+          </div>
+        </div>
+      </div>
+      <div class="exclusive-desc">Esse será você pouquíssimos dias depois do seguir o Plano! <span class="emoji">😍</span></div>
+      <div class="exclusive-box yellow-box">
+        <span class="exclusive-box-title">Seu nível de TDAH:</span>
+      </div>
+      <div class="exclusive-graphs-info-wrap">
+        <div class="exclusive-graphs-info-col">
+          <div class="exclusive-graph-card">
+            <div class="exclusive-graph-circle exclusive-graph-red">
+              <span class="exclusive-graph-percent">85%</span>
+            </div>
+            <div class="exclusive-graph-label">Hoje <span class="emoji">🥴</span></div>
+          </div>
+          <div class="exclusive-info-card">
+            <div class="exclusive-info-icon">🎯</div>
+            <div class="exclusive-info-title">Seu maior objetivo</div>
+            <div class="exclusive-info-desc">Conseguir se livrar dos sintomas do TDAH</div>
+          </div>
+        </div>
+        <div class="exclusive-graphs-info-col">
+          <div class="exclusive-graph-card">
+            <div class="exclusive-graph-circle exclusive-graph-green">
+              <span class="exclusive-graph-percent">10%</span>
+            </div>
+            <div class="exclusive-graph-label">Em 30 dias <span class="emoji">🥳</span></div>
+          </div>
+          <div class="exclusive-info-card">
+            <div class="exclusive-info-icon">⏱️</div>
+            <div class="exclusive-info-title">Tempo para atingir</div>
+            <div class="exclusive-info-desc">Em menos de 30 dias se começar hoje</div>
+          </div>
+        </div>
+      </div>
+      <div class="exclusive-benefits-box">
+        <div class="bg-green-100 text-green-700 p-4 rounded-2xl content"><h3 class="ql-align-center"><strong style="color: rgb(251, 146, 60);">O que você vai transformar em sua vida após adquirir o seu Plano</strong></h3><p><span style="color: rgb(9, 9, 11);">🌞 </span><strong style="color: rgb(9, 9, 11);">Acordar se sentindo motivado</strong><span style="color: rgb(9, 9, 11);"> e energizado, pronto para conquistar o dia.</span></p><p><span style="color: rgb(9, 9, 11);">🎯 </span><strong style="color: rgb(9, 9, 11);">Ter clareza sobre seus objetivos</strong><span style="color: rgb(9, 9, 11);"> diários e saber exatamente o que realizar sem procrastinar.</span></p><p><strong style="color: rgb(9, 9, 11);">💪 Diga adeus à sobrecarga</strong><span style="color: rgb(9, 9, 11);"> e ao estresse enquanto enfrenta as tarefas com confiança.</span></p><p><span style="color: rgb(9, 9, 11);">🌱</span><strong style="color: rgb(9, 9, 11);"> Abrace o crescimento pessoal</strong><span style="color: rgb(9, 9, 11);"> e o autoaperfeiçoamento à medida que se liberta dos sintomas do TDAH.</span></p><p><span style="color: rgb(9, 9, 11);">🤝 </span><strong style="color: rgb(9, 9, 11);">Fortaleça seus relacionamentos</strong><span style="color: rgb(9, 9, 11);"> com uma nova confiabilidade e produtividade.</span></p><p><span style="color: rgb(9, 9, 11);">🌟</span><strong style="color: rgb(9, 9, 11);"> Veja sua autoestima alcançar novos patamares</strong><span style="color: rgb(9, 9, 11);">, desbloqueando todo o seu potencial.</span></p></div>
+      </div>
+      <div class="exclusive-chamada-box">
+        <div class="exclusive-chamada-title">
+          <b>Não perca essa oportunidade e<br>Transforme sua vida agora igual a Fernanda!</b>
+        </div>
+        <div class="exclusive-chamada-desc">Obtenha seu plano personalizado em <b>apenas 1 cliques.</b></div>
+        <div class="exclusive-audio-player">
+          <div class="audio-message">
+            
+            <div class="audio-body">
+              <span class="audio-icon">
+                <svg class="play-svg" width="28" height="28" viewBox="0 0 448 512"><path fill="#007f4d" d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"></path></svg>
+              </span>
+              <div class="waveform"></div>
+              <span class="tempo">00:35</span>
+              <img class="avatar" src="IMG/perfil.webp" alt="Avatar">
+            </div>
+            <audio id="audio-player-2" src="IMG/audio.mp3" style="display:none;"></audio>
+          </div>
+        </div>
+        <div class="exclusive-discount-box">
+          <span class="discount-icon">⏰</span>
+          <span class="discount-text"><b>Seu desconto expira em: <span id="discount-timer">01:09</span>!</b></span>
+          <div class="discount-desc">Não perca essa oportunidade exclusiva!</div>
+        </div>
+        <!-- NOVO BLOCO: CARROSSEL DE MÓDULOS -->
+        <div class="exclusive-modules-section">
+          <div class="exclusive-modules-title">Oque você irá receber além do seu Plano personalizado</div>
+          <div class="exclusive-modules-subtitle">Curso Completo de Mini-Hábitos para Superar o TDAH</div>
+          <div class="exclusive-modules-carousel">
+            <div class="modules-carousel-track">
+              <img src="IMG/img24.webp" alt="Módulo 10 - Slide 1" class="modules-carousel-img active">
+              <img src="IMG/img25.webp" alt="Módulo 10 - Slide 2" class="modules-carousel-img">
+              <img src="IMG/img26.webp" alt="Módulo 10 - Slide 3" class="modules-carousel-img">
+              <img src="IMG/img27.webp" alt="Módulo 10 - Slide 4" class="modules-carousel-img">
+              <img src="IMG/img28.webp" alt="Módulo 10 - Slide 5" class="modules-carousel-img">
+              <img src="IMG/img29.webp" alt="Módulo 10 - Slide 6" class="modules-carousel-img">
+              <img src="IMG/img30.webp" alt="Módulo 10 - Slide 7" class="modules-carousel-img">
+              <img src="IMG/img31.webp" alt="Módulo 10 - Slide 8" class="modules-carousel-img">
+              <img src="IMG/img32.webp" alt="Módulo 10 - Slide 9" class="modules-carousel-img">
+              <img src="IMG/img33.webp" alt="Módulo 10 - Slide 10" class="modules-carousel-img">
+            </div>
+          </div>
+          <div class="modules-carousel-dots">
+            <span class="modules-dot active"></span>
+            <span class="modules-dot"></span>
+            <span class="modules-dot"></span>
+            <span class="modules-dot"></span>
+            <span class="modules-dot"></span>
+            <span class="modules-dot"></span>
+            <span class="modules-dot"></span>
+            <span class="modules-dot"></span>
+            <span class="modules-dot"></span>
+            <span class="modules-dot"></span>
+          </div>
+          <!-- BENEFÍCIOS DO CURSO E BARRAS -->
+          <div class="course-benefits-box">
+            <div class="bg-green-100 text-green-700 p-4 rounded-2xl content"><h3 class="ql-align-center"><strong style="color: rgb(251, 146, 60);">Benefícios do Curso</strong></h3><p><strong>📋 Programa Personalizado:</strong>&nbsp;Receba um plano adaptado às suas necessidades específicas.</p><p><strong>📚 Metodologia Comprovada:</strong>&nbsp;Técnicas baseadas em estudos científicos para criar e manter hábitos positivos.</p><p><strong>💡 Apoio Contínuo:</strong>&nbsp;Acesso a materiais extras e lives para aprofundar seu aprendizado.</p><p><strong>🎥 Flexibilidade:</strong>&nbsp;Aulas em vídeo e áudio para você estudar no seu ritmo.</p><p><strong>📈 Resultados Visíveis:</strong>&nbsp;Acompanhe seu progresso e veja as melhorias em sua vida diária.</p></div>
+          </div>
+          <div class="course-bars-box">
+            <div class="course-bar-row">
+              <div class="course-bar-labels">
+                <span class="course-bar-title">Pessoas atendidas</span>
+                <span class="course-bar-value">100%</span>
+              </div>
+              <div class="course-bar-outer"><div class="course-bar-inner" style="width:100%"></div></div>
+            </div>
+            <div class="course-bar-row">
+              <div class="course-bar-labels">
+                <span class="course-bar-title">Clientes Satisfeitos</span>
+                <span class="course-bar-value">98%</span>
+              </div>
+              <div class="course-bar-outer"><div class="course-bar-inner" style="width:98%"></div></div>
+            </div>
+            <div class="course-bar-row">
+              <div class="course-bar-labels">
+                <span class="course-bar-title">Resultado em menos de 30 dias</span>
+                <span class="course-bar-value">96%</span>
+              </div>
+              <div class="course-bar-outer"><div class="course-bar-inner" style="width:96%"></div></div>
+            </div>
+          </div>
+          <!-- BLOCO DE OFERTA ABAIXO -->
+          <div class="offer-section">
+            <img src="IMG/img21.webp" alt="Oferta" class="offer-img-top">
+            <div class="offer-discount-box">
+              <span class="offer-discount-icon">⏰</span>
+              <span class="offer-discount-text"><b>Seu desconto expira em: <span id="offer-timer">04:10</span>!</b></span>
+              <div class="offer-discount-desc">Não perca essa oportunidade exclusiva!</div>
+            </div>
+            <button class="offer-btn"><span class="offer-btn-icon">🔒</span> Quero o meu Plano Agora</button>
+            <div class="offer-payments">
+              <img src="IMG/img22.webp" alt="Bandeiras de Cartão" class="offer-payments-img">
+            </div>
+            <!-- FAQ e GARANTIA -->
+            <div class="faq-section">
+              <div class="faq-title">Perguntas frequentes</div>
+              <div class="faq-list">
+                <div class="faq-item">
+                  <span class="faq-dot"></span>
+                  <span class="faq-question">O plano é adequado para todas as idades?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">Sim! O plano foi desenvolvido para atender pessoas de todas as idades, desde adolescentes até adultos e idosos.</div>
+                <div class="faq-divider"></div>
+                <div class="faq-item">
+                  <span class="faq-dot"></span>
+                  <span class="faq-question">Quanto tempo leva para ver os resultados?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">A maioria dos clientes começa a perceber melhorias já nas primeiras semanas, especialmente seguindo as orientações e aplicando os mini-hábitos diariamente.</div>
+                <div class="faq-divider"></div>
+                <div class="faq-item">
+                  <span class="faq-dot"></span>
+                  <span class="faq-question">O plano inclui alguma forma de medicação?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">Não. O plano é 100% natural, baseado em técnicas comportamentais e hábitos saudáveis, sem uso de medicamentos.</div>
+                <div class="faq-divider"></div>
+                <div class="faq-item">
+                  <span class="faq-dot"></span>
+                  <span class="faq-question">O plano é compatível com outras terapias que estou seguindo?</span>
+                  <span class="faq-arrow">&#9660;</span>
+                </div>
+                <div class="faq-answer">Sim! O plano pode ser seguido em conjunto com outras terapias, potencializando seus resultados.</div>
+              </div>
+              <div class="faq-guarantee-title"><span class="faq-guarantee-icon">🔒</span> Garantia de Satisfação</div>
+              <div class="faq-guarantee-desc">Experimente por 7 dias e, se não estiver satisfeito, devolvemos seu dinheiro!</div>
+              <div class="faq-guarantee-img-wrap">
+                <img src="IMG/img23.webp" alt="Selo Garantia" class="faq-guarantee-img">
+              </div>
+              <div class="faq-extra-offer">
+                <img src="IMG/img21.webp" alt="Oferta" class="faq-offer-img">
+                <div class="faq-offer-installments">Ou em 8x de R$ 6,72 no Cartão</div>
+                <div class="faq-offer-discount-box">
+                  <span class="faq-offer-discount-icon">⏰</span>
+                  <span class="faq-offer-discount-text"><b>Seu desconto expira em: <span id="faq-offer-timer">13:17</span>!</b></span>
+                  <div class="faq-offer-discount-desc">Não perca essa oportunidade exclusiva!</div>
+                </div>
+                <button class="faq-offer-btn"><span class="faq-offer-btn-icon">🔒</span> Quero o meu Plano Agora</button>
+                <div class="faq-offer-payments">
+                  <img src="IMG/img22.webp" alt="Bandeiras de Cartão" class="faq-offer-payments-img">
+                  <img src="IMG/img9.webp" alt="Pagamento Seguro" class="faq-offer-secure-img">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <!-- Botão fixo apenas na última etapa -->
+  <button class="fixed-bottom-btn" style="display:none;">🔒 Quero o meu Plano Agora</button>
+  <script src="script.js"></script>
+</body>
+</html> 
