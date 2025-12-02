@@ -137,28 +137,28 @@ export const SwipeableCarousel = () => {
     <div className="overflow-hidden w-full h-dvh" ref={emblaRef}>
       <div className="flex touch-pan-y h-full pb-0">
         {/* Slide 0: Dashboard */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full")}>
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full")}>
           <Suspense fallback={<PageLoader />}>
             <Dashboard />
           </Suspense>
         </div>
 
         {/* Slide 1: Hábitos */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full")}>
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full")}>
           <Suspense fallback={<PageLoader />}>
             <MyHabits />
           </Suspense>
         </div>
 
         {/* Slide 2: Progress/Streaks */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full")}>
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full")}>
           <Suspense fallback={<PageLoader />}>
             <Progress />
           </Suspense>
         </div>
 
         {/* Slide 3: Profile */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full")}>
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full")}>
           <Suspense fallback={<PageLoader />}>
             <Profile />
           </Suspense>
