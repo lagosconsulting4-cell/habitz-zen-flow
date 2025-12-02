@@ -6,35 +6,30 @@ import { Clock } from "lucide-react";
 const WORK_SCHEDULE_OPTIONS: Array<{
   value: WorkSchedule;
   label: string;
-  emoji: string;
   description: string;
   hours: string;
 }> = [
   {
     value: "morning",
     label: "Manhã",
-    emoji: "🌅",
     description: "Trabalho de manhã",
     hours: "6h - 14h",
   },
   {
     value: "commercial",
     label: "Comercial",
-    emoji: "☀️",
     description: "Horário tradicional",
     hours: "8h - 18h",
   },
   {
     value: "evening",
     label: "Tarde/Noite",
-    emoji: "🌙",
     description: "Trabalho à tarde/noite",
     hours: "14h - 22h",
   },
   {
     value: "flexible",
     label: "Flexível",
-    emoji: "⚡",
     description: "Sem horário fixo",
     hours: "Varia",
   },
@@ -87,7 +82,6 @@ export const WorkScheduleStep = () => {
                     <p className="text-xs text-primary mt-1 font-medium">{option.hours}</p>
                   </div>
                 }
-                emoji={option.emoji}
                 selected={workSchedule === option.value}
                 onClick={() => setWorkSchedule(option.value)}
               />
@@ -103,7 +97,7 @@ export const WorkScheduleStep = () => {
         transition={{ delay: 0.8, duration: 0.4 }}
         className="text-center text-xs text-muted-foreground mt-6"
       >
-        💡 Seus hábitos serão sugeridos para antes e depois do trabalho
+        Seus hábitos serão sugeridos para antes e depois do trabalho
       </motion.p>
     </div>
   );

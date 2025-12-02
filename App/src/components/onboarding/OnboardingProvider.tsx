@@ -16,6 +16,7 @@ export type EnergyPeak = "morning" | "afternoon" | "evening";
 export type TimeAvailable = "15min" | "30min" | "1h" | "2h+";
 export type Objective = "productivity" | "health" | "mental" | "routine" | "avoid";
 export type WeekDaysPreset = "weekdays" | "everyday" | "custom";
+export type ThemePreference = "light" | "dark";
 
 export interface RecommendedHabit {
   id: string;
@@ -23,6 +24,7 @@ export interface RecommendedHabit {
   name: string;
   category: string;
   icon: string;
+  icon_key: string; // HabitGlyph icon key
   color: string;
   period: "morning" | "afternoon" | "evening";
   suggested_time: string; // HH:mm format
@@ -36,11 +38,15 @@ export interface RecommendedHabit {
   recommendation_sources?: string[]; // Why this habit was recommended
 }
 
+export interface PeriodSlot {
+  start: string;
+  end: string;
+}
+
 export interface TimeSlots {
-  morning_start: string;
-  morning_end: string;
-  evening_start: string;
-  evening_end: string;
+  morning?: PeriodSlot;
+  afternoon?: PeriodSlot;
+  evening?: PeriodSlot;
 }
 
 export interface OnboardingState {
@@ -56,6 +62,7 @@ export interface OnboardingState {
   workSchedule: WorkSchedule | null;
 
   // Preferences
+  themePreference: ThemePreference;
   energyPeak: EnergyPeak | null;
   timeAvailable: TimeAvailable | null;
   objective: Objective | null;
@@ -84,6 +91,7 @@ export interface OnboardingContextType extends OnboardingState {
   setAgeRange: (age: AgeRange) => void;
   setProfession: (profession: Profession) => void;
   setWorkSchedule: (schedule: WorkSchedule) => void;
+  setThemePreference: (theme: ThemePreference) => void;
   setEnergyPeak: (peak: EnergyPeak) => void;
   setTimeAvailable: (time: TimeAvailable) => void;
   setObjective: (objective: Objective) => void;
@@ -126,6 +134,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [ageRange, setAgeRange] = useState<AgeRange | null>(null);
   const [profession, setProfession] = useState<Profession | null>(null);
   const [workSchedule, setWorkSchedule] = useState<WorkSchedule | null>(null);
+  const [themePreference, setThemePreference] = useState<ThemePreference>("dark");
   const [energyPeak, setEnergyPeak] = useState<EnergyPeak | null>(null);
   const [timeAvailable, setTimeAvailable] = useState<TimeAvailable | null>(null);
   const [objective, setObjective] = useState<Objective | null>(null);
@@ -137,7 +146,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const totalSteps = 11;
+  const totalSteps = 12; // Welcome, Theme, Age, Profession, WorkSchedule, EnergyPeak, TimeAvailable, Objective, Challenges, WeekDays, Preview, Celebration
 
   // ============================================================================
   // NAVIGATION
@@ -172,25 +181,27 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     switch (currentStep) {
       case 0: // Welcome
         return true;
-      case 1: // Age
+      case 1: // Theme
+        return true; // Theme always has a default value
+      case 2: // Age
         return ageRange !== null;
-      case 2: // Profession
+      case 3: // Profession
         return profession !== null;
-      case 3: // Work Schedule
+      case 4: // Work Schedule
         return workSchedule !== null;
-      case 4: // Energy Peak
+      case 5: // Energy Peak
         return energyPeak !== null;
-      case 5: // Time Available
+      case 6: // Time Available
         return timeAvailable !== null;
-      case 6: // Objective
+      case 7: // Objective
         return objective !== null;
-      case 7: // Challenges
+      case 8: // Challenges
         return challenges.length > 0;
-      case 8: // Week Days
+      case 9: // Week Days
         return weekDays.length > 0;
-      case 9: // Preview
+      case 10: // Preview
         return selectedHabitIds.size >= 3;
-      case 10: // Celebration (auto-submits)
+      case 11: // Celebration (auto-submits)
         return true;
       default:
         return false;
@@ -203,34 +214,30 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const getTimeSlots = useCallback((): TimeSlots => {
     switch (workSchedule) {
-      case "morning": // 6-14h
+      case "morning": // Trabalha 6-14h
         return {
-          morning_start: "05:00",
-          morning_end: "06:00",
-          evening_start: "14:30",
-          evening_end: "23:00",
+          morning: { start: "05:00", end: "06:00" },
+          afternoon: { start: "14:30", end: "17:00" },
+          evening: { start: "19:00", end: "23:00" },
         };
-      case "commercial": // 8-18h
+      case "commercial": // Trabalha 8-18h
         return {
-          morning_start: "06:00",
-          morning_end: "07:30",
-          evening_start: "19:00",
-          evening_end: "23:00",
+          morning: { start: "06:00", end: "07:30" },
+          afternoon: { start: "12:00", end: "13:00" },
+          evening: { start: "19:00", end: "23:00" },
         };
-      case "evening": // 14-22h
+      case "evening": // Trabalha 14-22h
         return {
-          morning_start: "06:00",
-          morning_end: "13:00",
-          evening_start: "22:30",
-          evening_end: "23:59",
+          morning: { start: "06:00", end: "13:00" },
+          afternoon: { start: "13:00", end: "14:00" },
+          evening: { start: "22:30", end: "23:59" },
         };
       case "flexible":
       default:
         return {
-          morning_start: "06:00",
-          morning_end: "12:00",
-          evening_start: "18:00",
-          evening_end: "23:00",
+          morning: { start: "06:00", end: "09:00" },
+          afternoon: { start: "12:00", end: "15:00" },
+          evening: { start: "18:00", end: "23:00" },
         };
     }
   }, [workSchedule]);
@@ -334,6 +341,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
           user_id: user.id,
           name: habit.name,
           icon: habit.icon,
+          icon_key: habit.icon_key,
           color: habit.color,
           goal_value: habit.goal_value,
           unit: habit.goal_unit || "none",
@@ -379,6 +387,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     ageRange,
     profession,
     workSchedule,
+    themePreference,
     energyPeak,
     timeAvailable,
     objective,
@@ -399,6 +408,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     setAgeRange,
     setProfession,
     setWorkSchedule,
+    setThemePreference,
     setEnergyPeak,
     setTimeAvailable,
     setObjective,

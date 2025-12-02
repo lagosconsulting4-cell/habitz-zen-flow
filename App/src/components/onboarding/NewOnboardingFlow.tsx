@@ -6,6 +6,7 @@ import { OnboardingNavigation } from "./OnboardingNavigation";
 
 // Steps
 import { WelcomeStep } from "./steps/WelcomeStep";
+import { ThemeStep } from "./steps/ThemeStep";
 import { AgeStep } from "./steps/AgeStep";
 import { ProfessionStep } from "./steps/ProfessionStep";
 import { WorkScheduleStep } from "./steps/WorkScheduleStep";
@@ -24,40 +25,41 @@ import { CelebrationStep } from "./steps/CelebrationStep";
 const OnboardingFlowContent = () => {
   const { currentStep, generateRoutine } = useOnboarding();
 
-  // Generate routine when reaching preview step (step 8)
+  // Generate routine when reaching preview step (step 10 - after WeekDays)
   useEffect(() => {
-    if (currentStep === 8) {
+    if (currentStep === 10) {
       generateRoutine();
     }
   }, [currentStep, generateRoutine]);
 
-  // All 11 steps
+  // All 12 steps (including Theme step)
   const steps = [
-    <WelcomeStep key="welcome" />,
-    <AgeStep key="age" />,
-    <ProfessionStep key="profession" />,
-    <WorkScheduleStep key="work-schedule" />,
-    <EnergyPeakStep key="energy" />,
-    <TimeAvailableStep key="time" />,
-    <ObjectiveStep key="objective" />,
-    <ChallengesStep key="challenges" />,
-    <WeekDaysStep key="weekdays" />,
-    <RoutinePreviewStep key="preview" />,
-    <CelebrationStep key="celebration" />,
+    <WelcomeStep key="welcome" />,        // 0
+    <ThemeStep key="theme" />,            // 1 - NEW
+    <AgeStep key="age" />,                // 2
+    <ProfessionStep key="profession" />,  // 3
+    <WorkScheduleStep key="work-schedule" />, // 4
+    <EnergyPeakStep key="energy" />,      // 5
+    <TimeAvailableStep key="time" />,     // 6
+    <ObjectiveStep key="objective" />,    // 7
+    <ChallengesStep key="challenges" />,  // 8
+    <WeekDaysStep key="weekdays" />,      // 9
+    <RoutinePreviewStep key="preview" />, // 10
+    <CelebrationStep key="celebration" />,// 11
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
       {/* Progress Bar - Fixed at top */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="container max-w-2xl mx-auto px-4 py-6">
           <OnboardingProgress />
         </div>
       </div>
 
       {/* Step Content - Scrollable */}
-      <div className="flex-1 flex items-center justify-center overflow-y-auto">
-        <div className="container max-w-4xl mx-auto w-full">
+      <div className="flex-1 overflow-y-auto">
+        <div className="container max-w-4xl mx-auto w-full pt-6 pb-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -73,9 +75,13 @@ const OnboardingFlowContent = () => {
       </div>
 
       {/* Navigation - Fixed at bottom */}
-      <div className="sticky bottom-0 z-10 bg-background/95 backdrop-blur-sm border-t border-border">
+      <div
+        className={`sticky bottom-0 z-40 bg-background/95 backdrop-blur-sm ${
+          currentStep === 0 ? "" : "border-t border-border"
+        }`}
+      >
         <div className="container max-w-2xl mx-auto px-4 py-6">
-          <OnboardingNavigation />
+          <OnboardingNavigation centered={currentStep === 0} />
         </div>
       </div>
     </div>

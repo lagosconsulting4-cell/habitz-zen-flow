@@ -38,7 +38,7 @@ export const OnboardingProgress = () => {
       </div>
 
       {/* Step Counter */}
-      <div className="flex justify-between items-center mt-3">
+      <div className="flex justify-start items-center mt-3">
         <motion.p
           className="text-xs font-medium text-muted-foreground"
           initial={{ opacity: 0, y: -5 }}
@@ -46,15 +46,6 @@ export const OnboardingProgress = () => {
           transition={{ delay: 0.1 }}
         >
           Passo {currentStep + 1} de {totalSteps}
-        </motion.p>
-
-        <motion.p
-          className="text-xs font-bold text-primary"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          {Math.round(progress)}%
         </motion.p>
       </div>
 

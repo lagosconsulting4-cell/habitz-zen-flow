@@ -6,37 +6,31 @@ import { User } from "lucide-react";
 const AGE_OPTIONS: Array<{
   value: AgeRange;
   label: string;
-  emoji: string;
   description: string;
 }> = [
   {
     value: "18-24",
     label: "18-24 anos",
-    emoji: "🎓",
     description: "Início da vida adulta",
   },
   {
     value: "25-34",
     label: "25-34 anos",
-    emoji: "💼",
     description: "Construindo carreira",
   },
   {
     value: "35-44",
     label: "35-44 anos",
-    emoji: "🏆",
     description: "Consolidando experiência",
   },
   {
     value: "45-54",
     label: "45-54 anos",
-    emoji: "🌟",
     description: "Maturidade profissional",
   },
   {
     value: "55+",
     label: "55+ anos",
-    emoji: "🎯",
     description: "Sabedoria e equilíbrio",
   },
 ];
@@ -83,7 +77,6 @@ export const AgeStep = () => {
                 id={option.value}
                 title={option.label}
                 description={option.description}
-                emoji={option.emoji}
                 selected={ageRange === option.value}
                 onClick={() => setAgeRange(option.value)}
                 variant="compact"

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Plus, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { HabitGlyph } from "@/components/icons/HabitGlyph";
+import { CustomHabitDialog } from "../CustomHabitDialog";
 
 interface HabitsByPeriod {
   morning: typeof habits;
@@ -11,9 +13,28 @@ interface HabitsByPeriod {
   evening: typeof habits;
 }
 
+// Day labels for weekly distribution
+const DAY_LABELS: Record<number, string> = {
+  0: "Dom",
+  1: "Seg",
+  2: "Ter",
+  3: "Qua",
+  4: "Qui",
+  5: "Sex",
+  6: "Sáb",
+};
+
 export const RoutinePreviewStep = () => {
-  const { recommendedHabits, selectedHabitIds, toggleHabit, isGeneratingRoutine } = useOnboarding();
+  const {
+    recommendedHabits,
+    selectedHabitIds,
+    toggleHabit,
+    isGeneratingRoutine,
+    weekDays,
+    addCustomHabit,
+  } = useOnboarding();
   const [expandedPeriod, setExpandedPeriod] = useState<"morning" | "afternoon" | "evening" | null>(null);
+  const [showCustomDialog, setShowCustomDialog] = useState(false);
 
   // Group habits by period
   const habitsByPeriod = recommendedHabits.reduce(
@@ -35,9 +56,9 @@ export const RoutinePreviewStep = () => {
   const totalHabits = recommendedHabits.length;
 
   const periodLabels = {
-    morning: { emoji: "🌅", label: "Manhã", color: "from-orange-500/20 to-yellow-500/20" },
-    afternoon: { emoji: "☀️", label: "Tarde", color: "from-blue-500/20 to-cyan-500/20" },
-    evening: { emoji: "🌙", label: "Noite", color: "from-purple-500/20 to-pink-500/20" },
+    morning: { label: "Manhã", color: "from-orange-500/20 to-yellow-500/20" },
+    afternoon: { label: "Tarde", color: "from-blue-500/20 to-cyan-500/20" },
+    evening: { label: "Noite", color: "from-purple-500/20 to-pink-500/20" },
   };
 
   if (isGeneratingRoutine) {
@@ -67,7 +88,7 @@ export const RoutinePreviewStep = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-[600px] px-6 py-8">
+    <div className="flex flex-col min-h-[600px] px-6 pt-0 pb-8">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -128,7 +149,6 @@ export const RoutinePreviewStep = () => {
                 )}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{periodInfo.emoji}</span>
                   <div className="text-left">
                     <h3 className="font-bold text-lg">{periodInfo.label}</h3>
                     <p className="text-xs text-muted-foreground">
@@ -140,7 +160,7 @@ export const RoutinePreviewStep = () => {
                 <motion.div
                   animate={{ rotate: isExpanded ? 180 : 0 }}
                   transition={{ duration: 0.2 }}
-                  className="text-muted-foreground"
+                  className="text-foreground/60"
                 >
                   ▼
                 </motion.div>
@@ -169,31 +189,55 @@ export const RoutinePreviewStep = () => {
                           <button
                             onClick={() => toggleHabit(habit.id)}
                             className={cn(
-                              "w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all",
+                              "w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left",
                               "hover:scale-102 active:scale-98",
                               isSelected
                                 ? "border-primary bg-primary/5 shadow-sm"
                                 : "border-border hover:border-primary/30"
                             )}
                           >
-                            {/* Icon */}
+                            {/* Icon - Using HabitGlyph */}
                             <div
                               className={cn(
-                                "flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-xl transition-all",
-                                isSelected ? habit.color : "bg-muted"
+                                "flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all",
+                                isSelected ? "bg-primary/20" : "bg-muted"
                               )}
                             >
-                              {habit.icon}
+                              <HabitGlyph
+                                iconKey={habit.icon_key}
+                                category={habit.category}
+                                size="lg"
+                                tone={isSelected ? "lime" : "gray"}
+                              />
                             </div>
 
                             {/* Info */}
-                            <div className="flex-1 text-left">
-                              <h4 className="font-semibold">{habit.name}</h4>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold truncate">{habit.name}</h4>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
+                                <Clock className="h-3 w-3 flex-shrink-0" />
                                 <span>{habit.suggested_time}</span>
                                 {habit.duration && <span>• {habit.duration} min</span>}
                               </div>
+
+                              {/* Weekly Distribution Badges */}
+                              {habit.frequency_days && habit.frequency_days.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                  {habit.frequency_days.map((day) => (
+                                    <span
+                                      key={day}
+                                      className={cn(
+                                        "px-1.5 py-0.5 text-[10px] font-medium rounded",
+                                        isSelected
+                                          ? "bg-primary/20 text-primary"
+                                          : "bg-muted-foreground/10 text-muted-foreground"
+                                      )}
+                                    >
+                                      {DAY_LABELS[day]}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
 
                             {/* Checkbox */}
@@ -202,7 +246,7 @@ export const RoutinePreviewStep = () => {
                                 "flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
                                 isSelected
                                   ? "border-primary bg-primary text-primary-foreground"
-                                  : "border-muted-foreground"
+                                  : "border-border dark:border-muted-foreground/70"
                               )}
                             >
                               {isSelected && <span className="text-xs">✓</span>}
@@ -229,7 +273,7 @@ export const RoutinePreviewStep = () => {
         <Button
           variant="outline"
           className="w-full border-dashed border-2 hover:border-primary"
-          disabled
+          onClick={() => setShowCustomDialog(true)}
         >
           <Plus className="h-4 w-4 mr-2" />
           Adicionar Hábito Personalizado
@@ -243,8 +287,23 @@ export const RoutinePreviewStep = () => {
         transition={{ delay: 0.8, duration: 0.4 }}
         className="text-center text-xs text-muted-foreground mt-4"
       >
-        💡 Selecione pelo menos 3 hábitos para começar sua jornada
+        Selecione pelo menos 3 hábitos para começar sua jornada
       </motion.p>
+
+      {/* Custom Habit Dialog */}
+      {showCustomDialog && (
+        <CustomHabitDialog
+          isOpen={showCustomDialog}
+          onClose={() => setShowCustomDialog(false)}
+          onAdd={(habit) => {
+            addCustomHabit({
+              ...habit,
+              id: `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            });
+          }}
+          weekDays={weekDays}
+        />
+      )}
     </div>
   );
 };

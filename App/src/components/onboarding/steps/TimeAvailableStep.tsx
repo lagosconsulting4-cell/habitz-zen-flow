@@ -6,35 +6,30 @@ import { Timer } from "lucide-react";
 const TIME_AVAILABLE_OPTIONS: Array<{
   value: TimeAvailable;
   label: string;
-  emoji: string;
   description: string;
   habits: string;
 }> = [
   {
     value: "15min",
     label: "15 minutos",
-    emoji: "⚡",
     description: "Tenho pouco tempo livre",
     habits: "~3 hábitos rápidos",
   },
   {
     value: "30min",
     label: "30 minutos",
-    emoji: "⏰",
     description: "Um tempo moderado",
     habits: "~5 hábitos",
   },
   {
     value: "1h",
     label: "1 hora",
-    emoji: "⏲️",
     description: "Tenho tempo disponível",
     habits: "~7 hábitos",
   },
   {
     value: "2h+",
     label: "2+ horas",
-    emoji: "🕐",
     description: "Tenho bastante tempo",
     habits: "~10 hábitos completos",
   },
@@ -87,7 +82,6 @@ export const TimeAvailableStep = () => {
                     <p className="text-xs text-primary mt-1 font-medium">{option.habits}</p>
                   </div>
                 }
-                emoji={option.emoji}
                 selected={timeAvailable === option.value}
                 onClick={() => setTimeAvailable(option.value)}
               />
@@ -103,7 +97,7 @@ export const TimeAvailableStep = () => {
         transition={{ delay: 0.8, duration: 0.4 }}
         className="text-center text-xs text-muted-foreground mt-6"
       >
-        💡 Você sempre pode adicionar ou remover hábitos depois
+        Você sempre pode adicionar ou remover hábitos depois
       </motion.p>
     </div>
   );

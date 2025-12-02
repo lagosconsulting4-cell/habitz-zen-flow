@@ -6,25 +6,21 @@ import { Zap } from "lucide-react";
 const ENERGY_PEAK_OPTIONS: Array<{
   value: EnergyPeak;
   label: string;
-  emoji: string;
   description: string;
 }> = [
   {
     value: "morning",
     label: "Manhã",
-    emoji: "🌅",
     description: "Tenho mais energia pela manhã",
   },
   {
     value: "afternoon",
     label: "Tarde",
-    emoji: "☀️",
     description: "Rendo melhor à tarde",
   },
   {
     value: "evening",
     label: "Noite",
-    emoji: "🌙",
     description: "Sou mais produtivo à noite",
   },
 ];
@@ -71,7 +67,6 @@ export const EnergyPeakStep = () => {
                 id={option.value}
                 title={option.label}
                 description={option.description}
-                emoji={option.emoji}
                 selected={energyPeak === option.value}
                 onClick={() => setEnergyPeak(option.value)}
                 variant="compact"

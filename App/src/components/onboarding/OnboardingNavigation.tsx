@@ -8,12 +8,14 @@ interface OnboardingNavigationProps {
   className?: string;
   onNext?: () => void;
   onBack?: () => void;
+  centered?: boolean;
 }
 
 export const OnboardingNavigation = ({
   className,
   onNext,
   onBack,
+  centered = false,
 }: OnboardingNavigationProps) => {
   const {
     currentStep,
@@ -45,10 +47,10 @@ export const OnboardingNavigation = ({
   };
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex items-center gap-3", centered && "justify-center", className)}>
       {/* Back Button */}
       <AnimatePresence mode="wait">
-        {canGoBack && (
+        {canGoBack && !centered && (
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -70,14 +72,14 @@ export const OnboardingNavigation = ({
       </AnimatePresence>
 
       {/* Spacer */}
-      <div className="flex-1" />
+      {!centered && <div className="flex-1" />}
 
       {/* Next/Submit Button */}
       <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
+        initial={{ opacity: 0, y: centered ? 20 : 0, x: centered ? 0 : 20 }}
+        animate={{ opacity: 1, y: 0, x: 0 }}
         transition={{ duration: 0.2, delay: 0.1 }}
-        className="flex-1 max-w-[200px]"
+        className={centered ? "w-full max-w-[280px]" : "flex-1 max-w-[200px]"}
       >
         <Button
           size="lg"

@@ -58,19 +58,19 @@ export const SelectionCard = ({
         {/* Selection Indicator */}
         <motion.div
           className={cn(
-            "absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center",
+            "absolute top-1/2 -translate-y-1/2 right-3 w-5 h-5 rounded-full flex items-center justify-center",
             "transition-all duration-300",
             selected
               ? "bg-primary text-primary-foreground scale-100"
               : multiselect
-                ? "border-2 border-muted-foreground/30 scale-100"
+                ? "border-2 border-border dark:border-muted-foreground/50 scale-100"
                 : "scale-0"
           )}
           initial={{ scale: 0 }}
           animate={{ scale: selected ? 1 : multiselect ? 1 : 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
-          {selected && <Check className="h-4 w-4" strokeWidth={3} />}
+          {selected && <Check className="h-3 w-3" strokeWidth={3} />}
         </motion.div>
 
         {/* Content */}
@@ -153,8 +153,8 @@ export const SelectionCardGrid = ({
       className={cn(
         "grid gap-3",
         columns === 1 && "grid-cols-1",
-        columns === 2 && "grid-cols-2",
-        columns === 3 && "grid-cols-3",
+        columns === 2 && "grid-cols-1 sm:grid-cols-2",
+        columns === 3 && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
         className
       )}
     >

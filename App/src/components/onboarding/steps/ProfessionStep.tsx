@@ -6,37 +6,31 @@ import { Briefcase } from "lucide-react";
 const PROFESSION_OPTIONS: Array<{
   value: Profession;
   label: string;
-  emoji: string;
   description: string;
 }> = [
   {
     value: "clt",
     label: "CLT",
-    emoji: "💼",
     description: "Trabalho formal com horário fixo",
   },
   {
     value: "freelancer",
     label: "Autônomo",
-    emoji: "🎨",
     description: "Trabalho independente",
   },
   {
     value: "entrepreneur",
     label: "Empresário",
-    emoji: "🚀",
     description: "Tenho meu próprio negócio",
   },
   {
     value: "student",
     label: "Estudante",
-    emoji: "📚",
     description: "Foco nos estudos",
   },
   {
     value: "retired",
     label: "Aposentado",
-    emoji: "🌴",
     description: "Tempo livre para mim",
   },
 ];
@@ -83,7 +77,6 @@ export const ProfessionStep = () => {
                 id={option.value}
                 title={option.label}
                 description={option.description}
-                emoji={option.emoji}
                 selected={profession === option.value}
                 onClick={() => setProfession(option.value)}
                 variant="compact"

@@ -126,40 +126,40 @@ export const TIME_QUANTITY: Record<TimeAvailable, { min: number; max: number }> 
 // LAYER 4: WORK SCHEDULE → PERIODS & TIME SLOTS
 // ============================================================================
 
-export interface TimeSlots {
-  morning_start: string;
-  morning_end: string;
-  evening_start: string;
-  evening_end: string;
+export interface PeriodSlot {
+  start: string;
+  end: string;
 }
 
-export const WORK_SCHEDULE_SLOTS: Record<WorkSchedule, TimeSlots> = {
+export interface WorkScheduleSlots {
+  morning?: PeriodSlot;
+  afternoon?: PeriodSlot;
+  evening?: PeriodSlot;
+}
+
+export const WORK_SCHEDULE_SLOTS: Record<WorkSchedule, WorkScheduleSlots> = {
   morning: {
-    // 6-14h
-    morning_start: "05:00",
-    morning_end: "06:00",
-    evening_start: "14:30",
-    evening_end: "23:00",
+    // Trabalha 6-14h
+    morning: { start: "05:00", end: "06:00" },
+    afternoon: { start: "14:30", end: "17:00" },
+    evening: { start: "19:00", end: "23:00" },
   },
   commercial: {
-    // 8-18h
-    morning_start: "06:00",
-    morning_end: "07:30",
-    evening_start: "19:00",
-    evening_end: "23:00",
+    // Trabalha 8-18h
+    morning: { start: "06:00", end: "07:30" },
+    afternoon: { start: "12:00", end: "13:00" },
+    evening: { start: "19:00", end: "23:00" },
   },
   evening: {
-    // 14-22h
-    morning_start: "06:00",
-    morning_end: "13:00",
-    evening_start: "22:30",
-    evening_end: "23:59",
+    // Trabalha 14-22h
+    morning: { start: "06:00", end: "13:00" },
+    afternoon: { start: "13:00", end: "14:00" },
+    evening: { start: "22:30", end: "23:59" },
   },
   flexible: {
-    morning_start: "06:00",
-    morning_end: "12:00",
-    evening_start: "18:00",
-    evening_end: "23:00",
+    morning: { start: "06:00", end: "09:00" },
+    afternoon: { start: "12:00", end: "15:00" },
+    evening: { start: "18:00", end: "23:00" },
   },
 };
 
@@ -172,6 +172,7 @@ export interface HabitTemplate {
   name: string;
   category: string;
   icon: string;
+  icon_key: string; // HabitGlyph icon key
   color: string;
   preferredPeriod: "morning" | "afternoon" | "evening" | "any";
   defaultDuration?: number; // in minutes
@@ -189,6 +190,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Acordar Cedo",
     category: "productivity",
     icon: "🌅",
+    icon_key: "sunrise",
     color: "bg-orange-500",
     preferredPeriod: "morning",
     defaultGoalValue: 1,
@@ -200,6 +202,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Planejar o Dia",
     category: "productivity",
     icon: "📋",
+    icon_key: "plan",
     color: "bg-blue-500",
     preferredPeriod: "morning",
     defaultDuration: 10,
@@ -212,6 +215,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Trabalho Focado",
     category: "productivity",
     icon: "🎯",
+    icon_key: "deep_work",
     color: "bg-indigo-500",
     preferredPeriod: "any",
     defaultDuration: 90,
@@ -224,6 +228,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Sessão Pomodoro",
     category: "productivity",
     icon: "🍅",
+    icon_key: "clock",
     color: "bg-red-500",
     preferredPeriod: "any",
     defaultDuration: 25,
@@ -236,6 +241,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Inbox Zero",
     category: "productivity",
     icon: "📧",
+    icon_key: "checklist",
     color: "bg-cyan-500",
     preferredPeriod: "morning",
     defaultDuration: 15,
@@ -248,6 +254,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Revisão Semanal",
     category: "productivity",
     icon: "📊",
+    icon_key: "review",
     color: "bg-purple-500",
     preferredPeriod: "evening",
     defaultDuration: 30,
@@ -260,6 +267,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Foco Único",
     category: "productivity",
     icon: "🎯",
+    icon_key: "focus",
     color: "bg-teal-500",
     preferredPeriod: "any",
     defaultGoalValue: 1,
@@ -273,6 +281,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Exercício Físico",
     category: "health",
     icon: "💪",
+    icon_key: "active",
     color: "bg-green-500",
     preferredPeriod: "morning",
     defaultDuration: 30,
@@ -285,6 +294,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Beber Água",
     category: "health",
     icon: "💧",
+    icon_key: "water",
     color: "bg-blue-400",
     preferredPeriod: "any",
     defaultGoalValue: 2000,
@@ -296,6 +306,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Refeição Saudável",
     category: "health",
     icon: "🥗",
+    icon_key: "meal",
     color: "bg-green-400",
     preferredPeriod: "any",
     defaultGoalValue: 3,
@@ -307,6 +318,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Dormir Cedo",
     category: "health",
     icon: "😴",
+    icon_key: "sleep",
     color: "bg-indigo-400",
     preferredPeriod: "evening",
     defaultGoalValue: 1,
@@ -318,6 +330,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Alongamento",
     category: "health",
     icon: "🧘",
+    icon_key: "stretch",
     color: "bg-pink-500",
     preferredPeriod: "morning",
     defaultDuration: 10,
@@ -330,6 +343,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Caminhada",
     category: "health",
     icon: "🚶",
+    icon_key: "stand_hours",
     color: "bg-yellow-500",
     preferredPeriod: "any",
     defaultDuration: 20,
@@ -342,6 +356,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Tomar Vitaminas",
     category: "health",
     icon: "💊",
+    icon_key: "vitamins",
     color: "bg-orange-400",
     preferredPeriod: "morning",
     defaultGoalValue: 1,
@@ -355,6 +370,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Meditação",
     category: "mental",
     icon: "🧘",
+    icon_key: "meditate",
     color: "bg-purple-500",
     preferredPeriod: "morning",
     defaultDuration: 10,
@@ -367,6 +383,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Diário",
     category: "mental",
     icon: "📔",
+    icon_key: "journal",
     color: "bg-yellow-600",
     preferredPeriod: "evening",
     defaultDuration: 10,
@@ -379,6 +396,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Gratidão",
     category: "mental",
     icon: "🙏",
+    icon_key: "gratitude",
     color: "bg-pink-400",
     preferredPeriod: "evening",
     defaultDuration: 5,
@@ -391,6 +409,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Respiração",
     category: "mental",
     icon: "😮‍💨",
+    icon_key: "pause",
     color: "bg-cyan-400",
     preferredPeriod: "any",
     defaultDuration: 5,
@@ -403,6 +422,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Detox Digital",
     category: "mental",
     icon: "📵",
+    icon_key: "detox",
     color: "bg-gray-500",
     preferredPeriod: "evening",
     defaultDuration: 60,
@@ -415,6 +435,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Leitura",
     category: "mental",
     icon: "📖",
+    icon_key: "book",
     color: "bg-amber-500",
     preferredPeriod: "evening",
     defaultDuration: 20,
@@ -427,6 +448,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Mindfulness",
     category: "mental",
     icon: "🌸",
+    icon_key: "heart",
     color: "bg-rose-400",
     preferredPeriod: "any",
     defaultDuration: 5,
@@ -441,6 +463,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Arrumar a Cama",
     category: "routine",
     icon: "🛏️",
+    icon_key: "make_bed",
     color: "bg-blue-300",
     preferredPeriod: "morning",
     defaultDuration: 2,
@@ -453,6 +476,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Organizar Espaço",
     category: "routine",
     icon: "🧹",
+    icon_key: "organize",
     color: "bg-teal-400",
     preferredPeriod: "evening",
     defaultDuration: 15,
@@ -465,6 +489,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Preparar Refeições",
     category: "routine",
     icon: "🍱",
+    icon_key: "meal",
     color: "bg-green-300",
     preferredPeriod: "evening",
     defaultDuration: 30,
@@ -477,6 +502,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Planejar Semana",
     category: "routine",
     icon: "📅",
+    icon_key: "plan",
     color: "bg-indigo-300",
     preferredPeriod: "evening",
     defaultDuration: 20,
@@ -489,6 +515,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Organizar Mesa",
     category: "routine",
     icon: "🗂️",
+    icon_key: "organize",
     color: "bg-slate-400",
     preferredPeriod: "evening",
     defaultDuration: 10,
@@ -501,6 +528,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Rotina Noturna",
     category: "routine",
     icon: "🌙",
+    icon_key: "sleep",
     color: "bg-violet-500",
     preferredPeriod: "evening",
     defaultDuration: 30,
@@ -513,6 +541,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Rotina Matinal",
     category: "routine",
     icon: "☀️",
+    icon_key: "sunrise",
     color: "bg-amber-400",
     preferredPeriod: "morning",
     defaultDuration: 30,
@@ -527,6 +556,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Não Apertar Soneca",
     category: "avoid",
     icon: "⏰",
+    icon_key: "alarm",
     color: "bg-red-400",
     preferredPeriod: "morning",
     defaultGoalValue: 1,
@@ -538,6 +568,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Evitar Redes Sociais",
     category: "avoid",
     icon: "📱",
+    icon_key: "social_media",
     color: "bg-orange-600",
     preferredPeriod: "any",
     defaultDuration: 120,
@@ -550,6 +581,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Evitar Junk Food",
     category: "avoid",
     icon: "🍔",
+    icon_key: "no_fast_food",
     color: "bg-red-600",
     preferredPeriod: "any",
     defaultGoalValue: 1,
@@ -561,6 +593,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Não Procrastinar",
     category: "avoid",
     icon: "⚡",
+    icon_key: "no_procrastination",
     color: "bg-yellow-500",
     preferredPeriod: "any",
     defaultGoalValue: 1,
@@ -572,6 +605,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Celular Fora do Quarto",
     category: "avoid",
     icon: "🚫",
+    icon_key: "no_screens",
     color: "bg-purple-600",
     preferredPeriod: "evening",
     defaultGoalValue: 1,
@@ -583,6 +617,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Evitar Álcool",
     category: "avoid",
     icon: "🍷",
+    icon_key: "no_alcohol",
     color: "bg-red-700",
     preferredPeriod: "any",
     defaultGoalValue: 1,
@@ -594,6 +629,7 @@ export const HABIT_TEMPLATES: Record<string, HabitTemplate> = {
     name: "Limitar Tela",
     category: "avoid",
     icon: "📺",
+    icon_key: "no_screens",
     color: "bg-gray-600",
     preferredPeriod: "evening",
     defaultDuration: 60,
@@ -638,6 +674,6 @@ export const getQuantityForTime = (time: TimeAvailable): { min: number; max: num
 /**
  * Get time slots for work schedule
  */
-export const getTimeSlotsForSchedule = (schedule: WorkSchedule): TimeSlots => {
+export const getTimeSlotsForSchedule = (schedule: WorkSchedule): WorkScheduleSlots => {
   return WORK_SCHEDULE_SLOTS[schedule];
 };

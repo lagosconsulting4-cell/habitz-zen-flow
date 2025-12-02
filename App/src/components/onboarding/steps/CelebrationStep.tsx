@@ -55,10 +55,10 @@ export const CelebrationStep = () => {
     { morning: [], afternoon: [], evening: [] } as Record<string, typeof selectedHabits>
   );
 
-  const periodEmojis = {
-    morning: "🌅",
-    afternoon: "☀️",
-    evening: "🌙",
+  const periodLabels = {
+    morning: "Manhã",
+    afternoon: "Tarde",
+    evening: "Noite",
   };
 
   return (
@@ -114,7 +114,7 @@ export const CelebrationStep = () => {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-green-500 to-blue-500 bg-clip-text text-transparent"
         >
-          Parabéns! 🎉
+          Parabéns!
         </motion.h1>
 
         <motion.p
@@ -179,14 +179,9 @@ export const CelebrationStep = () => {
 
               return (
                 <div key={period} className="flex items-start gap-3">
-                  <span className="text-2xl flex-shrink-0">
-                    {periodEmojis[period as keyof typeof periodEmojis]}
-                  </span>
                   <div className="flex-1">
-                    <div className="font-medium text-sm text-muted-foreground mb-1 capitalize">
-                      {period === "morning" && "Manhã"}
-                      {period === "afternoon" && "Tarde"}
-                      {period === "evening" && "Noite"}
+                    <div className="font-medium text-sm text-muted-foreground mb-1">
+                      {periodLabels[period as keyof typeof periodLabels]}
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {habits.map((habit) => (
@@ -240,7 +235,7 @@ export const CelebrationStep = () => {
           transition={{ delay: 1.4, duration: 0.5 }}
           className="text-sm text-muted-foreground mt-8 italic"
         >
-          "Uma jornada de mil milhas começa com um único passo." 💪
+Uma jornada de mil milhas começa com um único passo.
         </motion.p>
       </div>
     </div>

@@ -330,6 +330,7 @@ function createRecommendedHabit(
     name: template.name,
     category: template.category,
     icon: template.icon,
+    icon_key: template.icon_key,
     color: template.color,
     period,
     suggested_time: suggestedTime,

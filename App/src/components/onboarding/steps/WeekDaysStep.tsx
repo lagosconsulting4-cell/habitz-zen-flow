@@ -7,28 +7,24 @@ import { cn } from "@/lib/utils";
 const PRESET_OPTIONS: Array<{
   value: WeekDaysPreset;
   label: string;
-  emoji: string;
   description: string;
   days: number[];
 }> = [
   {
     value: "weekdays",
     label: "Segunda a Sexta",
-    emoji: "💼",
     description: "Dias úteis apenas",
     days: [1, 2, 3, 4, 5],
   },
   {
     value: "everyday",
     label: "Todos os Dias",
-    emoji: "🌟",
     description: "Construir consistência diária",
     days: [0, 1, 2, 3, 4, 5, 6],
   },
   {
     value: "custom",
     label: "Personalizado",
-    emoji: "⚙️",
     description: "Escolher dias específicos",
     days: [],
   },
@@ -103,7 +99,6 @@ export const WeekDaysStep = () => {
                 id={option.value}
                 title={option.label}
                 description={option.description}
-                emoji={option.emoji}
                 selected={weekDaysPreset === option.value}
                 onClick={() => handlePresetChange(option.value)}
                 variant="compact"
@@ -176,7 +171,7 @@ export const WeekDaysStep = () => {
         transition={{ delay: 0.8, duration: 0.4 }}
         className="text-center text-xs text-muted-foreground mt-6"
       >
-        💡 Você pode ajustar dias específicos para cada hábito depois
+        Você pode ajustar dias específicos para cada hábito depois
       </motion.p>
     </div>
   );

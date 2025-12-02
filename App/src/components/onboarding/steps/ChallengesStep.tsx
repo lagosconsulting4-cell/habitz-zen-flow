@@ -7,37 +7,31 @@ const CHALLENGE_OPTIONS = [
   {
     id: "procrastination",
     label: "Procrastinação",
-    emoji: "😴",
     description: "Deixo tudo para depois",
   },
   {
     id: "focus",
     label: "Falta de Foco",
-    emoji: "🎯",
     description: "Me distraio facilmente",
   },
   {
     id: "forgetfulness",
     label: "Esquecimento",
-    emoji: "🤔",
     description: "Esqueço das tarefas",
   },
   {
     id: "tiredness",
     label: "Cansaço",
-    emoji: "😫",
     description: "Sempre me sinto cansado",
   },
   {
     id: "anxiety",
     label: "Ansiedade",
-    emoji: "😰",
     description: "Fico ansioso com frequência",
   },
   {
     id: "motivation",
     label: "Motivação",
-    emoji: "🔥",
     description: "Perco a motivação rápido",
   },
 ];
@@ -84,7 +78,6 @@ export const ChallengesStep = () => {
                 id={option.id}
                 title={option.label}
                 description={option.description}
-                emoji={option.emoji}
                 selected={challenges.includes(option.id)}
                 onClick={() => toggleChallenge(option.id)}
                 variant="compact"
@@ -104,10 +97,10 @@ export const ChallengesStep = () => {
       >
         {challenges.length > 0 ? (
           <>
-            ✓ {challenges.length} {challenges.length === 1 ? "desafio selecionado" : "desafios selecionados"}
+            {challenges.length} {challenges.length === 1 ? "desafio selecionado" : "desafios selecionados"}
           </>
         ) : (
-          "💡 Hábitos de suporte serão sugeridos para ajudar com seus desafios"
+          "Hábitos de suporte serão sugeridos para ajudar com seus desafios"
         )}
       </motion.p>
     </div>
