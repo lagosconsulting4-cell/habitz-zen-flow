@@ -54,7 +54,7 @@ export function InstallPrompt() {
           setSnap(0.2);
         }}
         className={cn(
-          "fixed bottom-24 right-4 z-50",
+          "fixed bottom-32 right-4 z-50",
           "w-16 h-16 rounded-full",
           "bg-gradient-to-br from-primary via-primary to-primary/80",
           "text-primary-foreground",
