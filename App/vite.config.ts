@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
   return {
     base,
     server: {
-      host: "::",
+      host: "localhost",
       port: 8080,
     },
     build: {
@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => {
             // React core
             "react-vendor": ["react", "react-dom", "react-router-dom"],
             // UI/Animation libraries
-            "ui-vendor": ["framer-motion", "motion/react", "class-variance-authority", "clsx", "tailwind-merge"],
+            "ui-vendor": ["motion/react", "class-variance-authority", "clsx", "tailwind-merge"],
             // Radix UI components
             "radix-vendor": [
               "@radix-ui/react-dialog",
@@ -44,6 +44,10 @@ export default defineConfig(({ mode }) => {
             "chart-vendor": ["recharts"],
             // Data/State management
             "data-vendor": ["@tanstack/react-query", "@supabase/supabase-js", "idb"],
+            // Particle effects
+            "particles-vendor": ["@tsparticles/react", "@tsparticles/engine", "@tsparticles/slim"],
+            // Icons
+            "icons-vendor": ["lucide-react", "@tabler/icons-react"],
           },
         },
       },
