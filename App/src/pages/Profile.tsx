@@ -13,7 +13,6 @@ import {
   Loader2,
   Sun,
   Moon,
-  Monitor,
   Volume2,
   VolumeX,
   Sparkles,
@@ -27,14 +26,12 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { sounds } from "@/lib/sounds";
 import { usePremium } from "@/hooks/usePremium";
 import { useProfileInsights } from "@/hooks/useProfileInsights";
 import { useAppPreferences } from "@/hooks/useAppPreferences";
 import { useTheme } from "@/hooks/useTheme";
-import { NotificationToggle } from "@/components/pwa/NotificationPermissionDialog";
 import { toast } from "sonner";
 import { bonusSections } from "@/pages/Bonus";
 import { bonusFlags } from "@/config/bonusFlags";
@@ -336,10 +333,8 @@ const Profile = () => {
                 <div className="flex items-center gap-3">
                   {theme === "dark" ? (
                     <Moon className="w-5 h-5 text-primary" />
-                  ) : theme === "light" ? (
-                    <Sun className="w-5 h-5 text-primary" />
                   ) : (
-                    <Monitor className="w-5 h-5 text-primary" />
+                    <Sun className="w-5 h-5 text-primary" />
                   )}
                   <div>
                     <p className="font-semibold text-foreground">Tema</p>
@@ -366,15 +361,6 @@ const Profile = () => {
                     title="Tema escuro"
                   >
                     <Moon className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className={`h-8 w-8 p-0 ${theme === "system" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
-                    onClick={() => setTheme("system")}
-                    title="Tema do sistema"
-                  >
-                    <Monitor className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
@@ -445,26 +431,6 @@ const Profile = () => {
                     onCheckedChange={(checked) => setPreferences({ soundEnabled: checked })}
                   />
                 </div>
-
-                {/* Volume Slider */}
-                {prefs.soundEnabled && (
-                  <div className="pl-8 pr-2">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-muted-foreground w-8">Vol</span>
-                      <Slider
-                        value={[prefs.soundVolume * 100]}
-                        onValueChange={([value]) => setPreferences({ soundVolume: value / 100 })}
-                        onValueCommit={() => sounds.complete()}
-                        max={100}
-                        step={10}
-                        className="flex-1"
-                      />
-                      <span className="text-xs text-muted-foreground w-8 text-right">
-                        {Math.round(prefs.soundVolume * 100)}%
-                      </span>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Haptic Feedback */}
@@ -531,7 +497,10 @@ const Profile = () => {
                     </p>
                   </div>
                 </div>
-                <NotificationToggle />
+                <Switch
+                  checked={prefs.notificationsEnabled}
+                  onCheckedChange={(checked) => setPreferences({ notificationsEnabled: checked })}
+                />
               </div>
             </div>
           </Card>
