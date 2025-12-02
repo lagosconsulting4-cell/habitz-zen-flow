@@ -55,11 +55,13 @@ const Auth = () => {
         const safePath = preferredPath && !["/auth", "/pricing", "/onboarding", "/onboarding-new"].includes(preferredPath) ? preferredPath : "/dashboard";
         navigate(safePath, { replace: true });
       } else {
-        navigate("/pricing", { replace: true });
+        // Redirect to external /bora page (outside /app basename)
+        window.location.href = "/bora";
       }
     } catch (err) {
       console.error("Failed to resolve premium status", err);
-      navigate("/pricing", { replace: true });
+      // Redirect to external /bora page (outside /app basename)
+      window.location.href = "/bora";
     }
   }, [navigate, location.state]);
 

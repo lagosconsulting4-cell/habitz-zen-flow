@@ -63,7 +63,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   if (!isPremium) {
-    return <Navigate to="/pricing" replace state={{ from: location }} />;
+    // Redirect to external /bora page (outside /app basename)
+    window.location.href = "/bora";
+    return null;
   }
 
   return <>{children}</>;
