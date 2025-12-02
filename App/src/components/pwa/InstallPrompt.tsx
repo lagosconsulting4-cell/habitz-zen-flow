@@ -18,12 +18,24 @@ export function InstallPrompt() {
   const [snap, setSnap] = useState<number | string | null>(0.2);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Logs de debug
+  console.log("[InstallPrompt] Valores recebidos:", { isInstalled, isInstallable, isIOS });
+
   // ÚNICA condição para esconder: app instalado
-  if (isInstalled) return null;
+  if (isInstalled) {
+    console.log("[InstallPrompt] Retornando null: app instalado (isInstalled=true)");
+    return null;
+  }
 
   // Mostrar para iOS (sempre) ou Android (quando installable)
   const shouldShow = isIOS || isInstallable;
-  if (!shouldShow) return null;
+  console.log("[InstallPrompt] shouldShow =", shouldShow, "(isIOS:", isIOS, "|| isInstallable:", isInstallable, ")");
+  if (!shouldShow) {
+    console.log("[InstallPrompt] Retornando null: shouldShow=false");
+    return null;
+  }
+
+  console.log("[InstallPrompt] ✅ RENDERIZANDO componente!");
 
   const isExpanded = snap === 0.6;
 

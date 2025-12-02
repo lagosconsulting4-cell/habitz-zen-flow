@@ -33,12 +33,16 @@ export function usePWA(): UsePWAReturn {
   // Detectar plataforma
   const [isIOS] = useState(() => {
     if (typeof window === "undefined") return false;
-    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const detected = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    console.log("[PWA] iOS detectado:", detected, "User Agent:", navigator.userAgent);
+    return detected;
   });
 
   const [isAndroid] = useState(() => {
     if (typeof window === "undefined") return false;
-    return /Android/.test(navigator.userAgent);
+    const detected = /Android/.test(navigator.userAgent);
+    console.log("[PWA] Android detectado:", detected, "User Agent:", navigator.userAgent);
+    return detected;
   });
 
   // Função para detectar se está instalado (standalone)
@@ -96,13 +100,13 @@ export function usePWA(): UsePWAReturn {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e as BeforeInstallPromptEvent);
-      console.log("[PWA] App disponível para instalação");
+      console.log("[PWA] App disponível para instalação (beforeinstallprompt disparado)");
     };
 
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setInstallPrompt(null);
-      console.log("[PWA] App instalado com sucesso");
+      console.log("[PWA] App instalado com sucesso (appinstalled disparado)");
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -209,6 +213,20 @@ export function usePWA(): UsePWAReturn {
       setNeedsUpdate(false);
     }
   }, [updateSW]);
+
+  // Log consolidado do estado PWA (executado em cada render)
+  const isInstallableValue = !!installPrompt;
+  useEffect(() => {
+    console.log("[PWA] Estado Atual:", {
+      isIOS,
+      isAndroid,
+      isStandalone,
+      isInstalled,
+      isInstallable: isInstallableValue,
+      shouldShowInstallPrompt: isIOS || isInstallableValue,
+      swRegistration: !!swRegistration,
+    });
+  }, [isIOS, isAndroid, isStandalone, isInstalled, isInstallableValue, swRegistration]);
 
   return {
     isInstalled,

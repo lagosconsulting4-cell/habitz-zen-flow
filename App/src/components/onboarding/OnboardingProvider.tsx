@@ -348,13 +348,27 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         return "none";
       };
 
+      // Map template categories to valid database enum values
+      const mapCategory = (category: string): string => {
+        const categoryMap: Record<string, string> = {
+          // Already valid in database
+          productivity: "productivity",
+          avoid: "avoid",
+          // Mappings needed for template categories
+          health: "corpo",
+          mental: "mente",
+          routine: "time_routine",
+        };
+        return categoryMap[category] || "outro";
+      };
+
       // Create habits in database with all available data
       for (const habit of selectedHabits) {
         const { error: habitError } = await supabase.from("habits").insert({
           // Required fields
           user_id: user.id,
           name: habit.name,
-          category: habit.category,
+          category: mapCategory(habit.category),
           period: habit.period,
 
           // Visual fields
