@@ -41,8 +41,8 @@ export function usePWA(): UsePWAReturn {
     return /Android/.test(navigator.userAgent);
   });
 
-  // Detectar se está instalado (standalone)
-  const [isStandalone] = useState(() => {
+  // Função para detectar se está instalado (standalone)
+  const checkIsStandalone = useCallback(() => {
     if (typeof window === "undefined") return false;
     return (
       window.matchMedia("(display-mode: standalone)").matches ||
@@ -50,12 +50,14 @@ export function usePWA(): UsePWAReturn {
         true ||
       document.referrer.includes("android-app://")
     );
-  });
+  }, []);
+
+  const [isStandalone] = useState(() => checkIsStandalone());
 
   // Estado do prompt de instalação
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(isStandalone);
+  const [isInstalled, setIsInstalled] = useState(() => checkIsStandalone());
 
   // Estado de atualização
   const [needsUpdate, setNeedsUpdate] = useState(false);
@@ -115,6 +117,23 @@ export function usePWA(): UsePWAReturn {
     };
   }, []);
 
+  // Detectar quando o app foi desinstalado e resetar o prompt
+  useEffect(() => {
+    const checkAndResetPrompt = () => {
+      const isInstalledNow = checkIsStandalone();
+      // Se não está mais em standalone, limpar o status de instalado
+      // para que o beforeinstallprompt possa ser disparado novamente
+      if (!isInstalledNow && installPrompt === null) {
+        // Força re-emissão do beforeinstallprompt trigger
+        console.log("[PWA] App foi desinstalado, aguardando novo prompt");
+      }
+    };
+
+    // Verificar a cada 2 segundos se o estado de standalone mudou
+    const interval = setInterval(checkAndResetPrompt, 2000);
+    return () => clearInterval(interval);
+  }, [checkIsStandalone, installPrompt]);
+
   // Detectar mudança de display-mode
   useEffect(() => {
     const mediaQuery = window.matchMedia("(display-mode: standalone)");
@@ -132,7 +151,7 @@ export function usePWA(): UsePWAReturn {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         // Quando a aba fica visível, re-verificar se o app ainda está instalado
-        const isStandaloneNow = window.matchMedia("(display-mode: standalone)").matches;
+        const isStandaloneNow = checkIsStandalone();
         setIsInstalled(isStandaloneNow);
         console.log("[PWA] Re-verificado status de instalação:", isStandaloneNow);
       }
@@ -140,7 +159,23 @@ export function usePWA(): UsePWAReturn {
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
+  }, [checkIsStandalone]);
+
+  // Verificar periodicamente se o app foi desinstalado
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const isStandaloneNow = checkIsStandalone();
+      setIsInstalled((prev) => {
+        if (prev !== isStandaloneNow) {
+          console.log("[PWA] Status de instalação mudou para:", isStandaloneNow);
+          return isStandaloneNow;
+        }
+        return prev;
+      });
+    }, 5000); // Verificar a cada 5 segundos
+
+    return () => clearInterval(interval);
+  }, [checkIsStandalone]);
 
   // Função para mostrar prompt de instalação
   const promptInstall = useCallback(async (): Promise<boolean> => {
