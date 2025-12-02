@@ -127,6 +127,21 @@ export function usePWA(): UsePWAReturn {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
+  // Re-detectar instalação quando usuário volta à aba
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        // Quando a aba fica visível, re-verificar se o app ainda está instalado
+        const isStandaloneNow = window.matchMedia("(display-mode: standalone)").matches;
+        setIsInstalled(isStandaloneNow);
+        console.log("[PWA] Re-verificado status de instalação:", isStandaloneNow);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
   // Função para mostrar prompt de instalação
   const promptInstall = useCallback(async (): Promise<boolean> => {
     if (!installPrompt) {
