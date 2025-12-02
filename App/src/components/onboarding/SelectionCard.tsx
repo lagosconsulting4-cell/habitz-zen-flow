@@ -58,19 +58,35 @@ export const SelectionCard = ({
         {/* Selection Indicator */}
         <motion.div
           className={cn(
-            "absolute top-1/2 -translate-y-1/2 right-3 w-5 h-5 rounded-full flex items-center justify-center",
-            "transition-all duration-300",
+            "absolute inset-y-0 right-3 flex items-center justify-center",
             selected
-              ? "bg-primary text-primary-foreground scale-100"
-              : multiselect
-                ? "border-2 border-border dark:border-muted-foreground/50 scale-100"
-                : "scale-0"
+              ? "text-primary-foreground"
+              : ""
           )}
-          initial={{ scale: 0 }}
-          animate={{ scale: selected ? 1 : multiselect ? 1 : 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{
+            scale: selected ? 1 : multiselect ? 1 : 0,
+            opacity: selected ? 1 : multiselect ? 1 : 0
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 200,
+            damping: 15,
+            duration: 0.4
+          }}
         >
-          {selected && <Check className="h-3 w-3" strokeWidth={3} />}
+          <div
+            className={cn(
+              "w-5 h-5 rounded-full flex items-center justify-center",
+              selected
+                ? "bg-primary text-primary-foreground"
+                : multiselect
+                  ? "border-2 border-border dark:border-muted-foreground/50"
+                  : ""
+            )}
+          >
+            {selected && <Check className="h-3 w-3" strokeWidth={3} />}
+          </div>
         </motion.div>
 
         {/* Content */}

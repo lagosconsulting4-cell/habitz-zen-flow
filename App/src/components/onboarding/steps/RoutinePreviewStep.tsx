@@ -1,28 +1,18 @@
 import { motion, AnimatePresence } from "motion/react";
 import { useOnboarding } from "../OnboardingProvider";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Plus, Clock } from "lucide-react";
+import { Sparkles, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { HabitGlyph } from "@/components/icons/HabitGlyph";
 import { CustomHabitDialog } from "../CustomHabitDialog";
+import { DaySelector, DAY_LABELS } from "../DaySelector";
 
 interface HabitsByPeriod {
   morning: typeof habits;
   afternoon: typeof habits;
   evening: typeof habits;
 }
-
-// Day labels for weekly distribution
-const DAY_LABELS: Record<number, string> = {
-  0: "Dom",
-  1: "Seg",
-  2: "Ter",
-  3: "Qua",
-  4: "Qui",
-  5: "Sex",
-  6: "Sáb",
-};
 
 export const RoutinePreviewStep = () => {
   const {
@@ -35,9 +25,28 @@ export const RoutinePreviewStep = () => {
   } = useOnboarding();
   const [expandedPeriod, setExpandedPeriod] = useState<"morning" | "afternoon" | "evening" | null>(null);
   const [showCustomDialog, setShowCustomDialog] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<number>(1); // Segunda como default
 
-  // Group habits by period
-  const habitsByPeriod = recommendedHabits.reduce(
+  // Calcular quantos hábitos tem em cada dia
+  const habitCountByDay = useMemo(() => {
+    const counts: Record<number, number> = {};
+    recommendedHabits.forEach((habit) => {
+      habit.frequency_days?.forEach((day) => {
+        counts[day] = (counts[day] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [recommendedHabits]);
+
+  // Filtrar hábitos pelo dia selecionado
+  const habitsForSelectedDay = useMemo(() => {
+    return recommendedHabits.filter(
+      (habit) => habit.frequency_days?.includes(selectedDay)
+    );
+  }, [recommendedHabits, selectedDay]);
+
+  // Group habits by period (filtered by selected day)
+  const habitsByPeriod = habitsForSelectedDay.reduce(
     (acc, habit) => {
       acc[habit.period].push(habit);
       return acc;
@@ -116,6 +125,23 @@ export const RoutinePreviewStep = () => {
         </div>
       </motion.div>
 
+      {/* Day Selector */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.3 }}
+        className="mb-4"
+      >
+        <DaySelector
+          selectedDay={selectedDay}
+          onDayChange={setSelectedDay}
+          habitCountByDay={habitCountByDay}
+        />
+        <p className="text-center text-xs text-muted-foreground mt-2">
+          {habitsForSelectedDay.length} hábitos para {DAY_LABELS[selectedDay]}
+        </p>
+      </motion.div>
+
       {/* Timeline by Period */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -189,8 +215,8 @@ export const RoutinePreviewStep = () => {
                           <button
                             onClick={() => toggleHabit(habit.id)}
                             className={cn(
-                              "w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left",
-                              "hover:scale-102 active:scale-98",
+                              "w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left",
+                              "hover:scale-[1.02] active:scale-[0.98]",
                               isSelected
                                 ? "border-primary bg-primary/5 shadow-sm"
                                 : "border-border hover:border-primary/30"
@@ -211,33 +237,9 @@ export const RoutinePreviewStep = () => {
                               />
                             </div>
 
-                            {/* Info */}
+                            {/* Name Only - Expanded */}
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold truncate">{habit.name}</h4>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3 flex-shrink-0" />
-                                <span>{habit.suggested_time}</span>
-                                {habit.duration && <span>• {habit.duration} min</span>}
-                              </div>
-
-                              {/* Weekly Distribution Badges */}
-                              {habit.frequency_days && habit.frequency_days.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1.5">
-                                  {habit.frequency_days.map((day) => (
-                                    <span
-                                      key={day}
-                                      className={cn(
-                                        "px-1.5 py-0.5 text-[10px] font-medium rounded",
-                                        isSelected
-                                          ? "bg-primary/20 text-primary"
-                                          : "bg-muted-foreground/10 text-muted-foreground"
-                                      )}
-                                    >
-                                      {DAY_LABELS[day]}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
+                              <h4 className="font-semibold text-base">{habit.name}</h4>
                             </div>
 
                             {/* Checkbox */}

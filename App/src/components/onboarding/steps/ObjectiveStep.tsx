@@ -1,49 +1,49 @@
 import { motion } from "motion/react";
 import { useOnboarding, type Objective } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
-import { Target, Heart, Brain, Calendar, Ban } from "lucide-react";
+import { HabitGlyph } from "@/components/icons/HabitGlyph";
 
 const OBJECTIVE_OPTIONS: Array<{
   value: Objective;
   label: string;
   description: string;
-  icon: typeof Target;
-  color: string;
+  iconKey: string;
+  category?: string;
 }> = [
   {
     value: "productivity",
     label: "Produtividade",
     description: "Otimizar tempo e realizar mais",
-    icon: Target,
-    color: "text-blue-500",
+    iconKey: "plan",
+    category: "productivity",
   },
   {
     value: "health",
     label: "Saúde Física",
     description: "Cuidar do corpo e energia",
-    icon: Heart,
-    color: "text-red-500",
+    iconKey: "heart",
+    category: "health",
   },
   {
     value: "mental",
     label: "Bem-estar Mental",
     description: "Equilibrar mente e emoções",
-    icon: Brain,
-    color: "text-purple-500",
+    iconKey: "meditate",
+    category: "mental",
   },
   {
     value: "routine",
     label: "Organização",
     description: "Estruturar rotina diária",
-    icon: Calendar,
-    color: "text-green-500",
+    iconKey: "clock",
+    category: "time_routine",
   },
   {
     value: "avoid",
     label: "Eliminar Vícios",
     description: "Quebrar maus hábitos",
-    icon: Ban,
-    color: "text-orange-500",
+    iconKey: "ban",
+    category: "avoid",
   },
 ];
 
@@ -60,7 +60,7 @@ export const ObjectiveStep = () => {
         className="text-center mb-8"
       >
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-          <Target className="h-8 w-8 text-primary" />
+          <HabitGlyph iconKey="target" size="lg" tone="lime" />
         </div>
 
         <h2 className="text-3xl font-bold mb-3">Qual seu principal objetivo?</h2>
@@ -79,8 +79,6 @@ export const ObjectiveStep = () => {
       >
         <SelectionCardGrid columns={2} className="max-w-2xl w-full">
           {OBJECTIVE_OPTIONS.map((option, index) => {
-            const Icon = option.icon;
-
             return (
               <motion.div
                 key={option.value}
@@ -92,7 +90,14 @@ export const ObjectiveStep = () => {
                   id={option.value}
                   title={option.label}
                   description={option.description}
-                  icon={<Icon className={`h-6 w-6 ${option.color}`} />}
+                  icon={
+                    <HabitGlyph
+                      iconKey={option.iconKey}
+                      category={option.category}
+                      size="xl"
+                      tone={objective === option.value ? "lime" : "gray"}
+                    />
+                  }
                   selected={objective === option.value}
                   onClick={() => setObjective(option.value)}
                 />
