@@ -202,6 +202,16 @@ const CreateHabit = () => {
   const { prefs } = useAppPreferences();
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
+  // Desabilita scroll da página quando o modal está aberto
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   // Sincroniza estado local com preferências do app (fallback)
   useEffect(() => {
     setNotificationsEnabled(prefs.notificationsEnabled);

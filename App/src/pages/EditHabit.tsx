@@ -94,6 +94,16 @@ const EditHabit = () => {
     return habits.find((h) => h.id === id);
   }, [habits, id]);
 
+  // Desabilita scroll da página quando o modal está aberto
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   // Load habit data when found
   useEffect(() => {
     if (habit && !habitLoaded) {
