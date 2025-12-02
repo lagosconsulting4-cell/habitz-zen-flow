@@ -348,20 +348,37 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         return "none";
       };
 
-      // Create habits in database
+      // Create habits in database with all available data
       for (const habit of selectedHabits) {
         const { error: habitError } = await supabase.from("habits").insert({
+          // Required fields
           user_id: user.id,
           name: habit.name,
+          category: habit.category,
+          period: habit.period,
+
+          // Visual fields
           emoji: habit.icon,
           icon_key: habit.icon_key,
           color: habit.color,
-          category: habit.category,
-          period: habit.period,
+
+          // Goal configuration
           goal_value: habit.goal_value,
           unit: mapUnit(habit.goal_unit),
+
+          // Frequency configuration
           frequency_type: habit.frequency_type || "fixed_days",
           days_of_week: habit.frequency_days || weekDays,
+
+          // New enriched fields
+          reminder_time: habit.suggested_time || null,
+          duration_minutes: habit.duration || null,
+          priority: habit.priority || 5,
+          template_id: habit.template_id || null,
+          recommendation_score: habit.recommendation_score || null,
+          source: "onboarding",
+
+          // Status
           is_active: true,
         });
 

@@ -299,6 +299,13 @@ export type Database = {
           updated_at: string
           days_of_week: number[]
           user_id: string
+          // New enriched fields
+          reminder_time: string | null
+          duration_minutes: number | null
+          priority: number | null
+          template_id: string | null
+          recommendation_score: number | null
+          source: string | null
         }
         Insert: {
           auto_complete_source?: Database["public"]["Enums"]["habit_auto_complete_source"] | null
@@ -322,6 +329,13 @@ export type Database = {
           updated_at?: string
           days_of_week?: number[]
           user_id: string
+          // New enriched fields
+          reminder_time?: string | null
+          duration_minutes?: number | null
+          priority?: number | null
+          template_id?: string | null
+          recommendation_score?: number | null
+          source?: string | null
         }
         Update: {
           auto_complete_source?: Database["public"]["Enums"]["habit_auto_complete_source"] | null
@@ -345,6 +359,13 @@ export type Database = {
           updated_at?: string
           days_of_week?: number[]
           user_id?: string
+          // New enriched fields
+          reminder_time?: string | null
+          duration_minutes?: number | null
+          priority?: number | null
+          template_id?: string | null
+          recommendation_score?: number | null
+          source?: string | null
         }
         Relationships: []
       }
