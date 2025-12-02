@@ -179,10 +179,6 @@ const Dashboard = () => {
       // Add completion optimistically
       addCompletionOptimistic(optimisticCompletion);
 
-      // Trigger celebration effect on the habit card IMMEDIATELY
-      const habitCardId = `habit-card-${habit.id}`;
-      celebrations.habitComplete(habitCardId);
-
       if (isGamificationEnabled) {
         // Queue XP toast IMMEDIATELY (will show after brief delay)
         queueXpToast({
@@ -260,7 +256,6 @@ const Dashboard = () => {
     if (timerHabit) {
       const targetDate = new Date().toISOString().split("T")[0];
       const habitId = timerHabit.id;
-      const habitCardId = `habit-card-${habitId}`;
 
       // OPTIMISTIC: Create completion object immediately
       const optimisticCompletion = {
@@ -273,9 +268,6 @@ const Dashboard = () => {
 
       // OPTIMISTIC: Add completion immediately
       addCompletionOptimistic(optimisticCompletion);
-
-      // IMMEDIATE: Trigger celebration
-      celebrations.habitComplete(habitCardId);
 
       if (isGamificationEnabled) {
         // IMMEDIATE: Queue XP toast
@@ -335,20 +327,20 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="bg-background flex flex-col min-h-[calc(100vh-80px)]">
         <DashboardSkeleton />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="bg-background flex flex-col">
       {/* Main Content */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 px-4 pt-6 sm:pt-4 pb-32 space-y-5"
+        className="flex-1 px-4 pt-6 sm:pt-4 pb-navbar space-y-5"
       >
         {/* Routine Card - Shows daily progress by period */}
         {todayHabits.length > 0 && (
@@ -364,7 +356,7 @@ const Dashboard = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="flex flex-col items-center justify-center h-[60vh]"
+            className="flex flex-col items-center justify-center py-12 md:py-16"
           >
             {/* Ilustração minimalista */}
             <motion.div
@@ -414,7 +406,7 @@ const Dashboard = () => {
           </motion.div>
         ) : (
           /* Grid de hábitos - 2 colunas */
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 justify-items-center">
             {todayHabits.map((habit, index) => (
               <motion.div
                 key={habit.id}
@@ -431,6 +423,8 @@ const Dashboard = () => {
                   completed={isCompletedToday(habit.id)}
                   onToggle={() => handleToggle(habit as Habit)}
                   streakDays={habit.streak}
+                  isTimedHabit={isTimedHabit(habit.unit)}
+                  onTimerClick={() => setTimerHabit(habit as Habit)}
                 />
               </motion.div>
             ))}

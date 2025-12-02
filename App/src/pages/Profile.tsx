@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import {
   Bell,
@@ -17,6 +18,8 @@ import {
   VolumeX,
   Sparkles,
   Vibrate,
+  Gift,
+  ChevronRight,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,6 +36,8 @@ import { useAppPreferences } from "@/hooks/useAppPreferences";
 import { useTheme } from "@/hooks/useTheme";
 import { NotificationToggle } from "@/components/pwa/NotificationPermissionDialog";
 import { toast } from "sonner";
+import { bonusSections } from "@/pages/Bonus";
+import { bonusFlags } from "@/config/bonusFlags";
 
 const Profile = () => {
   const [userId, setUserId] = useState<string | null>(null);
@@ -132,7 +137,7 @@ const Profile = () => {
     : "agora";
 
   return (
-    <div className="min-h-screen bg-background pb-20 transition-colors duration-300">
+    <div className="min-h-screen bg-background pb-navbar transition-colors duration-300">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -225,6 +230,40 @@ const Profile = () => {
             );
           })}
         </div>
+
+        {/* Bonus Content Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.12 }}
+          className="mb-8"
+        >
+          <Card className="rounded-2xl bg-card border border-border p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Gift className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-lg font-bold uppercase tracking-wide text-foreground">Conteúdo Bônus</h2>
+            </div>
+            <div className="space-y-2">
+              {bonusSections
+                .filter((section) => bonusFlags[section.id as keyof typeof bonusFlags] !== false)
+                .map((section) => (
+                  <Link
+                    key={section.id}
+                    to={section.path}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="font-semibold text-foreground text-sm">{section.title}</p>
+                      <p className="text-xs text-muted-foreground">{section.description}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </Link>
+                ))}
+            </div>
+          </Card>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

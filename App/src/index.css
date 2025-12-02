@@ -24,7 +24,7 @@
     --secondary: #F5F5F5;            /* Cinza muito claro */
     --secondary-foreground: #1A1A1A;
     --muted: #F0F0F0;                /* Cinza neutro para backgrounds sutis */
-    --muted-foreground: #737373;     /* Cinza médio para texto secundário */
+    --muted-foreground: #525252;     /* Cinza mais escuro para melhor contraste (5.7:1) */
     --accent: #65A30D;               /* Mesmo lime do primary */
     --accent-foreground: #FFFFFF;
     --destructive: #DC2626;          /* Vermelho para erros */
@@ -428,6 +428,10 @@
   --safe-area-right: env(safe-area-inset-right, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
+
+  /* NavigationBar height calculation for responsive padding */
+  --navbar-height: 76px; /* Minimum height without safe area */
+  --navbar-padding: max(8px, env(safe-area-inset-bottom, 8px));
 }
 
 /* Utility classes for safe areas */
@@ -472,6 +476,41 @@
   height: calc(100vh - var(--safe-area-top) - var(--safe-area-bottom));
 }
 
+/* Dynamic Viewport Height - Modern mobile support */
+.h-dvh {
+  height: 100vh; /* Fallback for older browsers */
+  height: 100dvh;
+}
+
+@supports (height: 100dvh) {
+  .h-dvh {
+    height: 100dvh;
+  }
+}
+
+.min-h-dvh {
+  min-height: 100vh; /* Fallback */
+  min-height: 100dvh;
+}
+
+@supports (min-height: 100dvh) {
+  .min-h-dvh {
+    min-height: 100dvh;
+  }
+}
+
+/* Safe DVH - dvh minus safe areas */
+.h-dvh-safe {
+  height: calc(100vh - var(--safe-area-top) - var(--safe-area-bottom)); /* Fallback */
+  height: calc(100dvh - var(--safe-area-top) - var(--safe-area-bottom));
+}
+
+@supports (height: 100dvh) {
+  .h-dvh-safe {
+    height: calc(100dvh - var(--safe-area-top) - var(--safe-area-bottom));
+  }
+}
+
 /* Bottom navigation with safe area */
 .bottom-nav-safe {
   padding-bottom: max(16px, var(--safe-area-bottom));
@@ -486,6 +525,11 @@
 .touch-target {
   min-width: 48px;
   min-height: 48px;
+}
+
+/* Dynamic padding for bottom navigation - adapts to device safe areas */
+.pb-navbar {
+  padding-bottom: calc(var(--navbar-height) + var(--navbar-padding));
 }
 
 .touch-target-sm {

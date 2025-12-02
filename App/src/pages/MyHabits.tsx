@@ -158,7 +158,7 @@ const MyHabits = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 transition-colors duration-300">
+    <div className="min-h-screen bg-background pb-navbar transition-colors duration-300">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
