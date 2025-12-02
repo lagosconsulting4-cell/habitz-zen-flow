@@ -27,7 +27,7 @@ const isTimedHabit = (unit?: string | null): boolean => {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { habits, loading, toggleHabit, getHabitCompletionStatus, addCompletionOptimistic, removeCompletionOptimistic } = useHabits();
+  const { habits, loading, toggleHabit, getHabitCompletionStatus, addCompletionOptimistic, removeCompletionOptimistic, getHabitsForDate } = useHabits();
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const { user } = useAuth();
@@ -103,22 +103,10 @@ const Dashboard = () => {
     };
   }, [isGamificationEnabled]);
 
-  // Filter habits for today
+  // Filter habits for today using comprehensive filtering logic
   const todayHabits = useMemo(() => {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-
-    return habits.filter((habit) => {
-      if (!habit.is_active) return false;
-
-      // Check if today is in days_of_week
-      if (habit.days_of_week && habit.days_of_week.length > 0) {
-        return habit.days_of_week.includes(dayOfWeek);
-      }
-
-      return true;
-    });
-  }, [habits]);
+    return getHabitsForDate(new Date());
+  }, [getHabitsForDate]);
 
   // Calculate progress for each habit (0-100) - memoized
   const calculateProgress = useCallback((habit: Habit): number => {

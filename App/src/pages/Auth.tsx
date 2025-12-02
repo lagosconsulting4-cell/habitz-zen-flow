@@ -34,6 +34,14 @@ const Auth = () => {
         throw error;
       }
 
+      // Check and update streak on login
+      try {
+        await supabase.rpc('update_streak', { p_user_id: userId });
+      } catch (error) {
+        console.error('Failed to update streak on login:', error);
+        // Don't block login on this error
+      }
+
       const locationState = location.state as { from?: { pathname?: string } } | null;
       const preferredPath = locationState?.from?.pathname;
 
