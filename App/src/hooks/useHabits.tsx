@@ -476,21 +476,20 @@ export const useHabits = () => {
       if (!user) throw new Error("User not authenticated");
 
       if (isOnline) {
-        // ONLINE: Use atomic RPC for batched operation
-        // Replaces 8+ sequential queries with 1 atomic operation
-        const { data, error } = await supabase.rpc("complete_habit_atomic", {
+        // ONLINE: Use atomic RPC for toggle operation
+        // Supports both marking and unmarking habits
+        const { data, error } = await supabase.rpc("toggle_habit_atomic", {
           p_user_id: user.id,
           p_habit_id: habitId,
           p_completed_at: targetDate,
           p_xp_amount: 10,
-          p_increment_streak: true,
         });
 
         if (error) throw error;
 
         // Update local state based on RPC response
-        if (data && data.completion_id) {
-          if (!existingCompletion) {
+        if (data) {
+          if (data.action === 'added') {
             // Adding completion
             const newCompletion: HabitCompletion = {
               id: data.completion_id,
@@ -500,10 +499,10 @@ export const useHabits = () => {
               created_at: new Date().toISOString(),
             };
             setCompletions((prev) => [...prev, newCompletion]);
-          } else {
+          } else if (data.action === 'removed') {
             // Removing completion
             setCompletions((prev) =>
-              prev.filter((c) => c.id !== existingCompletion.id)
+              prev.filter((c) => !(c.habit_id === habitId && c.completed_at === targetDate))
             );
           }
 

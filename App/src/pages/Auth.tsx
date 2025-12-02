@@ -39,12 +39,12 @@ const Auth = () => {
 
       // Se não completou onboarding, redirecionar para lá primeiro
       if (!data?.has_completed_onboarding) {
-        navigate("/onboarding", { replace: true });
+        navigate("/onboarding-new", { replace: true });
         return;
       }
 
       if (data?.is_premium) {
-        const safePath = preferredPath && !["/auth", "/pricing", "/onboarding"].includes(preferredPath) ? preferredPath : "/dashboard";
+        const safePath = preferredPath && !["/auth", "/pricing", "/onboarding", "/onboarding-new"].includes(preferredPath) ? preferredPath : "/dashboard";
         navigate(safePath, { replace: true });
       } else {
         navigate("/pricing", { replace: true });
