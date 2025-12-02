@@ -352,6 +352,19 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         });
       }
 
+      // Mark onboarding as complete in profile
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          has_completed_onboarding: true,
+          onboarding_completed_at: new Date().toISOString(),
+        })
+        .eq("user_id", user.id);
+
+      if (profileError) {
+        console.error("Failed to update profile:", profileError);
+      }
+
       // Award welcome XP
       if (addXP) {
         await addXP({
@@ -366,7 +379,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
       }
 
       // Navigate to dashboard
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       console.error("Failed to submit onboarding:", error);
     } finally {
