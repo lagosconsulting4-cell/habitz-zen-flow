@@ -1222,12 +1222,12 @@ const BoraLanding = () => {
         </div>
       </section>
 
-      {/* ============ PRICING SECTION (DARK) ============ */}
-      <section id="pricing" className="py-24 px-4 sm:px-6 relative overflow-hidden bg-slate-900">
+      {/* ============ PRICING SECTION ============ */}
+      <section id="pricing" className="py-24 px-4 sm:px-6 relative overflow-hidden bg-white">
         {/* Background effects */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[150px]" />
-        <div className="absolute top-20 right-20 w-64 h-64 bg-lime-500/10 rounded-full blur-[100px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-lime-50/30 to-white" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#A3E635]/10 rounded-full blur-[150px]" />
+        <div className="absolute top-20 right-20 w-64 h-64 bg-[#A3E635]/10 rounded-full blur-[100px]" />
 
         <div className="max-w-lg mx-auto relative z-10">
           <motion.div
@@ -1240,8 +1240,8 @@ const BoraLanding = () => {
               <Gift className="w-4 h-4 mr-2" />
               Melhor investimento do ano
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-white">
-              Invista em <span className="text-primary">você</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+              Invista em <span className="text-[#A3E635]">você</span>
             </h2>
           </motion.div>
 
@@ -1255,7 +1255,7 @@ const BoraLanding = () => {
             {/* Glow effect */}
             <div className="absolute -inset-2 bg-gradient-to-r from-primary via-lime-500 to-primary rounded-[2rem] blur-xl opacity-40 animate-pulse" />
 
-            <div className="relative bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 rounded-3xl p-8 md:p-10 shadow-2xl border-2 border-primary/30 overflow-hidden">
+            <div className="relative bg-white rounded-3xl p-8 md:p-10 shadow-2xl border-2 border-[#A3E635]/40 overflow-hidden">
               {/* Decorative elements */}
               <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-lime-500/10 rounded-full blur-3xl" />
@@ -1273,7 +1273,7 @@ const BoraLanding = () => {
                 </motion.div>
 
                 <div className="mb-2">
-                  <span className="text-slate-400 line-through text-2xl sm:text-3xl">
+                  <span className="text-slate-500 line-through text-2xl sm:text-3xl">
                     De R$ 805
                   </span>
                 </div>
@@ -1296,8 +1296,8 @@ const BoraLanding = () => {
                   </div>
                 </div>
 
-                <p className="text-slate-400 text-sm sm:text-base">
-                  ou R$47 à vista • <span className="text-primary font-semibold">1 ano de acesso</span>
+                <p className="text-slate-600 text-sm sm:text-base">
+                  ou R$47 à vista • <span className="text-[#A3E635] font-semibold">1 ano de acesso</span>
                 </p>
               </div>
 
@@ -1311,7 +1311,7 @@ const BoraLanding = () => {
                 ].map((item, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base text-white">{item}</span>
+                    <span className="text-sm sm:text-base text-slate-700">{item}</span>
                   </div>
                 ))}
               </div>
@@ -1343,8 +1343,8 @@ const BoraLanding = () => {
                     <Shield className="w-8 h-8 text-white" />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-white text-lg">Garantia Incondicional de 7 Dias</p>
-                    <p className="text-sm text-slate-400">
+                    <p className="font-bold text-slate-900 text-lg">Garantia Incondicional de 7 Dias</p>
+                    <p className="text-sm text-slate-600">
                       100% do seu dinheiro de volta, sem perguntas. Risco zero.
                     </p>
                   </div>
@@ -1356,8 +1356,9 @@ const BoraLanding = () => {
       </section>
 
       {/* ============ FINAL CTA ============ */}
-      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-br from-primary via-lime-500 to-lime-300">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIHN0cm9rZS13aWR0aD0iMiIvPjwvZz48L3N2Zz4=')] opacity-30" />
+      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
+        <div className="absolute inset-0 bg-gradient-to-b from-lime-50/50 via-white to-white" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#A3E635]/15 rounded-full blur-[120px]" />
 
         <motion.div
           className="max-w-3xl mx-auto text-center relative z-10"
@@ -1365,10 +1366,10 @@ const BoraLanding = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
-            Sua transformação começa agora
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            Sua transformação começa <span className="text-[#A3E635]">agora</span>
           </h2>
-          <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto">
+          <p className="text-slate-600 text-lg mb-8 max-w-xl mx-auto">
             Cada dia que passa é um dia a menos na sua transformação. Não deixe para depois.
           </p>
 
@@ -1395,7 +1396,7 @@ const BoraLanding = () => {
             <Button
               onClick={handleCTA}
               size="lg"
-              className="group bg-slate-900 text-white hover:bg-slate-800 text-lg px-10 py-7 rounded-full font-bold shadow-2xl shadow-slate-900/50 border-2 border-white/20"
+              className="group bg-[#A3E635] text-slate-900 hover:bg-[#A3E635]/90 text-lg px-10 py-7 rounded-full font-bold shadow-2xl shadow-[#A3E635]/40"
             >
               <Sparkles className="w-5 h-5 mr-2" />
               COMEÇAR POR 11x R$5,17
@@ -1403,7 +1404,7 @@ const BoraLanding = () => {
             </Button>
           </motion.div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-white/80 text-sm">
+          <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-slate-600 text-sm">
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4" />
               <span>Garantia 7 dias</span>
@@ -1421,7 +1422,7 @@ const BoraLanding = () => {
       </section>
 
       {/* ============ FOOTER ============ */}
-      <footer className="py-12 px-4 sm:px-6 bg-slate-800 border-t-4 border-[#A3E635]">
+      <footer className="py-12 px-4 sm:px-6 bg-white border-t border-slate-200">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Logo */}
@@ -1429,19 +1430,19 @@ const BoraLanding = () => {
               <img
                 src="/assets/logo_bora.png"
                 alt="Bora"
-                className="h-10 w-auto brightness-0 invert"
+                className="h-10 w-auto"
               />
             </div>
 
             {/* Links */}
-            <div className="flex items-center gap-6 text-sm text-slate-400">
+            <div className="flex items-center gap-6 text-sm text-slate-600">
               <a href="#" className="hover:text-[#A3E635] transition-colors">Termos de Uso</a>
               <a href="#" className="hover:text-[#A3E635] transition-colors">Política de Privacidade</a>
               <a href="#" className="hover:text-[#A3E635] transition-colors">Contato</a>
             </div>
 
             {/* Copyright */}
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-600">
               © {new Date().getFullYear()} BORA. Todos os direitos reservados.
             </p>
           </div>
