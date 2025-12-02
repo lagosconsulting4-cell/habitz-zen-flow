@@ -1078,7 +1078,10 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       </div>
 
       {/* CTA Button - Go to Confirm */}
-      <div className="px-4 pt-4">
+      <div
+        className="px-4 pt-4"
+        style={{ paddingBottom: 'max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom)))' }}
+      >
         <button
           onClick={() => setStep("confirm")}
           disabled={!habitName.trim()}
@@ -1281,6 +1284,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.35, duration: 0.3 }}
         className="px-4 pt-2"
+        style={{ paddingBottom: 'max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom)))' }}
       >
         <button
           onClick={handleSave}
