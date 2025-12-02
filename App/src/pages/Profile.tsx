@@ -290,10 +290,42 @@ const Profile = () => {
           </Card>
         </motion.div>
 
+        {/* Affiliate Program Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
+          transition={{ duration: 0.3, delay: 0.18 }}
+          className="mb-8"
+        >
+          <Card className="rounded-2xl bg-card border border-border p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-lg font-bold uppercase tracking-wide text-foreground">
+                Programa de Afiliados
+              </h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Indique amigos e ganhe recompensas. Compartilhe o Habitz e construa juntos.
+            </p>
+            <a
+              href="https://app.kirvano.com/affiliate/c891e35f-e7f1-4e3a-a719-5346f0af8710"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block w-full"
+            >
+              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
+                Acessar Programa de Afiliados
+              </Button>
+            </a>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.22 }}
         >
           <Card className="rounded-2xl bg-card border border-border p-6">
             <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Aparencia</h2>
@@ -385,7 +417,7 @@ const Profile = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.25 }}
+          transition={{ duration: 0.3, delay: 0.27 }}
           className="mt-4"
         >
           <Card className="rounded-2xl bg-card border border-border p-6">
@@ -481,7 +513,7 @@ const Profile = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.3 }}
+          transition={{ duration: 0.3, delay: 0.32 }}
           className="mt-4"
         >
           <Card className="rounded-2xl bg-card border border-border p-6">
@@ -508,7 +540,7 @@ const Profile = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.35 }}
+          transition={{ duration: 0.3, delay: 0.37 }}
           className="mt-6"
         >
           <Button

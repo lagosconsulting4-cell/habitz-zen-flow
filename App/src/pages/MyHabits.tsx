@@ -520,9 +520,6 @@ const MyHabits = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onSelect={() => handleEdit(habit)}>
-                                <Edit className="mr-2 h-4 w-4" /> Editar
-                              </DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => handleDuplicate(habit)}>
                                 <Copy className="mr-2 h-4 w-4" /> Duplicar
                               </DropdownMenuItem>
@@ -530,7 +527,14 @@ const MyHabits = () => {
                               <DropdownMenuItem onSelect={() => handleArchiveToggle(habit)}>
                                 {habit.is_active ? "Arquivar" : "Reativar"}
                               </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={() => setDeleteTarget(habit)} className="text-destructive">
+                              <DropdownMenuItem
+                                onSelect={(e) => {
+                                  e.preventDefault?.();
+                                  e.stopPropagation?.();
+                                  setDeleteTarget(habit);
+                                }}
+                                className="text-destructive"
+                              >
                                 <Trash2 className="mr-2 h-4 w-4" /> Excluir
                               </DropdownMenuItem>
                             </DropdownMenuContent>
