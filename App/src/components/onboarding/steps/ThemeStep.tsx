@@ -35,10 +35,9 @@ export const ThemeStep = () => {
   const [sliderPosition, setSliderPosition] = useState(50);
 
   // Sincronizar tema selecionado com o sistema
-  // Aplica tema OPOSTO para criar contraste visual com o mockup
   useEffect(() => {
     if (themePreference) {
-      setTheme(themePreference === "dark" ? "light" : "dark");
+      setTheme(themePreference);
     }
   }, [themePreference, setTheme]);
 
@@ -95,8 +94,8 @@ export const ThemeStep = () => {
         className="flex justify-center mb-6"
       >
         <Compare
-          firstContent={<ThemeMockup theme="dark" />}
-          secondContent={<ThemeMockup theme="light" />}
+          firstContent={<ThemeMockup theme="light" />}
+          secondContent={<ThemeMockup theme="dark" />}
           slideMode="drag"
           initialSliderPercentage={50}
           showHandlebar={true}
