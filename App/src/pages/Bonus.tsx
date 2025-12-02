@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import { Gift, ArrowLeft } from "lucide-react";
 import { bonusFlags } from "@/config/bonusFlags";
 
-const bonusSections = [
+export const bonusSections = [
   {
     id: "plano",
     title: "Programa 30 dias",
