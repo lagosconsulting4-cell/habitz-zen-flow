@@ -735,7 +735,7 @@ const EditHabit = () => {
     <div className={`fixed inset-0 z-50 flex items-start justify-center transition-colors duration-300 ${themeColors.overlay}`}>
       <div className={`mt-4 w-full max-w-md overflow-hidden rounded-3xl shadow-2xl animate-fade-in transition-colors duration-300 ${themeColors.container}`} style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)' }}>
         {HeaderBar}
-        <div className="overflow-y-auto overscroll-contain scrollbar-hide" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 6rem)' }}>
+        <div className="overflow-y-auto overscroll-contain scrollbar-hide" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 9rem)' }}>
           <AnimatePresence mode="wait">
             {step === "details" && DetailsStep}
             {step === "confirm" && ConfirmStep}

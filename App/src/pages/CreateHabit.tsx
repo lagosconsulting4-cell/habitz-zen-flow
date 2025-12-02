@@ -1307,7 +1307,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       <div className={`mt-4 w-full max-w-md overflow-hidden rounded-3xl shadow-2xl animate-fade-in transition-colors duration-300 ${themeColors.container}`} style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)' }}>
         {HeaderBar}
         {StepperIndicator}
-        <div className="overflow-y-auto overscroll-contain scrollbar-hide" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 10rem)' }}>
+        <div className="overflow-y-auto overscroll-contain scrollbar-hide" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 13rem)' }}>
           <AnimatePresence mode="wait">
             {step === "select" && SelectStep}
             {step === "details" && DetailsStep}
