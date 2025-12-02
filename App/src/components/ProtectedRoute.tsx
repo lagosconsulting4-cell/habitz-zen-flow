@@ -13,6 +13,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
+  // Allow onboarding-new route to work without auth during development
+  const isOnboardingNewRoute = location.pathname === "/onboarding-new";
+
   useEffect(() => {
     // Check current auth state
     const checkAuth = async () => {
@@ -20,6 +23,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       setUser(session?.user ?? null);
       setLoading(false);
     };
+
+    // Skip auth check for onboarding-new during development
+    if (isOnboardingNewRoute) {
+      setLoading(false);
+      return;
+    }
 
     checkAuth();
 
@@ -32,7 +41,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [isOnboardingNewRoute]);
 
   const { isPremium, loading: premiumLoading } = usePremium(user?.id);
 
@@ -42,6 +51,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  // Allow onboarding-new to be accessible without authentication during development
+  if (isOnboardingNewRoute) {
+    return <>{children}</>;
   }
 
   if (!user) {

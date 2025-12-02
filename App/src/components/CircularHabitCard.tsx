@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from "motion/react";
-import { Heart, Clock, Check, Flame } from "lucide-react";
+import { motion } from "motion/react";
+import { Heart, Clock, Flame } from "lucide-react";
 import { HabitGlyph } from "@/components/icons/HabitGlyph";
 import { cn } from "@/lib/utils";
 import { haptic } from "@/lib/haptics";
@@ -196,31 +196,12 @@ export const CircularHabitCard = ({
       {/* Círculo principal */}
       <div className="relative" style={{ width: size, height: size }}>
 
-        {/* Glow celebration - aparece brevemente ao completar */}
-        <AnimatePresence>
-          {showCelebration && (
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{
-                scale: [0.8, 1.2, 1.3],
-                opacity: [0, 0.7, 0]
-              }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="absolute inset-0 rounded-full pointer-events-none"
-              style={{
-                background: `radial-gradient(circle, ${colors.glowColor} 0%, transparent 70%)`,
-              }}
-            />
-          )}
-        </AnimatePresence>
-
         {/* SVG */}
         <motion.svg
           width={size}
           height={size}
           className="transform -rotate-90"
-          animate={showCelebration ? { scale: [1, 1.02, 1] } : { scale: 1 }}
+          animate={{ scale: 1 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
           <defs>
@@ -311,41 +292,6 @@ export const CircularHabitCard = ({
           </motion.div>
         </div>
 
-        {/* Checkmark overlay - aparece brevemente ao completar */}
-        <AnimatePresence>
-          {showCelebration && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 25
-              }}
-              className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                className={cn(
-                  "rounded-full p-3",
-                  isDarkMode ? "bg-lime-400/90" : "bg-white/90"
-                )}
-                style={{
-                  boxShadow: `0 4px 20px ${colors.glowColor}`
-                }}
-              >
-                <Check
-                  size={32}
-                  strokeWidth={3}
-                  className={isDarkMode ? "text-black" : "text-primary"}
-                />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* Nome do hábito */}

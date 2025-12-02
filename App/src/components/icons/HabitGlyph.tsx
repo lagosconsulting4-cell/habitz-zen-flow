@@ -8,6 +8,7 @@ const SIZE_CLASSES = {
   md: "h-6 w-6",
   lg: "h-8 w-8",
   xl: "h-10 w-10",
+  "2xl": "h-14 w-14",
 } as const;
 
 const TONE_CLASSES = {
