@@ -335,21 +335,39 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
       // Get selected habits
       const selectedHabits = recommendedHabits.filter((h) => selectedHabitIds.has(h.id));
 
+      // Map invalid units to valid enum values
+      const mapUnit = (unit?: string): "none" | "steps" | "minutes" | "km" | "custom" => {
+        const validUnits = ["none", "steps", "minutes", "km", "custom"];
+        if (unit && validUnits.includes(unit)) {
+          return unit as "none" | "steps" | "minutes" | "km" | "custom";
+        }
+        // Map other units to closest valid option
+        if (unit === "hours") return "minutes";
+        if (unit === "times" || unit === "pages") return "none";
+        if (unit === "ml") return "custom";
+        return "none";
+      };
+
       // Create habits in database
       for (const habit of selectedHabits) {
-        await supabase.from("habits").insert({
+        const { error: habitError } = await supabase.from("habits").insert({
           user_id: user.id,
           name: habit.name,
-          icon: habit.icon,
+          emoji: habit.icon,
           icon_key: habit.icon_key,
           color: habit.color,
+          category: habit.category,
+          period: habit.period,
           goal_value: habit.goal_value,
-          unit: habit.goal_unit || "none",
+          unit: mapUnit(habit.goal_unit),
           frequency_type: habit.frequency_type || "fixed_days",
           days_of_week: habit.frequency_days || weekDays,
-          reminder_time: habit.suggested_time,
           is_active: true,
         });
+
+        if (habitError) {
+          console.error("Failed to create habit:", habit.name, habitError);
+        }
       }
 
       // Mark onboarding as complete in profile
