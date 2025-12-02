@@ -11,8 +11,10 @@ const ProtectedLayout = () => {
   const isSwipeableRoute = SWIPEABLE_PATHS.has(location.pathname);
 
   const shouldHideNav = useMemo(() => {
-    const hiddenRoutes = new Set(["/onboarding", "/onboarding-new"]);
-    return hiddenRoutes.has(location.pathname);
+    const hiddenRoutes = new Set(["/onboarding", "/onboarding-new", "/create"]);
+    // Also hide for /habits/edit/:id routes
+    const isEditHabitRoute = location.pathname.startsWith("/habits/edit/");
+    return hiddenRoutes.has(location.pathname) || isEditHabitRoute;
   }, [location.pathname]);
 
   const showSidebar = !shouldHideNav && !isSwipeableRoute;

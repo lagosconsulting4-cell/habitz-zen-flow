@@ -202,16 +202,6 @@ const CreateHabit = () => {
   const { prefs } = useAppPreferences();
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
-  // Desabilita scroll da página quando o modal está aberto
-  useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, []);
-
   // Sincroniza estado local com preferências do app (fallback)
   useEffect(() => {
     setNotificationsEnabled(prefs.notificationsEnabled);
@@ -1313,17 +1303,15 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
   );
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-start justify-center transition-colors duration-300 ${themeColors.overlay}`}>
-      <div className={`mt-4 w-full max-w-md overflow-hidden rounded-3xl shadow-2xl animate-fade-in transition-colors duration-300 ${themeColors.container}`} style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)' }}>
-        {HeaderBar}
-        {StepperIndicator}
-        <div className="overflow-y-auto overscroll-contain scrollbar-hide" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 13rem)' }}>
-          <AnimatePresence mode="wait">
-            {step === "select" && SelectStep}
-            {step === "details" && DetailsStep}
-            {step === "confirm" && ConfirmStep}
-          </AnimatePresence>
-        </div>
+    <div className={`min-h-screen flex flex-col ${themeColors.background || 'bg-background'}`}>
+      {HeaderBar}
+      {StepperIndicator}
+      <div className="flex-1 px-4 py-6 overflow-y-auto">
+        <AnimatePresence mode="wait">
+          {step === "select" && SelectStep}
+          {step === "details" && DetailsStep}
+          {step === "confirm" && ConfirmStep}
+        </AnimatePresence>
       </div>
     </div>
   );
