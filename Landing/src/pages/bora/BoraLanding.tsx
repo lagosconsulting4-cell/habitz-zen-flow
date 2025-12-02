@@ -54,25 +54,25 @@ const pillars = [
     title: "Simplicidade",
     subtitle: "7 minutos por dia",
     description: "Micro-hábitos que cabem na rotina mais corrida. Sem complicação.",
-    icon: Clock,
-    gradient: "from-emerald-500 to-teal-500",
-    bgGlow: "bg-emerald-500/20",
+    icon: Zap,
+    gradient: "from-[#A3E635] to-lime-300",
+    bgGlow: "bg-[#A3E635]/20",
   },
   {
     title: "Personalização",
     subtitle: "Feito para você",
     description: "Quiz personalizado. Rotina que aprende e se adapta ao seu ritmo.",
-    icon: Target,
-    gradient: "from-amber-500 to-orange-500",
-    bgGlow: "bg-amber-500/20",
+    icon: Brain,
+    gradient: "from-[#A3E635] to-lime-400",
+    bgGlow: "bg-[#A3E635]/20",
   },
   {
     title: "Resultados",
     subtitle: "30 dias de transformação",
     description: "5000+ usuários. 94% mantém consistência. Garantia de 7 dias.",
-    icon: Trophy,
-    gradient: "from-primary to-emerald-600",
-    bgGlow: "bg-primary/20",
+    icon: Flame,
+    gradient: "from-[#A3E635] to-lime-300",
+    bgGlow: "bg-[#A3E635]/20",
   },
 ];
 
@@ -278,11 +278,12 @@ const BoraLanding = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-[#A3E635] flex items-center justify-center shadow-md shadow-[#A3E635]/20">
-              <Sparkles className="w-5 h-5 text-slate-900" />
-            </div>
-            <span className="text-xl font-bold text-slate-900">BORA</span>
+          <a href="#" className="flex items-center">
+            <img
+              src="/assets/logo_bora.png"
+              alt="Bora"
+              className="h-10 w-auto"
+            />
           </a>
 
           {/* CTA Button */}
@@ -390,109 +391,30 @@ const BoraLanding = () => {
               </motion.div>
             </motion.div>
 
-            {/* Right side - 3D Mockup Composition */}
+            {/* Right side - Clean Single Mockup */}
             <motion.div
-              className="relative flex justify-center lg:justify-end order-first lg:order-last min-h-[400px] md:min-h-[500px]"
+              className="relative flex justify-center lg:justify-end order-first lg:order-last"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.8, type: "spring" }}
             >
-              {/* Central glow */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#A3E635]/25 rounded-full blur-[100px]" />
+              {/* Subtle glow behind mockup */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#A3E635]/20 rounded-full blur-[80px]" />
 
-              {/* 3D Mockup composition with perspective */}
-              <div className="relative w-full max-w-[500px] h-[450px] md:h-[520px]" style={{ perspective: "1000px" }}>
-                {/* Back left mockup */}
-                <motion.div
-                  className="absolute left-0 md:-left-8 top-12 z-10"
-                  initial={{ opacity: 0, x: -50, rotateY: 15 }}
-                  animate={{ opacity: 1, x: 0, rotateY: 15 }}
-                  transition={{ delay: 0.5, duration: 0.8 }}
-                  style={{ transformStyle: "preserve-3d" }}
-                >
-                  <img
-                    src="/images/lp/mockup-app-vertical.webp"
-                    alt="App BORA - Rotina"
-                    className="w-[160px] md:w-[200px] h-auto rounded-3xl shadow-2xl shadow-black/20 border-4 border-white/50"
-                  />
-                </motion.div>
-
-                {/* Center main mockup */}
-                <motion.div
-                  className="absolute left-1/2 -translate-x-1/2 top-0 z-30"
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <div className="relative">
-                    <img
-                      src="/images/lp/mockup-app-vertical.webp"
-                      alt="App BORA - Dashboard"
-                      className="w-[200px] md:w-[260px] h-auto rounded-3xl shadow-2xl shadow-[#A3E635]/30 border-4 border-white"
-                    />
-                    {/* Glow ring around main mockup */}
-                    <div className="absolute -inset-2 bg-gradient-to-r from-[#A3E635]/50 via-emerald-400/30 to-[#A3E635]/50 rounded-[2rem] blur-xl -z-10 opacity-60" />
-                  </div>
-                </motion.div>
-
-                {/* Back right mockup */}
-                <motion.div
-                  className="absolute right-0 md:-right-8 top-12 z-10"
-                  initial={{ opacity: 0, x: 50, rotateY: -15 }}
-                  animate={{ opacity: 1, x: 0, rotateY: -15 }}
-                  transition={{ delay: 0.6, duration: 0.8 }}
-                  style={{ transformStyle: "preserve-3d" }}
-                >
-                  <img
-                    src="/images/lp/mockup-horizontal.webp"
-                    alt="App BORA - Progresso"
-                    className="w-[160px] md:w-[200px] h-auto rounded-3xl shadow-2xl shadow-black/20 border-4 border-white/50"
-                  />
-                </motion.div>
-
-                {/* Floating notification cards */}
-                <motion.div
-                  className="absolute -top-4 right-4 md:right-0 z-40 bg-white rounded-2xl p-3 shadow-xl border border-[#A3E635]/20"
-                  animate={{ y: [0, -8, 0], rotate: [0, 2, 0] }}
-                  transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-[#A3E635] rounded-xl flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-900">+23 hábitos</p>
-                      <p className="text-[10px] text-slate-500">completados hoje</p>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Floating streak card */}
-                <motion.div
-                  className="absolute bottom-16 -left-4 md:left-0 z-40 bg-white rounded-2xl p-3 shadow-xl border border-amber-500/20"
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 2.5, repeat: Infinity, delay: 1 }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center">
-                      <Flame className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-900">14 dias</p>
-                      <p className="text-[10px] text-slate-500">de streak 🔥</p>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Character image */}
-                <motion.img
-                  src="/images/lp/personagem-feliz.png"
-                  alt="Personagem feliz"
-                  className="absolute -bottom-8 right-8 w-32 md:w-40 h-auto z-20 drop-shadow-lg"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.8, duration: 0.5 }}
+              {/* Single centered mockup */}
+              <motion.div
+                className="relative z-10"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <img
+                  src="/images/lp/mockup-app-vertical.webp"
+                  alt="App BORA - Dashboard"
+                  className="w-[260px] md:w-[300px] h-auto rounded-3xl shadow-2xl border-4 border-white"
                 />
-              </div>
+                {/* Subtle glow ring */}
+                <div className="absolute -inset-1 bg-[#A3E635]/30 rounded-[2rem] blur-xl -z-10" />
+              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -897,7 +819,7 @@ const BoraLanding = () => {
                     <div className="relative bg-gradient-to-br from-slate-50 to-white rounded-3xl p-8 md:p-12 border border-slate-200/50 shadow-xl overflow-hidden">
                       {/* Step number */}
                       <div className="absolute top-6 left-6 md:top-8 md:left-8">
-                        <span className="text-7xl md:text-9xl font-black text-primary/10">
+                        <span className="text-7xl md:text-9xl font-black text-[#A3E635]/30">
                           {step.step}
                         </span>
                       </div>
@@ -939,7 +861,7 @@ const BoraLanding = () => {
       </section>
 
       {/* ============ BEFORE/AFTER SECTION ============ */}
-      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-b from-emerald-50/50 to-white">
+      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-b from-lime-50/50 to-white">
         <div className="max-w-4xl mx-auto relative z-10">
           <motion.div
             className="text-center mb-12"
@@ -947,7 +869,7 @@ const BoraLanding = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/25">
+            <Badge className="mb-4 bg-gradient-to-r from-primary to-lime-400 text-white border-0 shadow-lg shadow-primary/25">
               <Zap className="w-3 h-3 mr-1" />
               Transformação garantida
             </Badge>
@@ -967,7 +889,7 @@ const BoraLanding = () => {
               </TabsTrigger>
               <TabsTrigger
                 value="after"
-                className="text-xs sm:text-base font-semibold rounded-xl h-full transition-all duration-300 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:text-slate-600 data-[state=inactive]:hover:text-slate-900"
+                className="text-xs sm:text-base font-semibold rounded-xl h-full transition-all duration-300 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#A3E635] data-[state=active]:to-lime-300 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:text-slate-600 data-[state=inactive]:hover:text-slate-900"
               >
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
                 <span className="hidden sm:inline">Com o </span>BORA
@@ -1018,13 +940,13 @@ const BoraLanding = () => {
 
               <TabsContent value="after" className="mt-0">
                 <motion.div
-                  className="relative rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-teal-50 border-2 border-primary/30 p-6 sm:p-10 overflow-hidden shadow-xl"
+                  className="relative rounded-3xl bg-gradient-to-br from-lime-50 via-white to-lime-50 border-2 border-primary/30 p-6 sm:p-10 overflow-hidden shadow-xl"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                 >
                   <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/20 rounded-full blur-[80px]" />
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-lime-500/20 rounded-full blur-[80px]" />
                   <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 relative z-10">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {afterBenefits.map((item, index) => (
@@ -1036,7 +958,7 @@ const BoraLanding = () => {
                           transition={{ delay: index * 0.1 }}
                           whileHover={{ scale: 1.02 }}
                         >
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-lime-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
                             <item.icon className="w-6 h-6 text-white" />
                           </div>
                           <span className="text-slate-900 font-medium text-lg pt-2">{item.text}</span>
@@ -1066,7 +988,7 @@ const BoraLanding = () => {
       {/* ============ TESTIMONIALS CAROUSEL ============ */}
       <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-[100px]" />
-        <div className="absolute bottom-20 right-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-20 right-10 w-72 h-72 bg-lime-500/10 rounded-full blur-[100px]" />
 
         <div className="max-w-6xl mx-auto relative z-10">
           <motion.div
@@ -1075,7 +997,7 @@ const BoraLanding = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/25">
+            <Badge className="mb-4 bg-gradient-to-r from-primary to-lime-400 text-white border-0 shadow-lg shadow-primary/25">
               <Users className="w-3 h-3 mr-1" />
               Histórias reais
             </Badge>
@@ -1121,7 +1043,7 @@ const BoraLanding = () => {
                       </blockquote>
 
                       <div className="flex items-center gap-4 pt-4 border-t border-slate-200 relative z-10">
-                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary via-emerald-500 to-teal-500 p-0.5 shadow-lg shadow-primary/30">
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary via-lime-500 to-lime-300 p-0.5 shadow-lg shadow-primary/30">
                           {testimonial.photo ? (
                             <img
                               src={testimonial.photo}
@@ -1130,7 +1052,7 @@ const BoraLanding = () => {
                               loading="lazy"
                             />
                           ) : (
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-primary via-emerald-500 to-teal-500 flex items-center justify-center">
+                            <div className="w-full h-full rounded-full bg-gradient-to-br from-primary via-lime-500 to-lime-300 flex items-center justify-center">
                               <span className="text-white font-bold text-xl">
                                 {testimonial.name.charAt(0)}
                               </span>
@@ -1245,7 +1167,7 @@ const BoraLanding = () => {
               <Button
                 onClick={scrollToPricing}
                 size="lg"
-                className="group bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 text-white text-base px-8 py-4 rounded-full font-bold shadow-xl shadow-primary/30"
+                className="group bg-gradient-to-r from-primary to-lime-400 hover:from-primary/90 hover:to-lime-400/90 text-white text-base px-8 py-4 rounded-full font-bold shadow-xl shadow-primary/30"
               >
                 <Sparkles className="w-5 h-5 mr-2" />
                 GARANTIR MINHA VAGA
@@ -1305,7 +1227,7 @@ const BoraLanding = () => {
         {/* Background effects */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[150px]" />
-        <div className="absolute top-20 right-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px]" />
+        <div className="absolute top-20 right-20 w-64 h-64 bg-lime-500/10 rounded-full blur-[100px]" />
 
         <div className="max-w-lg mx-auto relative z-10">
           <motion.div
@@ -1314,7 +1236,7 @@ const BoraLanding = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Badge className="mb-4 bg-gradient-to-r from-primary to-emerald-500 text-white border-0 shadow-lg shadow-primary/30 text-sm px-4 py-2">
+            <Badge className="mb-4 bg-gradient-to-r from-primary to-lime-400 text-white border-0 shadow-lg shadow-primary/30 text-sm px-4 py-2">
               <Gift className="w-4 h-4 mr-2" />
               Melhor investimento do ano
             </Badge>
@@ -1331,12 +1253,12 @@ const BoraLanding = () => {
             transition={{ type: "spring", duration: 0.8 }}
           >
             {/* Glow effect */}
-            <div className="absolute -inset-2 bg-gradient-to-r from-primary via-emerald-500 to-primary rounded-[2rem] blur-xl opacity-40 animate-pulse" />
+            <div className="absolute -inset-2 bg-gradient-to-r from-primary via-lime-500 to-primary rounded-[2rem] blur-xl opacity-40 animate-pulse" />
 
             <div className="relative bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 rounded-3xl p-8 md:p-10 shadow-2xl border-2 border-primary/30 overflow-hidden">
               {/* Decorative elements */}
               <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-lime-500/10 rounded-full blur-3xl" />
 
               {/* Price display */}
               <div className="text-center mb-8 relative z-10">
@@ -1360,7 +1282,7 @@ const BoraLanding = () => {
                   <div className="flex flex-col items-center">
                     <span className="text-xl sm:text-2xl font-bold text-primary/80 mb-1">11x de</span>
                     <motion.span
-                      className="text-6xl sm:text-7xl md:text-8xl font-black bg-gradient-to-r from-primary via-emerald-400 to-primary bg-clip-text text-transparent"
+                      className="text-6xl sm:text-7xl md:text-8xl font-black bg-gradient-to-r from-primary via-lime-300 to-primary bg-clip-text text-transparent"
                       animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
                       transition={{ duration: 3, repeat: Infinity }}
                       style={{ backgroundSize: "200% 200%" }}
@@ -1400,12 +1322,12 @@ const BoraLanding = () => {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
               >
-                <div className="absolute -inset-2 bg-gradient-to-r from-primary via-emerald-500 to-primary rounded-2xl blur-xl opacity-50 group-hover:opacity-80 transition-all duration-500 animate-pulse" />
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-emerald-500 to-teal-500 rounded-xl opacity-100" />
+                <div className="absolute -inset-2 bg-gradient-to-r from-primary via-lime-500 to-primary rounded-2xl blur-xl opacity-50 group-hover:opacity-80 transition-all duration-500 animate-pulse" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-lime-500 to-lime-300 rounded-xl opacity-100" />
 
                 <button
                   onClick={handleCTA}
-                  className="relative w-full overflow-hidden bg-gradient-to-r from-primary via-emerald-500 to-primary hover:from-primary/90 hover:via-emerald-500/90 hover:to-primary/90 text-white font-black text-lg sm:text-xl md:text-2xl py-6 md:py-7 px-8 rounded-xl shadow-2xl shadow-primary/50 transition-all duration-300 tracking-wide flex items-center justify-center gap-3"
+                  className="relative w-full overflow-hidden bg-gradient-to-r from-primary via-lime-500 to-primary hover:from-primary/90 hover:via-lime-500/90 hover:to-primary/90 text-white font-black text-lg sm:text-xl md:text-2xl py-6 md:py-7 px-8 rounded-xl shadow-2xl shadow-primary/50 transition-all duration-300 tracking-wide flex items-center justify-center gap-3"
                 >
                   <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
                   <Sparkles className="w-6 h-6 md:w-7 md:h-7 animate-pulse flex-shrink-0" />
@@ -1434,7 +1356,7 @@ const BoraLanding = () => {
       </section>
 
       {/* ============ FINAL CTA ============ */}
-      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-br from-primary via-emerald-500 to-teal-500">
+      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-br from-primary via-lime-500 to-lime-300">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIHN0cm9rZS13aWR0aD0iMiIvPjwvZz48L3N2Zz4=')] opacity-30" />
 
         <motion.div
@@ -1473,7 +1395,7 @@ const BoraLanding = () => {
             <Button
               onClick={handleCTA}
               size="lg"
-              className="group bg-white text-primary hover:bg-white/90 text-lg px-10 py-7 rounded-full font-bold shadow-2xl shadow-black/20"
+              className="group bg-slate-900 text-white hover:bg-slate-800 text-lg px-10 py-7 rounded-full font-bold shadow-2xl shadow-slate-900/50 border-2 border-white/20"
             >
               <Sparkles className="w-5 h-5 mr-2" />
               COMEÇAR POR 11x R$5,17
@@ -1503,11 +1425,12 @@ const BoraLanding = () => {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Logo */}
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-[#A3E635] flex items-center justify-center shadow-lg shadow-[#A3E635]/30">
-                <Sparkles className="w-5 h-5 text-slate-900" />
-              </div>
-              <span className="text-xl font-bold text-white">BORA</span>
+            <div className="flex items-center">
+              <img
+                src="/assets/logo_bora.png"
+                alt="Bora"
+                className="h-10 w-auto brightness-0 invert"
+              />
             </div>
 
             {/* Links */}
