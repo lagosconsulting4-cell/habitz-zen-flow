@@ -8,6 +8,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerTrigger,
 } from "@/components/ui/drawer";
 import { usePWA } from "@/hooks/usePWA";
 import { cn } from "@/lib/utils";
@@ -93,30 +94,6 @@ export function InstallPrompt() {
 
   return (
     <>
-      {/* FAB - 100% persistente */}
-      <button
-        ref={buttonRef}
-        onClick={() => {
-          console.log("[InstallPrompt] ✅ BUTTON CLICKED!");
-          console.log("[InstallPrompt] Current drawerOpen state:", drawerOpen);
-          setDrawerOpen(true);
-          setSnap(0.2);
-          console.log("[InstallPrompt] setState called for drawerOpen");
-        }}
-        className={buttonClasses}
-        aria-label="Instalar app"
-        aria-hidden="false"
-      >
-        {/* Glow effect */}
-        <div className="absolute inset-0 rounded-full bg-white/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* Icon with animation */}
-        <Smartphone className="w-7 h-7 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
-
-        {/* Pulse animation ring */}
-        <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
-      </button>
-
       {/* Drawer com snap points */}
       <Drawer
         open={drawerOpen}
@@ -125,6 +102,29 @@ export function InstallPrompt() {
         activeSnapPoint={snap}
         setActiveSnapPoint={setSnap}
       >
+        {/* FAB - 100% persistente como Trigger */}
+        <DrawerTrigger asChild>
+          <button
+            ref={buttonRef}
+            className={buttonClasses}
+            aria-label="Instalar app"
+            onClick={() => {
+              console.log("[InstallPrompt] ✅ BUTTON CLICKED!");
+              console.log("[InstallPrompt] Current drawerOpen state:", drawerOpen);
+              setSnap(0.2);
+              console.log("[InstallPrompt] Drawer será aberto pelo DrawerTrigger");
+            }}
+          >
+            {/* Glow effect */}
+            <div className="absolute inset-0 rounded-full bg-white/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+            {/* Icon with animation */}
+            <Smartphone className="w-7 h-7 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+
+            {/* Pulse animation ring */}
+            <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
+          </button>
+        </DrawerTrigger>
         <DrawerContent className="border-t-4 border-primary/20">
           <DrawerHeader className="pb-2">
             <DrawerTitle className="text-xl font-bold flex items-center gap-2">
