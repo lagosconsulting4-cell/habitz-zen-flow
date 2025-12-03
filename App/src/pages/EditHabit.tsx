@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useHabits, Habit } from "@/hooks/useHabits";
 import { useAppPreferences } from "@/hooks/useAppPreferences";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { HabitIconKey, getHabitIcon, getHabitIconWithFallback } from "@/components/icons/HabitIcons";
 import { HeroCircle } from "@/components/HeroCircle";
 import { Switch } from "@/components/ui/switch";
@@ -81,6 +82,7 @@ const EditHabit = () => {
   const { habits, updateHabit, loading: habitsLoading } = useHabits();
   const { prefs } = useAppPreferences();
   const { resolvedTheme } = useTheme();
+  const { isSupported: pushSupported, isSubscribed: pushSubscribed, subscribe: pushSubscribe, isLoading: pushLoading } = usePushNotifications();
   const isDarkMode = resolvedTheme === "dark";
 
   const [habitName, setHabitName] = useState("");
@@ -141,6 +143,23 @@ const EditHabit = () => {
     setSelectedDays((prev) =>
       prev.includes(day) ? prev.filter((value) => value !== day) : [...prev, day]
     );
+  };
+
+  // Handler para toggle de notificações - solicita permissão se necessário
+  const handleNotificationToggle = async (checked: boolean) => {
+    if (checked && pushSupported && !pushSubscribed) {
+      // Solicitar permissão quando usuário ativa
+      const success = await pushSubscribe();
+      if (!success) {
+        toast({
+          title: "Permissão necessária",
+          description: "Ative as notificações nas configurações para receber lembretes.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    setNotificationsEnabled(checked);
   };
 
   const handleSave = async () => {
@@ -507,7 +526,8 @@ const EditHabit = () => {
           </div>
           <Switch
             checked={notificationsEnabled}
-            onCheckedChange={(checked) => setNotificationsEnabled(checked)}
+            onCheckedChange={handleNotificationToggle}
+            disabled={pushLoading}
             className="data-[state=checked]:bg-primary"
           />
         </div>

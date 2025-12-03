@@ -146,7 +146,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const totalSteps = 12; // Welcome, Theme, Age, Profession, WorkSchedule, EnergyPeak, TimeAvailable, Objective, Challenges, WeekDays, Preview, Celebration
+  const totalSteps = 13; // Welcome, Theme, Age, Profession, WorkSchedule, EnergyPeak, TimeAvailable, Objective, Challenges, WeekDays, Preview, Notification, Celebration
 
   // ============================================================================
   // NAVIGATION
@@ -201,7 +201,9 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         return weekDays.length > 0;
       case 10: // Preview
         return selectedHabitIds.size >= 3;
-      case 11: // Celebration (auto-submits)
+      case 11: // Notification
+        return true; // Notification step always valid (user can skip)
+      case 12: // Celebration (auto-submits)
         return true;
       default:
         return false;

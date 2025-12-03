@@ -16,6 +16,7 @@ import { ObjectiveStep } from "./steps/ObjectiveStep";
 import { ChallengesStep } from "./steps/ChallengesStep";
 import { WeekDaysStep } from "./steps/WeekDaysStep";
 import { RoutinePreviewStep } from "./steps/RoutinePreviewStep";
+import { NotificationStep } from "./steps/NotificationStep";
 import { CelebrationStep } from "./steps/CelebrationStep";
 
 /**
@@ -32,10 +33,10 @@ const OnboardingFlowContent = () => {
     }
   }, [currentStep, generateRoutine]);
 
-  // All 12 steps (including Theme step)
+  // All 13 steps (including Theme and Notification steps)
   const steps = [
     <WelcomeStep key="welcome" />,        // 0
-    <ThemeStep key="theme" />,            // 1 - NEW
+    <ThemeStep key="theme" />,            // 1
     <AgeStep key="age" />,                // 2
     <ProfessionStep key="profession" />,  // 3
     <WorkScheduleStep key="work-schedule" />, // 4
@@ -45,7 +46,8 @@ const OnboardingFlowContent = () => {
     <ChallengesStep key="challenges" />,  // 8
     <WeekDaysStep key="weekdays" />,      // 9
     <RoutinePreviewStep key="preview" />, // 10
-    <CelebrationStep key="celebration" />,// 11
+    <NotificationStep key="notification" />, // 11
+    <CelebrationStep key="celebration" />,// 12
   ];
 
   return (

@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useHabits } from "@/hooks/useHabits";
 import useHabitCatalog, { HabitTemplate } from "@/hooks/useHabitCatalog";
 import { useAppPreferences } from "@/hooks/useAppPreferences";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { HABIT_EMOJIS } from "@/data/habit-emojis";
 import type { HabitEmoji } from "@/data/habit-emojis";
 import { HabitIconKey, getHabitIcon } from "@/components/icons/HabitIcons";
@@ -209,11 +210,29 @@ const CreateHabit = () => {
   const { categories: catalogCategories, templates, isLoading: catalogLoading } = useHabitCatalog();
   const { prefs } = useAppPreferences();
   const { resolvedTheme } = useTheme();
+  const { isSupported: pushSupported, isSubscribed: pushSubscribed, subscribe: pushSubscribe, isLoading: pushLoading } = usePushNotifications();
   const isDarkMode = resolvedTheme === "dark";
   // Sincroniza estado local com preferências do app (fallback)
   useEffect(() => {
     setNotificationsEnabled(prefs.notificationsEnabled);
   }, [prefs.notificationsEnabled]);
+
+  // Handler para toggle de notificações - solicita permissão se necessário
+  const handleNotificationToggle = async (checked: boolean) => {
+    if (checked && pushSupported && !pushSubscribed) {
+      // Solicitar permissão quando usuário ativa
+      const success = await pushSubscribe();
+      if (!success) {
+        toast({
+          title: "Permissão necessária",
+          description: "Ative as notificações nas configurações para receber lembretes.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    setNotificationsEnabled(checked);
+  };
 
   const themeColors = getHabitFormTheme(isDarkMode);
 
@@ -959,7 +978,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
           </div>
           <Switch
             checked={notificationsEnabled}
-            onCheckedChange={(checked) => setNotificationsEnabled(checked)}
+            onCheckedChange={handleNotificationToggle}
+            disabled={pushLoading}
             className="data-[state=checked]:bg-primary"
           />
         </div>
