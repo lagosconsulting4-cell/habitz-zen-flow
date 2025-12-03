@@ -63,16 +63,9 @@ export function InstallPrompt() {
     <>
       {/* FAB Button - Completamente separado do Radix Dialog */}
       <button
-        onClick={(e) => {
-          console.log("[InstallPrompt] 🔘 BUTTON CLICKED!");
-          const button = e.currentTarget;
+        onClick={() => {
           setDrawerOpen(true);
           setSnap(0.2);
-          // Delay blur() para DEPOIS do drawer abrir, evitando que Vaul interprete como "click fora"
-          requestAnimationFrame(() => {
-            button.blur();
-            console.log("[InstallPrompt] 🔘 blur() executed after drawer opened");
-          });
         }}
         className={buttonClasses}
         aria-label="Instalar app"
@@ -90,10 +83,7 @@ export function InstallPrompt() {
       {/* Drawer com snap points */}
       <Drawer
         open={drawerOpen}
-        onOpenChange={(isOpen) => {
-          console.log("[InstallPrompt] 📦 onOpenChange called with:", isOpen, "| current drawerOpen:", drawerOpen);
-          setDrawerOpen(isOpen);
-        }}
+        onOpenChange={setDrawerOpen}
         snapPoints={[0.2, 0.6]}
         activeSnapPoint={snap}
         setActiveSnapPoint={setSnap}
