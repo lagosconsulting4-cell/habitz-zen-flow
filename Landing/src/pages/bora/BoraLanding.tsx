@@ -41,8 +41,10 @@ import {
   Sun,
   Heart,
   ChevronRight,
+  Play,
 } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/hooks/useAnimations";
+import { QuizModal } from "@/components/quiz/QuizModal";
 
 // ============ DATA ============
 
@@ -272,6 +274,7 @@ const AnimatedCounter = ({ value, suffix = "" }: { value: number; suffix?: strin
 const BoraLanding = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -703,123 +706,81 @@ const BoraLanding = () => {
               Descubra sua <span className="text-[#A3E635]">rotina ideal</span>
             </h2>
             <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-              Responda 3 perguntas rápidas e veja uma prévia do seu plano personalizado
+              Responda algumas perguntas e receba sua rotina personalizada em 2 minutos
             </p>
           </motion.div>
 
-          {/* Quiz Container */}
+          {/* Quiz CTA Card */}
           <motion.div
             className="bg-white/80 backdrop-blur-xl rounded-3xl border-2 border-[#A3E635]/30 shadow-2xl shadow-[#A3E635]/10 overflow-hidden"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            {/* Progress bar */}
-            <div className="px-8 pt-8">
-              <div className="flex gap-2">
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="h-2 flex-1 rounded-full bg-[#A3E635]"
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Quiz Result Preview (Static for demo) */}
             <div className="p-8 md:p-12">
-              {/* Result Header */}
+              {/* Icon illustration */}
               <div className="text-center mb-8">
                 <motion.div
-                  className="w-20 h-20 mx-auto bg-[#A3E635] rounded-full flex items-center justify-center mb-4"
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ type: "spring", delay: 0.2 }}
+                  className="w-24 h-24 mx-auto bg-gradient-to-br from-[#A3E635] to-lime-400 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-[#A3E635]/30"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <CheckCircle2 className="w-10 h-10 text-white" />
+                  <Sparkles className="w-12 h-12 text-white" />
                 </motion.div>
-                <h3 className="text-2xl font-bold text-slate-900">Sua rotina está pronta!</h3>
-                <p className="text-slate-600">Baseado no seu perfil, criamos um plano para você</p>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                  Quiz de Rotina Personalizada
+                </h3>
+                <p className="text-slate-600 max-w-md mx-auto">
+                  Baseado nas suas respostas, nosso algoritmo cria uma rotina única para você
+                </p>
               </div>
 
-              {/* Routine Preview (partially locked) */}
-              <div className="space-y-4">
-                {/* Unlocked item */}
-                <motion.div
-                  className="p-4 bg-[#A3E635]/10 rounded-xl border border-[#A3E635]/30"
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[#A3E635] rounded-xl flex items-center justify-center">
-                      <Sun className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-slate-900">Rotina Matinal</p>
-                      <p className="text-sm text-slate-600">3 hábitos • 7 min/dia</p>
-                    </div>
-                    <CheckCircle2 className="w-6 h-6 text-[#A3E635]" />
-                  </div>
-                </motion.div>
-
-                {/* Locked items */}
+              {/* Features list */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                 {[
-                  { icon: Calendar, title: "Checklist Diário", subtitle: "Personalizado para você" },
-                  { icon: LineChart, title: "Progresso Semanal", subtitle: "Gráficos e métricas" },
-                  { icon: Brain, title: "Meditações Guiadas", subtitle: "Acalme sua mente" },
+                  { icon: Clock, text: "2 minutos", subtext: "tempo estimado" },
+                  { icon: Target, text: "8 perguntas", subtext: "simples e rápidas" },
+                  { icon: Brain, text: "IA Personalizada", subtext: "algoritmo inteligente" },
                 ].map((item, index) => (
                   <motion.div
-                    key={item.title}
-                    className="p-4 bg-slate-100 rounded-xl border border-slate-200 relative overflow-hidden opacity-60"
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 0.6, x: 0 }}
+                    key={item.text}
+                    className="text-center p-4 bg-slate-50 rounded-xl"
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.4 + index * 0.1 }}
+                    transition={{ delay: 0.2 + index * 0.1 }}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-slate-300 rounded-xl flex items-center justify-center">
-                        <item.icon className="w-6 h-6 text-slate-500" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-slate-500">{item.title}</p>
-                        <p className="text-sm text-slate-400">{item.subtitle}</p>
-                      </div>
-                      <Lock className="w-6 h-6 text-slate-400" />
-                    </div>
-                    {/* Lock overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+                    <item.icon className="w-6 h-6 mx-auto mb-2 text-[#A3E635]" />
+                    <p className="font-semibold text-slate-900">{item.text}</p>
+                    <p className="text-xs text-slate-500">{item.subtext}</p>
                   </motion.div>
                 ))}
               </div>
 
-              {/* CTA to unlock */}
-              <div className="mt-8 text-center">
-                <p className="text-sm text-slate-500 mb-4 flex items-center justify-center gap-2">
-                  <Lock className="w-4 h-4" />
-                  Desbloqueie todas as funcionalidades
-                </p>
+              {/* CTA Button */}
+              <div className="text-center">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
-                    onClick={scrollToPricing}
+                    onClick={() => setQuizOpen(true)}
                     size="lg"
-                    className="bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 font-bold text-lg px-8 py-6 rounded-full shadow-xl shadow-[#A3E635]/30"
+                    className="bg-[#A3E635] hover:bg-[#84cc16] text-slate-900 font-bold text-lg px-10 py-7 rounded-full shadow-xl shadow-[#A3E635]/30"
                   >
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    DESBLOQUEAR ROTINA COMPLETA
+                    <Play className="w-5 h-5 mr-2" />
+                    FAZER QUIZ GRATUITO
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </motion.div>
-                <p className="text-xs text-slate-400 mt-3">
-                  Por apenas 11x de R$5,17 • Garantia de 7 dias
+                <p className="text-xs text-slate-400 mt-4">
+                  Sem cadastro • 100% gratuito • Resultado imediato
                 </p>
               </div>
             </div>
           </motion.div>
         </div>
       </section>
+
+      {/* Quiz Modal */}
+      <QuizModal open={quizOpen} onClose={() => setQuizOpen(false)} />
 
       {/* ============ HOW IT WORKS CAROUSEL ============ */}
       <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
