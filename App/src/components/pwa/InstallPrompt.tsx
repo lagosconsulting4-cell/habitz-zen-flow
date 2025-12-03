@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Smartphone, Share, Plus, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,7 @@ export function InstallPrompt() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [snap, setSnap] = useState<number | string | null>(0.2);
   const [isLoading, setIsLoading] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Logs de debug
   console.log("[InstallPrompt] Valores recebidos:", { isInstalled, isInstallable, isIOS });
@@ -45,6 +46,29 @@ export function InstallPrompt() {
     setIsLoading(false);
   };
 
+  // DEBUG: Log element visibility after render
+  useEffect(() => {
+    if (buttonRef.current) {
+      console.log("[InstallPrompt] ✅ Button element found in DOM!");
+      console.log("[InstallPrompt] Button computed style:", {
+        display: window.getComputedStyle(buttonRef.current).display,
+        visibility: window.getComputedStyle(buttonRef.current).visibility,
+        opacity: window.getComputedStyle(buttonRef.current).opacity,
+        position: window.getComputedStyle(buttonRef.current).position,
+        bottom: window.getComputedStyle(buttonRef.current).bottom,
+        right: window.getComputedStyle(buttonRef.current).right,
+        zIndex: window.getComputedStyle(buttonRef.current).zIndex,
+        width: window.getComputedStyle(buttonRef.current).width,
+        height: window.getComputedStyle(buttonRef.current).height,
+        backgroundColor: window.getComputedStyle(buttonRef.current).backgroundColor,
+      });
+      console.log("[InstallPrompt] Button rect:", buttonRef.current.getBoundingClientRect());
+      console.log("[InstallPrompt] Button element:", buttonRef.current);
+    } else {
+      console.log("[InstallPrompt] ❌ Button element NOT found in DOM!");
+    }
+  }, []);
+
   // DEBUG: Log do className
   const buttonClasses = cn(
     "fixed bottom-32 right-4 z-50",
@@ -64,6 +88,7 @@ export function InstallPrompt() {
     <>
       {/* FAB - 100% persistente */}
       <button
+        ref={buttonRef}
         onClick={() => {
           setDrawerOpen(true);
           setSnap(0.2);
