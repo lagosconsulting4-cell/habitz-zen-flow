@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Smartphone, Share, Plus, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +8,6 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "@/components/ui/drawer";
 import { usePWA } from "@/hooks/usePWA";
 import { cn } from "@/lib/utils";
@@ -64,7 +63,8 @@ export function InstallPrompt() {
     <>
       {/* FAB Button - Completamente separado do Radix Dialog */}
       <button
-        onClick={() => {
+        onClick={(e) => {
+          e.currentTarget.blur(); // Remove focus ANTES de abrir o drawer
           setDrawerOpen(true);
           setSnap(0.2);
         }}
@@ -91,10 +91,7 @@ export function InstallPrompt() {
       >
         <DrawerContent className="border-t-4 border-primary/20">
           <DrawerHeader className="pb-2">
-            <DrawerTitle
-              autoFocus
-              className="text-xl font-bold flex items-center gap-2"
-            >
+            <DrawerTitle className="text-xl font-bold flex items-center gap-2">
               {isExpanded ? (
                 <>
                   <span className="text-2xl">📱</span>
