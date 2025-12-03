@@ -45,6 +45,21 @@ export function InstallPrompt() {
     setIsLoading(false);
   };
 
+  // DEBUG: Log do className
+  const buttonClasses = cn(
+    "fixed bottom-32 right-4 z-50",
+    "w-16 h-16 rounded-full",
+    "bg-red-500", // DEBUG: Vermelho temporário para visibilidade!
+    "text-primary-foreground",
+    "shadow-xl hover:shadow-2xl",
+    "flex items-center justify-center",
+    "transition-all duration-300",
+    "hover:scale-110 active:scale-95",
+    "ring-4 ring-primary/20 hover:ring-primary/30",
+    "group relative overflow-hidden"
+  );
+  console.log("[InstallPrompt] className gerado:", buttonClasses);
+
   return (
     <>
       {/* FAB - 100% persistente */}
@@ -53,18 +68,7 @@ export function InstallPrompt() {
           setDrawerOpen(true);
           setSnap(0.2);
         }}
-        className={cn(
-          "fixed bottom-32 right-4 z-50",
-          "w-16 h-16 rounded-full",
-          "bg-gradient-to-br from-primary via-primary to-primary/80",
-          "text-primary-foreground",
-          "shadow-xl hover:shadow-2xl",
-          "flex items-center justify-center",
-          "transition-all duration-300",
-          "hover:scale-110 active:scale-95",
-          "ring-4 ring-primary/20 hover:ring-primary/30",
-          "group relative overflow-hidden"
-        )}
+        className={buttonClasses}
         aria-label="Instalar app"
       >
         {/* Glow effect */}
