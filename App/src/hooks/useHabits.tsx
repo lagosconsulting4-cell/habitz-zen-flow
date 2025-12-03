@@ -274,7 +274,7 @@ export const useHabits = () => {
             // Map unsupported unit values (hours, pages, liters) to "custom"
             unit: mapUnitToDatabase(habitData.unit),
             goal_value: habitData.goal_value ?? null,
-            frequency_type: habitData.frequency_type ?? "fixed_days",
+            frequency_type: habitData.frequency_type ?? "daily",
             times_per_week: habitData.times_per_week ?? null,
             times_per_month: habitData.times_per_month ?? null,
             every_n_days: habitData.every_n_days ?? null,

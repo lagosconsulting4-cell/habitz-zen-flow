@@ -196,6 +196,7 @@ const CreateHabit = () => {
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [reminderTime, setReminderTime] = useState<string>("08:00");
+  const [notificationSound, setNotificationSound] = useState<"default" | "soft" | "bright">("default");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string; iconKey?: HabitIconKey } | null>(null);
@@ -348,7 +349,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         icon_key: selectedIconKey,
         unit,
         goal_value: goalValue ?? null,
-        frequency_type: frequencyType,
+        frequency_type: frequencyType || "daily",
         times_per_week: null,
         times_per_month: null,
         every_n_days: null,
