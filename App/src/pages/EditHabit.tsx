@@ -119,18 +119,11 @@ const EditHabit = () => {
       const notifPref = habit.notification_pref as any;
       if (notifPref) {
         setNotificationsEnabled(notifPref.reminder_enabled ?? false);
-        setNotificationSound(notifPref.sound ?? "default");
       }
 
       setHabitLoaded(true);
     }
   }, [habit, habitLoaded]);
-
-  const soundOptions: Array<{ value: "default" | "soft" | "bright"; label: string; description: string }> = [
-    { value: "default", label: "Padrão", description: "Alerta equilibrado para o dia a dia" },
-    { value: "soft", label: "Suave", description: "Discreto, sem assustar" },
-    { value: "bright", label: "Vibrante", description: "Curto e chamativo" },
-  ];
 
   const themeColors = getHabitFormTheme(isDarkMode);
 
@@ -507,36 +500,6 @@ const EditHabit = () => {
             className="data-[state=checked]:bg-primary"
           />
         </div>
-
-        {notificationsEnabled && (
-          <div className="px-4 pb-4 space-y-3">
-            <div className="rounded-xl border border-border/60 bg-muted/10 p-3">
-              <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${themeColors.iconBg}`}>
-                  <BellRing className={`h-5 w-5 ${themeColors.iconColor}`} />
-                </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-semibold ${themeColors.bodyText}`}>Som da notificação</p>
-                  <Select value={notificationSound} onValueChange={(val) => setNotificationSound(val as typeof notificationSound)}>
-                    <SelectTrigger className={`mt-2 h-11 w-full rounded-lg ${themeColors.input}`}>
-                      <SelectValue placeholder="Escolha um som" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      {soundOptions.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{opt.label}</span>
-                            <span className="text-xs text-muted-foreground">{opt.description}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* CTA Button - Go to Confirm */}
