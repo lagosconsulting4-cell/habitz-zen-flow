@@ -79,18 +79,17 @@ export function InstallPrompt() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Video Tutorial */}
-          <div className="relative rounded-xl overflow-hidden shadow-2xl ring-2 ring-primary/10">
+        <div className="space-y-4 py-2">
+          {/* Video Tutorial - Vertical video optimized */}
+          <div className="relative rounded-xl overflow-hidden shadow-lg ring-1 ring-border/50 bg-muted/30 mx-auto" style={{ maxWidth: '200px' }}>
             <video
               autoPlay
               muted
               loop
               playsInline
-              className="w-full h-auto max-h-48 object-contain bg-gradient-to-br from-muted/50 to-muted"
+              className="w-full h-auto aspect-[9/16] object-cover"
             >
               <source src="/videos/install-tutorial.mp4" type="video/mp4" />
-              Seu navegador não suporta vídeo.
             </video>
           </div>
 
