@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getHabitFormTheme } from "@/theme/habitFormTheme";
 
 const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string }> = [
   { id: "morning", name: "Manhã" },
@@ -130,43 +131,7 @@ const EditHabit = () => {
     { value: "bright", label: "Vibrante", description: "Curto e chamativo" },
   ];
 
-  const themeColors = isDarkMode
-    ? {
-        overlay: "bg-black/90",
-        container: "bg-[#0a0a0a]",
-        headerBorder: "border-white/10",
-        headerText: "text-white",
-        headerIcon: "text-white/80 hover:text-white hover:bg-white/5",
-        sectionTitle: "text-white/40",
-        bodyText: "text-white",
-        bodyTextSecondary: "text-white/60",
-        bodyTextMuted: "text-white/50",
-        card: "bg-white/5 border-white/10",
-        cardHover: "hover:bg-white/10",
-        input: "bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50 focus:ring-lime-400/20",
-        buttonInactive: "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white",
-        buttonActive: "bg-lime-400 text-black",
-        iconBg: "bg-lime-400/10",
-        iconColor: "text-lime-400",
-      }
-    : {
-        overlay: "bg-primary/95",
-        container: "bg-primary",
-        headerBorder: "border-white/20",
-        headerText: "text-white",
-        headerIcon: "text-white/80 hover:text-white hover:bg-white/10",
-        sectionTitle: "text-white/70",
-        bodyText: "text-white",
-        bodyTextSecondary: "text-white/80",
-        bodyTextMuted: "text-white/60",
-        card: "bg-black/10 border-white/20",
-        cardHover: "hover:bg-black/15",
-        input: "bg-black/10 border-white/20 text-white placeholder:text-white/50 focus:border-white/50 focus:ring-white/20",
-        buttonInactive: "bg-black/10 text-white/80 hover:bg-black/15 hover:text-white",
-        buttonActive: "bg-white text-primary",
-        iconBg: "bg-white/20",
-        iconColor: "text-white",
-      };
+  const themeColors = getHabitFormTheme(isDarkMode);
 
   const toggleDay = (day: number) => {
     setSelectedDays((prev) =>
@@ -733,8 +698,13 @@ const EditHabit = () => {
 
   return (
     <div className={`min-h-screen flex flex-col ${themeColors.background || 'bg-background'}`}>
-      {HeaderBar}
-      <div className="flex-1 px-4 py-6 overflow-y-auto">
+      {/* Fixed header */}
+      <div className="fixed top-0 left-0 right-0 z-10 w-full bg-inherit">
+        {HeaderBar}
+      </div>
+
+      {/* Scrollable content with padding to account for fixed header */}
+      <div className="flex-1 pt-24 px-4 py-6 overflow-y-auto">
         <AnimatePresence mode="wait">
           {step === "details" && DetailsStep}
           {step === "confirm" && ConfirmStep}
