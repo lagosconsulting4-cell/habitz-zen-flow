@@ -6,6 +6,7 @@ interface HeroCircleProps {
   color: string;
   isAutoTask?: boolean;
   size?: "default" | "lg";
+  isDarkMode?: boolean;
 }
 
 const sizeConfig = {
@@ -44,9 +45,15 @@ export const HeroCircle: React.FC<HeroCircleProps> = ({
   color,
   isAutoTask = false,
   size = "default",
+  isDarkMode = true,
 }) => {
   const Icon = iconKey ? getHabitIcon(iconKey) : null;
   const config = sizeConfig[size];
+
+  // Cores adaptadas para light mode com bom contraste
+  const iconBgColor = isDarkMode ? `${color}20` : "#F1F5F9"; // slate-100 no light
+  const iconColor = isDarkMode ? color : "#65A30D"; // lime-600 no light
+  const borderColor = isDarkMode ? color : "#E2E8F0"; // slate-200 no light
 
   return (
     <div className={cn("relative flex items-center justify-center", config.container)}>
@@ -66,7 +73,7 @@ export const HeroCircle: React.FC<HeroCircleProps> = ({
           cy={config.circleCenter}
           r={config.circleRadius}
           fill="none"
-          stroke={color}
+          stroke={isDarkMode ? color : "#A3E635"} // Verde visível no light mode
           strokeWidth={config.strokeWidth}
           strokeDasharray={config.dashArray}
           strokeDashoffset={config.dashOffset}
@@ -81,13 +88,13 @@ export const HeroCircle: React.FC<HeroCircleProps> = ({
           config.iconContainer
         )}
         style={{
-          backgroundColor: `${color}10`,
-          borderColor: color,
+          backgroundColor: iconBgColor,
+          borderColor: borderColor,
           borderWidth: "2px",
           borderStyle: "solid",
         }}
       >
-        {Icon && <Icon className={config.iconSize} style={{ color }} />}
+        {Icon && <Icon className={config.iconSize} style={{ color: iconColor }} />}
       </div>
 
       {/* Plus badge for auto tasks */}

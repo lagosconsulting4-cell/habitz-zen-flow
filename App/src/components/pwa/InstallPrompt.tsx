@@ -105,6 +105,7 @@ export function InstallPrompt() {
         }}
         className={buttonClasses}
         aria-label="Instalar app"
+        aria-hidden="false"
       >
         {/* Glow effect */}
         <div className="absolute inset-0 rounded-full bg-white/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -139,11 +140,13 @@ export function InstallPrompt() {
                 </>
               )}
             </DrawerTitle>
-            {isExpanded && (
-              <DrawerDescription className="text-base">
-                Acesso rápido, funciona offline e muito mais!
-              </DrawerDescription>
-            )}
+            <DrawerDescription className="text-base">
+              {isExpanded ? (
+                "Acesso rápido, funciona offline e muito mais!"
+              ) : (
+                "Instale o Habitz no seu dispositivo para melhor experiência"
+              )}
+            </DrawerDescription>
           </DrawerHeader>
 
           {/* Conteúdo só aparece quando expandido */}

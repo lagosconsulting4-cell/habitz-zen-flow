@@ -19,14 +19,14 @@ interface BinaryGoalCardProps {
 }
 
 export const BinaryGoalCard: React.FC<BinaryGoalCardProps> = ({ config, isDarkMode = true }) => {
-  // Cores adaptativas baseadas no tema
+  // Cores adaptativas baseadas no tema com bom contraste
   const cardClass = isDarkMode
     ? "border-white/10 bg-white/5"
-    : "border-white/20 bg-black/10";
+    : "border-slate-200 bg-lime-50"; // Fundo lime claro no light mode
 
-  const iconClass = isDarkMode ? "text-lime-400" : "text-white";
-  const titleClass = isDarkMode ? "text-white/80" : "text-white";
-  const helpTextClass = isDarkMode ? "text-white/50" : "text-white/70";
+  const iconClass = isDarkMode ? "text-lime-400" : "text-lime-600"; // Lime-600 visível no light
+  const titleClass = isDarkMode ? "text-white/80" : "text-slate-700"; // Slate-700 para contraste
+  const helpTextClass = isDarkMode ? "text-white/50" : "text-slate-500"; // Slate-500 para texto secundário
 
   return (
     <div className={`mx-4 rounded-2xl border px-4 py-4 ${cardClass}`}>

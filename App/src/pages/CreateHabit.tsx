@@ -520,8 +520,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                   animate={{
                     scale: isActive ? 1.1 : 1,
                     backgroundColor: isActive || isCompleted
-                      ? (isDarkMode ? UNIFIED_COLOR : "#FFFFFF")
-                      : (isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"),
+                      ? "#A3E635"  // Verde lime para ativo/concluído (ambos os modos)
+                      : (isDarkMode ? "rgba(255,255,255,0.1)" : "#E2E8F0"), // Cinza visível no light
                   }}
                   transition={{ duration: 0.2 }}
                   className="flex h-10 w-10 items-center justify-center rounded-full"
@@ -530,8 +530,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                     className="h-5 w-5 transition-colors duration-200"
                     style={{
                       color: isActive || isCompleted
-                        ? (isDarkMode ? "#000000" : "#65A30D")
-                        : (isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.6)")
+                        ? "#FFFFFF"  // Branco no verde (ambos os modos)
+                        : (isDarkMode ? "rgba(255,255,255,0.4)" : "#64748B") // Slate-500 no light
                     }}
                   />
                 </motion.div>
@@ -555,8 +555,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                     className="h-0.5 rounded-full"
                     animate={{
                       backgroundColor: isCompleted
-                        ? (isDarkMode ? UNIFIED_COLOR : "#FFFFFF")
-                        : (isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"),
+                        ? "#A3E635"  // Verde para concluído (ambos os modos)
+                        : (isDarkMode ? "rgba(255,255,255,0.15)" : "#CBD5E1"), // Cinza visível no light
                     }}
                     transition={{ duration: 0.3 }}
                   />
@@ -706,6 +706,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
           iconKey={selectedTemplate?.iconKey ? (selectedTemplate.iconKey as any) : selectedCategoryData?.iconKey ?? null}
           color={isDarkMode ? UNIFIED_COLOR : "#FFFFFF"}
           isAutoTask={selectedTemplateAuto}
+          isDarkMode={isDarkMode}
         />
 
         {/* Task Title */}
@@ -759,7 +760,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
           layout
           className={`mt-2 overflow-hidden rounded-2xl border-2 ${themeColors.card}`}
           style={{
-            borderColor: isDarkMode ? UNIFIED_COLOR : "rgba(255,255,255,0.4)",
+            borderColor: isDarkMode ? UNIFIED_COLOR : "#E2E8F0", // Borda visível no light
+            backgroundColor: isDarkMode ? undefined : "#F8FAFC", // slate-50 no light
           }}
         >
           <div className="p-4">
@@ -770,7 +772,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                 layout
                 className="flex h-12 w-12 items-center justify-center rounded-xl"
                 style={{
-                  backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "rgba(255,255,255,0.2)",
+                  backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "#F1F5F9", // slate-100 no light
                 }}
               >
                 {(() => {
@@ -782,10 +784,10 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                   return PreviewIcon ? (
                     <PreviewIcon
                       className="h-6 w-6"
-                      style={{ color: isDarkMode ? UNIFIED_COLOR : "#FFFFFF" }}
+                      style={{ color: isDarkMode ? UNIFIED_COLOR : "#65A30D" }} // lime-600 no light
                     />
                   ) : (
-                    <Target className="h-6 w-6" style={{ color: isDarkMode ? UNIFIED_COLOR : "#FFFFFF" }} />
+                    <Target className="h-6 w-6" style={{ color: isDarkMode ? UNIFIED_COLOR : "#65A30D" }} />
                   );
                 })()}
               </motion.div>
@@ -813,7 +815,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
               <div
                 className="flex h-8 w-8 items-center justify-center rounded-full border-2"
                 style={{
-                  borderColor: isDarkMode ? UNIFIED_COLOR : "rgba(255,255,255,0.5)",
+                  borderColor: isDarkMode ? UNIFIED_COLOR : "#CBD5E1", // slate-300 no light
                 }}
               />
             </div>
@@ -823,8 +825,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase ${themeColors.periodIcon.selectedBg}`}
                 style={{
-                  backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "rgba(255,255,255,0.2)",
-                  color: isDarkMode ? UNIFIED_COLOR : "#FFFFFF",
+                  backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "#ECFCCB", // lime-100 no light
+                  color: isDarkMode ? UNIFIED_COLOR : "#3F6212", // lime-800 no light
                 }}
               >
                 {periods.find(p => p.id === selectedPeriod)?.icon}{" "}
@@ -834,8 +836,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                 <span
                   className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold"
                   style={{
-                    backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "rgba(255,255,255,0.2)",
-                    color: isDarkMode ? UNIFIED_COLOR : "#FFFFFF",
+                    backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "#ECFCCB", // lime-100 no light
+                    color: isDarkMode ? UNIFIED_COLOR : "#3F6212", // lime-800 no light
                   }}
                 >
                   <Bell className="h-3 w-3" /> {reminderTime}
@@ -1057,6 +1059,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             color={isDarkMode ? UNIFIED_COLOR : "#FFFFFF"}
             isAutoTask={selectedTemplateAuto}
             size="lg"
+            isDarkMode={isDarkMode}
           />
         </motion.div>
 

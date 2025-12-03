@@ -344,6 +344,7 @@ const EditHabit = () => {
           iconKey={selectedIconKey as HabitIconKey | null}
           color={isDarkMode ? UNIFIED_COLOR : "#FFFFFF"}
           isAutoTask={false}
+          isDarkMode={isDarkMode}
         />
         <div className="w-full px-6 text-center">
           <p className={`text-2xl font-bold uppercase tracking-wide ${themeColors.bodyText}`}>
@@ -554,6 +555,7 @@ const EditHabit = () => {
             color={isDarkMode ? UNIFIED_COLOR : "#FFFFFF"}
             isAutoTask={false}
             size="lg"
+            isDarkMode={isDarkMode}
           />
         </motion.div>
 
