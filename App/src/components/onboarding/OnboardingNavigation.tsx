@@ -59,10 +59,10 @@ export const OnboardingNavigation = ({
           >
             <Button
               variant="outline"
-              size="lg"
+              size="default"
               onClick={handleBack}
               disabled={!canGoBack}
-              className="gap-2 rounded-xl"
+              className="gap-1.5 rounded-xl h-10"
             >
               <ChevronLeft className="h-4 w-4" />
               Voltar
@@ -82,11 +82,11 @@ export const OnboardingNavigation = ({
         className={centered ? "w-full max-w-[280px]" : "flex-1 max-w-[200px]"}
       >
         <Button
-          size="lg"
+          size="default"
           onClick={handleNext}
           disabled={!isValid || isSubmitting}
           className={cn(
-            "w-full gap-2 rounded-xl font-bold transition-all duration-300",
+            "w-full gap-1.5 rounded-xl font-bold transition-all duration-300 h-10",
             isLastStep
               ? "bg-gradient-to-r from-primary to-primary/80 hover:scale-105 shadow-lg shadow-primary/25"
               : "bg-primary hover:bg-primary/90"

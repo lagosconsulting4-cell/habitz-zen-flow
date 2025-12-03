@@ -1,103 +1,76 @@
 import { motion } from "motion/react";
 import { useOnboarding, type WorkSchedule } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
-import { Clock } from "lucide-react";
 
 const WORK_SCHEDULE_OPTIONS: Array<{
   value: WorkSchedule;
   label: string;
-  description: string;
+  emoji: string;
   hours: string;
 }> = [
-  {
-    value: "morning",
-    label: "Manhã",
-    description: "Trabalho de manhã",
-    hours: "6h - 14h",
-  },
-  {
-    value: "commercial",
-    label: "Comercial",
-    description: "Horário tradicional",
-    hours: "8h - 18h",
-  },
-  {
-    value: "evening",
-    label: "Tarde/Noite",
-    description: "Trabalho à tarde/noite",
-    hours: "14h - 22h",
-  },
-  {
-    value: "flexible",
-    label: "Flexível",
-    description: "Sem horário fixo",
-    hours: "Varia",
-  },
+  { value: "morning", label: "Manhã", emoji: "🌅", hours: "6h-14h" },
+  { value: "commercial", label: "Comercial", emoji: "🏢", hours: "8h-18h" },
+  { value: "evening", label: "Tarde/Noite", emoji: "🌙", hours: "14h-22h" },
+  { value: "flexible", label: "Flexível", emoji: "🔄", hours: "Varia" },
 ];
 
 export const WorkScheduleStep = () => {
   const { workSchedule, setWorkSchedule } = useOnboarding();
 
+  // Get selected option hours for hint
+  const selectedOption = WORK_SCHEDULE_OPTIONS.find(o => o.value === workSchedule);
+
   return (
-    <div className="flex flex-col min-h-[500px] px-6 py-8">
-      {/* Header */}
+    <div className="flex flex-col h-full">
+      {/* Header - Compact */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="text-center mb-8"
+        transition={{ duration: 0.3 }}
+        className="text-center mb-4"
       >
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-          <Clock className="h-8 w-8 text-primary" />
-        </div>
-
-        <h2 className="text-3xl font-bold mb-3">Qual seu horário de trabalho?</h2>
-
-        <p className="text-muted-foreground max-w-md mx-auto">
-          Vamos organizar sua rotina nos horários livres
+        <h2 className="text-2xl font-bold mb-1">Seu horário de trabalho?</h2>
+        <p className="text-sm text-muted-foreground">
+          Organizamos sua rotina nos horários livres
         </p>
       </motion.div>
 
-      {/* Selection Grid */}
+      {/* Selection Grid - 2x2 */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
+        transition={{ delay: 0.1, duration: 0.3 }}
         className="flex-1 flex items-center justify-center"
       >
-        <SelectionCardGrid columns={2} className="max-w-2xl w-full">
+        <SelectionCardGrid mobileColumns={2} gap={2} className="w-full max-w-xs">
           {WORK_SCHEDULE_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 + index * 0.05, duration: 0.3 }}
+              transition={{ delay: 0.15 + index * 0.03, duration: 0.2 }}
             >
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                description={
-                  <div>
-                    <p>{option.description}</p>
-                    <p className="text-xs text-primary mt-1 font-medium">{option.hours}</p>
-                  </div>
-                }
+                emoji={option.emoji}
                 selected={workSchedule === option.value}
                 onClick={() => setWorkSchedule(option.value)}
+                variant="mini"
               />
             </motion.div>
           ))}
         </SelectionCardGrid>
       </motion.div>
 
-      {/* Hint */}
+      {/* Dynamic Hint */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.4 }}
-        className="text-center text-xs text-muted-foreground mt-6"
+        transition={{ delay: 0.3, duration: 0.3 }}
+        className="text-center text-xs text-muted-foreground mt-2"
       >
-        Seus hábitos serão sugeridos para antes e depois do trabalho
+        {selectedOption ? `Horário: ${selectedOption.hours}` : "Selecione seu turno de trabalho"}
       </motion.p>
     </div>
   );

@@ -1,103 +1,76 @@
 import { motion } from "motion/react";
 import { useOnboarding, type TimeAvailable } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
-import { Timer } from "lucide-react";
 
 const TIME_AVAILABLE_OPTIONS: Array<{
   value: TimeAvailable;
   label: string;
-  description: string;
+  emoji: string;
   habits: string;
 }> = [
-  {
-    value: "15min",
-    label: "15 minutos",
-    description: "Tenho pouco tempo livre",
-    habits: "~3 hábitos rápidos",
-  },
-  {
-    value: "30min",
-    label: "30 minutos",
-    description: "Um tempo moderado",
-    habits: "~5 hábitos",
-  },
-  {
-    value: "1h",
-    label: "1 hora",
-    description: "Tenho tempo disponível",
-    habits: "~7 hábitos",
-  },
-  {
-    value: "2h+",
-    label: "2+ horas",
-    description: "Tenho bastante tempo",
-    habits: "~10 hábitos completos",
-  },
+  { value: "15min", label: "15 min", emoji: "⚡", habits: "~3 hábitos" },
+  { value: "30min", label: "30 min", emoji: "⏱️", habits: "~5 hábitos" },
+  { value: "1h", label: "1 hora", emoji: "🕐", habits: "~7 hábitos" },
+  { value: "2h+", label: "2+ horas", emoji: "📅", habits: "~10 hábitos" },
 ];
 
 export const TimeAvailableStep = () => {
   const { timeAvailable, setTimeAvailable } = useOnboarding();
 
+  // Get selected option for hint
+  const selectedOption = TIME_AVAILABLE_OPTIONS.find(o => o.value === timeAvailable);
+
   return (
-    <div className="flex flex-col min-h-[500px] px-6 py-8">
-      {/* Header */}
+    <div className="flex flex-col h-full">
+      {/* Header - Compact */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="text-center mb-8"
+        transition={{ duration: 0.3 }}
+        className="text-center mb-4"
       >
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-          <Timer className="h-8 w-8 text-primary" />
-        </div>
-
-        <h2 className="text-3xl font-bold mb-3">Quanto tempo você tem por dia?</h2>
-
-        <p className="text-muted-foreground max-w-md mx-auto">
-          Isso define quantos hábitos vamos recomendar
+        <h2 className="text-2xl font-bold mb-1">Quanto tempo por dia?</h2>
+        <p className="text-sm text-muted-foreground">
+          Define quantos hábitos vamos recomendar
         </p>
       </motion.div>
 
-      {/* Selection Grid */}
+      {/* Selection Grid - 2x2 */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
+        transition={{ delay: 0.1, duration: 0.3 }}
         className="flex-1 flex items-center justify-center"
       >
-        <SelectionCardGrid columns={2} className="max-w-2xl w-full">
+        <SelectionCardGrid mobileColumns={2} gap={2} className="w-full max-w-xs">
           {TIME_AVAILABLE_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 + index * 0.05, duration: 0.3 }}
+              transition={{ delay: 0.15 + index * 0.03, duration: 0.2 }}
             >
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                description={
-                  <div>
-                    <p>{option.description}</p>
-                    <p className="text-xs text-primary mt-1 font-medium">{option.habits}</p>
-                  </div>
-                }
+                emoji={option.emoji}
                 selected={timeAvailable === option.value}
                 onClick={() => setTimeAvailable(option.value)}
+                variant="mini"
               />
             </motion.div>
           ))}
         </SelectionCardGrid>
       </motion.div>
 
-      {/* Hint */}
+      {/* Dynamic Hint */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.4 }}
-        className="text-center text-xs text-muted-foreground mt-6"
+        transition={{ delay: 0.3, duration: 0.3 }}
+        className="text-center text-xs text-muted-foreground mt-2"
       >
-        Você sempre pode adicionar ou remover hábitos depois
+        {selectedOption ? `Sugestão: ${selectedOption.habits}` : "Selecione seu tempo disponível"}
       </motion.p>
     </div>
   );

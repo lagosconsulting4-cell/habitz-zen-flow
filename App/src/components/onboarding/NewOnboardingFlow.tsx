@@ -50,16 +50,16 @@ const OnboardingFlowContent = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
-      {/* Progress Bar - Fixed at top */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="container max-w-2xl mx-auto px-4 py-6">
+      {/* Progress Bar - Fixed at top (compact) */}
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border pt-safe">
+        <div className="container max-w-2xl mx-auto px-4 py-3">
           <OnboardingProgress />
         </div>
       </div>
 
       {/* Step Content - Scrollable */}
       <div className="flex-1 overflow-y-auto">
-        <div className="container max-w-4xl mx-auto w-full pt-6 pb-8">
+        <div className="container max-w-4xl mx-auto w-full pt-4 pb-4 px-4">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -74,13 +74,13 @@ const OnboardingFlowContent = () => {
         </div>
       </div>
 
-      {/* Navigation - Fixed at bottom */}
+      {/* Navigation - Fixed at bottom (compact) */}
       <div
-        className={`sticky bottom-0 z-40 bg-background/95 backdrop-blur-sm ${
+        className={`sticky bottom-0 z-40 bg-background/95 backdrop-blur-sm pb-safe ${
           currentStep === 0 ? "" : "border-t border-border"
         }`}
       >
-        <div className="container max-w-2xl mx-auto px-4 py-6">
+        <div className="container max-w-2xl mx-auto px-4 py-3">
           <OnboardingNavigation centered={currentStep === 0} />
         </div>
       </div>

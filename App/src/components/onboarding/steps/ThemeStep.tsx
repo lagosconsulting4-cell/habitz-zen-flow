@@ -4,7 +4,7 @@ import { useOnboarding } from "../OnboardingProvider";
 import { useTheme } from "@/hooks/useTheme";
 import { Compare } from "@/components/ui/compare";
 import { ThemeMockup } from "../ThemeMockup";
-import { Palette, Sun, Moon, Check } from "lucide-react";
+import { Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ThemeOption = "light" | "dark";
@@ -13,25 +13,14 @@ const THEME_OPTIONS: Array<{
   value: ThemeOption;
   label: string;
   icon: typeof Sun;
-  description: string;
 }> = [
-  {
-    value: "dark",
-    label: "Escuro",
-    icon: Moon,
-    description: "Confortável para os olhos",
-  },
-  {
-    value: "light",
-    label: "Claro",
-    icon: Sun,
-    description: "Visual clean e luminoso",
-  },
+  { value: "dark", label: "Escuro", icon: Moon },
+  { value: "light", label: "Claro", icon: Sun },
 ];
 
 export const ThemeStep = () => {
   const { themePreference, setThemePreference } = useOnboarding();
-  const { setTheme, resolvedTheme } = useTheme();
+  const { setTheme } = useTheme();
   const [sliderPosition, setSliderPosition] = useState(50);
 
   // Sincronizar tema selecionado com o sistema
@@ -44,12 +33,10 @@ export const ThemeStep = () => {
   // Determinar tema baseado na posição do slider
   useEffect(() => {
     if (sliderPosition < 40) {
-      // Mais para a esquerda = tema escuro
       if (themePreference !== "dark") {
         setThemePreference("dark");
       }
     } else if (sliderPosition > 60) {
-      // Mais para a direita = tema claro
       if (themePreference !== "light") {
         setThemePreference("light");
       }
@@ -58,7 +45,6 @@ export const ThemeStep = () => {
 
   const handleThemeSelect = (theme: ThemeOption) => {
     setThemePreference(theme);
-    // Ajustar slider para refletir a escolha
     if (theme === "dark") {
       setSliderPosition(20);
     } else {
@@ -67,31 +53,26 @@ export const ThemeStep = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-[500px] px-6 py-8">
-      {/* Header */}
+    <div className="flex flex-col h-full">
+      {/* Header - Compact */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="text-center mb-6"
+        transition={{ duration: 0.3 }}
+        className="text-center mb-3"
       >
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-          <Palette className="h-8 w-8 text-primary" />
-        </div>
-
-        <h2 className="text-3xl font-bold mb-3">Escolha seu tema</h2>
-
-        <p className="text-muted-foreground max-w-md mx-auto">
-          Arraste para comparar ou selecione abaixo
+        <h2 className="text-2xl font-bold mb-1">Escolha seu tema</h2>
+        <p className="text-sm text-muted-foreground">
+          Arraste para comparar
         </p>
       </motion.div>
 
-      {/* Compare Component */}
+      {/* Compare Component - Reduced height */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
-        className="flex justify-center mb-6"
+        transition={{ delay: 0.1, duration: 0.3 }}
+        className="flex justify-center mb-3"
       >
         <Compare
           firstContent={<ThemeMockup theme="light" />}
@@ -99,26 +80,16 @@ export const ThemeStep = () => {
           slideMode="drag"
           initialSliderPercentage={50}
           showHandlebar={true}
-          className="w-full max-w-sm h-[320px] rounded-2xl border border-border shadow-lg"
+          className="w-full max-w-xs h-[200px] rounded-xl border border-border shadow-lg"
           onSliderChange={setSliderPosition}
         />
       </motion.div>
 
-      {/* Hint */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4, duration: 0.3 }}
-        className="text-center text-sm text-muted-foreground mb-6"
-      >
-        ← Arraste para comparar os temas →
-      </motion.p>
-
-      {/* Theme Selection Buttons */}
+      {/* Theme Selection Buttons - Compact */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.4 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
         className="flex justify-center gap-3"
       >
         {THEME_OPTIONS.map((option) => {
@@ -130,27 +101,26 @@ export const ThemeStep = () => {
               key={option.value}
               onClick={() => handleThemeSelect(option.value)}
               className={cn(
-                "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all min-w-[100px]",
-                "hover:scale-105 active:scale-95",
+                "flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all",
+                "active:scale-95",
                 isSelected
-                  ? "border-primary bg-primary/5 shadow-md"
-                  : "border-border hover:border-primary/50"
+                  ? "border-primary bg-primary/5"
+                  : "border-border"
               )}
             >
               <div
                 className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+                  "w-8 h-8 rounded-full flex items-center justify-center transition-all",
                   isSelected ? "bg-primary" : "bg-muted"
                 )}
               >
                 <Icon
                   className={cn(
-                    "w-5 h-5 transition-colors",
+                    "w-4 h-4 transition-colors",
                     isSelected ? "text-primary-foreground" : "text-muted-foreground"
                   )}
                 />
               </div>
-
               <span
                 className={cn(
                   "text-sm font-medium transition-colors",

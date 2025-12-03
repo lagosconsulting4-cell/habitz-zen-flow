@@ -14,7 +14,7 @@ export interface SelectionCardProps {
   disabled?: boolean;
   onClick?: () => void;
   className?: string;
-  variant?: "default" | "compact" | "icon-only";
+  variant?: "default" | "compact" | "mini" | "icon-only";
   multiselect?: boolean;
 }
 
@@ -32,6 +32,7 @@ export const SelectionCard = ({
   multiselect = false,
 }: SelectionCardProps) => {
   const isCompact = variant === "compact";
+  const isMini = variant === "mini";
   const isIconOnly = variant === "icon-only";
 
   return (
@@ -50,7 +51,7 @@ export const SelectionCard = ({
             ? "border-primary bg-primary/5 dark:bg-primary/10 shadow-md shadow-primary/20"
             : "border-border hover:border-primary/50 hover:shadow-sm",
           disabled && "opacity-50 cursor-not-allowed",
-          isIconOnly ? "p-4" : isCompact ? "p-4" : "p-6",
+          isIconOnly ? "p-4" : isMini ? "py-2 px-3" : isCompact ? "p-4" : "p-6",
           className
         )}
         onClick={disabled ? undefined : onClick}
@@ -58,7 +59,8 @@ export const SelectionCard = ({
         {/* Selection Indicator */}
         <motion.div
           className={cn(
-            "absolute inset-y-0 right-3 flex items-center justify-center",
+            "absolute inset-y-0 flex items-center justify-center",
+            isMini ? "right-2" : "right-3",
             selected
               ? "text-primary-foreground"
               : ""
@@ -77,7 +79,8 @@ export const SelectionCard = ({
         >
           <div
             className={cn(
-              "w-5 h-5 rounded-full flex items-center justify-center",
+              "rounded-full flex items-center justify-center",
+              isMini ? "w-4 h-4" : "w-5 h-5",
               selected
                 ? "bg-primary text-primary-foreground"
                 : multiselect
@@ -85,14 +88,15 @@ export const SelectionCard = ({
                   : ""
             )}
           >
-            {selected && <Check className="h-3 w-3" strokeWidth={3} />}
+            {selected && <Check className={cn(isMini ? "h-2.5 w-2.5" : "h-3 w-3")} strokeWidth={3} />}
           </div>
         </motion.div>
 
         {/* Content */}
         <div
           className={cn(
-            "flex items-center gap-4",
+            "flex items-center",
+            isMini ? "gap-2" : "gap-4",
             isIconOnly ? "flex-col justify-center text-center" : "flex-row"
           )}
         >
@@ -103,10 +107,12 @@ export const SelectionCard = ({
                 "flex-shrink-0 flex items-center justify-center rounded-xl",
                 isIconOnly
                   ? "w-16 h-16 text-4xl"
-                  : isCompact
-                    ? "w-12 h-12 text-2xl"
-                    : "w-14 h-14 text-3xl",
-                !emoji && "bg-muted p-3"
+                  : isMini
+                    ? "w-8 h-8 text-lg"
+                    : isCompact
+                      ? "w-12 h-12 text-2xl"
+                      : "w-14 h-14 text-3xl",
+                !emoji && (isMini ? "bg-muted p-1.5" : "bg-muted p-3")
               )}
               animate={{ rotate: selected ? [0, -10, 10, 0] : 0 }}
               transition={{ duration: 0.3 }}
@@ -116,17 +122,17 @@ export const SelectionCard = ({
           )}
 
           {/* Text Content */}
-          <div className={cn("flex-1", isIconOnly && "w-full")}>
+          <div className={cn("flex-1 min-w-0", isIconOnly && "w-full")}>
             <h3
               className={cn(
                 "font-bold text-foreground leading-tight",
-                isIconOnly ? "text-sm mt-2" : isCompact ? "text-base" : "text-lg"
+                isIconOnly ? "text-sm mt-2" : isMini ? "text-sm truncate" : isCompact ? "text-base" : "text-lg"
               )}
             >
               {title}
             </h3>
 
-            {description && !isIconOnly && (
+            {description && !isIconOnly && !isMini && (
               <p
                 className={cn(
                   "text-muted-foreground mt-1",
@@ -158,19 +164,28 @@ export const SelectionCard = ({
 export const SelectionCardGrid = ({
   children,
   columns = 2,
+  mobileColumns,
+  gap = 3,
   className,
 }: {
   children: ReactNode;
   columns?: 1 | 2 | 3;
+  mobileColumns?: 2 | 3; // Force columns on mobile for compact layouts
+  gap?: 2 | 3;
   className?: string;
 }) => {
   return (
     <div
       className={cn(
-        "grid gap-3",
-        columns === 1 && "grid-cols-1",
-        columns === 2 && "grid-cols-1 sm:grid-cols-2",
-        columns === 3 && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+        "grid",
+        gap === 2 ? "gap-2" : "gap-3",
+        // Mobile columns override
+        mobileColumns === 3 && "grid-cols-3",
+        mobileColumns === 2 && "grid-cols-2",
+        // Default responsive behavior (only if no mobileColumns)
+        !mobileColumns && columns === 1 && "grid-cols-1",
+        !mobileColumns && columns === 2 && "grid-cols-1 sm:grid-cols-2",
+        !mobileColumns && columns === 3 && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
         className
       )}
     >

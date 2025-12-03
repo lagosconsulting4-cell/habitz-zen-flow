@@ -1,80 +1,72 @@
 import { motion } from "motion/react";
 import { useOnboarding, type EnergyPeak } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
-import { Zap } from "lucide-react";
 
 const ENERGY_PEAK_OPTIONS: Array<{
   value: EnergyPeak;
   label: string;
-  description: string;
+  emoji: string;
 }> = [
-  {
-    value: "morning",
-    label: "Manhã",
-    description: "Tenho mais energia pela manhã",
-  },
-  {
-    value: "afternoon",
-    label: "Tarde",
-    description: "Rendo melhor à tarde",
-  },
-  {
-    value: "evening",
-    label: "Noite",
-    description: "Sou mais produtivo à noite",
-  },
+  { value: "morning", label: "Manhã", emoji: "☀️" },
+  { value: "afternoon", label: "Tarde", emoji: "🌤️" },
+  { value: "evening", label: "Noite", emoji: "🌙" },
 ];
 
 export const EnergyPeakStep = () => {
   const { energyPeak, setEnergyPeak } = useOnboarding();
 
   return (
-    <div className="flex flex-col min-h-[500px] px-6 py-8">
-      {/* Header */}
+    <div className="flex flex-col h-full">
+      {/* Header - Compact */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="text-center mb-8"
+        transition={{ duration: 0.3 }}
+        className="text-center mb-4"
       >
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-          <Zap className="h-8 w-8 text-primary" />
-        </div>
-
-        <h2 className="text-3xl font-bold mb-3">Quando você tem mais energia?</h2>
-
-        <p className="text-muted-foreground max-w-md mx-auto">
-          Vamos priorizar atividades importantes no seu melhor momento
+        <h2 className="text-2xl font-bold mb-1">Quando você tem mais energia?</h2>
+        <p className="text-sm text-muted-foreground">
+          Priorizamos atividades no seu melhor momento
         </p>
       </motion.div>
 
-      {/* Selection Grid */}
+      {/* Selection Grid - 3 columns horizontal */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
+        transition={{ delay: 0.1, duration: 0.3 }}
         className="flex-1 flex items-center justify-center"
       >
-        <SelectionCardGrid columns={1} className="max-w-md w-full">
+        <SelectionCardGrid mobileColumns={3} gap={2} className="w-full max-w-sm">
           {ENERGY_PEAK_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 + index * 0.08, duration: 0.3 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.15 + index * 0.05, duration: 0.2 }}
             >
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                description={option.description}
+                emoji={option.emoji}
                 selected={energyPeak === option.value}
                 onClick={() => setEnergyPeak(option.value)}
-                variant="compact"
+                variant="mini"
               />
             </motion.div>
           ))}
         </SelectionCardGrid>
       </motion.div>
+
+      {/* Hint */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.3 }}
+        className="text-center text-xs text-muted-foreground mt-2"
+      >
+        Tarefas importantes serão sugeridas nesse período
+      </motion.p>
     </div>
   );
 };

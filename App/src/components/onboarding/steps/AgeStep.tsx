@@ -1,85 +1,59 @@
 import { motion } from "motion/react";
 import { useOnboarding, type AgeRange } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
-import { User } from "lucide-react";
 
 const AGE_OPTIONS: Array<{
   value: AgeRange;
   label: string;
-  description: string;
+  emoji: string;
 }> = [
-  {
-    value: "18-24",
-    label: "18-24 anos",
-    description: "Início da vida adulta",
-  },
-  {
-    value: "25-34",
-    label: "25-34 anos",
-    description: "Construindo carreira",
-  },
-  {
-    value: "35-44",
-    label: "35-44 anos",
-    description: "Consolidando experiência",
-  },
-  {
-    value: "45-54",
-    label: "45-54 anos",
-    description: "Maturidade profissional",
-  },
-  {
-    value: "55+",
-    label: "55+ anos",
-    description: "Sabedoria e equilíbrio",
-  },
+  { value: "18-24", label: "18-24", emoji: "🎓" },
+  { value: "25-34", label: "25-34", emoji: "💼" },
+  { value: "35-44", label: "35-44", emoji: "🏠" },
+  { value: "45-54", label: "45-54", emoji: "⭐" },
+  { value: "55+", label: "55+", emoji: "🌟" },
 ];
 
 export const AgeStep = () => {
   const { ageRange, setAgeRange } = useOnboarding();
 
   return (
-    <div className="flex flex-col min-h-[500px] px-6 py-8">
-      {/* Header */}
+    <div className="flex flex-col h-full">
+      {/* Header - Compact */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="text-center mb-8"
+        transition={{ duration: 0.3 }}
+        className="text-center mb-4"
       >
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-          <User className="h-8 w-8 text-primary" />
-        </div>
-
-        <h2 className="text-3xl font-bold mb-3">Qual sua faixa etária?</h2>
-
-        <p className="text-muted-foreground max-w-md mx-auto">
-          Isso nos ajuda a recomendar hábitos adequados para seu momento de vida
+        <h2 className="text-2xl font-bold mb-1">Qual sua faixa etária?</h2>
+        <p className="text-sm text-muted-foreground">
+          Ajuda a recomendar hábitos para seu momento de vida
         </p>
       </motion.div>
 
-      {/* Selection Grid */}
+      {/* Selection Grid - 3 columns */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
+        transition={{ delay: 0.1, duration: 0.3 }}
         className="flex-1 flex items-center justify-center"
       >
-        <SelectionCardGrid columns={1} className="max-w-md w-full">
+        <SelectionCardGrid mobileColumns={3} gap={2} className="w-full max-w-sm">
           {AGE_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 + index * 0.05, duration: 0.3 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.15 + index * 0.03, duration: 0.2 }}
             >
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                description={option.description}
+                emoji={option.emoji}
                 selected={ageRange === option.value}
                 onClick={() => setAgeRange(option.value)}
-                variant="compact"
+                variant="mini"
               />
             </motion.div>
           ))}

@@ -1,6 +1,5 @@
 import { motion } from "motion/react";
 import { useOnboarding } from "./OnboardingProvider";
-import { cn } from "@/lib/utils";
 
 export const OnboardingProgress = () => {
   const { currentStep, totalSteps } = useOnboarding();
@@ -37,32 +36,15 @@ export const OnboardingProgress = () => {
         />
       </div>
 
-      {/* Step Counter */}
-      <div className="flex justify-start items-center mt-3">
+      {/* Step Counter - Compact */}
+      <div className="flex justify-start items-center mt-1.5">
         <motion.p
           className="text-xs font-medium text-muted-foreground"
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
         >
-          Passo {currentStep + 1} de {totalSteps}
+          {currentStep + 1}/{totalSteps}
         </motion.p>
-      </div>
-
-      {/* Step Dots */}
-      <div className="flex gap-1.5 mt-4 justify-center">
-        {Array.from({ length: totalSteps }).map((_, index) => (
-          <motion.div
-            key={index}
-            className={cn(
-              "h-1.5 rounded-full transition-all duration-300",
-              index <= currentStep ? "bg-primary w-8" : "bg-muted w-1.5"
-            )}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: index * 0.03 }}
-          />
-        ))}
       </div>
     </div>
   );
