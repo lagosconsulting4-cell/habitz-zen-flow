@@ -62,29 +62,33 @@ export function InstallPrompt() {
 
   return (
     <>
+      {/* FAB Button - Completamente separado do Radix Dialog */}
+      <button
+        onClick={() => {
+          setDrawerOpen(true);
+          setSnap(0.2);
+        }}
+        className={buttonClasses}
+        aria-label="Instalar app"
+      >
+        {/* Glow effect */}
+        <div className="absolute inset-0 rounded-full bg-white/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {/* Icon with animation */}
+        <Smartphone className="w-7 h-7 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+
+        {/* Pulse animation ring */}
+        <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
+      </button>
+
       {/* Drawer com snap points */}
       <Drawer
         open={drawerOpen}
-        onOpenChange={(isOpen) => {
-          setDrawerOpen(isOpen);
-          if (isOpen) setSnap(0.2);
-        }}
+        onOpenChange={setDrawerOpen}
         snapPoints={[0.2, 0.6]}
         activeSnapPoint={snap}
         setActiveSnapPoint={setSnap}
-        modal={false}
       >
-        {/* FAB - 100% persistente como Trigger */}
-        <DrawerTrigger className={buttonClasses} aria-label="Instalar app">
-          {/* Glow effect */}
-          <div className="absolute inset-0 rounded-full bg-white/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          {/* Icon with animation */}
-          <Smartphone className="w-7 h-7 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
-
-          {/* Pulse animation ring */}
-          <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
-        </DrawerTrigger>
         <DrawerContent className="border-t-4 border-primary/20">
           <DrawerHeader className="pb-2">
             <DrawerTitle className="text-xl font-bold flex items-center gap-2">
