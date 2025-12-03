@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Sunrise, Building2, Moon, RefreshCw, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 import type { WorkSchedule } from "@/lib/quizConfig";
@@ -6,13 +7,13 @@ import type { WorkSchedule } from "@/lib/quizConfig";
 const WORK_SCHEDULE_OPTIONS: Array<{
   value: WorkSchedule;
   label: string;
-  emoji: string;
+  icon: LucideIcon;
   hours: string;
 }> = [
-  { value: "morning", label: "Manhã", emoji: "🌅", hours: "6h-14h" },
-  { value: "commercial", label: "Comercial", emoji: "🏢", hours: "8h-18h" },
-  { value: "evening", label: "Tarde/Noite", emoji: "🌙", hours: "14h-22h" },
-  { value: "flexible", label: "Flexível", emoji: "🔄", hours: "Varia" },
+  { value: "morning", label: "Manhã", icon: Sunrise, hours: "6h-14h" },
+  { value: "commercial", label: "Comercial", icon: Building2, hours: "8h-18h" },
+  { value: "evening", label: "Tarde/Noite", icon: Moon, hours: "14h-22h" },
+  { value: "flexible", label: "Flexível", icon: RefreshCw, hours: "Varia" },
 ];
 
 export const WorkScheduleStep = () => {
@@ -44,7 +45,7 @@ export const WorkScheduleStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex items-center justify-center"
       >
-        <SelectionCardGrid mobileColumns={2} gap={2} className="w-full max-w-xs">
+        <SelectionCardGrid columns={2} gap={3} className="w-full max-w-md">
           {WORK_SCHEDULE_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
@@ -55,10 +56,11 @@ export const WorkScheduleStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                description={option.hours}
+                icon={<option.icon className="w-5 h-5 text-slate-600" />}
                 selected={workSchedule === option.value}
                 onClick={() => setWorkSchedule(option.value)}
-                variant="mini"
+                variant="compact"
               />
             </motion.div>
           ))}

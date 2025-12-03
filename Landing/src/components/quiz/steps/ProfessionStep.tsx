@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { GraduationCap, Briefcase, Rocket, Laptop, Sparkles, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 import type { Profession } from "@/lib/quizConfig";
@@ -6,13 +7,13 @@ import type { Profession } from "@/lib/quizConfig";
 const PROFESSION_OPTIONS: Array<{
   value: Profession;
   label: string;
-  emoji: string;
+  icon: LucideIcon;
 }> = [
-  { value: "student", label: "Estudante", emoji: "🎓" },
-  { value: "employed", label: "CLT", emoji: "💼" },
-  { value: "entrepreneur", label: "Empreendedor", emoji: "🚀" },
-  { value: "freelancer", label: "Freelancer", emoji: "💻" },
-  { value: "other", label: "Outro", emoji: "✨" },
+  { value: "student", label: "Estudante", icon: GraduationCap },
+  { value: "employed", label: "CLT", icon: Briefcase },
+  { value: "entrepreneur", label: "Empreendedor", icon: Rocket },
+  { value: "freelancer", label: "Freelancer", icon: Laptop },
+  { value: "other", label: "Outro", icon: Sparkles },
 ];
 
 export const ProfessionStep = () => {
@@ -42,7 +43,7 @@ export const ProfessionStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex items-center justify-center"
       >
-        <SelectionCardGrid mobileColumns={3} gap={2} className="w-full max-w-sm">
+        <SelectionCardGrid columns={2} gap={3} className="w-full max-w-md">
           {PROFESSION_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
@@ -53,10 +54,10 @@ export const ProfessionStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                icon={<option.icon className="w-5 h-5 text-slate-600" />}
                 selected={profession === option.value}
                 onClick={() => setProfession(option.value)}
-                variant="mini"
+                variant="compact"
               />
             </motion.div>
           ))}

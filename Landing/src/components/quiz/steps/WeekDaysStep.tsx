@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
+import { Briefcase, RefreshCw, Sparkles, type LucideIcon } from "lucide-react";
 import { useQuiz, type WeekDaysPreset } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 import { cn } from "@/lib/utils";
@@ -6,12 +7,12 @@ import { cn } from "@/lib/utils";
 const PRESET_OPTIONS: Array<{
   value: WeekDaysPreset;
   label: string;
-  emoji: string;
+  icon: LucideIcon;
   days: number[];
 }> = [
-  { value: "weekdays", label: "Seg-Sex", emoji: "💼", days: [1, 2, 3, 4, 5] },
-  { value: "everyday", label: "Todo dia", emoji: "🔄", days: [0, 1, 2, 3, 4, 5, 6] },
-  { value: "custom", label: "Custom", emoji: "✨", days: [] },
+  { value: "weekdays", label: "Seg-Sex", icon: Briefcase, days: [1, 2, 3, 4, 5] },
+  { value: "everyday", label: "Todo dia", icon: RefreshCw, days: [0, 1, 2, 3, 4, 5, 6] },
+  { value: "custom", label: "Custom", icon: Sparkles, days: [] },
 ];
 
 const WEEK_DAYS = [
@@ -66,7 +67,7 @@ export const WeekDaysStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex justify-center mb-4"
       >
-        <SelectionCardGrid mobileColumns={3} gap={2} className="w-full max-w-sm">
+        <SelectionCardGrid columns={3} gap={3} className="w-full max-w-md">
           {PRESET_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
@@ -77,10 +78,10 @@ export const WeekDaysStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                icon={<option.icon className="w-5 h-5 text-slate-600" />}
                 selected={weekDaysPreset === option.value}
                 onClick={() => handlePresetChange(option.value)}
-                variant="mini"
+                variant="compact"
               />
             </motion.div>
           ))}

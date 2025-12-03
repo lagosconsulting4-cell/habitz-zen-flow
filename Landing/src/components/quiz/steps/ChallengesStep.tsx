@@ -1,14 +1,19 @@
 import { motion } from "motion/react";
+import { Clock, Target, CloudFog, BedDouble, AlertCircle, Flame, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 
-const CHALLENGE_OPTIONS = [
-  { id: "procrastination", label: "Procrastinação", emoji: "⏰" },
-  { id: "focus", label: "Foco", emoji: "🎯" },
-  { id: "forgetfulness", label: "Esquecimento", emoji: "💭" },
-  { id: "tiredness", label: "Cansaço", emoji: "😴" },
-  { id: "anxiety", label: "Ansiedade", emoji: "😰" },
-  { id: "motivation", label: "Motivação", emoji: "🔥" },
+const CHALLENGE_OPTIONS: Array<{
+  id: string;
+  label: string;
+  icon: LucideIcon;
+}> = [
+  { id: "procrastination", label: "Procrastinação", icon: Clock },
+  { id: "focus", label: "Foco", icon: Target },
+  { id: "forgetfulness", label: "Esquecimento", icon: CloudFog },
+  { id: "tiredness", label: "Cansaço", icon: BedDouble },
+  { id: "anxiety", label: "Ansiedade", icon: AlertCircle },
+  { id: "motivation", label: "Motivação", icon: Flame },
 ];
 
 export const ChallengesStep = () => {
@@ -36,7 +41,7 @@ export const ChallengesStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex items-center justify-center"
       >
-        <SelectionCardGrid mobileColumns={3} gap={2} className="w-full max-w-sm">
+        <SelectionCardGrid columns={2} gap={3} className="w-full max-w-md">
           {CHALLENGE_OPTIONS.map((option, index) => (
             <motion.div
               key={option.id}
@@ -47,10 +52,10 @@ export const ChallengesStep = () => {
               <SelectionCard
                 id={option.id}
                 title={option.label}
-                emoji={option.emoji}
+                icon={<option.icon className="w-5 h-5 text-slate-600" />}
                 selected={challenges.includes(option.id)}
                 onClick={() => toggleChallenge(option.id)}
-                variant="mini"
+                variant="compact"
                 multiselect
               />
             </motion.div>

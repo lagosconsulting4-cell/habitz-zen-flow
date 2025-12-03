@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Sunrise, Sun, Moon, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 import type { EnergyPeak } from "@/lib/quizConfig";
@@ -6,12 +7,12 @@ import type { EnergyPeak } from "@/lib/quizConfig";
 const ENERGY_PEAK_OPTIONS: Array<{
   value: EnergyPeak;
   label: string;
-  emoji: string;
+  icon: LucideIcon;
   description: string;
 }> = [
-  { value: "morning", label: "Manhã", emoji: "🌅", description: "Acordo disposto" },
-  { value: "afternoon", label: "Tarde", emoji: "☀️", description: "Pico após almoço" },
-  { value: "evening", label: "Noite", emoji: "🌙", description: "Rendo mais de noite" },
+  { value: "morning", label: "Manhã", icon: Sunrise, description: "Acordo disposto" },
+  { value: "afternoon", label: "Tarde", icon: Sun, description: "Pico após almoço" },
+  { value: "evening", label: "Noite", icon: Moon, description: "Rendo mais de noite" },
 ];
 
 export const EnergyPeakStep = () => {
@@ -41,7 +42,7 @@ export const EnergyPeakStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex items-center justify-center"
       >
-        <SelectionCardGrid mobileColumns={3} gap={2} className="w-full max-w-sm">
+        <SelectionCardGrid columns={1} gap={3} className="w-full max-w-md">
           {ENERGY_PEAK_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
@@ -52,10 +53,11 @@ export const EnergyPeakStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                description={option.description}
+                icon={<option.icon className="w-5 h-5 text-slate-600" />}
                 selected={energyPeak === option.value}
                 onClick={() => setEnergyPeak(option.value)}
-                variant="mini"
+                variant="compact"
               />
             </motion.div>
           ))}

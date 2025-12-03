@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { BarChart3, Dumbbell, Brain, Calendar, Ban, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 import type { Objective } from "@/lib/quizConfig";
@@ -6,13 +7,13 @@ import type { Objective } from "@/lib/quizConfig";
 const OBJECTIVE_OPTIONS: Array<{
   value: Objective;
   label: string;
-  emoji: string;
+  icon: LucideIcon;
 }> = [
-  { value: "productivity", label: "Produtividade", emoji: "📊" },
-  { value: "health", label: "Saúde Física", emoji: "💪" },
-  { value: "mental", label: "Bem-estar", emoji: "🧘" },
-  { value: "routine", label: "Organização", emoji: "📅" },
-  { value: "avoid", label: "Eliminar Vícios", emoji: "🚫" },
+  { value: "productivity", label: "Produtividade", icon: BarChart3 },
+  { value: "health", label: "Saúde Física", icon: Dumbbell },
+  { value: "mental", label: "Bem-estar", icon: Brain },
+  { value: "routine", label: "Organização", icon: Calendar },
+  { value: "avoid", label: "Eliminar Vícios", icon: Ban },
 ];
 
 export const ObjectiveStep = () => {
@@ -42,7 +43,7 @@ export const ObjectiveStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex items-center justify-center"
       >
-        <SelectionCardGrid mobileColumns={3} gap={2} className="w-full max-w-sm">
+        <SelectionCardGrid columns={2} gap={3} className="w-full max-w-md">
           {OBJECTIVE_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
@@ -53,10 +54,10 @@ export const ObjectiveStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                icon={<option.icon className="w-5 h-5 text-slate-600" />}
                 selected={objective === option.value}
                 onClick={() => setObjective(option.value)}
-                variant="mini"
+                variant="compact"
               />
             </motion.div>
           ))}

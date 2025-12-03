@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { GraduationCap, Briefcase, Home, Star, Sparkles, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 import type { AgeRange } from "@/lib/quizConfig";
@@ -6,13 +7,13 @@ import type { AgeRange } from "@/lib/quizConfig";
 const AGE_OPTIONS: Array<{
   value: AgeRange;
   label: string;
-  emoji: string;
+  icon: LucideIcon;
 }> = [
-  { value: "18-24", label: "18-24", emoji: "🎓" },
-  { value: "25-34", label: "25-34", emoji: "💼" },
-  { value: "35-44", label: "35-44", emoji: "🏠" },
-  { value: "45-54", label: "45-54", emoji: "⭐" },
-  { value: "55+", label: "55+", emoji: "🌟" },
+  { value: "18-24", label: "18-24 anos", icon: GraduationCap },
+  { value: "25-34", label: "25-34 anos", icon: Briefcase },
+  { value: "35-44", label: "35-44 anos", icon: Home },
+  { value: "45-54", label: "45-54 anos", icon: Star },
+  { value: "55+", label: "55+ anos", icon: Sparkles },
 ];
 
 export const AgeStep = () => {
@@ -42,7 +43,7 @@ export const AgeStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex items-center justify-center"
       >
-        <SelectionCardGrid mobileColumns={3} gap={2} className="w-full max-w-sm">
+        <SelectionCardGrid columns={2} gap={3} className="w-full max-w-md">
           {AGE_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
@@ -53,10 +54,10 @@ export const AgeStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                icon={<option.icon className="w-5 h-5 text-slate-600" />}
                 selected={ageRange === option.value}
                 onClick={() => setAgeRange(option.value)}
-                variant="mini"
+                variant="compact"
               />
             </motion.div>
           ))}

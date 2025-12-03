@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Zap, Target, Dumbbell, Trophy, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 import type { TimeAvailable } from "@/lib/quizConfig";
@@ -6,13 +7,13 @@ import type { TimeAvailable } from "@/lib/quizConfig";
 const TIME_OPTIONS: Array<{
   value: TimeAvailable;
   label: string;
-  emoji: string;
+  icon: LucideIcon;
   habits: string;
 }> = [
-  { value: "15min", label: "15 min", emoji: "⚡", habits: "3 hábitos" },
-  { value: "30min", label: "30 min", emoji: "🎯", habits: "4-5 hábitos" },
-  { value: "1h", label: "1 hora", emoji: "💪", habits: "6-7 hábitos" },
-  { value: "2h+", label: "2h+", emoji: "🏆", habits: "8-10 hábitos" },
+  { value: "15min", label: "15 min", icon: Zap, habits: "3 hábitos" },
+  { value: "30min", label: "30 min", icon: Target, habits: "4-5 hábitos" },
+  { value: "1h", label: "1 hora", icon: Dumbbell, habits: "6-7 hábitos" },
+  { value: "2h+", label: "2h+", icon: Trophy, habits: "8-10 hábitos" },
 ];
 
 export const TimeAvailableStep = () => {
@@ -44,7 +45,7 @@ export const TimeAvailableStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex items-center justify-center"
       >
-        <SelectionCardGrid mobileColumns={2} gap={2} className="w-full max-w-xs">
+        <SelectionCardGrid columns={2} gap={3} className="w-full max-w-md">
           {TIME_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
@@ -55,10 +56,11 @@ export const TimeAvailableStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                description={option.habits}
+                icon={<option.icon className="w-5 h-5 text-slate-600" />}
                 selected={timeAvailable === option.value}
                 onClick={() => setTimeAvailable(option.value)}
-                variant="mini"
+                variant="compact"
               />
             </motion.div>
           ))}

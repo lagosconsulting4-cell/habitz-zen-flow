@@ -49,7 +49,7 @@ export const SelectionCard = ({
             ? "border-[#A3E635] bg-[#A3E635]/5 shadow-md shadow-[#A3E635]/20"
             : "border-slate-200 hover:border-[#A3E635]/50 hover:shadow-sm",
           disabled && "opacity-50 cursor-not-allowed",
-          isIconOnly ? "p-4" : isMini ? "py-2 px-3" : isCompact ? "p-4" : "p-6",
+          isIconOnly ? "p-4" : isMini ? "py-3 px-4" : isCompact ? "p-4" : "p-6",
           className
         )}
         onClick={disabled ? undefined : onClick}
@@ -105,11 +105,11 @@ export const SelectionCard = ({
                 isIconOnly
                   ? "w-16 h-16 text-4xl"
                   : isMini
-                    ? "w-8 h-8 text-lg"
+                    ? "w-10 h-10 text-xl"
                     : isCompact
                       ? "w-12 h-12 text-2xl"
                       : "w-14 h-14 text-3xl",
-                !emoji && (isMini ? "bg-slate-100 p-1.5" : "bg-slate-100 p-3")
+                !emoji && (isMini ? "bg-slate-100 p-2" : "bg-slate-100 p-3")
               )}
               animate={{ rotate: selected ? [0, -10, 10, 0] : 0 }}
               transition={{ duration: 0.3 }}
@@ -126,7 +126,7 @@ export const SelectionCard = ({
                 isIconOnly
                   ? "text-sm mt-2"
                   : isMini
-                    ? "text-sm truncate"
+                    ? "text-sm leading-tight"
                     : isCompact
                       ? "text-base"
                       : "text-lg"
@@ -157,17 +157,20 @@ export const SelectionCardGrid = ({
 }: {
   children: ReactNode;
   columns?: 1 | 2 | 3;
-  mobileColumns?: 2 | 3;
-  gap?: 2 | 3;
+  mobileColumns?: 1 | 2 | 3;
+  gap?: 2 | 3 | 4;
   className?: string;
 }) => {
   return (
     <div
       className={cn(
         "grid",
-        gap === 2 ? "gap-2" : "gap-3",
-        mobileColumns === 3 && "grid-cols-3",
-        mobileColumns === 2 && "grid-cols-2",
+        gap === 2 ? "gap-2" : gap === 4 ? "gap-4" : "gap-3",
+        // Mobile columns (default: 1 column for better readability)
+        mobileColumns === 3 && "grid-cols-3 sm:grid-cols-3",
+        mobileColumns === 2 && "grid-cols-2 sm:grid-cols-2",
+        mobileColumns === 1 && "grid-cols-1",
+        // Desktop columns when no mobileColumns specified
         !mobileColumns && columns === 1 && "grid-cols-1",
         !mobileColumns && columns === 2 && "grid-cols-1 sm:grid-cols-2",
         !mobileColumns && columns === 3 && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",

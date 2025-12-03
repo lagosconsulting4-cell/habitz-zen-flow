@@ -224,7 +224,7 @@ export const LockedRoutinePreview = ({ onClose }: LockedRoutinePreviewProps) => 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-center"
+        className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-4 sm:p-6 text-center"
       >
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#A3E635]/20 rounded-full mb-3">
           <Lock className="w-3 h-3 text-[#A3E635]" />
@@ -233,20 +233,20 @@ export const LockedRoutinePreview = ({ onClose }: LockedRoutinePreviewProps) => 
           </span>
         </div>
 
-        <h3 className="text-xl font-bold text-white mb-2">
+        <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
           Desbloqueie sua rotina completa
         </h3>
-        <p className="text-slate-400 text-sm mb-4">
+        <p className="text-slate-400 text-xs sm:text-sm mb-4 px-2">
           Acesse todos os hábitos personalizados e comece sua transformação hoje
         </p>
 
         <Button
           onClick={handleUnlock}
           size="lg"
-          className="w-full bg-[#A3E635] hover:bg-[#84cc16] text-slate-900 font-bold py-6 text-lg"
+          className="w-full bg-[#A3E635] hover:bg-[#84cc16] text-slate-900 font-bold py-4 sm:py-6 text-sm sm:text-lg"
         >
-          <Lock className="w-5 h-5 mr-2" />
-          DESBLOQUEAR ROTINA COMPLETA
+          <Lock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" />
+          <span className="truncate">DESBLOQUEAR ROTINA</span>
         </Button>
 
         <p className="text-slate-500 text-xs mt-3">
