@@ -69,6 +69,12 @@ export function InstallPrompt() {
     }
   }, []);
 
+  // DEBUG: Log drawer state changes
+  useEffect(() => {
+    console.log("[InstallPrompt] drawerOpen state changed:", drawerOpen);
+    console.log("[InstallPrompt] snap state changed:", snap);
+  }, [drawerOpen, snap]);
+
   // DEBUG: Log do className
   const buttonClasses = cn(
     "fixed bottom-32 right-4 z-50",
@@ -91,8 +97,11 @@ export function InstallPrompt() {
       <button
         ref={buttonRef}
         onClick={() => {
+          console.log("[InstallPrompt] ✅ BUTTON CLICKED!");
+          console.log("[InstallPrompt] Current drawerOpen state:", drawerOpen);
           setDrawerOpen(true);
           setSnap(0.2);
+          console.log("[InstallPrompt] setState called for drawerOpen");
         }}
         className={buttonClasses}
         aria-label="Instalar app"
