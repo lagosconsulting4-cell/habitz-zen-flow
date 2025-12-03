@@ -26,13 +26,10 @@ import {
   Star,
   Users,
   Rocket,
-  HeartCrack,
   AlertCircle,
-  TrendingDown,
   Brain,
   Target,
   Flame,
-  Trophy,
   Gift,
   BadgeCheck,
   Calendar,
@@ -90,35 +87,73 @@ const howItWorks = [
   {
     step: "01",
     title: "Faça o Quiz",
-    description: "3 minutos para entendermos você",
-    image: "/images/lp/mockup-app-vertical.webp",
+    description: "3 minutos para entendermos você em detalhes",
+    image: "/images/lp/quiz_mockup.png",
   },
   {
     step: "02",
-    title: "Receba sua Rotina",
-    description: "Plano único baseado nos seus objetivos",
-    image: "/images/lp/mockup-app-horizontal.webp",
+    title: "Receba sua rotina",
+    description: "Plano único baseado nos seus objetivos e limites",
+    image: "/images/lp/quiz_mockup.png",
   },
   {
     step: "03",
-    title: "Acompanhe seu Progresso",
-    description: "7 minutos por dia, resultados em 30 dias",
-    image: "/images/lp/mockup-horizontal.webp",
+    title: "Se organize de forma fácil e prática",
+    description: "Agenda visual e cards de ação para clarear seu dia",
+    image: "/images/lp/dashboard_mockup.png",
+  },
+  {
+    step: "04",
+    title: "Acompanhe seu progresso",
+    description: "Gráficos e streaks para manter a consistência sem esforço",
+    image: "/images/lp/progresso_mockup.png",
   },
 ];
 
 const beforeProblems = [
-  { icon: AlertCircle, text: "Acordar sem energia ou motivação" },
-  { icon: TrendingDown, text: "Procrastinar tarefas importantes" },
-  { icon: Brain, text: "Mente sobrecarregada e ansiosa" },
-  { icon: HeartCrack, text: "Dormir com sensação de fracasso" },
+  {
+    iconImage: "/images/lp/icons/before-energia.png",
+    text: "Acordar sem energia ou motivação",
+    alt: "Ícone representando cansaço",
+  },
+  {
+    iconImage: "/images/lp/icons/before-procrastinacao.png",
+    text: "Procrastinar tarefas importantes",
+    alt: "Ícone representando procrastinação",
+  },
+  {
+    iconImage: "/images/lp/icons/before-ansiedade.png",
+    text: "Mente sobrecarregada e ansiosa",
+    alt: "Ícone representando ansiedade",
+  },
+  {
+    iconImage: "/images/lp/icons/before-fracasso.png",
+    text: "Dormir com sensação de fracasso",
+    alt: "Ícone representando frustração",
+  },
 ];
 
 const afterBenefits = [
-  { icon: Zap, text: "Despertar com clareza e energia" },
-  { icon: Target, text: "Foco nas prioridades certas" },
-  { icon: Flame, text: "Consistência sem esforço" },
-  { icon: Trophy, text: "Orgulho real das suas conquistas" },
+  {
+    iconImage: "/images/lp/icons/after-claridade.png",
+    text: "Despertar com clareza e energia",
+    alt: "Ícone representando clareza",
+  },
+  {
+    iconImage: "/images/lp/icons/after-prioridades.png",
+    text: "Foco nas prioridades certas",
+    alt: "Ícone representando foco",
+  },
+  {
+    iconImage: "/images/lp/icons/after-consistencia.png",
+    text: "Consistência sem esforço",
+    alt: "Ícone representando consistência",
+  },
+  {
+    iconImage: "/images/lp/icons/after-orgulho.png",
+    text: "Orgulho real das suas conquistas",
+    alt: "Ícone representando orgulho",
+  },
 ];
 
 const testimonials = [
@@ -262,6 +297,9 @@ const BoraLanding = () => {
     document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const totalHowItWorksSteps = howItWorks.length;
+  const formattedTotalHowItWorksSteps = totalHowItWorksSteps.toString().padStart(2, "0");
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden w-full max-w-full font-['Plus_Jakarta_Sans',sans-serif]">
 
@@ -300,7 +338,7 @@ const BoraLanding = () => {
       </motion.header>
 
       {/* ============ HERO SECTION ============ */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 md:px-6 pt-24 pb-16 w-full overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center px-4 md:px-6 pt-24 pb-16 w-full overflow-hidden bg-white">
         {/* Background - Clean white with subtle green accents */}
         <div className="absolute inset-0 bg-gradient-to-b from-white via-[#A3E635]/5 to-white" />
 
@@ -391,7 +429,7 @@ const BoraLanding = () => {
               </motion.div>
             </motion.div>
 
-            {/* Right side - Clean Single Mockup */}
+            {/* Right side - Static hero mockup */}
             <motion.div
               className="relative flex justify-center lg:justify-end order-first lg:order-last"
               initial={{ opacity: 0, y: 40 }}
@@ -399,26 +437,24 @@ const BoraLanding = () => {
               transition={{ delay: 0.3, duration: 0.8, type: "spring" }}
             >
               {/* Subtle glow behind mockup */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#A3E635]/20 rounded-full blur-[80px]" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-[#A3E635]/15 rounded-full blur-[120px]" />
 
-              {/* Single centered mockup */}
               <motion.div
-                className="relative z-10"
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="relative z-10 w-full flex justify-center"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
               >
                 <img
-                  src="/images/lp/mockup-app-vertical.webp"
-                  alt="App BORA - Dashboard"
-                  className="w-[260px] md:w-[300px] h-auto rounded-3xl shadow-2xl border-4 border-white"
+                  src="/images/lp/hero_mockup.png"
+                  alt="Mockup do aplicativo BORA"
+                  className="w-[260px] sm:w-[320px] lg:w-[420px] h-auto drop-shadow-2xl"
                 />
-                {/* Subtle glow ring */}
-                <div className="absolute -inset-1 bg-[#A3E635]/30 rounded-[2rem] blur-xl -z-10" />
               </motion.div>
             </motion.div>
-          </div>
-        </div>
-      </section>
+         </div>
+       </div>
+     </section>
 
       {/* ============ 3 PILLARS SECTION ============ */}
       <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
@@ -798,11 +834,14 @@ const BoraLanding = () => {
               <Target className="w-3 h-3 mr-1" />
               Passo a passo
             </Badge>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-3">
               Como <span className="text-primary">funciona</span>
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               Simples como deveria ser
+            </p>
+            <p className="text-xs sm:text-sm uppercase tracking-[0.35em] text-slate-400 mt-4">
+              {totalHowItWorksSteps} passos guiados • arraste para ver todos
             </p>
           </motion.div>
 
@@ -818,24 +857,27 @@ const BoraLanding = () => {
                   >
                     <div className="relative bg-gradient-to-br from-slate-50 to-white rounded-3xl p-8 md:p-12 border border-slate-200/50 shadow-xl overflow-hidden">
                       {/* Step number */}
-                      <div className="absolute top-6 left-6 md:top-8 md:left-8">
-                        <span className="text-7xl md:text-9xl font-black text-[#A3E635]/30">
+                      <div className="absolute top-6 left-6 md:top-8 md:left-8 space-y-1">
+                        <span className="text-6xl md:text-8xl font-black text-[#A3E635]/30 leading-none">
                           {step.step}
+                        </span>
+                        <span className="text-[10px] font-semibold tracking-[0.4em] text-slate-400 uppercase block">
+                          de {formattedTotalHowItWorksSteps}
                         </span>
                       </div>
 
-                      <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                      <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-8 lg:gap-12">
                         {/* Image */}
-                        <div className="w-full md:w-1/2">
+                        <div className="w-full md:w-7/12">
                           <img
                             src={step.image}
                             alt={step.title}
-                            className="w-full h-auto rounded-2xl shadow-xl"
+                            className="w-full h-auto max-w-[420px] md:max-w-[580px] mx-auto rounded-[32px] border-4 border-white shadow-2xl"
                           />
                         </div>
 
                         {/* Content */}
-                        <div className="w-full md:w-1/2 text-center md:text-left">
+                        <div className="w-full md:w-5/12 text-center md:text-left">
                           <Badge className="mb-4 bg-primary text-white border-0">
                             Passo {step.step}
                           </Badge>
@@ -861,7 +903,8 @@ const BoraLanding = () => {
       </section>
 
       {/* ============ BEFORE/AFTER SECTION ============ */}
-      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-b from-lime-50/50 to-white">
+      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-lime-50/80 to-white" />
         <div className="max-w-4xl mx-auto relative z-10">
           <motion.div
             className="text-center mb-12"
@@ -882,17 +925,15 @@ const BoraLanding = () => {
             <TabsList className="grid w-full grid-cols-2 mb-8 h-14 sm:h-16 p-1.5 sm:p-2 bg-slate-200 rounded-2xl border-0">
               <TabsTrigger
                 value="before"
-                className="text-xs sm:text-base font-semibold rounded-xl h-full transition-all duration-300 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:text-slate-600 data-[state=inactive]:hover:text-slate-900"
+                className="text-xs sm:text-base font-semibold rounded-xl h-full transition-all duration-300 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:text-slate-600 data-[state=inactive]:hover:text-slate-900 uppercase tracking-wide"
               >
-                <HeartCrack className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
-                <span className="hidden sm:inline">Sem o </span>BORA
+                Sem o Bora
               </TabsTrigger>
               <TabsTrigger
                 value="after"
-                className="text-xs sm:text-base font-semibold rounded-xl h-full transition-all duration-300 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#A3E635] data-[state=active]:to-lime-300 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:text-slate-600 data-[state=inactive]:hover:text-slate-900"
+                className="text-xs sm:text-base font-semibold rounded-xl h-full transition-all duration-300 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#A3E635] data-[state=active]:to-lime-300 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:text-slate-600 data-[state=inactive]:hover:text-slate-900 uppercase tracking-wide"
               >
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
-                <span className="hidden sm:inline">Com o </span>BORA
+                Com o Bora
               </TabsTrigger>
             </TabsList>
 
@@ -916,7 +957,15 @@ const BoraLanding = () => {
                           transition={{ delay: index * 0.1 }}
                         >
                           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-500/30">
-                            <item.icon className="w-6 h-6 text-white" />
+                            {item.iconImage ? (
+                              <img
+                                src={item.iconImage}
+                                alt={item.alt || item.text}
+                                className="w-8 h-8 object-contain"
+                              />
+                            ) : (
+                              item.icon && <item.icon className="w-6 h-6 text-white" />
+                            )}
                           </div>
                           <span className="text-slate-900 font-medium text-lg pt-2">{item.text}</span>
                         </motion.div>
@@ -959,7 +1008,15 @@ const BoraLanding = () => {
                           whileHover={{ scale: 1.02 }}
                         >
                           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-lime-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
-                            <item.icon className="w-6 h-6 text-white" />
+                            {item.iconImage ? (
+                              <img
+                                src={item.iconImage}
+                                alt={item.alt || item.text}
+                                className="w-8 h-8 object-contain"
+                              />
+                            ) : (
+                              item.icon && <item.icon className="w-6 h-6 text-white" />
+                            )}
                           </div>
                           <span className="text-slate-900 font-medium text-lg pt-2">{item.text}</span>
                         </motion.div>
@@ -1155,11 +1212,11 @@ const BoraLanding = () => {
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
           >
-            <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-primary/10 border border-primary/20 mb-6">
-              <CheckCircle2 className="w-5 h-5 text-primary" />
-              <span className="text-slate-900 font-medium">
-                <strong className="text-primary">R$ 805</strong> em valor → Por apenas{" "}
-                <strong className="text-primary">11x R$5,17</strong>
+            <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-[#A3E635] via-[#84CC16] to-[#4ADE80] border border-[#65A30D] shadow-xl shadow-[#A3E635]/30 mb-6">
+              <CheckCircle2 className="w-5 h-5 text-slate-900" />
+              <span className="text-slate-900 font-semibold">
+                <strong className="text-slate-900 font-black">R$ 805</strong> em valor → Por apenas{" "}
+                <strong className="text-slate-900 font-black">11x R$5,17</strong>
               </span>
             </div>
 
@@ -1167,7 +1224,7 @@ const BoraLanding = () => {
               <Button
                 onClick={scrollToPricing}
                 size="lg"
-                className="group bg-gradient-to-r from-primary to-lime-400 hover:from-primary/90 hover:to-lime-400/90 text-white text-base px-8 py-4 rounded-full font-bold shadow-xl shadow-primary/30"
+                className="group bg-[#A3E635] hover:bg-[#84CC16] text-slate-900 text-base px-10 py-5 rounded-full font-black shadow-2xl shadow-[#A3E635]/40 border border-transparent"
               >
                 <Sparkles className="w-5 h-5 mr-2" />
                 GARANTIR MINHA VAGA
