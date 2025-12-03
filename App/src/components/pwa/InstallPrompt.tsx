@@ -87,7 +87,10 @@ export function InstallPrompt() {
       {/* Drawer com snap points */}
       <Drawer
         open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+        onOpenChange={(isOpen) => {
+          console.log("[InstallPrompt] 📦 onOpenChange called with:", isOpen, "| current drawerOpen:", drawerOpen);
+          setDrawerOpen(isOpen);
+        }}
         snapPoints={[0.2, 0.6]}
         activeSnapPoint={snap}
         setActiveSnapPoint={setSnap}
