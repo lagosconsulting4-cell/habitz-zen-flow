@@ -42,6 +42,13 @@ import {
   Heart,
   ChevronRight,
   Play,
+  // Ícones para seção "A diferença que o BORA faz"
+  Moon,
+  Pause,
+  Ban,
+  Sunrise,
+  ListChecks,
+  type LucideIcon,
 } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/hooks/useAnimations";
 import { QuizModal } from "@/components/quiz/QuizModal";
@@ -112,49 +119,41 @@ const howItWorks = [
   },
 ];
 
-const beforeProblems = [
+const beforeProblems: { icon: LucideIcon; text: string }[] = [
   {
-    iconImage: "/images/lp/icons/before-energia.png",
+    icon: Moon,
     text: "Acordar sem energia ou motivação",
-    alt: "Ícone representando cansaço",
   },
   {
-    iconImage: "/images/lp/icons/before-procrastinacao.png",
+    icon: Clock,
     text: "Procrastinar tarefas importantes",
-    alt: "Ícone representando procrastinação",
   },
   {
-    iconImage: "/images/lp/icons/before-ansiedade.png",
+    icon: Pause,
     text: "Mente sobrecarregada e ansiosa",
-    alt: "Ícone representando ansiedade",
   },
   {
-    iconImage: "/images/lp/icons/before-fracasso.png",
+    icon: Ban,
     text: "Dormir com sensação de fracasso",
-    alt: "Ícone representando frustração",
   },
 ];
 
-const afterBenefits = [
+const afterBenefits: { icon: LucideIcon; text: string }[] = [
   {
-    iconImage: "/images/lp/icons/after-claridade.png",
+    icon: Sunrise,
     text: "Despertar com clareza e energia",
-    alt: "Ícone representando clareza",
   },
   {
-    iconImage: "/images/lp/icons/after-prioridades.png",
+    icon: Target,
     text: "Foco nas prioridades certas",
-    alt: "Ícone representando foco",
   },
   {
-    iconImage: "/images/lp/icons/after-consistencia.png",
+    icon: ListChecks,
     text: "Consistência sem esforço",
-    alt: "Ícone representando consistência",
   },
   {
-    iconImage: "/images/lp/icons/after-orgulho.png",
+    icon: Heart,
     text: "Orgulho real das suas conquistas",
-    alt: "Ícone representando orgulho",
   },
 ];
 
@@ -817,23 +816,15 @@ const BoraLanding = () => {
                     viewport={{ once: true }}
                   >
                     <div className="relative bg-gradient-to-br from-slate-50 to-white rounded-3xl p-8 md:p-12 border border-slate-200/50 shadow-xl overflow-hidden">
-                      {/* Step number */}
-                      <div className="absolute top-6 left-6 md:top-8 md:left-8 space-y-1">
-                        <span className="text-6xl md:text-8xl font-black text-[#A3E635]/30 leading-none">
-                          {step.step}
-                        </span>
-                        <span className="text-[10px] font-semibold tracking-[0.4em] text-slate-400 uppercase block">
-                          de {formattedTotalHowItWorksSteps}
-                        </span>
-                      </div>
+                      {/* Step number removido - usando dots abaixo */}
 
                       <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-8 lg:gap-12">
-                        {/* Image */}
+                        {/* Image - sem border extra */}
                         <div className="w-full md:w-7/12">
                           <img
                             src={step.image}
                             alt={step.title}
-                            className="w-full h-auto max-w-[420px] md:max-w-[580px] mx-auto rounded-[32px] border-4 border-white shadow-2xl"
+                            className="w-full h-auto max-w-[420px] md:max-w-[580px] mx-auto rounded-[32px] shadow-2xl"
                           />
                         </div>
 
@@ -855,9 +846,22 @@ const BoraLanding = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="flex justify-center gap-4 mt-8">
-              <CarouselPrevious className="static translate-y-0 bg-primary/10 border-primary/20 hover:bg-primary hover:text-white" />
-              <CarouselNext className="static translate-y-0 bg-primary/10 border-primary/20 hover:bg-primary hover:text-white" />
+            {/* Navigation with dots */}
+            <div className="flex flex-col items-center gap-4 mt-8">
+              {/* Dots indicator */}
+              <div className="flex justify-center gap-2">
+                {howItWorks.map((_, index) => (
+                  <div
+                    key={index}
+                    className="w-2.5 h-2.5 rounded-full bg-primary/30 transition-all duration-300"
+                  />
+                ))}
+              </div>
+              {/* Navigation arrows */}
+              <div className="flex justify-center gap-4">
+                <CarouselPrevious className="static translate-y-0 bg-primary/10 border-primary/20 hover:bg-primary hover:text-white" />
+                <CarouselNext className="static translate-y-0 bg-primary/10 border-primary/20 hover:bg-primary hover:text-white" />
+              </div>
             </div>
           </Carousel>
         </div>
@@ -918,15 +922,7 @@ const BoraLanding = () => {
                           transition={{ delay: index * 0.1 }}
                         >
                           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-500/30">
-                            {item.iconImage ? (
-                              <img
-                                src={item.iconImage}
-                                alt={item.alt || item.text}
-                                className="w-8 h-8 object-contain"
-                              />
-                            ) : (
-                              item.icon && <item.icon className="w-6 h-6 text-white" />
-                            )}
+                            <item.icon className="w-6 h-6 text-white" strokeWidth={2.5} />
                           </div>
                           <span className="text-slate-900 font-medium text-lg pt-2">{item.text}</span>
                         </motion.div>
@@ -969,15 +965,7 @@ const BoraLanding = () => {
                           whileHover={{ scale: 1.02 }}
                         >
                           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-lime-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
-                            {item.iconImage ? (
-                              <img
-                                src={item.iconImage}
-                                alt={item.alt || item.text}
-                                className="w-8 h-8 object-contain"
-                              />
-                            ) : (
-                              item.icon && <item.icon className="w-6 h-6 text-white" />
-                            )}
+                            <item.icon className="w-6 h-6 text-white" strokeWidth={2.5} />
                           </div>
                           <span className="text-slate-900 font-medium text-lg pt-2">{item.text}</span>
                         </motion.div>
@@ -1273,7 +1261,7 @@ const BoraLanding = () => {
             {/* Glow effect */}
             <div className="absolute -inset-2 bg-gradient-to-r from-primary via-lime-500 to-primary rounded-[2rem] blur-xl opacity-40 animate-pulse" />
 
-            <div className="relative bg-white rounded-3xl p-8 md:p-10 shadow-2xl border-2 border-[#A3E635]/40 overflow-hidden">
+            <div className="relative bg-white rounded-3xl p-5 sm:p-8 md:p-10 shadow-2xl border-2 border-[#A3E635]/40 overflow-hidden">
               {/* Decorative elements */}
               <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-lime-500/10 rounded-full blur-3xl" />
@@ -1291,16 +1279,16 @@ const BoraLanding = () => {
                 </motion.div>
 
                 <div className="mb-2">
-                  <span className="text-slate-500 line-through text-2xl sm:text-3xl">
+                  <span className="text-slate-700 line-through text-xl sm:text-2xl md:text-3xl font-medium">
                     De R$ 805
                   </span>
                 </div>
 
                 <div className="relative inline-block mb-2">
                   <div className="flex flex-col items-center">
-                    <span className="text-xl sm:text-2xl font-bold text-primary/80 mb-1">11x de</span>
+                    <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary mb-1">11x de</span>
                     <motion.span
-                      className="text-6xl sm:text-7xl md:text-8xl font-black bg-gradient-to-r from-primary via-lime-300 to-primary bg-clip-text text-transparent"
+                      className="text-5xl sm:text-6xl md:text-8xl font-black bg-gradient-to-r from-primary via-lime-300 to-primary bg-clip-text text-transparent"
                       animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
                       transition={{ duration: 3, repeat: Infinity }}
                       style={{ backgroundSize: "200% 200%" }}
@@ -1309,13 +1297,13 @@ const BoraLanding = () => {
                     </motion.span>
                   </div>
                   {/* Glow behind price */}
-                  <div className="absolute inset-0 flex items-center justify-center text-6xl sm:text-7xl md:text-8xl font-black text-primary blur-2xl opacity-30">
+                  <div className="absolute inset-0 flex items-center justify-center text-5xl sm:text-6xl md:text-8xl font-black text-primary blur-2xl opacity-30">
                     R$5,17
                   </div>
                 </div>
 
-                <p className="text-slate-600 text-sm sm:text-base">
-                  ou R$47 à vista • <span className="text-[#A3E635] font-semibold">1 ano de acesso</span>
+                <p className="text-slate-800 text-sm sm:text-base font-medium">
+                  ou R$47 à vista • <span className="text-primary font-bold">1 ano de acesso</span>
                 </p>
               </div>
 
@@ -1356,13 +1344,13 @@ const BoraLanding = () => {
 
               {/* Premium Guarantee Seal */}
               <div className="relative z-10 mt-2">
-                <div className="flex items-center gap-4 p-4 bg-[#A3E635]/10 rounded-2xl border border-[#A3E635]/30">
-                  <div className="flex-shrink-0 w-16 h-16 rounded-full bg-[#A3E635] flex items-center justify-center shadow-lg shadow-[#A3E635]/30">
-                    <Shield className="w-8 h-8 text-white" />
+                <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-[#A3E635]/15 rounded-2xl border-2 border-[#A3E635]/40">
+                  <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#A3E635] flex items-center justify-center shadow-lg shadow-[#A3E635]/30">
+                    <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-slate-900 text-lg">Garantia Incondicional de 7 Dias</p>
-                    <p className="text-sm text-slate-600">
+                    <p className="font-bold text-slate-900 text-base sm:text-lg">Garantia Incondicional de 7 Dias</p>
+                    <p className="text-xs sm:text-sm text-slate-700">
                       100% do seu dinheiro de volta, sem perguntas. Risco zero.
                     </p>
                   </div>
