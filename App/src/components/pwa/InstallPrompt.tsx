@@ -2,34 +2,29 @@ import { useState } from "react";
 import { Smartphone, Share, Plus, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { usePWA } from "@/hooks/usePWA";
 import { cn } from "@/lib/utils";
 
 export function InstallPrompt() {
   const { isInstalled, isInstallable, isIOS, promptInstall } = usePWA();
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [snap, setSnap] = useState<number | string | null>(0.2);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Logs de debug
-  console.log("[InstallPrompt] Valores recebidos:", { isInstalled, isInstallable, isIOS });
+  // Debug logs
+  console.log("[InstallPrompt] Valores:", { isInstalled, isInstallable, isIOS });
 
-  // ÚNICA condição para esconder: app instalado
   if (isInstalled) {
-    console.log("[InstallPrompt] Retornando null: app instalado (isInstalled=true)");
+    console.log("[InstallPrompt] Retornando null: app instalado");
     return null;
   }
 
-  // Mostrar para iOS (sempre) ou Android (quando installable)
   const shouldShow = isIOS || isInstallable;
-  console.log("[InstallPrompt] shouldShow =", shouldShow, "(isIOS:", isIOS, "|| isInstallable:", isInstallable, ")");
   if (!shouldShow) {
     console.log("[InstallPrompt] Retornando null: shouldShow=false");
     return null;
@@ -37,14 +32,11 @@ export function InstallPrompt() {
 
   console.log("[InstallPrompt] ✅ RENDERIZANDO componente!");
 
-  const isExpanded = snap === 0.6;
-
   const handleInstall = async () => {
     setIsLoading(true);
     await promptInstall();
     setIsLoading(false);
   };
-
 
   const buttonClasses = cn(
     "fixed bottom-32 right-4 z-50",
@@ -60,156 +52,85 @@ export function InstallPrompt() {
   );
 
   return (
-    <>
-      {/* FAB Button - Completamente separado do Radix Dialog */}
-      <button
-        onClick={() => {
-          setDrawerOpen(true);
-          setSnap(0.2);
-        }}
-        className={buttonClasses}
-        aria-label="Instalar app"
-      >
-        {/* Glow effect */}
-        <div className="absolute inset-0 rounded-full bg-white/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    <Dialog>
+      <DialogTrigger asChild>
+        <button className={buttonClasses} aria-label="Instalar app">
+          {/* Glow effect */}
+          <div className="absolute inset-0 rounded-full bg-white/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Icon */}
+          <Smartphone className="w-7 h-7 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+          {/* Pulse animation */}
+          <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
+        </button>
+      </DialogTrigger>
 
-        {/* Icon with animation */}
-        <Smartphone className="w-7 h-7 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+      <DialogContent className="rounded-2xl max-w-sm mx-4">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+            <span className="text-2xl">📱</span>
+            <span>Instale o Bora</span>
+          </DialogTitle>
+          <DialogDescription>
+            Acesso rápido, funciona offline e muito mais!
+          </DialogDescription>
+        </DialogHeader>
 
-        {/* Pulse animation ring */}
-        <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
-      </button>
+        <div className="space-y-6 py-4">
+          {/* Video Tutorial */}
+          <div className="relative rounded-xl overflow-hidden shadow-2xl ring-2 ring-primary/10">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-auto max-h-48 object-contain bg-gradient-to-br from-muted/50 to-muted"
+            >
+              <source src="/videos/install-tutorial.mp4" type="video/mp4" />
+              Seu navegador não suporta vídeo.
+            </video>
+          </div>
 
-      {/* Drawer com snap points */}
-      <Drawer
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
-        snapPoints={[0.2, 0.6]}
-        activeSnapPoint={snap}
-        setActiveSnapPoint={setSnap}
-      >
-        <DrawerContent className="border-t-4 border-primary/20">
-          <DrawerHeader className="pb-2">
-            <DrawerTitle className="text-xl font-bold flex items-center gap-2">
-              {isExpanded ? (
-                <>
-                  <span className="text-2xl">📱</span>
-                  <span>Instale o Bora no seu celular</span>
-                </>
-              ) : (
-                <>
-                  <span className="text-2xl">📱</span>
-                  <span>Instale o Bora</span>
-                </>
-              )}
-            </DrawerTitle>
-            <DrawerDescription className="text-base">
-              {isExpanded ? (
-                "Acesso rápido, funciona offline e muito mais!"
-              ) : (
-                "Instale o Habitz no seu dispositivo para melhor experiência"
-              )}
-            </DrawerDescription>
-          </DrawerHeader>
-
-          {/* Conteúdo só aparece quando expandido */}
-          {isExpanded && (
-            <div className="px-4 pb-6 space-y-6">
-              {/* Video Tutorial - MP4 autoplay loop */}
-              <div className="relative rounded-xl overflow-hidden shadow-2xl ring-2 ring-primary/10">
-                <video
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="w-full h-auto max-h-72 object-contain bg-gradient-to-br from-muted/50 to-muted"
-                >
-                  <source src="/videos/install-tutorial.mp4" type="video/mp4" />
-                  Seu navegador não suporta vídeo.
-                </video>
-                {/* Play indicator overlay */}
-                <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full text-xs text-white flex items-center gap-1">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                  Tutorial
-                </div>
-              </div>
-
-              {/* Instruções iOS */}
-              {isIOS && (
-                <div className="space-y-3 bg-muted/50 rounded-xl p-4 border border-border/50">
-                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-primary rounded-full" />
-                    Como instalar
-                  </h3>
-                  <IOSStep
-                    step={1}
-                    icon={<Share className="w-4 h-4" />}
-                    text='Toque no botão "Compartilhar"'
-                  />
-                  <IOSStep
-                    step={2}
-                    icon={<Plus className="w-4 h-4" />}
-                    text='Selecione "Adicionar à Tela Inicial"'
-                  />
-                  <IOSStep
-                    step={3}
-                    icon={<ChevronRight className="w-4 h-4" />}
-                    text='Toque em "Adicionar"'
-                  />
-                </div>
-              )}
-
-              {/* Botão de instalação Android */}
-              {isInstallable && !isIOS && (
-                <DrawerFooter className="px-0 pt-2">
-                  <Button
-                    onClick={handleInstall}
-                    disabled={isLoading}
-                    size="lg"
-                    className="w-full h-14 text-base font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 relative overflow-hidden group"
-                  >
-                    {/* Animated background */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-
-                    {/* Content */}
-                    <span className="relative z-10 flex items-center gap-2">
-                      {isLoading ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Instalando...
-                        </>
-                      ) : (
-                        <>
-                          <Smartphone className="w-5 h-5" />
-                          Instalar Agora
-                        </>
-                      )}
-                    </span>
-                  </Button>
-                </DrawerFooter>
-              )}
+          {/* iOS Instructions */}
+          {isIOS && (
+            <div className="space-y-3 bg-muted/50 rounded-xl p-4 border border-border/50">
+              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 bg-primary rounded-full" />
+                Como instalar
+              </h3>
+              <IOSStep step={1} icon={<Share className="w-4 h-4" />} text='Toque no botão "Compartilhar"' />
+              <IOSStep step={2} icon={<Plus className="w-4 h-4" />} text='Selecione "Adicionar à Tela Inicial"' />
+              <IOSStep step={3} icon={<ChevronRight className="w-4 h-4" />} text='Toque em "Adicionar"' />
             </div>
           )}
 
-          {/* Estado minimizado - hint para expandir */}
-          {!isExpanded && (
-            <div className="px-4 pb-4 text-center">
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
-                <ChevronRight className="w-4 h-4 rotate-90 animate-bounce" />
-                <span>Arraste para cima para ver o tutorial</span>
-                <ChevronRight className="w-4 h-4 rotate-90 animate-bounce" />
-              </div>
-              <p className="text-xs text-muted-foreground/70">
-                Acesso rápido • Funciona offline • Notificações
-              </p>
-            </div>
+          {/* Android Install Button */}
+          {isInstallable && !isIOS && (
+            <Button
+              onClick={handleInstall}
+              disabled={isLoading}
+              size="lg"
+              className="w-full h-14 text-base font-bold bg-gradient-to-r from-primary via-primary to-primary/90"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  Instalando...
+                </>
+              ) : (
+                <>
+                  <Smartphone className="w-5 h-5 mr-2" />
+                  Instalar Agora
+                </>
+              )}
+            </Button>
           )}
-        </DrawerContent>
-      </Drawer>
-    </>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
+// Helper component for iOS steps
 interface IOSStepProps {
   step: number;
   icon: React.ReactNode;
@@ -219,18 +140,18 @@ interface IOSStepProps {
 function IOSStep({ step, icon, text }: IOSStepProps) {
   return (
     <div className="flex items-center gap-3 group hover:scale-[1.02] transition-transform duration-200">
-      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground flex items-center justify-center text-xs font-bold shadow-md group-hover:shadow-lg transition-shadow">
+      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground flex items-center justify-center text-xs font-bold shadow-md">
         {step}
       </div>
-      <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center text-muted-foreground border border-border/50 group-hover:border-primary/30 transition-colors">
+      <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center text-muted-foreground border border-border/50">
         {icon}
       </div>
-      <span className="text-sm text-foreground font-medium group-hover:text-primary transition-colors">{text}</span>
+      <span className="text-sm text-foreground font-medium">{text}</span>
     </div>
   );
 }
 
-// Componente para banner de atualização disponível
+// Component for update available banner
 export function UpdatePrompt() {
   const { needsUpdate, updateApp } = usePWA();
   const [dismissed, setDismissed] = useState(false);
@@ -256,11 +177,7 @@ export function UpdatePrompt() {
             >
               Depois
             </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={updateApp}
-            >
+            <Button variant="secondary" size="sm" onClick={updateApp}>
               Atualizar
             </Button>
           </div>
