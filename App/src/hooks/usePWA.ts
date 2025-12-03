@@ -56,7 +56,24 @@ export function usePWA(): UsePWAReturn {
     );
   }, []);
 
-  const [isStandalone] = useState(() => checkIsStandalone());
+  const [isStandalone, setIsStandalone] = useState(() => checkIsStandalone());
+
+  // Atualizar isStandalone quando display-mode muda (importante para iOS)
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(display-mode: standalone)");
+
+    const handleChange = () => {
+      const current = checkIsStandalone();
+      setIsStandalone(current);
+      console.log("[PWA] isStandalone atualizado:", current);
+    };
+
+    // Verificar imediatamente (para casos onde o PWA foi instalado e aberto)
+    handleChange();
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [checkIsStandalone]);
 
   // Estado do prompt de instalação
   const [installPrompt, setInstallPrompt] =

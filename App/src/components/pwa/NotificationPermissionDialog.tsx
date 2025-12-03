@@ -24,6 +24,17 @@ export function NotificationPermissionDialog({
 
   // Verificar se deve mostrar
   useEffect(() => {
+    // Log de debug para diagnóstico
+    console.log("[NotificationDialog] Verificando exibição:", {
+      dismissed,
+      isSubscribed,
+      permission,
+      isIOS,
+      isStandalone,
+      isSupported,
+      trigger,
+    });
+
     if (dismissed || isSubscribed || permission === "denied") {
       setIsVisible(false);
       return;

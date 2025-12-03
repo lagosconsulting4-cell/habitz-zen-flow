@@ -53,6 +53,22 @@ export function usePushNotifications(): UsePushNotificationsReturn {
   // iOS só suporta push em PWA instalada (iOS 16.4+)
   const canUsePush = isSupported && (!isIOS || isStandalone);
 
+  // Log de debug para diagnóstico de push notifications
+  useEffect(() => {
+    console.log("[Push] Estado do suporte:", {
+      vapidKeyPresent: !!VAPID_PUBLIC_KEY,
+      vapidKeyLength: VAPID_PUBLIC_KEY.length,
+      hasServiceWorker: "serviceWorker" in navigator,
+      hasPushManager: "PushManager" in window,
+      hasNotification: "Notification" in window,
+      isIOS,
+      isStandalone,
+      isSupported,
+      canUsePush,
+      permission: typeof Notification !== "undefined" ? Notification.permission : "undefined",
+    });
+  }, [isIOS, isStandalone, isSupported, canUsePush]);
+
   // Verificar se já está inscrito
   useEffect(() => {
     const checkSubscription = async () => {
