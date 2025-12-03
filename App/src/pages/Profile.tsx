@@ -35,6 +35,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { toast } from "sonner";
 import { bonusSections } from "@/pages/Bonus";
 import { bonusFlags } from "@/config/bonusFlags";
+import { NotificationToggle } from "@/components/pwa/NotificationPermissionDialog";
 
 const Profile = () => {
   const [userId, setUserId] = useState<string | null>(null);
@@ -486,22 +487,8 @@ const Profile = () => {
             <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Notificacoes</h2>
 
             <div className="space-y-4">
-              {/* Notifications */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Bell className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="font-semibold text-foreground">Lembretes</p>
-                    <p className="text-sm text-muted-foreground">
-                      Receba lembretes dos seus habitos
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={prefs.notificationsEnabled}
-                  onCheckedChange={(checked) => setPreferences({ notificationsEnabled: checked })}
-                />
-              </div>
+              {/* Push Notifications Toggle */}
+              <NotificationToggle />
             </div>
           </Card>
         </motion.div>
