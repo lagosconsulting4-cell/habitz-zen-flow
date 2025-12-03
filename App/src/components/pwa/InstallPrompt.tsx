@@ -64,9 +64,12 @@ export function InstallPrompt() {
       {/* FAB Button - Completamente separado do Radix Dialog */}
       <button
         onClick={(e) => {
+          console.log("[InstallPrompt] 🔘 BUTTON CLICKED!");
           e.currentTarget.blur(); // Remove focus ANTES de abrir o drawer
+          console.log("[InstallPrompt] 🔘 Calling setDrawerOpen(true)...");
           setDrawerOpen(true);
           setSnap(0.2);
+          console.log("[InstallPrompt] 🔘 drawerOpen should be true now");
         }}
         className={buttonClasses}
         aria-label="Instalar app"
