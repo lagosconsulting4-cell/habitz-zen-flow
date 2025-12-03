@@ -65,11 +65,14 @@ export function InstallPrompt() {
       <button
         onClick={(e) => {
           console.log("[InstallPrompt] 🔘 BUTTON CLICKED!");
-          e.currentTarget.blur(); // Remove focus ANTES de abrir o drawer
-          console.log("[InstallPrompt] 🔘 Calling setDrawerOpen(true)...");
+          const button = e.currentTarget;
           setDrawerOpen(true);
           setSnap(0.2);
-          console.log("[InstallPrompt] 🔘 drawerOpen should be true now");
+          // Delay blur() para DEPOIS do drawer abrir, evitando que Vaul interprete como "click fora"
+          requestAnimationFrame(() => {
+            button.blur();
+            console.log("[InstallPrompt] 🔘 blur() executed after drawer opened");
+          });
         }}
         className={buttonClasses}
         aria-label="Instalar app"
