@@ -514,25 +514,38 @@ const MyHabits = () => {
                           <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
 
                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                              <Button variant="ghost" size="icon" className="h-9 w-9 text-foreground hover:bg-muted">
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-9 w-9 text-foreground hover:bg-muted"
+                                onClick={(e) => e.stopPropagation()}
+                                onPointerDown={(e) => e.stopPropagation()}
+                              >
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onSelect={() => handleDuplicate(habit)}>
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-48"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <DropdownMenuItem
+                                onClick={(e) => e.stopPropagation()}
+                                onSelect={() => handleDuplicate(habit)}
+                              >
                                 <Copy className="mr-2 h-4 w-4" /> Duplicar
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onSelect={() => handleArchiveToggle(habit)}>
+                              <DropdownMenuItem
+                                onClick={(e) => e.stopPropagation()}
+                                onSelect={() => handleArchiveToggle(habit)}
+                              >
                                 {habit.is_active ? "Arquivar" : "Reativar"}
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onSelect={(e) => {
-                                  e.preventDefault?.();
-                                  e.stopPropagation?.();
-                                  setDeleteTarget(habit);
-                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                onSelect={() => setDeleteTarget(habit)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="mr-2 h-4 w-4" /> Excluir
