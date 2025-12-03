@@ -7,9 +7,10 @@ import {
   Target,
   Calendar,
   Bell,
-  BellRing,
   Clock,
   Sun,
+  Sunset,
+  Moon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTheme } from "@/hooks/useTheme";
@@ -38,10 +39,10 @@ import {
 } from "@/components/ui/select";
 import { getHabitFormTheme } from "@/theme/habitFormTheme";
 
-const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; emoji: string }> = [
-  { id: "morning", name: "Manhã", emoji: "☀️" },
-  { id: "afternoon", name: "Tarde", emoji: "🌇" },
-  { id: "evening", name: "Noite", emoji: "🌙" },
+const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; icon: React.ReactNode }> = [
+  { id: "morning", name: "Manhã", icon: <Sun className="h-5 w-5" /> },
+  { id: "afternoon", name: "Tarde", icon: <Sunset className="h-5 w-5" /> },
+  { id: "evening", name: "Noite", icon: <Moon className="h-5 w-5" /> },
 ];
 
 const weekdays = [
@@ -188,7 +189,6 @@ const CreateHabit = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<typeof periods[number]["id"]>(periods[0].id);
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
-  const [notificationSound, setNotificationSound] = useState<"default" | "soft" | "bright">("default");
   const [reminderTime, setReminderTime] = useState<string>("08:00");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
@@ -206,13 +206,7 @@ const CreateHabit = () => {
   // Sincroniza estado local com preferências do app (fallback)
   useEffect(() => {
     setNotificationsEnabled(prefs.notificationsEnabled);
-    setNotificationSound(prefs.defaultSound);
-  }, [prefs.notificationsEnabled, prefs.defaultSound]);
-  const soundOptions: Array<{ value: "default" | "soft" | "bright"; label: string; description: string }> = [
-    { value: "default", label: "Padrão", description: "Alerta equilibrado para o dia a dia" },
-    { value: "soft", label: "Suave", description: "Discreto, sem assustar" },
-    { value: "bright", label: "Vibrante", description: "Curto e chamativo" },
-  ];
+  }, [prefs.notificationsEnabled]);
 
   const themeColors = getHabitFormTheme(isDarkMode);
 
@@ -820,13 +814,13 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             {/* Period Badge */}
             <div className="mt-3 flex items-center gap-2">
               <span
-                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase"
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase ${themeColors.periodIcon.selectedBg}`}
                 style={{
                   backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "rgba(255,255,255,0.2)",
                   color: isDarkMode ? UNIFIED_COLOR : "#FFFFFF",
                 }}
               >
-                {periods.find(p => p.id === selectedPeriod)?.emoji}{" "}
+                {periods.find(p => p.id === selectedPeriod)?.icon}{" "}
                 {periods.find(p => p.id === selectedPeriod)?.name}
               </span>
               {notificationsEnabled && (
@@ -910,7 +904,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                 Período do Dia
               </p>
               <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {periods.find(p => p.id === selectedPeriod)?.emoji} {periods.find(p => p.id === selectedPeriod)?.name}
+                {periods.find(p => p.id === selectedPeriod)?.name}
               </p>
             </div>
           </div>
@@ -924,11 +918,13 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                 onClick={() => setSelectedPeriod(period.id)}
                 className={`flex flex-col items-center gap-1 rounded-xl py-3 text-center transition-all duration-200 ${
                   selectedPeriod === period.id
-                    ? themeColors.buttonActive
-                    : themeColors.buttonInactive
+                    ? themeColors.periodIcon.selectedBg
+                    : `bg-transparent ${themeColors.periodIcon.unselectedText}`
                 }`}
               >
-                <span className="text-lg">{period.emoji}</span>
+                <span className={`${selectedPeriod === period.id ? themeColors.periodIcon.selectedText : themeColors.periodIcon.unselectedText}`}>
+                  {period.icon}
+                </span>
                 <span className="text-xs font-semibold">{period.name}</span>
               </button>
             ))}
@@ -975,33 +971,6 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                     onChange={(e) => setReminderTime(e.target.value)}
                     className={`mt-2 h-11 w-full rounded-lg px-3 ${themeColors.input}`}
                   />
-                </div>
-              </div>
-            </div>
-
-            {/* Sound Selector */}
-            <div className="rounded-xl border border-border/60 bg-muted/10 p-3">
-              <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${themeColors.iconBg}`}>
-                  <BellRing className={`h-5 w-5 ${themeColors.iconColor}`} />
-                </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-semibold ${themeColors.bodyText}`}>Som da notificação</p>
-                  <Select value={notificationSound} onValueChange={(val) => setNotificationSound(val as typeof notificationSound)}>
-                    <SelectTrigger className={`mt-2 h-11 w-full rounded-lg ${themeColors.input}`}>
-                      <SelectValue placeholder="Escolha um som" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      {soundOptions.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{opt.label}</span>
-                            <span className="text-xs text-muted-foreground">{opt.description}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
             </div>

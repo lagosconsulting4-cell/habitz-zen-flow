@@ -6,8 +6,10 @@ import {
   Target,
   Calendar,
   Bell,
-  BellRing,
   Loader2,
+  Sun,
+  Sunset,
+  Moon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTheme } from "@/hooks/useTheme";
@@ -30,10 +32,10 @@ import {
 } from "@/components/ui/select";
 import { getHabitFormTheme } from "@/theme/habitFormTheme";
 
-const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string }> = [
-  { id: "morning", name: "Manhã" },
-  { id: "afternoon", name: "Tarde" },
-  { id: "evening", name: "Noite" },
+const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; icon: React.ReactNode }> = [
+  { id: "morning", name: "Manhã", icon: <Sun className="h-5 w-5" /> },
+  { id: "afternoon", name: "Tarde", icon: <Sunset className="h-5 w-5" /> },
+  { id: "evening", name: "Noite", icon: <Moon className="h-5 w-5" /> },
 ];
 
 const weekdays = [
@@ -85,7 +87,6 @@ const EditHabit = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<typeof periods[number]["id"]>("morning");
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
-  const [notificationSound, setNotificationSound] = useState<"default" | "soft" | "bright">("default");
   const [isSaving, setIsSaving] = useState(false);
   const [step, setStep] = useState<Step>("details");
   const [habitLoaded, setHabitLoaded] = useState(false);

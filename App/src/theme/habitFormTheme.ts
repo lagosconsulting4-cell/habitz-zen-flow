@@ -29,6 +29,16 @@ export interface HabitFormTheme {
     chevron: string;
     shadow: string;
   };
+  stepper: {
+    inactiveCircle: string;
+    inactiveConnector: string;
+    inactiveIcon: string;
+  };
+  periodIcon: {
+    selectedBg: string;
+    selectedText: string;
+    unselectedText: string;
+  };
 }
 
 export const getHabitFormTheme = (isDarkMode: boolean): HabitFormTheme => {
@@ -64,6 +74,16 @@ export const getHabitFormTheme = (isDarkMode: boolean): HabitFormTheme => {
         chevron: "text-slate-400",
         shadow: "shadow-lg shadow-slate-900",
       },
+      stepper: {
+        inactiveCircle: "rgba(255,255,255,0.15)",
+        inactiveConnector: "rgba(255,255,255,0.1)",
+        inactiveIcon: "text-slate-500",
+      },
+      periodIcon: {
+        selectedBg: "bg-primary",
+        selectedText: "text-white",
+        unselectedText: "text-slate-500",
+      },
     };
   }
 
@@ -75,8 +95,8 @@ export const getHabitFormTheme = (isDarkMode: boolean): HabitFormTheme => {
     headerText: "text-gray-900",
     bodyText: "text-gray-900",
     bodyTextSecondary: "text-gray-600",
-    bodyTextMuted: "text-gray-500",
-    sectionTitle: "text-gray-500",
+    bodyTextMuted: "text-gray-600",
+    sectionTitle: "text-gray-600",
     input: "bg-white border-gray-300 text-gray-900 placeholder:text-gray-400",
     buttonActive: "bg-emerald-500 text-white hover:bg-emerald-600",
     buttonInactive: "bg-gray-100 text-gray-700 hover:bg-gray-200",
@@ -95,8 +115,18 @@ export const getHabitFormTheme = (isDarkMode: boolean): HabitFormTheme => {
       text: "text-gray-900",
       iconBg: "bg-gray-200",
       iconColor: "text-gray-600",
-      chevron: "text-gray-400",
+      chevron: "text-gray-500",
       shadow: "shadow-lg shadow-gray-300",
+    },
+    stepper: {
+      inactiveCircle: "rgba(0,0,0,0.2)",
+      inactiveConnector: "rgba(0,0,0,0.15)",
+      inactiveIcon: "text-gray-400",
+    },
+    periodIcon: {
+      selectedBg: "bg-primary",
+      selectedText: "text-white",
+      unselectedText: "text-gray-400",
     },
   };
 };
