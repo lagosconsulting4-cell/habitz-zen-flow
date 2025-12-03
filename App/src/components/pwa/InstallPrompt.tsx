@@ -74,20 +74,15 @@ export function InstallPrompt() {
         setActiveSnapPoint={setSnap}
       >
         {/* FAB - 100% persistente como Trigger */}
-        <DrawerTrigger asChild>
-          <button
-            className={buttonClasses}
-            aria-label="Instalar app"
-          >
-            {/* Glow effect */}
-            <div className="absolute inset-0 rounded-full bg-white/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <DrawerTrigger className={buttonClasses} aria-label="Instalar app">
+          {/* Glow effect */}
+          <div className="absolute inset-0 rounded-full bg-white/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-            {/* Icon with animation */}
-            <Smartphone className="w-7 h-7 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+          {/* Icon with animation */}
+          <Smartphone className="w-7 h-7 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
 
-            {/* Pulse animation ring */}
-            <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
-          </button>
+          {/* Pulse animation ring */}
+          <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
         </DrawerTrigger>
         <DrawerContent className="border-t-4 border-primary/20">
           <DrawerHeader className="pb-2">
