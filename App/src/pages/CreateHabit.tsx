@@ -55,6 +55,12 @@ const weekdays = [
   { id: 0, label: "Dom" },
 ];
 
+const soundOptions: Array<{ value: "default" | "soft" | "bright"; label: string; description: string }> = [
+  { value: "default", label: "Padrão", description: "Som padrão do sistema" },
+  { value: "soft", label: "Suave", description: "Som suave e discreto" },
+  { value: "bright", label: "Vibrante", description: "Som mais chamativo" },
+];
+
 type Step = "select" | "details" | "confirm";
 type FrequencyType = "daily" | "fixed_days";
 
@@ -190,6 +196,7 @@ const CreateHabit = () => {
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [reminderTime, setReminderTime] = useState<string>("08:00");
+  const [notificationSound, setNotificationSound] = useState<"default" | "soft" | "bright">("default");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string; iconKey?: HabitIconKey } | null>(null);
