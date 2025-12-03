@@ -72,6 +72,7 @@ export function InstallPrompt() {
         snapPoints={[0.2, 0.6]}
         activeSnapPoint={snap}
         setActiveSnapPoint={setSnap}
+        modal={false}
       >
         {/* FAB - 100% persistente como Trigger */}
         <DrawerTrigger className={buttonClasses} aria-label="Instalar app">
