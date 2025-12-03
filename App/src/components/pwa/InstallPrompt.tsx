@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Smartphone, Share, Plus, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +18,6 @@ export function InstallPrompt() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [snap, setSnap] = useState<number | string | null>(0.2);
   const [isLoading, setIsLoading] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Logs de debug
   console.log("[InstallPrompt] Valores recebidos:", { isInstalled, isInstallable, isIOS });
@@ -47,40 +46,11 @@ export function InstallPrompt() {
     setIsLoading(false);
   };
 
-  // DEBUG: Log element visibility after render
-  useEffect(() => {
-    if (buttonRef.current) {
-      console.log("[InstallPrompt] ✅ Button element found in DOM!");
-      console.log("[InstallPrompt] Button computed style:", {
-        display: window.getComputedStyle(buttonRef.current).display,
-        visibility: window.getComputedStyle(buttonRef.current).visibility,
-        opacity: window.getComputedStyle(buttonRef.current).opacity,
-        position: window.getComputedStyle(buttonRef.current).position,
-        bottom: window.getComputedStyle(buttonRef.current).bottom,
-        right: window.getComputedStyle(buttonRef.current).right,
-        zIndex: window.getComputedStyle(buttonRef.current).zIndex,
-        width: window.getComputedStyle(buttonRef.current).width,
-        height: window.getComputedStyle(buttonRef.current).height,
-        backgroundColor: window.getComputedStyle(buttonRef.current).backgroundColor,
-      });
-      console.log("[InstallPrompt] Button rect:", buttonRef.current.getBoundingClientRect());
-      console.log("[InstallPrompt] Button element:", buttonRef.current);
-    } else {
-      console.log("[InstallPrompt] ❌ Button element NOT found in DOM!");
-    }
-  }, []);
 
-  // DEBUG: Log drawer state changes
-  useEffect(() => {
-    console.log("[InstallPrompt] drawerOpen state changed:", drawerOpen);
-    console.log("[InstallPrompt] snap state changed:", snap);
-  }, [drawerOpen, snap]);
-
-  // DEBUG: Log do className
   const buttonClasses = cn(
     "fixed bottom-32 right-4 z-50",
     "w-16 h-16 rounded-full",
-    "bg-red-500", // DEBUG: Vermelho temporário para visibilidade!
+    "bg-primary",
     "text-primary-foreground",
     "shadow-xl hover:shadow-2xl",
     "flex items-center justify-center",
@@ -88,16 +58,17 @@ export function InstallPrompt() {
     "hover:scale-110 active:scale-95",
     "ring-4 ring-primary/20 hover:ring-primary/30",
     "group"
-    // REMOVER: "relative overflow-hidden" foram movidas para elementos filhos
   );
-  console.log("[InstallPrompt] className gerado:", buttonClasses);
 
   return (
     <>
       {/* Drawer com snap points */}
       <Drawer
         open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+        onOpenChange={(isOpen) => {
+          setDrawerOpen(isOpen);
+          if (isOpen) setSnap(0.2);
+        }}
         snapPoints={[0.2, 0.6]}
         activeSnapPoint={snap}
         setActiveSnapPoint={setSnap}
@@ -105,15 +76,8 @@ export function InstallPrompt() {
         {/* FAB - 100% persistente como Trigger */}
         <DrawerTrigger asChild>
           <button
-            ref={buttonRef}
             className={buttonClasses}
             aria-label="Instalar app"
-            onClick={() => {
-              console.log("[InstallPrompt] ✅ BUTTON CLICKED!");
-              console.log("[InstallPrompt] Current drawerOpen state:", drawerOpen);
-              setSnap(0.2);
-              console.log("[InstallPrompt] Drawer será aberto pelo DrawerTrigger");
-            }}
           >
             {/* Glow effect */}
             <div className="absolute inset-0 rounded-full bg-white/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
