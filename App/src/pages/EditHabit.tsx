@@ -48,6 +48,12 @@ const weekdays = [
   { id: 0, label: "Dom" },
 ];
 
+const soundOptions: Array<{ value: "default" | "soft" | "bright"; label: string; description: string }> = [
+  { value: "default", label: "Padrão", description: "Som padrão do sistema" },
+  { value: "soft", label: "Suave", description: "Som suave e discreto" },
+  { value: "bright", label: "Vibrante", description: "Som mais chamativo" },
+];
+
 const categories = [
   { id: "mente", label: "Mente" },
   { id: "corpo", label: "Corpo" },
@@ -87,6 +93,7 @@ const EditHabit = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<typeof periods[number]["id"]>("morning");
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
+  const [notificationSound, setNotificationSound] = useState<"default" | "soft" | "bright">("default");
   const [isSaving, setIsSaving] = useState(false);
   const [step, setStep] = useState<Step>("details");
   const [habitLoaded, setHabitLoaded] = useState(false);
@@ -119,6 +126,9 @@ const EditHabit = () => {
       const notifPref = habit.notification_pref as any;
       if (notifPref) {
         setNotificationsEnabled(notifPref.reminder_enabled ?? false);
+        if (notifPref.sound) {
+          setNotificationSound(notifPref.sound);
+        }
       }
 
       setHabitLoaded(true);
