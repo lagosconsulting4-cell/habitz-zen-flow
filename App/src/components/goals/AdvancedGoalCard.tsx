@@ -71,24 +71,24 @@ export const AdvancedGoalCard: React.FC<AdvancedGoalCardProps> = ({
     }
   };
 
-  // Cores adaptativas baseadas no tema
+  // Cores adaptativas baseadas no tema com bom contraste
   const cardClass = isDarkMode
     ? "border-white/10 bg-white/5"
-    : "border-white/20 bg-black/10";
-  const iconBgClass = isDarkMode ? "bg-lime-400/10" : "bg-white/20";
-  const iconClass = isDarkMode ? "text-lime-400" : "text-white";
-  const labelClass = isDarkMode ? "text-white/40" : "text-white/70";
-  const valueClass = isDarkMode ? "text-white" : "text-white";
-  const borderClass = isDarkMode ? "border-white/10" : "border-white/20";
+    : "border-slate-200 bg-slate-50"; // Fundo claro visível
+  const iconBgClass = isDarkMode ? "bg-lime-400/10" : "bg-lime-100"; // Lime suave no light
+  const iconClass = isDarkMode ? "text-lime-400" : "text-lime-600"; // Lime visível
+  const labelClass = isDarkMode ? "text-white/40" : "text-slate-500"; // Texto legível
+  const valueClass = isDarkMode ? "text-white" : "text-slate-900"; // Texto escuro legível
+  const borderClass = isDarkMode ? "border-white/10" : "border-slate-200";
   const inputClass = isDarkMode
     ? "bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50"
-    : "bg-black/10 border-white/20 text-white placeholder:text-white/50 focus:border-white/50";
-  const unitLabelClass = isDarkMode ? "text-white/50" : "text-white/70";
-  const buttonActiveClass = isDarkMode ? "bg-lime-400 text-black" : "bg-white text-primary";
+    : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-lime-500";
+  const unitLabelClass = isDarkMode ? "text-white/50" : "text-slate-500";
+  const buttonActiveClass = isDarkMode ? "bg-lime-400 text-black" : "bg-lime-500 text-white"; // Lime consistente
   const buttonInactiveClass = isDarkMode
     ? "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
-    : "bg-black/10 text-white/80 hover:bg-black/15 hover:text-white";
-  const helpTextClass = isDarkMode ? "text-white/50" : "text-white/70";
+    : "bg-slate-200 text-slate-600 hover:bg-slate-300 hover:text-slate-800"; // Cinza neutro
+  const helpTextClass = isDarkMode ? "text-white/50" : "text-slate-500";
 
   return (
     <div className={`mx-4 overflow-hidden rounded-2xl border ${cardClass}`}>
@@ -107,9 +107,7 @@ export const AdvancedGoalCard: React.FC<AdvancedGoalCardProps> = ({
             </p>
           </div>
         </div>
-        {config.emoji && (
-          <span className="text-2xl">{config.emoji}</span>
-        )}
+        {/* Emoji removido - não usar emojis genéricos */}
       </div>
 
       {/* Body */}
