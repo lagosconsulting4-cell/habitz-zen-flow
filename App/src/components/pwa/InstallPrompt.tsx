@@ -80,7 +80,8 @@ export function InstallPrompt() {
     "transition-all duration-300",
     "hover:scale-110 active:scale-95",
     "ring-4 ring-primary/20 hover:ring-primary/30",
-    "group relative overflow-hidden"
+    "group"
+    // REMOVER: "relative overflow-hidden" foram movidas para elementos filhos
   );
   console.log("[InstallPrompt] className gerado:", buttonClasses);
 
