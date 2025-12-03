@@ -91,7 +91,10 @@ export function InstallPrompt() {
       >
         <DrawerContent className="border-t-4 border-primary/20">
           <DrawerHeader className="pb-2">
-            <DrawerTitle className="text-xl font-bold flex items-center gap-2">
+            <DrawerTitle
+              autoFocus
+              className="text-xl font-bold flex items-center gap-2"
+            >
               {isExpanded ? (
                 <>
                   <span className="text-2xl">📱</span>
