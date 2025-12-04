@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -204,6 +204,8 @@ const CreateHabit = () => {
   const [selectedTemplateAuto, setSelectedTemplateAuto] = useState<boolean>(false);
   const [step, setStep] = useState<Step>("select");
   const [selectedCategoryData, setSelectedCategoryData] = useState<(typeof CATEGORY_DATA)[number] | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { createHabit } = useHabits();
@@ -258,6 +260,19 @@ const CreateHabit = () => {
       handleSelectCategory(CATEGORY_DATA[0]);
     }
   }, [step]);
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    if (contentScrollRef.current) {
+      contentScrollRef.current.scrollTop = 0;
+    }
+    setIsScrolled(false);
+  }, [step]);
+
+  // Handle scroll for header opacity
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    setIsScrolled(e.currentTarget.scrollTop > 10);
+  };
 
   const toggleDay = (day: number) => {
     setSelectedDays((prev) =>
@@ -1236,13 +1251,25 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
   return (
     <div className={`min-h-screen flex flex-col ${themeColors.background || 'bg-background'}`}>
       {/* Fixed header and stepper */}
-      <div className="fixed top-0 left-0 right-0 z-10 w-full bg-inherit">
+      <div
+        className={`fixed top-0 left-0 right-0 z-10 w-full transition-all duration-200 ${
+          isScrolled
+            ? `${themeColors.background || 'bg-background'} shadow-md`
+            : 'bg-inherit'
+        }`}
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
         {HeaderBar}
         {StepperIndicator}
       </div>
 
       {/* Scrollable content with padding to account for fixed header */}
-      <div className="flex-1 pt-40 px-4 py-6 overflow-y-auto">
+      <div
+        ref={contentScrollRef}
+        onScroll={handleScroll}
+        className="flex-1 px-4 py-6 overflow-y-auto"
+        style={{ paddingTop: 'calc(10rem + env(safe-area-inset-top))' }}
+      >
         <AnimatePresence mode="wait">
           {step === "select" && SelectStep}
           {step === "details" && DetailsStep}

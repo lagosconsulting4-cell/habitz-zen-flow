@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -99,6 +99,8 @@ const EditHabit = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [step, setStep] = useState<Step>("details");
   const [habitLoaded, setHabitLoaded] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
 
   // Find the habit to edit
   const habit = useMemo(() => {
@@ -143,6 +145,19 @@ const EditHabit = () => {
     setSelectedDays((prev) =>
       prev.includes(day) ? prev.filter((value) => value !== day) : [...prev, day]
     );
+  };
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    if (contentScrollRef.current) {
+      contentScrollRef.current.scrollTop = 0;
+    }
+    setIsScrolled(false);
+  }, [step]);
+
+  // Handle scroll for header opacity
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    setIsScrolled(e.currentTarget.scrollTop > 10);
   };
 
   // Handler para toggle de notificações - solicita permissão se necessário
@@ -695,12 +710,24 @@ const EditHabit = () => {
   return (
     <div className={`min-h-screen flex flex-col ${themeColors.background || 'bg-background'}`}>
       {/* Fixed header */}
-      <div className="fixed top-0 left-0 right-0 z-10 w-full bg-inherit">
+      <div
+        className={`fixed top-0 left-0 right-0 z-10 w-full transition-all duration-200 ${
+          isScrolled
+            ? `${themeColors.background || 'bg-background'} shadow-md`
+            : 'bg-inherit'
+        }`}
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
         {HeaderBar}
       </div>
 
       {/* Scrollable content with padding to account for fixed header */}
-      <div className="flex-1 pt-24 px-4 py-6 overflow-y-auto">
+      <div
+        ref={contentScrollRef}
+        onScroll={handleScroll}
+        className="flex-1 px-4 py-6 overflow-y-auto"
+        style={{ paddingTop: 'calc(6rem + env(safe-area-inset-top))' }}
+      >
         <AnimatePresence mode="wait">
           {step === "details" && DetailsStep}
           {step === "confirm" && ConfirmStep}
