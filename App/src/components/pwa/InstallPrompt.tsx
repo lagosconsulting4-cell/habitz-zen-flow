@@ -81,13 +81,13 @@ export function InstallPrompt() {
 
         <div className="space-y-4 py-2">
           {/* Video Tutorial - Local MP4 */}
-          <div className="relative rounded-xl overflow-hidden shadow-lg ring-1 ring-border/50 bg-muted/30 mx-auto" style={{ maxWidth: '200px' }}>
+          <div className="relative rounded-xl overflow-hidden shadow-lg ring-1 ring-border/50 bg-muted/30 mx-auto" style={{ maxWidth: '240px' }}>
             <video
               autoPlay
               muted
               loop
               playsInline
-              className="w-full aspect-[9/16] object-cover"
+              className="w-full aspect-[9/19] object-contain"
             >
               <source src={`${import.meta.env.BASE_URL}videos/install-tutorial.mp4`} type="video/mp4" />
             </video>
