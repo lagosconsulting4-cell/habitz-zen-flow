@@ -1252,10 +1252,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     <div className={`min-h-screen flex flex-col ${themeColors.background || 'bg-background'}`}>
       {/* Fixed header and stepper */}
       <div
-        className={`fixed top-0 left-0 right-0 z-10 w-full transition-all duration-200 ${
-          isScrolled
-            ? `${themeColors.background || 'bg-background'} shadow-md`
-            : 'bg-inherit'
+        className={`fixed top-0 left-0 right-0 z-20 w-full transition-all duration-200 ${themeColors.background || 'bg-background'} ${
+          isScrolled ? 'shadow-md' : ''
         }`}
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
