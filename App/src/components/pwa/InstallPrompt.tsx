@@ -80,16 +80,17 @@ export function InstallPrompt() {
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          {/* Video Tutorial - YouTube Shorts embed */}
+          {/* Video Tutorial - Local MP4 */}
           <div className="relative rounded-xl overflow-hidden shadow-lg ring-1 ring-border/50 bg-muted/30 mx-auto" style={{ maxWidth: '200px' }}>
-            <iframe
-              src="https://www.youtube.com/embed/dF8Ugvu1eTY?autoplay=1&mute=1&loop=1&playlist=dF8Ugvu1eTY&playsinline=1&controls=0&modestbranding=1&rel=0"
-              className="w-full aspect-[9/16]"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              title="Tutorial de instalação do Bora"
-              frameBorder="0"
-            />
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full aspect-[9/16] object-cover"
+            >
+              <source src="/videos/install-tutorial.mp4" type="video/mp4" />
+            </video>
           </div>
 
           {/* iOS Instructions */}
