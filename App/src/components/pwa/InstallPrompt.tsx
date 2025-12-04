@@ -89,7 +89,7 @@ export function InstallPrompt() {
               playsInline
               className="w-full aspect-[9/16] object-cover"
             >
-              <source src="/videos/install-tutorial.mp4" type="video/mp4" />
+              <source src={`${import.meta.env.BASE_URL}videos/install-tutorial.mp4`} type="video/mp4" />
             </video>
           </div>
 
