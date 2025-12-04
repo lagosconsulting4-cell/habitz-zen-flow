@@ -538,8 +538,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
   const currentStepIndex = steps.findIndex(s => s.id === step);
 
   const StepperIndicator = (
-    <div className="px-6 py-3">
-      <div className="flex items-center justify-between">
+    <div className="px-4 py-3 flex justify-center">
+      <div className="flex items-center justify-center w-full max-w-xs">
         {steps.map((s, index) => {
           const StepIcon = s.icon;
           const isActive = index === currentStepIndex;
@@ -547,7 +547,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
           const isLast = index === steps.length - 1;
 
           return (
-            <div key={s.id} className="flex items-center flex-1">
+            <div key={s.id} className="flex items-center">
               {/* Step Circle */}
               <div className="flex flex-col items-center gap-1.5">
                 <motion.div
@@ -584,7 +584,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
 
               {/* Connector Line */}
               {!isLast && (
-                <div className="flex-1 mx-2">
+                <div className="w-12 mx-2">
                   <motion.div
                     className="h-0.5 rounded-full"
                     animate={{
