@@ -67,11 +67,11 @@ export function InstallPrompt() {
       <DialogContent className="rounded-2xl w-[calc(100vw-2rem)] max-w-sm">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
-              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-              </svg>
-            </div>
+            <img
+              src={`${import.meta.env.BASE_URL}icons/icon-96.png`}
+              alt="Bora"
+              className="w-8 h-8 rounded-lg flex-shrink-0"
+            />
             <span>Instale o Bora</span>
           </DialogTitle>
           <DialogDescription>
