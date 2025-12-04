@@ -6,6 +6,7 @@ import {
   Target,
   Calendar,
   Bell,
+  Clock,
   Loader2,
   Sun,
   Sunset,
@@ -557,6 +558,28 @@ const EditHabit = () => {
             className="data-[state=checked]:bg-primary"
           />
         </div>
+
+        {notificationsEnabled && (
+          <div className={`border-t px-4 py-4 space-y-3 ${themeColors.headerBorder}`}>
+            {/* Time Picker */}
+            <div className="rounded-xl border border-border/60 bg-muted/10 p-3">
+              <div className="flex items-center gap-3">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${themeColors.iconBg}`}>
+                  <Clock className={`h-5 w-5 ${themeColors.iconColor}`} />
+                </div>
+                <div className="flex-1">
+                  <p className={`text-xs font-semibold ${themeColors.bodyText}`}>Horário do lembrete</p>
+                  <input
+                    type="time"
+                    value={reminderTime}
+                    onChange={(e) => setReminderTime(e.target.value)}
+                    className={`mt-2 h-11 w-full rounded-lg px-3 ${themeColors.input}`}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* CTA Button - Go to Confirm */}
