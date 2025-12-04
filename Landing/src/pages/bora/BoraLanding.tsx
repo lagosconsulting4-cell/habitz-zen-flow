@@ -757,7 +757,7 @@ const BoraLanding = () => {
               </div>
 
               {/* CTA Button */}
-              <div className="text-center">
+              <div className="flex flex-col items-center">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     onClick={() => setQuizOpen(true)}
