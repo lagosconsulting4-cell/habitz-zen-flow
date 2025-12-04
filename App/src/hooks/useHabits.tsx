@@ -43,6 +43,7 @@ export interface Habit {
   every_n_days?: number | null;
   notification_pref?: HabitNotificationPref | null;
   auto_complete_source?: "manual" | "health" | null;
+  reminder_time?: string | null;
 }
 
 export interface HabitCompletion {
@@ -323,7 +324,8 @@ export const useHabits = () => {
       "times_per_month" |
       "every_n_days" |
       "notification_pref" |
-      "auto_complete_source"
+      "auto_complete_source" |
+      "reminder_time"
     >>
   ) => {
     try {

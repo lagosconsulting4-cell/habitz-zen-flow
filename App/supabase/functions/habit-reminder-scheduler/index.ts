@@ -1,25 +1,15 @@
 /**
  * Edge Function: habit-reminder-scheduler
  *
- * Sends push notifications to remind users about their habits.
- * Designed to be called by pg_cron at regular intervals (e.g., every hour).
+ * Sends push notifications for individual habit reminders at user-configured times.
+ * Runs every 5 minutes via pg_cron and checks which habits need reminders NOW.
  *
  * Logic:
- * 1. Get current hour in user's timezone
- * 2. Find habits that have reminders enabled for this time period
- * 3. Check if habit wasn't completed today
- * 4. Send push notification to users with pending habits
- *
- * pg_cron setup:
- * SELECT cron.schedule(
- *   'habit-reminders-morning',
- *   '0 8 * * *',  -- 8:00 AM UTC
- *   $$SELECT net.http_post(
- *     url := 'https://jbucnphyrziaxupdsnbn.supabase.co/functions/v1/habit-reminder-scheduler',
- *     headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY"}'::jsonb,
- *     body := '{"period": "morning"}'::jsonb
- *   )$$
- * );
+ * 1. Get current time in Brazil timezone (UTC-3)
+ * 2. Find habits with reminder_time within current 5-minute window
+ * 3. Check if habit is scheduled for today (days_of_week)
+ * 4. Check if habit wasn't completed today
+ * 5. Send individual push notification for each habit
  */
 
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
@@ -35,58 +25,76 @@ const corsHeaders = {
 };
 
 interface SchedulerPayload {
-  period?: "morning" | "afternoon" | "evening";
   dryRun?: boolean;
+  testTime?: string; // For testing: "HH:mm" format
 }
 
-// Period configuration
-const PERIOD_CONFIG: Record<string, { greeting: string; emoji: string }> = {
-  morning: { greeting: "Bom dia", emoji: "🌅" },
-  afternoon: { greeting: "Boa tarde", emoji: "☀️" },
-  evening: { greeting: "Boa noite", emoji: "🌙" },
-};
-
-interface HabitNotificationPref {
-  reminder_enabled?: boolean;
-  reminder_time?: string;
-  sound?: string | null;
-  time_sensitive?: boolean;
-}
-
-interface HabitWithPref {
+interface Habit {
   id: string;
   name: string;
   emoji: string;
   period: string;
   user_id: string;
-  notification_pref?: HabitNotificationPref | null;
+  reminder_time: string | null;
+  days_of_week: number[] | null;
+  notification_pref: {
+    reminder_enabled?: boolean;
+  } | null;
 }
 
 /**
- * Generate personalized notification message for a user based on their pending habits
+ * Get current time in Brazil timezone (UTC-3)
  */
-function generateUserMessage(
-  habits: HabitWithPref[],
-  period: string
-): { title: string; body: string } {
-  const count = habits.length;
-  const config = PERIOD_CONFIG[period] || PERIOD_CONFIG.morning;
+function getBrazilTime(): Date {
+  const now = new Date();
+  // Brazil is UTC-3
+  const brazilOffset = -3 * 60; // minutes
+  const utcOffset = now.getTimezoneOffset(); // minutes from UTC
+  const brazilTime = new Date(now.getTime() + (utcOffset + brazilOffset) * 60 * 1000);
+  return brazilTime;
+}
 
-  // Title with count
-  const habitWord = count === 1 ? "hábito aguarda" : "hábitos aguardam";
-  const title = `${config.emoji} ${config.greeting}! ${count} ${habitWord} você`;
+/**
+ * Check if a time string (HH:mm) is within the current 5-minute window
+ */
+function isTimeInWindow(reminderTime: string, currentTime: Date): boolean {
+  const [hours, minutes] = reminderTime.split(":").map(Number);
+  const reminderMinutes = hours * 60 + minutes;
 
-  // Body with habit names (up to 3, then "+ N more")
-  const habitNames = habits.slice(0, 3).map(h => `${h.emoji} ${h.name}`);
-  const remaining = count - 3;
+  const currentHours = currentTime.getHours();
+  const currentMinutes = currentTime.getMinutes();
+  const currentTotalMinutes = currentHours * 60 + currentMinutes;
 
-  let body = habitNames.join(", ");
-  if (remaining > 0) {
-    body += ` e mais ${remaining}`;
+  // Check if reminder is within current 5-minute window
+  // e.g., if current time is 14:32, window is 14:30-14:34
+  const windowStart = Math.floor(currentTotalMinutes / 5) * 5;
+  const windowEnd = windowStart + 4;
+
+  return reminderMinutes >= windowStart && reminderMinutes <= windowEnd;
+}
+
+/**
+ * Check if habit is scheduled for today based on days_of_week
+ */
+function isScheduledForToday(daysOfWeek: number[] | null, currentTime: Date): boolean {
+  if (!daysOfWeek || daysOfWeek.length === 0) {
+    return true; // No restriction = every day
   }
-  body += ". Bora!";
+  const today = currentTime.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  return daysOfWeek.includes(today);
+}
 
-  return { title, body };
+/**
+ * Get greeting based on time of day
+ */
+function getGreeting(hour: number): { greeting: string; emoji: string } {
+  if (hour >= 5 && hour < 12) {
+    return { greeting: "Bom dia", emoji: "🌅" };
+  } else if (hour >= 12 && hour < 18) {
+    return { greeting: "Boa tarde", emoji: "☀️" };
+  } else {
+    return { greeting: "Boa noite", emoji: "🌙" };
+  }
 }
 
 serve(async (req) => {
@@ -103,17 +111,6 @@ serve(async (req) => {
     });
   }
 
-  // Verify authorization (should be called with service role key)
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader || !authHeader.includes(SUPABASE_SERVICE_ROLE_KEY || "")) {
-    // Also accept if called from pg_cron (internal)
-    const isInternalCall = req.headers.get("x-pg-cron") === "true";
-    if (!isInternalCall) {
-      console.warn("Unauthorized call to scheduler");
-      // Continue anyway for development, but log warning
-    }
-  }
-
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     console.error("Missing required environment variables");
     return new Response(JSON.stringify({ error: "Function misconfigured" }), {
@@ -124,37 +121,32 @@ serve(async (req) => {
 
   try {
     const payload: SchedulerPayload = await req.json().catch(() => ({}));
-    const period = payload.period;
     const dryRun = payload.dryRun || false;
+
+    // Get current time in Brazil timezone
+    const brazilTime = getBrazilTime();
+
+    // Allow override for testing
+    if (payload.testTime) {
+      const [h, m] = payload.testTime.split(":").map(Number);
+      brazilTime.setHours(h, m, 0, 0);
+    }
+
+    const currentHour = brazilTime.getHours();
+    const currentMinute = brazilTime.getMinutes();
+    const today = brazilTime.toISOString().split("T")[0];
+
+    console.log(`[Scheduler] Running at ${currentHour}:${currentMinute.toString().padStart(2, "0")} Brazil time`);
 
     // Create Supabase client
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Get today's date in Brazil timezone
-    const now = new Date();
-    const today = now.toISOString().split("T")[0];
-
-    // Build query for habits
-    let query = supabase
+    // Get all active habits with reminder_time set
+    const { data: habits, error: habitsError } = await supabase
       .from("habits")
-      .select(`
-        id,
-        name,
-        emoji,
-        period,
-        user_id,
-        habit_completions!inner (
-          completed_at
-        )
-      `)
-      .eq("is_active", true);
-
-    // Filter by period if specified
-    if (period) {
-      query = query.eq("period", period);
-    }
-
-    const { data: habits, error: habitsError } = await query;
+      .select("id, name, emoji, period, user_id, reminder_time, days_of_week, notification_pref")
+      .eq("is_active", true)
+      .not("reminder_time", "is", null);
 
     if (habitsError) {
       console.error("Error fetching habits:", habitsError);
@@ -164,33 +156,57 @@ serve(async (req) => {
       });
     }
 
-    // Get all habits with notification preferences
-    const { data: allHabits, error: allHabitsError } = await supabase
-      .from("habits")
-      .select("id, name, emoji, period, user_id, notification_pref")
-      .eq("is_active", true)
-      .eq("period", period || "morning");
-
-    if (allHabitsError) {
-      console.error("Error fetching all habits:", allHabitsError);
-      return new Response(JSON.stringify({ error: "Database error" }), {
-        status: 500,
+    if (!habits || habits.length === 0) {
+      return new Response(JSON.stringify({
+        success: true,
+        message: "No habits with reminders configured",
+        habitsChecked: 0,
+        notificationsSent: 0,
+      }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Filter habits based on notification preferences
-    // If no preference is set, assume notifications are enabled (backwards compatibility)
-    const habitsWithNotifications = (allHabits as HabitWithPref[] || []).filter(h => {
-      const pref = h.notification_pref;
-      // If no preference exists or reminder_enabled is not explicitly false, include it
-      return pref?.reminder_enabled !== false;
+    // Filter habits that should receive notification NOW
+    const habitsToNotify = (habits as Habit[]).filter(habit => {
+      // Check if notifications are enabled
+      if (habit.notification_pref?.reminder_enabled === false) {
+        return false;
+      }
+
+      // Check if reminder_time is in current window
+      if (!habit.reminder_time || !isTimeInWindow(habit.reminder_time, brazilTime)) {
+        return false;
+      }
+
+      // Check if habit is scheduled for today
+      if (!isScheduledForToday(habit.days_of_week, brazilTime)) {
+        return false;
+      }
+
+      return true;
     });
 
+    if (habitsToNotify.length === 0) {
+      return new Response(JSON.stringify({
+        success: true,
+        message: "No habits need reminders right now",
+        habitsChecked: habits.length,
+        currentTime: `${currentHour}:${currentMinute.toString().padStart(2, "0")}`,
+        notificationsSent: 0,
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Get today's completions
+    const habitIds = habitsToNotify.map(h => h.id);
     const { data: completions, error: completionsError } = await supabase
       .from("habit_completions")
       .select("habit_id")
+      .in("habit_id", habitIds)
       .eq("completed_at", today);
 
     if (completionsError) {
@@ -199,32 +215,24 @@ serve(async (req) => {
 
     const completedHabitIds = new Set(completions?.map(c => c.habit_id) || []);
 
-    // Filter to habits not completed today (only those with notifications enabled)
-    const pendingHabits = habitsWithNotifications.filter(h => !completedHabitIds.has(h.id));
+    // Filter to habits not completed today
+    const pendingHabits = habitsToNotify.filter(h => !completedHabitIds.has(h.id));
 
-    // Group by user
-    const userHabits: Record<string, HabitWithPref[]> = {};
-    for (const habit of pendingHabits) {
-      if (!userHabits[habit.user_id]) {
-        userHabits[habit.user_id] = [];
-      }
-      userHabits[habit.user_id].push(habit);
-    }
-
-    const userIds = Object.keys(userHabits);
-
-    if (userIds.length === 0) {
+    if (pendingHabits.length === 0) {
       return new Response(JSON.stringify({
         success: true,
-        message: "No pending habits to remind",
-        usersNotified: 0,
+        message: "All habits in this window already completed",
+        habitsChecked: habits.length,
+        habitsInWindow: habitsToNotify.length,
+        notificationsSent: 0,
       }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Get push subscriptions for these users
+    // Get users with push subscriptions
+    const userIds = [...new Set(pendingHabits.map(h => h.user_id))];
     const { data: subscriptions, error: subsError } = await supabase
       .from("push_subscriptions")
       .select("user_id")
@@ -235,14 +243,17 @@ serve(async (req) => {
     }
 
     const usersWithPush = new Set(subscriptions?.map(s => s.user_id) || []);
-    const usersToNotify = userIds.filter(uid => usersWithPush.has(uid));
 
-    if (usersToNotify.length === 0) {
+    // Filter to habits where user has push enabled
+    const habitsWithPush = pendingHabits.filter(h => usersWithPush.has(h.user_id));
+
+    if (habitsWithPush.length === 0) {
       return new Response(JSON.stringify({
         success: true,
-        message: "No users with push subscriptions have pending habits",
-        pendingUsers: userIds.length,
-        usersNotified: 0,
+        message: "No users with push subscriptions for pending habits",
+        habitsChecked: habits.length,
+        pendingHabits: pendingHabits.length,
+        notificationsSent: 0,
       }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -254,24 +265,28 @@ serve(async (req) => {
       return new Response(JSON.stringify({
         success: true,
         dryRun: true,
-        period,
+        currentTime: `${currentHour}:${currentMinute.toString().padStart(2, "0")}`,
+        habitsChecked: habits.length,
+        habitsInWindow: habitsToNotify.length,
         pendingHabits: pendingHabits.length,
-        usersWithPendingHabits: userIds.length,
-        usersWithPushEnabled: usersToNotify.length,
-        wouldNotify: usersToNotify,
+        habitsWithPush: habitsWithPush.length,
+        wouldNotify: habitsWithPush.map(h => ({
+          habitId: h.id,
+          name: h.name,
+          userId: h.user_id,
+          reminderTime: h.reminder_time,
+        })),
       }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Send personalized notifications for each user
-    const pushResults: Array<{ userId: string; success: boolean; error?: string }> = [];
+    // Send individual notifications for each habit
+    const { greeting, emoji } = getGreeting(currentHour);
+    const results: Array<{ habitId: string; userId: string; success: boolean; error?: string }> = [];
 
-    for (const userId of usersToNotify) {
-      const userPendingHabits = userHabits[userId];
-      const message = generateUserMessage(userPendingHabits, period || "morning");
-
+    for (const habit of habitsWithPush) {
       try {
         const pushResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
           method: "POST",
@@ -280,44 +295,54 @@ serve(async (req) => {
             "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
           },
           body: JSON.stringify({
-            userId, // Send to one user at a time for personalized message
-            title: message.title,
-            body: message.body,
-            tag: `habit-reminder-${period || "morning"}`,
+            userId: habit.user_id,
+            title: `${emoji} ${greeting}! Hora do seu hábito`,
+            body: `${habit.emoji} ${habit.name} - Bora!`,
+            tag: `habit-${habit.id}`,
             data: {
               type: "habit-reminder",
-              period: period || "morning",
-              habitCount: userPendingHabits.length,
-              habitIds: userPendingHabits.map(h => h.id),
+              habitId: habit.id,
+              habitName: habit.name,
               url: "/app/dashboard",
             },
             actions: [
-              { action: "open", title: "Ver hábitos" },
+              { action: "complete", title: "Completar" },
               { action: "dismiss", title: "Depois" },
             ],
           }),
         });
 
         const result = await pushResponse.json();
-        pushResults.push({ userId, success: pushResponse.ok, ...result });
+        results.push({
+          habitId: habit.id,
+          userId: habit.user_id,
+          success: pushResponse.ok && result.sent > 0,
+          error: result.error,
+        });
 
-        console.log(`Push sent to ${userId}: ${userPendingHabits.length} habits - "${message.title}"`);
+        console.log(`[Scheduler] Sent reminder for "${habit.name}" to user ${habit.user_id}`);
       } catch (error) {
-        console.error(`Failed to send push to ${userId}:`, error);
-        pushResults.push({ userId, success: false, error: String(error) });
+        console.error(`[Scheduler] Failed to send reminder for habit ${habit.id}:`, error);
+        results.push({
+          habitId: habit.id,
+          userId: habit.user_id,
+          success: false,
+          error: String(error),
+        });
       }
     }
 
-    const successCount = pushResults.filter(r => r.success).length;
-    console.log(`Habit reminders sent: ${successCount}/${usersToNotify.length} successful`);
+    const successCount = results.filter(r => r.success).length;
+    console.log(`[Scheduler] Sent ${successCount}/${habitsWithPush.length} reminders`);
 
     return new Response(JSON.stringify({
       success: true,
-      period,
-      pendingHabits: pendingHabits.length,
-      usersNotified: successCount,
-      totalAttempted: usersToNotify.length,
-      results: pushResults,
+      currentTime: `${currentHour}:${currentMinute.toString().padStart(2, "0")}`,
+      habitsChecked: habits.length,
+      habitsInWindow: habitsToNotify.length,
+      notificationsSent: successCount,
+      totalAttempted: habitsWithPush.length,
+      results,
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -325,7 +350,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error("Error in scheduler:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
+    return new Response(JSON.stringify({ error: "Internal server error", details: String(error) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -387,6 +387,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         times_per_week: null,
         times_per_month: null,
         every_n_days: null,
+        reminder_time: notificationsEnabled ? reminderTime : null,
         notification_pref: notificationsEnabled
           ? {
               reminder_enabled: true,

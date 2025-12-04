@@ -96,6 +96,7 @@ const EditHabit = () => {
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [notificationSound, setNotificationSound] = useState<"default" | "soft" | "bright">("default");
+  const [reminderTime, setReminderTime] = useState<string>("08:00");
   const [isSaving, setIsSaving] = useState(false);
   const [step, setStep] = useState<Step>("details");
   const [habitLoaded, setHabitLoaded] = useState(false);
@@ -133,6 +134,15 @@ const EditHabit = () => {
         if (notifPref.sound) {
           setNotificationSound(notifPref.sound);
         }
+        if (notifPref.reminder_time) {
+          setReminderTime(notifPref.reminder_time);
+        }
+      }
+      // Also check the table column for reminder_time
+      if (habit.reminder_time) {
+        // Format: "HH:mm:ss" -> "HH:mm"
+        const timeStr = habit.reminder_time as string;
+        setReminderTime(timeStr.substring(0, 5));
       }
 
       setHabitLoaded(true);
@@ -215,10 +225,11 @@ const EditHabit = () => {
         unit,
         goal_value: goalValue ?? null,
         frequency_type: frequencyType,
+        reminder_time: notificationsEnabled ? reminderTime : null,
         notification_pref: notificationsEnabled
           ? {
               reminder_enabled: true,
-              reminder_time: "08:00",
+              reminder_time: reminderTime,
               sound: notificationSound,
               time_sensitive: false,
             }

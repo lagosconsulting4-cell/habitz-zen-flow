@@ -171,22 +171,19 @@ async function encryptPayload(
   // Generate random salt (16 bytes)
   const salt = crypto.getRandomValues(new Uint8Array(16));
 
-  // Create info for HKDF
-  // "WebPush: info" || 0x00 || client_public_key || local_public_key
+  // RFC 8291 Step 1: Derive IKM from shared secret
+  // salt = auth_secret (from subscription)
+  // ikm = ecdh_secret (shared secret from ECDH)
+  // info = "WebPush: info" || 0x00 || ua_public || as_public
   const infoPrefix = encoder.encode("WebPush: info\0");
   const keyInfo = concatUint8Arrays(infoPrefix, clientPublicKey, localPublicKey);
+  const ikm = await hkdf(clientAuth, sharedSecret, keyInfo, 32);
 
-  // Derive PRK using auth secret
-  // IKM = ECDH(local_private, client_public)
-  // PRK = HKDF-Extract(auth_secret, IKM)
-  const authInfo = encoder.encode("Content-Encoding: auth\0");
-  const prk = await hkdf(clientAuth, sharedSecret, authInfo, 32);
-
-  // Derive Content Encryption Key (CEK) and nonce
+  // RFC 8291 Step 2: Derive CEK and nonce from IKM
+  // salt = random 16 bytes (generated above)
+  // ikm = IKM from step 1
   const cekInfo = encoder.encode("Content-Encoding: aes128gcm\0");
   const nonceInfo = encoder.encode("Content-Encoding: nonce\0");
-
-  const ikm = await hkdf(salt, prk, keyInfo, 32);
   const cek = await hkdf(salt, ikm, cekInfo, 16);
   const nonce = await hkdf(salt, ikm, nonceInfo, 12);
 
