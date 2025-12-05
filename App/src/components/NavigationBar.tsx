@@ -63,7 +63,7 @@ const NavigationBar = () => {
     <nav
       className={cn(
         "fixed inset-x-0 bottom-0 z-40 md:hidden",
-        "px-3 pt-1"
+        "pt-1"
       )}
       style={{
         paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 0.5rem))'
@@ -76,7 +76,7 @@ const NavigationBar = () => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
         className={cn(
-          "mx-auto flex items-center justify-around gap-1.5 p-2 rounded-2xl",
+          "flex items-center justify-around gap-1.5 px-4 py-2 rounded-t-2xl",
           // Light mode: white bg with top border
           "bg-card/95 border-t border-border",
           // Dark mode: dark bg with subtle border

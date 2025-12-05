@@ -743,13 +743,11 @@ const EditHabit = () => {
 
   return (
     <div className={`min-h-screen flex flex-col ${themeColors.background || 'bg-background'}`}>
-      {/* Fixed header */}
+      {/* Fixed header - z-20 and always opaque background to prevent content overlap */}
       <div
-        className={`fixed top-0 left-0 right-0 z-10 w-full transition-all duration-200 ${
-          isScrolled
-            ? `${themeColors.background || 'bg-background'} shadow-md`
-            : 'bg-inherit'
-        }`}
+        className={`fixed top-0 left-0 right-0 z-20 w-full transition-all duration-200 ${
+          themeColors.background || 'bg-background'
+        } ${isScrolled ? 'shadow-md' : ''}`}
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         {HeaderBar}
@@ -760,7 +758,7 @@ const EditHabit = () => {
         ref={contentScrollRef}
         onScroll={handleScroll}
         className="flex-1 px-4 py-6 overflow-y-auto"
-        style={{ paddingTop: 'calc(6rem + env(safe-area-inset-top))' }}
+        style={{ paddingTop: 'calc(7rem + env(safe-area-inset-top))' }}
       >
         <AnimatePresence mode="wait">
           {step === "details" && DetailsStep}
