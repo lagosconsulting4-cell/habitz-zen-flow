@@ -1,1 +1,5 @@
 project_id = "jbucnphyrziaxupdsnbn"
+
+# Edge Functions configuration
+[functions.buckpay-pix]
+verify_jwt = false

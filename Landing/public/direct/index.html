@@ -643,6 +643,284 @@
   </main>
   <!-- Botão fixo apenas na última etapa -->
   <button class="fixed-bottom-btn" style="display:none;">🔒 Quero meu plano de calma e foco - 11x de R$5,17</button>
+
+  <!-- Checkout Modal -->
+  <div id="checkout-modal" class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title" style="display:none;">
+    <div class="checkout-overlay" data-close-modal></div>
+    <div class="checkout-container">
+
+      <!-- Step 1: Escolha do Método de Pagamento -->
+      <div class="checkout-step checkout-step-select active" data-step="select">
+        <button class="checkout-close" type="button" aria-label="Fechar" data-close-modal>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+
+        <div class="checkout-header">
+          <div class="checkout-logo-wrap">
+            <img src="/direct/images/logo.webp" alt="Bora" class="checkout-logo">
+          </div>
+          <h2 id="checkout-title" class="checkout-title">Escolha como pagar</h2>
+          <p class="checkout-subtitle">Pagamento 100% seguro e protegido</p>
+        </div>
+
+        <!-- Trust Badges -->
+        <div class="checkout-trust">
+          <span class="trust-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            SSL Seguro
+          </span>
+          <span class="trust-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Garantia 7 dias
+          </span>
+          <span class="trust-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            +2.000 clientes
+          </span>
+        </div>
+
+        <!-- Payment Options -->
+        <div class="checkout-options">
+          <button class="payment-option payment-pix" data-payment="pix">
+            <span class="payment-badge">-15% OFF</span>
+            <div class="payment-icon pix-icon">
+              <svg width="32" height="32" viewBox="0 0 512 512" fill="currentColor">
+                <path d="M242.4 292.5C247.8 287.1 257.1 287.1 262.5 292.5L339.5 369.5C353.7 383.7 372.6 391.5 392.6 391.5H407.7L310.6 488.6C280.3 518.9 231.1 518.9 200.8 488.6L## 103.3 391.2H112.6C132.6 391.2 151.5 383.4 165.7 369.2L242.4 292.5zM262.5 218.9C257.1 224.4 247.9 224.5 242.4 218.9L165.7 142.2C151.5 128 132.6 120.2 112.6 120.2H103.3L200.7 22.76C231.1-7.586 280.3-7.586 310.6 22.76L407.8 120H392.6C372.6 120 353.7 127.8 339.5 142L262.5 218.9zM77.83 120.1C67.39 120.1 57.19 124 49.27 131.9L7.581 173.7C-2.528 183.8-2.528 199.8 7.581 209.8L49.27 251.6C57.19 259.5 67.39 263.4 77.83 263.4H124.2L198.4 189.2C214.1 173.5 237.1 164.7 261.2 164.7H261.6C285.7 164.7 308.7 173.5 324.4 189.2L398.6 263.4H434.2C444.6 263.4 454.8 259.5 462.7 251.6L504.4 209.8C514.5 199.8 514.5 183.8 504.4 173.7L462.7 131.9C454.8 124 444.6 120.1 434.2 120.1H398.5L324.4 46.01C308.7 30.31 285.7 21.47 261.6 21.47H261.2C237.1 21.47 214.1 30.31 198.4 46.01L124.1 120.1H77.83zM77.83 391.4C67.39 391.4 57.19 387.5 49.27 379.6L7.581 337.8C-2.528 327.7-2.528 311.7 7.581 301.6L49.27 259.9C57.19 252 67.39 248.1 77.83 248.1H124.1L198.4 322.4C214.1 338.1 237.1 346.9 261.2 346.9H261.6C285.7 346.9 308.7 338.1 324.4 322.4L398.5 248.3H434.2C444.6 248.3 454.8 252.2 462.7 260.1L504.4 301.9C514.5 312 514.5 328 504.4 338.1L462.7 379.8C454.8 387.7 444.6 391.6 434.2 391.6H398.6L324.4 465.8C308.7 481.5 285.7 490.3 261.6 490.3H261.2C237.1 490.3 214.1 481.5 198.4 465.8L124.2 391.4H77.83z"/>
+              </svg>
+            </div>
+            <div class="payment-info">
+              <span class="payment-name">PIX</span>
+              <span class="payment-desc">Aprovação instantânea</span>
+              <span class="payment-price">R$ 47,00 à vista</span>
+            </div>
+            <div class="payment-arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </button>
+
+          <button class="payment-option payment-card" data-payment="card">
+            <div class="payment-icon card-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            </div>
+            <div class="payment-info">
+              <span class="payment-name">Cartão de Crédito</span>
+              <span class="payment-desc">Até 11x sem juros</span>
+              <span class="payment-price">11x de R$ 5,17</span>
+            </div>
+            <div class="payment-arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </button>
+        </div>
+
+        <!-- Urgency Timer -->
+        <div class="checkout-urgency">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Oferta expira em: <strong id="checkout-timer">15:00</strong></span>
+        </div>
+
+        <!-- Guarantee -->
+        <div class="checkout-guarantee">
+          <img src="/direct/images/offer/img23.webp" alt="Garantia 7 dias" class="guarantee-seal">
+          <p>Satisfação garantida ou seu dinheiro de volta em até 7 dias</p>
+        </div>
+      </div>
+
+      <!-- Step 2: Formulário PIX -->
+      <div class="checkout-step checkout-step-form" data-step="form" style="display:none;">
+        <button class="checkout-back" type="button" aria-label="Voltar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Voltar
+        </button>
+        <button class="checkout-close" type="button" aria-label="Fechar" data-close-modal>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+
+        <div class="checkout-header">
+          <div class="pix-header-icon">
+            <svg width="40" height="40" viewBox="0 0 512 512" fill="currentColor">
+              <path d="M242.4 292.5C247.8 287.1 257.1 287.1 262.5 292.5L339.5 369.5C353.7 383.7 372.6 391.5 392.6 391.5H407.7L310.6 488.6C280.3 518.9 231.1 518.9 200.8 488.6L103.3 391.2H112.6C132.6 391.2 151.5 383.4 165.7 369.2L242.4 292.5zM262.5 218.9C257.1 224.4 247.9 224.5 242.4 218.9L165.7 142.2C151.5 128 132.6 120.2 112.6 120.2H103.3L200.7 22.76C231.1-7.586 280.3-7.586 310.6 22.76L407.8 120H392.6C372.6 120 353.7 127.8 339.5 142L262.5 218.9zM77.83 120.1C67.39 120.1 57.19 124 49.27 131.9L7.581 173.7C-2.528 183.8-2.528 199.8 7.581 209.8L49.27 251.6C57.19 259.5 67.39 263.4 77.83 263.4H124.2L198.4 189.2C214.1 173.5 237.1 164.7 261.2 164.7H261.6C285.7 164.7 308.7 173.5 324.4 189.2L398.6 263.4H434.2C444.6 263.4 454.8 259.5 462.7 251.6L504.4 209.8C514.5 199.8 514.5 183.8 504.4 173.7L462.7 131.9C454.8 124 444.6 120.1 434.2 120.1H398.5L324.4 46.01C308.7 30.31 285.7 21.47 261.6 21.47H261.2C237.1 21.47 214.1 30.31 198.4 46.01L124.1 120.1H77.83z"/>
+            </svg>
+          </div>
+          <h2 class="checkout-title">Pagamento via PIX</h2>
+          <p class="checkout-subtitle">Preencha seus dados para gerar o código</p>
+        </div>
+
+        <form id="pix-form" class="pix-form" novalidate>
+          <div class="form-group">
+            <label for="pix-name">Nome completo <span class="required">*</span></label>
+            <input type="text" id="pix-name" name="name" required placeholder="Seu nome completo" autocomplete="name">
+            <span class="form-error"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="pix-email">E-mail <span class="required">*</span></label>
+            <input type="email" id="pix-email" name="email" required placeholder="seu@email.com" autocomplete="email">
+            <span class="form-error"></span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group form-group-half">
+              <label for="pix-cpf">CPF <span class="optional">(opcional)</span></label>
+              <input type="text" id="pix-cpf" name="cpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14">
+            </div>
+            <div class="form-group form-group-half">
+              <label for="pix-phone">Telefone <span class="optional">(opcional)</span></label>
+              <input type="tel" id="pix-phone" name="phone" placeholder="(00) 00000-0000" autocomplete="tel" maxlength="15">
+            </div>
+          </div>
+
+          <div class="form-summary">
+            <div class="summary-row">
+              <span>Plano Bora Premium</span>
+              <span class="summary-original">R$ 56,87</span>
+            </div>
+            <div class="summary-row summary-discount">
+              <span>Desconto PIX (-15%)</span>
+              <span>- R$ 9,87</span>
+            </div>
+            <div class="summary-row summary-total">
+              <span>Total</span>
+              <span>R$ 47,00</span>
+            </div>
+          </div>
+
+          <button type="submit" class="pix-submit-btn">
+            <span class="btn-text">Gerar código PIX</span>
+            <span class="btn-loading" style="display:none;">
+              <svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/></svg>
+              Gerando...
+            </span>
+          </button>
+        </form>
+
+        <div class="checkout-security">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <span>Seus dados estão protegidos com criptografia SSL</span>
+        </div>
+      </div>
+
+      <!-- Step 3: QR Code PIX -->
+      <div class="checkout-step checkout-step-qrcode" data-step="qrcode" style="display:none;">
+        <button class="checkout-close" type="button" aria-label="Fechar" data-close-modal>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+
+        <div class="checkout-header">
+          <div class="qr-status-icon pending">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h2 class="checkout-title">Escaneie o QR Code</h2>
+          <p class="checkout-subtitle">Abra o app do seu banco e escaneie</p>
+        </div>
+
+        <div class="qr-container">
+          <div class="qr-code-wrapper">
+            <img id="pix-qrcode" src="" alt="QR Code PIX" class="qr-code-img">
+            <div class="qr-overlay" style="display:none;">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Pago!</span>
+            </div>
+          </div>
+          <div class="qr-expiry">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Código expira em: <strong id="qr-timer">15:00</strong></span>
+          </div>
+        </div>
+
+        <div class="pix-code-section">
+          <label>Ou copie o código PIX:</label>
+          <div class="pix-code-wrapper">
+            <input type="text" id="pix-code-input" readonly class="pix-code-input">
+            <button type="button" id="copy-pix-btn" class="copy-pix-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              <span>Copiar</span>
+            </button>
+          </div>
+          <div id="copy-feedback" class="copy-feedback" style="display:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Código copiado!
+          </div>
+        </div>
+
+        <div class="payment-status">
+          <div class="status-indicator pending">
+            <span class="status-dot"></span>
+            <span class="status-text">Aguardando pagamento...</span>
+          </div>
+        </div>
+
+        <div class="pix-instructions">
+          <h4>Como pagar:</h4>
+          <ol>
+            <li><span class="step-num">1</span> Abra o app do seu banco</li>
+            <li><span class="step-num">2</span> Escolha pagar com PIX</li>
+            <li><span class="step-num">3</span> Escaneie o QR Code ou cole o código</li>
+            <li><span class="step-num">4</span> Confirme o pagamento</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Step 4: Sucesso -->
+      <div class="checkout-step checkout-step-success" data-step="success" style="display:none;">
+        <div class="success-animation">
+          <div class="confetti-container"></div>
+          <div class="success-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+
+        <div class="checkout-header">
+          <h2 class="checkout-title success-title">Pagamento Confirmado!</h2>
+          <p class="checkout-subtitle">Bem-vindo(a) à sua jornada de transformação</p>
+        </div>
+
+        <div class="success-message">
+          <p>Enviamos um e-mail para <strong id="success-email"></strong> com as instruções de acesso.</p>
+          <p class="success-highlight">Verifique também sua caixa de spam.</p>
+        </div>
+
+        <div class="success-next-steps">
+          <h4>Próximos passos:</h4>
+          <ul>
+            <li><span class="step-num">1</span> Verifique seu e-mail</li>
+            <li><span class="step-num">2</span> Crie sua senha de acesso</li>
+            <li><span class="step-num">3</span> Comece sua jornada!</li>
+          </ul>
+        </div>
+
+        <button type="button" class="success-btn" id="success-access-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+          Acessar minha conta
+        </button>
+      </div>
+
+      <!-- Step 5: Erro -->
+      <div class="checkout-step checkout-step-error" data-step="error" style="display:none;">
+        <button class="checkout-close" type="button" aria-label="Fechar" data-close-modal>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+
+        <div class="error-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+
+        <h2 class="checkout-title error-title">Ops! Algo deu errado</h2>
+        <p class="error-message" id="error-message">Não foi possível processar seu pagamento.</p>
+
+        <button type="button" class="retry-btn" id="retry-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+          Tentar novamente
+        </button>
+
+        <p class="error-help">
+          Precisa de ajuda? <a href="mailto:suporte@borahabitz.com.br">Fale conosco</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
   <script src="/direct/script.js" defer></script>
 </body>
 </html> 

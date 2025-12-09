@@ -730,8 +730,640 @@ function redirectToCheckout() {
   window.location.href = 'https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac'; // Coloque aqui o link do seu checkout
 }
 
-// Seleciona todos os botões de checkout
+// Seleciona todos os botões de checkout - AGORA ABRE O MODAL
 const checkoutBtns = document.querySelectorAll('.offer-btn, .faq-offer-btn, .fixed-bottom-btn');
 checkoutBtns.forEach(btn => {
-  btn.addEventListener('click', redirectToCheckout);
-}); 
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (window.__pixCheckout) {
+      window.__pixCheckout.openModal();
+    } else {
+      // Fallback para Kirvano se módulo não carregou
+      redirectToCheckout();
+    }
+  });
+});
+
+// ===========================================
+// PIX CHECKOUT MODULE
+// Integrated checkout with BuckPay API
+// ===========================================
+
+(function() {
+  'use strict';
+
+  // ============ CONFIGURATION ============
+  const CONFIG = {
+    SUPABASE_URL: 'https://jbucnphyrziaxupdsnbn.supabase.co',
+    EDGE_FUNCTION: '/functions/v1/buckpay-pix',
+    PRODUCT_AMOUNT: 4700, // R$ 47,00 em centavos
+    PRODUCT_NAME: 'Bora Premium - Plano de Calma e Foco',
+    POLL_INTERVAL: 3000, // 3 segundos
+    MAX_POLL_TIME: 900000, // 15 minutos
+    QR_EXPIRY: 900, // 15 minutos em segundos
+    APP_URL: 'https://app.borahabitz.com.br'
+  };
+
+  // ============ STATE ============
+  const state = {
+    currentStep: 'select',
+    transactionId: null,
+    externalId: null,
+    pixCode: null,
+    qrCodeBase64: null,
+    pollInterval: null,
+    qrTimerInterval: null,
+    qrTimeRemaining: CONFIG.QR_EXPIRY,
+    userData: {
+      name: '',
+      email: '',
+      cpf: '',
+      phone: ''
+    }
+  };
+
+  // ============ DOM ELEMENTS ============
+  let modal, overlay, steps, form;
+
+  function initElements() {
+    modal = document.getElementById('checkout-modal');
+    if (!modal) return false;
+
+    overlay = modal.querySelector('.checkout-overlay');
+    steps = {
+      select: modal.querySelector('[data-step="select"]'),
+      form: modal.querySelector('[data-step="form"]'),
+      qrcode: modal.querySelector('[data-step="qrcode"]'),
+      success: modal.querySelector('[data-step="success"]'),
+      error: modal.querySelector('[data-step="error"]')
+    };
+    form = document.getElementById('pix-form');
+    return true;
+  }
+
+  // ============ MODAL CONTROL ============
+  function openModal() {
+    if (!modal) return;
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    goToStep('select');
+    syncCheckoutTimer();
+
+    // Track event
+    if (typeof trackFbCustomEvent === 'function') {
+      const eventId = createFbEventId();
+      trackFbCustomEvent('CheckoutModalOpened', { eventID: eventId });
+      rememberFbEventId(eventId, 'CheckoutModalOpened');
+    }
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    resetState();
+  }
+
+  function resetState() {
+    state.currentStep = 'select';
+    state.transactionId = null;
+    state.externalId = null;
+    state.pixCode = null;
+    state.qrCodeBase64 = null;
+    clearInterval(state.pollInterval);
+    clearInterval(state.qrTimerInterval);
+    state.qrTimeRemaining = CONFIG.QR_EXPIRY;
+
+    // Reset form
+    if (form) form.reset();
+
+    // Clear error states
+    const inputs = modal.querySelectorAll('input.error');
+    inputs.forEach(input => input.classList.remove('error'));
+    const errors = modal.querySelectorAll('.form-error');
+    errors.forEach(err => err.textContent = '');
+
+    // Hide all steps, show select
+    Object.values(steps).forEach(step => {
+      if (step) {
+        step.style.display = 'none';
+        step.classList.remove('active');
+      }
+    });
+    if (steps.select) {
+      steps.select.style.display = 'block';
+      steps.select.classList.add('active');
+    }
+  }
+
+  function goToStep(stepName) {
+    state.currentStep = stepName;
+
+    Object.entries(steps).forEach(([name, el]) => {
+      if (el) {
+        el.style.display = name === stepName ? 'block' : 'none';
+        el.classList.toggle('active', name === stepName);
+      }
+    });
+
+    // Scroll to top of modal
+    const container = modal.querySelector('.checkout-container');
+    if (container) container.scrollTo(0, 0);
+  }
+
+  // ============ TIMER SYNC ============
+  function syncCheckoutTimer() {
+    // Sync com o timer da página principal se existir
+    const pageTimer = document.getElementById('offer-timer');
+    const checkoutTimer = document.getElementById('checkout-timer');
+    if (pageTimer && checkoutTimer) {
+      checkoutTimer.textContent = pageTimer.textContent;
+    }
+  }
+
+  // ============ PAYMENT FLOW ============
+  function handlePaymentSelection(method) {
+    if (method === 'card') {
+      // Mantém redirect para Kirvano
+      closeModal();
+      redirectToCheckout();
+    } else if (method === 'pix') {
+      goToStep('form');
+
+      // Track PIX selection
+      if (typeof trackFbCustomEvent === 'function') {
+        const eventId = createFbEventId();
+        trackFbCustomEvent('PixSelected', { eventID: eventId });
+      }
+    }
+  }
+
+  async function handlePixFormSubmit(e) {
+    e.preventDefault();
+
+    // Get inputs
+    const nameInput = document.getElementById('pix-name');
+    const emailInput = document.getElementById('pix-email');
+    const cpfInput = document.getElementById('pix-cpf');
+    const phoneInput = document.getElementById('pix-phone');
+
+    const name = nameInput?.value?.trim();
+    const email = emailInput?.value?.trim();
+    const cpf = cpfInput?.value?.trim().replace(/\D/g, '');
+    const phone = phoneInput?.value?.trim().replace(/\D/g, '');
+
+    // Validate
+    let hasError = false;
+
+    if (!name || name.length < 3 || !name.includes(' ')) {
+      showFieldError(nameInput, 'Digite nome e sobrenome');
+      hasError = true;
+    } else {
+      clearFieldError(nameInput);
+    }
+
+    if (!email || !isValidEmail(email)) {
+      showFieldError(emailInput, 'E-mail inválido');
+      hasError = true;
+    } else {
+      clearFieldError(emailInput);
+    }
+
+    if (hasError) return;
+
+    // Store user data
+    state.userData = { name, email, cpf, phone };
+
+    // Show loading
+    const submitBtn = form.querySelector('.pix-submit-btn');
+    const btnText = submitBtn?.querySelector('.btn-text');
+    const btnLoading = submitBtn?.querySelector('.btn-loading');
+
+    if (submitBtn) submitBtn.disabled = true;
+    if (btnText) btnText.style.display = 'none';
+    if (btnLoading) btnLoading.style.display = 'flex';
+
+    try {
+      // Generate PIX via Edge Function
+      const result = await createPixTransaction({
+        name,
+        email,
+        document: cpf || undefined,
+        phone: phone ? '55' + phone : undefined
+      });
+
+      if (result.success && result.data) {
+        state.transactionId = result.data.id;
+        state.externalId = result.external_id || result.data.external_id;
+        state.pixCode = result.data.pix?.code;
+        state.qrCodeBase64 = result.data.pix?.qrcode_base64;
+
+        // Show QR code step
+        displayQRCode();
+        goToStep('qrcode');
+
+        // Start polling
+        startPaymentPolling();
+
+        // Start QR timer
+        startQRTimer();
+
+        // Track event
+        if (typeof trackFbEvent === 'function') {
+          const eventId = createFbEventId();
+          trackFbEvent('InitiateCheckout', {
+            value: CONFIG.PRODUCT_AMOUNT / 100,
+            currency: 'BRL',
+            payment_method: 'pix',
+            eventID: eventId
+          });
+          rememberFbEventId(eventId, 'InitiateCheckout');
+        }
+      } else {
+        throw new Error(result.error || 'Erro ao gerar PIX');
+      }
+    } catch (error) {
+      console.error('PIX generation error:', error);
+      showError(error.message || 'Não foi possível gerar o código PIX. Tente novamente.');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+      if (btnText) btnText.style.display = 'inline';
+      if (btnLoading) btnLoading.style.display = 'none';
+    }
+  }
+
+  // ============ API CALLS ============
+  async function createPixTransaction(buyer) {
+    const externalId = `pix_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    const response = await fetch(`${CONFIG.SUPABASE_URL}${CONFIG.EDGE_FUNCTION}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: 'create',
+        external_id: externalId,
+        amount: CONFIG.PRODUCT_AMOUNT,
+        buyer: {
+          name: buyer.name,
+          email: buyer.email,
+          document: buyer.document,
+          phone: buyer.phone
+        },
+        product: {
+          name: CONFIG.PRODUCT_NAME
+        },
+        tracking: getTrackingData()
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Erro na requisição');
+    }
+
+    // Store external_id for polling
+    data.external_id = externalId;
+    return data;
+  }
+
+  async function checkPaymentStatus(externalId) {
+    const response = await fetch(`${CONFIG.SUPABASE_URL}${CONFIG.EDGE_FUNCTION}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: 'status',
+        external_id: externalId
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Erro ao verificar status');
+    }
+
+    return data;
+  }
+
+  // ============ POLLING ============
+  function startPaymentPolling() {
+    let elapsedTime = 0;
+
+    state.pollInterval = setInterval(async () => {
+      elapsedTime += CONFIG.POLL_INTERVAL;
+
+      if (elapsedTime >= CONFIG.MAX_POLL_TIME) {
+        clearInterval(state.pollInterval);
+        showError('Tempo expirado. Por favor, tente novamente.');
+        return;
+      }
+
+      try {
+        const result = await checkPaymentStatus(state.externalId);
+
+        if (result.data?.status === 'paid' || result.data?.status === 'processed') {
+          clearInterval(state.pollInterval);
+          clearInterval(state.qrTimerInterval);
+          handlePaymentSuccess();
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+        // Continue polling - don't stop on transient errors
+      }
+    }, CONFIG.POLL_INTERVAL);
+  }
+
+  function startQRTimer() {
+    state.qrTimeRemaining = CONFIG.QR_EXPIRY;
+    updateQRTimerDisplay();
+
+    state.qrTimerInterval = setInterval(() => {
+      state.qrTimeRemaining--;
+      updateQRTimerDisplay();
+
+      if (state.qrTimeRemaining <= 0) {
+        clearInterval(state.qrTimerInterval);
+        clearInterval(state.pollInterval);
+        showError('O código PIX expirou. Por favor, gere um novo código.');
+      }
+    }, 1000);
+  }
+
+  function updateQRTimerDisplay() {
+    const timerEl = document.getElementById('qr-timer');
+    if (timerEl) {
+      const mins = Math.floor(state.qrTimeRemaining / 60);
+      const secs = state.qrTimeRemaining % 60;
+      timerEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+  }
+
+  // ============ UI UPDATES ============
+  function displayQRCode() {
+    const qrImg = document.getElementById('pix-qrcode');
+    const codeInput = document.getElementById('pix-code-input');
+
+    if (qrImg && state.qrCodeBase64) {
+      qrImg.src = `data:image/png;base64,${state.qrCodeBase64}`;
+    }
+
+    if (codeInput && state.pixCode) {
+      codeInput.value = state.pixCode;
+    }
+  }
+
+  function handlePaymentSuccess() {
+    // Show success overlay on QR
+    const qrOverlay = modal?.querySelector('.qr-overlay');
+    const statusIndicator = modal?.querySelector('.status-indicator');
+
+    if (qrOverlay) qrOverlay.style.display = 'flex';
+    if (statusIndicator) {
+      statusIndicator.classList.remove('pending');
+      statusIndicator.classList.add('success');
+      const statusText = statusIndicator.querySelector('.status-text');
+      if (statusText) statusText.textContent = 'Pagamento confirmado!';
+    }
+
+    // Wait, then show success step
+    setTimeout(() => {
+      const emailEl = document.getElementById('success-email');
+      if (emailEl) emailEl.textContent = state.userData.email;
+
+      goToStep('success');
+      playConfettiAnimation();
+
+      // Track purchase
+      if (typeof trackFbEvent === 'function') {
+        const eventId = createFbEventId();
+        trackFbEvent('Purchase', {
+          value: CONFIG.PRODUCT_AMOUNT / 100,
+          currency: 'BRL',
+          payment_method: 'pix',
+          eventID: eventId
+        });
+        rememberFbEventId(eventId, 'Purchase');
+      }
+    }, 1500);
+  }
+
+  function playConfettiAnimation() {
+    const container = modal?.querySelector('.confetti-container');
+    if (!container) return;
+
+    const colors = ['#36bf9e', '#ffb788', '#e6e0ff', '#f7b955', '#ff6a5c', '#50d7c6'];
+
+    for (let i = 0; i < 60; i++) {
+      const confetti = document.createElement('div');
+      const size = Math.random() * 8 + 6;
+      confetti.style.cssText = `
+        position: absolute;
+        width: ${size}px;
+        height: ${size}px;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        left: ${Math.random() * 100}%;
+        top: -20px;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        animation: confettiFall ${1.5 + Math.random() * 2}s ease-out forwards;
+        animation-delay: ${Math.random() * 0.5}s;
+        opacity: 0.9;
+      `;
+      container.appendChild(confetti);
+
+      setTimeout(() => confetti.remove(), 4000);
+    }
+  }
+
+  function showError(message) {
+    const errorMsg = document.getElementById('error-message');
+    if (errorMsg) errorMsg.textContent = message;
+    goToStep('error');
+  }
+
+  function showFieldError(input, message) {
+    if (!input) return;
+    input.classList.add('error');
+    const errorSpan = input.parentElement?.querySelector('.form-error');
+    if (errorSpan) errorSpan.textContent = message;
+  }
+
+  function clearFieldError(input) {
+    if (!input) return;
+    input.classList.remove('error');
+    const errorSpan = input.parentElement?.querySelector('.form-error');
+    if (errorSpan) errorSpan.textContent = '';
+  }
+
+  // ============ UTILITIES ============
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function getTrackingData() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      utm_source: params.get('utm_source') || undefined,
+      utm_medium: params.get('utm_medium') || undefined,
+      utm_campaign: params.get('utm_campaign') || undefined,
+      utm_content: params.get('utm_content') || undefined,
+      utm_term: params.get('utm_term') || undefined,
+      ref: params.get('ref') || undefined,
+      src: params.get('src') || undefined,
+      sck: params.get('sck') || undefined
+    };
+  }
+
+  function copyPixCode() {
+    const codeInput = document.getElementById('pix-code-input');
+    const feedback = document.getElementById('copy-feedback');
+
+    if (codeInput && state.pixCode) {
+      navigator.clipboard.writeText(state.pixCode).then(() => {
+        showCopyFeedback(feedback);
+      }).catch(() => {
+        // Fallback
+        codeInput.select();
+        document.execCommand('copy');
+        showCopyFeedback(feedback);
+      });
+    }
+  }
+
+  function showCopyFeedback(feedback) {
+    if (feedback) {
+      feedback.style.display = 'flex';
+      setTimeout(() => {
+        feedback.style.display = 'none';
+      }, 2500);
+    }
+  }
+
+  // ============ INPUT MASKS ============
+  function maskCPF(value) {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+      .replace(/(-\d{2})\d+?$/, '$1');
+  }
+
+  function maskPhone(value) {
+    return value
+      .replace(/\D/g, '')
+      .replace(/^(\d{2})(\d)/g, '($1) $2')
+      .replace(/(\d{5})(\d)/, '$1-$2')
+      .replace(/(-\d{4})\d+?$/, '$1');
+  }
+
+  // ============ EVENT LISTENERS ============
+  function setupEventListeners() {
+    if (!modal) return;
+
+    // Payment option clicks
+    const paymentOptions = modal.querySelectorAll('.payment-option');
+    paymentOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        const method = option.dataset.payment;
+        handlePaymentSelection(method);
+      });
+    });
+
+    // Form submission
+    if (form) {
+      form.addEventListener('submit', handlePixFormSubmit);
+    }
+
+    // Close modal
+    const closeButtons = modal.querySelectorAll('[data-close-modal]');
+    closeButtons.forEach(btn => {
+      btn.addEventListener('click', closeModal);
+    });
+
+    // Back button
+    const backBtn = modal.querySelector('.checkout-back');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => goToStep('select'));
+    }
+
+    // Copy PIX code
+    const copyBtn = document.getElementById('copy-pix-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', copyPixCode);
+    }
+
+    // Retry button
+    const retryBtn = document.getElementById('retry-btn');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => {
+        resetState();
+        goToStep('select');
+      });
+    }
+
+    // Success access button
+    const accessBtn = document.getElementById('success-access-btn');
+    if (accessBtn) {
+      accessBtn.addEventListener('click', () => {
+        window.location.href = CONFIG.APP_URL;
+      });
+    }
+
+    // Input masks
+    const cpfInput = document.getElementById('pix-cpf');
+    if (cpfInput) {
+      cpfInput.addEventListener('input', (e) => {
+        e.target.value = maskCPF(e.target.value);
+      });
+    }
+
+    const phoneInput = document.getElementById('pix-phone');
+    if (phoneInput) {
+      phoneInput.addEventListener('input', (e) => {
+        e.target.value = maskPhone(e.target.value);
+      });
+    }
+
+    // ESC key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal?.style.display === 'flex') {
+        closeModal();
+      }
+    });
+
+    // Click outside to close
+    overlay?.addEventListener('click', closeModal);
+  }
+
+  // ============ INITIALIZATION ============
+  function init() {
+    if (!initElements()) {
+      console.warn('[PIX Checkout] Modal element not found');
+      return;
+    }
+
+    setupEventListeners();
+    console.log('[PIX Checkout] Module initialized');
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // Expose API for external use
+  window.__pixCheckout = {
+    openModal,
+    closeModal,
+    resetState,
+    state
+  };
+
+})(); 
