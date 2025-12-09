@@ -14,6 +14,9 @@ import { TimeAvailableStep } from "./steps/TimeAvailableStep";
 import { ObjectiveStep } from "./steps/ObjectiveStep";
 import { ChallengesStep } from "./steps/ChallengesStep";
 import { WeekDaysStep } from "./steps/WeekDaysStep";
+import { EmailStep } from "./steps/EmailStep";
+import { NameStep } from "./steps/NameStep";
+import { OfferSlide } from "./steps/OfferSlide";
 import { LockedRoutinePreview } from "./LockedRoutinePreview";
 
 interface QuizModalProps {
@@ -25,9 +28,9 @@ interface QuizModalProps {
 const QuizContent = ({ onClose }: { onClose: () => void }) => {
   const { currentStep, generateRoutine } = useQuiz();
 
-  // Gera a rotina quando chega no último step
+  // Gera a rotina quando chega no LockedRoutinePreview (step 11)
   useEffect(() => {
-    if (currentStep === 8) {
+    if (currentStep === 11) {
       generateRoutine();
     }
   }, [currentStep, generateRoutine]);
@@ -52,6 +55,12 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
       case 7:
         return <WeekDaysStep />;
       case 8:
+        return <EmailStep />;
+      case 9:
+        return <NameStep />;
+      case 10:
+        return <OfferSlide />;
+      case 11:
         return <LockedRoutinePreview onClose={onClose} />;
       default:
         return null;
@@ -94,8 +103,8 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
         </div>
       </div>
 
-      {/* Footer com navegação (oculto no último step) */}
-      {currentStep < 8 && (
+      {/* Footer com navegação (oculto nos steps de Offer e Preview) */}
+      {currentStep < 10 && (
         <div className="sticky bottom-0 bg-white border-t border-slate-100">
           <div className="max-w-2xl mx-auto p-4">
             <QuizNavigation />

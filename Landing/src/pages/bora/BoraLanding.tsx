@@ -292,11 +292,7 @@ const BoraLanding = () => {
   }, []);
 
   const handleCTA = () => {
-    window.location.href = "https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac";
-  };
-
-  const scrollToPricing = () => {
-    document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
+    setQuizOpen(true);
   };
 
   const totalHowItWorksSteps = howItWorks.length;
@@ -329,7 +325,7 @@ const BoraLanding = () => {
           {/* CTA Button */}
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
-              onClick={scrollToPricing}
+              onClick={handleCTA}
               className="bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 font-semibold px-6 py-2 rounded-full shadow-lg shadow-[#A3E635]/25"
             >
               Começar agora
@@ -415,7 +411,7 @@ const BoraLanding = () => {
               <motion.div variants={staggerItem} className="pt-4 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
-                    onClick={scrollToPricing}
+                    onClick={handleCTA}
                     size="lg"
                     className="group bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 text-base sm:text-lg px-8 py-6 rounded-full font-bold shadow-xl shadow-[#A3E635]/30"
                   >
@@ -670,7 +666,7 @@ const BoraLanding = () => {
             </p>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
-                onClick={scrollToPricing}
+                onClick={handleCTA}
                 className="bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 font-bold px-8 py-6 rounded-full shadow-xl shadow-[#A3E635]/30"
               >
                 <Sparkles className="w-5 h-5 mr-2" />
@@ -1171,7 +1167,7 @@ const BoraLanding = () => {
 
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
-                onClick={scrollToPricing}
+                onClick={handleCTA}
                 size="lg"
                 className="group bg-[#A3E635] hover:bg-[#84CC16] text-slate-900 text-base px-10 py-5 rounded-full font-black shadow-2xl shadow-[#A3E635]/40 border border-transparent"
               >
@@ -1228,139 +1224,6 @@ const BoraLanding = () => {
         </div>
       </section>
 
-      {/* ============ PRICING SECTION ============ */}
-      <section id="pricing" className="py-24 px-4 sm:px-6 relative overflow-hidden bg-white">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-lime-50/30 to-white" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#A3E635]/10 rounded-full blur-[150px]" />
-        <div className="absolute top-20 right-20 w-64 h-64 bg-[#A3E635]/10 rounded-full blur-[100px]" />
-
-        <div className="max-w-lg mx-auto relative z-10">
-          <motion.div
-            className="text-center mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Badge className="mb-4 bg-gradient-to-r from-primary to-lime-400 text-white border-0 shadow-lg shadow-primary/30 text-sm px-4 py-2">
-              <Gift className="w-4 h-4 mr-2" />
-              Melhor investimento do ano
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
-              Invista em <span className="text-[#A3E635]">você</span>
-            </h2>
-          </motion.div>
-
-          <motion.div
-            className="relative"
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ type: "spring", duration: 0.8 }}
-          >
-            {/* Glow effect */}
-            <div className="absolute -inset-2 bg-gradient-to-r from-primary via-lime-500 to-primary rounded-[2rem] blur-xl opacity-40 animate-pulse" />
-
-            <div className="relative bg-white rounded-3xl p-5 sm:p-8 md:p-10 shadow-2xl border-2 border-[#A3E635]/40 overflow-hidden">
-              {/* Decorative elements */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-lime-500/10 rounded-full blur-3xl" />
-
-              {/* Price display */}
-              <div className="text-center mb-8 relative z-10">
-                <motion.div
-                  className="inline-flex mb-4"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Badge className="bg-gradient-to-r from-red-500 to-rose-500 text-white border-0 text-xl sm:text-2xl font-black px-6 py-3 shadow-xl shadow-red-500/40">
-                    94% OFF
-                  </Badge>
-                </motion.div>
-
-                <div className="mb-2">
-                  <span className="text-slate-700 line-through text-xl sm:text-2xl md:text-3xl font-medium">
-                    De R$ 805
-                  </span>
-                </div>
-
-                <div className="relative inline-block mb-2">
-                  <div className="flex flex-col items-center">
-                    <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary mb-1">11x de</span>
-                    <motion.span
-                      className="text-5xl sm:text-6xl md:text-8xl font-black bg-gradient-to-r from-primary via-lime-300 to-primary bg-clip-text text-transparent"
-                      animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-                      transition={{ duration: 3, repeat: Infinity }}
-                      style={{ backgroundSize: "200% 200%" }}
-                    >
-                      R$5,17
-                    </motion.span>
-                  </div>
-                  {/* Glow behind price */}
-                  <div className="absolute inset-0 flex items-center justify-center text-5xl sm:text-6xl md:text-8xl font-black text-primary blur-2xl opacity-30">
-                    R$5,17
-                  </div>
-                </div>
-
-                <p className="text-slate-800 text-sm sm:text-base font-medium">
-                  ou R$47 à vista • <span className="text-primary font-bold">1 ano de acesso</span>
-                </p>
-              </div>
-
-              {/* Checklist */}
-              <div className="space-y-3 mb-8 relative z-10">
-                {[
-                  "App BORA completo",
-                  "Todos os 5 bônus inclusos (R$ 805 em valor)",
-                  "1 ano de acesso",
-                  "Garantia incondicional de 7 dias",
-                ].map((item, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base text-slate-700">{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* CTA Button */}
-              <motion.div
-                className="relative group mb-6"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <div className="absolute -inset-2 bg-gradient-to-r from-primary via-lime-500 to-primary rounded-2xl blur-xl opacity-50 group-hover:opacity-80 transition-all duration-500 animate-pulse" />
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-lime-500 to-lime-300 rounded-xl opacity-100" />
-
-                <button
-                  onClick={handleCTA}
-                  className="relative w-full overflow-hidden bg-gradient-to-r from-primary via-lime-500 to-primary hover:from-primary/90 hover:via-lime-500/90 hover:to-primary/90 text-white font-black text-lg sm:text-xl md:text-2xl py-6 md:py-7 px-8 rounded-xl shadow-2xl shadow-primary/50 transition-all duration-300 tracking-wide flex items-center justify-center gap-3"
-                >
-                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
-                  <Sparkles className="w-6 h-6 md:w-7 md:h-7 animate-pulse flex-shrink-0" />
-                  <span className="relative z-10">QUERO MINHA ROTINA</span>
-                  <ArrowRight className="w-6 h-6 md:w-7 md:h-7 group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0" />
-                </button>
-              </motion.div>
-
-              {/* Premium Guarantee Seal */}
-              <div className="relative z-10 mt-2">
-                <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-[#A3E635]/15 rounded-2xl border-2 border-[#A3E635]/40">
-                  <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#A3E635] flex items-center justify-center shadow-lg shadow-[#A3E635]/30">
-                    <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-bold text-slate-900 text-base sm:text-lg">Garantia Incondicional de 7 Dias</p>
-                    <p className="text-xs sm:text-sm text-slate-700">
-                      100% do seu dinheiro de volta, sem perguntas. Risco zero.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* ============ FINAL CTA ============ */}
       <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
         <div className="absolute inset-0 bg-gradient-to-b from-lime-50/50 via-white to-white" />
@@ -1405,7 +1268,7 @@ const BoraLanding = () => {
               className="group bg-[#A3E635] text-slate-900 hover:bg-[#A3E635]/90 text-lg px-10 py-7 rounded-full font-bold shadow-2xl shadow-[#A3E635]/40"
             >
               <Sparkles className="w-5 h-5 mr-2" />
-              COMEÇAR POR 11x R$5,17
+              QUERO MINHA ROTINA
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </motion.div>

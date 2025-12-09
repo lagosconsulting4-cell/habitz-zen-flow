@@ -23,6 +23,10 @@ export interface QuizState {
   canGoBack: boolean;
   canGoNext: boolean;
 
+  // Contact Information
+  email: string | null;
+  name: string | null;
+
   // Demographics
   ageRange: AgeRange | null;
   profession: Profession | null;
@@ -52,6 +56,8 @@ export interface QuizContextType extends QuizState {
   prevStep: () => void;
 
   // Data Updates
+  setEmail: (email: string) => void;
+  setName: (name: string) => void;
   setAgeRange: (age: AgeRange) => void;
   setProfession: (profession: Profession) => void;
   setWorkSchedule: (schedule: WorkSchedule) => void;
@@ -86,6 +92,8 @@ interface QuizProviderProps {
 export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   // State
   const [currentStep, setCurrentStep] = useState(0);
+  const [email, setEmail] = useState<string | null>(null);
+  const [name, setName] = useState<string | null>(null);
   const [ageRange, setAgeRange] = useState<AgeRange | null>(null);
   const [profession, setProfession] = useState<Profession | null>(null);
   const [workSchedule, setWorkSchedule] = useState<WorkSchedule | null>(null);
@@ -98,8 +106,8 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   const [recommendedHabits, setRecommendedHabits] = useState<RecommendedHabit[]>([]);
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
 
-  // 9 Steps: Age, Profession, WorkSchedule, EnergyPeak, TimeAvailable, Objective, Challenges, WeekDays, LockedPreview
-  const totalSteps = 9;
+  // 12 Steps: Age, Profession, WorkSchedule, EnergyPeak, TimeAvailable, Objective, Challenges, WeekDays, Email, Name, Offer, LockedPreview
+  const totalSteps = 12;
 
   // ============================================================================
   // NAVIGATION
@@ -148,12 +156,18 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
         return challenges.length > 0;
       case 7: // Week Days
         return weekDays.length > 0;
-      case 8: // Locked Preview (always valid)
+      case 8: // Email
+        return email !== null && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      case 9: // Name
+        return name !== null && name.trim().length >= 2;
+      case 10: // Offer (always valid)
+        return true;
+      case 11: // Locked Preview (always valid)
         return true;
       default:
         return false;
     }
-  }, [currentStep, ageRange, profession, workSchedule, energyPeak, timeAvailable, objective, challenges, weekDays]);
+  }, [currentStep, ageRange, profession, workSchedule, energyPeak, timeAvailable, objective, challenges, weekDays, email, name]);
 
   // ============================================================================
   // HABIT MANAGEMENT
@@ -210,6 +224,8 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
     totalSteps,
     canGoBack,
     canGoNext,
+    email,
+    name,
     ageRange,
     profession,
     workSchedule,
@@ -228,6 +244,8 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
     prevStep,
 
     // Data Updates
+    setEmail,
+    setName,
     setAgeRange,
     setProfession,
     setWorkSchedule,

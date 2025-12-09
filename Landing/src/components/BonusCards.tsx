@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 // Dados detalhados dos bônus com capas ilustradas
-const bonusDetails = [
+export const bonusDetails = [
   {
     id: 1,
     title: "Programa de 30 Dias",

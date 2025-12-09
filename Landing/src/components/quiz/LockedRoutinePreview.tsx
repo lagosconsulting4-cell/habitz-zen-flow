@@ -110,7 +110,7 @@ const PeriodSection = ({
 };
 
 export const LockedRoutinePreview = ({ onClose }: LockedRoutinePreviewProps) => {
-  const { recommendedHabits, isGeneratingRoutine } = useQuiz();
+  const { recommendedHabits, isGeneratingRoutine, goToStep } = useQuiz();
 
   // Calcula quantos hábitos mostrar (50%) e quantos bloquear
   const totalHabits = recommendedHabits.length;
@@ -137,15 +137,10 @@ export const LockedRoutinePreview = ({ onClose }: LockedRoutinePreviewProps) => 
     lockedByPeriod.evening += lockedCount - lockedSum;
   }
 
-  // Handler para scroll até pricing e fechar modal
+  // Handler para navegar para o OfferSlide (step 10)
   const handleUnlock = () => {
-    onClose();
-    setTimeout(() => {
-      const pricingSection = document.getElementById("pricing");
-      if (pricingSection) {
-        pricingSection.scrollIntoView({ behavior: "smooth" });
-      }
-    }, 100);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    goToStep(10);
   };
 
   if (isGeneratingRoutine) {
@@ -251,7 +246,7 @@ export const LockedRoutinePreview = ({ onClose }: LockedRoutinePreviewProps) => 
 
         <p className="text-slate-500 text-xs mt-3">
           Acesso vitalício por apenas{" "}
-          <span className="text-[#A3E635] font-bold">R$ 47</span>
+          <span className="text-[#A3E635] font-bold">11x R$5,17</span>
         </p>
       </motion.div>
     </div>
