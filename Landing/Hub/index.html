@@ -15,49 +15,43 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/tiktok/style.css" />
+    <!-- PostHog Analytics -->
+    <script>
+      !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+      posthog.init('YOUR_PROJECT_API_KEY', {api_host: 'https://app.posthog.com'})
+    </script>
   </head>
   <body>
-    <div class="noise-overlay" aria-hidden="true"></div>
-    <main class="hub-shell hub-shell--compact">
+    <main class="hub-shell">
       <section class="banners" aria-label="Ofertas e experiências Habitz">
         <a
           class="image-banner"
-          data-variant="bora"
-          href="https://habitz.life"
+          href="https://habitz.life/bora"
           target="_blank"
           rel="noreferrer noopener"
-          aria-label="Bora - explorar agora"
+          aria-label="Bora"
         >
           <img
-            src="/tiktok/assets/bora.png"
-            alt="Bora - banner principal"
+            src="https://i.ibb.co/pvSrrsx6/GANHE-AT-R-3-675-95-AINDA-ESSA-SEMANA-28.png"
+            alt="Bora"
             loading="lazy"
             decoding="async"
           />
-          <div class="image-banner__label">
-            <span>Bora</span>
-            <strong>Explorar agora</strong>
-          </div>
         </a>
 
         <a
           class="image-banner"
-          data-variant="foquinha"
           href="https://www.foquinhaai.life"
           target="_blank"
           rel="noreferrer noopener"
-          aria-label="Foquinha Aí - acessar rotinas"
+          aria-label="Foquinha Aí"
         >
           <img
-            src="/tiktok/assets/foquinha.png"
-            alt="Foquinha Aí - banner promocional"
+            src="https://i.ibb.co/2YmBCxtH/GANHE-AT-R-3-675-95-AINDA-ESSA-SEMANA-27.png"
+            alt="Foquinha Aí"
             loading="lazy"
             decoding="async"
           />
-          <div class="image-banner__label">
-            <span>Foquinha Aí</span>
-            <strong>Quero focar agora</strong>
-          </div>
         </a>
       </section>
     </main>
