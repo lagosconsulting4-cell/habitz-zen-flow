@@ -61,13 +61,7 @@ const NavigationBar = () => {
 
   return (
     <nav
-      className={cn(
-        "fixed inset-x-0 bottom-0 z-40 md:hidden",
-        "pt-1"
-      )}
-      style={{
-        paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 0.5rem))'
-      }}
+      className={cn("fixed inset-x-0 bottom-0 z-40 md:hidden", "pt-1")}
       role="navigation"
       aria-label="Navegação principal"
     >
@@ -86,6 +80,7 @@ const NavigationBar = () => {
           "dark:shadow-[0_-4px_24px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.03)]",
           "backdrop-blur-xl"
         )}
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         {navItems.map((item) => {
           const isActive = item.index !== undefined && activeIndex === item.index;
