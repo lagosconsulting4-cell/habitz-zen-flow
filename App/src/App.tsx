@@ -37,6 +37,14 @@ const MyHabits = lazy(() => import("./pages/MyHabits"));
 const Bonus = lazy(() => import("./pages/Bonus"));
 const Preview = lazy(() => import("./pages/Preview"));
 const CriarSenha = lazy(() => import("./pages/CriarSenha"));
+
+// Admin pages
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const AdminUsers = lazy(() => import("./pages/admin/Users"));
+const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
+const AdminContent = lazy(() => import("./pages/admin/Content"));
+const AdminAudit = lazy(() => import("./pages/admin/Audit"));
+
 // Loading fallback component
 const PageLoader = () => (
   <div className="min-h-screen bg-background flex items-center justify-center transition-colors duration-300">
@@ -124,6 +132,15 @@ const App = () => (
               <Route path="/guided" element={<GuidedJourney />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/bonus" element={<Bonus />} />
+            </Route>
+
+            {/* Admin routes - protected with adminOnly */}
+            <Route element={<ProtectedRoute adminOnly><ProtectedLayout /></ProtectedRoute>}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/analytics" element={<AdminAnalytics />} />
+              <Route path="/admin/content" element={<AdminContent />} />
+              <Route path="/admin/audit" element={<AdminAudit />} />
             </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

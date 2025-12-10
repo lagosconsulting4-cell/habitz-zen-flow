@@ -12,10 +12,14 @@ import {
   Map,
   Calendar,
   Gift,
+  ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { navItems, type NavItem } from "@/config/nav";
+import { useAdmin } from "@/hooks/useAdmin";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 const iconMap: Record<string, LucideIcon> = {
   home: Home,
@@ -39,6 +43,16 @@ interface AppSidebarProps {
 const AppSidebar = ({ onOpenMore }: AppSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [userId, setUserId] = useState<string | null>(null);
+  const { isAdmin } = useAdmin(userId ?? undefined);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id ?? null);
+    };
+    getUser();
+  }, []);
 
   const handleNavigate = (item: NavItem) => {
     if (location.pathname === item.path) {
@@ -79,6 +93,27 @@ const AppSidebar = ({ onOpenMore }: AppSidebarProps) => {
             {essentials.map(renderLink)}
           </nav>
         </div>
+
+        {isAdmin && (
+          <div>
+            <h3 className="text-xs font-semibold uppercase text-muted-foreground">Admin</h3>
+            <nav className="mt-2 space-y-1">
+              <button
+                type="button"
+                onClick={() => navigate("/admin")}
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                  location.pathname.startsWith("/admin")
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                }`}
+                aria-label="Admin Dashboard"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                <span>Admin</span>
+              </button>
+            </nav>
+          </div>
+        )}
 
         <div>
           <h3 className="text-xs font-semibold uppercase text-muted-foreground">Conteudo</h3>
