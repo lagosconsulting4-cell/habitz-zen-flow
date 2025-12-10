@@ -88,9 +88,13 @@ export const PixCheckoutModal = ({ onClose }: PixCheckoutModalProps) => {
         }
       }
 
-      const data = await response.json();
-      console.log("[PIX] Transaction created:", data);
-      setPixData(data);
+      const response_data = await response.json();
+      console.log("[PIX] Transaction created:", response_data);
+
+      // A edge function retorna { success: true, data: {...} }
+      // Precisamos pegar o objeto interno 'data'
+      const pixData = response_data.data || response_data;
+      setPixData(pixData);
     } catch (err: any) {
       const errorMsg = err.message || "Erro ao gerar PIX. Tente novamente.";
       setError(errorMsg);
@@ -114,10 +118,14 @@ export const PixCheckoutModal = ({ onClose }: PixCheckoutModalProps) => {
         }
       );
 
-      const data = await response.json();
-      return data.status;
+      const response_data = await response.json();
+      console.log("[PIX] Status check response:", response_data);
+
+      // A edge function retorna { success: true, data: {...} }
+      const transactionData = response_data.data || response_data;
+      return transactionData.status;
     } catch (err) {
-      console.error("Erro ao verificar status:", err);
+      console.error("[PIX] Erro ao verificar status:", err);
       return null;
     }
   };
