@@ -31,9 +31,10 @@ export const usePremium = (userId?: string) => {
   });
 
   return {
-    isPremium: Boolean(query.data?.is_premium),
+    isPremium: query.data?.is_premium ?? null,
     premiumSince: query.data?.premium_since ?? null,
     loading: query.isLoading,
+    error: query.error,
     refresh: query.refetch,
   };
 };

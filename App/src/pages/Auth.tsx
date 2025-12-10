@@ -23,6 +23,9 @@ const Auth = () => {
   const location = useLocation();
 
   const redirectAfterAuth = useCallback(async (userId: string) => {
+    const locationState = location.state as { from?: { pathname?: string } } | null;
+    const preferredPath = locationState?.from?.pathname;
+
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -36,23 +39,23 @@ const Auth = () => {
 
       // Check and update streak on login
       try {
-        await supabase.rpc('update_streak', { p_user_id: userId });
+        await supabase.rpc("update_streak", { p_user_id: userId });
       } catch (error) {
-        console.error('Failed to update streak on login:', error);
+        console.error("Failed to update streak on login:", error);
         // Don't block login on this error
       }
 
-      const locationState = location.state as { from?: { pathname?: string } } | null;
-      const preferredPath = locationState?.from?.pathname;
-
-      // Se não completou onboarding, redirecionar para lá primeiro
+      // Se nao completou onboarding, redirecionar para la primeiro
       if (!data?.has_completed_onboarding) {
         navigate("/onboarding-new", { replace: true });
         return;
       }
 
       if (data?.is_premium) {
-        const safePath = preferredPath && !["/auth", "/pricing", "/onboarding", "/onboarding-new"].includes(preferredPath) ? preferredPath : "/dashboard";
+        const safePath =
+          preferredPath && !["/auth", "/pricing", "/onboarding", "/onboarding-new"].includes(preferredPath)
+            ? preferredPath
+            : "/dashboard";
         navigate(safePath, { replace: true });
       } else {
         // Redirect to external /bora page (outside /app basename)
@@ -60,8 +63,12 @@ const Auth = () => {
       }
     } catch (err) {
       console.error("Failed to resolve premium status", err);
-      // Redirect to external /bora page (outside /app basename)
-      window.location.href = "/bora";
+      toast.error("Nao conseguimos validar sua assinatura agora. Entrando no app mesmo assim.");
+      const safePath =
+        preferredPath && !["/auth", "/pricing", "/onboarding", "/onboarding-new"].includes(preferredPath)
+          ? preferredPath
+          : "/dashboard";
+      navigate(safePath, { replace: true });
     }
   }, [navigate, location.state]);
 

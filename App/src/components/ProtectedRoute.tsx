@@ -3,12 +3,14 @@ import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { usePremium } from "@/hooks/usePremium";
+import { useAdmin } from "@/hooks/useAdmin";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  adminOnly?: boolean;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
@@ -43,9 +45,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return () => subscription.unsubscribe();
   }, [isOnboardingNewRoute]);
 
-  const { isPremium, loading: premiumLoading } = usePremium(user?.id);
+  const { isPremium, loading: premiumLoading, error: premiumError } = usePremium(user?.id);
+  const { isAdmin, loading: adminLoading } = useAdmin(user?.id);
 
-  if (loading || premiumLoading) {
+  if (loading || premiumLoading || (adminOnly && adminLoading)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -62,7 +65,18 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/auth" replace state={{ from: location }} />;
   }
 
-  if (!isPremium) {
+  // Admin-only route check
+  if (adminOnly && !isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // If premium check failed, avoid redirecting to /bora so the user can still access the app
+  if (premiumError) {
+    console.error("Failed to validate premium status", premiumError);
+    return <>{children}</>;
+  }
+
+  if (isPremium === false) {
     // Redirect to external /bora page (outside /app basename)
     window.location.href = "/bora";
     return null;
