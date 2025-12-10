@@ -103,6 +103,28 @@ const Dashboard = () => {
     };
   }, [isGamificationEnabled]);
 
+  // Listen for notification-triggered habit completion
+  useEffect(() => {
+    const handleCompleteFromNotification = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const habitId = customEvent.detail?.habitId;
+
+      if (habitId) {
+        console.log("[Dashboard] Completing habit from notification:", habitId);
+        // Complete the habit (today's date)
+        toggleHabit(habitId).catch((error) => {
+          console.error("[Dashboard] Error completing habit from notification:", error);
+        });
+      }
+    };
+
+    window.addEventListener("habit:complete-from-notification", handleCompleteFromNotification);
+
+    return () => {
+      window.removeEventListener("habit:complete-from-notification", handleCompleteFromNotification);
+    };
+  }, [toggleHabit]);
+
   // Filter habits for today using comprehensive filtering logic
   const todayHabits = useMemo(() => {
     return getHabitsForDate(new Date());

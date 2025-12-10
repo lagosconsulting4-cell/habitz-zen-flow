@@ -137,6 +137,30 @@ self.addEventListener("notificationclick", (event) => {
     return;
   }
 
+  // If user clicked "complete", send message to app without opening
+  if (action === "complete" && data.habitId) {
+    event.waitUntil(
+      self.clients
+        .matchAll({ type: "window", includeUncontrolled: true })
+        .then((windowClients) => {
+          // Send message to app to complete the habit
+          for (const client of windowClients) {
+            if (client.url.includes(self.location.origin)) {
+              client.postMessage({
+                type: "COMPLETE_HABIT_FROM_NOTIFICATION",
+                habitId: data.habitId,
+              });
+              return;
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("[SW] Error completing habit from notification:", error);
+        })
+    );
+    return;
+  }
+
   // Determine target URL
   const targetUrl = data.url || "/app/dashboard";
   const fullUrl = new URL(targetUrl, self.location.origin).href;

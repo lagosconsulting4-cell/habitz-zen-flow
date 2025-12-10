@@ -2,8 +2,9 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface NotificationClickMessage {
-  type: "NOTIFICATION_CLICK";
-  url: string;
+  type: "NOTIFICATION_CLICK" | "COMPLETE_HABIT_FROM_NOTIFICATION";
+  url?: string;
+  habitId?: string;
   data?: {
     type?: string;
     period?: string;
@@ -15,12 +16,14 @@ interface NotificationClickMessage {
 /**
  * Hook that listens for notification click messages from the Service Worker
  * and navigates to the appropriate URL when a notification is clicked.
+ * Also handles completing habits directly from notifications.
  */
 export function useNotificationNavigation() {
   const navigate = useNavigate();
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent<NotificationClickMessage>) => {
+      // Handle notification click navigation
       if (event.data?.type === "NOTIFICATION_CLICK") {
         console.log("[App] Notification click received:", event.data);
 
@@ -38,6 +41,21 @@ export function useNotificationNavigation() {
             `[App] ${event.data.data.habitCount} pending habits from ${event.data.data.period}`
           );
         }
+      }
+
+      // Handle completing habit from notification
+      if (event.data?.type === "COMPLETE_HABIT_FROM_NOTIFICATION") {
+        console.log(
+          "[App] Habit completion request received from notification:",
+          event.data.habitId
+        );
+
+        // Dispatch a custom event that can be caught by components with useHabits
+        window.dispatchEvent(
+          new CustomEvent("habit:complete-from-notification", {
+            detail: { habitId: event.data.habitId },
+          })
+        );
       }
     };
 
