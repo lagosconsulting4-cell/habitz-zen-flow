@@ -81,15 +81,23 @@ export const PixCheckoutModal = ({ onClose }: PixCheckoutModalProps) => {
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erro ao criar PIX");
+        const errorText = await response.text();
+        console.error("[PIX] Response error:", response.status, errorText);
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.error || errorData.message || `Erro ${response.status}`);
+        } catch (parseError) {
+          throw new Error(`Erro ao criar PIX (${response.status}): ${errorText.substring(0, 100)}`);
+        }
       }
 
       const data = await response.json();
+      console.log("[PIX] Transaction created:", data);
       setPixData(data);
     } catch (err: any) {
-      setError(err.message || "Erro ao gerar PIX. Tente novamente.");
-      console.error("Erro ao criar PIX:", err);
+      const errorMsg = err.message || "Erro ao gerar PIX. Tente novamente.";
+      setError(errorMsg);
+      console.error("[PIX] Error creating transaction:", err);
     } finally {
       setIsLoading(false);
     }
