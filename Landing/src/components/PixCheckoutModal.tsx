@@ -73,9 +73,6 @@ export const PixCheckoutModal = ({ onClose }: PixCheckoutModalProps) => {
               name: name || "Cliente",
               email: email || "",
             },
-            product: {
-              name: "BORA - Plano Anual",
-            },
           }),
         }
       );
