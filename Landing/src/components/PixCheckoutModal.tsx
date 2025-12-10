@@ -61,7 +61,7 @@ export const PixCheckoutModal = ({ onClose }: PixCheckoutModalProps) => {
       const externalId = `quiz-${Date.now()}-${email?.replace(/[^a-zA-Z0-9]/g, "")}`;
 
       const response = await fetch(
-        "https://harxhykvapsdvkbmhvmk.supabase.co/functions/v1/buckpay-pix",
+        "https://jbucnphyrziaxupdsnbn.supabase.co/functions/v1/buckpay-pix",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -98,7 +98,7 @@ export const PixCheckoutModal = ({ onClose }: PixCheckoutModalProps) => {
   const checkPaymentStatus = async (externalId: string) => {
     try {
       const response = await fetch(
-        "https://harxhykvapsdvkbmhvmk.supabase.co/functions/v1/buckpay-pix",
+        "https://jbucnphyrziaxupdsnbn.supabase.co/functions/v1/buckpay-pix",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
