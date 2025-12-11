@@ -364,6 +364,22 @@ export const useGamification = (userId?: string) => {
     });
   };
 
+  // Helper: Send streak milestone notification
+  const sendStreakNotification = async (streakDays: number) => {
+    const streakMilestones = [3, 7, 14, 30];
+    if (!streakMilestones.includes(streakDays) || !userId) {
+      return;
+    }
+
+    try {
+      await supabase.functions.invoke("send-streak-notification", {
+        body: { userId, milestone: streakDays },
+      });
+    } catch (error) {
+      console.error(`Failed to send streak notification for ${streakDays} days:`, error);
+    }
+  };
+
   // Helper: Award streak bonus
   const awardStreakBonus = async (streakDays: number) => {
     let amount = 0;
@@ -381,11 +397,16 @@ export const useGamification = (userId?: string) => {
     }
 
     if (amount > 0) {
-      return addXPMutation.mutateAsync({
+      const xpResult = await addXPMutation.mutateAsync({
         amount,
         reason,
         metadata: { streak_days: streakDays },
       });
+
+      // Send streak milestone notification
+      await sendStreakNotification(streakDays);
+
+      return xpResult;
     }
   };
 

@@ -196,6 +196,22 @@ async function handleBuckPayWebhook(req: Request, payload: WebhookRequest) {
   });
 }
 
+// Helper function to calculate PIX expiration date (15 minutes from creation)
+function calculateExpirationDate(createdAt: string): string {
+  try {
+    const created = new Date(createdAt);
+    if (isNaN(created.getTime())) {
+      // Fallback: 15 minutes from now if invalid date
+      return new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    }
+    const expires = new Date(created.getTime() + 15 * 60 * 1000);
+    return expires.toISOString();
+  } catch {
+    // Fallback: 15 minutes from now if error
+    return new Date(Date.now() + 15 * 60 * 1000).toISOString();
+  }
+}
+
 async function handleCreateTransaction(payload: CreatePixRequest) {
   console.log("[buckpay-pix] Creating PIX transaction");
   console.log("[buckpay-pix] Buyer email:", payload.buyer.email);
@@ -293,7 +309,26 @@ async function handleCreateTransaction(payload: CreatePixRequest) {
     }
   }
 
-  return new Response(JSON.stringify({ success: true, data: data.data }), {
+  // Transform BuckPay response to frontend-expected format
+  const buckpayData = data.data;
+  const transformedData = {
+    qr_code: buckpayData.pix?.qrcode_base64 || "",
+    qr_code_text: buckpayData.pix?.code || "",
+    expires_at: calculateExpirationDate(buckpayData.created_at),
+    transaction_id: buckpayData.id,
+    external_id: payload.external_id,
+    status: buckpayData.status,
+    amount: buckpayData.total_amount,
+  };
+
+  console.log("[buckpay-pix] Transformed response:", {
+    has_qr_code: !!transformedData.qr_code,
+    has_qr_code_text: !!transformedData.qr_code_text,
+    expires_at: transformedData.expires_at,
+    status: transformedData.status,
+  });
+
+  return new Response(JSON.stringify({ success: true, data: transformedData }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
@@ -329,7 +364,28 @@ async function handleCheckStatus(payload: StatusRequest) {
     await handlePaidTransaction(payload.external_id, data.data);
   }
 
-  return new Response(JSON.stringify({ success: true, data: data.data }), {
+  // Transform BuckPay response to frontend-expected format
+  const buckpayData = data.data;
+  const transformedData = {
+    qr_code: buckpayData.pix?.qrcode_base64 || "",
+    qr_code_text: buckpayData.pix?.code || "",
+    expires_at: buckpayData.created_at
+      ? calculateExpirationDate(buckpayData.created_at)
+      : new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+    transaction_id: buckpayData.id,
+    external_id: payload.external_id,
+    status: buckpayData.status,
+    amount: buckpayData.total_amount,
+  };
+
+  console.log("[buckpay-pix] Status check transformed response:", {
+    has_qr_code: !!transformedData.qr_code,
+    has_qr_code_text: !!transformedData.qr_code_text,
+    expires_at: transformedData.expires_at,
+    status: transformedData.status,
+  });
+
+  return new Response(JSON.stringify({ success: true, data: transformedData }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
