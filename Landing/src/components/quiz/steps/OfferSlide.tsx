@@ -6,14 +6,30 @@ import { Gift, Sparkles, ArrowRight, CheckCircle2, Shield } from "lucide-react";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { bonusDetails } from "@/components/BonusCards";
 import { PixCheckoutModal } from "@/components/PixCheckoutModal";
+import { PaymentMethodModal } from "@/components/PaymentMethodModal";
 
 export const OfferSlide = () => {
   const [isPixModalOpen, setIsPixModalOpen] = useState(false);
+  const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false);
 
   const totalValue = 805; // Soma dos bônus
   const offerPrice = 47; // Preço à vista
   const installmentPrice = "5,17"; // 11x
   const discount = 94; // % desconto
+
+  // Pricing for payment methods
+  const pixPrice = 47.00;
+  const creditCardPrice = 49.35;
+
+  const handleSelectPix = () => {
+    setIsPaymentMethodModalOpen(false);
+    setIsPixModalOpen(true);
+  };
+
+  const handleSelectCreditCard = () => {
+    setIsPaymentMethodModalOpen(false);
+    window.location.href = "https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac";
+  };
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
@@ -101,7 +117,7 @@ export const OfferSlide = () => {
 
         {/* CTA Button */}
         <Button
-          onClick={() => setIsPixModalOpen(true)}
+          onClick={() => setIsPaymentMethodModalOpen(true)}
           size="lg"
           className="w-full bg-[#A3E635] hover:bg-[#84cc16] text-slate-900 font-black text-xl py-7 rounded-xl shadow-xl shadow-[#A3E635]/30"
         >
@@ -131,7 +147,19 @@ export const OfferSlide = () => {
         </div>
       </motion.div>
 
-      {/* Modal PIX */}
+      {/* Payment Method Selection Modal */}
+      {isPaymentMethodModalOpen && (
+        <PaymentMethodModal
+          isOpen={isPaymentMethodModalOpen}
+          onClose={() => setIsPaymentMethodModalOpen(false)}
+          onSelectPix={handleSelectPix}
+          onSelectCreditCard={handleSelectCreditCard}
+          pixPrice={pixPrice}
+          creditCardPrice={creditCardPrice}
+        />
+      )}
+
+      {/* Modal PIX - opens after selecting PIX in PaymentMethodModal */}
       {isPixModalOpen && (
         <PixCheckoutModal onClose={() => setIsPixModalOpen(false)} />
       )}
