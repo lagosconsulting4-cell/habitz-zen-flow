@@ -315,11 +315,14 @@ const BoraLanding = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           {/* Logo */}
           <a href="#" className="flex items-center">
-            <img
-              src="/assets/logo_bora.png"
-              alt="Bora"
-              className="h-10 w-auto"
-            />
+            <picture>
+              <source srcSet="/assets/logo_bora.webp" type="image/webp" />
+              <img
+                src="/assets/logo_bora.png"
+                alt="Bora"
+                className="h-10 w-auto"
+              />
+            </picture>
           </a>
 
           {/* CTA Button */}
@@ -443,11 +446,14 @@ const BoraLanding = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
-                <img
-                  src="/images/lp/hero_mockup.png"
-                  alt="Mockup do aplicativo BORA"
-                  className="w-[260px] sm:w-[320px] lg:w-[420px] h-auto drop-shadow-2xl"
-                />
+                <picture>
+                  <source srcSet="/images/lp/hero_mockup.webp" type="image/webp" />
+                  <img
+                    src="/images/lp/hero_mockup.png"
+                    alt="Mockup do aplicativo BORA"
+                    className="w-[260px] sm:w-[320px] lg:w-[420px] h-auto drop-shadow-2xl"
+                  />
+                </picture>
               </motion.div>
             </motion.div>
          </div>
@@ -1296,11 +1302,14 @@ const BoraLanding = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Logo */}
             <div className="flex items-center">
-              <img
-                src="/assets/logo_bora.png"
-                alt="Bora"
-                className="h-10 w-auto"
-              />
+              <picture>
+                <source srcSet="/assets/logo_bora.webp" type="image/webp" />
+                <img
+                  src="/assets/logo_bora.png"
+                  alt="Bora"
+                  className="h-10 w-auto"
+                />
+              </picture>
             </div>
 
             {/* Links */}

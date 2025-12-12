@@ -65,7 +65,12 @@
       "Bash(node deploy-migration.js:*)",
       "Bash(del \"C:\\Users\\bruno\\Documents\\Black\\Habitz\\App\\deploy-migration.js\")",
       "Bash(python -m json.tool:*)",
-      "Bash(python deploy-admin-migration.py:*)"
+      "Bash(python deploy-admin-migration.py:*)",
+      "WebSearch",
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(pkill:*)",
+      "Bash(taskkill:*)",
+      "Bash(node -e:*)"
     ],
     "deny": [],
     "ask": []

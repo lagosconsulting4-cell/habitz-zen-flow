@@ -1,0 +1,498 @@
+📱 DOCUMENTAÇÃO DE PUSH NOTIFICATIONS - BORA!
+🎯 Estratégia de Comunicação
+Tom de Voz
+
+Personalidade: Carente, descontraído, jovial
+Primeira pessoa: O app fala como se fosse uma pessoa
+Público: 18-30 anos, estudantes e início de carreira
+Referência: Estilo Duolingo (cobrança amigável e divertida)
+
+Estrutura das Mensagens
+Título: 1 palavra (ex: "Psiu...", "Eaí", "Saudade")
+Corpo: ~8 palavras em média (máx. 12 palavras)
+Personalização: Pode incluir emoji + nome do hábito
+
+📋 Sistema de Variáveis
+javascript// Variáveis disponíveis para personalização
+{
+  habitEmoji: "📖",           // Emoji do hábito
+  habitName: "Ler 10 páginas", // Nome do hábito
+  greeting: "Bom dia",         // Saudação baseada no horário
+  greetingEmoji: "🌅"         // Emoji da saudação
+}
+```
+
+---
+
+## 🌅 CONTEXTO 1: Lembretes Normais - MANHÃ (5h-11h59)
+
+### **Versão Genérica (sem hábito específico)**
+```
+Título: "Psiu..."
+Corpo: "só passando pra lembrar do seu hábito 👀"
+
+Título: "Bom diaaa"
+Corpo: "já pensou em começar o dia comigo?"
+
+Título: "Eaí..."
+Corpo: "vai me deixar esperando ou bora fazer?"
+
+Título: "Acordou?"
+Corpo: "porque eu tô aqui esperando você 🥺"
+
+Título: "Oi!"
+Corpo: "bora começar o dia bem hoje?"
+
+Título: "Olá..."
+Corpo: "seu hábito tá te esperando aqui 👀"
+```
+
+### **Versão Personalizada (com hábito específico)**
+```
+Título: "Psiu..."
+Corpo: "{habitEmoji} {habitName}... tá na hora viu"
+
+Título: "Bom dia!"
+Corpo: "{habitEmoji} {habitName} - bora começar bem?"
+
+Título: "Eaí..."
+Corpo: "esqueceu de {habitName} hoje? 👀"
+
+Título: "Acordou?"
+Corpo: "{habitEmoji} {habitName} tá te esperando aqui"
+
+Título: "Então..."
+Corpo: "bora fazer {habitName} antes que esqueça?"
+
+Título: "Oi!"
+Corpo: "{habitEmoji} {habitName} - me ajuda aqui?"
+```
+
+---
+
+## ☀️ CONTEXTO 2: Lembretes Normais - TARDE (12h-17h59)
+
+### **Versão Genérica**
+```
+Título: "Oi..."
+Corpo: "não esqueceu de mim né? bora?"
+
+Título: "Então..."
+Corpo: "tá na hora do seu hábito viu"
+
+Título: "Lembrando!"
+Corpo: "aquele hábito tá te esperando ainda 👀"
+
+Título: "Sério?"
+Corpo: "vai me deixar aqui sozinho o dia todo?"
+
+Título: "Eaí?"
+Corpo: "me dá só 5 minutos do seu tempo"
+
+Título: "Psiu!"
+Corpo: "tá aí? porque eu tô aqui esperando 🥺"
+```
+
+### **Versão Personalizada**
+```
+Título: "Oi..."
+Corpo: "{habitEmoji} {habitName} não vai se fazer sozinho"
+
+Título: "Então..."
+Corpo: "hora de {habitName}... por mim? 🥺"
+
+Título: "Sério?"
+Corpo: "vai deixar {habitName} pra depois de novo?"
+
+Título: "Eaí?"
+Corpo: "{habitEmoji} {habitName} - só uns minutinhos?"
+
+Título: "Psiu!"
+Corpo: "lembra de {habitName}? tô esperando você 👀"
+
+Título: "Opa..."
+Corpo: "{habitEmoji} {habitName} chamando... atende aí?"
+```
+
+---
+
+## 🌙 CONTEXTO 3: Lembretes Normais - NOITE (18h-4h59)
+
+### **Versão Genérica**
+```
+Título: "Boa noite!"
+Corpo: "antes de dormir... bora fazer aquele hábito?"
+
+Título: "Último aviso"
+Corpo: "o dia tá acabando... me ajuda aqui?"
+
+Título: "Oiee"
+Corpo: "ainda dá tempo de fazer hoje 🌙"
+
+Título: "Cadê você?"
+Corpo: "já ia dormir sem fazer o hábito?"
+
+Título: "Psiu..."
+Corpo: "última chance do dia... por mim? 🥺"
+
+Título: "Então..."
+Corpo: "vai deixar o dia passar assim? bora"
+```
+
+### **Versão Personalizada**
+```
+Título: "Boa noite!"
+Corpo: "{habitEmoji} {habitName} antes de dormir?"
+
+Título: "Último aviso"
+Corpo: "{habitName} ainda tá pendente... bora?"
+
+Título: "Oiee"
+Corpo: "{habitEmoji} {habitName} - ainda dá tempo 🌙"
+
+Título: "Cadê?"
+Corpo: "vai dormir sem fazer {habitName}?"
+
+Título: "Psiu..."
+Corpo: "{habitName} esperando você... última chance viu"
+
+Título: "Socorro!"
+Corpo: "{habitEmoji} {habitName} - me salva antes da meia-noite?"
+```
+
+---
+
+## ⏰ CONTEXTO 4: Hábito Atrasado (não fez ainda)
+
+### **Versão Genérica**
+```
+Título: "Oi?"
+Corpo: "tá me evitando ou esqueceu mesmo? 👀"
+
+Título: "Saudade..."
+Corpo: "faz quanto tempo que não se vê né"
+
+Título: "Então..."
+Corpo: "vai fingir que não viu a notificação?"
+
+Título: "Tá aí?"
+Corpo: "porque o hábito tá aqui me olhando 🥺"
+
+Título: "Eaí?"
+Corpo: "me dá só 5 minutos do seu tempo"
+
+Título: "Cadê?"
+Corpo: "sumiu... tá tudo bem aí? 👀"
+```
+
+### **Versão Personalizada**
+```
+Título: "Oi?"
+Corpo: "cadê {habitName}? tá sumido hoje viu"
+
+Título: "Saudade..."
+Corpo: "{habitEmoji} {habitName} sentindo sua falta aqui"
+
+Título: "Então..."
+Corpo: "{habitName} ainda tá esperando... vai fazer?"
+
+Título: "Eaí?"
+Corpo: "esqueceu de {habitName} ou só procrastinando?"
+
+Título: "Psiu..."
+Corpo: "{habitEmoji} {habitName} não vai se fazer sozinho 👀"
+
+Título: "Socorro!"
+Corpo: "{habitName} pedindo ajuda aqui... bora?"
+```
+
+---
+
+## 🔥 CONTEXTO 5: Primeira vez do dia
+
+### **Versão Genérica**
+```
+Título: "Bom dia!"
+Corpo: "pronto pra começar o dia comigo? 🚀"
+
+Título: "Eaí!"
+Corpo: "primeiro hábito do dia, vamos junto?"
+
+Título: "Olá!"
+Corpo: "que tal começar bem o dia hoje?"
+
+Título: "Opa!"
+Corpo: "bora dar aquele start no dia?"
+
+Título: "Psiu!"
+Corpo: "primeiro de vários... vamos começar? 👀"
+```
+
+### **Versão Personalizada**
+```
+Título: "Bom dia!"
+Corpo: "{habitEmoji} {habitName} pra começar bem?"
+
+Título: "Eaí!"
+Corpo: "primeiro do dia: {habitName}... bora?"
+
+Título: "Olá!"
+Corpo: "{habitEmoji} {habitName} esperando pra começar"
+
+Título: "Opa!"
+Corpo: "que tal começar com {habitName} hoje?"
+
+Título: "Psiu!"
+Corpo: "{habitName} chamando pra dar o start 🚀"
+```
+
+---
+
+## 📊 CONTEXTO 6: Múltiplos hábitos pendentes
+```
+Título: "Psiu!"
+Corpo: "tem 3 hábitos esperando você aqui 👀"
+
+Título: "Eita..."
+Corpo: "acumulou ein... bora fazer pelo menos um?"
+
+Título: "Oi!"
+Corpo: "seus hábitos tão todos com saudade viu"
+
+Título: "Socorro!"
+Corpo: "3 hábitos pedindo atenção... me ajuda? 🥺"
+
+Título: "Então..."
+Corpo: "tem uma fila de hábitos aqui esperando"
+
+Título: "Olha..."
+Corpo: "vários hábitos pendentes... bora resolver isso?"
+```
+
+---
+
+## ⚡ CONTEXTO 7: Final do dia (últimas 2 horas)
+
+### **Versão Genérica**
+```
+Título: "Urgente!"
+Corpo: "última chance de fazer hoje... me ajuda?"
+
+Título: "Socorro!"
+Corpo: "o dia tá acabando e você sumiu 🥺"
+
+Título: "Oieee"
+Corpo: "ainda dá tempo... por mim? 🥹"
+
+Título: "Sério?"
+Corpo: "vai deixar o dia passar em branco?"
+
+Título: "Psiu!"
+Corpo: "última chamada... literalmente a última viu"
+
+Título: "Então..."
+Corpo: "2 horas pro dia acabar... bora?"
+```
+
+### **Versão Personalizada**
+```
+Título: "Urgente!"
+Corpo: "{habitEmoji} {habitName} - última chance hoje!"
+
+Título: "Socorro!"
+Corpo: "{habitName} não vai rolar hoje? me ajuda 🥺"
+
+Título: "Oieee"
+Corpo: "{habitEmoji} {habitName} antes da meia-noite?"
+
+Título: "Sério?"
+Corpo: "vai deixar {habitName} pra amanhã de novo?"
+
+Título: "Então..."
+Corpo: "{habitName} esperando... faltam 2 horas só"
+
+Título: "Psiu!"
+Corpo: "{habitEmoji} {habitName} - última chamada viu"
+```
+
+---
+
+## 💪 CONTEXTO 8: Por tipo de hábito (opcional)
+
+### **Exercício Físico**
+```
+Título: "Bora!"
+Corpo: "{habitEmoji} {habitName} não vai se fazer sozinho 💪"
+
+Título: "Eaí!"
+Corpo: "aquele treino tá te esperando... bora?"
+
+Título: "Opa!"
+Corpo: "{habitName} chamando... partiu suar a camisa?"
+```
+
+### **Leitura**
+```
+Título: "Psiu..."
+Corpo: "{habitEmoji} {habitName} - que tal ler agora? 📚"
+
+Título: "Oi!"
+Corpo: "bora viajar nas páginas de {habitName}?"
+
+Título: "Então..."
+Corpo: "{habitName} esperando... só uns minutinhos?"
+```
+
+### **Meditação**
+```
+Título: "Calma..."
+Corpo: "{habitEmoji} {habitName} - bora respirar uns minutos? 🧘"
+
+Título: "Psiu!"
+Corpo: "hora de {habitName}... vamos desacelerar?"
+
+Título: "Oi..."
+Corpo: "{habitName} chamando pra dar aquela relaxada"
+```
+
+### **Água/Hidratação**
+```
+Título: "Psiu!"
+Corpo: "{habitEmoji} {habitName} - tá hidratado aí? 💧"
+
+Título: "Oi!"
+Corpo: "hora de {habitName}... seu corpo agradece"
+
+Título: "Eaí!"
+Corpo: "{habitName} lembrando você de beber água 👀"
+```
+
+---
+
+## 🎮 CONTEXTO 9: Gamificação (para futuro)
+
+### **Sequência de 3 dias**
+```
+Título: "Opa!"
+Corpo: "3 dias seguidos! tá virando rotina ein 👀"
+
+Título: "Olha só!"
+Corpo: "{habitEmoji} {habitName} - 3 dias firme! 🔥"
+```
+
+### **Sequência de 7 dias**
+```
+Título: "Sério?!"
+Corpo: "1 semana direto?! tô orgulhoso de você 🥹"
+
+Título: "Caramba!"
+Corpo: "{habitName} - 7 dias seguidos! você é brabo"
+```
+
+### **Quebrou sequência**
+```
+Título: "Voltou!"
+Corpo: "senti sua falta... bora recomeçar? 🥺"
+
+Título: "Oi..."
+Corpo: "{habitEmoji} {habitName} te esperando... recomeça?"
+
+Título: "Eaí!"
+Corpo: "tropeçou mas levanta... {habitName} te espera"
+```
+
+### **Está "on fire"**
+```
+Título: "Brabo!"
+Corpo: "completando tudo hoje... tá voando! 🚀"
+
+Título: "Opa!"
+Corpo: "{habitName} agora e fecha o dia perfeito?"
+
+🔧 Implementação Técnica
+Lógica de Seleção
+javascript// Pseudocódigo para selecionar a copy
+function selectPushCopy(context) {
+  // 1. Identificar contexto
+  const timeOfDay = getCurrentPeriod(); // manhã/tarde/noite
+  const isDelayed = checkIfDelayed(habit);
+  const isLastHours = checkIfLastHours();
+  const pendingCount = getPendingHabitsCount();
+  
+  // 2. Decidir se usa versão personalizada
+  const usePersonalized = shouldPersonalize(habit);
+  
+  // 3. Selecionar copy aleatória do contexto
+  const copies = getCopiesForContext({
+    timeOfDay,
+    isDelayed,
+    isLastHours,
+    pendingCount,
+    usePersonalized
+  });
+  
+  return randomSelect(copies);
+}
+Rotação de Mensagens
+javascript// Evitar repetição - guardar últimas 5 mensagens enviadas por usuário
+const recentMessages = getUserRecentMessages(userId, 5);
+
+// Filtrar copies já usadas
+const availableCopies = copies.filter(
+  copy => !recentMessages.includes(copy.id)
+);
+
+// Se filtrou tudo, resetar histórico
+if (availableCopies.length === 0) {
+  clearUserMessageHistory(userId);
+  return randomSelect(copies);
+}
+
+return randomSelect(availableCopies);
+Personalização
+javascript// Substituir variáveis
+function personalizePush(template, habit) {
+  return template
+    .replace('{habitEmoji}', habit.emoji)
+    .replace('{habitName}', habit.name)
+    .replace('{greeting}', getGreeting())
+    .replace('{greetingEmoji}', getGreetingEmoji());
+}
+
+📈 Métricas Sugeridas
+Rastrear para otimização futura:
+
+Taxa de abertura por tipo de copy
+Taxa de conversão (abriu → completou hábito)
+Melhor horário de engajamento por usuário
+Copies com melhor performance por contexto
+Impacto da personalização vs. genérica
+
+
+🎯 Diretrizes de Uso
+✅ FAZER
+
+Variar as mensagens (usar rotação)
+Personalizar quando possível (mencionar hábito)
+Respeitar o contexto (manhã/tarde/noite)
+Manter tom carente mas divertido
+Usar emojis com moderação (1-2 por mensagem)
+
+❌ NÃO FAZER
+
+Repetir a mesma copy seguidas vezes
+Ser agressivo ou muito insistente
+Usar palavras muito longas ou complexas
+Exceder 12 palavras no corpo
+Usar mais de 2 emojis por mensagem
+
+
+🚀 Próximas Evoluções
+
+Mascote visual (Opção 2 da estratégia)
+Gamificação (streaks, conquistas, pontos)
+Segmentação por perfil (usuário matutino vs noturno)
+A/B testing de copies
+Mensagens por milestone (1 mês, 100 hábitos, etc)
+Push de re-engajamento (usuário inativo)
+Celebrações (completou todos do dia)
