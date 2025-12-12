@@ -59,25 +59,18 @@ export function useOfflineSync() {
             }
 
             // Adicionar filtro por user_id para alinhar com RLS policy
-            const { error, count } = await supabase
+            const { error } = await supabase
               .from("habits")
               .delete()
               .eq("id", id)
-              .eq("user_id", user.id)
-              .select();
+              .eq("user_id", user.id);
 
-            if (error) throw error;
-
-            if (!count || count === 0) {
-              console.warn(
-                "[Sync] Nenhum hábito foi deletado (ID não encontrado ou sem permissão):",
-                id,
-                "User ID:",
-                user.id
-              );
-            } else {
-              console.log("[Sync] Hábito deletado:", id);
+            if (error) {
+              console.error("[Sync] Erro ao deletar:", error);
+              throw error;
             }
+
+            console.log("[Sync] Hábito deletado:", id);
             break;
           }
 

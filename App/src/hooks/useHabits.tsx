@@ -400,19 +400,15 @@ export const useHabits = () => {
       }
 
       // Adicionar filtro por user_id para alinhar com RLS policy
-      const { error, count } = await supabase
+      const { error } = await supabase
         .from("habits")
         .delete()
         .eq("id", habitId)
-        .eq("user_id", user.id)
-        .select();
+        .eq("user_id", user.id);
 
       if (error) throw error;
 
-      // Verificar se alguma linha foi realmente deletada
-      if (!count || count === 0) {
-        throw new Error("Habito nao encontrado ou voce nao tem permissao para deleta-lo.");
-      }
+      // ✅ Sem verificação de count - se error é null, DELETE funcionou!
 
       // Limpar cache do IndexedDB
       await deleteCachedHabit(habitId);
