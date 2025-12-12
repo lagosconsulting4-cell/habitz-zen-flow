@@ -1,7 +1,44 @@
 /**
  * Premium Animation Configurations for Habitz Landing Page
  * Using Framer Motion (motion library)
+ *
+ * Supports prefers-reduced-motion for accessibility
  */
+
+import { useEffect, useState } from "react";
+
+// Hook to detect if user prefers reduced motion
+export function useReducedMotion(): boolean {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handler = (event: MediaQueryListEvent) => {
+      setPrefersReducedMotion(event.matches);
+    };
+
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
+  return prefersReducedMotion;
+}
+
+// Reduced motion versions (instant transitions, no movement)
+export const reducedMotionTransition = {
+  duration: 0,
+  ease: "linear",
+};
+
+export const reducedFadeIn = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  transition: { duration: 0.15 },
+};
 
 // Spring physics for natural button interactions
 export const springTransition = {
@@ -182,3 +219,42 @@ export const getStaggerDelay = (index: number, baseDelay = 0.1) => ({
     delay: index * baseDelay,
   },
 });
+
+// Helper to get animation props based on reduced motion preference
+export function getAnimationProps(
+  animation: {
+    initial?: object;
+    animate?: object;
+    transition?: object;
+  },
+  prefersReducedMotion: boolean
+) {
+  if (prefersReducedMotion) {
+    return {
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      transition: { duration: 0.15 },
+    };
+  }
+  return animation;
+}
+
+// Optimized float animation that respects reduced motion
+export function getFloatAnimation(prefersReducedMotion: boolean) {
+  if (prefersReducedMotion) {
+    return {}; // No animation
+  }
+  return floatAnimation;
+}
+
+// Optimized infinite animation - lighter on CPU
+export const lightFloatAnimation = {
+  animate: {
+    y: [0, -6, 0], // Reduced amplitude
+  },
+  transition: {
+    duration: 5, // Slower = less CPU
+    repeat: Infinity,
+    ease: "easeInOut",
+  },
+};

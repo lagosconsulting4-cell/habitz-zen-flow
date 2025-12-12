@@ -5,20 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Mail, Lock, User, Loader2, KeyRound } from "lucide-react";
+import { ArrowLeft, Mail, Lock, Loader2, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
-  type Mode = "login" | "register" | "forgot" | "reset";
+  type Mode = "login" | "reset";
   const [mode, setMode] = useState<Mode>("login");
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [name, setName] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -124,44 +122,6 @@ const Auth = () => {
           toast.success("Login feito com sucesso");
           await redirectAfterAuth(data.user.id);
         }
-      } else if (mode === "register") {
-        const redirectUrl = `${window.location.origin}/`;
-
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: {
-            emailRedirectTo: redirectUrl,
-            data: {
-              display_name: name.trim(),
-            },
-          },
-        });
-
-        if (error) {
-          if (error.message.includes("User already registered")) {
-            toast.error("Este email já está cadastrado. Faça login.");
-            setMode("login");
-          } else {
-            toast.error(error.message);
-          }
-          return;
-        }
-
-        if (data.user) {
-          toast.success("Conta criada! Verifique seu email para confirmar e finalize a compra.");
-          setMode("login");
-        }
-      } else if (mode === "forgot") {
-        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-          redirectTo: `${window.location.origin}/auth`,
-        });
-        if (error) {
-          toast.error(error.message);
-          return;
-        }
-        toast.success("Enviamos um link para Redefinir sua senha. Confira seu email.");
-        setMode("login");
       } else if (mode === "reset") {
         if (newPassword.length < 6) {
           toast.error("A nova senha deve ter ao menos 6 caracteres.");
@@ -184,24 +144,6 @@ const Auth = () => {
       toast.error("Erro inesperado. Tente novamente.");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleGoogleAuth = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
-
-      if (error) {
-        toast.error("Erro ao Fazer login com Google");
-      }
-    } catch (error) {
-      console.error("Unexpected Google auth error", error);
-      toast.error("Erro inesperado com Google");
     }
   };
 
@@ -229,55 +171,14 @@ const Auth = () => {
                 <KeyRound className="w-8 h-8 text-primary" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold uppercase tracking-wide">Acesse seu Plano</CardTitle>
+            <CardTitle className="text-2xl font-bold uppercase tracking-wide">Acesse sua conta</CardTitle>
             <CardDescription className="text-muted-foreground">
-              Entre ou crie sua conta para acessar seu programa completo de 30 dias para TDAH.
+              Use o email que você usou na compra
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <Button
-              onClick={handleGoogleAuth}
-              variant="outline"
-              className="w-full py-3 border-border/60 bg-foreground text-background transition hover:bg-foreground/90"
-              type="button"
-            >
-              <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-              </svg>
-              Continuar com Google
-            </Button>
-
-            <div className="flex items-center gap-4">
-              <Separator className="flex-1 bg-border" />
-              <span className="text-muted-foreground text-sm">ou</span>
-              <Separator className="flex-1 bg-border" />
-            </div>
-
             <form onSubmit={handleAuth} className="space-y-4">
-              {mode === "register" && (
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-foreground">Nome completo</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Seu nome"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required={mode === "register"}
-                      className="pl-10 py-3 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
-                      minLength={2}
-                      maxLength={50}
-                    />
-                  </div>
-                </div>
-              )}
-
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-foreground">Email</Label>
                 <div className="relative">
@@ -294,7 +195,7 @@ const Auth = () => {
                 </div>
               </div>
 
-              {mode !== "forgot" && mode !== "reset" && (
+              {mode !== "reset" && (
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-foreground">Senha</Label>
                   <div className="relative">
@@ -302,10 +203,10 @@ const Auth = () => {
                     <Input
                       id="password"
                       type="password"
-                      placeholder={mode === "login" ? "Sua senha" : "Mínimo 6 caracteres"}
+                      placeholder="Sua senha"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      required={mode !== "forgot"}
+                      required
                       minLength={6}
                       className="pl-10 py-3 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                     />
@@ -356,19 +257,10 @@ const Auth = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    {mode === "login" && "Entrando..."}
-                    {mode === "register" && "Criando conta..."}
-                    {mode === "forgot" && "Enviando link..."}
-                    {mode === "reset" && "Salvando..."}
+                    {mode === "login" ? "Entrando..." : "Salvando..."}
                   </>
                 ) : (
-                  mode === "login"
-                    ? "Entrar"
-                    : mode === "register"
-                      ? "Criar conta"
-                      : mode === "forgot"
-                        ? "Enviar link de redefinição"
-                        : "Salvar nova senha"
+                  mode === "login" ? "Entrar" : "Salvar nova senha"
                 )}
               </Button>
             </form>
@@ -376,30 +268,16 @@ const Auth = () => {
             <div className="text-center pt-4 border-t border-border">
               {mode === "login" && (
                 <>
-                  <p className="text-muted-foreground">Esqueceu sua senha?</p>
-                  <Button variant="link" onClick={() => setMode("forgot")} className="font-semibold p-0 h-auto text-primary hover:text-primary/80">
-                    Redefinir senha
+                  <p className="text-muted-foreground">Precisa definir ou redefinir sua senha?</p>
+                  <Button variant="link" onClick={() => navigate("/definir-senha")} className="font-semibold p-0 h-auto text-primary hover:text-primary/80">
+                    Definir/Redefinir senha
                   </Button>
-                  <p className="text-muted-foreground mt-2">Ainda não tem conta?</p>
-                  <Button variant="link" onClick={() => setMode("register")} className="font-semibold p-0 h-auto text-primary hover:text-primary/80">
-                    Criar conta
-                  </Button>
-                </>
-              )}
-              {mode === "register" && (
-                <>
-                  <p className="text-muted-foreground">Já tem conta?</p>
-                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto text-primary hover:text-primary/80">
-                    Fazer login
-                  </Button>
-                </>
-              )}
-              {mode === "forgot" && (
-                <>
-                  <p className="text-muted-foreground">Lembrou a senha?</p>
-                  <Button variant="link" onClick={() => setMode("login")} className="font-semibold p-0 h-auto text-primary hover:text-primary/80">
-                    Voltar ao login
-                  </Button>
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <p className="text-muted-foreground">Ainda não tem acesso?</p>
+                    <Link to="/bora" className="font-semibold text-primary hover:text-primary/80">
+                      Garantir acesso agora →
+                    </Link>
+                  </div>
                 </>
               )}
               {mode === "reset" && (

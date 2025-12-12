@@ -60,6 +60,8 @@ export default defineConfig(() => ({
           "vendor-motion": ["motion"],
           // Charts library (only loaded when needed)
           "vendor-charts": ["recharts"],
+          // Carousel library (lazy loaded)
+          "vendor-carousel": ["embla-carousel-react"],
           // UI components library
           "vendor-radix": [
             "@radix-ui/react-accordion",
@@ -77,6 +79,10 @@ export default defineConfig(() => ({
           ],
           // Query library
           "vendor-query": ["@tanstack/react-query"],
+          // Utility libraries
+          "vendor-utils": ["class-variance-authority", "clsx", "tailwind-merge", "date-fns"],
+          // Icons
+          "vendor-icons": ["lucide-react"],
         },
         // Chunk naming for better caching
         chunkFileNames: "assets/[name]-[hash].js",

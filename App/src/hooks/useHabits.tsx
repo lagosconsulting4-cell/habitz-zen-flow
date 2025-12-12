@@ -9,6 +9,7 @@ import {
   cacheHabits,
   getCachedHabits,
   cacheCompletions,
+  deleteCachedHabit,
   CachedHabit,
 } from "@/lib/offline-db";
 
@@ -379,12 +380,21 @@ export const useHabits = () => {
 
   const deleteHabit = async (habitId: string) => {
     try {
-      const { error } = await supabase
+      const { error, count } = await supabase
         .from("habits")
         .delete()
-        .eq("id", habitId);
+        .eq("id", habitId)
+        .select();
 
       if (error) throw error;
+
+      // Verificar se alguma linha foi realmente deletada
+      if (!count || count === 0) {
+        throw new Error("Nenhum habito foi deletado. Verifique se voce tem permissao.");
+      }
+
+      // Limpar cache do IndexedDB
+      await deleteCachedHabit(habitId);
 
       setHabits((prev) => prev.filter((habit) => habit.id !== habitId));
       toast({ title: "Habito removido" });
@@ -393,7 +403,7 @@ export const useHabits = () => {
       console.error("Error deleting habit:", error);
       toast({
         title: "Erro",
-        description: "Nao foi possivel remover o habito",
+        description: error instanceof Error ? error.message : "Nao foi possivel remover o habito",
         variant: "destructive",
       });
       throw error;

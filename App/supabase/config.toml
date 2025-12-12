@@ -3,3 +3,6 @@ project_id = "jbucnphyrziaxupdsnbn"
 # Edge Functions configuration
 [functions.buckpay-pix]
 verify_jwt = false
+
+[functions.kirvano-webhook]
+verify_jwt = false

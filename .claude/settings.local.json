@@ -70,7 +70,11 @@
       "Bash(if exist .next rmdir /s /q .next)",
       "Bash(pkill:*)",
       "Bash(taskkill:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(cat:*)",
+      "mcp__n8n-mcp__n8n_list_executions",
+      "mcp__n8n-mcp__n8n_get_execution",
+      "mcp__playwright__browser_snapshot"
     ],
     "deny": [],
     "ask": []

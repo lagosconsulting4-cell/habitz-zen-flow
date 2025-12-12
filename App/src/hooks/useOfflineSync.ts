@@ -49,10 +49,14 @@ export function useOfflineSync() {
 
           case "delete_habit": {
             const { id } = item.payload as { id: string };
-            const { error } = await supabase.from("habits").delete().eq("id", id);
+            const { error, count } = await supabase.from("habits").delete().eq("id", id).select();
 
             if (error) throw error;
-            console.log("[Sync] Hábito deletado:", id);
+            if (!count || count === 0) {
+              console.warn("[Sync] Nenhum hábito foi deletado (possível problema de permissão):", id);
+            } else {
+              console.log("[Sync] Hábito deletado:", id);
+            }
             break;
           }
 
