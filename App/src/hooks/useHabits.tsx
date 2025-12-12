@@ -297,7 +297,9 @@ export const useHabits = () => {
 
       if (error) throw error;
 
-      setHabits((prev) => [...prev, data as Habit]);
+      // Refetch para garantir sincronização instantânea
+      await fetchHabits();
+
       toast({
         title: "Sucesso!",
         description: "Habito criado com sucesso",
@@ -415,7 +417,9 @@ export const useHabits = () => {
       // Limpar cache do IndexedDB
       await deleteCachedHabit(habitId);
 
-      setHabits((prev) => prev.filter((habit) => habit.id !== habitId));
+      // Refetch para garantir sincronização instantânea
+      await fetchHabits();
+
       toast({ title: "Habito removido" });
       emitProgressChange();
     } catch (error) {
