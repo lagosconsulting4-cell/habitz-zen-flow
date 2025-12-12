@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
 import { generateRecommendations } from "@/lib/generateRecommendations";
+import posthog from "posthog-js";
 import type {
   AgeRange,
   Profession,
@@ -116,12 +117,28 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   const goToStep = useCallback((step: number) => {
     if (step >= 0 && step < totalSteps) {
       setCurrentStep(step);
+
+      // Track step view
+      posthog.capture("quiz_step_view", {
+        step,
+        total_steps: totalSteps,
+        progress: Math.round(((step + 1) / totalSteps) * 100),
+      });
     }
   }, []);
 
   const nextStep = useCallback(() => {
     if (currentStep < totalSteps - 1) {
-      setCurrentStep((prev) => prev + 1);
+      const newStep = currentStep + 1;
+      setCurrentStep(newStep);
+
+      // Track step completion
+      posthog.capture("quiz_step_complete", {
+        completed_step: currentStep,
+        next_step: newStep,
+        total_steps: totalSteps,
+        progress: Math.round((newStep / totalSteps) * 100),
+      });
     }
   }, [currentStep]);
 
@@ -191,6 +208,17 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
     }
 
     setIsGeneratingRoutine(true);
+
+    // Track quiz completion
+    posthog.capture("quiz_completed", {
+      objective,
+      time_available: timeAvailable,
+      work_schedule: workSchedule,
+      energy_peak: energyPeak,
+      challenges_count: challenges.length,
+      week_days_count: weekDays.length,
+    });
+
     try {
       // Add artificial delay for better UX (shows loading state)
       await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -207,61 +235,97 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
 
       // Set recommended habits
       setRecommendedHabits(recommendations);
+
+      // Track successful routine generation
+      posthog.capture("routine_generated", {
+        habits_count: recommendations.length,
+      });
     } catch (error) {
       console.error("Failed to generate routine:", error);
+
+      // Track error
+      posthog.capture("routine_generation_error", {
+        error: String(error),
+      });
     } finally {
       setIsGeneratingRoutine(false);
     }
   }, [objective, challenges, timeAvailable, workSchedule, energyPeak, weekDays]);
 
   // ============================================================================
-  // CONTEXT VALUE
+  // CONTEXT VALUE - Memoized to prevent unnecessary re-renders
   // ============================================================================
 
-  const value: QuizContextType = {
-    // State
-    currentStep,
-    totalSteps,
-    canGoBack,
-    canGoNext,
-    email,
-    name,
-    ageRange,
-    profession,
-    workSchedule,
-    energyPeak,
-    timeAvailable,
-    objective,
-    challenges,
-    weekDaysPreset,
-    weekDays,
-    recommendedHabits,
-    isGeneratingRoutine,
+  const value = useMemo<QuizContextType>(
+    () => ({
+      // State
+      currentStep,
+      totalSteps,
+      canGoBack,
+      canGoNext,
+      email,
+      name,
+      ageRange,
+      profession,
+      workSchedule,
+      energyPeak,
+      timeAvailable,
+      objective,
+      challenges,
+      weekDaysPreset,
+      weekDays,
+      recommendedHabits,
+      isGeneratingRoutine,
 
-    // Navigation
-    goToStep,
-    nextStep,
-    prevStep,
+      // Navigation
+      goToStep,
+      nextStep,
+      prevStep,
 
-    // Data Updates
-    setEmail,
-    setName,
-    setAgeRange,
-    setProfession,
-    setWorkSchedule,
-    setEnergyPeak,
-    setTimeAvailable,
-    setObjective,
-    toggleChallenge,
-    setWeekDaysPreset,
-    setWeekDays,
+      // Data Updates
+      setEmail,
+      setName,
+      setAgeRange,
+      setProfession,
+      setWorkSchedule,
+      setEnergyPeak,
+      setTimeAvailable,
+      setObjective,
+      toggleChallenge,
+      setWeekDaysPreset,
+      setWeekDays,
 
-    // Habit Management
-    generateRoutine,
+      // Habit Management
+      generateRoutine,
 
-    // Helpers
-    isStepValid,
-  };
+      // Helpers
+      isStepValid,
+    }),
+    [
+      currentStep,
+      canGoBack,
+      canGoNext,
+      email,
+      name,
+      ageRange,
+      profession,
+      workSchedule,
+      energyPeak,
+      timeAvailable,
+      objective,
+      challenges,
+      weekDaysPreset,
+      weekDays,
+      recommendedHabits,
+      isGeneratingRoutine,
+      goToStep,
+      nextStep,
+      prevStep,
+      toggleChallenge,
+      generateRoutine,
+      isStepValid,
+    ]
+  );
 
   return <QuizContext.Provider value={value}>{children}</QuizContext.Provider>;
 };

@@ -52,6 +52,7 @@ import {
 } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/hooks/useAnimations";
 import { QuizModal } from "@/components/quiz/QuizModal";
+import { useTracking } from "@/hooks/useTracking";
 
 // ============ DATA ============
 
@@ -274,6 +275,7 @@ const BoraLanding = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
+  const { trackCTA, trackScrollDepth } = useTracking();
 
   // Scroll to top on mount
   useEffect(() => {
@@ -291,7 +293,29 @@ const BoraLanding = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleCTA = () => {
+  // Scroll depth tracking
+  useEffect(() => {
+    let lastDepth = 0;
+    const checkpoints = [25, 50, 75, 100];
+
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = Math.round((scrollTop / docHeight) * 100);
+
+      const nextCheckpoint = checkpoints.find((cp) => cp > lastDepth && scrollPercent >= cp);
+      if (nextCheckpoint) {
+        lastDepth = nextCheckpoint;
+        trackScrollDepth(nextCheckpoint);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [trackScrollDepth]);
+
+  const handleCTA = (location: string) => {
+    trackCTA(location);
     setQuizOpen(true);
   };
 
@@ -328,7 +352,7 @@ const BoraLanding = () => {
           {/* CTA Button */}
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
-              onClick={handleCTA}
+              onClick={() => handleCTA("header")}
               className="bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 font-semibold px-6 py-2 rounded-full shadow-lg shadow-[#A3E635]/25"
             >
               Começar agora
@@ -414,7 +438,7 @@ const BoraLanding = () => {
               <motion.div variants={staggerItem} className="pt-4 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
-                    onClick={handleCTA}
+                    onClick={() => handleCTA("hero")}
                     size="lg"
                     className="group bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 text-base sm:text-lg px-8 py-6 rounded-full font-bold shadow-xl shadow-[#A3E635]/30"
                   >
@@ -557,7 +581,8 @@ const BoraLanding = () => {
                 time: "06:00",
                 title: "Despertar",
                 description: "Rotina matinal de 7 minutos que energiza seu dia",
-                character: "/images/lp/personagem-manha.png",
+                characterWebp: "/images/lp/personagem-manha.webp",
+                characterPng: "/images/lp/personagem-manha.png",
                 mood: "energizado",
                 features: ["3 micro-hábitos", "Checklist matinal", "Lembrete suave"],
               },
@@ -565,7 +590,8 @@ const BoraLanding = () => {
                 time: "12:00",
                 title: "Meio do Dia",
                 description: "Check-in rápido para manter o foco e a produtividade",
-                character: "/images/lp/personagem-meio-dia.png",
+                characterWebp: "/images/lp/personagem-meio-dia.webp",
+                characterPng: "/images/lp/personagem-meio-dia.png",
                 mood: "focado",
                 features: ["Pausa consciente", "Revisão de tarefas", "Momento de gratidão"],
               },
@@ -573,7 +599,8 @@ const BoraLanding = () => {
                 time: "18:00",
                 title: "Fim do Expediente",
                 description: "Revisão do progresso e celebração das conquistas do dia",
-                character: "/images/lp/personagem-tarde.png",
+                characterWebp: "/images/lp/personagem-tarde.webp",
+                characterPng: "/images/lp/personagem-tarde.png",
                 mood: "realizado",
                 features: ["Streak atualizado", "Progresso visual", "Recompensas desbloqueadas"],
               },
@@ -581,7 +608,8 @@ const BoraLanding = () => {
                 time: "22:00",
                 title: "Noite",
                 description: "Preparação para um sono restaurador e planejamento do próximo dia",
-                character: "/images/lp/personagem-noite.png",
+                characterWebp: "/images/lp/personagem-noite.webp",
+                characterPng: "/images/lp/personagem-noite.png",
                 mood: "tranquilo",
                 features: ["Meditação guiada", "Reflexão do dia", "Rotina de sono"],
               },
@@ -648,13 +676,20 @@ const BoraLanding = () => {
 
                 {/* Character image */}
                 <div className={`hidden md:flex flex-1 items-center justify-center ${index % 2 === 0 ? "md:pl-16" : "md:pr-16"}`}>
-                  <motion.img
-                    src={item.character}
-                    alt={`Personagem ${item.mood}`}
-                    className="w-40 h-auto drop-shadow-lg"
+                  <motion.div
                     animate={{ y: [0, -8, 0] }}
                     transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
-                  />
+                  >
+                    <picture>
+                      <source srcSet={item.characterWebp} type="image/webp" />
+                      <img
+                        src={item.characterPng}
+                        alt={`Personagem ${item.mood}`}
+                        className="w-40 h-auto drop-shadow-lg"
+                        loading="lazy"
+                      />
+                    </picture>
+                  </motion.div>
                 </div>
               </motion.div>
             ))}
@@ -672,7 +707,7 @@ const BoraLanding = () => {
             </p>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
-                onClick={handleCTA}
+                onClick={() => handleCTA("timeline")}
                 className="bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 font-bold px-8 py-6 rounded-full shadow-xl shadow-[#A3E635]/30"
               >
                 <Sparkles className="w-5 h-5 mr-2" />
@@ -762,7 +797,7 @@ const BoraLanding = () => {
               <div className="flex flex-col items-center">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
-                    onClick={() => setQuizOpen(true)}
+                    onClick={() => handleCTA("quiz_section")}
                     size="lg"
                     className="bg-[#A3E635] hover:bg-[#84cc16] text-slate-900 font-bold text-lg px-10 py-7 rounded-full shadow-xl shadow-[#A3E635]/30"
                   >
@@ -936,11 +971,15 @@ const BoraLanding = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.3 }}
                     >
-                      <img
-                        src="/images/lp/personagem_triste.webp"
-                        alt="Pessoa estressada"
-                        className="w-40 lg:w-48 h-auto drop-shadow-lg"
-                      />
+                      <picture>
+                        <source srcSet="/images/lp/personagem_triste.webp" type="image/webp" />
+                        <img
+                          src="/images/lp/personagem_triste.png"
+                          alt="Pessoa estressada"
+                          className="w-40 lg:w-48 h-auto drop-shadow-lg"
+                          loading="lazy"
+                        />
+                      </picture>
                     </motion.div>
                   </div>
                 </motion.div>
@@ -979,11 +1018,15 @@ const BoraLanding = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.3 }}
                     >
-                      <img
-                        src="/images/lp/meditação_personagem.webp"
-                        alt="Pessoa em paz meditando"
-                        className="w-40 lg:w-48 h-auto drop-shadow-lg"
-                      />
+                      <picture>
+                        <source srcSet="/images/lp/meditação_personagem.webp" type="image/webp" />
+                        <img
+                          src="/images/lp/meditação_personagem.png"
+                          alt="Pessoa em paz meditando"
+                          className="w-40 lg:w-48 h-auto drop-shadow-lg"
+                          loading="lazy"
+                        />
+                      </picture>
                     </motion.div>
                   </div>
                 </motion.div>
@@ -1173,7 +1216,7 @@ const BoraLanding = () => {
 
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
-                onClick={handleCTA}
+                onClick={() => handleCTA("bonus")}
                 size="lg"
                 className="group bg-[#A3E635] hover:bg-[#84CC16] text-slate-900 text-base px-10 py-5 rounded-full font-black shadow-2xl shadow-[#A3E635]/40 border border-transparent"
               >
@@ -1254,12 +1297,15 @@ const BoraLanding = () => {
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
-            <img
-              src="/images/lp/mockup-horizontal.webp"
-              alt="App BORA - Telas do aplicativo"
-              className="w-full max-w-2xl mx-auto h-auto rounded-2xl shadow-2xl"
-              loading="lazy"
-            />
+            <picture>
+              <source srcSet="/images/lp/mockup-horizontal.webp" type="image/webp" />
+              <img
+                src="/images/lp/mockup-horizontal.png"
+                alt="App BORA - Telas do aplicativo"
+                className="w-full max-w-2xl mx-auto h-auto rounded-2xl shadow-2xl"
+                loading="lazy"
+              />
+            </picture>
             <div className="absolute inset-0 -z-10 bg-white/10 blur-3xl opacity-50 scale-110" />
           </motion.div>
 
@@ -1269,7 +1315,7 @@ const BoraLanding = () => {
             whileTap={{ scale: 0.98 }}
           >
             <Button
-              onClick={handleCTA}
+              onClick={() => handleCTA("final_cta")}
               size="lg"
               className="group bg-[#A3E635] text-slate-900 hover:bg-[#A3E635]/90 text-lg px-10 py-7 rounded-full font-bold shadow-2xl shadow-[#A3E635]/40"
             >

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { QuizProvider, useQuiz } from "./QuizProvider";
+import posthog from "posthog-js";
 import { QuizProgress } from "./QuizProgress";
 import { QuizNavigation } from "./QuizNavigation";
 
@@ -117,12 +118,23 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
 
 // Componente principal do Modal
 export const QuizModal = ({ open, onClose }: QuizModalProps) => {
+  // Track modal open/close
+  useEffect(() => {
+    if (open) {
+      posthog.capture("quiz_modal_opened");
+    }
+  }, [open]);
+
   // Previne scroll do body quando modal está aberto
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
+      // Track modal close when it's actually closed
+      if (!open) {
+        posthog.capture("quiz_modal_closed");
+      }
     }
     return () => {
       document.body.style.overflow = "";

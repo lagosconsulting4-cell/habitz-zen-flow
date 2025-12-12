@@ -13,3 +13,7 @@ package-lock.json
 yarn.lock
 dist/
 *.log
+
+# Environment variables (contains API keys)
+.env.local
+.env*.local
