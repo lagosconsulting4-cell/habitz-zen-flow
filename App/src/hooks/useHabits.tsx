@@ -380,17 +380,28 @@ export const useHabits = () => {
 
   const deleteHabit = async (habitId: string) => {
     try {
+      // Obter usuário autenticado
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("Usuario nao autenticado. Faca login novamente.");
+      }
+
+      // Adicionar filtro por user_id para alinhar com RLS policy
       const { error, count } = await supabase
         .from("habits")
         .delete()
         .eq("id", habitId)
+        .eq("user_id", user.id)
         .select();
 
       if (error) throw error;
 
       // Verificar se alguma linha foi realmente deletada
       if (!count || count === 0) {
-        throw new Error("Nenhum habito foi deletado. Verifique se voce tem permissao.");
+        throw new Error("Habito nao encontrado ou voce nao tem permissao para deleta-lo.");
       }
 
       // Limpar cache do IndexedDB
@@ -401,6 +412,15 @@ export const useHabits = () => {
       emitProgressChange();
     } catch (error) {
       console.error("Error deleting habit:", error);
+
+      // Logging para diagnóstico
+      if (error instanceof Error && error.message.includes("nao encontrado")) {
+        console.error("[DEBUG] Habit ID:", habitId);
+        supabase.auth.getUser().then(({ data }) => {
+          console.error("[DEBUG] User ID:", data.user?.id);
+        });
+      }
+
       toast({
         title: "Erro",
         description: error instanceof Error ? error.message : "Nao foi possivel remover o habito",

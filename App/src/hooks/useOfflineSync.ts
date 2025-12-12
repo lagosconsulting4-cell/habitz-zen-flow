@@ -49,11 +49,32 @@ export function useOfflineSync() {
 
           case "delete_habit": {
             const { id } = item.payload as { id: string };
-            const { error, count } = await supabase.from("habits").delete().eq("id", id).select();
+
+            // Obter usuário autenticado
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+              console.error("[Sync] User not authenticated for delete_habit");
+              break;
+            }
+
+            // Adicionar filtro por user_id para alinhar com RLS policy
+            const { error, count } = await supabase
+              .from("habits")
+              .delete()
+              .eq("id", id)
+              .eq("user_id", user.id)
+              .select();
 
             if (error) throw error;
+
             if (!count || count === 0) {
-              console.warn("[Sync] Nenhum hábito foi deletado (possível problema de permissão):", id);
+              console.warn(
+                "[Sync] Nenhum hábito foi deletado (ID não encontrado ou sem permissão):",
+                id,
+                "User ID:",
+                user.id
+              );
             } else {
               console.log("[Sync] Hábito deletado:", id);
             }
