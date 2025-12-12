@@ -21,7 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Types
 type TokenStatus = "loading" | "valid" | "invalid" | "expired" | "used";
-type PageMode = "token" | "email" | "detecting";
+type PageMode = "token" | "email" | "recovery" | "detecting";
 
 interface TokenValidation {
   is_valid: boolean;
@@ -38,7 +38,7 @@ interface Feedback {
 // Constants
 const PASSWORD_ENDPOINT = "https://jbucnphyrziaxupdsnbn.supabase.co/functions/v1/create-password-direct";
 
-const CriarSenha = () => {
+const DefinirSenha = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -57,6 +57,9 @@ const CriarSenha = () => {
 
   // Email flow states
   const [email, setEmail] = useState("");
+
+  // Recovery flow states
+  const [recoveryEmail, setRecoveryEmail] = useState<string>("");
 
   // Auto-login and redirect to dashboard
   const handleSuccessfulPasswordCreation = async (userEmail: string, userPassword: string) => {
@@ -86,17 +89,40 @@ const CriarSenha = () => {
 
   // Detect mode and validate token if present
   useEffect(() => {
-    const token = searchParams.get("token");
+    const detectMode = async () => {
+      // Check for Supabase recovery token in hash fragment
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get("access_token");
+      const type = hashParams.get("type");
 
-    if (token) {
-      // Token flow
-      setPageMode("token");
-      validateToken(token);
-    } else {
-      // Email flow - no token needed
-      setPageMode("email");
-      setTokenStatus("valid"); // Not relevant for email mode but prevents loading state
-    }
+      if (accessToken && type === "recovery") {
+        // Recovery flow (Supabase password reset)
+        setPageMode("recovery");
+        setTokenStatus("valid");
+
+        // Get user email from session
+        const { data } = await supabase.auth.getUser();
+        if (data.user?.email) {
+          setRecoveryEmail(data.user.email);
+        }
+        return;
+      }
+
+      // Check for custom access token in query params
+      const token = searchParams.get("token");
+
+      if (token) {
+        // Token flow (custom access token)
+        setPageMode("token");
+        validateToken(token);
+      } else {
+        // Email flow - no token needed
+        setPageMode("email");
+        setTokenStatus("valid"); // Not relevant for email mode but prevents loading state
+      }
+    };
+
+    void detectMode();
   }, [searchParams]);
 
   // Token validation function
@@ -200,6 +226,50 @@ const CriarSenha = () => {
     } catch (err) {
       console.error("Account creation error:", err);
       setFeedback({ message: "Erro ao criar conta. Tente novamente.", type: "error" });
+      setIsLoading(false);
+    }
+  };
+
+  // Recovery flow submit handler (Supabase password reset)
+  const handleRecoverySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password.length < 6) {
+      toast.error("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("As senhas não coincidem");
+      return;
+    }
+
+    setIsLoading(true);
+    setFeedback({ message: "Atualizando sua senha...", type: null });
+
+    try {
+      // Update password using Supabase recovery session
+      const { error: updateError } = await supabase.auth.updateUser({
+        password,
+        data: {
+          has_set_password: true,
+        },
+      });
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setFeedback({ message: "Senha atualizada! Redirecionando...", type: "success" });
+
+      // Auto-login and redirect
+      await handleSuccessfulPasswordCreation(recoveryEmail, password);
+    } catch (err) {
+      console.error("Password recovery error:", err);
+      setFeedback({
+        message: err instanceof Error ? err.message : "Erro ao redefinir senha. Tente novamente.",
+        type: "error",
+      });
       setIsLoading(false);
     }
   };
@@ -358,6 +428,123 @@ const CriarSenha = () => {
               Se você já criou sua conta, faça login normalmente.
             </p>
           </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Recovery flow form (Supabase password reset)
+  if (pageMode === "recovery") {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 transition-colors duration-300">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="w-full max-w-md"
+        >
+          <Button
+            variant="ghost"
+            className="text-muted-foreground hover:text-foreground hover:bg-muted mb-6 flex items-center gap-2"
+            onClick={() => navigate("/")}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar para inicio
+          </Button>
+
+          <Card className="rounded-2xl bg-card border border-border text-foreground overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-primary via-primary/80 to-primary/60" />
+
+            <CardHeader className="space-y-4 text-center pt-8">
+              <motion.div
+                className="flex justify-center"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+              >
+                <div className="p-3 bg-primary/10 rounded-full">
+                  <KeyRound className="w-8 h-8 text-primary" />
+                </div>
+              </motion.div>
+              <CardTitle className="text-2xl font-bold">Redefinir Senha</CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Crie uma nova senha para sua conta
+              </CardDescription>
+              <div className="bg-secondary/50 rounded-lg p-3">
+                <p className="text-sm text-muted-foreground">
+                  Email: <span className="font-medium text-foreground">{recoveryEmail}</span>
+                </p>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pb-8">
+              <form onSubmit={handleRecoverySubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-foreground flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    Nova Senha
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Mínimo 6 caracteres"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    autoComplete="new-password"
+                    className="h-12 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password" className="text-foreground flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    Confirmar Nova Senha
+                  </Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="Repita a senha"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    autoComplete="new-password"
+                    className="h-12 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Atualizando senha...
+                    </>
+                  ) : (
+                    "Atualizar Senha"
+                  )}
+                </Button>
+
+                <FeedbackMessage />
+              </form>
+
+              <div className="text-center pt-6 border-t border-border mt-6">
+                <p className="text-muted-foreground text-sm">Lembrou sua senha?</p>
+                <Button
+                  variant="link"
+                  onClick={() => navigate("/auth")}
+                  className="font-semibold p-0 h-auto text-primary hover:text-primary/80"
+                >
+                  Voltar para login
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
     );
@@ -647,4 +834,4 @@ const CriarSenha = () => {
   );
 };
 
-export default CriarSenha;
+export default DefinirSenha;
