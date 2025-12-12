@@ -99,9 +99,20 @@ export const useHabits = () => {
     try {
       if (isOnline) {
         // ONLINE: Fetch from Supabase and cache
+        // CRITICAL: Get user BEFORE querying to filter by user_id
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          throw new Error("User not authenticated");
+        }
+
+        // SECURITY FIX: Filter habits by user_id
         const { data, error } = await supabase
           .from("habits")
           .select("*")
+          .eq("user_id", user.id)
           .order("created_at", { ascending: true });
 
         if (error) throw error;
@@ -110,10 +121,7 @@ export const useHabits = () => {
         setHabits(habitsData);
 
         // Cache habits for offline use
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (user && habitsData.length > 0) {
+        if (habitsData.length > 0) {
           await cacheHabits(
             habitsData.map((h) => ({
               id: h.id,
