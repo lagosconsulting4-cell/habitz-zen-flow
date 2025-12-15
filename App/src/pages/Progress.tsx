@@ -100,7 +100,8 @@ const Progress = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="container mx-auto px-4 py-6 max-w-4xl"
+        className="container mx-auto px-4 pb-6 max-w-4xl"
+        style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
         <div className="mb-8">
           <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground mb-2">

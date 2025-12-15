@@ -140,7 +140,8 @@ const Profile = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="container mx-auto px-4 py-6 max-w-2xl"
+        className="container mx-auto px-4 pb-6 max-w-2xl"
+        style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
         <div className="text-center mb-8">
           <div className="relative">
