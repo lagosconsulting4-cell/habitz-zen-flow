@@ -16,6 +16,9 @@ precacheAndRoute(self.__WB_MANIFEST);
 // Runtime caching strategies
 
 // Cache Supabase API responses (stale-while-revalidate)
+// Note: StaleWhileRevalidate returns cache instantly and updates in background,
+// so networkTimeout is not needed - no waiting for network, preventing hangs.
+// This provides better UX than NetworkFirst with timeout (which would wait).
 registerRoute(
   /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
   new StaleWhileRevalidate({
@@ -203,6 +206,190 @@ self.addEventListener("notificationclick", (event) => {
 self.addEventListener("notificationclose", (event) => {
   console.log("[SW] Notification closed:", event.notification.tag);
 });
+
+// ============================================
+// Background Sync API
+// ============================================
+
+/**
+ * Background Sync - processa fila offline mesmo com app fechado
+ * Complementa o useOfflineSync do app layer
+ */
+self.addEventListener("sync", (event) => {
+  console.log("[SW] Background sync event:", event.tag);
+
+  if (event.tag === "sync-offline-queue") {
+    event.waitUntil(syncOfflineQueue());
+  }
+});
+
+/**
+ * Processa a fila de operações offline do IndexedDB
+ */
+async function syncOfflineQueue(): Promise<void> {
+  try {
+    console.log("[SW] Starting background sync...");
+
+    // Abrir IndexedDB para acessar a fila
+    const db = await openOfflineDB();
+    const queue = await getQueueFromDB(db);
+
+    if (queue.length === 0) {
+      console.log("[SW] Sync queue is empty");
+      return;
+    }
+
+    console.log(`[SW] Processing ${queue.length} queued items`);
+    let successCount = 0;
+
+    for (const item of queue) {
+      try {
+        // Tentar processar o item
+        await processQueueItemInSW(item);
+        await removeFromDB(db, item.id);
+        successCount++;
+      } catch (error) {
+        console.error("[SW] Failed to sync item:", item.id, error);
+        // Incrementar retries no IndexedDB
+        await incrementRetriesInDB(db, item.id);
+      }
+    }
+
+    console.log(`[SW] Sync completed: ${successCount}/${queue.length} items`);
+
+    // Notificar app se estiver aberto
+    const clients = await self.clients.matchAll();
+    clients.forEach((client) => {
+      client.postMessage({
+        type: "SYNC_COMPLETED",
+        count: successCount,
+      });
+    });
+  } catch (error) {
+    console.error("[SW] Background sync error:", error);
+  }
+}
+
+/**
+ * Abre o banco IndexedDB offline
+ */
+function openOfflineDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("bora-offline", 1);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+/**
+ * Busca items da fila no IndexedDB
+ */
+async function getQueueFromDB(db: IDBDatabase): Promise<any[]> {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(["syncQueue"], "readonly");
+    const store = transaction.objectStore("syncQueue");
+    const request = store.getAll();
+
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+/**
+ * Remove item da fila no IndexedDB
+ */
+async function removeFromDB(db: IDBDatabase, id: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(["syncQueue"], "readwrite");
+    const store = transaction.objectStore("syncQueue");
+    const request = store.delete(id);
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+/**
+ * Incrementa retries no IndexedDB
+ */
+async function incrementRetriesInDB(db: IDBDatabase, id: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(["syncQueue"], "readwrite");
+    const store = transaction.objectStore("syncQueue");
+    const getRequest = store.get(id);
+
+    getRequest.onsuccess = () => {
+      const item = getRequest.result;
+      if (item) {
+        item.retries = (item.retries || 0) + 1;
+        const putRequest = store.put(item);
+        putRequest.onsuccess = () => resolve();
+        putRequest.onerror = () => reject(putRequest.error);
+      } else {
+        resolve();
+      }
+    };
+    getRequest.onerror = () => reject(getRequest.error);
+  });
+}
+
+/**
+ * Processa um item da fila (similar ao useOfflineSync)
+ */
+async function processQueueItemInSW(item: any): Promise<void> {
+  // Nota: Service Worker não tem acesso ao supabase client
+  // Então fazemos requests HTTP diretos para a API
+  const supabaseUrl = "https://jbucnphyrziaxupdsnbn.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impic2NucGh5cnppYXh1cGRzYmJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMxMzI3NzQsImV4cCI6MjA0ODcwODc3NH0.wHUpGNb_pOPBGGfEPx3bWCwJ3JEV5w5PSRlUfKPxfUQ";
+
+  const headers = {
+    "Content-Type": "application/json",
+    "apikey": supabaseKey,
+    "Authorization": `Bearer ${supabaseKey}`,
+  };
+
+  switch (item.type) {
+    case "create_habit":
+    case "create_completion":
+      const table = item.type === "create_habit" ? "habits" : "habit_completions";
+      const response = await fetch(`${supabaseUrl}/rest/v1/${table}`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(item.payload),
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      break;
+
+    case "update_habit":
+      const { id, ...updates } = item.payload;
+      const updateResponse = await fetch(`${supabaseUrl}/rest/v1/habits?id=eq.${id}`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify(updates),
+      });
+
+      if (!updateResponse.ok) throw new Error(`HTTP ${updateResponse.status}`);
+      break;
+
+    case "delete_habit":
+    case "delete_completion":
+      const deleteTable = item.type === "delete_habit" ? "habits" : "habit_completions";
+      const deleteResponse = await fetch(
+        `${supabaseUrl}/rest/v1/${deleteTable}?id=eq.${item.payload.id}`,
+        {
+          method: "DELETE",
+          headers,
+        }
+      );
+
+      if (!deleteResponse.ok) throw new Error(`HTTP ${deleteResponse.status}`);
+      break;
+
+    default:
+      throw new Error(`Unknown sync type: ${item.type}`);
+  }
+}
 
 // ============================================
 // Service Worker Lifecycle

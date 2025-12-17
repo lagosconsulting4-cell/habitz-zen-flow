@@ -104,7 +104,6 @@ const useProgress = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("habit_completions")
-        .select("habit_id, completed_at, value")
         .select("habit_id, completed_at, value, completed_at_time")
         .gte("completed_at", formatDate(streakRangeStart))
         .lte("completed_at", formatDate(today));

@@ -39,6 +39,20 @@ export default defineConfig(({ mode }) => {
               "@radix-ui/react-label",
               "@radix-ui/react-select",
               "@radix-ui/react-progress",
+              "@radix-ui/react-accordion",
+              "@radix-ui/react-alert-dialog",
+              "@radix-ui/react-avatar",
+              "@radix-ui/react-checkbox",
+              "@radix-ui/react-collapsible",
+              "@radix-ui/react-context-menu",
+              "@radix-ui/react-hover-card",
+              "@radix-ui/react-menubar",
+              "@radix-ui/react-navigation-menu",
+              "@radix-ui/react-scroll-area",
+              "@radix-ui/react-separator",
+              "@radix-ui/react-toggle-group",
+              "@radix-ui/react-toast",
+              "@radix-ui/react-tooltip",
             ],
             // Charts
             "chart-vendor": ["recharts"],
@@ -63,6 +77,9 @@ export default defineConfig(({ mode }) => {
         manifest: false, // Usar manifest.json manual em public/
         injectManifest: {
           globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+          globIgnores: [
+            "**/particles-vendor*.js", // Tsparticles usado apenas no onboarding - carregar sob demanda
+          ],
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
         },
         devOptions: {

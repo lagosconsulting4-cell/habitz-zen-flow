@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
@@ -442,7 +442,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   // CONTEXT VALUE
   // ============================================================================
 
-  const value: OnboardingContextType = {
+  const value = useMemo<OnboardingContextType>(() => ({
     // State
     currentStep,
     totalSteps,
@@ -493,7 +493,47 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     // Helpers
     getTimeSlots,
     isStepValid,
-  };
+  }), [
+    currentStep,
+    totalSteps,
+    canGoBack,
+    canGoNext,
+    ageRange,
+    profession,
+    workSchedule,
+    themePreference,
+    energyPeak,
+    timeAvailable,
+    objective,
+    challenges,
+    weekDaysPreset,
+    weekDays,
+    recommendedHabits,
+    selectedHabitIds,
+    isGeneratingRoutine,
+    isSubmitting,
+    goToStep,
+    nextStep,
+    prevStep,
+    setAgeRange,
+    setProfession,
+    setWorkSchedule,
+    setThemePreference,
+    setEnergyPeak,
+    setTimeAvailable,
+    setObjective,
+    toggleChallenge,
+    setWeekDaysPreset,
+    setWeekDays,
+    generateRoutine,
+    toggleHabit,
+    updateHabitTime,
+    addCustomHabit,
+    removeHabit,
+    submitOnboarding,
+    getTimeSlots,
+    isStepValid,
+  ]);
 
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
 };

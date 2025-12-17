@@ -186,6 +186,19 @@ export async function addToSyncQueue(item: Omit<SyncQueueItem, "id" | "created_a
     retries: 0,
   });
 
+  // Registrar Background Sync para processar quando voltar online
+  // (mesmo se o app estiver fechado!)
+  if ("serviceWorker" in navigator && "sync" in navigator.serviceWorker) {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.sync.register("sync-offline-queue");
+      console.log("[OfflineDB] Background sync registered");
+    } catch (error) {
+      console.error("[OfflineDB] Failed to register background sync:", error);
+      // Fallback: o useOfflineSync vai tentar sincronizar normalmente
+    }
+  }
+
   return id;
 }
 

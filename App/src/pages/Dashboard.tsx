@@ -164,8 +164,8 @@ const Dashboard = () => {
     setXpToastQueue((prev) => [...prev, toast]);
   };
 
-  // Handle habit toggle - opens timer for timed habits
-  const handleToggle = async (habit: Habit) => {
+  // Handle habit toggle - opens timer for timed habits (memoized to prevent recreation)
+  const handleToggle = useCallback(async (habit: Habit) => {
     const wasCompleted = getHabitCompletionStatus(habit.id);
     const targetDate = new Date().toISOString().split("T")[0];
 
@@ -259,7 +259,22 @@ const Dashboard = () => {
         addCompletionOptimistic(optimisticCompletion);
       }
     }
-  };
+  }, [
+    getHabitCompletionStatus,
+    isTimedHabit,
+    setTimerHabit,
+    user,
+    addCompletionOptimistic,
+    removeCompletionOptimistic,
+    queueXpToast,
+    awardStreakBonus,
+    setStreakMilestone,
+    awardPerfectDayBonus,
+    todayHabits,
+    celebrations,
+    isGamificationEnabled,
+    toggleHabit,
+  ]);
 
   // Handle timer completion
   const handleTimerComplete = async () => {

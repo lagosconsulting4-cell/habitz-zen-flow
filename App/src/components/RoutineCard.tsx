@@ -28,6 +28,13 @@ export const RoutineCard = ({
 }: RoutineCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Pre-compute completion status map to avoid redundant calls
+  const completionMap = useMemo(() => {
+    const map = new Map<string, boolean>();
+    habits.forEach((h) => map.set(h.id, getHabitCompletionStatus(h.id)));
+    return map;
+  }, [habits, getHabitCompletionStatus]);
+
   // Group habits by period and calculate progress
   const periods = useMemo((): PeriodData[] => {
     const periodMap: Record<string, Habit[]> = {
@@ -44,17 +51,17 @@ export const RoutineCard = ({
       }
     });
 
-    // Calculate progress for each period
+    // Calculate progress for each period using pre-computed completion map
     return [
       {
         id: "morning" as const,
         name: "Manhã",
         icon: Sunrise,
         habits: periodMap.morning,
-        completed: periodMap.morning.filter((h) => getHabitCompletionStatus(h.id)).length,
+        completed: periodMap.morning.filter((h) => completionMap.get(h.id)).length,
         total: periodMap.morning.length,
         progress: periodMap.morning.length > 0
-          ? (periodMap.morning.filter((h) => getHabitCompletionStatus(h.id)).length / periodMap.morning.length) * 100
+          ? (periodMap.morning.filter((h) => completionMap.get(h.id)).length / periodMap.morning.length) * 100
           : 0,
       },
       {
@@ -62,10 +69,10 @@ export const RoutineCard = ({
         name: "Tarde",
         icon: Sun,
         habits: periodMap.afternoon,
-        completed: periodMap.afternoon.filter((h) => getHabitCompletionStatus(h.id)).length,
+        completed: periodMap.afternoon.filter((h) => completionMap.get(h.id)).length,
         total: periodMap.afternoon.length,
         progress: periodMap.afternoon.length > 0
-          ? (periodMap.afternoon.filter((h) => getHabitCompletionStatus(h.id)).length / periodMap.afternoon.length) * 100
+          ? (periodMap.afternoon.filter((h) => completionMap.get(h.id)).length / periodMap.afternoon.length) * 100
           : 0,
       },
       {
@@ -73,14 +80,14 @@ export const RoutineCard = ({
         name: "Noite",
         icon: Moon,
         habits: periodMap.evening,
-        completed: periodMap.evening.filter((h) => getHabitCompletionStatus(h.id)).length,
+        completed: periodMap.evening.filter((h) => completionMap.get(h.id)).length,
         total: periodMap.evening.length,
         progress: periodMap.evening.length > 0
-          ? (periodMap.evening.filter((h) => getHabitCompletionStatus(h.id)).length / periodMap.evening.length) * 100
+          ? (periodMap.evening.filter((h) => completionMap.get(h.id)).length / periodMap.evening.length) * 100
           : 0,
       },
     ];
-  }, [habits, getHabitCompletionStatus]);
+  }, [habits, completionMap]);
 
   // Overall progress
   const totalHabits = periods.reduce((sum, p) => sum + p.total, 0);

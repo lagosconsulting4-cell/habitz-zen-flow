@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Quote {
@@ -31,32 +31,24 @@ export interface Book {
 }
 
 export const useQuotes = () => {
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: quotes = [], isLoading: loading } = useQuery({
+    queryKey: ['quotes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('quotes')
+        .select('id, text, author')
+        .order('created_at', { ascending: false })
+        .limit(50); // Limit to reduce payload
 
-  useEffect(() => {
-    const fetchQuotes = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('quotes')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setQuotes(data || []);
-      } catch (error) {
-        console.error('Error fetching quotes:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchQuotes();
-  }, []);
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 60 * 60 * 1000, // 1 hour - content rarely changes
+  });
 
   const getDailyQuote = () => {
     if (quotes.length === 0) return null;
-    
+
     // Get a consistent quote based on the current date
     const today = new Date().toDateString();
     const quoteIndex = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % quotes.length;
@@ -67,55 +59,39 @@ export const useQuotes = () => {
 };
 
 export const useTips = () => {
-  const [tips, setTips] = useState<Tip[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: tips = [], isLoading: loading } = useQuery({
+    queryKey: ['tips'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tips')
+        .select('id, title, content, category, icon')
+        .order('created_at', { ascending: false })
+        .limit(30); // Limit to reduce payload
 
-  useEffect(() => {
-    const fetchTips = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('tips')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setTips(data || []);
-      } catch (error) {
-        console.error('Error fetching tips:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTips();
-  }, []);
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 60 * 60 * 1000, // 1 hour - content rarely changes
+  });
 
   return { tips, loading };
 };
 
 export const useBooks = () => {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: books = [], isLoading: loading } = useQuery({
+    queryKey: ['books'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('books')
+        .select('id, title, author, description, image_url, affiliate_link, rating')
+        .order('rating', { ascending: false })
+        .limit(20); // Limit to reduce payload
 
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('books')
-          .select('*')
-          .order('rating', { ascending: false });
-
-        if (error) throw error;
-        setBooks(data || []);
-      } catch (error) {
-        console.error('Error fetching books:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBooks();
-  }, []);
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 60 * 60 * 1000, // 1 hour - content rarely changes
+  });
 
   return { books, loading };
 };

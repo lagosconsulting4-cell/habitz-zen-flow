@@ -136,7 +136,7 @@ export const useGamification = (userId?: string) => {
 
       const { data, error } = await supabase
         .from("user_progress")
-        .select("*")
+        .select("user_id, current_streak, longest_streak, total_completions, level, xp")
         .eq("user_id", userId)
         .maybeSingle();
 
@@ -159,7 +159,7 @@ export const useGamification = (userId?: string) => {
 
       const { data, error } = await supabase
         .from("user_unlocks")
-        .select("*")
+        .select("id, user_id, unlock_type, unlock_id, unlocked_at")
         .eq("user_id", userId)
         .order("unlocked_at", { ascending: false });
 

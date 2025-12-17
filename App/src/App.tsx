@@ -1,4 +1,4 @@
-﻿import { Suspense, lazy } from "react";
+﻿import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,11 +8,14 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "@/layouts/ProtectedLayout";
 import ScrollToTop from "@/components/ScrollToTop";
 import { useTheme } from "@/hooks/useTheme";
-import { InstallPrompt, UpdatePrompt } from "@/components/pwa/InstallPrompt";
-import { OfflineIndicator } from "@/components/pwa/OfflineIndicator";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useNotificationNavigation } from "@/hooks/useNotificationNavigation";
 import { AuthProvider } from "@/integrations/supabase/auth";
+
+// Lazy load PWA components for better initial bundle
+const InstallPrompt = lazy(() => import("@/components/pwa/InstallPrompt").then(m => ({ default: m.InstallPrompt })));
+const UpdatePrompt = lazy(() => import("@/components/pwa/InstallPrompt").then(m => ({ default: m.UpdatePrompt })));
+const OfflineIndicator = lazy(() => import("@/components/pwa/OfflineIndicator").then(m => ({ default: m.OfflineIndicator })));
 
 // Lazy load pages for better initial bundle size
 const OnboardingFlow = lazy(() => import("./pages/OnboardingFlow"));
@@ -91,6 +94,30 @@ const NotificationNavigationHandler = () => {
   return null;
 };
 
+// Componente para prefetch de rotas mais acessadas quando browser estiver idle
+const RoutePrefetcher = () => {
+  useEffect(() => {
+    const prefetchRoutes = () => {
+      // Top 5 rotas mais acessadas - prefetch para cache do browser
+      import("./pages/Dashboard");
+      import("./pages/MyHabits");
+      import("./pages/Progress");
+      import("./pages/Calendar");
+      import("./pages/CreateHabit");
+    };
+
+    if ("requestIdleCallback" in window) {
+      // Usar requestIdleCallback se disponível (Chrome, Edge, modern browsers)
+      requestIdleCallback(prefetchRoutes, { timeout: 2000 });
+    } else {
+      // Fallback para Safari e browsers antigos
+      setTimeout(prefetchRoutes, 1000);
+    }
+  }, []);
+
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -103,9 +130,12 @@ const App = () => (
         {/* PWA Components */}
         <OfflineSyncInitializer />
         <NotificationNavigationHandler />
-        <OfflineIndicator />
-        <UpdatePrompt />
-        <InstallPrompt />
+        <RoutePrefetcher />
+        <Suspense fallback={null}>
+          <OfflineIndicator />
+          <UpdatePrompt />
+          <InstallPrompt />
+        </Suspense>
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

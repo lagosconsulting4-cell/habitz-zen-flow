@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { motion } from "motion/react";
 import { Calendar, TrendingUp, Target, Award, Flame, ListOrdered, Timer, Zap, Trophy } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -77,6 +77,10 @@ const Progress = () => {
 
   const hasData = useMemo(() => weeklySeries.some((point) => point.scheduled > 0), [weeklySeries]);
   const tierColor = currentLevelConfig ? tierColors[currentLevelConfig.tier] : tierColors.bronze;
+
+  // Pre-compute max values to avoid O(n²) computation
+  const maxHourCount = useMemo(() => Math.max(...hourDist.map((h) => h.count), 1), [hourDist]);
+  const maxWeekdayCount = useMemo(() => Math.max(...weekdayDist.map((d) => d.count), 1), [weekdayDist]);
   const nextLevelConfig = currentLevelConfig ? getLevelConfig(currentLevelConfig.level + 1) : null;
   const isMaxLevel = currentLevelConfig?.level === 10;
 
@@ -512,8 +516,7 @@ const Progress = () => {
                 </div>
                 <div className="grid grid-cols-6 md:grid-cols-12 gap-2">
                   {hourDist.map((item) => {
-                    const max = Math.max(...hourDist.map((h) => h.count), 1);
-                    const height = (item.count / max) * 100;
+                    const height = (item.count / maxHourCount) * 100;
                     return (
                       <div key={item.hour} className="flex flex-col items-center gap-1">
                         <div className="h-24 w-full bg-muted rounded-lg overflow-hidden flex items-end">
@@ -541,8 +544,7 @@ const Progress = () => {
                 </div>
                 <div className="grid grid-cols-7 gap-2">
                   {weekdayDist.map((item) => {
-                    const max = Math.max(...weekdayDist.map((d) => d.count), 1);
-                    const height = (item.count / max) * 100;
+                    const height = (item.count / maxWeekdayCount) * 100;
                     return (
                       <div key={item.weekday} className="flex flex-col items-center gap-1">
                         <div className="h-24 w-full bg-muted rounded-lg overflow-hidden flex items-end">
@@ -564,8 +566,8 @@ const Progress = () => {
 
 export default Progress;
 
-// Sparkline simples em SVG
-const Sparkline = ({ data }: { data: number[] }) => {
+// Sparkline simples em SVG (memoized to prevent unnecessary re-renders)
+const Sparkline = memo(({ data }: { data: number[] }) => {
   if (!data || data.length === 0) return null;
   const max = Math.max(...data, 1);
   const width = 300;
@@ -589,7 +591,7 @@ const Sparkline = ({ data }: { data: number[] }) => {
       />
     </svg>
   );
-};
+});
 
 
 

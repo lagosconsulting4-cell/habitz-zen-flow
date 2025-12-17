@@ -31,7 +31,7 @@ export const useCheckins = () => {
 
       const { data, error } = await supabase
         .from("daily_checkins")
-        .select("*")
+        .select("id, user_id, checkin_date, mood_level, energy_level, focus_level, notes, created_at, updated_at")
         .eq("user_id", user.id)
         .eq("checkin_date", today)
         .maybeSingle();
@@ -43,6 +43,7 @@ export const useCheckins = () => {
 
       return data as DailyCheckin | null;
     },
+    staleTime: 60 * 1000, // 1 minute - checkins don't change frequently
   });
 
   // Buscar últimos N check-ins
@@ -54,7 +55,7 @@ export const useCheckins = () => {
 
       const { data, error } = await supabase
         .from("daily_checkins")
-        .select("*")
+        .select("id, user_id, checkin_date, mood_level, energy_level, focus_level")
         .eq("user_id", user.id)
         .order("checkin_date", { ascending: false })
         .limit(30); // Últimos 30 dias
@@ -66,6 +67,7 @@ export const useCheckins = () => {
 
       return data as DailyCheckin[];
     },
+    staleTime: 60 * 1000, // 1 minute - checkins don't change frequently
   });
 
   // Criar check-in

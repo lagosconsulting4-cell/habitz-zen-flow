@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useRef, useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/integrations/supabase/auth";
 import { useToast } from "@/hooks/use-toast";
 import {
   addToSyncQueue,
@@ -84,41 +86,35 @@ const mapUnitToDatabase = (unit?: string | null): DatabaseHabitUnit => {
 };
 
 export const useHabits = () => {
-  const [habits, setHabits] = useState<Habit[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [completions, setCompletions] = useState<HabitCompletion[]>([]);
-  const [completionsDate, setCompletionsDate] = useState<string | null>(null);
+  const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Debounce ref to prevent double-click race conditions
   const toggleInProgressRef = useRef<Set<string>>(new Set());
 
-  const fetchHabits = useCallback(async () => {
+  // Query function for habits
+  const fetchHabitsQuery = useCallback(async () => {
     const isOnline = navigator.onLine;
 
     try {
       if (isOnline) {
         // ONLINE: Fetch from Supabase and cache
-        // CRITICAL: Get user BEFORE querying to filter by user_id
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
         if (!user) {
           throw new Error("User not authenticated");
         }
 
         // SECURITY FIX: Filter habits by user_id
+        // Select only necessary columns to reduce payload
         const { data, error } = await supabase
           .from("habits")
-          .select("*")
+          .select("id, name, emoji, icon_key, category, period, days_of_week, streak, is_active, user_id, created_at, updated_at, color, unit, goal_value, frequency_type, times_per_week, times_per_month, every_n_days, reminder_time, notification_pref, auto_complete_source")
           .eq("user_id", user.id)
           .order("created_at", { ascending: true });
 
         if (error) throw error;
 
         const habitsData = (data || []) as Habit[];
-        setHabits(habitsData);
 
         // Cache habits for offline use
         if (habitsData.length > 0) {
@@ -137,11 +133,10 @@ export const useHabits = () => {
             }))
           );
         }
+
+        return habitsData;
       } else {
         // OFFLINE: Load from IndexedDB cache
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
         if (user) {
           const cached = await getCachedHabits(user.id);
           // Map cached habits to full Habit type
@@ -149,23 +144,21 @@ export const useHabits = () => {
             ...c,
             days_of_week: [0, 1, 2, 3, 4, 5, 6], // Default, will be synced when online
           })) as Habit[];
-          setHabits(habitsData);
+          return habitsData;
         }
+        return [];
       }
     } catch (error) {
       console.error("Error fetching habits:", error);
       // Try loading from cache on error
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
         if (user) {
           const cached = await getCachedHabits(user.id);
           const habitsData = cached.map((c: CachedHabit) => ({
             ...c,
             days_of_week: [0, 1, 2, 3, 4, 5, 6],
           })) as Habit[];
-          setHabits(habitsData);
+          return habitsData;
         }
       } catch {
         toast({
@@ -174,26 +167,36 @@ export const useHabits = () => {
           variant: "destructive",
         });
       }
+      return [];
     }
-  // Intentionally no dependencies to keep function identity stable and
-  // avoid re-triggering the initial load effect in a loop if `toast` changes.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user, toast]);
 
-  const fetchCompletionsForDate = useCallback(async (date: string) => {
+  // React Query for habits
+  const {
+    data: habits = [],
+    isLoading: loading,
+    refetch: refetchHabits,
+  } = useQuery({
+    queryKey: ['habits', user?.id],
+    queryFn: fetchHabitsQuery,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!user,
+  });
+
+  // Query function for completions
+  const fetchCompletionsQuery = useCallback(async (date: string) => {
     const isOnline = navigator.onLine;
 
     try {
       if (isOnline) {
         // ONLINE: Fetch from Supabase
+        // Select only necessary columns to reduce payload
         const { data, error } = await supabase
           .from("habit_completions")
-          .select("*")
+          .select("id, habit_id, user_id, completed_at, created_at, value, note, completed_at_time")
           .eq("completed_at", date);
 
         if (error) throw error;
-        setCompletions(data || []);
-        setCompletionsDate(date);
 
         // Cache completions for offline use
         if (data && data.length > 0) {
@@ -219,8 +222,6 @@ export const useHabits = () => {
           completed_at: c.completed_at,
           created_at: c.created_at,
         }));
-        setCompletions(mapped);
-        setCompletionsDate(date);
         return mapped;
       }
     } catch (error) {
@@ -235,39 +236,48 @@ export const useHabits = () => {
           completed_at: c.completed_at,
           created_at: c.created_at,
         }));
-        setCompletions(mapped);
-        setCompletionsDate(date);
         return mapped;
       } catch {
-        setCompletions([]);
-        setCompletionsDate(date);
         return [];
       }
     }
   }, []);
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      const today = new Date().toISOString().split("T")[0];
-      try {
-        // Use settled to avoid hanging the UI if one query fails temporarily
-        await Promise.allSettled([fetchHabits(), fetchCompletionsForDate(today)]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Track current completions date
+  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const [completionsDate, setCompletionsDateState] = useState<string>(today);
 
-    loadData();
-  }, [fetchHabits, fetchCompletionsForDate]);
+  // React Query for completions
+  const {
+    data: completions = [],
+    refetch: refetchCompletions,
+  } = useQuery({
+    queryKey: ['completions', completionsDate],
+    queryFn: () => fetchCompletionsQuery(completionsDate),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!user,
+  });
 
-  const createHabit = async (
-    habitData: Omit<Habit, "id" | "user_id" | "created_at" | "updated_at" | "streak" | "is_active">
-  ) => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  // Helper to fetch completions for a specific date
+  const fetchCompletionsForDate = useCallback(async (date: string) => {
+    setCompletionsDateState(date);
+    // This will trigger the query to refetch with the new date
+    return queryClient.fetchQuery({
+      queryKey: ['completions', date],
+      queryFn: () => fetchCompletionsQuery(date),
+    });
+  }, [queryClient, fetchCompletionsQuery]);
+
+  // Helper to refetch habits (for backward compatibility)
+  const fetchHabits = useCallback(async () => {
+    await refetchHabits();
+  }, [refetchHabits]);
+
+  // Mutation for creating habit
+  const createHabitMutation = useMutation({
+    mutationFn: async (
+      habitData: Omit<Habit, "id" | "user_id" | "created_at" | "updated_at" | "streak" | "is_active">
+    ) => {
       if (!user) throw new Error("User not authenticated");
 
       const { data, error } = await supabase
@@ -296,50 +306,60 @@ export const useHabits = () => {
         .single();
 
       if (error) throw error;
-
-      // Refetch para garantir sincronização instantânea
-      await fetchHabits();
-
+      return data;
+    },
+    onSuccess: () => {
+      // Invalidate to refetch habits
+      queryClient.invalidateQueries({ queryKey: ['habits', user?.id] });
       toast({
         title: "Sucesso!",
         description: "Habito criado com sucesso",
       });
-
-      return data;
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("Error creating habit:", error);
       toast({
         title: "Erro",
         description: "Nao foi possivel criar o habito",
         variant: "destructive",
       });
-      throw error;
-    }
-  };
+    },
+  });
 
-  const updateHabit = async (
-    habitId: string,
-    updates: Partial<Pick<Habit,
-      "name" |
-      "emoji" |
-      "category" |
-      "period" |
-      "days_of_week" |
-      "is_active" |
-      "color" |
-      "icon_key" |
-      "unit" |
-      "goal_value" |
-      "frequency_type" |
-      "times_per_week" |
-      "times_per_month" |
-      "every_n_days" |
-      "notification_pref" |
-      "auto_complete_source" |
-      "reminder_time"
-    >>
-  ) => {
-    try {
+  const createHabit = useCallback(
+    (habitData: Omit<Habit, "id" | "user_id" | "created_at" | "updated_at" | "streak" | "is_active">) => {
+      return createHabitMutation.mutateAsync(habitData);
+    },
+    [createHabitMutation]
+  );
+
+  // Mutation for updating habit
+  const updateHabitMutation = useMutation({
+    mutationFn: async ({
+      habitId,
+      updates,
+    }: {
+      habitId: string;
+      updates: Partial<Pick<Habit,
+        "name" |
+        "emoji" |
+        "category" |
+        "period" |
+        "days_of_week" |
+        "is_active" |
+        "color" |
+        "icon_key" |
+        "unit" |
+        "goal_value" |
+        "frequency_type" |
+        "times_per_week" |
+        "times_per_month" |
+        "every_n_days" |
+        "notification_pref" |
+        "auto_complete_source" |
+        "reminder_time"
+      >>;
+    }) => {
       // Map unit to valid database value if present
       const mappedUpdates = updates.unit !== undefined
         ? { ...updates, unit: mapUnitToDatabase(updates.unit) }
@@ -353,19 +373,51 @@ export const useHabits = () => {
         .single();
 
       if (error) throw error;
-
-      setHabits((prev) => prev.map((habit) => (habit.id === habitId ? { ...habit, ...updates } : habit)));
       return data as Habit;
-    } catch (error) {
+    },
+    onSuccess: (data, variables) => {
+      // Optimistically update cache
+      queryClient.setQueryData(['habits', user?.id], (old: Habit[] = []) =>
+        old.map((habit) => (habit.id === variables.habitId ? { ...habit, ...variables.updates } : habit))
+      );
+    },
+    onError: (error) => {
       console.error("Error updating habit:", error);
       toast({
         title: "Erro",
         description: "Nao foi possivel atualizar o habito",
         variant: "destructive",
       });
-      throw error;
-    }
-  };
+    },
+  });
+
+  const updateHabit = useCallback(
+    (
+      habitId: string,
+      updates: Partial<Pick<Habit,
+        "name" |
+        "emoji" |
+        "category" |
+        "period" |
+        "days_of_week" |
+        "is_active" |
+        "color" |
+        "icon_key" |
+        "unit" |
+        "goal_value" |
+        "frequency_type" |
+        "times_per_week" |
+        "times_per_month" |
+        "every_n_days" |
+        "notification_pref" |
+        "auto_complete_source" |
+        "reminder_time"
+      >>
+    ) => {
+      return updateHabitMutation.mutateAsync({ habitId, updates });
+    },
+    [updateHabitMutation]
+  );
 
   const setHabitActive = async (habitId: string, isActive: boolean) => {
     await updateHabit(habitId, { is_active: isActive });
@@ -388,13 +440,9 @@ export const useHabits = () => {
     });
   };
 
-  const deleteHabit = async (habitId: string) => {
-    try {
-      // Obter usuário autenticado
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
+  // Mutation for deleting habit
+  const deleteHabitMutation = useMutation({
+    mutationFn: async (habitId: string) => {
       if (!user) {
         throw new Error("Usuario nao autenticado. Faca login novamente.");
       }
@@ -408,25 +456,24 @@ export const useHabits = () => {
 
       if (error) throw error;
 
-      // ✅ Sem verificação de count - se error é null, DELETE funcionou!
-
       // Limpar cache do IndexedDB
       await deleteCachedHabit(habitId);
 
-      // Refetch para garantir sincronização instantânea
-      await fetchHabits();
-
+      return habitId;
+    },
+    onSuccess: (habitId) => {
+      // Invalidate habits query
+      queryClient.invalidateQueries({ queryKey: ['habits', user?.id] });
       toast({ title: "Habito removido" });
       emitProgressChange();
-    } catch (error) {
+    },
+    onError: (error, habitId) => {
       console.error("Error deleting habit:", error);
 
       // Logging para diagnóstico
       if (error instanceof Error && error.message.includes("nao encontrado")) {
         console.error("[DEBUG] Habit ID:", habitId);
-        supabase.auth.getUser().then(({ data }) => {
-          console.error("[DEBUG] User ID:", data.user?.id);
-        });
+        console.error("[DEBUG] User ID:", user?.id);
       }
 
       toast({
@@ -434,20 +481,24 @@ export const useHabits = () => {
         description: error instanceof Error ? error.message : "Nao foi possivel remover o habito",
         variant: "destructive",
       });
-      throw error;
-    }
-  };
+    },
+  });
 
-  const duplicateHabit = async (habitId: string) => {
-    try {
+  const deleteHabit = useCallback(
+    (habitId: string) => {
+      return deleteHabitMutation.mutateAsync(habitId);
+    },
+    [deleteHabitMutation]
+  );
+
+  // Mutation for duplicating habit
+  const duplicateHabitMutation = useMutation({
+    mutationFn: async (habitId: string) => {
       const original = habits.find((habit) => habit.id === habitId);
       if (!original) {
         throw new Error("Habit not found");
       }
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
       const { data, error } = await supabase
@@ -468,19 +519,29 @@ export const useHabits = () => {
         .single();
 
       if (error) throw error;
-
-      setHabits((prev) => [...prev, data as Habit]);
+      return data as Habit;
+    },
+    onSuccess: (data) => {
+      // Optimistically add to cache
+      queryClient.setQueryData(['habits', user?.id], (old: Habit[] = []) => [...old, data]);
       toast({ title: "Habito duplicado" });
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("Error duplicating habit:", error);
       toast({
         title: "Erro",
         description: "Nao foi possivel duplicar o habito",
         variant: "destructive",
       });
-      throw error;
-    }
-  };
+    },
+  });
+
+  const duplicateHabit = useCallback(
+    (habitId: string) => {
+      return duplicateHabitMutation.mutateAsync(habitId);
+    },
+    [duplicateHabitMutation]
+  );
 
   const toggleHabit = async (habitId: string, date?: string) => {
     const targetDate = date ?? new Date().toISOString().split("T")[0];
@@ -510,14 +571,10 @@ export const useHabits = () => {
     );
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
       if (isOnline) {
         // ONLINE: Use atomic RPC for toggle operation
-        // Supports both marking and unmarking habits
         const { data, error } = await supabase.rpc("toggle_habit_atomic", {
           p_user_id: user.id,
           p_habit_id: habitId,
@@ -527,7 +584,7 @@ export const useHabits = () => {
 
         if (error) throw error;
 
-        // Update local state based on RPC response
+        // Update local state based on RPC response using React Query cache
         if (data) {
           if (data.action === 'added') {
             // Adding completion
@@ -538,18 +595,20 @@ export const useHabits = () => {
               completed_at: targetDate,
               created_at: new Date().toISOString(),
             };
-            setCompletions((prev) => [...prev, newCompletion]);
+            queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
+              [...old, newCompletion]
+            );
           } else if (data.action === 'removed') {
             // Removing completion
-            setCompletions((prev) =>
-              prev.filter((c) => !(c.habit_id === habitId && c.completed_at === targetDate))
+            queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
+              old.filter((c) => !(c.habit_id === habitId && c.completed_at === targetDate))
             );
           }
 
           // Update streak from RPC response
           if (data.new_streak !== undefined) {
-            setHabits((prev) =>
-              prev.map((h) =>
+            queryClient.setQueryData(['habits', user.id], (old: Habit[] = []) =>
+              old.map((h) =>
                 h.id === habitId ? { ...h, streak: data.new_streak } : h
               )
             );
@@ -561,7 +620,9 @@ export const useHabits = () => {
 
         if (existingCompletion) {
           // Remove completion optimistically
-          setCompletions((prev) => prev.filter((c) => c.id !== existingCompletion.id));
+          queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
+            old.filter((c) => c.id !== existingCompletion.id)
+          );
 
           // Add to sync queue
           await addToSyncQueue({
@@ -586,7 +647,9 @@ export const useHabits = () => {
             created_at: new Date().toISOString(),
           };
 
-          setCompletions((prev) => [...prev, newCompletion]);
+          queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
+            [...old, newCompletion]
+          );
 
           // Add to sync queue
           await addToSyncQueue({
@@ -624,8 +687,8 @@ export const useHabits = () => {
         // For online: RPC already updated streak
         const increment = !existingCompletion;
         const newStreak = Math.max(0, habit.streak + (increment ? 1 : -1));
-        setHabits((prev) =>
-          prev.map((h) => (h.id === habitId ? { ...h, streak: newStreak } : h))
+        queryClient.setQueryData(['habits', user.id], (old: Habit[] = []) =>
+          old.map((h) => (h.id === habitId ? { ...h, streak: newStreak } : h))
         );
       }
     } catch (error) {
@@ -650,8 +713,9 @@ export const useHabits = () => {
 
       if (error) throw error;
 
-      setHabits((prev) =>
-        prev.map((habit) => (habit.id === habitId ? { ...habit, streak } : habit))
+      // Update cache optimistically
+      queryClient.setQueryData(['habits', user?.id], (old: Habit[] = []) =>
+        old.map((habit) => (habit.id === habitId ? { ...habit, streak } : habit))
       );
     } catch (error) {
       console.error("Error updating habit streak:", error);
@@ -717,14 +781,16 @@ export const useHabits = () => {
 
   // Optimistic update methods for immediate UI feedback
   const addCompletionOptimistic = useCallback((completion: HabitCompletion) => {
-    setCompletions(prev => [...prev, completion]);
-  }, []);
+    queryClient.setQueryData(['completions', completion.completed_at], (old: HabitCompletion[] = []) =>
+      [...old, completion]
+    );
+  }, [queryClient]);
 
   const removeCompletionOptimistic = useCallback((habitId: string, date: string) => {
-    setCompletions(prev =>
-      prev.filter(c => !(c.habit_id === habitId && c.completed_at === date))
+    queryClient.setQueryData(['completions', date], (old: HabitCompletion[] = []) =>
+      old.filter(c => !(c.habit_id === habitId && c.completed_at === date))
     );
-  }, []);
+  }, [queryClient]);
 
   return {
     habits,
@@ -752,7 +818,9 @@ export const useHabits = () => {
           .eq("habit_id", habitId)
           .eq("completed_at", date);
         if (error) throw error;
-        await fetchCompletionsForDate(date);
+
+        // Invalidate completions cache to refetch with updated note
+        await queryClient.invalidateQueries({ queryKey: ['completions', date] });
         return true;
       } catch (err) {
         console.error("Erro ao salvar nota", err);
