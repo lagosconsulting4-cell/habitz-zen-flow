@@ -36,6 +36,7 @@ import { PotentialChartStep } from "./steps/PotentialChartStep";
 // Steps - Final Flow
 import { LoadingStep } from "./steps/LoadingStep";
 import { CongratsStep } from "./steps/CongratsStep";
+import { PersonalizedPlanView } from "./steps/PersonalizedPlanView";
 import { DataCollectionStep } from "./steps/DataCollectionStep";
 
 interface QuizModalProps {
@@ -45,7 +46,7 @@ interface QuizModalProps {
 
 // Componente interno que usa o context
 const QuizContent = ({ onClose }: { onClose: () => void }) => {
-  const { currentStep, generateRoutine, canGoBack, prevStep } = useQuiz();
+  const { currentStep, generateRoutine, canGoBack, prevStep, nextStep } = useQuiz();
 
   // Gera a rotina quando chega no LoadingStep (step 21)
   useEffect(() => {
@@ -102,9 +103,9 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
       case 21:
         return <AppExplanationStep />;
       case 22:
-        return <LoadingStep onComplete={() => {}} />;
+        return <LoadingStep onComplete={nextStep} />;
       case 23:
-        return <CongratsStep />;
+        return <PersonalizedPlanView />;
       case 24:
         return <DataCollectionStep />;
       default:
