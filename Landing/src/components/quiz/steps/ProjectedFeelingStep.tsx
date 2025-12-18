@@ -1,25 +1,33 @@
 import { motion } from "motion/react";
-import { Zap, Clock, Target, Dumbbell, type LucideIcon } from "lucide-react";
+import { MinusCircle, Smile, Shield, Trophy, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
-import type { TimeAvailable } from "@/lib/quizConfig";
+import type { ProjectedFeeling } from "@/lib/quizConfig";
 
-const TIME_OPTIONS: Array<{
-  value: TimeAvailable;
+const PROJECTED_FEELING_OPTIONS: Array<{
+  value: ProjectedFeeling;
   label: string;
   icon: LucideIcon;
-  habits: string;
 }> = [
-  { value: "5min", label: "5 minutos", icon: Zap, habits: "2 hábitos" },
-  { value: "15min", label: "15 minutos", icon: Clock, habits: "3 hábitos" },
-  { value: "30min", label: "30 minutos", icon: Target, habits: "4-5 hábitos" },
-  { value: "1h", label: "1 hora", icon: Dumbbell, habits: "6-7 hábitos" },
+  { value: "sem_mudanca", label: "Não ia mudar nada", icon: MinusCircle },
+  { value: "muito_feliz", label: "Iria ficar muito feliz", icon: Smile },
+  { value: "sem_insegurancas", label: "Não teria mais inseguranças", icon: Shield },
+  { value: "realizado", label: "Me sentiria realizado", icon: Trophy },
 ];
 
-export const TimeAvailableStep = () => {
-  const { timeAvailable, setTimeAvailable } = useQuiz();
+export const ProjectedFeelingStep = () => {
+  const { projectedFeeling, setProjectedFeeling, objective } = useQuiz();
 
-  const selectedOption = TIME_OPTIONS.find((o) => o.value === timeAvailable);
+  // Map objective to readable text
+  const objectiveLabels: Record<string, string> = {
+    productivity: "sendo mais produtivo",
+    health: "com saúde física melhorada",
+    routine: "mais organizado",
+    avoid: "livre dos vícios",
+    mental: "com qualidade de vida melhor",
+  };
+
+  const objectiveText = objective ? objectiveLabels[objective] || "seus objetivos alcançados" : "seus objetivos alcançados";
 
   return (
     <div className="flex flex-col">
@@ -31,11 +39,8 @@ export const TimeAvailableStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Quanto tempo você se sente confortável para se dedicar por dia?
+          Como você se sentiria se no final desse ano, você estivesse {objectiveText}?
         </h2>
-        <p className="text-sm text-slate-500">
-          Isso nos ajuda a traçar um plano que você consiga cumprir
-        </p>
       </motion.div>
 
       {/* Selection Grid */}
@@ -46,7 +51,7 @@ export const TimeAvailableStep = () => {
         className="flex items-center justify-center"
       >
         <SelectionCardGrid columns={2} gap={3} className="w-full max-w-md">
-          {TIME_OPTIONS.map((option, index) => (
+          {PROJECTED_FEELING_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -56,26 +61,15 @@ export const TimeAvailableStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                description={option.habits}
                 icon={<option.icon className="w-5 h-5 text-slate-600" />}
-                selected={timeAvailable === option.value}
-                onClick={() => setTimeAvailable(option.value)}
+                selected={projectedFeeling === option.value}
+                onClick={() => setProjectedFeeling(option.value)}
                 variant="compact"
               />
             </motion.div>
           ))}
         </SelectionCardGrid>
       </motion.div>
-
-      {/* Hint */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.3 }}
-        className="text-center text-xs text-slate-400 mt-4"
-      >
-        {selectedOption ? `Recomendamos: ${selectedOption.habits}` : "Qualidade > Quantidade"}
-      </motion.p>
     </div>
   );
 };

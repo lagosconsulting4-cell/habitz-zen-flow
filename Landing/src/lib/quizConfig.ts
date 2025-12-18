@@ -17,8 +17,15 @@ export type AgeRange = "18-24" | "25-34" | "35-44" | "45-54" | "55+";
 export type Profession = "student" | "employed" | "entrepreneur" | "freelancer" | "other";
 export type WorkSchedule = "morning" | "commercial" | "evening" | "flexible";
 export type EnergyPeak = "morning" | "afternoon" | "evening";
-export type TimeAvailable = "15min" | "30min" | "1h" | "2h+";
+export type TimeAvailable = "5min" | "15min" | "30min" | "1h";
 export type Objective = "productivity" | "health" | "mental" | "routine" | "avoid";
+
+// NEW TYPES for Quiz Remodel
+export type FinancialRange = "1600-3000" | "3000-7000" | "7000-20000" | "20000+";
+export type Gender = "masculino" | "feminino" | "outro";
+export type ConsistencyFeeling = "frustrado" | "evitando" | "conformado" | "determinado";
+export type ProjectedFeeling = "sem_mudanca" | "muito_feliz" | "sem_insegurancas" | "realizado";
+export type YearsPromising = "primeiro_ano" | "2-3_anos" | "4-5_anos" | "perdi_conta";
 
 export interface RecommendedHabit {
   id: string;
@@ -146,10 +153,10 @@ export const CHALLENGE_HABITS: Record<string, string[]> = {
 // ============================================================================
 
 export const TIME_QUANTITY: Record<TimeAvailable, { min: number; max: number }> = {
+  "5min": { min: 2, max: 2 },
   "15min": { min: 3, max: 3 },
   "30min": { min: 4, max: 5 },
   "1h": { min: 6, max: 7 },
-  "2h+": { min: 8, max: 10 },
 };
 
 // ============================================================================

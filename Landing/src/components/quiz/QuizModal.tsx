@@ -6,19 +6,38 @@ import posthog from "posthog-js";
 import { QuizProgress } from "./QuizProgress";
 import { QuizNavigation } from "./QuizNavigation";
 
-// Steps
+// Steps - Question Steps
+import { HeroStep } from "./steps/HeroStep";
+import { ObjectiveStep } from "./steps/ObjectiveStep";
+import { TimeAvailableStep } from "./steps/TimeAvailableStep";
+import { EnergyPeakStep } from "./steps/EnergyPeakStep";
+import { WorkScheduleStep } from "./steps/WorkScheduleStep";
+import { FinancialRangeStep } from "./steps/FinancialRangeStep";
 import { AgeStep } from "./steps/AgeStep";
 import { ProfessionStep } from "./steps/ProfessionStep";
-import { WorkScheduleStep } from "./steps/WorkScheduleStep";
-import { EnergyPeakStep } from "./steps/EnergyPeakStep";
-import { TimeAvailableStep } from "./steps/TimeAvailableStep";
-import { ObjectiveStep } from "./steps/ObjectiveStep";
 import { ChallengesStep } from "./steps/ChallengesStep";
-import { WeekDaysStep } from "./steps/WeekDaysStep";
-import { EmailStep } from "./steps/EmailStep";
-import { NameStep } from "./steps/NameStep";
-import { OfferSlide } from "./steps/OfferSlide";
-import { LockedRoutinePreview } from "./LockedRoutinePreview";
+import { GenderStep } from "./steps/GenderStep";
+import { ConsistencyFeelingStep } from "./steps/ConsistencyFeelingStep";
+import { ProjectedFeelingStep } from "./steps/ProjectedFeelingStep";
+import { YearsPromisingStep } from "./steps/YearsPromisingStep";
+
+// Steps - Feedback & Special Screens
+import { FeedbackTimeStep } from "./steps/FeedbackTimeStep";
+import { FeedbackAdaptStep } from "./steps/FeedbackAdaptStep";
+import { PWAInstallStep } from "./steps/PWAInstallStep";
+import { TestimonialsStep } from "./steps/TestimonialsStep";
+import { UrgencyStep } from "./steps/UrgencyStep";
+import { AppExplanationStep } from "./steps/AppExplanationStep";
+
+// Steps - Chart Components
+import { FeedbackAgeChartStep } from "./steps/FeedbackAgeChartStep";
+import { SocialProofChartStep } from "./steps/SocialProofChartStep";
+import { PotentialChartStep } from "./steps/PotentialChartStep";
+
+// Steps - Final Flow
+import { LoadingStep } from "./steps/LoadingStep";
+import { CongratsStep } from "./steps/CongratsStep";
+import { DataCollectionStep } from "./steps/DataCollectionStep";
 
 interface QuizModalProps {
   open: boolean;
@@ -29,9 +48,9 @@ interface QuizModalProps {
 const QuizContent = ({ onClose }: { onClose: () => void }) => {
   const { currentStep, generateRoutine } = useQuiz();
 
-  // Gera a rotina quando chega no LockedRoutinePreview (step 11)
+  // Gera a rotina quando chega no LoadingStep (step 21)
   useEffect(() => {
-    if (currentStep === 11) {
+    if (currentStep === 21) {
       generateRoutine();
     }
   }, [currentStep, generateRoutine]);
@@ -40,29 +59,55 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <AgeStep />;
+        return <HeroStep />;
       case 1:
-        return <ProfessionStep />;
-      case 2:
-        return <WorkScheduleStep />;
-      case 3:
-        return <EnergyPeakStep />;
-      case 4:
-        return <TimeAvailableStep />;
-      case 5:
         return <ObjectiveStep />;
+      case 2:
+        return <TimeAvailableStep />;
+      case 3:
+        return <FeedbackTimeStep />;
+      case 4:
+        return <EnergyPeakStep />;
+      case 5:
+        return <WorkScheduleStep />;
       case 6:
-        return <ChallengesStep />;
+        return <FinancialRangeStep />;
       case 7:
-        return <WeekDaysStep />;
+        return <ProfessionStep />;
       case 8:
-        return <EmailStep />;
+        return <FeedbackAdaptStep />;
       case 9:
-        return <NameStep />;
+        return <AgeStep />;
       case 10:
-        return <OfferSlide />;
+        return <FeedbackAgeChartStep />;
       case 11:
-        return <LockedRoutinePreview onClose={onClose} />;
+        return <ChallengesStep />;
+      case 12:
+        return <GenderStep />;
+      case 13:
+        return <PWAInstallStep />;
+      case 14:
+        return <SocialProofChartStep />;
+      case 15:
+        return <ConsistencyFeelingStep />;
+      case 16:
+        return <ProjectedFeelingStep />;
+      case 17:
+        return <TestimonialsStep />;
+      case 18:
+        return <YearsPromisingStep />;
+      case 19:
+        return <UrgencyStep />;
+      case 20:
+        return <PotentialChartStep />;
+      case 21:
+        return <AppExplanationStep />;
+      case 22:
+        return <LoadingStep onComplete={() => {}} />;
+      case 23:
+        return <CongratsStep />;
+      case 24:
+        return <DataCollectionStep />;
       default:
         return null;
     }
@@ -104,8 +149,8 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
         </div>
       </div>
 
-      {/* Footer com navegação (oculto nos steps de Offer e Preview) */}
-      {currentStep < 10 && (
+      {/* Footer com navegação (oculto em Loading e DataCollection que tem submit próprio) */}
+      {currentStep !== 22 && currentStep !== 24 && (
         <div className="sticky bottom-0 bg-white border-t border-slate-100">
           <div className="max-w-2xl mx-auto p-4">
             <QuizNavigation />

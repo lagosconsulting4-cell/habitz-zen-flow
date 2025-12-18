@@ -10,10 +10,9 @@ const WORK_SCHEDULE_OPTIONS: Array<{
   icon: LucideIcon;
   hours: string;
 }> = [
+  { value: "commercial", label: "Comercial", icon: Building2, hours: "9h-18h" },
   { value: "morning", label: "Manhã", icon: Sunrise, hours: "6h-14h" },
-  { value: "commercial", label: "Comercial", icon: Building2, hours: "8h-18h" },
-  { value: "evening", label: "Tarde/Noite", icon: Moon, hours: "14h-22h" },
-  { value: "flexible", label: "Flexível", icon: RefreshCw, hours: "Varia" },
+  { value: "evening", label: "Noite", icon: Moon, hours: "18h-02h" },
 ];
 
 export const WorkScheduleStep = () => {
@@ -31,10 +30,10 @@ export const WorkScheduleStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Seu horário de trabalho?
+          Qual é o seu horário de trabalho?
         </h2>
         <p className="text-sm text-slate-500">
-          Organizamos sua rotina nos horários livres
+          Adaptamos a sua rotina de acordo com a sua disponibilidade de tempo
         </p>
       </motion.div>
 

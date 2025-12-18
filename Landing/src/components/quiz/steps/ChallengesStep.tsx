@@ -8,9 +8,9 @@ const CHALLENGE_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { id: "procrastination", label: "Procrastinação", icon: Clock },
-  { id: "focus", label: "Foco", icon: Target },
-  { id: "forgetfulness", label: "Esquecimento", icon: CloudFog },
+  { id: "procrastination", label: "Procrastino muito", icon: Clock },
+  { id: "focus", label: "Falta de foco", icon: Target },
+  { id: "forgetfulness", label: "Esquecimentos", icon: CloudFog },
   { id: "tiredness", label: "Cansaço", icon: BedDouble },
   { id: "anxiety", label: "Ansiedade", icon: AlertCircle },
   { id: "motivation", label: "Motivação", icon: Flame },
@@ -29,7 +29,7 @@ export const ChallengesStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Seus maiores desafios?
+          Quais são os seus maiores desafios para ter a vida dos sonhos?
         </h2>
         <p className="text-sm text-slate-500">Selecione todos que se aplicam</p>
       </motion.div>

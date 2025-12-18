@@ -29,10 +29,10 @@ export const AgeStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Qual sua faixa etária?
+          Quantos anos você tem?
         </h2>
         <p className="text-sm text-slate-500">
-          Ajuda a recomendar hábitos para seu momento de vida
+          Isso será usado para recomendar hábitos adequados para seu momento de vida
         </p>
       </motion.div>
 

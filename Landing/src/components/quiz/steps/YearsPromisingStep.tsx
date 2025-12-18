@@ -1,22 +1,33 @@
 import { motion } from "motion/react";
-import { Sunrise, Sun, Moon, type LucideIcon } from "lucide-react";
+import { Calendar, CalendarDays, CalendarRange, HelpCircle, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
-import type { EnergyPeak } from "@/lib/quizConfig";
+import type { YearsPromising } from "@/lib/quizConfig";
 
-const ENERGY_PEAK_OPTIONS: Array<{
-  value: EnergyPeak;
+const YEARS_PROMISING_OPTIONS: Array<{
+  value: YearsPromising;
   label: string;
   icon: LucideIcon;
-  description: string;
 }> = [
-  { value: "morning", label: "Manhã", icon: Sunrise, description: "Acordo disposto" },
-  { value: "afternoon", label: "Tarde", icon: Sun, description: "Pico após almoço" },
-  { value: "evening", label: "Noite", icon: Moon, description: "Rendo mais de noite" },
+  { value: "primeiro_ano", label: "Esse seria o primeiro", icon: Calendar },
+  { value: "2-3_anos", label: "2-3 anos desperdiçados", icon: CalendarDays },
+  { value: "4-5_anos", label: "4-5 anos... já perdi a conta", icon: CalendarRange },
+  { value: "perdi_conta", label: "Prefiro não pensar nisso", icon: HelpCircle },
 ];
 
-export const EnergyPeakStep = () => {
-  const { energyPeak, setEnergyPeak } = useQuiz();
+export const YearsPromisingStep = () => {
+  const { yearsPromising, setYearsPromising, objective } = useQuiz();
+
+  // Map objective to verb form
+  const objectiveVerbs: Record<string, string> = {
+    productivity: "ser mais produtivo",
+    health: "melhorar sua saúde física",
+    routine: "ser mais organizado",
+    avoid: "eliminar vícios",
+    mental: "ter qualidade de vida melhor",
+  };
+
+  const objectiveVerb = objective ? objectiveVerbs[objective] || "mudar" : "mudar";
 
   return (
     <div className="flex flex-col">
@@ -28,11 +39,8 @@ export const EnergyPeakStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Quando você se sente mais disposto no seu dia?
+          Há quantos anos você promete que vai {objectiveVerb}?
         </h2>
-        <p className="text-sm text-slate-500">
-          Colocamos hábitos mais importantes no horário que você se sente mais comprometido
-        </p>
       </motion.div>
 
       {/* Selection Grid */}
@@ -42,8 +50,8 @@ export const EnergyPeakStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex items-center justify-center"
       >
-        <SelectionCardGrid columns={1} gap={3} className="w-full max-w-md">
-          {ENERGY_PEAK_OPTIONS.map((option, index) => (
+        <SelectionCardGrid columns={2} gap={3} className="w-full max-w-md">
+          {YEARS_PROMISING_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -53,10 +61,9 @@ export const EnergyPeakStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                description={option.description}
                 icon={<option.icon className="w-5 h-5 text-slate-600" />}
-                selected={energyPeak === option.value}
-                onClick={() => setEnergyPeak(option.value)}
+                selected={yearsPromising === option.value}
+                onClick={() => setYearsPromising(option.value)}
                 variant="compact"
               />
             </motion.div>

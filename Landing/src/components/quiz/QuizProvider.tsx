@@ -9,6 +9,11 @@ import type {
   TimeAvailable,
   Objective,
   RecommendedHabit,
+  FinancialRange,
+  Gender,
+  ConsistencyFeeling,
+  ProjectedFeeling,
+  YearsPromising,
 } from "@/lib/quizConfig";
 
 // ============================================================================
@@ -27,11 +32,14 @@ export interface QuizState {
   // Contact Information
   email: string | null;
   name: string | null;
+  phone: string | null;
 
   // Demographics
   ageRange: AgeRange | null;
   profession: Profession | null;
   workSchedule: WorkSchedule | null;
+  gender: Gender | null;
+  financialRange: FinancialRange | null;
 
   // Preferences
   energyPeak: EnergyPeak | null;
@@ -39,12 +47,25 @@ export interface QuizState {
   objective: Objective | null;
   challenges: string[];
 
+  // Emotional/Psychological
+  consistencyFeeling: ConsistencyFeeling | null;
+  projectedFeeling: ProjectedFeeling | null;
+  yearsPromising: YearsPromising | null;
+
   // Routine Configuration
   weekDays: number[];
   weekDaysPreset: WeekDaysPreset;
 
   // Recommended Habits
   recommendedHabits: RecommendedHabit[];
+
+  // Tracking/Display
+  currentDate: string;
+  primaryChallenge: string | null;
+
+  // PWA
+  pwaInstallPromptShown: boolean;
+  pwaInstalled: boolean;
 
   // Status
   isGeneratingRoutine: boolean;
@@ -59,15 +80,23 @@ export interface QuizContextType extends QuizState {
   // Data Updates
   setEmail: (email: string) => void;
   setName: (name: string) => void;
+  setPhone: (phone: string) => void;
   setAgeRange: (age: AgeRange) => void;
   setProfession: (profession: Profession) => void;
   setWorkSchedule: (schedule: WorkSchedule) => void;
+  setGender: (gender: Gender) => void;
+  setFinancialRange: (range: FinancialRange) => void;
   setEnergyPeak: (peak: EnergyPeak) => void;
   setTimeAvailable: (time: TimeAvailable) => void;
   setObjective: (objective: Objective) => void;
   toggleChallenge: (challenge: string) => void;
+  setConsistencyFeeling: (feeling: ConsistencyFeeling) => void;
+  setProjectedFeeling: (feeling: ProjectedFeeling) => void;
+  setYearsPromising: (years: YearsPromising) => void;
   setWeekDaysPreset: (preset: WeekDaysPreset) => void;
   setWeekDays: (days: number[]) => void;
+  setPwaInstallPromptShown: (shown: boolean) => void;
+  setPwaInstalled: (installed: boolean) => void;
 
   // Habit Management
   generateRoutine: () => Promise<void>;
@@ -91,24 +120,51 @@ interface QuizProviderProps {
 }
 
 export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
-  // State
+  // State - Contact
   const [currentStep, setCurrentStep] = useState(0);
   const [email, setEmail] = useState<string | null>(null);
   const [name, setName] = useState<string | null>(null);
+  const [phone, setPhone] = useState<string | null>(null);
+
+  // State - Demographics
   const [ageRange, setAgeRange] = useState<AgeRange | null>(null);
   const [profession, setProfession] = useState<Profession | null>(null);
   const [workSchedule, setWorkSchedule] = useState<WorkSchedule | null>(null);
+  const [gender, setGender] = useState<Gender | null>(null);
+  const [financialRange, setFinancialRange] = useState<FinancialRange | null>(null);
+
+  // State - Preferences
   const [energyPeak, setEnergyPeak] = useState<EnergyPeak | null>(null);
   const [timeAvailable, setTimeAvailable] = useState<TimeAvailable | null>(null);
   const [objective, setObjective] = useState<Objective | null>(null);
   const [challenges, setChallenges] = useState<string[]>([]);
+
+  // State - Emotional/Psychological
+  const [consistencyFeeling, setConsistencyFeeling] = useState<ConsistencyFeeling | null>(null);
+  const [projectedFeeling, setProjectedFeeling] = useState<ProjectedFeeling | null>(null);
+  const [yearsPromising, setYearsPromising] = useState<YearsPromising | null>(null);
+
+  // State - Routine
   const [weekDaysPreset, setWeekDaysPreset] = useState<WeekDaysPreset>("weekdays");
   const [weekDays, setWeekDays] = useState<number[]>([1, 2, 3, 4, 5]); // Mon-Fri
   const [recommendedHabits, setRecommendedHabits] = useState<RecommendedHabit[]>([]);
+
+  // State - Tracking/Display
+  const [currentDate] = useState<string>(new Date().toLocaleDateString("pt-BR"));
+  const [primaryChallenge, setPrimaryChallenge] = useState<string | null>(null);
+
+  // State - PWA
+  const [pwaInstallPromptShown, setPwaInstallPromptShown] = useState(false);
+  const [pwaInstalled, setPwaInstalled] = useState(false);
+
+  // State - Status
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
 
-  // 12 Steps: Age, Profession, WorkSchedule, EnergyPeak, TimeAvailable, Objective, Challenges, WeekDays, Email, Name, Offer, LockedPreview
-  const totalSteps = 12;
+  // 24 Steps: Hero, Objective, Time, FeedbackTime, Energy, WorkSchedule, Financial, FeedbackAdapt,
+  // Age, FeedbackAgeChart, Challenges, Gender, PWAInstall, SocialProofChart, ConsistencyFeeling,
+  // ProjectedFeeling, Testimonials, YearsPromising, Urgency, PotentialChart, AppExplanation,
+  // Loading, Congrats, DataCollection
+  const totalSteps = 24;
 
   // ============================================================================
   // NAVIGATION
@@ -157,44 +213,81 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
 
   const isStepValid = useCallback((): boolean => {
     switch (currentStep) {
-      case 0: // Age
-        return ageRange !== null;
-      case 1: // Profession
-        return profession !== null;
-      case 2: // Work Schedule
-        return workSchedule !== null;
-      case 3: // Energy Peak
-        return energyPeak !== null;
-      case 4: // Time Available
-        return timeAvailable !== null;
-      case 5: // Objective
-        return objective !== null;
-      case 6: // Challenges
-        return challenges.length > 0;
-      case 7: // Week Days
-        return weekDays.length > 0;
-      case 8: // Email
-        return email !== null && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      case 9: // Name
-        return name !== null && name.trim().length >= 2;
-      case 10: // Offer (always valid)
+      case 0: // HeroStep - intro screen
         return true;
-      case 11: // Locked Preview (always valid)
+      case 1: // ObjectiveStep
+        return objective !== null;
+      case 2: // TimeAvailableStep
+        return timeAvailable !== null;
+      case 3: // FeedbackTimeStep - feedback screen
+        return true;
+      case 4: // EnergyPeakStep
+        return energyPeak !== null;
+      case 5: // WorkScheduleStep
+        return workSchedule !== null;
+      case 6: // FinancialRangeStep
+        return financialRange !== null;
+      case 7: // ProfessionStep
+        return profession !== null;
+      case 8: // FeedbackAdaptStep - feedback screen
+        return true;
+      case 9: // AgeStep
+        return ageRange !== null;
+      case 10: // FeedbackAgeChartStep - chart screen
+        return true;
+      case 11: // ChallengesStep
+        return challenges.length > 0;
+      case 12: // GenderStep
+        return gender !== null;
+      case 13: // PWAInstallStep - special screen
+        return true;
+      case 14: // SocialProofChartStep - chart screen
+        return true;
+      case 15: // ConsistencyFeelingStep
+        return consistencyFeeling !== null;
+      case 16: // ProjectedFeelingStep
+        return projectedFeeling !== null;
+      case 17: // TestimonialsStep - feedback screen
+        return true;
+      case 18: // YearsPromisingStep
+        return yearsPromising !== null;
+      case 19: // UrgencyStep - feedback screen
+        return true;
+      case 20: // PotentialChartStep - chart screen
+        return true;
+      case 21: // AppExplanationStep - explanation screen
+        return true;
+      case 22: // LoadingStep - auto-advances
+        return true;
+      case 23: // CongratsStep - summary screen
+        return true;
+      case 24: // DataCollectionStep - has its own validation
         return true;
       default:
         return false;
     }
-  }, [currentStep, ageRange, profession, workSchedule, energyPeak, timeAvailable, objective, challenges, weekDays, email, name]);
+  }, [currentStep, objective, timeAvailable, energyPeak, workSchedule, financialRange, profession, ageRange, challenges, gender, consistencyFeeling, projectedFeeling, yearsPromising]);
 
   // ============================================================================
   // HABIT MANAGEMENT
   // ============================================================================
 
   const toggleChallenge = useCallback((challenge: string) => {
-    setChallenges((prev) =>
-      prev.includes(challenge) ? prev.filter((c) => c !== challenge) : [...prev, challenge]
-    );
-  }, []);
+    setChallenges((prev) => {
+      const newChallenges = prev.includes(challenge)
+        ? prev.filter((c) => c !== challenge)
+        : [...prev, challenge];
+
+      // Set primary challenge to the first selected challenge
+      if (newChallenges.length > 0 && !primaryChallenge) {
+        setPrimaryChallenge(newChallenges[0]);
+      } else if (newChallenges.length === 0) {
+        setPrimaryChallenge(null);
+      }
+
+      return newChallenges;
+    });
+  }, [primaryChallenge]);
 
   // ============================================================================
   // ROUTINE GENERATION - 4-Layer Smart Algorithm
@@ -265,16 +358,26 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
       canGoNext,
       email,
       name,
+      phone,
       ageRange,
       profession,
       workSchedule,
+      gender,
+      financialRange,
       energyPeak,
       timeAvailable,
       objective,
       challenges,
+      consistencyFeeling,
+      projectedFeeling,
+      yearsPromising,
       weekDaysPreset,
       weekDays,
       recommendedHabits,
+      currentDate,
+      primaryChallenge,
+      pwaInstallPromptShown,
+      pwaInstalled,
       isGeneratingRoutine,
 
       // Navigation
@@ -285,15 +388,23 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
       // Data Updates
       setEmail,
       setName,
+      setPhone,
       setAgeRange,
       setProfession,
       setWorkSchedule,
+      setGender,
+      setFinancialRange,
       setEnergyPeak,
       setTimeAvailable,
       setObjective,
       toggleChallenge,
+      setConsistencyFeeling,
+      setProjectedFeeling,
+      setYearsPromising,
       setWeekDaysPreset,
       setWeekDays,
+      setPwaInstallPromptShown,
+      setPwaInstalled,
 
       // Habit Management
       generateRoutine,
@@ -307,16 +418,26 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
       canGoNext,
       email,
       name,
+      phone,
       ageRange,
       profession,
       workSchedule,
+      gender,
+      financialRange,
       energyPeak,
       timeAvailable,
       objective,
       challenges,
+      consistencyFeeling,
+      projectedFeeling,
+      yearsPromising,
       weekDaysPreset,
       weekDays,
       recommendedHabits,
+      currentDate,
+      primaryChallenge,
+      pwaInstallPromptShown,
+      pwaInstalled,
       isGeneratingRoutine,
       goToStep,
       nextStep,

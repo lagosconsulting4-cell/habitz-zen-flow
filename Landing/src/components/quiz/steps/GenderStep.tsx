@@ -1,22 +1,21 @@
 import { motion } from "motion/react";
-import { Sunrise, Sun, Moon, type LucideIcon } from "lucide-react";
+import { User, Users, Sparkles, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
-import type { EnergyPeak } from "@/lib/quizConfig";
+import type { Gender } from "@/lib/quizConfig";
 
-const ENERGY_PEAK_OPTIONS: Array<{
-  value: EnergyPeak;
+const GENDER_OPTIONS: Array<{
+  value: Gender;
   label: string;
   icon: LucideIcon;
-  description: string;
 }> = [
-  { value: "morning", label: "Manhã", icon: Sunrise, description: "Acordo disposto" },
-  { value: "afternoon", label: "Tarde", icon: Sun, description: "Pico após almoço" },
-  { value: "evening", label: "Noite", icon: Moon, description: "Rendo mais de noite" },
+  { value: "masculino", label: "Masculino", icon: User },
+  { value: "feminino", label: "Feminino", icon: Users },
+  { value: "outro", label: "Outro", icon: Sparkles },
 ];
 
-export const EnergyPeakStep = () => {
-  const { energyPeak, setEnergyPeak } = useQuiz();
+export const GenderStep = () => {
+  const { gender, setGender } = useQuiz();
 
   return (
     <div className="flex flex-col">
@@ -28,10 +27,10 @@ export const EnergyPeakStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Quando você se sente mais disposto no seu dia?
+          Escolhe o seu gênero
         </h2>
         <p className="text-sm text-slate-500">
-          Colocamos hábitos mais importantes no horário que você se sente mais comprometido
+          Isso será usado para gerar a sua rotina personalizada
         </p>
       </motion.div>
 
@@ -43,7 +42,7 @@ export const EnergyPeakStep = () => {
         className="flex items-center justify-center"
       >
         <SelectionCardGrid columns={1} gap={3} className="w-full max-w-md">
-          {ENERGY_PEAK_OPTIONS.map((option, index) => (
+          {GENDER_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -53,10 +52,9 @@ export const EnergyPeakStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                description={option.description}
                 icon={<option.icon className="w-5 h-5 text-slate-600" />}
-                selected={energyPeak === option.value}
-                onClick={() => setEnergyPeak(option.value)}
+                selected={gender === option.value}
+                onClick={() => setGender(option.value)}
                 variant="compact"
               />
             </motion.div>

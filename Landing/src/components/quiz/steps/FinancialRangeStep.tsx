@@ -1,22 +1,22 @@
 import { motion } from "motion/react";
-import { Sunrise, Sun, Moon, type LucideIcon } from "lucide-react";
+import { DollarSign, TrendingUp, Wallet, Banknote, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
-import type { EnergyPeak } from "@/lib/quizConfig";
+import type { FinancialRange } from "@/lib/quizConfig";
 
-const ENERGY_PEAK_OPTIONS: Array<{
-  value: EnergyPeak;
+const FINANCIAL_RANGE_OPTIONS: Array<{
+  value: FinancialRange;
   label: string;
   icon: LucideIcon;
-  description: string;
 }> = [
-  { value: "morning", label: "Manhã", icon: Sunrise, description: "Acordo disposto" },
-  { value: "afternoon", label: "Tarde", icon: Sun, description: "Pico após almoço" },
-  { value: "evening", label: "Noite", icon: Moon, description: "Rendo mais de noite" },
+  { value: "1600-3000", label: "R$ 1.600 - 3.000", icon: Wallet },
+  { value: "3000-7000", label: "R$ 3.000 - 7.000", icon: DollarSign },
+  { value: "7000-20000", label: "R$ 7.000 - 20.000", icon: TrendingUp },
+  { value: "20000+", label: "R$ 20.000+", icon: Banknote },
 ];
 
-export const EnergyPeakStep = () => {
-  const { energyPeak, setEnergyPeak } = useQuiz();
+export const FinancialRangeStep = () => {
+  const { financialRange, setFinancialRange } = useQuiz();
 
   return (
     <div className="flex flex-col">
@@ -28,10 +28,10 @@ export const EnergyPeakStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Quando você se sente mais disposto no seu dia?
+          Qual é a sua Condição Financeira?
         </h2>
         <p className="text-sm text-slate-500">
-          Colocamos hábitos mais importantes no horário que você se sente mais comprometido
+          Sugerimos hábitos que estão alinhados com a sua realidade no momento
         </p>
       </motion.div>
 
@@ -42,8 +42,8 @@ export const EnergyPeakStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex items-center justify-center"
       >
-        <SelectionCardGrid columns={1} gap={3} className="w-full max-w-md">
-          {ENERGY_PEAK_OPTIONS.map((option, index) => (
+        <SelectionCardGrid columns={2} gap={3} className="w-full max-w-md">
+          {FINANCIAL_RANGE_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -53,10 +53,9 @@ export const EnergyPeakStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                description={option.description}
                 icon={<option.icon className="w-5 h-5 text-slate-600" />}
-                selected={energyPeak === option.value}
-                onClick={() => setEnergyPeak(option.value)}
+                selected={financialRange === option.value}
+                onClick={() => setFinancialRange(option.value)}
                 variant="compact"
               />
             </motion.div>

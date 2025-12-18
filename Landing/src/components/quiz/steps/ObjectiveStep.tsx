@@ -9,11 +9,11 @@ const OBJECTIVE_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { value: "productivity", label: "Produtividade", icon: BarChart3 },
-  { value: "health", label: "Saúde Física", icon: Dumbbell },
-  { value: "mental", label: "Bem-estar", icon: Brain },
-  { value: "routine", label: "Organização", icon: Calendar },
-  { value: "avoid", label: "Eliminar Vícios", icon: Ban },
+  { value: "productivity", label: "Ser mais produtivo", icon: BarChart3 },
+  { value: "health", label: "Melhorar a minha saúde física", icon: Dumbbell },
+  { value: "routine", label: "Ser mais organizado", icon: Calendar },
+  { value: "avoid", label: "Eliminar vícios", icon: Ban },
+  { value: "mental", label: "Ter uma qualidade de Vida Melhor", icon: Brain },
 ];
 
 export const ObjectiveStep = () => {
@@ -29,10 +29,10 @@ export const ObjectiveStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Qual seu principal objetivo?
+          Qual é o seu principal objetivo com a sua nova rotina?
         </h2>
         <p className="text-sm text-slate-500">
-          Define 40% dos hábitos recomendados
+          Nos ajuda a traçar uma rotina que te ajuda a conquistar o que você sempre sonhou
         </p>
       </motion.div>
 

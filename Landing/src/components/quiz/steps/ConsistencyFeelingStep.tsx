@@ -1,22 +1,22 @@
 import { motion } from "motion/react";
-import { Sunrise, Sun, Moon, type LucideIcon } from "lucide-react";
+import { Frown, EyeOff, Meh, Flame, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
-import type { EnergyPeak } from "@/lib/quizConfig";
+import type { ConsistencyFeeling } from "@/lib/quizConfig";
 
-const ENERGY_PEAK_OPTIONS: Array<{
-  value: EnergyPeak;
+const CONSISTENCY_FEELING_OPTIONS: Array<{
+  value: ConsistencyFeeling;
   label: string;
   icon: LucideIcon;
-  description: string;
 }> = [
-  { value: "morning", label: "Manhã", icon: Sunrise, description: "Acordo disposto" },
-  { value: "afternoon", label: "Tarde", icon: Sun, description: "Pico após almoço" },
-  { value: "evening", label: "Noite", icon: Moon, description: "Rendo mais de noite" },
+  { value: "frustrado", label: "Frustrado e arrependido por não ter agido antes", icon: Frown },
+  { value: "evitando", label: "Evitando situações e se escondendo de novo", icon: EyeOff },
+  { value: "conformado", label: "Conformado, já acostumei com isso", icon: Meh },
+  { value: "determinado", label: "Determinado a mudar esse ano", icon: Flame },
 ];
 
-export const EnergyPeakStep = () => {
-  const { energyPeak, setEnergyPeak } = useQuiz();
+export const ConsistencyFeelingStep = () => {
+  const { consistencyFeeling, setConsistencyFeeling } = useQuiz();
 
   return (
     <div className="flex flex-col">
@@ -28,10 +28,10 @@ export const EnergyPeakStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Quando você se sente mais disposto no seu dia?
+          Um ano novo começando e você ainda não conseguiu ter consistência...
         </h2>
-        <p className="text-sm text-slate-500">
-          Colocamos hábitos mais importantes no horário que você se sente mais comprometido
+        <p className="text-lg font-medium text-slate-700 mb-1">
+          Como você se sente?
         </p>
       </motion.div>
 
@@ -43,7 +43,7 @@ export const EnergyPeakStep = () => {
         className="flex items-center justify-center"
       >
         <SelectionCardGrid columns={1} gap={3} className="w-full max-w-md">
-          {ENERGY_PEAK_OPTIONS.map((option, index) => (
+          {CONSISTENCY_FEELING_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -53,10 +53,9 @@ export const EnergyPeakStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                description={option.description}
                 icon={<option.icon className="w-5 h-5 text-slate-600" />}
-                selected={energyPeak === option.value}
-                onClick={() => setEnergyPeak(option.value)}
+                selected={consistencyFeeling === option.value}
+                onClick={() => setConsistencyFeeling(option.value)}
                 variant="compact"
               />
             </motion.div>
