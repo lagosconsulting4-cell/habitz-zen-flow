@@ -19,19 +19,19 @@
     --card-foreground: #1A1A1A;
     --popover: #FFFFFF;
     --popover-foreground: #1A1A1A;
-    --primary: #65A30D;              /* Lime-600 para melhor contraste em light */
+    --primary: #A3E635;              /* Lime-400 (Bora) */
     --primary-foreground: #FFFFFF;
     --secondary: #F5F5F5;            /* Cinza muito claro */
     --secondary-foreground: #1A1A1A;
     --muted: #F0F0F0;                /* Cinza neutro para backgrounds sutis */
     --muted-foreground: #525252;     /* Cinza mais escuro para melhor contraste (5.7:1) */
-    --accent: #65A30D;               /* Mesmo lime do primary */
+    --accent: #A3E635;               /* Mesmo lime do primary */
     --accent-foreground: #FFFFFF;
     --destructive: #DC2626;          /* Vermelho para erros */
     --destructive-foreground: #FFFFFF;
     --border: #E5E5E5;               /* Borda sutil */
     --input: #E5E5E5;
-    --ring: #65A30D;                 /* Ring com accent color */
+    --ring: #A3E635;                 /* Ring com accent color */
     --chart-1: oklch(0.8100 0.1000 252);
     --chart-2: oklch(0.6200 0.1900 260);
     --chart-3: oklch(0.5500 0.2200 263);
@@ -39,12 +39,12 @@
     --chart-5: oklch(0.4200 0.1800 266);
     --sidebar: #FFFFFF;
     --sidebar-foreground: #1A1A1A;
-    --sidebar-primary: #65A30D;
+    --sidebar-primary: #A3E635;
     --sidebar-primary-foreground: #FFFFFF;
     --sidebar-accent: #F5F5F5;
     --sidebar-accent-foreground: #1A1A1A;
     --sidebar-border: #E5E5E5;
-    --sidebar-ring: #65A30D;
+    --sidebar-ring: #A3E635;
     --font-sans: Alexandria, ui-sans-serif, sans-serif, system-ui;
     --font-serif: Alike, ui-serif, serif;
     --font-mono: Cousine, ui-monospace, monospace;
