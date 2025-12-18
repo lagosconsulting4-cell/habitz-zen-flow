@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { MinusCircle, Smile, Shield, Trophy, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
+import { ContinueButton } from "../ContinueButton";
 import type { ProjectedFeeling } from "@/lib/quizConfig";
 
 const PROJECTED_FEELING_OPTIONS: Array<{
@@ -70,6 +71,9 @@ export const ProjectedFeelingStep = () => {
           ))}
         </SelectionCardGrid>
       </motion.div>
+
+      {/* Continue Button */}
+      <ContinueButton disabled={!projectedFeeling} />
     </div>
   );
 };

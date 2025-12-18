@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Frown, EyeOff, Meh, Flame, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
+import { ContinueButton } from "../ContinueButton";
 import type { ConsistencyFeeling } from "@/lib/quizConfig";
 
 const CONSISTENCY_FEELING_OPTIONS: Array<{
@@ -62,6 +63,9 @@ export const ConsistencyFeelingStep = () => {
           ))}
         </SelectionCardGrid>
       </motion.div>
+
+      {/* Continue Button */}
+      <ContinueButton disabled={!consistencyFeeling} />
     </div>
   );
 };

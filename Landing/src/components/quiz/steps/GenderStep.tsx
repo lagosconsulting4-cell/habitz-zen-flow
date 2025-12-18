@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { User, Users, Sparkles, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
+import { ContinueButton } from "../ContinueButton";
 import type { Gender } from "@/lib/quizConfig";
 
 const GENDER_OPTIONS: Array<{
@@ -61,6 +62,9 @@ export const GenderStep = () => {
           ))}
         </SelectionCardGrid>
       </motion.div>
+
+      {/* Continue Button */}
+      <ContinueButton disabled={!gender} />
     </div>
   );
 };

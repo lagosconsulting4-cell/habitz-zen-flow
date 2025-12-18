@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Zap, Clock, Target, Dumbbell, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
+import { ContinueButton } from "../ContinueButton";
 import type { TimeAvailable } from "@/lib/quizConfig";
 
 const TIME_OPTIONS: Array<{
@@ -76,6 +77,9 @@ export const TimeAvailableStep = () => {
       >
         {selectedOption ? `Recomendamos: ${selectedOption.habits}` : "Qualidade > Quantidade"}
       </motion.p>
+
+      {/* Continue Button */}
+      <ContinueButton disabled={!timeAvailable} />
     </div>
   );
 };

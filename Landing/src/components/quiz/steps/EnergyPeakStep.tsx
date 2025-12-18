@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Sunrise, Sun, Moon, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
+import { ContinueButton } from "../ContinueButton";
 import type { EnergyPeak } from "@/lib/quizConfig";
 
 const ENERGY_PEAK_OPTIONS: Array<{
@@ -63,6 +64,9 @@ export const EnergyPeakStep = () => {
           ))}
         </SelectionCardGrid>
       </motion.div>
+
+      {/* Continue Button */}
+      <ContinueButton disabled={!energyPeak} />
     </div>
   );
 };

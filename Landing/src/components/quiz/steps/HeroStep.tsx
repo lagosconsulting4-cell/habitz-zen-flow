@@ -1,7 +1,10 @@
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { useQuiz } from "../QuizProvider";
 
 export const HeroStep = () => {
+  const { nextStep } = useQuiz();
+
   return (
     <div className="flex flex-col items-center">
       {/* Video Section */}
@@ -9,9 +12,9 @@ export const HeroStep = () => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-2xl mb-8"
+        className="w-full max-w-sm mb-8"
       >
-        <div className="relative aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="relative aspect-[9/16] bg-slate-900 rounded-2xl overflow-hidden shadow-2xl">
           <video
             autoPlay
             muted
@@ -49,6 +52,7 @@ export const HeroStep = () => {
       >
         <Button
           size="lg"
+          onClick={nextStep}
           className="w-full h-14 text-lg font-bold bg-lime-500 hover:bg-lime-600 text-slate-900"
         >
           Iniciar Quiz

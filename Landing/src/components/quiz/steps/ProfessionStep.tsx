@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { GraduationCap, Briefcase, Rocket, Laptop, Sparkles, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
+import { ContinueButton } from "../ContinueButton";
 import type { Profession } from "@/lib/quizConfig";
 
 const PROFESSION_OPTIONS: Array<{
@@ -63,6 +64,9 @@ export const ProfessionStep = () => {
           ))}
         </SelectionCardGrid>
       </motion.div>
+
+      {/* Continue Button */}
+      <ContinueButton disabled={!profession} />
     </div>
   );
 };

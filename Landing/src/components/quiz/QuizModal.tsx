@@ -1,10 +1,9 @@
 import { useEffect } from "react";
-import { X } from "lucide-react";
+import { X, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { QuizProvider, useQuiz } from "./QuizProvider";
 import posthog from "posthog-js";
 import { QuizProgress } from "./QuizProgress";
-import { QuizNavigation } from "./QuizNavigation";
 
 // Steps - Question Steps
 import { HeroStep } from "./steps/HeroStep";
@@ -46,7 +45,7 @@ interface QuizModalProps {
 
 // Componente interno que usa o context
 const QuizContent = ({ onClose }: { onClose: () => void }) => {
-  const { currentStep, generateRoutine } = useQuiz();
+  const { currentStep, generateRoutine, canGoBack, prevStep } = useQuiz();
 
   // Gera a rotina quando chega no LoadingStep (step 21)
   useEffect(() => {
@@ -117,18 +116,31 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
     <div className="flex flex-col h-full">
       {/* Header com progresso */}
       <div className="sticky top-0 bg-white border-b border-slate-100 z-10">
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-between p-4 gap-3">
+          {/* Botão Voltar à esquerda */}
+          {canGoBack ? (
+            <button
+              onClick={prevStep}
+              className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          ) : (
+            <div className="w-9" /> /* Spacer quando não tem voltar */
+          )}
+
+          {/* QuizProgress centralizado */}
+          <div className="flex-1 max-w-md mx-auto">
+            <QuizProgress />
+          </div>
+
+          {/* Botão Fechar à direita */}
           <button
             onClick={onClose}
             className="flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors"
           >
             <X className="w-5 h-5" />
-            <span className="text-sm font-medium">Fechar</span>
           </button>
-          <div className="flex-1 max-w-md mx-4">
-            <QuizProgress />
-          </div>
-          <div className="w-16" /> {/* Spacer para centralizar progress */}
         </div>
       </div>
 
@@ -149,14 +161,6 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
         </div>
       </div>
 
-      {/* Footer com navegação (oculto em Loading e DataCollection que tem submit próprio) */}
-      {currentStep !== 22 && currentStep !== 24 && (
-        <div className="sticky bottom-0 bg-white border-t border-slate-100">
-          <div className="max-w-2xl mx-auto p-4">
-            <QuizNavigation />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

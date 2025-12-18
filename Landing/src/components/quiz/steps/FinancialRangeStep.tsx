@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { DollarSign, TrendingUp, Wallet, Banknote, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
+import { ContinueButton } from "../ContinueButton";
 import type { FinancialRange } from "@/lib/quizConfig";
 
 const FINANCIAL_RANGE_OPTIONS: Array<{
@@ -62,6 +63,9 @@ export const FinancialRangeStep = () => {
           ))}
         </SelectionCardGrid>
       </motion.div>
+
+      {/* Continue Button */}
+      <ContinueButton disabled={!financialRange} />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Clock, Target, CloudFog, BedDouble, AlertCircle, Flame, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
+import { ContinueButton } from "../ContinueButton";
 
 const CHALLENGE_OPTIONS: Array<{
   id: string;
@@ -74,6 +75,9 @@ export const ChallengesStep = () => {
           ? `${challenges.length} ${challenges.length === 1 ? "selecionado" : "selecionados"}`
           : "Sugerimos hábitos para seus desafios"}
       </motion.p>
+
+      {/* Continue Button */}
+      <ContinueButton disabled={challenges.length === 0} />
     </div>
   );
 };

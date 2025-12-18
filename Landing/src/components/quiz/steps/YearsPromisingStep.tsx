@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Calendar, CalendarDays, CalendarRange, HelpCircle, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
+import { ContinueButton } from "../ContinueButton";
 import type { YearsPromising } from "@/lib/quizConfig";
 
 const YEARS_PROMISING_OPTIONS: Array<{
@@ -70,6 +71,9 @@ export const YearsPromisingStep = () => {
           ))}
         </SelectionCardGrid>
       </motion.div>
+
+      {/* Continue Button */}
+      <ContinueButton disabled={!yearsPromising} />
     </div>
   );
 };

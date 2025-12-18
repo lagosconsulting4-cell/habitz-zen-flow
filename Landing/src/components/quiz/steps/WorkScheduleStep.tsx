@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Sunrise, Building2, Moon, RefreshCw, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
+import { ContinueButton } from "../ContinueButton";
 import type { WorkSchedule } from "@/lib/quizConfig";
 
 const WORK_SCHEDULE_OPTIONS: Array<{
@@ -75,6 +76,9 @@ export const WorkScheduleStep = () => {
       >
         {selectedOption ? `Horário: ${selectedOption.hours}` : "Selecione seu turno de trabalho"}
       </motion.p>
+
+      {/* Continue Button */}
+      <ContinueButton disabled={!workSchedule} />
     </div>
   );
 };

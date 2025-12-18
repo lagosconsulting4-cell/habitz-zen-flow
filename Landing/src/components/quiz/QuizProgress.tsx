@@ -3,24 +3,21 @@ import { useQuiz } from "./QuizProvider";
 
 export const QuizProgress = () => {
   const { currentStep, totalSteps } = useQuiz();
-
-  // O último step (8) é a preview, não conta como "pergunta"
-  const questionSteps = totalSteps - 1;
-  const progress = Math.min(currentStep / questionSteps, 1) * 100;
+  const progress = ((currentStep + 1) / totalSteps) * 100;
 
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-slate-500">
-          {currentStep < questionSteps
-            ? `Pergunta ${currentStep + 1} de ${questionSteps}`
-            : "Sua rotina"}
-        </span>
-        <span className="text-xs font-medium text-slate-600">{Math.round(progress)}%</span>
+    <div className="flex items-center gap-3 w-full max-w-md">
+      {/* Logo U */}
+      <div className="flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-lime-500 flex items-center justify-center text-white font-bold text-sm">
+          U
+        </div>
       </div>
-      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+
+      {/* Progress Bar */}
+      <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-[#A3E635] rounded-full"
+          className="h-full bg-lime-500 rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.3, ease: "easeOut" }}

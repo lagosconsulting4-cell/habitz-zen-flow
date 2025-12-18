@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { GraduationCap, Briefcase, Home, Star, Sparkles, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
+import { ContinueButton } from "../ContinueButton";
 import type { AgeRange } from "@/lib/quizConfig";
 
 const AGE_OPTIONS: Array<{
@@ -63,6 +64,9 @@ export const AgeStep = () => {
           ))}
         </SelectionCardGrid>
       </motion.div>
+
+      {/* Continue Button */}
+      <ContinueButton disabled={!ageRange} />
     </div>
   );
 };

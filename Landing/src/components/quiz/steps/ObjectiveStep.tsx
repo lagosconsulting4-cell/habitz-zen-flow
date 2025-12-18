@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { BarChart3, Dumbbell, Brain, Calendar, Ban, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
+import { ContinueButton } from "../ContinueButton";
 import type { Objective } from "@/lib/quizConfig";
 
 const OBJECTIVE_OPTIONS: Array<{
@@ -63,6 +64,9 @@ export const ObjectiveStep = () => {
           ))}
         </SelectionCardGrid>
       </motion.div>
+
+      {/* Continue Button */}
+      <ContinueButton disabled={!objective} />
     </div>
   );
 };
