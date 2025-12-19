@@ -1,81 +1,71 @@
+import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "motion/react";
-import { useQuiz } from "../QuizProvider";
-import { Smartphone, Download, CheckCircle } from "lucide-react";
+import { Smartphone, Share, Plus, ChevronRight, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useQuiz } from "../QuizProvider";
 import { useTracking } from "@/hooks/useTracking";
+import { usePWA } from "@/hooks/usePWA";
+
+const IOSStep = ({ step, icon, text }: { step: number; icon: ReactNode; text: string }) => (
+  <div className="flex items-center gap-3 group">
+    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground flex items-center justify-center text-xs font-bold shadow-md">
+      {step}
+    </div>
+    <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center text-slate-500 border border-slate-200">
+      {icon}
+    </div>
+    <span className="text-sm text-slate-800 font-medium">{text}</span>
+  </div>
+);
 
 export const PWAInstallStep = () => {
   const { pwaInstalled, setPwaInstalled, setPwaInstallPromptShown, nextStep } = useQuiz();
   const { trackPWAPromptShown, trackPWAInstalled } = useTracking();
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [canInstall, setCanInstall] = useState(false);
+  const { isInstalled, isInstallable, isIOS, promptInstall } = usePWA();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Track that PWA prompt was shown
     trackPWAPromptShown();
     setPwaInstallPromptShown(true);
+  }, [trackPWAPromptShown, setPwaInstallPromptShown]);
 
-    // Listen for beforeinstallprompt event
-    const handleBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setCanInstall(true);
-    };
-
-    // Check if already installed
-    if (window.matchMedia("(display-mode: standalone)").matches) {
+  // Sincroniza estado global quando o app for instalado
+  useEffect(() => {
+    if (isInstalled && !pwaInstalled) {
       setPwaInstalled(true);
-      setCanInstall(false);
+      trackPWAInstalled(true, "prompt");
     }
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstall);
-
-    return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
-    };
-  }, [trackPWAPromptShown, setPwaInstallPromptShown, setPwaInstalled]);
+  }, [isInstalled, pwaInstalled, setPwaInstalled, trackPWAInstalled]);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) {
-      trackPWAInstalled(false, "manual");
-      // User needs to install manually
-      alert("Para instalar: Clique no menu do navegador (⋮) > 'Instalar app' ou 'Adicionar à tela inicial'");
-      return;
-    }
-
-    // Show install prompt
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === "accepted") {
-      trackPWAInstalled(true, "prompt");
+    setIsLoading(true);
+    const success = await promptInstall();
+    trackPWAInstalled(success, "prompt");
+    if (success) {
       setPwaInstalled(true);
-      setCanInstall(false);
-    } else {
-      trackPWAInstalled(false, "prompt");
     }
-
-    setDeferredPrompt(null);
+    setIsLoading(false);
   };
 
   const handleContinue = () => {
     nextStep();
   };
 
+  const showInstallCTA = isInstallable && !isIOS && !pwaInstalled;
+  const alreadyInstalled = pwaInstalled || isInstalled;
+
   return (
-    <div className="flex flex-col items-center">
-      {/* Icon */}
+    <div className="flex flex-col items-center gap-6">
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 200, damping: 15 }}
-        className="mb-6"
+        className="mt-2"
       >
         <div className={`w-20 h-20 rounded-full flex items-center justify-center ${
-          pwaInstalled ? "bg-green-100" : "bg-blue-100"
+          alreadyInstalled ? "bg-green-100" : "bg-blue-100"
         }`}>
-          {pwaInstalled ? (
+          {alreadyInstalled ? (
             <CheckCircle className="w-10 h-10 text-green-600" />
           ) : (
             <Smartphone className="w-10 h-10 text-blue-600" />
@@ -83,91 +73,107 @@ export const PWAInstallStep = () => {
         </div>
       </motion.div>
 
-      {/* Main Message */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.3 }}
-        className="text-center mb-6 px-4"
+        transition={{ delay: 0.1, duration: 0.25 }}
+        className="text-center px-4"
       >
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
-          {pwaInstalled ? "App Instalado!" : "Instale o App Bora"}
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+          {alreadyInstalled ? "App Instalado!" : "Instale o Bora"}
         </h2>
         <p className="text-base text-slate-700">
-          {pwaInstalled
-            ? "Você já tem o Bora instalado no seu dispositivo!"
-            : "Tenha acesso rápido e notificações para manter sua consistência"}
+          Acesso rapido, push e offline direto da sua tela inicial.
         </p>
       </motion.div>
 
-      {/* Video Tutorial */}
-      {!pwaInstalled && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.3 }}
-          className="w-full max-w-md mb-6"
-        >
-          <div className="relative aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-lg">
-            {/* Placeholder for installation tutorial video */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <Download className="w-16 h-16 text-white mb-3 mx-auto opacity-80" />
-                <p className="text-white text-sm font-medium px-4">
-                  Tutorial de Instalação
-                </p>
-              </div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.15, duration: 0.25 }}
+        className="w-full max-w-md"
+      >
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+              <Smartphone className="w-5 h-5" />
             </div>
-            {/* TODO: Add actual video embed showing installation steps */}
-            {/* <iframe src="INSTALLATION_TUTORIAL_VIDEO_URL" ... /> */}
+            <div className="text-left">
+              <p className="text-lg font-bold text-slate-900">Instale o Bora</p>
+              <p className="text-sm text-slate-600">Mesmo fluxo do app para baixar direto no seu celular.</p>
+            </div>
           </div>
-        </motion.div>
-      )}
 
-      {/* Installation Steps */}
-      {!pwaInstalled && !canInstall && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.3 }}
-          className="w-full max-w-md mb-6 px-4"
-        >
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <h3 className="font-bold text-slate-900 mb-2">Como instalar:</h3>
-            <ol className="text-sm text-slate-700 space-y-1 list-decimal list-inside">
-              <li>Clique no menu do navegador (⋮)</li>
-              <li>Selecione "Instalar app" ou "Adicionar à tela inicial"</li>
-              <li>Confirme a instalação</li>
-            </ol>
-          </div>
-        </motion.div>
-      )}
+          {!alreadyInstalled && (
+            <div className="relative rounded-xl overflow-hidden shadow-lg ring-1 ring-slate-200 bg-slate-50 mx-auto" style={{ maxWidth: "260px" }}>
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full aspect-[9/19] object-contain"
+              >
+                <source src="/videos/install-tutorial.mp4" type="video/mp4" />
+              </video>
+            </div>
+          )}
 
-      {/* CTA Button */}
+          {isIOS && !alreadyInstalled && (
+            <div className="space-y-3 bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <h3 className="text-sm font-semibold text-slate-900 mb-1">Como instalar no iPhone</h3>
+              <IOSStep step={1} icon={<Share className="w-4 h-4" />} text='Toque em "Compartilhar"' />
+              <IOSStep step={2} icon={<Plus className="w-4 h-4" />} text='Selecione "Adicionar a Tela Inicial"' />
+              <IOSStep step={3} icon={<ChevronRight className="w-4 h-4" />} text='Confirme em "Adicionar"' />
+            </div>
+          )}
+
+          {!isIOS && !isInstallable && !alreadyInstalled && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-left">
+              <h3 className="font-semibold text-slate-900 mb-2">Nao apareceu o botao?</h3>
+              <ol className="text-sm text-slate-700 space-y-1 list-decimal list-inside">
+                <li>Abra o menu do navegador (tres pontos ...)</li>
+                <li>Escolha "Instalar app" ou "Adicionar a tela inicial"</li>
+                <li>Confirme a instalacao</li>
+              </ol>
+            </div>
+          )}
+
+          {showInstallCTA && (
+            <Button
+              onClick={handleInstall}
+              disabled={isLoading}
+              size="lg"
+              className="w-full h-14 text-base font-bold bg-gradient-to-r from-primary via-primary to-primary/90"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  Instalando...
+                </>
+              ) : (
+                <>
+                  <Smartphone className="w-5 h-5 mr-2" />
+                  Instalar Agora
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+      </motion.div>
+
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.3 }}
+        transition={{ delay: 0.2, duration: 0.25 }}
         className="w-full max-w-md"
       >
-        {pwaInstalled || !canInstall ? (
-          <Button
-            size="lg"
-            onClick={handleContinue}
-            className="w-full h-14 text-lg font-bold bg-lime-500 hover:bg-lime-600 text-slate-900"
-          >
-            Pronto
-          </Button>
-        ) : (
-          <Button
-            size="lg"
-            onClick={handleInstall}
-            className="w-full h-14 text-lg font-bold bg-blue-500 hover:bg-blue-600 text-white"
-          >
-            <Download className="w-5 h-5 mr-2" />
-            Instalar Agora
-          </Button>
-        )}
+        <Button
+          size="lg"
+          onClick={handleContinue}
+          className="w-full h-14 text-lg font-bold bg-lime-500 hover:bg-lime-600 text-slate-900"
+        >
+          Pronto
+        </Button>
       </motion.div>
     </div>
   );

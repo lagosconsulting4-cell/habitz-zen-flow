@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +42,7 @@ import {
   Heart,
   ChevronRight,
   Play,
-  // Ícones para seção "A diferença que o BORA faz"
+  // Ãcones para seÃ§Ã£o "A diferenÃ§a que o BORA faz"
   Moon,
   Pause,
   Ban,
@@ -60,14 +60,14 @@ const pillars = [
   {
     title: "Simplicidade",
     subtitle: "7 minutos por dia",
-    description: "Micro-hábitos que cabem na rotina mais corrida. Sem complicação.",
+    description: "Micro-hÃ¡bitos que cabem na rotina mais corrida. Sem complicaÃ§Ã£o.",
     icon: Zap,
     gradient: "from-[#A3E635] to-lime-300",
     bgGlow: "bg-[#A3E635]/20",
   },
   {
-    title: "Personalização",
-    subtitle: "Feito para você",
+    title: "PersonalizaÃ§Ã£o",
+    subtitle: "Feito para vocÃª",
     description: "Quiz personalizado. Rotina que aprende e se adapta ao seu ritmo.",
     icon: Brain,
     gradient: "from-[#A3E635] to-lime-400",
@@ -75,8 +75,8 @@ const pillars = [
   },
   {
     title: "Resultados",
-    subtitle: "30 dias de transformação",
-    description: "5000+ usuários. 94% mantém consistência. Garantia de 7 dias.",
+    subtitle: "30 dias de transformaÃ§Ã£o",
+    description: "5000+ usuÃ¡rios. 94% mantÃ©m consistÃªncia. Garantia de 7 dias.",
     icon: Flame,
     gradient: "from-[#A3E635] to-lime-300",
     bgGlow: "bg-[#A3E635]/20",
@@ -85,37 +85,37 @@ const pillars = [
 
 const features = [
   { icon: Target, title: "Rotina Sob Medida", description: "Criada para seus objetivos", size: "large" },
-  { icon: Calendar, title: "Checklists Diários", description: "Simples e práticos", size: "small" },
-  { icon: LineChart, title: "Progresso Visual", description: "Veja sua evolução", size: "small" },
+  { icon: Calendar, title: "Checklists DiÃ¡rios", description: "Simples e prÃ¡ticos", size: "small" },
+  { icon: LineChart, title: "Progresso Visual", description: "Veja sua evoluÃ§Ã£o", size: "small" },
   { icon: Bell, title: "Lembretes Inteligentes", description: "No momento certo", size: "medium" },
   { icon: Brain, title: "Adapta ao Seu Ritmo", description: "Reorganiza quando precisa", size: "medium" },
-  { icon: Flame, title: "Streaks e Conquistas", description: "Gamificação motivadora", size: "small" },
-  { icon: Rocket, title: "Transformação Real", description: "7 min/dia, resultados em 30 dias", size: "large" },
+  { icon: Flame, title: "Streaks e Conquistas", description: "GamificaÃ§Ã£o motivadora", size: "small" },
+  { icon: Rocket, title: "TransformaÃ§Ã£o Real", description: "7 min/dia, resultados em 30 dias", size: "large" },
 ];
 
 const howItWorks = [
   {
     step: "01",
-    title: "Faça o Quiz",
-    description: "3 minutos para entendermos você em detalhes",
+    title: "FaÃ§a o Quiz",
+    description: "3 minutos para entendermos vocÃª em detalhes",
     image: "/images/lp/quiz_mockup.png",
   },
   {
     step: "02",
     title: "Receba sua rotina",
-    description: "Plano único baseado nos seus objetivos e limites",
+    description: "Plano Ãºnico baseado nos seus objetivos e limites",
     image: "/images/lp/quiz_mockup.png",
   },
   {
     step: "03",
-    title: "Se organize de forma fácil e prática",
-    description: "Agenda visual e cards de ação para clarear seu dia",
+    title: "Se organize de forma fÃ¡cil e prÃ¡tica",
+    description: "Agenda visual e cards de aÃ§Ã£o para clarear seu dia",
     image: "/images/lp/dashboard_mockup.png",
   },
   {
     step: "04",
     title: "Acompanhe seu progresso",
-    description: "Gráficos e streaks para manter a consistência sem esforço",
+    description: "GrÃ¡ficos e streaks para manter a consistÃªncia sem esforÃ§o",
     image: "/images/lp/progresso_mockup.png",
   },
 ];
@@ -123,7 +123,7 @@ const howItWorks = [
 const beforeProblems: { icon: LucideIcon; text: string }[] = [
   {
     icon: Moon,
-    text: "Acordar sem energia ou motivação",
+    text: "Acordar sem energia ou motivaÃ§Ã£o",
   },
   {
     icon: Clock,
@@ -135,7 +135,7 @@ const beforeProblems: { icon: LucideIcon; text: string }[] = [
   },
   {
     icon: Ban,
-    text: "Dormir com sensação de fracasso",
+    text: "Dormir com sensaÃ§Ã£o de fracasso",
   },
 ];
 
@@ -150,7 +150,7 @@ const afterBenefits: { icon: LucideIcon; text: string }[] = [
   },
   {
     icon: ListChecks,
-    text: "Consistência sem esforço",
+    text: "ConsistÃªncia sem esforÃ§o",
   },
   {
     icon: Heart,
@@ -164,7 +164,7 @@ const testimonials = [
     age: 28,
     role: "Designer",
     photo: "https://i.ibb.co/xtXmcTS3/Gemini-Generated-Image-ixzgp8ixzgp8ixzg.png",
-    quote: "Em 14 dias, passei de acordar às 10h para às 6h30 naturalmente. Minha produtividade aumentou 40% e finalmente entrego projetos no prazo.",
+    quote: "Em 14 dias, passei de acordar Ã s 10h para Ã s 6h30 naturalmente. Minha produtividade aumentou 40% e finalmente entrego projetos no prazo.",
     rating: 5,
     metric: "14 dias para acordar cedo",
   },
@@ -173,7 +173,7 @@ const testimonials = [
     age: 24,
     role: "Estudante",
     photo: "https://i.ibb.co/TMPp1Kw1/Gemini-Generated-Image-200v6k200v6k200v.png",
-    quote: "Completei 21 dias de streak consecutivos! Antes não conseguia manter nada por mais de 3 dias. Passei em 2 concursos estudando só 2h/dia com foco.",
+    quote: "Completei 21 dias de streak consecutivos! Antes nÃ£o conseguia manter nada por mais de 3 dias. Passei em 2 concursos estudando sÃ³ 2h/dia com foco.",
     rating: 5,
     metric: "21 dias de streak",
   },
@@ -189,11 +189,11 @@ const testimonials = [
   {
     name: "Ana Paula",
     age: 29,
-    role: "Médica",
+    role: "MÃ©dica",
     photo: "https://i.ibb.co/7t5yRpDd/Gemini-Generated-Image-i7pejzi7pejzi7pe.png",
-    quote: "Mesmo com plantões de 24h, mantenho 87% de consistência nos meus hábitos. O BORA se adapta quando minha rotina muda.",
+    quote: "Mesmo com plantÃµes de 24h, mantenho 87% de consistÃªncia nos meus hÃ¡bitos. O BORA se adapta quando minha rotina muda.",
     rating: 5,
-    metric: "87% de consistência",
+    metric: "87% de consistÃªncia",
   },
 ];
 
@@ -201,7 +201,7 @@ const bonusItems = [
   {
     id: 1,
     title: "Programa 30 Dias",
-    subtitle: "Transformação completa",
+    subtitle: "TransformaÃ§Ã£o completa",
     value: 297,
     image: "/images/lp/programa_completo_bonus_capa.webp",
   },
@@ -214,10 +214,10 @@ const bonusItems = [
   },
   {
     id: 3,
-    title: "Meditações & Respiração",
+    title: "MeditaÃ§Ãµes & RespiraÃ§Ã£o",
     subtitle: "Acalme sua mente",
     value: 147,
-    image: "/images/lp/meditações_bonus_capa.webp",
+    image: "/images/lp/meditaÃ§Ãµes_bonus_capa.webp",
   },
   {
     id: 4,
@@ -228,7 +228,7 @@ const bonusItems = [
   },
   {
     id: 5,
-    title: "27 Dicas Práticas",
+    title: "27 Dicas PrÃ¡ticas",
     subtitle: "Hacks de produtividade",
     value: 67,
     image: "/images/lp/dicas_praticas_hack_bonus_capa.webp",
@@ -238,19 +238,19 @@ const bonusItems = [
 const faqs = [
   {
     question: "Quanto tempo preciso dedicar por dia?",
-    answer: "Apenas 7 minutos! Nosso método foi desenhado para se encaixar na rotina mais corrida. São micro-hábitos que geram macro resultados.",
+    answer: "Apenas 7 minutos! Nosso mÃ©todo foi desenhado para se encaixar na rotina mais corrida. SÃ£o micro-hÃ¡bitos que geram macro resultados.",
   },
   {
-    question: "Funciona mesmo se eu já tentei de tudo?",
-    answer: "Sim! O BORA é diferente porque não tenta mudar tudo de uma vez. Começamos com pequenas vitórias que criam momentum para mudanças maiores.",
+    question: "Funciona mesmo se eu jÃ¡ tentei de tudo?",
+    answer: "Sim! O BORA Ã© diferente porque nÃ£o tenta mudar tudo de uma vez. ComeÃ§amos com pequenas vitÃ³rias que criam momentum para mudanÃ§as maiores.",
   },
   {
-    question: "E se eu não gostar?",
-    answer: "Oferecemos garantia de 7 dias. Se não sentir diferença na sua rotina, devolvemos 100% do seu investimento. Sem perguntas, sem burocracia.",
+    question: "E se eu nÃ£o gostar?",
+    answer: "Oferecemos garantia de 7 dias. Se nÃ£o sentir diferenÃ§a na sua rotina, devolvemos 100% do seu investimento. Sem perguntas, sem burocracia.",
   },
   {
     question: "Preciso baixar algum app?",
-    answer: "Não precisa baixar nada! O BORA funciona direto do seu celular pelo navegador. Você pode salvar na tela inicial como um app e usar offline.",
+    answer: "NÃ£o precisa baixar nada! O BORA funciona direto do seu celular pelo navegador. VocÃª pode salvar na tela inicial como um app e usar offline.",
   },
 ];
 
@@ -355,7 +355,7 @@ const BoraLanding = () => {
               onClick={() => handleCTA("header")}
               className="bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 font-semibold px-6 py-2 rounded-full shadow-lg shadow-[#A3E635]/25"
             >
-              Começar agora
+              ComeÃ§ar agora
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </motion.div>
@@ -412,7 +412,7 @@ const BoraLanding = () => {
               >
                 Chega de acordar sem energia. Chega de procrastinar.{" "}
                 <strong className="text-slate-900">Seu plano personalizado</strong> vai
-                te dar clareza e consistência — <strong className="text-[#A3E635]">ou seu dinheiro de volta</strong>.
+                te dar clareza e consistÃªncia â€” <strong className="text-[#A3E635]">ou seu dinheiro de volta</strong>.
               </motion.p>
 
               {/* Stats with Bora Green */}
@@ -423,7 +423,7 @@ const BoraLanding = () => {
                 {[
                   { value: 7, label: "minutos/dia" },
                   { value: 5000, suffix: "+", label: "vidas transformadas" },
-                  { value: 94, suffix: "%", label: "mantêm a rotina" },
+                  { value: 94, suffix: "%", label: "mantÃªm a rotina" },
                 ].map((stat, i) => (
                   <div key={i} className="text-center lg:text-left">
                     <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#A3E635]">
@@ -498,10 +498,10 @@ const BoraLanding = () => {
               Por que funciona
             </Badge>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
-              O BORA é <span className="text-[#A3E635]">diferente</span>
+              O BORA Ã© <span className="text-[#A3E635]">diferente</span>
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Três pilares que fazem a transformação acontecer
+              TrÃªs pilares que fazem a transformaÃ§Ã£o acontecer
             </p>
           </motion.div>
 
@@ -563,7 +563,7 @@ const BoraLanding = () => {
               Um dia usando o BORA
             </Badge>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
-              Sua jornada de <span className="text-[#A3E635]">transformação</span>
+              Sua jornada de <span className="text-[#A3E635]">transformaÃ§Ã£o</span>
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               Veja como 7 minutos por dia mudam tudo
@@ -584,21 +584,21 @@ const BoraLanding = () => {
                 characterWebp: "/images/lp/personagem-manha.webp",
                 characterPng: "/images/lp/personagem-manha.png",
                 mood: "energizado",
-                features: ["3 micro-hábitos", "Checklist matinal", "Lembrete suave"],
+                features: ["3 micro-hÃ¡bitos", "Checklist matinal", "Lembrete suave"],
               },
               {
                 time: "12:00",
                 title: "Meio do Dia",
-                description: "Check-in rápido para manter o foco e a produtividade",
+                description: "Check-in rÃ¡pido para manter o foco e a produtividade",
                 characterWebp: "/images/lp/personagem-meio-dia.webp",
                 characterPng: "/images/lp/personagem-meio-dia.png",
                 mood: "focado",
-                features: ["Pausa consciente", "Revisão de tarefas", "Momento de gratidão"],
+                features: ["Pausa consciente", "RevisÃ£o de tarefas", "Momento de gratidÃ£o"],
               },
               {
                 time: "18:00",
                 title: "Fim do Expediente",
-                description: "Revisão do progresso e celebração das conquistas do dia",
+                description: "RevisÃ£o do progresso e celebraÃ§Ã£o das conquistas do dia",
                 characterWebp: "/images/lp/personagem-tarde.webp",
                 characterPng: "/images/lp/personagem-tarde.png",
                 mood: "realizado",
@@ -607,11 +607,11 @@ const BoraLanding = () => {
               {
                 time: "22:00",
                 title: "Noite",
-                description: "Preparação para um sono restaurador e planejamento do próximo dia",
+                description: "PreparaÃ§Ã£o para um sono restaurador e planejamento do prÃ³ximo dia",
                 characterWebp: "/images/lp/personagem-noite.webp",
                 characterPng: "/images/lp/personagem-noite.png",
                 mood: "tranquilo",
-                features: ["Meditação guiada", "Reflexão do dia", "Rotina de sono"],
+                features: ["MeditaÃ§Ã£o guiada", "ReflexÃ£o do dia", "Rotina de sono"],
               },
             ].map((item, index) => (
               <motion.div
@@ -711,7 +711,7 @@ const BoraLanding = () => {
                 className="bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 font-bold px-8 py-6 rounded-full shadow-xl shadow-[#A3E635]/30"
               >
                 <Sparkles className="w-5 h-5 mr-2" />
-                COMEÇAR MINHA TRANSFORMAÇÃO
+                COMEÃ‡AR MINHA TRANSFORMAÃ‡ÃƒO
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </motion.div>
@@ -767,7 +767,7 @@ const BoraLanding = () => {
                   Quiz de Rotina Personalizada
                 </h3>
                 <p className="text-slate-600 max-w-md mx-auto">
-                  Baseado nas suas respostas, nosso algoritmo cria uma rotina única para você
+                  Baseado nas suas respostas, nosso algoritmo cria uma rotina Ãºnica para vocÃª
                 </p>
               </div>
 
@@ -775,7 +775,7 @@ const BoraLanding = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                 {[
                   { icon: Clock, text: "2 minutos", subtext: "tempo estimado" },
-                  { icon: Target, text: "8 perguntas", subtext: "simples e rápidas" },
+                  { icon: Target, text: "8 perguntas", subtext: "simples e rÃ¡pidas" },
                   { icon: Brain, text: "IA Personalizada", subtext: "algoritmo inteligente" },
                 ].map((item, index) => (
                   <motion.div
@@ -807,7 +807,7 @@ const BoraLanding = () => {
                   </Button>
                 </motion.div>
                 <p className="text-xs text-slate-400 mt-4">
-                  Sem cadastro • 100% gratuito • Resultado imediato
+                  Sem cadastro â€¢ 100% gratuito â€¢ Resultado imediato
                 </p>
               </div>
             </div>
@@ -838,7 +838,7 @@ const BoraLanding = () => {
               Simples como deveria ser
             </p>
             <p className="text-xs sm:text-sm uppercase tracking-[0.35em] text-slate-400 mt-4">
-              {totalHowItWorksSteps} passos guiados • arraste para ver todos
+              {totalHowItWorksSteps} passos guiados â€¢ arraste para ver todos
             </p>
           </motion.div>
 
@@ -916,10 +916,10 @@ const BoraLanding = () => {
           >
             <Badge className="mb-4 bg-gradient-to-r from-primary to-lime-400 text-white border-0 shadow-lg shadow-primary/25">
               <Zap className="w-3 h-3 mr-1" />
-              Transformação garantida
+              TransformaÃ§Ã£o garantida
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
-              A diferença que o <span className="text-primary font-extrabold">BORA</span> faz
+              A diferenÃ§a que o <span className="text-primary font-extrabold">BORA</span> faz
             </h2>
           </motion.div>
 
@@ -1019,9 +1019,9 @@ const BoraLanding = () => {
                       transition={{ delay: 0.3 }}
                     >
                       <picture>
-                        <source srcSet="/images/lp/meditação_personagem.webp" type="image/webp" />
+                        <source srcSet="/images/lp/meditaÃ§Ã£o_personagem.webp" type="image/webp" />
                         <img
-                          src="/images/lp/meditação_personagem.png"
+                          src="/images/lp/meditaÃ§Ã£o_personagem.png"
                           alt="Pessoa em paz meditando"
                           className="w-40 lg:w-48 h-auto drop-shadow-lg"
                           loading="lazy"
@@ -1049,11 +1049,11 @@ const BoraLanding = () => {
             viewport={{ once: true }}
           >
             <Badge className="mb-4 bg-gradient-to-r from-primary to-lime-400 text-white border-0 shadow-lg shadow-primary/25">
-              <Users className="w-3 h-3 mr-1" />
-              Histórias reais
+              <Users className="hidden md:inline-block w-3 h-3" />
+              <span>Mais de 2000 transformacoes</span>
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
-              Quem já <span className="text-primary font-extrabold">virou o jogo</span>
+              Mais de 2000 usuarios transformaram suas vidas
             </h2>
           </motion.div>
 
@@ -1190,7 +1190,7 @@ const BoraLanding = () => {
                         R$ {bonus.value}
                       </span>
                       <span className="text-primary text-xs font-bold">
-                        GRÁTIS
+                        GRÃTIS
                       </span>
                     </div>
                   </div>
@@ -1209,7 +1209,7 @@ const BoraLanding = () => {
             <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-[#A3E635] via-[#84CC16] to-[#4ADE80] border border-[#65A30D] shadow-xl shadow-[#A3E635]/30 mb-6">
               <CheckCircle2 className="w-5 h-5 text-slate-900" />
               <span className="text-slate-900 font-semibold">
-                <strong className="text-slate-900 font-black">R$ 805</strong> em valor → Por apenas{" "}
+                <strong className="text-slate-900 font-black">R$ 805</strong> em valor â†’ Por apenas{" "}
                 <strong className="text-slate-900 font-black">11x R$5,17</strong>
               </span>
             </div>
@@ -1240,7 +1240,7 @@ const BoraLanding = () => {
           >
             <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
               <AlertCircle className="w-3 h-3 mr-1" />
-              Tire suas dúvidas
+              Tire suas dÃºvidas
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
               Perguntas <span className="text-primary font-extrabold">frequentes</span>
@@ -1285,10 +1285,10 @@ const BoraLanding = () => {
           viewport={{ once: true }}
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-            Sua transformação começa <span className="text-[#A3E635]">agora</span>
+            Sua transformaÃ§Ã£o comeÃ§a <span className="text-[#A3E635]">agora</span>
           </h2>
           <p className="text-slate-600 text-lg mb-8 max-w-xl mx-auto">
-            Cada dia que passa é um dia a menos na sua transformação. Não deixe para depois.
+            Cada dia que passa Ã© um dia a menos na sua transformaÃ§Ã£o. NÃ£o deixe para depois.
           </p>
 
           {/* APP MOCKUP */}
@@ -1336,7 +1336,7 @@ const BoraLanding = () => {
             </div>
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4" />
-              <span>Resultados rápidos</span>
+              <span>Resultados rÃ¡pidos</span>
             </div>
           </div>
         </motion.div>
@@ -1361,13 +1361,13 @@ const BoraLanding = () => {
             {/* Links */}
             <div className="flex items-center gap-6 text-sm text-slate-600">
               <a href="#" className="hover:text-[#A3E635] transition-colors">Termos de Uso</a>
-              <a href="#" className="hover:text-[#A3E635] transition-colors">Política de Privacidade</a>
+              <a href="#" className="hover:text-[#A3E635] transition-colors">PolÃ­tica de Privacidade</a>
               <a href="#" className="hover:text-[#A3E635] transition-colors">Contato</a>
             </div>
 
             {/* Copyright */}
             <p className="text-sm text-slate-600">
-              © {new Date().getFullYear()} BORA. Todos os direitos reservados.
+              Â© {new Date().getFullYear()} BORA. Todos os direitos reservados.
             </p>
           </div>
         </div>
@@ -1377,3 +1377,5 @@ const BoraLanding = () => {
 };
 
 export default BoraLanding;
+
+
