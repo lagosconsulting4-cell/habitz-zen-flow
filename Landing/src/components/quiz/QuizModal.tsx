@@ -147,7 +147,7 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
 
       {/* Conteúdo do Step */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto px-4 pt-12 pb-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}

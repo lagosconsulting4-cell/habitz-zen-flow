@@ -40,6 +40,7 @@ import {
   staggerContainer,
   staggerItem,
 } from "@/hooks/useAnimations";
+import { useTracking } from "@/hooks/useTracking";
 
 const PASSWORD_ENDPOINT = "https://jbucnphyrziaxupdsnbn.supabase.co/functions/v1/create-password-direct";
 const APP_URL = "https://habitz.life/app";
@@ -160,6 +161,8 @@ const Obrigado = () => {
     message: "",
     type: null,
   });
+  const { trackPasswordCreation, trackAppRedirect } = useTracking();
+  const [formStartTime] = useState<number>(Date.now());
 
   useEffect(() => {
     // Track Lead event on page load
@@ -204,6 +207,9 @@ const Obrigado = () => {
     setIsLoading(true);
     setFeedback({ message: "Verificando pagamento...", type: null });
 
+    // Track password creation started
+    trackPasswordCreation('started', { email_provided: !!email });
+
     try {
       const response = await fetch(PASSWORD_ENDPOINT, {
         method: "POST",
@@ -221,16 +227,29 @@ const Obrigado = () => {
 
       setFeedback({ message: "Acesso liberado! Redirecionando para o app...", type: "success" });
 
+      // Track password creation success
+      trackPasswordCreation('success', {
+        time_to_create_ms: Date.now() - formStartTime
+      });
+
       // Track Subscribe event
       if (window.fbq) {
         window.fbq("track", "Subscribe", { value: 1, currency: "BRL" });
       }
 
       setTimeout(() => {
-        window.location.href = buildAppAuthUrl();
+        const appUrl = buildAppAuthUrl();
+        trackAppRedirect(appUrl);
+        window.location.href = appUrl;
       }, 1800);
     } catch (error) {
       console.error("[obrigado] create-password error", error);
+
+      // Track password creation error
+      trackPasswordCreation('error', {
+        error_message: error instanceof Error ? error.message : "Unknown error"
+      });
+
       setFeedback({
         message: error instanceof Error ? error.message : "Erro ao liberar acesso. Tente novamente.",
         type: "error",

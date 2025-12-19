@@ -3,6 +3,7 @@ import { useQuiz } from "../QuizProvider";
 import { AlertCircle, Clock, TrendingUp } from "lucide-react";
 import { useEffect } from "react";
 import { useTracking } from "@/hooks/useTracking";
+import { ContinueButton } from "../ContinueButton";
 
 export const UrgencyStep = () => {
   const { consistencyFeeling, primaryChallenge, currentDate, objective } = useQuiz();
@@ -144,6 +145,8 @@ export const UrgencyStep = () => {
           </div>
         </div>
       </motion.div>
+
+      <ContinueButton />
     </div>
   );
 };

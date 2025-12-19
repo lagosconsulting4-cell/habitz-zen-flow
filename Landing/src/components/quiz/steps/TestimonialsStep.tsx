@@ -3,11 +3,13 @@ import { TestimonialCard } from "@/components/premium/TestimonialCard";
 import { Users, Star } from "lucide-react";
 import { useEffect } from "react";
 import { useTracking } from "@/hooks/useTracking";
+import { ContinueButton } from "../ContinueButton";
 
 const TESTIMONIALS = [
   {
     name: "Ana Paula Silva",
     role: "Estudante de Marketing",
+    avatar: "https://i.ibb.co/7t5yRpDd/Gemini-Generated-Image-i7pejzi7pejzi7pe.png",
     quote: "Consegui finalmente criar uma rotina de estudos que funciona! Em 3 meses minha produtividade aumentou absurdamente.",
     rating: 5,
     beforeAfter: {
@@ -18,6 +20,7 @@ const TESTIMONIALS = [
   {
     name: "Carlos Eduardo",
     role: "Desenvolvedor",
+    avatar: "https://i.ibb.co/Rkx7XcKT/Gemini-Generated-Image-vy66g8vy66g8vy66.png",
     quote: "O Bora me ajudou a equilibrar trabalho e saúde. Perdi 8kg em 2 meses sem sacrificar meu emprego.",
     rating: 5,
     beforeAfter: {
@@ -28,6 +31,7 @@ const TESTIMONIALS = [
   {
     name: "Mariana Costa",
     role: "Empreendedora",
+    avatar: "https://i.ibb.co/TMPp1Kw1/Gemini-Generated-Image-200v6k200v6k200v.png",
     quote: "Achei que seria mais um app genérico, mas o plano personalizado realmente se adapta à minha rotina corrida. Mudou minha vida!",
     rating: 5,
     beforeAfter: {
@@ -127,6 +131,8 @@ export const TestimonialsStep = () => {
           </p>
         </div>
       </motion.div>
+
+      <ContinueButton />
     </div>
   );
 };

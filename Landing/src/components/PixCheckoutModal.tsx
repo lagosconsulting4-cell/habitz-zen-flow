@@ -4,6 +4,7 @@ import { X, Copy, CheckCircle2, Clock, QrCode as QrCodeIcon } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { useQuiz } from "./quiz/QuizProvider";
 import { QRCodeSVG } from "qrcode.react";
+import { useTracking } from "@/hooks/useTracking";
 
 interface PixCheckoutModalProps {
   onClose: () => void;
@@ -24,6 +25,7 @@ export const PixCheckoutModal = ({ onClose }: PixCheckoutModalProps) => {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
+  const { trackPixQRGenerated, trackPixCodeCopied, trackPaymentCompleted } = useTracking();
 
   // Cria transação PIX ao montar
   useEffect(() => {
@@ -39,6 +41,14 @@ export const PixCheckoutModal = ({ onClose }: PixCheckoutModalProps) => {
         const status = await checkPaymentStatus(pixData.external_id);
         if (status === "paid") {
           setIsPaid(true);
+
+          // Track payment completion
+          trackPaymentCompleted({
+            transaction_id: pixData.external_id,
+            amount: 47,
+            method: 'pix'
+          });
+
           clearInterval(interval);
           // Redireciona para app após 3s
           setTimeout(() => {
@@ -95,6 +105,14 @@ export const PixCheckoutModal = ({ onClose }: PixCheckoutModalProps) => {
       // Precisamos pegar o objeto interno 'data'
       const pixData = response_data.data || response_data;
       setPixData(pixData);
+
+      // Track PIX QR code generation
+      trackPixQRGenerated({
+        transaction_id: pixData.transaction_id,
+        external_id: pixData.external_id,
+        amount: 4700,
+        expires_at: pixData.expires_at
+      });
     } catch (err: any) {
       const errorMsg = err.message || "Erro ao gerar PIX. Tente novamente.";
       setError(errorMsg);
@@ -133,6 +151,10 @@ export const PixCheckoutModal = ({ onClose }: PixCheckoutModalProps) => {
   const copyPixCode = () => {
     if (pixData?.qr_code_text) {
       navigator.clipboard.writeText(pixData.qr_code_text);
+
+      // Track PIX code copied
+      trackPixCodeCopied(pixData.transaction_id);
+
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }

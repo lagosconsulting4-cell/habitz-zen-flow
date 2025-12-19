@@ -3,6 +3,7 @@ import { useQuiz } from "../QuizProvider";
 import { Heart, Users } from "lucide-react";
 import { useEffect } from "react";
 import { useTracking } from "@/hooks/useTracking";
+import { ContinueButton } from "../ContinueButton";
 
 export const FeedbackAdaptStep = () => {
   const { financialRange, profession } = useQuiz();
@@ -82,6 +83,9 @@ export const FeedbackAdaptStep = () => {
           </p>
         </div>
       </motion.div>
+
+      {/* Continue */}
+      <ContinueButton />
     </div>
   );
 };

@@ -1,6 +1,7 @@
-import { motion } from "motion/react";
+﻿import { motion } from "motion/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, Trophy, Gift, Calendar, Timer, Star } from "lucide-react";
+import { ContinueButton } from "../ContinueButton";
 
 export const AppExplanationStep = () => {
   return (
@@ -46,9 +47,13 @@ export const AppExplanationStep = () => {
           {/* Tab 1: Routine */}
           <TabsContent value="routine" className="space-y-4">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-6">
-              {/* Screenshot placeholder */}
-              <div className="aspect-video bg-slate-900 rounded-xl mb-4 flex items-center justify-center">
-                <Calendar className="w-16 h-16 text-white opacity-50" />
+              {/* Screenshot */}
+              <div className="aspect-video bg-slate-100 rounded-xl mb-4 overflow-hidden">
+                <img
+                  src="/images/lp/mockup-app-vertical.webp"
+                  alt="Rotina personalizada do app Bora"
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               <h3 className="text-xl font-bold text-slate-900 mb-3">
@@ -81,7 +86,7 @@ export const AppExplanationStep = () => {
                   <div>
                     <p className="font-semibold text-slate-900">Adaptação inteligente</p>
                     <p className="text-sm text-slate-700">
-                      A rotina se ajusta automaticamente à sua realidade
+                      A rotina se ajusta automaticamente Ã  sua realidade
                     </p>
                   </div>
                 </div>
@@ -92,9 +97,13 @@ export const AppExplanationStep = () => {
           {/* Tab 2: Completion */}
           <TabsContent value="completion" className="space-y-4">
             <div className="bg-gradient-to-br from-lime-50 to-lime-100 border-2 border-lime-200 rounded-2xl p-6">
-              {/* Screenshot placeholder */}
-              <div className="aspect-video bg-slate-900 rounded-xl mb-4 flex items-center justify-center">
-                <Trophy className="w-16 h-16 text-white opacity-50" />
+              {/* Screenshot */}
+              <div className="aspect-video bg-slate-100 rounded-xl mb-4 overflow-hidden">
+                <img
+                  src="/direct/images/dashboard/img16.webp"
+                  alt="Conclusão de hábitos no app Bora"
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               <h3 className="text-xl font-bold text-slate-900 mb-3">
@@ -138,13 +147,17 @@ export const AppExplanationStep = () => {
           {/* Tab 3: Bonus */}
           <TabsContent value="bonus" className="space-y-4">
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-2xl p-6">
-              {/* Screenshot placeholder */}
-              <div className="aspect-video bg-slate-900 rounded-xl mb-4 flex items-center justify-center">
-                <Gift className="w-16 h-16 text-white opacity-50" />
+              {/* Screenshot */}
+              <div className="aspect-video bg-slate-100 rounded-xl mb-4 overflow-hidden">
+                <img
+                  src="/direct/images/dashboard/img17.webp"
+                  alt="Área de bônus do app Bora"
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               <h3 className="text-xl font-bold text-slate-900 mb-3">
-                Área de Bônus
+                Ãrea de BÃ´nus
               </h3>
 
               <div className="space-y-3">
@@ -153,7 +166,7 @@ export const AppExplanationStep = () => {
                   <div>
                     <p className="font-semibold text-slate-900">Recompensas exclusivas</p>
                     <p className="text-sm text-slate-700">
-                      Ganhe pontos e desbloqueie benefícios à medida que evolui
+                      Ganhe pontos e desbloqueie benefÃ­cios Ã  medida que evolui
                     </p>
                   </div>
                 </div>
@@ -194,6 +207,9 @@ export const AppExplanationStep = () => {
           Tudo isso vai estar disponível para você em alguns minutos
         </p>
       </motion.div>
+
+      <ContinueButton />
     </div>
   );
 };
+

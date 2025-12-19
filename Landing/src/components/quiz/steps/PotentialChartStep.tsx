@@ -4,6 +4,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Area, AreaChart } from "recharts";
 import { useEffect } from "react";
 import { useTracking } from "@/hooks/useTracking";
+import { ContinueButton } from "../ContinueButton";
 
 const PROGRESS_DATA = [
   { week: "Sem 1", consistency: 45 },
@@ -108,6 +109,8 @@ export const PotentialChartStep = () => {
           </p>
         </div>
       </motion.div>
+
+      <ContinueButton />
     </div>
   );
 };

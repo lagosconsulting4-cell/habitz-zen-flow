@@ -4,6 +4,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
 import { useEffect } from "react";
 import { useTracking } from "@/hooks/useTracking";
+import { ContinueButton } from "../ContinueButton";
 
 const AGE_DISTRIBUTION_DATA = [
   { label: "18-24", percentage: 22, fill: "hsl(var(--chart-1))" },
@@ -92,6 +93,8 @@ export const FeedbackAgeChartStep = () => {
           </span>
         )}
       </motion.p>
+
+      <ContinueButton />
     </div>
   );
 };

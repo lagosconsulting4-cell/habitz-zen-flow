@@ -48,6 +48,7 @@ import {
 } from "lucide-react";
 import { buttonHoverTap, springTransition } from "@/hooks/useAnimations";
 import { CountdownTimer } from "@/components/CountdownTimer";
+import { useTracking } from "@/hooks/useTracking";
 import { ValueStack } from "@/components/ValueStack";
 import { BonusCards } from "@/components/BonusCards";
 
@@ -226,6 +227,7 @@ const AnimatedCounter = ({ value, suffix = "" }: { value: number; suffix?: strin
 
 const Offer = () => {
   const navigate = useNavigate();
+  const { trackCheckoutRedirect, trackOfferViewed, trackFAQExpanded, trackCountdownExpired } = useTracking();
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -233,6 +235,11 @@ const Offer = () => {
   });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
+
+  // Track offer page view on mount
+  useEffect(() => {
+    trackOfferViewed();
+  }, [trackOfferViewed]);
 
   // Scroll to top on mount - using requestAnimationFrame to ensure DOM is ready
   useEffect(() => {
@@ -327,7 +334,10 @@ const Offer = () => {
                 transition={{ delay: 0.7 }}
                 className="pt-2"
               >
-                <CountdownTimer variant="hero" />
+                <CountdownTimer
+                  variant="hero"
+                  onExpire={() => trackCountdownExpired('offer')}
+                />
               </motion.div>
 
               {/* CTA */}
@@ -633,7 +643,20 @@ const Offer = () => {
             </h2>
           </motion.div>
 
-          <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
+          <Accordion
+            type="single"
+            collapsible
+            className="space-y-3 sm:space-y-4"
+            onValueChange={(value) => {
+              if (value) {
+                const questionIndex = parseInt(value.replace('faq-', ''));
+                const questionText = faqs[questionIndex]?.question;
+                if (questionText) {
+                  trackFAQExpanded(questionIndex, questionText);
+                }
+              }
+            }}
+          >
             {faqs.map((faq, index) => (
               <motion.div
                 key={index}
@@ -706,7 +729,10 @@ const Offer = () => {
 
               {/* Countdown in pricing */}
               <div className="mb-6">
-                <CountdownTimer variant="pricing" />
+                <CountdownTimer
+                  variant="pricing"
+                  onExpire={() => trackCountdownExpired('offer')}
+                />
               </div>
 
               {/* Price - DESTACADO */}
@@ -754,7 +780,10 @@ const Offer = () => {
                 <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 rounded-xl opacity-100" />
 
                 <button
-                  onClick={() => window.open("https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac", "_blank")}
+                  onClick={() => {
+                    trackCheckoutRedirect('credit_card', 'kirvano', 49.35);
+                    window.open("https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac", "_blank");
+                  }}
                   className="relative w-full overflow-hidden bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:via-orange-400 hover:to-amber-400 text-white font-black text-base sm:text-xl md:text-2xl py-5 sm:py-6 md:py-7 px-6 sm:px-8 rounded-xl shadow-2xl shadow-orange-500/50 transition-all duration-300 tracking-wide flex items-center justify-center gap-2 sm:gap-3"
                 >
                   {/* Shimmer effect */}
@@ -833,7 +862,10 @@ const Offer = () => {
               whileTap={{ scale: 0.98 }}
             >
               <Button
-                onClick={() => window.open("https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac", "_blank")}
+                onClick={() => {
+                  trackCheckoutRedirect('credit_card', 'kirvano', 49.35);
+                  window.open("https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac", "_blank");
+                }}
                 size="lg"
                 className="bg-white hover:bg-gray-100 !text-emerald-600 font-black text-sm sm:text-lg md:text-xl shadow-2xl shadow-white/30 group px-4 sm:px-8 py-5 sm:py-6 w-full sm:w-auto border-0"
               >

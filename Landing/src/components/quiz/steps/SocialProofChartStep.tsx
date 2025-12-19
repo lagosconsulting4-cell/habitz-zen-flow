@@ -4,6 +4,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
 import { useEffect } from "react";
 import { useTracking } from "@/hooks/useTracking";
+import { ContinueButton } from "../ContinueButton";
 
 const COMPARISON_DATA = [
   {
@@ -94,6 +95,8 @@ export const SocialProofChartStep = () => {
           94% vs 18% = 5.2x mais chances de sucesso
         </p>
       </motion.div>
+
+      <ContinueButton />
     </div>
   );
 };

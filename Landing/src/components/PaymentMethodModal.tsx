@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Zap, CreditCard, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTracking } from '@/hooks/useTracking';
 
 interface PaymentMethodModalProps {
   isOpen: boolean;
@@ -20,6 +21,14 @@ export function PaymentMethodModal({
   creditCardPrice,
 }: PaymentMethodModalProps) {
   const savings = creditCardPrice - pixPrice;
+  const { trackPaymentMethodSelected, trackEvent } = useTracking();
+
+  // Track when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      trackEvent("payment_method_modal_opened", { source: 'offer_page' });
+    }
+  }, [isOpen, trackEvent]);
 
   return (
     <AnimatePresence>
@@ -79,7 +88,10 @@ export function PaymentMethodModal({
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 }}
                   whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                  onClick={onSelectPix}
+                  onClick={() => {
+                    trackPaymentMethodSelected('pix', pixPrice);
+                    onSelectPix();
+                  }}
                   className="relative cursor-pointer group"
                 >
                   {/* Minimalist 5% Badge */}
@@ -195,7 +207,10 @@ export function PaymentMethodModal({
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
                   whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                  onClick={onSelectCreditCard}
+                  onClick={() => {
+                    trackPaymentMethodSelected('credit_card', creditCardPrice);
+                    onSelectCreditCard();
+                  }}
                   className="relative cursor-pointer group"
                 >
                   {/* Card */}

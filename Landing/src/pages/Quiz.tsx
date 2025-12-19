@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { useTracking } from "@/hooks/useTracking";
 import {
   Target,
   MessageCircle,
@@ -157,6 +158,7 @@ const questions: Question[] = [
 
 const Quiz = () => {
   const navigate = usePathAwareNavigate();
+  const { trackQuizAnswer, trackQuizAbandoned, trackEvent } = useTracking();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showMidFeedback, setShowMidFeedback] = useState(false);
@@ -164,6 +166,8 @@ const Quiz = () => {
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [dragDirection, setDragDirection] = useState<"left" | "right" | null>(null);
   const controls = useAnimation();
+  const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
+  const [quizStartTime] = useState<number>(Date.now());
 
   // Scroll to top on mount - using requestAnimationFrame to ensure DOM is ready
   useEffect(() => {
@@ -172,11 +176,61 @@ const Quiz = () => {
     });
   }, []);
 
+  // Track quiz abandonment on unmount
+  useEffect(() => {
+    return () => {
+      // Only track if quiz was not completed
+      const answersCount = Object.keys(answers).length;
+      if (answersCount > 0 && !showCelebration) {
+        trackQuizAbandoned({
+          last_step: currentQuestion,
+          total_steps: questions.length,
+          time_spent: Math.floor((Date.now() - quizStartTime) / 1000),
+          answers_given: answersCount
+        });
+      }
+    };
+  }, [currentQuestion, answers, showCelebration, quizStartTime, trackQuizAbandoned]);
+
+  // Track mid-feedback view
+  useEffect(() => {
+    if (showMidFeedback) {
+      trackEvent("quiz_mid_feedback_viewed", { step: 5 });
+    }
+  }, [showMidFeedback, trackEvent]);
+
+  // Track celebration screen
+  useEffect(() => {
+    if (showCelebration && quizResult) {
+      trackEvent("quiz_celebration_viewed", {
+        score: quizResult.score,
+        severity: quizResult.severity,
+        percentage: quizResult.percentage
+      });
+    }
+  }, [showCelebration, quizResult, trackEvent]);
+
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const hasCurrentAnswer = answers[currentQuestion] !== undefined;
 
   const handleAnswer = (answer: string) => {
+    const question = questions[currentQuestion];
+    const timeOnQuestion = Math.floor((Date.now() - questionStartTime) / 1000);
+    const answerIndex = question.options.indexOf(answer);
+
+    // Track quiz answer
+    trackQuizAnswer({
+      step: currentQuestion,
+      question_text: question.question,
+      answer_text: answer,
+      answer_index: answerIndex,
+      time_on_question: timeOnQuestion
+    });
+
     setAnswers({ ...answers, [currentQuestion]: answer });
+
+    // Reset timer for next question
+    setQuestionStartTime(Date.now());
   };
 
   const handleNext = useCallback(() => {

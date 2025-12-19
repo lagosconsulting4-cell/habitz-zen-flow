@@ -3,6 +3,7 @@ import { useQuiz } from "../QuizProvider";
 import { Clock, TrendingUp } from "lucide-react";
 import { useEffect } from "react";
 import { useTracking } from "@/hooks/useTracking";
+import { ContinueButton } from "../ContinueButton";
 
 export const FeedbackTimeStep = () => {
   const { timeAvailable } = useQuiz();
@@ -69,6 +70,9 @@ export const FeedbackTimeStep = () => {
           </p>
         </div>
       </motion.div>
+
+      {/* Continue */}
+      <ContinueButton />
     </div>
   );
 };
