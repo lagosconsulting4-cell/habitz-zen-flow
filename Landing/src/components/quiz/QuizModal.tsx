@@ -23,7 +23,6 @@ import { YearsPromisingStep } from "./steps/YearsPromisingStep";
 // Steps - Feedback & Special Screens
 import { FeedbackTimeStep } from "./steps/FeedbackTimeStep";
 import { FeedbackAdaptStep } from "./steps/FeedbackAdaptStep";
-import { PWAInstallStep } from "./steps/PWAInstallStep";
 import { TestimonialsStep } from "./steps/TestimonialsStep";
 import { UrgencyStep } from "./steps/UrgencyStep";
 import { AppExplanationStep } from "./steps/AppExplanationStep";
@@ -49,9 +48,9 @@ interface QuizModalProps {
 const QuizContent = ({ onClose }: { onClose: () => void }) => {
   const { currentStep, generateRoutine, canGoBack, prevStep, nextStep } = useQuiz();
 
-  // Gera a rotina quando chega no LoadingStep (step 21)
+  // Gera a rotina quando chega no LoadingStep (step 20)
   useEffect(() => {
-    if (currentStep === 21) {
+    if (currentStep === 20) {
       generateRoutine();
     }
   }, [currentStep, generateRoutine]);
@@ -86,30 +85,28 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
       case 12:
         return <GenderStep />;
       case 13:
-        return <PWAInstallStep />;
-      case 14:
         return <SocialProofChartStep />;
-      case 15:
+      case 14:
         return <ConsistencyFeelingStep />;
-      case 16:
+      case 15:
         return <ProjectedFeelingStep />;
-      case 17:
+      case 16:
         return <TestimonialsStep />;
-      case 18:
+      case 17:
         return <YearsPromisingStep />;
-      case 19:
+      case 18:
         return <UrgencyStep />;
-      case 20:
+      case 19:
         return <PotentialChartStep />;
-      case 21:
+      case 20:
         return <AppExplanationStep />;
-      case 22:
+      case 21:
         return <LoadingStep onComplete={nextStep} />;
-      case 23:
+      case 22:
         return <PersonalizedPlanView />;
-      case 24:
+      case 23:
         return <DataCollectionStep />;
-      case 25:
+      case 24:
         return <SubscriptionOffersStep />;
       default:
         return null;

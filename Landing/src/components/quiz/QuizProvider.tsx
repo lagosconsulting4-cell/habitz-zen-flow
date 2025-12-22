@@ -160,11 +160,11 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   // State - Status
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
 
-  // 26 Steps: Hero, Objective, Time, FeedbackTime, Energy, WorkSchedule, Financial, FeedbackAdapt,
-  // Age, FeedbackAgeChart, Challenges, Gender, PWAInstall, SocialProofChart, ConsistencyFeeling,
+  // 25 Steps: Hero, Objective, Time, FeedbackTime, Energy, WorkSchedule, Financial, FeedbackAdapt,
+  // Age, FeedbackAgeChart, Challenges, Gender, SocialProofChart, ConsistencyFeeling,
   // ProjectedFeeling, Testimonials, YearsPromising, Urgency, PotentialChart, AppExplanation,
-  // Loading, PersonalizedPlan, DataCollection, OfferSlide
-  const totalSteps = 26;
+  // Loading, PersonalizedPlan, DataCollection, SubscriptionOffersStep
+  const totalSteps = 25;
 
   // ============================================================================
   // NAVIGATION
@@ -239,31 +239,29 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
         return challenges.length > 0;
       case 12: // GenderStep
         return gender !== null;
-      case 13: // PWAInstallStep - special screen
+      case 13: // SocialProofChartStep - chart screen
         return true;
-      case 14: // SocialProofChartStep - chart screen
-        return true;
-      case 15: // ConsistencyFeelingStep
+      case 14: // ConsistencyFeelingStep
         return consistencyFeeling !== null;
-      case 16: // ProjectedFeelingStep
+      case 15: // ProjectedFeelingStep
         return projectedFeeling !== null;
-      case 17: // TestimonialsStep - feedback screen
+      case 16: // TestimonialsStep - feedback screen
         return true;
-      case 18: // YearsPromisingStep
+      case 17: // YearsPromisingStep
         return yearsPromising !== null;
-      case 19: // UrgencyStep - feedback screen
+      case 18: // UrgencyStep - feedback screen
         return true;
-      case 20: // PotentialChartStep - chart screen
+      case 19: // PotentialChartStep - chart screen
         return true;
-      case 21: // AppExplanationStep - explanation screen
+      case 20: // AppExplanationStep - explanation screen
         return true;
-      case 22: // LoadingStep - auto-advances
+      case 21: // LoadingStep - auto-advances
         return true;
-      case 23: // CongratsStep - summary screen
+      case 22: // PersonalizedPlanView - summary screen
         return true;
-      case 24: // DataCollectionStep - has its own validation
+      case 23: // DataCollectionStep - has its own validation
         return true;
-      case 25: // OfferSlide - final step
+      case 24: // SubscriptionOffersStep - final step
         return true;
       default:
         return false;
