@@ -5,8 +5,8 @@ import { Check, Sparkles, Zap, Crown } from "lucide-react";
 import { fadeInUp, buttonHoverTap } from "@/hooks/useAnimations";
 
 // Links de pagamento do Stripe
-const STRIPE_LINK_MONTHLY = "https://buy.stripe.com/eVq14n6n216Wff29lG";
-const STRIPE_LINK_ANNUAL = "https://buy.stripe.com/6oU3cv3aQ16Wd6UeG0";
+const STRIPE_LINK_MONTHLY = "https://buy.stripe.com/eVq14n6n216Wff29lG9oc01";
+const STRIPE_LINK_ANNUAL = "https://buy.stripe.com/6oU3cv3aQ16Wd6UeG09oc00";
 
 export const SubscriptionOffersStep = () => {
   const handleSubscribe = (plan: "monthly" | "annual") => {

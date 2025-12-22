@@ -6,7 +6,7 @@ import { CountdownTimer } from "@/components/CountdownTimer";
 import { bonusDetails } from "@/components/BonusCards";
 
 // Link de pagamento Stripe - Plano Anual
-const STRIPE_LINK_ANNUAL = "https://buy.stripe.com/6oU3cv3aQ16Wd6UeG0";
+const STRIPE_LINK_ANNUAL = "https://buy.stripe.com/6oU3cv3aQ16Wd6UeG09oc00";
 
 export const OfferSlide = () => {
   const totalValue = 805; // Soma dos bônus
