@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useTracking } from "@/hooks/useTracking";
+import { SubscriptionOffersStep } from "@/components/quiz/steps/SubscriptionOffersStep";
 import {
   Target,
   MessageCircle,
@@ -163,6 +164,7 @@ const Quiz = () => {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showMidFeedback, setShowMidFeedback] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showSubscription, setShowSubscription] = useState(false);
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [dragDirection, setDragDirection] = useState<"left" | "right" | null>(null);
   const controls = useAnimation();
@@ -181,7 +183,7 @@ const Quiz = () => {
     return () => {
       // Only track if quiz was not completed
       const answersCount = Object.keys(answers).length;
-      if (answersCount > 0 && !showCelebration) {
+      if (answersCount > 0 && !showCelebration && !showSubscription) {
         trackQuizAbandoned({
           last_step: currentQuestion,
           total_steps: questions.length,
@@ -190,7 +192,7 @@ const Quiz = () => {
         });
       }
     };
-  }, [currentQuestion, answers, showCelebration, quizStartTime, trackQuizAbandoned]);
+  }, [currentQuestion, answers, showCelebration, showSubscription, quizStartTime, trackQuizAbandoned]);
 
   // Track mid-feedback view
   useEffect(() => {
@@ -256,9 +258,9 @@ const Quiz = () => {
     }
   }, [currentQuestion, showMidFeedback, answers]);
 
-  const handleGoToMirror = useCallback(() => {
-    navigate("/mirror");
-  }, [navigate]);
+  const handleGoToSubscription = useCallback(() => {
+    setShowSubscription(true);
+  }, []);
 
   const handlePrevious = useCallback(() => {
     if (currentQuestion > 0) {setCurrentQuestion(currentQuestion - 1);
@@ -298,6 +300,11 @@ const Quiz = () => {
     },
     []
   );
+
+  // Subscription screen after celebration
+  if (showSubscription) {
+    return <SubscriptionOffersStep />;
+  }
 
   // Celebration screen after completing quiz
   if (showCelebration && quizResult) {
@@ -419,13 +426,13 @@ const Quiz = () => {
             >
               <motion.div {...buttonHoverTap}>
                 <Button
-                  onClick={handleGoToMirror}
+                  onClick={handleGoToSubscription}
                   variant="premium"
                   size="xl"
                   className="group"
                 >
                   <Sparkles className="h-5 w-5 mr-2 animate-pulse" />
-                  <span>Ver minha solução personalizada</span>
+                  <span>Continuar para escolher meu plano</span>
                   <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </motion.div>

@@ -1,34 +1,21 @@
-import { useState } from "react";
 import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Gift, Sparkles, ArrowRight, CheckCircle2, Shield } from "lucide-react";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { bonusDetails } from "@/components/BonusCards";
-import { PixCheckoutModal } from "@/components/PixCheckoutModal";
-import { PaymentMethodModal } from "@/components/PaymentMethodModal";
+
+// Link de pagamento Stripe - Plano Anual
+const STRIPE_LINK_ANNUAL = "https://buy.stripe.com/6oU3cv3aQ16Wd6UeG0";
 
 export const OfferSlide = () => {
-  const [isPixModalOpen, setIsPixModalOpen] = useState(false);
-  const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false);
-
   const totalValue = 805; // Soma dos bônus
-  const offerPrice = 47; // Preço à vista
-  const installmentPrice = "5,17"; // 11x
-  const discount = 94; // % desconto
+  const offerPrice = 99.90; // Preço anual
+  const monthlyEquivalent = "8,33"; // R$ 99,90 / 12 meses
+  const discount = 88; // % desconto (de R$ 805 para R$ 99,90)
 
-  // Pricing for payment methods
-  const pixPrice = 47.00;
-  const creditCardPrice = 49.35;
-
-  const handleSelectPix = () => {
-    setIsPaymentMethodModalOpen(false);
-    setIsPixModalOpen(true);
-  };
-
-  const handleSelectCreditCard = () => {
-    setIsPaymentMethodModalOpen(false);
-    window.location.href = "https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac";
+  const handleSubscribe = () => {
+    window.location.href = STRIPE_LINK_ANNUAL;
   };
 
   return (
@@ -105,19 +92,19 @@ export const OfferSlide = () => {
             De R$ {totalValue}
           </div>
           <div className="mb-2">
-            <div className="text-[#A3E635] text-lg font-bold mb-1">11x de</div>
+            <div className="text-[#A3E635] text-lg font-bold mb-1">Por apenas</div>
             <div className="text-6xl font-black bg-gradient-to-r from-[#A3E635] via-lime-300 to-[#A3E635] bg-clip-text text-transparent">
-              R${installmentPrice}
+              R${offerPrice}
             </div>
           </div>
           <p className="text-slate-400 text-sm">
-            ou R${offerPrice} à vista • 1 ano de acesso
+            1 ano de acesso • Equivale a R${monthlyEquivalent}/mês
           </p>
         </div>
 
         {/* CTA Button */}
         <Button
-          onClick={() => setIsPaymentMethodModalOpen(true)}
+          onClick={handleSubscribe}
           size="lg"
           className="w-full bg-[#A3E635] hover:bg-[#84cc16] text-slate-900 font-black text-xl py-7 rounded-xl shadow-xl shadow-[#A3E635]/30"
         >
@@ -146,23 +133,6 @@ export const OfferSlide = () => {
           </p>
         </div>
       </motion.div>
-
-      {/* Payment Method Selection Modal */}
-      {isPaymentMethodModalOpen && (
-        <PaymentMethodModal
-          isOpen={isPaymentMethodModalOpen}
-          onClose={() => setIsPaymentMethodModalOpen(false)}
-          onSelectPix={handleSelectPix}
-          onSelectCreditCard={handleSelectCreditCard}
-          pixPrice={pixPrice}
-          creditCardPrice={creditCardPrice}
-        />
-      )}
-
-      {/* Modal PIX - opens after selecting PIX in PaymentMethodModal */}
-      {isPixModalOpen && (
-        <PixCheckoutModal onClose={() => setIsPixModalOpen(false)} />
-      )}
     </div>
   );
 };
