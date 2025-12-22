@@ -38,6 +38,7 @@ import { LoadingStep } from "./steps/LoadingStep";
 import { CongratsStep } from "./steps/CongratsStep";
 import { PersonalizedPlanView } from "./steps/PersonalizedPlanView";
 import { DataCollectionStep } from "./steps/DataCollectionStep";
+import { OfferSlide } from "./steps/OfferSlide";
 
 interface QuizModalProps {
   open: boolean;
@@ -108,6 +109,8 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
         return <PersonalizedPlanView />;
       case 24:
         return <DataCollectionStep />;
+      case 25:
+        return <OfferSlide />;
       default:
         return null;
     }
