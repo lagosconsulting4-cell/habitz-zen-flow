@@ -7,13 +7,6 @@ export const QuizProgress = () => {
 
   return (
     <div className="flex items-center gap-3 w-full max-w-md">
-      {/* Logo U */}
-      <div className="flex-shrink-0">
-        <div className="w-8 h-8 rounded-full bg-lime-500 flex items-center justify-center text-white font-bold text-sm">
-          U
-        </div>
-      </div>
-
       {/* Progress Bar */}
       <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
         <motion.div
