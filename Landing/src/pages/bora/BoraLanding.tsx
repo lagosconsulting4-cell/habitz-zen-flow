@@ -1131,7 +1131,8 @@ const BoraLanding = () => {
       </section>
 
       {/* ============ BONUS SECTION ============ */}
-      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-slate-50">
+      {/* SECTION REMOVED - Pricing and bonus details will be shown after quiz completion */}
+      {/* <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-slate-50">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[150px]" />
         <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-amber-500/10 rounded-full blur-[120px]" />
 
@@ -1227,7 +1228,7 @@ const BoraLanding = () => {
             </motion.div>
           </motion.div>
         </div>
-      </section>
+      </section> */}
 
       {/* ============ FAQ SECTION ============ */}
       <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
