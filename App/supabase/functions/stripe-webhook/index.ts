@@ -67,6 +67,51 @@ serve(async (req) => {
     return data.user_id;
   };
 
+  // Helper: Create user account from Stripe customer
+  const createUserFromStripe = async (email: string): Promise<string | null> => {
+    try {
+      console.log(`Creating user account for: ${email}`);
+
+      // Create auth user (without password - will be set later)
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: email.toLowerCase(),
+        email_confirm: true, // Auto-confirm email
+      });
+
+      if (authError || !authData.user) {
+        console.error(`Failed to create auth user for ${email}:`, authError);
+        return null;
+      }
+
+      const userId = authData.user.id;
+      console.log(`Auth user created: ${userId}`);
+
+      // Create profile
+      const { error: profileError } = await supabaseAdmin
+        .from("profiles")
+        .insert({
+          user_id: userId,
+          email: email.toLowerCase(),
+          is_premium: false, // Will be activated by trigger when purchase is created
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (profileError) {
+        console.error(`Failed to create profile for ${email}:`, profileError);
+        // Try to cleanup auth user
+        await supabaseAdmin.auth.admin.deleteUser(userId);
+        return null;
+      }
+
+      console.log(`Profile created for user ${userId}`);
+      return userId;
+    } catch (error) {
+      console.error(`Error creating user from Stripe:`, error);
+      return null;
+    }
+  };
+
   // Helper: Upsert purchase record
   const upsertPurchase = async (payload: {
     userId: string;
@@ -158,10 +203,18 @@ serve(async (req) => {
           break;
         }
 
-        const userId = await findUserByEmail(customer.email);
+        // Try to find existing user, or create if doesn't exist
+        let userId = await findUserByEmail(customer.email);
         if (!userId) {
-          console.log(`No user found for email ${customer.email}, skipping`);
-          break;
+          console.log(`User not found for ${customer.email}, creating account...`);
+          userId = await createUserFromStripe(customer.email);
+
+          if (!userId) {
+            console.error(`Failed to create user for ${customer.email}, skipping purchase creation`);
+            break;
+          }
+
+          console.log(`✅ User account created automatically for ${customer.email}`);
         }
 
         const interval = subscription.items.data[0]?.price?.recurring?.interval;

@@ -61,7 +61,7 @@ const DefinirSenha = () => {
   // Recovery flow states
   const [recoveryEmail, setRecoveryEmail] = useState<string>("");
 
-  // Auto-login and redirect to dashboard
+  // Auto-login and redirect to onboarding (Stripe) or dashboard (normal)
   const handleSuccessfulPasswordCreation = async (userEmail: string, userPassword: string) => {
     setFeedback({ message: "Acesso liberado! Entrando...", type: "success" });
     setIsSuccess(true);
@@ -79,8 +79,10 @@ const DefinirSenha = () => {
         return;
       }
 
-      // Success - go directly to dashboard
-      setTimeout(() => navigate("/dashboard", { replace: true }), 1500);
+      // Success - redirect based on source
+      const fromStripe = searchParams.get("from") === "stripe";
+      const destination = fromStripe ? "/onboarding" : "/dashboard";
+      setTimeout(() => navigate(destination, { replace: true }), 1500);
     } catch {
       toast.success("Conta criada! Faça login para continuar.");
       setTimeout(() => navigate("/auth", { replace: true }), 2000);
@@ -381,7 +383,9 @@ const DefinirSenha = () => {
           </motion.div>
           <h1 className="text-2xl font-bold text-foreground mb-2">Acesso Liberado!</h1>
           <p className="text-muted-foreground mb-6">
-            Entrando no seu programa de 30 dias...
+            {searchParams.get("from") === "stripe"
+              ? "Preparando seu onboarding personalizado..."
+              : "Entrando no seu programa de 30 dias..."}
           </p>
           <div className="flex items-center justify-center gap-2 text-primary">
             <Loader2 className="w-4 h-4 animate-spin" />

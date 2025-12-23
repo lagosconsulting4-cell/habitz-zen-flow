@@ -34,34 +34,13 @@ export default function Welcome() {
           throw new Error("Dados da sessão inválidos");
         }
 
-        setMessage(`Bem-vindo, ${data.email}! Fazendo login...`);
-
-        // Fazer login com OTP (magic link instantâneo)
-        const { error: signInError } = await supabase.auth.signInWithOtp({
-          email: data.email,
-          options: {
-            shouldCreateUser: false, // Usuário já existe
-          },
-        });
-
-        if (signInError) {
-          // Se OTP falhar, tentar com senha temporária
-          console.warn("OTP failed, trying alternative method");
-
-          // Redirecionar para página de definir senha
-          setMessage("Por favor, defina sua senha para continuar.");
-          setTimeout(() => {
-            navigate(`/definir-senha?email=${encodeURIComponent(data.email)}`);
-          }, 2000);
-          return;
-        }
-
         setStatus("success");
-        setMessage("Login realizado com sucesso! Redirecionando...");
+        setMessage(`✅ Pagamento confirmado! Agora vamos criar sua senha...`);
 
-        // Redirecionar para onboarding após 2 segundos
+        // Redirecionar para página de definir senha após 2 segundos
+        // Incluir parâmetro 'from=stripe' para redirecionar para onboarding após criar senha
         setTimeout(() => {
-          navigate("/onboarding");
+          navigate(`/definir-senha?email=${encodeURIComponent(data.email)}&from=stripe`);
         }, 2000);
 
       } catch (error) {
@@ -116,7 +95,7 @@ export default function Welcome() {
           {status === "success" && (
             <div className="w-full bg-lime-50 rounded-lg p-4 border border-lime-200">
               <p className="text-sm text-lime-800">
-                🎉 Seu acesso premium foi ativado com sucesso!
+                🎉 Pagamento confirmado! Você será redirecionado para criar sua senha.
               </p>
             </div>
           )}
