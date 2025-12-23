@@ -147,14 +147,14 @@ export const DataCollectionStep = () => {
 
       console.log("✅ Quiz data saved to Supabase");
 
-      // Send notification email (non-blocking - don't wait for it)
+      // Send notification via Google Apps Script (non-blocking - don't wait for it)
       supabase.functions
-        .invoke('quiz-notification', { body: quizData })
+        .invoke('quiz-notification-google', { body: quizData })
         .then(({ error: emailError }) => {
           if (emailError) {
             console.warn("Email notification failed:", emailError);
           } else {
-            console.log("✅ Email notification sent");
+            console.log("✅ Email notification sent via Google Apps Script");
           }
         })
         .catch((err) => console.warn("Email notification error:", err));
