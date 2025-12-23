@@ -74,7 +74,7 @@ export const FeedbackAdaptStep = () => {
             <Users className="w-6 h-6 text-blue-600" />
             <h3 className="text-lg font-bold text-slate-900">Comunidade forte</h3>
           </div>
-          <p className="text-3xl font-bold text-blue-700 mb-2">+50%</p>
+          <p className="text-3xl font-bold text-blue-700 mb-2">+87%</p>
           <p className="text-sm text-slate-700">
             dos nossos usuários com{" "}
             <strong className="text-blue-800">{rangeText}</strong> e{" "}
