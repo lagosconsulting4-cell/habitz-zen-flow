@@ -40,6 +40,7 @@ const MyHabits = lazy(() => import("./pages/MyHabits"));
 const Bonus = lazy(() => import("./pages/Bonus"));
 const Preview = lazy(() => import("./pages/Preview"));
 const DefinirSenha = lazy(() => import("./pages/DefinirSenha"));
+const Welcome = lazy(() => import("./pages/Welcome"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
@@ -145,6 +146,7 @@ const App = () => (
             <Route path="/cancel" element={<Cancel />} />
             <Route path="/preview" element={<Preview />} />
             <Route path="/definir-senha" element={<DefinirSenha />} />
+            <Route path="/welcome" element={<Welcome />} />
             {/* Redirect old route for backward compatibility */}
             <Route path="/criar-senha" element={<Navigate to="/definir-senha" replace />} />
 
