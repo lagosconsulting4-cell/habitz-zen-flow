@@ -6,9 +6,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, User, Phone, Loader2 } from "lucide-react";
 import { useTracking } from "@/hooks/useTracking";
+import { supabase } from "@/integrations/supabase/client";
 
 export const DataCollectionStep = () => {
-  const { phone, setPhone, nextStep } = useQuiz();
+  const {
+    phone,
+    setPhone,
+    setName: setQuizName,
+    setEmail: setQuizEmail,
+    nextStep,
+    // Get all quiz data for submission
+    ageRange,
+    profession,
+    workSchedule,
+    gender,
+    financialRange,
+    energyPeak,
+    timeAvailable,
+    objective,
+    challenges,
+    consistencyFeeling,
+    projectedFeeling,
+    yearsPromising,
+    weekDays,
+    weekDaysPreset,
+    recommendedHabits,
+  } = useQuiz();
   const { trackPhoneEntered, trackDataCollectionComplete } = useTracking();
 
   const [name, setName] = useState("");
@@ -81,18 +104,62 @@ export const DataCollectionStep = () => {
       // Save phone to quiz context
       const cleanPhone = phoneInput.replace(/\D/g, "");
       setPhone(cleanPhone);
+      setQuizName(name);
+      setQuizEmail(email);
 
       // Track data collection
       trackPhoneEntered(!!cleanPhone);
       trackDataCollectionComplete(["name", "email", "phone"]);
 
-      // TODO: Submit to Supabase/API
-      // await submitQuizData({ name, email, phone: cleanPhone, ...quizData });
+      // Prepare quiz data for submission
+      const quizData = {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        phone: cleanPhone,
+        age_range: ageRange,
+        profession,
+        work_schedule: workSchedule,
+        gender,
+        financial_range: financialRange,
+        energy_peak: energyPeak,
+        time_available: timeAvailable,
+        objective,
+        challenges: challenges || [],
+        consistency_feeling: consistencyFeeling,
+        projected_feeling: projectedFeeling,
+        years_promising: yearsPromising,
+        week_days: weekDays || [],
+        week_days_preset: weekDaysPreset,
+        recommended_habits: recommendedHabits || [],
+        completed: true,
+        source: 'landing_quiz',
+      };
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Save to Supabase
+      const { error: saveError } = await supabase
+        .from('quiz_responses')
+        .insert(quizData);
 
-      // Move to next step (account creation or offer page)
+      if (saveError) {
+        console.error("Error saving quiz data:", saveError);
+        throw new Error("Erro ao salvar dados do quiz");
+      }
+
+      console.log("✅ Quiz data saved to Supabase");
+
+      // Send notification email (non-blocking - don't wait for it)
+      supabase.functions
+        .invoke('quiz-notification', { body: quizData })
+        .then(({ error: emailError }) => {
+          if (emailError) {
+            console.warn("Email notification failed:", emailError);
+          } else {
+            console.log("✅ Email notification sent");
+          }
+        })
+        .catch((err) => console.warn("Email notification error:", err));
+
+      // Move to next step (subscription offers page)
       nextStep();
     } catch (error) {
       console.error("Error submitting data:", error);
