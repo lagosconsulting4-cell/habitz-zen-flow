@@ -1,6 +1,7 @@
 import Stripe from "npm:stripe";
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendUTMifyPurchase, sendUTMifyRefund } from "../_shared/utmify.ts";
 
 const stripeSecret = Deno.env.get("STRIPE_SECRET_KEY");
 const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
@@ -191,6 +192,22 @@ serve(async (req) => {
           currency: session.currency ?? "BRL",
           status: "paid",
         });
+
+        // Send Purchase event to UTMify → Meta Pixel
+        if (session.customer_details?.email) {
+          const nameParts = session.customer_details.name?.split(" ") || [];
+          await sendUTMifyPurchase({
+            email: session.customer_details.email,
+            phone: session.customer_details.phone || undefined,
+            firstName: nameParts[0] || undefined,
+            lastName: nameParts.slice(1).join(" ") || undefined,
+            value: (session.amount_total ?? 0) / 100, // Convert cents to dollars
+            currency: session.currency ?? "BRL",
+            transactionId: session.id,
+            subscriptionId: typeof session.subscription === "string" ? session.subscription : undefined,
+            status: "approved",
+          });
+        }
         break;
       }
 
@@ -318,6 +335,20 @@ serve(async (req) => {
           currency: charge.currency ?? "BRL",
           status: "refunded",
         });
+
+        // Send Refund event to UTMify
+        if (charge.billing_details?.email) {
+          const nameParts = charge.billing_details.name?.split(" ") || [];
+          await sendUTMifyRefund({
+            email: charge.billing_details.email,
+            phone: charge.billing_details.phone || undefined,
+            firstName: nameParts[0] || undefined,
+            lastName: nameParts.slice(1).join(" ") || undefined,
+            value: (charge.amount_refunded ?? charge.amount ?? 0) / 100,
+            currency: charge.currency ?? "BRL",
+            transactionId: charge.id,
+          });
+        }
         break;
       }
 

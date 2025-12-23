@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Mail, User, Phone, Loader2 } from "lucide-react";
 import { useTracking } from "@/hooks/useTracking";
 import { supabase } from "@/integrations/supabase/client";
+import { trackLead, trackCompleteRegistration } from "@/lib/utmify-tracking";
 
 export const DataCollectionStep = () => {
   const {
@@ -146,6 +147,18 @@ export const DataCollectionStep = () => {
       }
 
       console.log("✅ Quiz data saved to Supabase");
+
+      // Track CompleteRegistration event in UTMify (Meta Pixel)
+      const nameParts = name.trim().split(" ");
+      trackCompleteRegistration({
+        email: email.trim().toLowerCase(),
+        phone: cleanPhone,
+        firstName: nameParts[0] || name.trim(),
+        lastName: nameParts.slice(1).join(" ") || "",
+        age: ageRange,
+        gender,
+        profession,
+      });
 
       // Send notification via Google Apps Script (non-blocking - don't wait for it)
       supabase.functions
