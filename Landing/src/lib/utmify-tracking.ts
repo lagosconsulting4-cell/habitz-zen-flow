@@ -97,7 +97,19 @@ export const trackLead = (data: UTMifyLeadData) => {
  * Helper: Track CompleteRegistration event
  */
 export const trackCompleteRegistration = (data: UTMifyLeadData) => {
+  // Send to UTMify
   trackUTMifyEvent('CompleteRegistration', data);
+
+  // Send to Meta Pixel natively
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', 'CompleteRegistration', {
+      email: data.email,
+      phone: data.phone,
+      fn: data.firstName,
+      ln: data.lastName,
+    });
+    console.log('[Meta Pixel] CompleteRegistration tracked');
+  }
 };
 
 /**
@@ -127,5 +139,6 @@ declare global {
       track: (eventName: string, data?: any) => void;
       getTruthyLead: () => any;
     };
+    fbq?: (action: string, eventName: string, data?: any) => void;
   }
 }
