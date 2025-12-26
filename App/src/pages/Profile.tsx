@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import {
   Bell,
@@ -19,6 +19,7 @@ import {
   Vibrate,
   Gift,
   ChevronRight,
+  XCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ import { bonusFlags } from "@/config/bonusFlags";
 import { NotificationToggle } from "@/components/pwa/NotificationPermissionDialog";
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState("Habitz");
   const [email, setEmail] = useState("usuario@habitz.app");
@@ -494,15 +496,33 @@ const Profile = () => {
           </Card>
         </motion.div>
 
+        {isPremium && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.37 }}
+            className="mt-6"
+          >
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-center gap-3 p-4 border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors rounded-2xl"
+              onClick={() => navigate("/cancel-subscription")}
+            >
+              <XCircle className="w-5 h-5" />
+              <span className="font-semibold">Cancelar Assinatura</span>
+            </Button>
+          </motion.div>
+        )}
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.37 }}
-          className="mt-6"
+          transition={{ duration: 0.3, delay: isPremium ? 0.42 : 0.37 }}
+          className="mt-4"
         >
           <Button
             variant="ghost"
-            className="w-full flex items-center justify-center gap-3 p-4 hover:bg-destructive/10 transition-colors rounded-2xl text-destructive"
+            className="w-full flex items-center justify-center gap-3 p-4 hover:bg-muted transition-colors rounded-2xl text-muted-foreground"
             onClick={handleSignOut}
           >
             <LogOut className="w-5 h-5" />

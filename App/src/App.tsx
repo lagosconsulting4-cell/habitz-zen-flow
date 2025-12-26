@@ -26,6 +26,7 @@ const CreateHabit = lazy(() => import("./pages/CreateHabit"));
 const EditHabit = lazy(() => import("./pages/EditHabit"));
 const Progress = lazy(() => import("./pages/Progress"));
 const Profile = lazy(() => import("./pages/Profile"));
+const CancelSubscription = lazy(() => import("./pages/CancelSubscription"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Meditation = lazy(() => import("./pages/Meditation"));
 const BooksHub = lazy(() => import("./pages/BooksHub"));
@@ -165,6 +166,7 @@ const App = () => (
               <Route path="/tips" element={<Tips />} />
               <Route path="/guided" element={<GuidedJourney />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/cancel-subscription" element={<CancelSubscription />} />
               <Route path="/bonus" element={<Bonus />} />
             </Route>
 
