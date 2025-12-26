@@ -272,7 +272,7 @@ const Profile = () => {
           transition={{ duration: 0.3, delay: 0.15 }}
         >
           <Card className="rounded-2xl bg-card border-2 border-primary/30 p-6 mb-8">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-primary/10 rounded-lg">
                 <Shield className="w-5 h-5 text-primary" />
               </div>
@@ -288,6 +288,17 @@ const Profile = () => {
                 {isPremium ? "Premium" : "Pendente"}
               </Badge>
             </div>
+            {isPremium && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full border-destructive/30 text-destructive hover:bg-destructive/10"
+                onClick={() => navigate("/cancel-subscription")}
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                Gerenciar Assinatura
+              </Button>
+            )}
           </Card>
         </motion.div>
 
