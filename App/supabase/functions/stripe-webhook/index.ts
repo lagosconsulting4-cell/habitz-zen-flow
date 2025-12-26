@@ -175,10 +175,31 @@ serve(async (req) => {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const userId = session.metadata?.user_id;
+        let userId = session.metadata?.user_id;
+
+        // If no user_id in metadata, try to find/create user by email
+        if (!userId && session.customer_details?.email) {
+          console.log(`No user_id in metadata, trying to find/create user for: ${session.customer_details.email}`);
+
+          userId = await findUserByEmail(session.customer_details.email);
+
+          if (!userId) {
+            console.log(`User not found, creating account for: ${session.customer_details.email}`);
+            userId = await createUserFromStripe(session.customer_details.email);
+
+            if (!userId) {
+              console.error(`Failed to create user for ${session.customer_details.email}, skipping`);
+              break;
+            }
+
+            console.log(`✅ User account created from checkout for ${session.customer_details.email}`);
+          } else {
+            console.log(`✅ Found existing user for ${session.customer_details.email}`);
+          }
+        }
 
         if (!userId) {
-          console.log("No user_id in session metadata, skipping");
+          console.log("No user_id and no email in session, skipping");
           break;
         }
 
