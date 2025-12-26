@@ -40,23 +40,27 @@ serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    const { data: existingUsers, error: listError } = await adminClient.auth.admin.listUsers();
-    if (listError) {
-      console.error("[create-password-direct] ❌ Erro ao listar usuários:", listError);
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Buscar usuário direto do profile (mais eficiente)
+    const { data: profile, error: profileError } = await adminClient
+      .from("profiles")
+      .select("user_id")
+      .eq("email", normalizedEmail)
+      .maybeSingle();
+
+    if (profileError) {
+      console.error("[create-password-direct] ❌ Erro ao buscar profile:", profileError);
       throw new Error("Erro ao validar usuário");
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
-    const existingUser = existingUsers?.users?.find(
-      (user) => user.email?.trim().toLowerCase() === normalizedEmail,
-    );
-
-    if (!existingUser) {
+    if (!profile) {
       console.log("[create-password-direct] ❌ Usuário não encontrado");
       throw new Error("Email não encontrado. Verifique se sua compra foi processada.");
     }
 
-    console.log("[create-password-direct] ✅ Usuário encontrado:", existingUser.id);
+    console.log("[create-password-direct] ✅ Usuário encontrado:", profile.user_id);
+    const existingUser = { id: profile.user_id, email: normalizedEmail };
 
     const { data: purchase, error: purchaseError } = await adminClient
       .from("purchases")
