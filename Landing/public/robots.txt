@@ -1,14 +1,29 @@
+# robots.txt para Bora App - Habitz
+# Permitir indexação completa para melhor SEO
+
+User-agent: *
+Allow: /
+
+# Sitemap principal
+Sitemap: https://habitz.life/sitemap.xml
+
+# Bloquear apenas admin/internal se houver no futuro
+Disallow: /admin/
+Disallow: /api/
+
+# Otimizar crawl rate para Google
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 0
 
+# Bing
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 0
 
+# Social media bots
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
-Allow: /
-
-User-agent: *
 Allow: /
