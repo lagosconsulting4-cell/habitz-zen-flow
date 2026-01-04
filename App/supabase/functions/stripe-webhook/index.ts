@@ -1,7 +1,70 @@
 import Stripe from "npm:stripe";
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { sendUTMifyPurchase, sendUTMifyRefund } from "../_shared/utmify.ts";
+
+// UTMify helpers (inline to avoid module import issues)
+const UTMIFY_PIXEL_ID = "6928b75029dffcb87ec192fd";
+const UTMIFY_API_URL = "https://api.utmify.com.br/api/v1/events";
+
+interface UTMifyPurchasePayload {
+  email: string;
+  phone?: string;
+  firstName?: string;
+  lastName?: string;
+  value: number;
+  currency: string;
+  transactionId: string;
+  subscriptionId?: string;
+  status: string;
+}
+
+interface UTMifyRefundPayload {
+  email: string;
+  phone?: string;
+  firstName?: string;
+  lastName?: string;
+  value: number;
+  currency: string;
+  transactionId: string;
+}
+
+async function sendUTMifyPurchase(payload: UTMifyPurchasePayload) {
+  try {
+    const response = await fetch(UTMIFY_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pixelId: UTMIFY_PIXEL_ID,
+        eventName: "Purchase",
+        eventData: payload,
+      }),
+    });
+    if (!response.ok) {
+      console.warn("UTMify Purchase event failed:", await response.text());
+    }
+  } catch (error) {
+    console.error("Failed to send UTMify Purchase event:", error);
+  }
+}
+
+async function sendUTMifyRefund(payload: UTMifyRefundPayload) {
+  try {
+    const response = await fetch(UTMIFY_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pixelId: UTMIFY_PIXEL_ID,
+        eventName: "Refund",
+        eventData: payload,
+      }),
+    });
+    if (!response.ok) {
+      console.warn("UTMify Refund event failed:", await response.text());
+    }
+  } catch (error) {
+    console.error("Failed to send UTMify Refund event:", error);
+  }
+}
 
 const stripeSecret = Deno.env.get("STRIPE_SECRET_KEY");
 const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
@@ -44,7 +107,7 @@ serve(async (req) => {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+    event = await stripe.webhooks.constructEventAsync(rawBody, signature, webhookSecret);
   } catch (err) {
     console.error("Webhook signature verification failed", err);
     return new Response("Invalid signature", { status: 400 });
@@ -86,26 +149,26 @@ serve(async (req) => {
 
       const userId = authData.user.id;
       console.log(`Auth user created: ${userId}`);
+      console.log(`Waiting for trigger to create profile for ${userId}`);
 
-      // Create profile
-      const { error: profileError } = await supabaseAdmin
+      // Wait for the handle_new_user() trigger to create the profile
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Verify profile was created by trigger
+      const { data: profile, error: profileError } = await supabaseAdmin
         .from("profiles")
-        .insert({
-          user_id: userId,
-          email: email.toLowerCase(),
-          is_premium: false, // Will be activated by trigger when purchase is created
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
+        .select("user_id")
+        .eq("user_id", userId)
+        .maybeSingle();
 
-      if (profileError) {
-        console.error(`Failed to create profile for ${email}:`, profileError);
+      if (profileError || !profile) {
+        console.error(`Profile not created by trigger for ${userId}:`, profileError);
         // Try to cleanup auth user
         await supabaseAdmin.auth.admin.deleteUser(userId);
         return null;
       }
 
-      console.log(`Profile created for user ${userId}`);
+      console.log(`✅ Profile created by trigger for user ${userId}`);
       return userId;
     } catch (error) {
       console.error(`Error creating user from Stripe:`, error);
