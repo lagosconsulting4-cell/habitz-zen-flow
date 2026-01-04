@@ -2,70 +2,6 @@ import Stripe from "npm:stripe";
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// UTMify helpers (inline to avoid module import issues)
-const UTMIFY_PIXEL_ID = "6928b75029dffcb87ec192fd";
-const UTMIFY_API_URL = "https://api.utmify.com.br/api/v1/events";
-
-interface UTMifyPurchasePayload {
-  email: string;
-  phone?: string;
-  firstName?: string;
-  lastName?: string;
-  value: number;
-  currency: string;
-  transactionId: string;
-  subscriptionId?: string;
-  status: string;
-}
-
-interface UTMifyRefundPayload {
-  email: string;
-  phone?: string;
-  firstName?: string;
-  lastName?: string;
-  value: number;
-  currency: string;
-  transactionId: string;
-}
-
-async function sendUTMifyPurchase(payload: UTMifyPurchasePayload) {
-  try {
-    const response = await fetch(UTMIFY_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        pixelId: UTMIFY_PIXEL_ID,
-        eventName: "Purchase",
-        eventData: payload,
-      }),
-    });
-    if (!response.ok) {
-      console.warn("UTMify Purchase event failed:", await response.text());
-    }
-  } catch (error) {
-    console.error("Failed to send UTMify Purchase event:", error);
-  }
-}
-
-async function sendUTMifyRefund(payload: UTMifyRefundPayload) {
-  try {
-    const response = await fetch(UTMIFY_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        pixelId: UTMIFY_PIXEL_ID,
-        eventName: "Refund",
-        eventData: payload,
-      }),
-    });
-    if (!response.ok) {
-      console.warn("UTMify Refund event failed:", await response.text());
-    }
-  } catch (error) {
-    console.error("Failed to send UTMify Refund event:", error);
-  }
-}
-
 const stripeSecret = Deno.env.get("STRIPE_SECRET_KEY");
 const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? Deno.env.get("PROJECT_URL");
@@ -276,22 +212,6 @@ serve(async (req) => {
           currency: session.currency ?? "BRL",
           status: "paid",
         });
-
-        // Send Purchase event to UTMify → Meta Pixel
-        if (session.customer_details?.email) {
-          const nameParts = session.customer_details.name?.split(" ") || [];
-          await sendUTMifyPurchase({
-            email: session.customer_details.email,
-            phone: session.customer_details.phone || undefined,
-            firstName: nameParts[0] || undefined,
-            lastName: nameParts.slice(1).join(" ") || undefined,
-            value: (session.amount_total ?? 0) / 100, // Convert cents to dollars
-            currency: session.currency ?? "BRL",
-            transactionId: session.id,
-            subscriptionId: typeof session.subscription === "string" ? session.subscription : undefined,
-            status: "approved",
-          });
-        }
         break;
       }
 
@@ -419,20 +339,6 @@ serve(async (req) => {
           currency: charge.currency ?? "BRL",
           status: "refunded",
         });
-
-        // Send Refund event to UTMify
-        if (charge.billing_details?.email) {
-          const nameParts = charge.billing_details.name?.split(" ") || [];
-          await sendUTMifyRefund({
-            email: charge.billing_details.email,
-            phone: charge.billing_details.phone || undefined,
-            firstName: nameParts[0] || undefined,
-            lastName: nameParts.slice(1).join(" ") || undefined,
-            value: (charge.amount_refunded ?? charge.amount ?? 0) / 100,
-            currency: charge.currency ?? "BRL",
-            transactionId: charge.id,
-          });
-        }
         break;
       }
 
