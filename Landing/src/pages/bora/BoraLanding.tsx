@@ -1194,7 +1194,7 @@ const BoraLanding = () => {
                         R$ {bonus.value}
                       </span>
                       <span className="text-primary text-xs font-bold">
-                        GRÃTIS
+                        GRÁTIS
                       </span>
                     </div>
                   </div>
@@ -1213,7 +1213,7 @@ const BoraLanding = () => {
             <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-[#A3E635] via-[#84CC16] to-[#4ADE80] border border-[#65A30D] shadow-xl shadow-[#A3E635]/30 mb-6">
               <CheckCircle2 className="w-5 h-5 text-slate-900" />
               <span className="text-slate-900 font-semibold">
-                <strong className="text-slate-900 font-black">R$ 805</strong> em valor â Por apenas{" "}
+                <strong className="text-slate-900 font-black">R$ 805</strong> em valor – Por apenas{" "}
                 <strong className="text-slate-900 font-black">11x R$5,17</strong>
               </span>
             </div>

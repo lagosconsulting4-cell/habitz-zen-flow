@@ -1,4 +1,4 @@
-﻿import { motion } from "motion/react";
+import { motion } from "motion/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, Trophy, Gift, Calendar, Timer, Star } from "lucide-react";
 import { ContinueButton } from "../ContinueButton";
@@ -86,7 +86,7 @@ export const AppExplanationStep = () => {
                   <div>
                     <p className="font-semibold text-slate-900">Adaptação inteligente</p>
                     <p className="text-sm text-slate-700">
-                      A rotina se ajusta automaticamente Ã  sua realidade
+                      A rotina se ajusta automaticamente à sua realidade
                     </p>
                   </div>
                 </div>
@@ -157,7 +157,7 @@ export const AppExplanationStep = () => {
               </div>
 
               <h3 className="text-xl font-bold text-slate-900 mb-3">
-                Ãrea de BÃ´nus
+                Área de Bônus
               </h3>
 
               <div className="space-y-3">
@@ -166,7 +166,7 @@ export const AppExplanationStep = () => {
                   <div>
                     <p className="font-semibold text-slate-900">Recompensas exclusivas</p>
                     <p className="text-sm text-slate-700">
-                      Ganhe pontos e desbloqueie benefÃ­cios Ã  medida que evolui
+                      Ganhe pontos e desbloqueie benefícios à medida que evolui
                     </p>
                   </div>
                 </div>
@@ -212,4 +212,3 @@ export const AppExplanationStep = () => {
     </div>
   );
 };
-
