@@ -5,6 +5,9 @@
  * 1. DELAYED: Habit not completed 2+ hours after reminder time
  * 2. END_OF_DAY: Pending habits at 22:00-23:59 (last chance notification)
  * 3. MULTIPLE_PENDING: 3+ habits pending at 15:00-18:00 (afternoon catch-up)
+ * 4. TRIAL_DAY_3: User on day 3 of trial with no habits created
+ * 5. TRIAL_DAY_5: User on day 5 of trial with streak < 3
+ * 6. TRIAL_ENDING: Trial ending in 3 days or 1 day
  *
  * Runs hourly via pg_cron. Different from habit-reminder-scheduler which
  * runs every 5 minutes for time-based reminders.
@@ -76,6 +79,105 @@ function isScheduledForToday(daysOfWeek: number[] | null, currentTime: Date): bo
   }
   const today = currentTime.getDay(); // 0 = Sunday, 1 = Monday, etc.
   return daysOfWeek.includes(today);
+}
+
+/**
+ * Checks if sending a notification would exceed daily limits.
+ * Limit: daily_limit (default 3) + extra_for_streaks (default 2) if streak >= 7
+ */
+async function checkDailyLimit(
+  supabase: any,
+  userId: string,
+  habitId: string | null
+): Promise<boolean> {
+  const today = new Date().toISOString().split("T")[0];
+
+  // If habitId provided, check if this specific habit already got a notification today
+  if (habitId) {
+    const { data: habitNotif, error: habitError } = await supabase
+      .from("notification_history")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("habit_id", habitId)
+      .eq("notification_date", today)
+      .maybeSingle();
+
+    if (habitError) {
+      console.error("[Daily Limit] Error checking habit notifications:", habitError);
+      return true; // Allow on error
+    }
+
+    if (habitNotif) {
+      // Habit already got a notification today
+      return false;
+    }
+  }
+
+  // Count today's notifications for this user
+  const { data: todayNotifs, error: countError } = await supabase
+    .from("notification_history")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("notification_date", today);
+
+  if (countError) {
+    console.error("[Daily Limit] Error counting notifications:", countError);
+    return true; // Allow on error
+  }
+
+  // Get user preferences (default: 3 base + 2 for streaks)
+  const { data: userProgress, error: prefError } = await supabase
+    .from("user_progress")
+    .select("notification_preferences, current_streak")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const prefs = userProgress?.notification_preferences || {
+    daily_limit: 3,
+    extra_for_streaks: 2,
+  };
+
+  // Calculate effective limit based on streak
+  let effectiveLimit = prefs.daily_limit || 3;
+  if (userProgress?.current_streak >= 7) {
+    effectiveLimit += prefs.extra_for_streaks || 2;
+  }
+
+  const currentCount = (todayNotifs || []).length;
+  return currentCount < effectiveLimit;
+}
+
+/**
+ * Checks if we already sent a notification for this habit+context today.
+ * Prevents duplicate notifications for the same trigger.
+ */
+async function checkAlreadySentToday(
+  supabase: any,
+  userId: string,
+  habitId: string | null,
+  contextType: string
+): Promise<boolean> {
+  const today = new Date().toISOString().split("T")[0];
+
+  let query = supabase
+    .from("notification_history")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("context_type", contextType)
+    .eq("notification_date", today);
+
+  if (habitId) {
+    query = query.eq("habit_id", habitId);
+  }
+
+  const { data, error } = await query.maybeSingle();
+
+  if (error) {
+    console.error("[AlreadySent] Error checking notification history:", error);
+    return false; // Allow on error
+  }
+
+  return !!data;
 }
 
 /**
@@ -284,6 +386,163 @@ async function checkMultiplePendingHabits(
 }
 
 /**
+ * TRIGGER 4: TRIAL DAY 3
+ * Checks users on day 3 of trial who haven't created any habits
+ */
+async function checkTrialDay3(
+  supabase: any,
+  currentHour: number
+): Promise<{ userId: string; email: string }[]> {
+  // Only trigger at 10:00 AM (morning engagement time)
+  if (currentHour !== 10) {
+    return [];
+  }
+
+  // Get users in trial for exactly 3 days
+  const threeDaysAgo = new Date();
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+  const startOfDay = threeDaysAgo.toISOString().split("T")[0];
+  const endOfDay = startOfDay + "T23:59:59Z";
+
+  const { data: purchases, error } = await supabase
+    .from("purchases")
+    .select("user_id, email")
+    .eq("status", "paid")
+    .not("trial_end_date", "is", null)
+    .gte("created_at", startOfDay)
+    .lte("created_at", endOfDay);
+
+  if (error) {
+    console.error("[TrialDay3] Error fetching trial users:", error);
+    return [];
+  }
+
+  const result: { userId: string; email: string }[] = [];
+
+  for (const purchase of purchases || []) {
+    // Check if user has any habits
+    const { data: habits, error: habitsError } = await supabase
+      .from("habits")
+      .select("id")
+      .eq("user_id", purchase.user_id)
+      .eq("is_active", true)
+      .limit(1);
+
+    if (habitsError) {
+      console.error(`[TrialDay3] Error checking habits for user ${purchase.user_id}:`, habitsError);
+      continue;
+    }
+
+    if (!habits || habits.length === 0) {
+      // User has no habits after 3 days
+      result.push({ userId: purchase.user_id, email: purchase.email });
+    }
+  }
+
+  return result;
+}
+
+/**
+ * TRIGGER 5: TRIAL DAY 5
+ * Checks users on day 5 of trial with streak < 3
+ */
+async function checkTrialDay5(
+  supabase: any,
+  currentHour: number
+): Promise<{ userId: string; email: string; streak: number }[]> {
+  // Only trigger at 10:00 AM
+  if (currentHour !== 10) {
+    return [];
+  }
+
+  // Get users in trial for exactly 5 days
+  const fiveDaysAgo = new Date();
+  fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+  const startOfDay = fiveDaysAgo.toISOString().split("T")[0];
+  const endOfDay = startOfDay + "T23:59:59Z";
+
+  const { data: purchases, error } = await supabase
+    .from("purchases")
+    .select("user_id, email")
+    .eq("status", "paid")
+    .not("trial_end_date", "is", null)
+    .gte("created_at", startOfDay)
+    .lte("created_at", endOfDay);
+
+  if (error) {
+    console.error("[TrialDay5] Error fetching trial users:", error);
+    return [];
+  }
+
+  const result: { userId: string; email: string; streak: number }[] = [];
+
+  for (const purchase of purchases || []) {
+    // Check user's current streak
+    const { data: progress, error: progressError } = await supabase
+      .from("user_progress")
+      .select("current_streak")
+      .eq("user_id", purchase.user_id)
+      .maybeSingle();
+
+    if (progressError) {
+      console.error(`[TrialDay5] Error checking progress for user ${purchase.user_id}:`, progressError);
+      continue;
+    }
+
+    const streak = progress?.current_streak ?? 0;
+    if (streak < 3) {
+      // User has low streak after 5 days
+      result.push({ userId: purchase.user_id, email: purchase.email, streak });
+    }
+  }
+
+  return result;
+}
+
+/**
+ * TRIGGER 6: TRIAL ENDING
+ * Checks users whose trial ends in 3 days or 1 day
+ */
+async function checkTrialEnding(
+  supabase: any,
+  currentHour: number
+): Promise<{ userId: string; email: string; daysLeft: number }[]> {
+  // Only trigger at 10:00 AM
+  if (currentHour !== 10) {
+    return [];
+  }
+
+  const now = new Date();
+  const result: { userId: string; email: string; daysLeft: number }[] = [];
+
+  // Check for 3 days and 1 day before trial ends
+  for (const daysLeft of [3, 1]) {
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + daysLeft);
+    const startOfDay = targetDate.toISOString().split("T")[0];
+    const endOfDay = startOfDay + "T23:59:59Z";
+
+    const { data: purchases, error } = await supabase
+      .from("purchases")
+      .select("user_id, email")
+      .eq("status", "paid")
+      .gte("trial_end_date", startOfDay)
+      .lte("trial_end_date", endOfDay);
+
+    if (error) {
+      console.error(`[TrialEnding] Error fetching trial users (${daysLeft}d):`, error);
+      continue;
+    }
+
+    for (const purchase of purchases || []) {
+      result.push({ userId: purchase.user_id, email: purchase.email, daysLeft });
+    }
+  }
+
+  return result;
+}
+
+/**
  * Send trigger notification via send-push-notification edge function
  */
 async function sendTriggerNotification(
@@ -417,6 +676,18 @@ serve(async (req) => {
     const multiplePendingUsers = await checkMultiplePendingHabits(supabase, brazilTime, currentHour);
     const multiplePendingWithPush = multiplePendingUsers.filter(u => usersWithPush.has(u.userId));
 
+    // TRIGGER 4: Check trial day 3 (no habits)
+    const trialDay3Users = await checkTrialDay3(supabase, currentHour);
+    const trialDay3WithPush = trialDay3Users.filter(u => usersWithPush.has(u.userId));
+
+    // TRIGGER 5: Check trial day 5 (low streak)
+    const trialDay5Users = await checkTrialDay5(supabase, currentHour);
+    const trialDay5WithPush = trialDay5Users.filter(u => usersWithPush.has(u.userId));
+
+    // TRIGGER 6: Check trial ending (3d and 1d)
+    const trialEndingUsers = await checkTrialEnding(supabase, currentHour);
+    const trialEndingWithPush = trialEndingUsers.filter(u => usersWithPush.has(u.userId));
+
     if (dryRun) {
       return new Response(JSON.stringify({
         success: true,
@@ -426,6 +697,9 @@ serve(async (req) => {
           delayed: delayedWithPush.length,
           endOfDay: endOfDayWithPush.length,
           multiplePending: multiplePendingWithPush.length,
+          trialDay3: trialDay3WithPush.length,
+          trialDay5: trialDay5WithPush.length,
+          trialEnding: trialEndingWithPush.length,
         },
       }), {
         status: 200,
@@ -437,11 +711,31 @@ serve(async (req) => {
       delayed: 0,
       endOfDay: 0,
       multiplePending: 0,
+      trialDay3: 0,
+      trialDay5: 0,
+      trialEnding: 0,
+      skipped: 0,
       failed: 0,
     };
 
     // Process TRIGGER 1: Delayed habits
     for (const habit of delayedWithPush) {
+      // Check if we already sent a delayed notification for this habit today
+      const alreadySent = await checkAlreadySentToday(supabase, habit.userId, habit.habitId, "delayed");
+      if (alreadySent) {
+        console.log(`[Delayed] Skipping habit ${habit.habitId} - already sent today`);
+        results.skipped++;
+        continue;
+      }
+
+      // Check daily limit
+      const withinLimit = await checkDailyLimit(supabase, habit.userId, habit.habitId);
+      if (!withinLimit) {
+        console.log(`[Delayed] Skipping habit ${habit.habitId} - daily limit reached for user ${habit.userId}`);
+        results.skipped++;
+        continue;
+      }
+
       const success = await sendTriggerNotification(
         supabase,
         habit.userId,
@@ -457,6 +751,22 @@ serve(async (req) => {
 
     // Process TRIGGER 2: End of day
     for (const habit of endOfDayWithPush) {
+      // Check if we already sent an end_of_day notification for this habit today
+      const alreadySent = await checkAlreadySentToday(supabase, habit.userId, habit.habitId, "end_of_day");
+      if (alreadySent) {
+        console.log(`[EndOfDay] Skipping habit ${habit.habitId} - already sent today`);
+        results.skipped++;
+        continue;
+      }
+
+      // Check daily limit
+      const withinLimit = await checkDailyLimit(supabase, habit.userId, habit.habitId);
+      if (!withinLimit) {
+        console.log(`[EndOfDay] Skipping habit ${habit.habitId} - daily limit reached for user ${habit.userId}`);
+        results.skipped++;
+        continue;
+      }
+
       const success = await sendTriggerNotification(
         supabase,
         habit.userId,
@@ -472,6 +782,22 @@ serve(async (req) => {
 
     // Process TRIGGER 3: Multiple pending
     for (const user of multiplePendingWithPush) {
+      // Check if we already sent a multiple_pending notification for this user today
+      const alreadySent = await checkAlreadySentToday(supabase, user.userId, null, "multiple_pending");
+      if (alreadySent) {
+        console.log(`[MultiplePending] Skipping user ${user.userId} - already sent today`);
+        results.skipped++;
+        continue;
+      }
+
+      // Check daily limit
+      const withinLimit = await checkDailyLimit(supabase, user.userId, null);
+      if (!withinLimit) {
+        console.log(`[MultiplePending] Skipping user ${user.userId} - daily limit reached`);
+        results.skipped++;
+        continue;
+      }
+
       const success = await sendTriggerNotification(
         supabase,
         user.userId,
@@ -481,6 +807,98 @@ serve(async (req) => {
         "multiple_pending_g1"
       );
       if (success) results.multiplePending++;
+      else results.failed++;
+    }
+
+    // Process TRIGGER 4: Trial Day 3 (no habits)
+    for (const user of trialDay3WithPush) {
+      const alreadySent = await checkAlreadySentToday(supabase, user.userId, null, "trial_day_3");
+      if (alreadySent) {
+        console.log(`[TrialDay3] Skipping user ${user.userId} - already sent today`);
+        results.skipped++;
+        continue;
+      }
+
+      const withinLimit = await checkDailyLimit(supabase, user.userId, null);
+      if (!withinLimit) {
+        console.log(`[TrialDay3] Skipping user ${user.userId} - daily limit reached`);
+        results.skipped++;
+        continue;
+      }
+
+      const success = await sendTriggerNotification(
+        supabase,
+        user.userId,
+        "Voce criou seus habitos? 🌱",
+        "Seu trial ta rolando mas voce ainda nao criou nenhum habito... bora comecar?",
+        "trial_day_3",
+        "trial_day_3_no_habits"
+      );
+      if (success) results.trialDay3++;
+      else results.failed++;
+    }
+
+    // Process TRIGGER 5: Trial Day 5 (low streak)
+    for (const user of trialDay5WithPush) {
+      const alreadySent = await checkAlreadySentToday(supabase, user.userId, null, "trial_day_5");
+      if (alreadySent) {
+        console.log(`[TrialDay5] Skipping user ${user.userId} - already sent today`);
+        results.skipped++;
+        continue;
+      }
+
+      const withinLimit = await checkDailyLimit(supabase, user.userId, null);
+      if (!withinLimit) {
+        console.log(`[TrialDay5] Skipping user ${user.userId} - daily limit reached`);
+        results.skipped++;
+        continue;
+      }
+
+      const success = await sendTriggerNotification(
+        supabase,
+        user.userId,
+        "Ja formou seu primeiro streak? 🔥",
+        "Faltam poucos dias de trial... bora construir uma sequencia hoje!",
+        "trial_day_5",
+        "trial_day_5_low_streak"
+      );
+      if (success) results.trialDay5++;
+      else results.failed++;
+    }
+
+    // Process TRIGGER 6: Trial Ending
+    for (const user of trialEndingWithPush) {
+      const contextKey = user.daysLeft === 3 ? "trial_ending_3d" : "trial_ending_1d";
+      const alreadySent = await checkAlreadySentToday(supabase, user.userId, null, contextKey);
+      if (alreadySent) {
+        console.log(`[TrialEnding] Skipping user ${user.userId} - already sent today`);
+        results.skipped++;
+        continue;
+      }
+
+      const withinLimit = await checkDailyLimit(supabase, user.userId, null);
+      if (!withinLimit) {
+        console.log(`[TrialEnding] Skipping user ${user.userId} - daily limit reached`);
+        results.skipped++;
+        continue;
+      }
+
+      const title = user.daysLeft === 3
+        ? "Seu trial termina em 3 dias ⏰"
+        : "Ultima chance! Trial acaba amanha 🚨";
+      const body = user.daysLeft === 3
+        ? "Aproveita pra explorar tudo o que o Habitz oferece!"
+        : "Garanta sua assinatura pra nao perder seu progresso!";
+
+      const success = await sendTriggerNotification(
+        supabase,
+        user.userId,
+        title,
+        body,
+        contextKey,
+        contextKey
+      );
+      if (success) results.trialEnding++;
       else results.failed++;
     }
 

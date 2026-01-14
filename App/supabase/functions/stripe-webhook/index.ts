@@ -129,6 +129,10 @@ serve(async (req) => {
     isNewUser: boolean;
     productName?: string;
     amount?: number;
+    trialEndDate?: string;
+    isTrial?: boolean;
+    subscriptionId?: string;
+    failureCount?: number;
   }) => {
     try {
       const n8nPayload = {
@@ -141,6 +145,10 @@ serve(async (req) => {
         },
         user_id: payload.userId,
         is_new_user: payload.isNewUser,
+        is_trial: payload.isTrial ?? false,
+        trial_end_date: payload.trialEndDate,
+        subscription_id: payload.subscriptionId,
+        failure_count: payload.failureCount,
         amount: payload.amount,
         provider: "stripe",
         timestamp: new Date().toISOString(),
@@ -177,6 +185,7 @@ serve(async (req) => {
     currency: string;
     status: "paid" | "open" | "failed" | "refunded";
     billingInterval?: "month" | "year";
+    trialEndDate?: string;
   }) => {
     const { error } = await supabaseAdmin
       .from("purchases")
@@ -193,6 +202,7 @@ serve(async (req) => {
           currency: payload.currency.toUpperCase(),
           status: payload.status,
           billing_interval: payload.billingInterval,
+          trial_end_date: payload.trialEndDate,
         },
         { onConflict: "provider_session_id" }
       );
@@ -317,6 +327,10 @@ serve(async (req) => {
 
         const interval = subscription.items.data[0]?.price?.recurring?.interval;
         const amount = subscription.items.data[0]?.price?.unit_amount ?? 0;
+        const isTrial = subscription.status === "trialing";
+        const trialEndDate = subscription.trial_end
+          ? new Date(subscription.trial_end * 1000).toISOString()
+          : undefined;
 
         await upsertPurchase({
           userId,
@@ -327,6 +341,7 @@ serve(async (req) => {
           currency: subscription.currency,
           status: subscription.status === "active" || subscription.status === "trialing" ? "paid" : "open",
           billingInterval: interval === "month" ? "month" : "year",
+          trialEndDate,
         });
 
         // Notify N8N for welcome email workflow
@@ -336,6 +351,9 @@ serve(async (req) => {
           customerName,
           userId,
           isNewUser,
+          isTrial,
+          trialEndDate,
+          subscriptionId: subscription.id,
           amount,
         });
         break;
@@ -357,9 +375,54 @@ serve(async (req) => {
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
+        const customer = await stripe.customers.retrieve(subscription.customer as string);
 
         // Mark purchase as refunded to deactivate premium
         await updatePurchaseBySubscription(subscription.id, "refunded");
+
+        // Notify N8N for churn/winback email sequence
+        if (!customer.deleted && customer.email) {
+          const userId = await findUserByEmail(customer.email);
+          await notifyN8N({
+            event: "SUBSCRIPTION_CANCELED",
+            email: customer.email,
+            customerName: customer.name ?? "Cliente",
+            userId: userId ?? "",
+            isNewUser: false,
+            subscriptionId: subscription.id,
+          });
+        }
+        break;
+      }
+
+      case "customer.subscription.trial_will_end": {
+        // Triggered 3 days before trial ends
+        const subscription = event.data.object as Stripe.Subscription;
+        const customer = await stripe.customers.retrieve(subscription.customer as string);
+
+        if (customer.deleted || !customer.email) {
+          console.log("Customer deleted or no email, skipping trial_will_end");
+          break;
+        }
+
+        const trialEndDate = subscription.trial_end
+          ? new Date(subscription.trial_end * 1000).toISOString()
+          : undefined;
+
+        const userId = await findUserByEmail(customer.email);
+
+        console.log(`📧 Trial ending in 3 days for ${customer.email}`);
+
+        await notifyN8N({
+          event: "TRIAL_ENDING_3D",
+          email: customer.email,
+          customerName: customer.name ?? "Cliente",
+          userId: userId ?? "",
+          isNewUser: false,
+          isTrial: true,
+          trialEndDate,
+          subscriptionId: subscription.id,
+        });
         break;
       }
 
@@ -370,14 +433,50 @@ serve(async (req) => {
           break;
         }
 
+        const subscriptionId = invoice.subscription as string;
         const userId = await findUserByEmail(invoice.customer_email);
         if (!userId) {
           console.log(`No user found for email ${invoice.customer_email}, skipping`);
           break;
         }
 
-        // For recurring payments, update existing purchase to paid
-        await updatePurchaseBySubscription(invoice.subscription as string, "paid");
+        // Check if this is a recovery from failed payment
+        const { data: purchase } = await supabaseAdmin
+          .from("purchases")
+          .select("payment_failure_count")
+          .eq("stripe_subscription_id", subscriptionId)
+          .single();
+
+        const wasInFailedState = (purchase?.payment_failure_count ?? 0) > 0;
+
+        // Update purchase - reset failure tracking if recovered
+        const { error: updateError } = await supabaseAdmin
+          .from("purchases")
+          .update({
+            status: "paid",
+            payment_failure_count: 0,
+            last_payment_recovered_at: wasInFailedState ? new Date().toISOString() : undefined,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("stripe_subscription_id", subscriptionId);
+
+        if (updateError) {
+          console.error(`Failed to update purchase for subscription ${subscriptionId}:`, updateError);
+        }
+
+        if (wasInFailedState) {
+          console.log(`✅ Payment recovered for subscription ${subscriptionId}`);
+
+          // Notify N8N that payment was recovered (to stop recovery sequence)
+          await notifyN8N({
+            event: "PAYMENT_RECOVERED",
+            email: invoice.customer_email,
+            customerName: invoice.customer_name ?? "Cliente",
+            userId,
+            isNewUser: false,
+            subscriptionId,
+          });
+        }
         break;
       }
 
@@ -388,8 +487,49 @@ serve(async (req) => {
           break;
         }
 
-        // Mark purchase as failed (will deactivate premium if no other active purchases)
-        await updatePurchaseBySubscription(invoice.subscription as string, "failed");
+        const subscriptionId = invoice.subscription as string;
+
+        // Get current failure count and increment
+        const { data: purchase } = await supabaseAdmin
+          .from("purchases")
+          .select("payment_failure_count, user_id")
+          .eq("stripe_subscription_id", subscriptionId)
+          .single();
+
+        const currentFailureCount = purchase?.payment_failure_count ?? 0;
+        const newFailureCount = currentFailureCount + 1;
+
+        // Update purchase with failure tracking
+        const { error: updateError } = await supabaseAdmin
+          .from("purchases")
+          .update({
+            status: "failed",
+            payment_failure_count: newFailureCount,
+            last_payment_failure_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq("stripe_subscription_id", subscriptionId);
+
+        if (updateError) {
+          console.error(`Failed to update payment failure for subscription ${subscriptionId}:`, updateError);
+        }
+
+        console.log(`💳 Payment failed (#${newFailureCount}) for subscription ${subscriptionId}`);
+
+        // Notify N8N for payment recovery email sequence
+        if (invoice.customer_email) {
+          const userId = purchase?.user_id ?? await findUserByEmail(invoice.customer_email);
+          await notifyN8N({
+            event: "PAYMENT_FAILED",
+            email: invoice.customer_email,
+            customerName: invoice.customer_name ?? "Cliente",
+            userId: userId ?? "",
+            isNewUser: false,
+            subscriptionId,
+            failureCount: newFailureCount,
+            amount: invoice.amount_due ?? 0,
+          });
+        }
         break;
       }
 
