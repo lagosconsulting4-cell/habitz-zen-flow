@@ -478,6 +478,146 @@ const BoraUpsell = () => {
        </div>
      </section>
 
+      {/* ============ VIDEO SECTION - VEJA O BORA EM AÇÃO ============ */}
+      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#A3E635]/5 to-white" />
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Badge className="mb-4 bg-[#A3E635] text-slate-900 border-0 shadow-lg shadow-[#A3E635]/30">
+              <Sparkles className="w-3 h-3 mr-1" />
+              Veja o BORA em ação
+            </Badge>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+              Conheça o app que vai{" "}
+              <span className="text-[#A3E635]">transformar sua rotina</span>
+            </h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Veja como é simples ter uma rotina personalizada que realmente funciona
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Video */}
+            <motion.div
+              className="flex justify-center lg:justify-end"
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="relative w-full max-w-sm">
+                {/* Glow effect behind video */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[#A3E635]/20 rounded-full blur-[100px]" />
+
+                {/* Video container */}
+                <div className="relative aspect-[9/16] bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border-4 border-white ring-2 ring-[#A3E635]/20">
+                  <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover"
+                  >
+                    <source src="/videos/quiz-hero.mp4" type="video/mp4" />
+                    Seu navegador não suporta vídeo HTML5.
+                  </video>
+                </div>
+
+                {/* Floating badge */}
+                <motion.div
+                  className="absolute -bottom-4 -right-4 bg-white rounded-2xl px-4 py-3 shadow-xl border border-slate-200"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-sm font-semibold text-slate-900">Ao vivo</span>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* Benefits */}
+            <motion.div
+              className="space-y-6"
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <h3 className="text-2xl md:text-3xl font-bold text-slate-900">
+                Tudo que você precisa em um só lugar
+              </h3>
+
+              <div className="space-y-4">
+                {[
+                  {
+                    icon: Target,
+                    title: "Rotina Personalizada",
+                    description: "Criada especificamente para seus objetivos e rotina",
+                  },
+                  {
+                    icon: Calendar,
+                    title: "Checklists Diários",
+                    description: "Saiba exatamente o que fazer a cada momento do dia",
+                  },
+                  {
+                    icon: LineChart,
+                    title: "Progresso Visual",
+                    description: "Acompanhe sua evolução e mantenha a motivação",
+                  },
+                  {
+                    icon: Flame,
+                    title: "Gamificação",
+                    description: "Streaks, conquistas e recompensas que te mantêm consistente",
+                  },
+                ].map((item, index) => (
+                  <motion.div
+                    key={index}
+                    className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:border-[#A3E635]/30 transition-colors"
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#A3E635] to-lime-400 flex items-center justify-center flex-shrink-0 shadow-lg">
+                      <item.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 mb-1">{item.title}</h4>
+                      <p className="text-sm text-slate-600">{item.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <motion.div
+                className="pt-4"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  onClick={() => handleCTA("annual", "video_section")}
+                  className="bg-[#A3E635] hover:bg-[#84cc16] text-slate-900 font-bold px-8 py-6 rounded-full shadow-xl shadow-[#A3E635]/30"
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  QUERO TRANSFORMAR MINHA VIDA
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* ============ TRANSITION SECTION ============ */}
       <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-b from-white to-slate-50">
         <div className="max-w-4xl mx-auto relative z-10">
