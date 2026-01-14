@@ -60,7 +60,7 @@ const pillars = [
   {
     title: "Simplicidade",
     subtitle: "7 minutos por dia",
-    description: "Micro-hábitos que cabem na rotina mais corrida. Sem complicação.",
+    description: "Abre o app. Segue o plano. Pronto. Funciona automático.",
     icon: Zap,
     gradient: "from-[#A3E635] to-lime-300",
     bgGlow: "bg-[#A3E635]/20",
@@ -68,7 +68,7 @@ const pillars = [
   {
     title: "Personalização",
     subtitle: "Feito para você",
-    description: "Quiz personalizado. Rotina que aprende e se adapta ao seu ritmo.",
+    description: "Rotina do seu jeito. Se adapta sozinha ao seu tempo e energia.",
     icon: Brain,
     gradient: "from-[#A3E635] to-lime-400",
     bgGlow: "bg-[#A3E635]/20",
@@ -76,7 +76,7 @@ const pillars = [
   {
     title: "Resultados",
     subtitle: "30 dias de transformação",
-    description: "Melhore foco, ansiedade e sono. 5000+ usuários. 94% mantêm consistência.",
+    description: "Foco volta. Energia aumenta. Sono melhora. 5000+ já mudaram.",
     icon: Flame,
     gradient: "from-[#A3E635] to-lime-300",
     bgGlow: "bg-[#A3E635]/20",
@@ -238,19 +238,19 @@ const bonusItems = [
 const faqs = [
   {
     question: "Quanto tempo preciso dedicar por dia?",
-    answer: "De 5 minutos a 1 hora por dia - você decide! Nosso método se adapta à sua disponibilidade. Perfeito para quem tem pouco tempo, poderoso para quem quer se aprofundar. São micro-hábitos que geram macro resultados.",
+    answer: "De 5 a 15 minutos na média. O app se adapta ao SEU tempo disponível. Se você disse que tem 5 minutos, vai receber só hábitos de 5 minutos. Sem forçar.",
   },
   {
     question: "Funciona mesmo se eu já tentei de tudo?",
-    answer: "Sim! O BORA é diferente porque não tenta mudar tudo de uma vez. Começamos com pequenas vitórias que criam momentum para mudanças maiores.",
+    answer: "Sim! O BORA é diferente porque funciona automático. Você não precisa 'aprender' nada ou fazer esforço. Só seguir o que o app manda. Simples assim.",
   },
   {
     question: "E se eu não gostar?",
-    answer: "Oferecemos garantia de 7 dias. Se não sentir diferença na sua rotina, devolvemos 100% do seu investimento. Sem perguntas, sem burocracia.",
+    answer: "Tem garantia de 7 dias. Não curtiu? Pega o dinheiro de volta. Sem enrolação, sem perguntas.",
   },
   {
     question: "Preciso baixar algum app?",
-    answer: "Não precisa baixar nada! O BORA funciona direto do seu celular pelo navegador. Você pode salvar na tela inicial como um app e usar offline.",
+    answer: "Não precisa baixar nada! Funciona direto no navegador do seu celular. Salva na tela inicial e usa como app. Offline e tudo.",
   },
 ];
 
@@ -396,9 +396,9 @@ const BoraLanding = () => {
                 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.1] text-slate-900"
                 variants={staggerItem}
               >
-                Recupere o foco e elimine a{" "}
+                Pare de se sentir sufocado.{" "}
                 <span className="text-[#A3E635] relative">
-                  procrastinação em 7 minutos por dia
+                  Foco e energia voltam em 7 minutos
                   <svg className="absolute -bottom-2 left-0 w-full h-3 text-[#A3E635]/30" viewBox="0 0 200 12" preserveAspectRatio="none">
                     <path d="M0,8 Q50,0 100,8 T200,8" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round"/>
                   </svg>
@@ -410,11 +410,11 @@ const BoraLanding = () => {
                 className="text-lg md:text-xl text-slate-600 max-w-xl mx-auto lg:mx-0"
                 variants={staggerItem}
               >
-                Chega de acordar sem energia. Chega de procrastinar.{" "}
-                <strong className="text-slate-900">Seu plano personalizado</strong> vai
-                te dar clareza e consistência.{" "}
+                Sem esforço. Sem complicação.{" "}
+                <strong className="text-slate-900">Só abrir o app e seguir.</strong>{" "}
+                7 minutos que mudam seu dia inteiro.{" "}
                 <span className="block mt-2 text-base md:text-lg">
-                  Perfeito para quem tem <strong className="text-[#A3E635]">5 minutos</strong>, poderoso para quem quer dominar sua <strong className="text-[#A3E635]">1 hora livre</strong>.
+                  Funciona mesmo se você tem <strong className="text-[#A3E635]">só 5 minutos</strong> livres. Zero pressão.
                 </span>
               </motion.p>
 
@@ -1289,10 +1289,10 @@ const BoraLanding = () => {
           viewport={{ once: true }}
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-            Sua transformação começa <span className="text-[#A3E635]">agora</span>
+            Falta só <span className="text-[#A3E635]">2 minutos</span> pro teste grátis
           </h2>
           <p className="text-slate-600 text-lg mb-8 max-w-xl mx-auto">
-            Cada dia que passa é um dia a menos na sua transformação. Não deixe para depois.
+            Responde o quiz. Recebe sua rotina. Testa grátis por 3 dias. Simples assim.
           </p>
 
           {/* APP MOCKUP */}

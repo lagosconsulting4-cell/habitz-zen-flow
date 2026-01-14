@@ -59,8 +59,8 @@ export function generateRecommendations(
   // LAYER 3: Determine target quantity based on time available
   const targetQuantity = determineQuantity(input.timeAvailable);
 
-  // Select top habits based on combined scores
-  const selectedHabitIds = selectTopHabits(combinedScores, targetQuantity);
+  // Select top habits based on combined scores AND time constraints
+  const selectedHabitIds = selectTopHabits(combinedScores, targetQuantity, input.timeAvailable);
 
   // LAYER 4: Assign periods, time slots, and create habit objects
   const recommendedHabits = assignScheduleAndCreateHabits(
@@ -173,17 +173,67 @@ function determineQuantity(timeAvailable: TimeAvailable): number {
 }
 
 /**
- * Select top N habits based on scores
+ * Get max duration in minutes for a given time availability
+ */
+function getMaxDuration(timeAvailable: TimeAvailable): number {
+  const timeMap: Record<TimeAvailable, number> = {
+    "5min": 5,
+    "15min": 15,
+    "30min": 30,
+    "1h": 60,
+  };
+  return timeMap[timeAvailable];
+}
+
+/**
+ * Select top N habits based on scores, respecting time constraints
+ * CRITICAL: Filters out habits that don't fit in the user's available time
  */
 function selectTopHabits(
   scores: Map<string, ScoredHabit>,
-  quantity: number
+  quantity: number,
+  timeAvailable: TimeAvailable
 ): string[] {
+  const maxDuration = getMaxDuration(timeAvailable);
+
   // Sort habits by score (descending)
   const sorted = Array.from(scores.values()).sort((a, b) => b.score - a.score);
 
-  // Take top N
-  return sorted.slice(0, quantity).map((scored) => scored.habitId);
+  // Filter out habits that are too long for the user's available time
+  const compatibleHabits = sorted.filter((scored) => {
+    const template = getHabitTemplate(scored.habitId);
+    if (!template) return false;
+
+    const habitDuration = template.defaultDuration || 5; // Default to 5 min if not specified
+
+    // Only include habits that fit in the user's available time
+    return habitDuration <= maxDuration;
+  });
+
+  // Select top N compatible habits
+  const selectedHabits: string[] = [];
+  let totalDuration = 0;
+
+  for (const scored of compatibleHabits) {
+    const template = getHabitTemplate(scored.habitId);
+    if (!template) continue;
+
+    const habitDuration = template.defaultDuration || 5;
+
+    // Check if adding this habit would exceed the time limit
+    if (totalDuration + habitDuration <= maxDuration) {
+      selectedHabits.push(scored.habitId);
+      totalDuration += habitDuration;
+
+      // Stop if we've selected enough habits
+      if (selectedHabits.length >= quantity) {
+        break;
+      }
+    }
+  }
+
+  // If we couldn't fill the quantity with time constraints, return what we got
+  return selectedHabits;
 }
 
 /**
