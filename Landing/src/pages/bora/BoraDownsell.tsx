@@ -217,7 +217,7 @@ const BoraDownsell = () => {
               className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto"
               variants={staggerItem}
             >
-              Sem compromisso. Sem cartão de crédito. Sem risco.
+              Sem compromisso. Sem risco.
               <br />
               <strong className="text-slate-900">Apenas 3 dias para você descobrir</strong> se o BORA é o que faltava na sua vida.
             </motion.p>
