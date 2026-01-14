@@ -6,6 +6,7 @@ const stripeSecret = Deno.env.get("STRIPE_SECRET_KEY");
 const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? Deno.env.get("PROJECT_URL");
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SERVICE_ROLE_KEY");
+const n8nWebhookUrl = Deno.env.get("N8N_WEBHOOK_URL") ?? "https://n8n-evo-n8n.harxon.easypanel.host/webhook/bora-welcome";
 
 if (!stripeSecret || !webhookSecret || !supabaseUrl || !supabaseServiceRoleKey) {
   console.error("Missing environment variables for stripe-webhook function");
@@ -51,31 +52,57 @@ serve(async (req) => {
 
   const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-  // Helper: Find user by email
+  // Helper: Find user by email - first check purchases table, then auth users
   const findUserByEmail = async (email: string): Promise<string | null> => {
-    const { data, error } = await supabaseAdmin
-      .from("profiles")
-      .select("user_id")
-      .eq("email", email.toLowerCase())
-      .single();
+    const normalizedEmail = email.toLowerCase();
 
-    if (error || !data) {
+    // First, check if we have a purchase with this email (fastest lookup)
+    const { data: purchase } = await supabaseAdmin
+      .from("purchases")
+      .select("user_id")
+      .eq("email", normalizedEmail)
+      .not("user_id", "is", null)
+      .limit(1)
+      .maybeSingle();
+
+    if (purchase?.user_id) {
+      console.log(`Found user via purchases table for: ${email}`);
+      return purchase.user_id;
+    }
+
+    // Fallback: search auth users directly
+    const { data: userLookup, error } = await supabaseAdmin.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000, // Get enough users to search through
+    });
+
+    if (error) {
+      console.error(`Error looking up users:`, error);
+      return null;
+    }
+
+    const user = userLookup?.users?.find(u => u.email?.toLowerCase() === normalizedEmail);
+    if (!user) {
       console.log(`User not found for email: ${email}`);
       return null;
     }
 
-    return data.user_id;
+    console.log(`Found user via auth.users for: ${email}`);
+    return user.id;
   };
 
   // Helper: Create user account from Stripe customer
-  const createUserFromStripe = async (email: string): Promise<string | null> => {
+  const createUserFromStripe = async (email: string, customerName?: string): Promise<string | null> => {
     try {
       console.log(`Creating user account for: ${email}`);
 
-      // Create auth user (without password - will be set later)
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email: email.toLowerCase(),
-        email_confirm: true, // Auto-confirm email
+        email_confirm: true,
+        user_metadata: {
+          full_name: customerName ?? "Cliente Stripe",
+          created_via: "stripe-webhook"
+        }
       });
 
       if (authError || !authData.user) {
@@ -84,27 +111,8 @@ serve(async (req) => {
       }
 
       const userId = authData.user.id;
-      console.log(`Auth user created: ${userId}`);
-      console.log(`Waiting for trigger to create profile for ${userId}`);
-
-      // Wait for the handle_new_user() trigger to create the profile
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Verify profile was created by trigger
-      const { data: profile, error: profileError } = await supabaseAdmin
-        .from("profiles")
-        .select("user_id")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      if (profileError || !profile) {
-        console.error(`Profile not created by trigger for ${userId}:`, profileError);
-        // Try to cleanup auth user
-        await supabaseAdmin.auth.admin.deleteUser(userId);
-        return null;
-      }
-
-      console.log(`✅ Profile created by trigger for user ${userId}`);
+      console.log(`✅ Auth user created: ${userId}`);
+      // Profile will be created by handle_new_user() trigger automatically
       return userId;
     } catch (error) {
       console.error(`Error creating user from Stripe:`, error);
@@ -112,9 +120,55 @@ serve(async (req) => {
     }
   };
 
+  // Helper: Notify N8N for email workflows
+  const notifyN8N = async (payload: {
+    event: string;
+    email: string;
+    customerName: string;
+    userId: string;
+    isNewUser: boolean;
+    productName?: string;
+    amount?: number;
+  }) => {
+    try {
+      const n8nPayload = {
+        event: payload.event,
+        Product: { name: payload.productName ?? "Habitz Premium (Stripe)" },
+        Customer: {
+          email: payload.email,
+          full_name: payload.customerName,
+          first_name: payload.customerName.split(" ")[0],
+        },
+        user_id: payload.userId,
+        is_new_user: payload.isNewUser,
+        amount: payload.amount,
+        provider: "stripe",
+        timestamp: new Date().toISOString(),
+      };
+
+      console.log(`📤 Sending to N8N:`, JSON.stringify(n8nPayload));
+
+      const response = await fetch(n8nWebhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(n8nPayload),
+      });
+
+      if (response.ok) {
+        console.log("✅ N8N webhook executado com sucesso");
+      } else {
+        console.warn(`⚠️ Erro N8N (${response.status})`);
+      }
+    } catch (error) {
+      console.warn("⚠️ Erro ao chamar N8N:", error);
+      // Don't block the main webhook
+    }
+  };
+
   // Helper: Upsert purchase record
   const upsertPurchase = async (payload: {
     userId: string;
+    email?: string;
     sessionId?: string;
     paymentIntentId?: string;
     stripeCustomerId?: string;
@@ -129,6 +183,7 @@ serve(async (req) => {
       .upsert(
         {
           user_id: payload.userId,
+          email: payload.email?.toLowerCase(),
           provider: "stripe",
           provider_session_id: payload.sessionId,
           provider_payment_intent: payload.paymentIntentId,
@@ -175,25 +230,29 @@ serve(async (req) => {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         let userId = session.metadata?.user_id;
+        const customerEmail = session.customer_details?.email;
+        const customerName = session.customer_details?.name ?? "Cliente Stripe";
+        let isNewUser = false;
 
         // If no user_id in metadata, try to find/create user by email
-        if (!userId && session.customer_details?.email) {
-          console.log(`No user_id in metadata, trying to find/create user for: ${session.customer_details.email}`);
+        if (!userId && customerEmail) {
+          console.log(`No user_id in metadata, trying to find/create user for: ${customerEmail}`);
 
-          userId = await findUserByEmail(session.customer_details.email);
+          userId = await findUserByEmail(customerEmail);
 
           if (!userId) {
-            console.log(`User not found, creating account for: ${session.customer_details.email}`);
-            userId = await createUserFromStripe(session.customer_details.email);
+            console.log(`User not found, creating account for: ${customerEmail}`);
+            userId = await createUserFromStripe(customerEmail, customerName);
+            isNewUser = true;
 
             if (!userId) {
-              console.error(`Failed to create user for ${session.customer_details.email}, skipping`);
+              console.error(`Failed to create user for ${customerEmail}, skipping`);
               break;
             }
 
-            console.log(`✅ User account created from checkout for ${session.customer_details.email}`);
+            console.log(`✅ User account created from checkout for ${customerEmail}`);
           } else {
-            console.log(`✅ Found existing user for ${session.customer_details.email}`);
+            console.log(`✅ Found existing user for ${customerEmail}`);
           }
         }
 
@@ -204,6 +263,7 @@ serve(async (req) => {
 
         await upsertPurchase({
           userId,
+          email: customerEmail,
           sessionId: session.id,
           paymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
           stripeCustomerId: typeof session.customer === "string" ? session.customer : undefined,
@@ -212,6 +272,18 @@ serve(async (req) => {
           currency: session.currency ?? "BRL",
           status: "paid",
         });
+
+        // Notify N8N for welcome email workflow
+        if (customerEmail) {
+          await notifyN8N({
+            event: "CHECKOUT_COMPLETED",
+            email: customerEmail,
+            customerName,
+            userId,
+            isNewUser,
+            amount: session.amount_total ?? 0,
+          });
+        }
         break;
       }
 
@@ -224,18 +296,23 @@ serve(async (req) => {
           break;
         }
 
+        const customerEmail = customer.email;
+        const customerName = customer.name ?? "Cliente Stripe";
+        let isNewUser = false;
+
         // Try to find existing user, or create if doesn't exist
-        let userId = await findUserByEmail(customer.email);
+        let userId = await findUserByEmail(customerEmail);
         if (!userId) {
-          console.log(`User not found for ${customer.email}, creating account...`);
-          userId = await createUserFromStripe(customer.email);
+          console.log(`User not found for ${customerEmail}, creating account...`);
+          userId = await createUserFromStripe(customerEmail, customerName);
+          isNewUser = true;
 
           if (!userId) {
-            console.error(`Failed to create user for ${customer.email}, skipping purchase creation`);
+            console.error(`Failed to create user for ${customerEmail}, skipping purchase creation`);
             break;
           }
 
-          console.log(`✅ User account created automatically for ${customer.email}`);
+          console.log(`✅ User account created automatically for ${customerEmail}`);
         }
 
         const interval = subscription.items.data[0]?.price?.recurring?.interval;
@@ -243,12 +320,23 @@ serve(async (req) => {
 
         await upsertPurchase({
           userId,
+          email: customerEmail,
           stripeCustomerId: subscription.customer as string,
           stripeSubscriptionId: subscription.id,
           amount,
           currency: subscription.currency,
           status: subscription.status === "active" || subscription.status === "trialing" ? "paid" : "open",
           billingInterval: interval === "month" ? "month" : "year",
+        });
+
+        // Notify N8N for welcome email workflow
+        await notifyN8N({
+          event: "SUBSCRIPTION_CREATED",
+          email: customerEmail,
+          customerName,
+          userId,
+          isNewUser,
+          amount,
         });
         break;
       }

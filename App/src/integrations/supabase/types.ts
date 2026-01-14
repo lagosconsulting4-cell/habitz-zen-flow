@@ -525,6 +525,45 @@ export type Database = {
         }
         Relationships: []
       }
+      sessions: {
+        Row: {
+          id: string
+          user_id: string
+          started_at: string
+          ended_at: string | null
+          duration_seconds: number | null
+          session_date: string
+          device_type: string | null
+          platform: string | null
+          app_version: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          started_at?: string
+          ended_at?: string | null
+          duration_seconds?: number | null
+          session_date?: string
+          device_type?: string | null
+          platform?: string | null
+          app_version?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          started_at?: string
+          ended_at?: string | null
+          duration_seconds?: number | null
+          session_date?: string
+          device_type?: string | null
+          platform?: string | null
+          app_version?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       onboarding_responses: {
         Row: {
           id: string

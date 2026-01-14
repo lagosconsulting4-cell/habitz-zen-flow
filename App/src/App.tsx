@@ -10,6 +10,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import { useTheme } from "@/hooks/useTheme";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useNotificationNavigation } from "@/hooks/useNotificationNavigation";
+import { useSessionTracker } from "@/hooks/useSessionTracker";
 import { AuthProvider } from "@/integrations/supabase/auth";
 
 // Lazy load PWA components for better initial bundle
@@ -96,6 +97,12 @@ const NotificationNavigationHandler = () => {
   return null;
 };
 
+// Componente para rastrear sessões de usuário (analytics)
+const SessionTracker = () => {
+  useSessionTracker();
+  return null;
+};
+
 // Componente para prefetch de rotas mais acessadas quando browser estiver idle
 const RoutePrefetcher = () => {
   useEffect(() => {
@@ -132,6 +139,7 @@ const App = () => (
         {/* PWA Components */}
         <OfflineSyncInitializer />
         <NotificationNavigationHandler />
+        <SessionTracker />
         <RoutePrefetcher />
         <Suspense fallback={null}>
           <OfflineIndicator />
