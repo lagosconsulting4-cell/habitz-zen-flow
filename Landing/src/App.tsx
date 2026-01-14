@@ -22,6 +22,7 @@ const AntigoOffer = lazy(() => import("./pages/antigo/DirectOffer"));
 
 // Bora landing page - single page optimized for conversion
 const BoraLanding = lazy(() => import("./pages/bora/BoraLanding"));
+const BoraUpsell = lazy(() => import("./pages/bora/BoraUpsell"));
 
 const queryClient = new QueryClient();
 
@@ -133,6 +134,16 @@ const App = () => (
               element={
                 <PathPrefixProvider prefix="/bora">
                   <BoraLanding />
+                </PathPrefixProvider>
+              }
+            />
+
+            {/* Bora Upsell Page - Foquinha cross-sell */}
+            <Route
+              path="/upsell-bora"
+              element={
+                <PathPrefixProvider prefix="/upsell-bora">
+                  <BoraUpsell />
                 </PathPrefixProvider>
               }
             />
