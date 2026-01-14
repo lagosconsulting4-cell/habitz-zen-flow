@@ -1022,9 +1022,9 @@ const BoraLanding = () => {
                       transition={{ delay: 0.3 }}
                     >
                       <picture>
-                        <source srcSet="/images/lp/meditacao_personagem.webp" type="image/webp" />
+                        <source srcSet="/images/lp/meditação_personagem.webp" type="image/webp" />
                         <img
-                          src="/images/lp/meditacao_personagem.png"
+                          src="/images/lp/meditação_personagem.png"
                           alt="Pessoa em paz meditando"
                           className="w-40 lg:w-48 h-auto drop-shadow-lg"
                           loading="lazy"
