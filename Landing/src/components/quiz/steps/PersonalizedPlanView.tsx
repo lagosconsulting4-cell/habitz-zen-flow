@@ -10,6 +10,34 @@ import {
   Target,
   TrendingUp,
   Zap,
+  Sunrise,
+  ListChecks,
+  Timer,
+  Mail,
+  BarChart3,
+  Dumbbell,
+  Droplets,
+  Utensils,
+  Sparkles,
+  Footprints,
+  Pill,
+  BookOpen,
+  Heart,
+  PhoneOff,
+  BookMarked,
+  Flower2,
+  BedDouble,
+  Brush,
+  UtensilsCrossed,
+  FolderOpen,
+  AlarmClock,
+  Smartphone,
+  Ban,
+  Wine,
+  Tv,
+  Star,
+  Activity,
+  type LucideIcon,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +45,55 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { RecommendedHabit } from "@/lib/quizConfig";
 import { ContinueButton } from "../ContinueButton";
+
+// Mapeamento de emoji para ícone Lucide
+const EMOJI_TO_ICON: Record<string, LucideIcon> = {
+  "🌅": Sunrise,
+  "📋": ListChecks,
+  "🎯": Target,
+  "🍅": Timer,
+  "📧": Mail,
+  "📊": BarChart3,
+  "💪": Dumbbell,
+  "💧": Droplets,
+  "🥗": Utensils,
+  "😴": Moon,
+  "🧘": Sparkles,
+  "🚶": Footprints,
+  "💊": Pill,
+  "📔": BookOpen,
+  "🙏": Heart,
+  "😮‍💨": Sparkles,
+  "📵": PhoneOff,
+  "📖": BookMarked,
+  "🌸": Flower2,
+  "🛏️": BedDouble,
+  "🧹": Brush,
+  "🍱": UtensilsCrossed,
+  "📅": Calendar,
+  "🗂️": FolderOpen,
+  "🌙": Moon,
+  "☀️": Sun,
+  "⏰": AlarmClock,
+  "📱": Smartphone,
+  "🍔": Ban,
+  "⚡": Zap,
+  "🚫": Ban,
+  "🍷": Wine,
+  "📺": Tv,
+};
+
+// Componente para exibir ícone do hábito
+const HabitIcon = ({
+  emoji,
+  className = "w-6 h-6",
+}: {
+  emoji: string;
+  className?: string;
+}) => {
+  const Icon = EMOJI_TO_ICON[emoji] || Activity;
+  return <Icon className={className} />;
+};
 
 // Helper: Group habits by period
 const groupByPeriod = (habits: RecommendedHabit[]) => ({
@@ -67,14 +144,12 @@ const DetailedHabitCard = ({
     animate={{ opacity: 1, x: 0 }}
     transition={{ delay: index * 0.05 }}
   >
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-all duration-200 hover:border-lime-200">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           {/* Ícone */}
-          <div
-            className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ${habit.color}`}
-          >
-            {habit.icon}
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-lime-100 text-lime-700">
+            <HabitIcon emoji={habit.icon} className="w-6 h-6" />
           </div>
 
           {/* Info Principal */}
@@ -84,7 +159,7 @@ const DetailedHabitCard = ({
               <h4 className="font-bold text-base text-slate-900">
                 {habit.name}
               </h4>
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs text-lime-700 bg-lime-50 border-lime-200">
                 {categoryLabels[habit.category] || habit.category}
               </Badge>
             </div>
@@ -128,8 +203,8 @@ const DetailedHabitCard = ({
             </Badge>
 
             {habit.priority >= 8 && (
-              <Badge variant="outline" className="text-xs">
-                ⭐ Alta
+              <Badge variant="outline" className="text-xs text-amber-600 bg-amber-50 border-amber-200">
+                <Star className="w-3 h-3 mr-1 fill-amber-400 text-amber-400" /> Alta
               </Badge>
             )}
           </div>
@@ -187,10 +262,12 @@ const PeriodSection = ({
       transition={{ delay }}
       className="space-y-3"
     >
-      <div className="flex items-center gap-2">
-        <Icon className="w-5 h-5 text-slate-600" />
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-100">
+          <Icon className="w-5 h-5 text-slate-700" />
+        </div>
         <h3 className="font-bold text-lg text-slate-900">{title}</h3>
-        <Badge variant="secondary">{habits.length} hábitos</Badge>
+        <Badge variant="secondary" className="ml-auto">{habits.length} hábitos</Badge>
       </div>
 
       <div className="space-y-2">
@@ -228,8 +305,9 @@ const RoadmapView = ({ habits }: { habits: RecommendedHabit[] }) => {
           </p>
           <div className="flex flex-wrap gap-2">
             {highPriority.map((h) => (
-              <Badge key={h.id} variant="secondary" className="text-sm">
-                {h.icon} {h.name}
+              <Badge key={h.id} variant="secondary" className="text-sm flex items-center gap-1.5">
+                <HabitIcon emoji={h.icon} className="w-3.5 h-3.5" />
+                {h.name}
               </Badge>
             ))}
           </div>
@@ -256,8 +334,9 @@ const RoadmapView = ({ habits }: { habits: RecommendedHabit[] }) => {
           </p>
           <div className="flex flex-wrap gap-2">
             {mediumPriority.map((h) => (
-              <Badge key={h.id} variant="outline" className="text-sm">
-                {h.icon} {h.name}
+              <Badge key={h.id} variant="outline" className="text-sm flex items-center gap-1.5">
+                <HabitIcon emoji={h.icon} className="w-3.5 h-3.5" />
+                {h.name}
               </Badge>
             ))}
           </div>
@@ -364,7 +443,7 @@ export const PersonalizedPlanView = () => {
           className="text-center mb-8 px-4"
         >
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">
-            🎉 Seu Plano Personalizado!
+            Personalizado!
           </h1>
           <p className="text-lg text-slate-700">
             {recommendedHabits.length} hábitos criados especialmente para você
