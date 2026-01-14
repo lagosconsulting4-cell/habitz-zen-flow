@@ -206,12 +206,17 @@ const pricingPlans = [
     period: "por semana",
     stripeLink: "https://buy.stripe.com/00weVdaDig1Q4AofK49oc07",
     features: [
-      "Teste semanal",
-      "Renovação automática",
+      "Rotina personalizada",
+      "Checklists diários",
+      "Progresso visual",
+      "Lembretes inteligentes",
       "Cancele quando quiser",
       "Garantia de 7 dias",
     ],
-    badge: null,
+    badge: "TESTE",
+    badgeColor: "bg-slate-500",
+    description: "Experimente por uma semana",
+    savings: null,
   },
   {
     id: "monthly",
@@ -220,13 +225,18 @@ const pricingPlans = [
     period: "por mês",
     stripeLink: "https://buy.stripe.com/3cI3cvbHm9Ds3wk69u9oc06",
     features: [
+      "Tudo do plano Semanal +",
+      "🧘 Meditações guiadas",
+      "📚 Hub de livros e conteúdos",
+      "🎯 Jornada guiada de 30 dias",
+      "💪 Programa completo de hábitos",
       "Economia de 25% vs semanal",
-      "Renovação automática",
-      "Cancele quando quiser",
       "Garantia de 7 dias",
     ],
     badge: "POPULAR",
-    highlighted: true,
+    badgeColor: "bg-blue-500",
+    description: "Compromisso com 30 dias de transformação",
+    savings: "25%",
   },
   {
     id: "annual",
@@ -236,13 +246,20 @@ const pricingPlans = [
     monthlyPrice: "10,82",
     stripeLink: "https://buy.stripe.com/bJeaEXh1G9Ds8QE2Xi9oc05",
     features: [
-      "Economia de 64% vs mensal",
-      "Apenas R$10,82/mês",
-      "Cancele quando quiser",
+      "Tudo do plano Mensal +",
+      "🏆 Programa completo de 12 meses",
+      "🎁 27 dicas práticas exclusivas",
+      "📖 Biblioteca de desenvolvimento",
+      "🔥 Comprometimento total com mudança",
+      "💰 Economia de 64% vs mensal",
+      "🌟 Apenas R$10,82/mês",
       "Garantia de 7 dias",
     ],
     badge: "MELHOR OFERTA",
-    highlighted: false,
+    badgeColor: "bg-gradient-to-r from-amber-500 to-orange-500",
+    description: "Para quem quer os melhores 12 meses da vida",
+    savings: "64%",
+    mostPopular: true,
   },
 ];
 
@@ -952,9 +969,56 @@ const BoraUpsell = () => {
             <h3 className="text-2xl md:text-3xl font-bold text-[#A3E635] mb-6">
               Agora complete sua transformação com o BORA
             </h3>
-            <p className="text-lg text-slate-600 max-w-3xl mx-auto">
+            <p className="text-lg text-slate-600 max-w-3xl mx-auto mb-8">
               Enquanto a Foquinha organiza, o BORA transforma. Juntos, eles são imparáveis.
             </p>
+
+            {/* Bonus Section */}
+            <motion.div
+              className="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-amber-200 max-w-4xl mx-auto mb-12"
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+            >
+              <div className="text-center mb-6">
+                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-lg mb-3">
+                  🎁 BÔNUS EXCLUSIVOS INCLUSOS
+                </Badge>
+                <h3 className="text-2xl font-bold text-slate-900">
+                  Tudo isso está esperando por você
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { icon: "🧘", title: "Meditações Guiadas", subtitle: "Acalme sua mente" },
+                  { icon: "📚", title: "Hub de Livros", subtitle: "Biblioteca exclusiva" },
+                  { icon: "🎯", title: "Jornada 30 Dias", subtitle: "Passo a passo completo" },
+                  { icon: "🏆", title: "27 Dicas Práticas", subtitle: "Hacks de produtividade" },
+                ].map((bonus, i) => (
+                  <motion.div
+                    key={i}
+                    className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-4 border border-slate-200 text-center"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    <div className="text-4xl mb-2">{bonus.icon}</div>
+                    <h4 className="font-bold text-slate-900 text-sm mb-1">{bonus.title}</h4>
+                    <p className="text-xs text-slate-600">{bonus.subtitle}</p>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-slate-200 text-center">
+                <p className="text-sm text-slate-600">
+                  <strong className="text-slate-900">Valor total dos bônus:</strong>{" "}
+                  <span className="line-through text-slate-400">R$ 608,00</span>{" "}
+                  <span className="text-amber-600 font-bold">→ GRÁTIS para você</span>
+                </p>
+              </div>
+            </motion.div>
           </motion.div>
 
           {/* Pricing Cards */}
@@ -962,64 +1026,102 @@ const BoraUpsell = () => {
             {pricingPlans.map((plan, index) => (
               <motion.div
                 key={plan.id}
-                className={`relative rounded-3xl p-8 ${
-                  plan.highlighted
-                    ? "bg-gradient-to-br from-[#A3E635]/10 via-white to-lime-50 border-2 border-[#A3E635] shadow-2xl shadow-[#A3E635]/20 scale-105"
-                    : "bg-white border border-slate-200 shadow-xl"
+                className={`relative rounded-3xl p-6 md:p-8 ${
+                  plan.mostPopular
+                    ? "bg-gradient-to-br from-amber-50 via-orange-50 to-amber-50 border-4 border-amber-500 shadow-2xl shadow-amber-500/30 md:scale-110 z-10"
+                    : plan.id === "monthly"
+                    ? "bg-gradient-to-br from-blue-50 via-white to-blue-50 border-2 border-blue-500 shadow-2xl shadow-blue-500/20"
+                    : "bg-white border-2 border-slate-200 shadow-xl"
                 }`}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
+                {/* Badge */}
                 {plan.badge && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <Badge className={`${
-                      plan.highlighted
-                        ? "bg-[#A3E635] text-slate-900"
-                        : "bg-amber-500 text-white"
-                    } border-0 shadow-lg text-xs font-bold px-4 py-1`}>
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                    <Badge className={`${plan.badgeColor} text-white border-0 shadow-lg text-xs font-bold px-4 py-1.5 uppercase tracking-wide`}>
                       {plan.badge}
                     </Badge>
                   </div>
                 )}
 
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-slate-900 mb-2">{plan.name}</h3>
-                  <div className="flex items-baseline justify-center gap-2">
-                    <span className="text-sm text-slate-500">R$</span>
-                    <span className="text-5xl font-bold text-slate-900">{plan.price}</span>
+                {/* Savings Badge */}
+                {plan.savings && (
+                  <div className="absolute -top-3 -right-3 z-20">
+                    <div className={`${
+                      plan.mostPopular ? "bg-amber-500" : "bg-blue-500"
+                    } text-white rounded-full w-16 h-16 flex flex-col items-center justify-center shadow-lg transform rotate-12`}>
+                      <span className="text-xs font-semibold">Economize</span>
+                      <span className="text-lg font-bold leading-none">{plan.savings}</span>
+                    </div>
                   </div>
-                  <p className="text-slate-500 text-sm mt-1">{plan.period}</p>
-                  {plan.monthlyPrice && (
-                    <p className="text-[#A3E635] font-semibold mt-2">
-                      = R${plan.monthlyPrice}/mês
-                    </p>
-                  )}
+                )}
+
+                {/* Header */}
+                <div className="text-center mb-6 pt-4">
+                  <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{plan.name}</h3>
+                  <p className="text-slate-600 text-sm mb-4 min-h-[40px] flex items-center justify-center">
+                    {plan.description}
+                  </p>
+
+                  {/* Price */}
+                  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 mb-4 border border-slate-200/50">
+                    <div className="flex items-baseline justify-center gap-2">
+                      <span className="text-sm text-slate-500">R$</span>
+                      <span className="text-4xl md:text-5xl font-bold text-slate-900">{plan.price}</span>
+                    </div>
+                    <p className="text-slate-500 text-sm mt-1">{plan.period}</p>
+                    {plan.monthlyPrice && (
+                      <div className="mt-2 pt-2 border-t border-slate-200">
+                        <p className={`${
+                          plan.mostPopular ? "text-amber-600" : "text-[#A3E635]"
+                        } font-bold text-lg`}>
+                          Apenas R${plan.monthlyPrice}/mês
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <ul className="space-y-3 mb-8">
+                {/* Features */}
+                <ul className="space-y-3 mb-6">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#A3E635] flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-600 text-sm">{feature}</span>
+                      <CheckCircle2 className={`w-5 h-5 ${
+                        plan.mostPopular ? "text-amber-500" :
+                        plan.id === "monthly" ? "text-blue-500" :
+                        "text-[#A3E635]"
+                      } flex-shrink-0 mt-0.5`} />
+                      <span className="text-slate-700 text-sm font-medium">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
+                {/* CTA Button */}
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     onClick={() => handleCTA(plan.id, "pricing")}
                     className={`w-full ${
-                      plan.highlighted
-                        ? "bg-[#A3E635] hover:bg-[#84cc16] text-slate-900"
+                      plan.mostPopular
+                        ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                        : plan.id === "monthly"
+                        ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
                         : "bg-slate-900 hover:bg-slate-800 text-white"
-                    } py-6 rounded-full font-bold shadow-lg`}
+                    } py-6 rounded-full font-bold shadow-lg text-base`}
                   >
-                    Garantir agora
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    {plan.mostPopular ? "Quero Transformar Minha Vida" : "Garantir agora"}
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </motion.div>
+
+                {/* Trust badges */}
+                <div className="mt-4 pt-4 border-t border-slate-200/50 flex items-center justify-center gap-2 text-xs text-slate-500">
+                  <Shield className="w-4 h-4" />
+                  <span>Garantia de 7 dias • Cancele quando quiser</span>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -1166,13 +1268,14 @@ const BoraUpsell = () => {
               className="mb-4"
             >
               <Button
-                onClick={() => handleCTA("monthly", "final_cta")}
+                onClick={() => handleCTA("annual", "final_cta")}
                 size="lg"
-                className="group w-full sm:w-auto bg-[#A3E635] text-slate-900 hover:bg-[#A3E635]/90 text-lg px-10 py-7 rounded-full font-bold shadow-2xl shadow-[#A3E635]/40"
+                className="group w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-base sm:text-lg px-6 sm:px-10 py-6 sm:py-7 rounded-full font-bold shadow-2xl shadow-amber-500/40"
               >
-                <Sparkles className="w-5 h-5 mr-2" />
-                QUERO O COMBO COMPLETO (FOQUINHA + BORA)
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                <Sparkles className="w-5 h-5 mr-2 flex-shrink-0" />
+                <span className="hidden sm:inline">QUERO O COMBO COMPLETO (FOQUINHA + BORA)</span>
+                <span className="sm:hidden">GARANTIR COMBO COMPLETO</span>
+                <ArrowRight className="w-5 h-5 ml-2 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>
 
