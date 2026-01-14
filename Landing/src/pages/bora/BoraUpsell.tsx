@@ -45,6 +45,8 @@ import {
 } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/hooks/useAnimations";
 import { useTracking } from "@/hooks/useTracking";
+import { useExitIntent } from "@/hooks/useExitIntent";
+import { ExitIntentModal } from "@/components/ExitIntentModal";
 
 // ============ DATA ============
 
@@ -267,7 +269,16 @@ const pricingPlans = [
 
 const BoraUpsell = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showExitIntent, setShowExitIntent] = useState(false);
   const { trackCTA, trackScrollDepth } = useTracking();
+
+  // Exit intent detection
+  const { isExiting } = useExitIntent({
+    enabled: true,
+    threshold: 10,
+    delay: 5000, // Wait 5 seconds before enabling
+    sessionKey: "boraUpsellExitIntent",
+  });
 
   // Scroll to top on mount
   useEffect(() => {
@@ -306,12 +317,29 @@ const BoraUpsell = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [trackScrollDepth]);
 
+  // Show exit intent modal when user tries to leave
+  useEffect(() => {
+    if (isExiting) {
+      setShowExitIntent(true);
+    }
+  }, [isExiting]);
+
   const handleCTA = (planId: string, location: string) => {
     trackCTA(`${location}_${planId}`);
     const plan = pricingPlans.find((p) => p.id === planId);
     if (plan) {
       window.location.href = plan.stripeLink;
     }
+  };
+
+  const handleExitIntentAccept = () => {
+    trackCTA("exit_intent_accept");
+    window.location.href = "/downsell-bora";
+  };
+
+  const handleExitIntentClose = () => {
+    trackCTA("exit_intent_close");
+    setShowExitIntent(false);
   };
 
   const totalHowItWorksSteps = howItWorks.length;
@@ -1328,6 +1356,13 @@ const BoraUpsell = () => {
           </div>
         </div>
       </footer>
+
+      {/* Exit Intent Modal */}
+      <ExitIntentModal
+        isOpen={showExitIntent}
+        onClose={handleExitIntentClose}
+        onAccept={handleExitIntentAccept}
+      />
     </div>
   );
 };
