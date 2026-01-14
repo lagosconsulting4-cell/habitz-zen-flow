@@ -116,7 +116,7 @@ export const SubscriptionOffersStep = () => {
             </div>
           </motion.div>
 
-          {/* Card Mensal - POPULAR */}
+          {/* Card Mensal */}
           <motion.div
             className="relative bg-white rounded-3xl p-6 border-2 border-blue-500 shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-2"
             initial={{ opacity: 0, y: -10 }}
@@ -124,14 +124,6 @@ export const SubscriptionOffersStep = () => {
             transition={{ delay: 0.3 }}
             whileHover={{ scale: 1.02 }}
           >
-            {/* Popular Badge */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-              <Badge className="bg-blue-500 text-white border-0 text-sm px-4 py-2 font-bold shadow-lg">
-                <Zap className="w-4 h-4 mr-1" />
-                MAIS POPULAR
-              </Badge>
-            </div>
-
             <div className="space-y-5">
               {/* Badge */}
               <Badge className="bg-blue-500 text-white border-0 text-xs px-3 py-1">
@@ -188,7 +180,7 @@ export const SubscriptionOffersStep = () => {
             </div>
           </motion.div>
 
-          {/* Card Anual - DESTAQUE */}
+          {/* Card Anual */}
           <motion.div
             className="relative bg-gradient-to-br from-[#A3E635] to-lime-400 rounded-3xl p-6 shadow-2xl hover:shadow-[#A3E635]/50 transition-all duration-300 hover:-translate-y-2 border-2 border-[#84cc16]"
             initial={{ opacity: 0, x: 20 }}
@@ -197,14 +189,6 @@ export const SubscriptionOffersStep = () => {
             whileHover={{ scale: 1.05 }}
             style={{ transform: 'scale(1.05)' }}
           >
-            {/* Best Offer Badge */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-              <Badge className="bg-amber-500 text-white border-0 text-sm px-4 py-2 font-bold shadow-lg animate-pulse">
-                <Crown className="w-4 h-4 mr-1" />
-                MELHOR OFERTA
-              </Badge>
-            </div>
-
             <div className="space-y-5">
               {/* Badge */}
               <Badge className="bg-white/30 backdrop-blur-sm text-slate-900 border-0 text-xs px-3 py-1 font-bold">
