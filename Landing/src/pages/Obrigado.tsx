@@ -13,7 +13,6 @@ import {
   HelpCircle,
   Gift,
   Search,
-  ExternalLink,
   AlertCircle,
   Loader2,
   PartyPopper,
@@ -44,7 +43,6 @@ import { useTracking } from "@/hooks/useTracking";
 
 const PASSWORD_ENDPOINT = "https://jbucnphyrziaxupdsnbn.supabase.co/functions/v1/create-password-direct";
 const APP_URL = "https://habitz.life/app";
-const MEMBERS_AREA_URL = "https://app.kirvano.com/";
 
 declare global {
   interface Window {
@@ -333,7 +331,6 @@ const Obrigado = () => {
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Em menos de dois minutos você já consegue acessar o app. Basta usar o e-mail da compra, criar uma senha segura e pronto.
-              <strong className="text-foreground"> Esse processo vale para compras feitas pela Kirvano.</strong>
             </p>
           </motion.div>
 
@@ -449,25 +446,14 @@ const Obrigado = () => {
 
           {/* Alternative Actions */}
           <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center max-w-xl mx-auto"
+            className="flex justify-center max-w-xl mx-auto"
             variants={staggerItem}
           >
-            <motion.a
-              href={MEMBERS_AREA_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-6 glass-card hover:bg-muted/50 transition-colors text-center"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <ExternalLink className="h-4 w-4" />
-              <span>Área de Membros Kirvano</span>
-            </motion.a>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 variant="glass"
                 onClick={handleResendEmail}
-                className="flex-1 w-full"
+                className="w-full"
               >
                 <Mail className="h-4 w-4 mr-2" />
                 Reenviar link por e-mail
