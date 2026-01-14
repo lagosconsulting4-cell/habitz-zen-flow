@@ -1281,7 +1281,7 @@ const BoraUpsell = () => {
 
             {/* Secondary CTA - No thanks */}
             <button
-              onClick={() => window.location.href = "/obrigado"}
+              onClick={() => window.location.href = "/downsell-bora"}
               className="text-slate-500 hover:text-slate-700 text-sm underline transition-colors"
             >
               Não, obrigado. Só quero a Foquinha por enquanto
