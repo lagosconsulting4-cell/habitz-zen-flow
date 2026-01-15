@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
 import { useToast } from "@/hooks/use-toast";
+import { trackEventGlobal } from "@/hooks/useEventTracker";
 import {
   addToSyncQueue,
   addCachedCompletion,
@@ -308,12 +309,20 @@ export const useHabits = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Invalidate to refetch habits
       queryClient.invalidateQueries({ queryKey: ['habits', user?.id] });
       toast({
         title: "Sucesso!",
         description: "Habito criado com sucesso",
+      });
+      // Track event for analytics
+      trackEventGlobal("habit_created", {
+        habit_id: data.id,
+        habit_name: data.name,
+        category: data.category,
+        period: data.period,
+        frequency_type: data.frequency_type || "daily",
       });
     },
     onError: (error) => {
@@ -466,6 +475,8 @@ export const useHabits = () => {
       queryClient.invalidateQueries({ queryKey: ['habits', user?.id] });
       toast({ title: "Habito removido" });
       emitProgressChange();
+      // Track event for analytics
+      trackEventGlobal("habit_deleted", { habit_id: habitId });
     },
     onError: (error, habitId) => {
       console.error("Error deleting habit:", error);
@@ -598,11 +609,23 @@ export const useHabits = () => {
             queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
               [...old, newCompletion]
             );
+            // Track completion event
+            trackEventGlobal("habit_completed", {
+              habit_id: habitId,
+              habit_name: targetHabit?.name,
+              date: targetDate,
+              new_streak: data.new_streak,
+            });
           } else if (data.action === 'removed') {
             // Removing completion
             queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
               old.filter((c) => !(c.habit_id === habitId && c.completed_at === targetDate))
             );
+            // Track uncompletion event
+            trackEventGlobal("habit_uncompleted", {
+              habit_id: habitId,
+              date: targetDate,
+            });
           }
 
           // Update streak from RPC response

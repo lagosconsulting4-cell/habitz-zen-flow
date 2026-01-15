@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
+import { setGlobalSessionId, setGlobalUserId } from "./useEventTracker";
 
 const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? "1.0.0";
 
@@ -42,6 +43,8 @@ export const useSessionTracker = () => {
 
       sessionIdRef.current = data.id;
       startTimeRef.current = new Date();
+      setGlobalSessionId(data.id);
+      setGlobalUserId(user.id);
       console.log("📊 Session started:", data.id);
     } catch (err) {
       console.error("Failed to start session:", err);
@@ -70,6 +73,7 @@ export const useSessionTracker = () => {
     } finally {
       sessionIdRef.current = null;
       startTimeRef.current = null;
+      setGlobalSessionId(null);
     }
   }, []);
 

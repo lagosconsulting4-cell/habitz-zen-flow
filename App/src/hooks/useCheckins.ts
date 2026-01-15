@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { trackEventGlobal } from "@/hooks/useEventTracker";
 
 export interface DailyCheckin {
   id: string;
@@ -91,10 +92,15 @@ export const useCheckins = () => {
       if (error) throw error;
       return data as DailyCheckin;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["today-checkin"] });
       queryClient.invalidateQueries({ queryKey: ["recent-checkins"] });
       toast.success("Check-in registrado!");
+      // Track checkin event for analytics
+      trackEventGlobal("checkin_submitted", {
+        mood_level: data.mood_level,
+        checkin_date: data.checkin_date,
+      });
     },
     onError: (error) => {
       console.error("Error creating checkin:", error);

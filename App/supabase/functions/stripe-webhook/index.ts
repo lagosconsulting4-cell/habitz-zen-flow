@@ -6,7 +6,11 @@ const stripeSecret = Deno.env.get("STRIPE_SECRET_KEY");
 const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? Deno.env.get("PROJECT_URL");
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SERVICE_ROLE_KEY");
-const n8nWebhookUrl = Deno.env.get("N8N_WEBHOOK_URL") ?? "https://n8n-evo-n8n.harxon.easypanel.host/webhook/bora-welcome";
+const n8nBaseUrl = Deno.env.get("N8N_BASE_URL") ?? "https://n8n-evo-n8n.harxon.easypanel.host/webhook";
+const n8nWebhookUrl = `${n8nBaseUrl}/bora-welcome`; // Legacy welcome flow
+const n8nTrialJourneyUrl = `${n8nBaseUrl}/trial-journey`;
+const n8nPaymentFailedUrl = `${n8nBaseUrl}/payment-failed`;
+const n8nSubscriptionCanceledUrl = `${n8nBaseUrl}/subscription-canceled`;
 
 if (!stripeSecret || !webhookSecret || !supabaseUrl || !supabaseServiceRoleKey) {
   console.error("Missing environment variables for stripe-webhook function");
@@ -52,11 +56,11 @@ serve(async (req) => {
 
   const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-  // Helper: Find user by email - first check purchases table, then auth users
+  // Helper: Find user by email - check purchases and profiles tables (efficient)
   const findUserByEmail = async (email: string): Promise<string | null> => {
     const normalizedEmail = email.toLowerCase();
 
-    // First, check if we have a purchase with this email (fastest lookup)
+    // 1. Check purchases table first (has email index)
     const { data: purchase } = await supabaseAdmin
       .from("purchases")
       .select("user_id")
@@ -70,25 +74,21 @@ serve(async (req) => {
       return purchase.user_id;
     }
 
-    // Fallback: search auth users directly
-    const { data: userLookup, error } = await supabaseAdmin.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000, // Get enough users to search through
-    });
+    // 2. Check profiles table (has email column with index)
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("user_id")
+      .eq("email", normalizedEmail)
+      .limit(1)
+      .maybeSingle();
 
-    if (error) {
-      console.error(`Error looking up users:`, error);
-      return null;
+    if (profile?.user_id) {
+      console.log(`Found user via profiles table for: ${email}`);
+      return profile.user_id;
     }
 
-    const user = userLookup?.users?.find(u => u.email?.toLowerCase() === normalizedEmail);
-    if (!user) {
-      console.log(`User not found for email: ${email}`);
-      return null;
-    }
-
-    console.log(`Found user via auth.users for: ${email}`);
-    return user.id;
+    console.log(`User not found in purchases or profiles for: ${email}`);
+    return null;
   };
 
   // Helper: Create user account from Stripe customer
@@ -105,8 +105,66 @@ serve(async (req) => {
         }
       });
 
-      if (authError || !authData.user) {
+      if (authError) {
+        // Handle case where user already exists
+        if (authError.code === "email_exists") {
+          console.log(`User already exists for ${email}, fetching existing user...`);
+
+          // Try to find in profiles table first
+          const { data: profile } = await supabaseAdmin
+            .from("profiles")
+            .select("user_id")
+            .eq("email", email.toLowerCase())
+            .limit(1)
+            .maybeSingle();
+
+          if (profile?.user_id) {
+            console.log(`✅ Found existing user: ${profile.user_id}`);
+            return profile.user_id;
+          }
+
+          // Profile not found - fetch user_id from auth.users via RPC
+          console.log(`Profile not found, fetching from auth.users via RPC for ${email}...`);
+
+          const { data: existingUserId, error: rpcError } = await supabaseAdmin
+            .rpc("get_user_id_by_email", { p_email: email.toLowerCase() });
+
+          if (rpcError) {
+            console.error(`RPC error fetching user: ${rpcError.message}`);
+          }
+
+          if (existingUserId) {
+            console.log(`✅ Found user via RPC: ${existingUserId}`);
+
+            // Create missing profile
+            const { error: profileError } = await supabaseAdmin
+              .from("profiles")
+              .insert({
+                user_id: existingUserId,
+                email: email.toLowerCase(),
+                display_name: customerName ?? "Cliente Stripe",
+              })
+              .single();
+
+            if (profileError) {
+              console.warn(`⚠️ Failed to create profile, but continuing: ${profileError.message}`);
+            } else {
+              console.log(`✅ Profile created for user: ${existingUserId}`);
+            }
+
+            return existingUserId;
+          }
+
+          console.error(`User exists but not found via RPC for ${email}`);
+          return null;
+        }
+
         console.error(`Failed to create auth user for ${email}:`, authError);
+        return null;
+      }
+
+      if (!authData.user) {
+        console.error(`No user data returned for ${email}`);
         return null;
       }
 
@@ -133,7 +191,7 @@ serve(async (req) => {
     isTrial?: boolean;
     subscriptionId?: string;
     failureCount?: number;
-  }) => {
+  }, webhookUrl?: string) => {
     try {
       const n8nPayload = {
         event: payload.event,
@@ -154,21 +212,22 @@ serve(async (req) => {
         timestamp: new Date().toISOString(),
       };
 
-      console.log(`📤 Sending to N8N:`, JSON.stringify(n8nPayload));
+      const targetUrl = webhookUrl ?? n8nWebhookUrl;
+      console.log(`📤 Sending to N8N (${targetUrl}):`, JSON.stringify(n8nPayload));
 
-      const response = await fetch(n8nWebhookUrl, {
+      const response = await fetch(targetUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(n8nPayload),
       });
 
       if (response.ok) {
-        console.log("✅ N8N webhook executado com sucesso");
+        console.log(`✅ N8N webhook executado com sucesso: ${targetUrl}`);
       } else {
-        console.warn(`⚠️ Erro N8N (${response.status})`);
+        console.warn(`⚠️ Erro N8N (${response.status}) em ${targetUrl}`);
       }
     } catch (error) {
-      console.warn("⚠️ Erro ao chamar N8N:", error);
+      console.warn(`⚠️ Erro ao chamar N8N (${webhookUrl ?? n8nWebhookUrl}):`, error);
       // Don't block the main webhook
     }
   };
@@ -187,6 +246,13 @@ serve(async (req) => {
     billingInterval?: "month" | "year";
     trialEndDate?: string;
   }) => {
+    // Determine the best conflict resolution key based on available data
+    // For subscription events, use stripe_subscription_id
+    // For checkout sessions, use provider_session_id
+    const conflictKey = payload.stripeSubscriptionId
+      ? "stripe_subscription_id"
+      : "provider_session_id";
+
     const { error } = await supabaseAdmin
       .from("purchases")
       .upsert(
@@ -204,7 +270,7 @@ serve(async (req) => {
           billing_interval: payload.billingInterval,
           trial_end_date: payload.trialEndDate,
         },
-        { onConflict: "provider_session_id" }
+        { onConflict: conflictKey }
       );
 
     if (error) {
@@ -212,7 +278,7 @@ serve(async (req) => {
       throw error;
     }
 
-    console.log(`Purchase upserted for user ${payload.userId}, status: ${payload.status}`);
+    console.log(`Purchase upserted for user ${payload.userId}, status: ${payload.status} (conflict key: ${conflictKey})`);
   };
 
   // Helper: Update purchase by subscription ID
@@ -282,6 +348,24 @@ serve(async (req) => {
           currency: session.currency ?? "BRL",
           status: "paid",
         });
+
+        // Update user_cohorts with acquisition_source and first_purchase_date
+        if (userId) {
+          const { error: cohortError } = await supabaseAdmin
+            .from("user_cohorts")
+            .update({
+              acquisition_source: "stripe",
+              first_purchase_date: new Date().toISOString().split("T")[0],
+            })
+            .eq("user_id", userId)
+            .is("first_purchase_date", null); // Only update if not already set
+
+          if (cohortError) {
+            console.error("[stripe-webhook] User cohort update error:", cohortError);
+          } else {
+            console.log("[stripe-webhook] User cohort updated for:", userId);
+          }
+        }
 
         // Notify N8N for welcome email workflow
         if (customerEmail) {
@@ -356,6 +440,22 @@ serve(async (req) => {
           subscriptionId: subscription.id,
           amount,
         });
+
+        // If this is a trial subscription, also trigger trial journey workflow
+        if (isTrial) {
+          console.log(`🎯 Trial subscription detected, triggering trial-journey workflow`);
+          await notifyN8N({
+            event: "SUBSCRIPTION_CREATED",
+            email: customerEmail,
+            customerName,
+            userId,
+            isNewUser,
+            isTrial: true,
+            trialEndDate,
+            subscriptionId: subscription.id,
+            amount,
+          }, n8nTrialJourneyUrl);
+        }
         break;
       }
 
@@ -383,6 +483,8 @@ serve(async (req) => {
         // Notify N8N for churn/winback email sequence
         if (!customer.deleted && customer.email) {
           const userId = await findUserByEmail(customer.email);
+
+          // Send to dedicated churn-winback workflow
           await notifyN8N({
             event: "SUBSCRIPTION_CANCELED",
             email: customer.email,
@@ -390,7 +492,7 @@ serve(async (req) => {
             userId: userId ?? "",
             isNewUser: false,
             subscriptionId: subscription.id,
-          });
+          }, n8nSubscriptionCanceledUrl);
         }
         break;
       }
@@ -519,6 +621,8 @@ serve(async (req) => {
         // Notify N8N for payment recovery email sequence
         if (invoice.customer_email) {
           const userId = purchase?.user_id ?? await findUserByEmail(invoice.customer_email);
+
+          // Send to dedicated payment-failed workflow for recovery sequence
           await notifyN8N({
             event: "PAYMENT_FAILED",
             email: invoice.customer_email,
@@ -528,7 +632,7 @@ serve(async (req) => {
             subscriptionId,
             failureCount: newFailureCount,
             amount: invoice.amount_due ?? 0,
-          });
+          }, n8nPaymentFailedUrl);
         }
         break;
       }

@@ -7,6 +7,7 @@ import { DashboardSkeleton } from "@/components/ui/skeleton";
 
 import { DashboardHabitCard } from "@/components/DashboardHabitCard";
 import { RoutineCard } from "@/components/RoutineCard";
+import CheckinCard from "@/components/CheckinCard";
 import { LevelUpModal } from "@/components/LevelUpModal";
 import { TimerModal } from "@/components/timer";
 import { NotificationPermissionDialog } from "@/components/pwa/NotificationPermissionDialog";
@@ -374,6 +375,9 @@ const Dashboard = () => {
             getHabitCompletionStatus={getHabitCompletionStatus}
           />
         )}
+
+        {/* Daily Check-in Card - Mood tracking */}
+        <CheckinCard />
 
         {todayHabits.length === 0 ? (
           /* Empty State Premium */
