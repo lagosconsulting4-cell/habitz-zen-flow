@@ -79,36 +79,135 @@ const Index = () => {
           {/* Headline */}
           <motion.div className="space-y-4" variants={staggerItem}>
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight tracking-tight">
-              Pare de prometer.
-              <span className="block gradient-text mt-2">Comece a fazer.</span>
+              Se organizar não deveria
+              <span className="block gradient-text mt-2">ser tão difícil.</span>
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Descubra em 2 minutos por que você não consegue manter uma rotina — e como mudar isso de verdade.
+              Se você já tentou criar uma rotina, manter hábitos ou organizar seus dias e não conseguiu sustentar por muito tempo… isso não significa que tem algo errado com você.
             </p>
           </motion.div>
 
-          {/* Features mini-list */}
-          <motion.div
-            className="flex flex-wrap justify-center gap-4 md:gap-6"
-            variants={staggerItem}
-          >
-            {[
-              { icon: Target, text: "Rotina personalizada" },
-              { icon: Zap, text: "Resultados rápidos" },
-              { icon: CheckCircle, text: "Método comprovado" },
-            ].map((feature, index) => (
-              <motion.div
-                key={feature.text}
-                className="flex items-center gap-2 text-sm text-muted-foreground"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 + index * 0.1 }}
-              >
-                <feature.icon className="h-4 w-4 text-primary" />
-                <span>{feature.text}</span>
-              </motion.div>
-            ))}
+          {/* Body Content */}
+          <motion.div className="space-y-6 text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed" variants={staggerItem}>
+            <p>
+              A maioria das pessoas falha não por falta de disciplina mas porque tenta encaixar sistemas mirabolantes em uma vida real.
+              <br />
+              Dias corridos.
+              <br />
+              Energia baixa.
+              <br />
+              Imprevistos.
+              <br />
+              Cansaço e Estresse.
+              <br />
+              <strong className="text-foreground">Nenhuma rotina "perfeita" sobrevive a isso.</strong>
+            </p>
+
+            <p>
+              Talvez o problema nunca tenha sido você.
+              <br />
+              Talvez você só tenha tentado métodos que exigiam mais do que você tinha para dar.
+              <br />
+              Mais tempo.
+              <br />
+              Mais foco.
+              <br />
+              Mais força de vontade.
+              <br />
+              <strong className="text-foreground">E quando não dava certo, a culpa caía toda em você.</strong>
+            </p>
+
+            <p>
+              <strong className="text-foreground">Aqui não é sobre mudar quem você é.</strong>
+              <br />
+              Não é sobre virar uma pessoa super organizada.
+              <br />
+              Não é sobre acordar às 5h.
+              <br />
+              Não é sobre fazer tudo certo todos os dias.
+              <br />
+              É só sobre entender como sua vida realmente funciona hoje.
+              <br />
+              Sem comparação.
+              <br />
+              Sem cobrança.
+              <br />
+              Sem julgamento.
+            </p>
+
+            <p>
+              <strong className="text-foreground">Antes de qualquer solução, vem a clareza.</strong>
+              <br />
+              Cada pessoa vive uma rotina diferente.
+              <br />
+              Horários diferentes.
+              <br />
+              Níveis de energia diferentes.
+              <br />
+              Responsabilidades diferentes.
+              <br />
+              Então não faz sentido aplicar a mesma fórmula para todo mundo.
+              <br />
+              O primeiro passo não é mudar.
+              <br />
+              <strong className="text-foreground">É entender.</strong>
+            </p>
+
+            <p>
+              <strong className="text-foreground">Por isso criamos um diagnóstico simples.</strong>
+              <br />
+              Algumas perguntas rápidas para mapear:
+            </p>
+
+            <ul className="space-y-1 list-none pl-0">
+              <li>• como são seus dias de verdade</li>
+              <li>• onde você costuma travar</li>
+              <li>• quanto tempo você realmente tem</li>
+              <li>• o que te desgasta</li>
+              <li>• o que já tentou antes</li>
+            </ul>
+
+            <p>
+              Sem certo ou errado.
+              <br />
+              Sem resposta ideal.
+              <br />
+              <strong className="text-foreground">Só a sua realidade.</strong>
+            </p>
+
+            <p>
+              <strong className="text-foreground">Não é um teste. Não é um compromisso.</strong>
+              <br />
+              Você não precisa se preparar.
+              <br />
+              Não precisa "estar motivado".
+              <br />
+              Não precisa continuar se não quiser.
+              <br />
+              Leva poucos minutos.
+            </p>
+
+            <p>
+              <strong className="text-foreground">Pense nisso como uma pausa.</strong>
+              <br />
+              Uma chance de olhar para sua rotina com mais honestidade e menos culpa.
+              <br />
+              Às vezes, só dar nome ao caos já traz alívio.
+            </p>
+
+            <p>
+              <strong className="text-foreground">Se quiser, você pode começar agora.</strong>
+              <br />
+              Responder algumas perguntas simples e entender melhor por que manter hábitos sempre parece tão difícil.
+            </p>
+
+            <ul className="space-y-1 list-none pl-0">
+              <li>• Sem cadastro</li>
+              <li>• Sem pressão</li>
+              <li>• Sem promessa vazia</li>
+              <li>• Só clareza</li>
+            </ul>
           </motion.div>
 
           {/* CTA Button */}
@@ -123,15 +222,16 @@ const Index = () => {
                 size="2xl"
                 className="group animate-pulse-glow"
               >
-                <span>Descobrir agora</span>
+                <span>Quero entender minha rotina</span>
                 <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>
 
             {/* Secondary CTA text */}
-            <p className="text-xs text-muted-foreground">
-              Grátis • 2 minutos • Sem cadastro
-            </p>
+            <div className="text-center space-y-1">
+              <p className="text-sm text-muted-foreground">Leva cerca de 2 minutos</p>
+              <p className="text-sm text-muted-foreground">100% gratuito • Resultado imediato</p>
+            </div>
           </motion.div>
 
           {/* Social proof */}

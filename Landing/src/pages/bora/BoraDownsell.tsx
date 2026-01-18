@@ -32,14 +32,13 @@ const pricingPlans = [
     period: "por semana",
     stripeLink: "https://buy.stripe.com/14A4gz7r62b01ocdBW9oc02",
     features: [
-      "✨ 3 dias de teste GRÁTIS",
       "Rotina personalizada",
       "Checklists diários",
       "Progresso visual",
       "Lembretes inteligentes",
       "Cancele quando quiser",
     ],
-    badge: "TESTE",
+    badge: "FLEXÍVEL",
     badgeColor: "bg-slate-500",
     description: "Experimente sem compromisso",
   },
@@ -50,7 +49,6 @@ const pricingPlans = [
     period: "por mês",
     stripeLink: "https://buy.stripe.com/cNidR9dPuaHwaYM41m9oc03",
     features: [
-      "✨ 3 dias de teste GRÁTIS",
       "Tudo do plano Semanal +",
       "🧘 Meditações guiadas",
       "📚 Hub de livros e conteúdos",
@@ -70,7 +68,6 @@ const pricingPlans = [
     monthlyPrice: "10,82",
     stripeLink: "https://buy.stripe.com/14AeVd9zedTI7MA69u9oc04",
     features: [
-      "✨ 3 dias de teste GRÁTIS",
       "Tudo do plano Mensal +",
       "🏆 Programa completo de 12 meses",
       "🎁 27 dicas práticas exclusivas",
@@ -80,7 +77,7 @@ const pricingPlans = [
     ],
     badge: "MELHOR OFERTA",
     badgeColor: "bg-gradient-to-r from-emerald-500 to-teal-500",
-    description: "Transformação completa",
+    description: "Acompanhamento completo",
     mostPopular: false,
   },
 ];
@@ -169,7 +166,7 @@ const BoraDownsell = () => {
               onClick={() => handleCTA("monthly", "header")}
               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-full shadow-lg shadow-blue-500/25"
             >
-              Testar 3 dias grátis
+              Começar agora
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </motion.div>
@@ -203,9 +200,9 @@ const BoraDownsell = () => {
               className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] text-slate-900"
               variants={staggerItem}
             >
-              E se você pudesse testar o BORA{" "}
+              E se você pudesse ter uma rotina{" "}
               <span className="text-blue-500 relative">
-                GRÁTIS por 3 dias?
+                que realmente funciona?
                 <svg className="absolute -bottom-2 left-0 w-full h-3 text-blue-500/30" viewBox="0 0 200 12" preserveAspectRatio="none">
                   <path d="M0,8 Q50,0 100,8 T200,8" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round"/>
                 </svg>
@@ -217,9 +214,9 @@ const BoraDownsell = () => {
               className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto"
               variants={staggerItem}
             >
-              Sem compromisso. Sem risco.
+              Sem pressão. Sem pegadinha.
               <br />
-              <strong className="text-slate-900">Apenas 3 dias para você descobrir</strong> se o BORA é o que faltava na sua vida.
+              <strong className="text-slate-900">Você pode testar com calma.</strong> Se não fizer sentido, é só cancelar.
             </motion.p>
 
             {/* Visual comparison */}
@@ -253,9 +250,6 @@ const BoraDownsell = () => {
 
               {/* With BORA */}
               <div className="bg-gradient-to-br from-blue-50 to-emerald-50 rounded-3xl p-6 border-2 border-blue-500 shadow-xl relative overflow-hidden">
-                <div className="absolute top-2 right-2">
-                  <Badge className="bg-blue-500 text-white border-0 text-xs">3 DIAS GRÁTIS</Badge>
-                </div>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center">
                     <Sparkles className="w-6 h-6 text-white" />
@@ -288,9 +282,8 @@ const BoraDownsell = () => {
                     size="lg"
                     className="group bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-base sm:text-lg px-8 sm:px-12 py-6 sm:py-7 rounded-full font-bold shadow-2xl shadow-blue-500/40"
                   >
-                    <Gift className="w-5 h-5 mr-2 flex-shrink-0" />
-                    <span className="hidden sm:inline">QUERO TESTAR 3 DIAS GRÁTIS</span>
-                    <span className="sm:hidden">TESTAR GRÁTIS</span>
+                    <span className="hidden sm:inline">QUERO COMEÇAR AGORA</span>
+                    <span className="sm:hidden">COMEÇAR AGORA</span>
                     <ArrowRight className="w-5 h-5 ml-2 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </motion.div>
@@ -298,7 +291,7 @@ const BoraDownsell = () => {
                 <div className="flex flex-col sm:flex-row items-center gap-3 text-sm text-slate-600">
                   <div className="flex items-center gap-2">
                     <Shield className="w-4 h-4 text-blue-500" />
-                    <span>Sem cobrança nos 3 dias</span>
+                    <span>Pagamento seguro</span>
                   </div>
                   <div className="hidden sm:block w-1 h-1 rounded-full bg-slate-300" />
                   <div className="flex items-center gap-2">
@@ -312,87 +305,6 @@ const BoraDownsell = () => {
         </div>
       </section>
 
-      {/* ============ WHY 3 DAYS SECTION ============ */}
-      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
-        <div className="max-w-4xl mx-auto relative z-10">
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Badge className="mb-4 bg-blue-500/10 text-blue-600 border-blue-500/20">
-              <Calendar className="w-3 h-3 mr-1" />
-              Por que 3 dias?
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              É tempo suficiente para <span className="text-blue-500">sentir a diferença</span>
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                day: "Dia 1",
-                title: "Descubra sua rotina",
-                description: "Faça o quiz personalizado e receba seu plano único",
-                icon: Brain,
-                color: "blue",
-              },
-              {
-                day: "Dia 2",
-                title: "Sinta o foco",
-                description: "Experimente a clareza de ter uma rotina que funciona",
-                icon: Target,
-                color: "emerald",
-              },
-              {
-                day: "Dia 3",
-                title: "Veja os resultados",
-                description: "Energia pela manhã, consistência durante o dia",
-                icon: Flame,
-                color: "amber",
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                className="bg-white rounded-2xl p-6 border border-slate-200 shadow-lg"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.15 }}
-              >
-                <div className={`w-12 h-12 rounded-xl bg-${item.color}-500/10 flex items-center justify-center mb-4`}>
-                  <item.icon className={`w-6 h-6 text-${item.color}-500`} />
-                </div>
-                <Badge className="mb-3 bg-slate-100 text-slate-700 border-0 text-xs">
-                  {item.day}
-                </Badge>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">{item.title}</h3>
-                <p className="text-slate-600 text-sm">{item.description}</p>
-              </motion.div>
-            ))}
-          </div>
-
-          <motion.div
-            className="mt-12 bg-gradient-to-br from-blue-50 to-emerald-50 rounded-3xl p-8 border-2 border-blue-200"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <div className="text-center">
-              <p className="text-lg md:text-xl font-semibold text-slate-900 mb-2">
-                Depois dos 3 dias, você decide:
-              </p>
-              <p className="text-slate-600">
-                Quer continuar transformando sua vida? Ótimo, a cobrança começa automaticamente.
-                <br />
-                Não sentiu diferença? Cancele com 1 clique. Sem perguntas, sem complicação.
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      </section>
 
       {/* ============ PRICING SECTION ============ */}
       <section className="py-24 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-b from-white to-slate-50">
@@ -407,14 +319,11 @@ const BoraDownsell = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Badge className="bg-blue-500 text-white border-0 mb-4 shadow-lg shadow-blue-500/30 text-sm px-4 py-2">
-              🎁 3 DIAS GRÁTIS EM TODOS OS PLANOS
-            </Badge>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
               Escolha seu plano e comece agora
             </h2>
             <p className="text-lg text-slate-600 max-w-3xl mx-auto">
-              Teste grátis por 3 dias. Sem compromisso. Cancele quando quiser.
+              Você pode testar com calma. Se não fizer sentido, é só cancelar. Sem pressão. Sem pegadinha.
             </p>
           </motion.div>
 
@@ -442,15 +351,6 @@ const BoraDownsell = () => {
                   </div>
                 )}
 
-                {/* Free Trial Badge */}
-                <div className="absolute -top-3 -right-3 z-20">
-                  <div className={`${
-                    plan.highlighted ? "bg-blue-500" : "bg-emerald-500"
-                  } text-white rounded-full w-16 h-16 flex flex-col items-center justify-center shadow-lg transform rotate-12`}>
-                    <span className="text-xs font-semibold">GRÁTIS</span>
-                    <span className="text-lg font-bold leading-none">3 dias</span>
-                  </div>
-                </div>
 
                 {/* Header */}
                 <div className="text-center mb-6 pt-4">
@@ -473,7 +373,6 @@ const BoraDownsell = () => {
                         </p>
                       </div>
                     )}
-                    <p className="text-xs text-slate-400 mt-2">Após 3 dias de teste grátis</p>
                   </div>
                 </div>
 
@@ -499,8 +398,7 @@ const BoraDownsell = () => {
                         : "bg-slate-900 hover:bg-slate-800 text-white"
                     } py-6 rounded-full font-bold shadow-lg text-base`}
                   >
-                    <Gift className="w-5 h-5 mr-2" />
-                    Começar teste grátis
+                    Começar agora
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </motion.div>
@@ -508,7 +406,7 @@ const BoraDownsell = () => {
                 {/* Trust badges */}
                 <div className="mt-4 pt-4 border-t border-slate-200/50 flex items-center justify-center gap-2 text-xs text-slate-500">
                   <Shield className="w-4 h-4" />
-                  <span>Sem cobrança nos 3 dias • Cancele quando quiser</span>
+                  <span>Pagamento seguro • Cancele quando quiser</span>
                 </div>
               </motion.div>
             ))}
@@ -530,11 +428,11 @@ const BoraDownsell = () => {
               </div>
 
               <p className="text-lg text-slate-700">
-                Você não paga nada nos primeiros 3 dias. Use o BORA completamente, teste tudo, veja os resultados.
+                Use o BORA com calma, teste tudo, veja os resultados. Se não fizer sentido, é só cancelar.
               </p>
 
               <p className="text-slate-600">
-                Se em algum momento você decidir que não é pra você, basta cancelar com 1 clique no app. Simples assim.
+                Sem pressão. Sem pegadinha. Basta cancelar com 1 clique no app. Simples assim.
               </p>
             </div>
           </motion.div>
@@ -563,16 +461,16 @@ const BoraDownsell = () => {
           <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl border-2 border-blue-500/30 mb-8">
             <div className="flex flex-wrap items-center justify-center gap-6 mb-8 text-slate-600">
               <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-blue-500" />
-                <span className="font-semibold">3 dias grátis</span>
+                <Target className="w-5 h-5 text-blue-500" />
+                <span className="font-semibold">Rotina personalizada</span>
               </div>
               <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-blue-500" />
-                <span className="font-semibold">7 minutos/dia</span>
+                <Clock className="w-5 h-5 text-blue-500" />
+                <span className="font-semibold">Poucos minutos/dia</span>
               </div>
               <div className="flex items-center gap-2">
                 <Heart className="w-5 h-5 text-blue-500" />
-                <span className="font-semibold">5.000+ transformações</span>
+                <span className="font-semibold">5.000+ usuários</span>
               </div>
             </div>
 
@@ -587,9 +485,8 @@ const BoraDownsell = () => {
                 size="lg"
                 className="group w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-base sm:text-lg px-6 sm:px-10 py-6 sm:py-7 rounded-full font-bold shadow-2xl shadow-blue-500/40"
               >
-                <Gift className="w-5 h-5 mr-2 flex-shrink-0" />
-                <span className="hidden sm:inline">COMEÇAR TESTE DE 3 DIAS GRÁTIS</span>
-                <span className="sm:hidden">TESTAR GRÁTIS</span>
+                <span className="hidden sm:inline">COMEÇAR AGORA</span>
+                <span className="sm:hidden">COMEÇAR</span>
                 <ArrowRight className="w-5 h-5 ml-2 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>
@@ -607,7 +504,7 @@ const BoraDownsell = () => {
           <div className="flex items-center justify-center gap-3 text-slate-600">
             <Shield className="w-5 h-5 text-blue-500" />
             <span className="text-sm">
-              <strong>Sem cobrança nos 3 dias</strong> • Cancele a qualquer momento
+              <strong>Pagamento seguro</strong> • Cancele a qualquer momento
             </span>
           </div>
         </motion.div>

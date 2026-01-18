@@ -40,12 +40,12 @@ export const SubscriptionOffersStep = () => {
           </motion.div>
 
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
-            Teste sua rotina personalizada por{" "}
-            <span className="text-[#A3E635]">3 dias grátis</span>
+            Escolha seu plano e comece{" "}
+            <span className="text-[#A3E635]">sua transformação</span>
           </h2>
 
           <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto">
-            Sem cobrança nos 3 dias. Cancele quando quiser. Sem pegadinha.
+            Você pode testar com calma. Se não fizer sentido, é só cancelar. Sem pressão. Sem pegadinha.
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export const SubscriptionOffersStep = () => {
             <div className="space-y-5">
               {/* Badge */}
               <Badge className="bg-slate-500 text-white border-0 text-xs px-3 py-1">
-                TESTE FLEXÍVEL
+                FLEXÍVEL
               </Badge>
 
               {/* Plan Name */}
@@ -75,14 +75,6 @@ export const SubscriptionOffersStep = () => {
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-black text-slate-900">R$ 19,90</span>
                 <span className="text-base text-slate-600">/semana</span>
-              </div>
-
-              {/* Trial Badge */}
-              <div className="bg-lime-50 border border-lime-200 rounded-xl p-3">
-                <p className="text-sm font-bold text-lime-700 flex items-center gap-2">
-                  <Gift className="w-4 h-4" />
-                  3 dias grátis pra testar
-                </p>
               </div>
 
               {/* Features */}
@@ -109,8 +101,7 @@ export const SubscriptionOffersStep = () => {
                   size="lg"
                   className="w-full text-base font-bold py-5 rounded-xl border-2 border-slate-900 hover:bg-slate-900 hover:text-white"
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Começar Teste
+                  Começar agora
                 </Button>
               </motion.div>
             </div>
@@ -142,14 +133,6 @@ export const SubscriptionOffersStep = () => {
                 <span className="text-base text-slate-600">/mês</span>
               </div>
 
-              {/* Trial Badge */}
-              <div className="bg-lime-50 border border-lime-200 rounded-xl p-3">
-                <p className="text-sm font-bold text-lime-700 flex items-center gap-2">
-                  <Gift className="w-4 h-4" />
-                  3 dias grátis pra testar
-                </p>
-              </div>
-
               {/* Features */}
               <ul className="space-y-2.5">
                 {[
@@ -174,7 +157,7 @@ export const SubscriptionOffersStep = () => {
                   className="w-full bg-blue-500 hover:bg-blue-600 text-white text-base font-bold py-5 rounded-xl shadow-xl"
                 >
                   <Crown className="w-4 h-4 mr-2" />
-                  Começar Teste
+                  Começar agora
                 </Button>
               </motion.div>
             </div>
@@ -192,7 +175,7 @@ export const SubscriptionOffersStep = () => {
             <div className="space-y-5">
               {/* Badge */}
               <Badge className="bg-white/30 backdrop-blur-sm text-slate-900 border-0 text-xs px-3 py-1 font-bold">
-                TRANSFORMAÇÃO COMPLETA
+                ACOMPANHAMENTO COMPLETO
               </Badge>
 
               {/* Plan Name */}
@@ -211,14 +194,6 @@ export const SubscriptionOffersStep = () => {
                 </div>
                 <p className="text-sm text-slate-900/80 mt-2 font-bold">
                   Só R$ 10,82/mês
-                </p>
-              </div>
-
-              {/* Trial Badge */}
-              <div className="bg-white/30 backdrop-blur-sm border border-white/50 rounded-xl p-3">
-                <p className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Gift className="w-4 h-4" />
-                  3 dias grátis pra testar
                 </p>
               </div>
 
@@ -253,7 +228,7 @@ export const SubscriptionOffersStep = () => {
                   className="w-full bg-slate-900 hover:bg-slate-800 text-white text-base font-bold py-5 rounded-xl shadow-2xl"
                 >
                   <Crown className="w-4 h-4 mr-2" />
-                  Começar Teste
+                  Começar agora
                 </Button>
               </motion.div>
             </div>

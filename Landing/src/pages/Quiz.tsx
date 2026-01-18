@@ -47,45 +47,45 @@ const questions: Question[] = [
   {
     id: 1,
     icon: Target,
-    question: "Quão difícil é criar uma rotina que realmente funciona?",
+    question: "O que você mais gostaria de melhorar na sua rotina agora?",
     options: [
-      "Impossível — sempre desisto",
-      "Começo empolgado, mas perco o ritmo em dias",
-      "Às vezes consigo manter, mas não é consistente",
-      "Consigo seguir com disciplina",
+      "Conseguir manter hábitos com consistência",
+      "Ter mais energia e disposição no dia a dia",
+      "Organizar melhor meu tempo",
+      "Reduzir procrastinação e começar as coisas",
     ],
   },
   {
     id: 2,
-    icon: MessageCircle,
-    question: "O que você sente ao ver alguém evoluindo enquanto você está parado?",
+    icon: Clock,
+    question: "Quanto tempo você realmente tem disponível no seu dia para cuidar de hábitos?",
     options: [
-      "Frustração profunda — sinto que fiquei pra trás",
-      "Inveja disfarçada de motivação",
-      "Indiferença — cada um no seu tempo",
-      "Inspiração real — quero fazer igual",
+      "Menos de 10 minutos — meus dias são muito corridos",
+      "Entre 10 e 30 minutos, se conseguir me organizar",
+      "Cerca de 1 hora, mas nem sempre consigo usar",
+      "Mais de 1 hora — tenho flexibilidade",
     ],
   },
   {
     id: 3,
-    icon: RefreshCw,
-    question: "Quantas vezes você prometeu a si mesmo que ia mudar... e não mudou?",
+    icon: Zap,
+    question: "Como anda sua energia durante o dia?",
     options: [
-      "Perdí a conta — virou piada interna",
-      "Umas 5 a 10 vezes só esse ano",
-      "Algumas vezes, mas tento não pensar nisso",
-      "Raramente prometo, prefiro agir",
+      "Sempre exausto, vivo no piloto automático",
+      "Minha energia despenca do nada — muito instável",
+      "Razoável, mas podia ser bem melhor",
+      "Acordo disposto e mantenho o ritmo",
     ],
   },
   {
     id: 4,
-    icon: Frown,
-    question: "Qual dessas frases mais dói quando você pensa nela?",
+    icon: Heart,
+    question: "Como você se sente hoje em relação à sua rotina?",
     options: [
-      '"Estou estagnado e cansado de mim mesmo"',
-      '"Sinto que o tempo tá passando e eu não saí do lugar"',
-      '"Não sei nem por onde começar"',
-      '"Estou fazendo meu melhor e crescendo"',
+      "Cansado e meio perdido",
+      "Frustrado por não conseguir manter constância",
+      "Ok, mas sinto que poderia estar melhor",
+      "Com vontade de entender e ajustar as coisas",
     ],
   },
   {
@@ -96,7 +96,7 @@ const questions: Question[] = [
       "Falta de disciplina — sempre deixo pra depois",
       "Paralisia — não sei por onde começar",
       "Falta de tempo — minha rotina é caótica",
-      "Nada — estou construindo meu caminho",
+      "Nada específico — só preciso de clareza",
     ],
   },
   {
@@ -112,46 +112,46 @@ const questions: Question[] = [
   },
   {
     id: 7,
-    icon: Brain,
-    question: "Qual pensamento mais aparece na sua mente ultimamente?",
+    icon: Compass,
+    question: "Qual faixa de renda mais se aproxima da sua realidade atual?",
     options: [
-      '"Segunda eu começo..." (mas nunca começa)',
-      '"Mais um dia que eu desperdicei"',
-      '"Por que diabos eu não consigo mudar?"',
-      '"Estou evoluindo, um passo de cada vez"',
+      "Até R$ 2.000",
+      "R$ 2.000 a R$ 5.000",
+      "R$ 5.000 a R$ 10.000",
+      "Acima de R$ 10.000",
     ],
   },
   {
     id: 8,
-    icon: Zap,
-    question: "Como anda sua energia durante o dia?",
+    icon: Brain,
+    question: "Qual é a sua faixa etária?",
     options: [
-      "Sempre exausto, vivo no piloto automático",
-      "Minha energia despenca do nada — muito instável",
-      "Razoável, mas podia ser bem melhor",
-      "Acordo disposto e mantenho o ritmo",
+      "18-25 anos",
+      "26-35 anos",
+      "36-45 anos",
+      "46+ anos",
     ],
   },
   {
     id: 9,
     icon: Sprout,
-    question: "Olhando pro último ano, você sente que evoluiu de verdade?",
+    question: "Você já tentou manter hábitos antes?",
     options: [
-      "Não. Estou no mesmo lugar (ou pior)",
-      "Quase nada — mudou pouca coisa",
-      "Evoluí um pouco, mas muito devagar",
-      "Sim, vejo progresso real",
+      "Sim, várias vezes, mas não consegui sustentar",
+      "Sim, algumas vezes com sucesso parcial",
+      "Poucas vezes, mas quero tentar de novo",
+      "Não, essa seria minha primeira tentativa estruturada",
     ],
   },
   {
     id: 10,
-    icon: Compass,
-    question: "Se você continuar exatamente como está hoje, onde vai estar daqui a 1 ano?",
+    icon: Target,
+    question: "O que você espera encontrar ao final deste diagnóstico?",
     options: [
-      "No mesmo lugar — mais velho, mais arrependido",
-      "Provavelmente igual... ou até pior",
-      "Talvez diferente, mas não tenho certeza",
-      "Em outro nível — estou construindo meu futuro agora",
+      "Clareza sobre o que está travando minha rotina",
+      "Um plano simples que eu consiga seguir",
+      "Entender por que não consigo manter hábitos",
+      "Todas as opções acima",
     ],
   },
 ];
@@ -378,11 +378,12 @@ const Quiz = () => {
               transition={{ delay: 0.3 }}
             >
               <p className="text-sm uppercase tracking-wider text-muted-foreground">
-                Seu diagnóstico está pronto
+                Com base nas suas respostas
               </p>
-              <h2 className="text-4xl md:text-6xl font-black">
-                <span className={`bg-gradient-to-r ${severityColors[quizResult.severity]} bg-clip-text text-transparent`}>
-                  {quizResult.emoji} {quizResult.title}
+              <h2 className="text-3xl md:text-5xl font-bold leading-tight">
+                Criamos um plano simples
+                <span className={`block bg-gradient-to-r ${severityColors[quizResult.severity]} bg-clip-text text-transparent mt-2`}>
+                  para você
                 </span>
               </h2>
             </motion.div>
@@ -409,14 +410,23 @@ const Quiz = () => {
             </motion.div>
 
             {/* Description */}
-            <motion.p
-              className="text-lg text-muted-foreground max-w-xl mx-auto"
+            <motion.div
+              className="space-y-4 text-base md:text-lg text-muted-foreground max-w-2xl mx-auto"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
             >
-              {quizResult.description}
-            </motion.p>
+              <p>
+                Nada genérico.
+                <br />
+                Nada fora da sua realidade.
+                <br />
+                <strong className="text-foreground">Só uma rotina pensada para funcionar</strong> mesmo quando o dia não está perfeito.
+              </p>
+              <p className="text-sm">
+                <strong className="text-foreground">Este é um ponto de partida.</strong> Você pode ajustar tudo depois, no seu ritmo.
+              </p>
+            </motion.div>
 
             {/* CTA Button */}
             <motion.div
@@ -431,8 +441,7 @@ const Quiz = () => {
                   size="xl"
                   className="group"
                 >
-                  <Sparkles className="h-5 w-5 mr-2 animate-pulse" />
-                  <span>Continuar para escolher meu plano</span>
+                  <span>Ver meu plano personalizado</span>
                   <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </motion.div>
@@ -475,14 +484,18 @@ const Quiz = () => {
               transition={{ delay: 0.3 }}
             >
               <h2 className="text-3xl md:text-4xl font-bold leading-tight">
-                A gente entende.
+                Pouco tempo já é
                 <span className="block gradient-text mt-2">
-                  Você não está sozinho nisso.
+                  suficiente
                 </span>
               </h2>
               <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-                Mais de 5.000 pessoas já sentiram essa mesma dor… e conseguiram
-                virar o jogo com uma rotina de menos de 7 minutos por dia.
+                Não é sobre fazer tudo.
+                <br />
+                É sobre fazer algo que caiba até nos dias cansativos.
+                <br />
+                <strong className="text-foreground">Rotinas pequenas são mais fáceis de manter</strong>
+                {" "}— especialmente quando o dia não ajuda.
               </p>
             </motion.div>
 
