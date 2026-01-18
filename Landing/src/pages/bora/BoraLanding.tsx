@@ -58,26 +58,26 @@ import { useTracking } from "@/hooks/useTracking";
 
 const pillars = [
   {
-    title: "Simplicidade",
-    subtitle: "7 minutos por dia",
-    description: "Abre o app. Segue o plano. Pronto. Funciona automático.",
-    icon: Zap,
+    title: "Entender",
+    subtitle: "Como são seus dias de verdade",
+    description: "Mapeamos sua rotina real, não a ideal. Onde você trava, quanto tempo realmente tem, o que te desgasta.",
+    icon: Brain,
     gradient: "from-[#A3E635] to-lime-300",
     bgGlow: "bg-[#A3E635]/20",
   },
   {
-    title: "Personalização",
-    subtitle: "Feito para você",
-    description: "Rotina do seu jeito. Se adapta sozinha ao seu tempo e energia.",
-    icon: Brain,
+    title: "Adaptar",
+    subtitle: "Uma rotina que caiba na sua vida",
+    description: "Não sobre fazer tudo certo. É sobre fazer algo que funcione até nos dias cansativos.",
+    icon: Target,
     gradient: "from-[#A3E635] to-lime-400",
     bgGlow: "bg-[#A3E635]/20",
   },
   {
-    title: "Resultados",
-    subtitle: "30 dias de transformação",
-    description: "Foco volta. Energia aumenta. Sono melhora. 5000+ já mudaram.",
-    icon: Flame,
+    title: "Clareza",
+    subtitle: "Sem certo ou errado",
+    description: "Só a sua realidade. Sem comparação. Sem cobrança. Só dar nome ao caos já traz alívio.",
+    icon: Zap,
     gradient: "from-[#A3E635] to-lime-300",
     bgGlow: "bg-[#A3E635]/20",
   },
@@ -396,9 +396,9 @@ const BoraLanding = () => {
                 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.1] text-slate-900"
                 variants={staggerItem}
               >
-                Pare de se sentir sufocado.{" "}
+                Se organizar não deveria{" "}
                 <span className="text-[#A3E635] relative">
-                  Foco e energia voltam em 7 minutos
+                  ser tão difícil.
                   <svg className="absolute -bottom-2 left-0 w-full h-3 text-[#A3E635]/30" viewBox="0 0 200 12" preserveAspectRatio="none">
                     <path d="M0,8 Q50,0 100,8 T200,8" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round"/>
                   </svg>
@@ -410,31 +410,24 @@ const BoraLanding = () => {
                 className="text-lg md:text-xl text-slate-600 max-w-xl mx-auto lg:mx-0"
                 variants={staggerItem}
               >
-                Sem esforço. Sem complicação.{" "}
-                <strong className="text-slate-900">Só abrir o app e seguir.</strong>{" "}
-                7 minutos que mudam seu dia inteiro.{" "}
-                <span className="block mt-2 text-base md:text-lg">
-                  Funciona mesmo se você tem <strong className="text-[#A3E635]">só 5 minutos</strong> livres. Zero pressão.
-                </span>
+                Se você já tentou criar uma rotina, manter hábitos ou organizar seus dias e não conseguiu sustentar por muito tempo…{" "}
+                <strong className="text-slate-900">isso não significa que tem algo errado com você.</strong>
               </motion.p>
 
-              {/* Stats with Bora Green */}
+              {/* Key points */}
               <motion.div
-                className="flex flex-wrap justify-center lg:justify-start gap-8 pt-4"
+                className="space-y-3 pt-4 text-left max-w-xl mx-auto lg:mx-0"
                 variants={staggerItem}
               >
-                {[
-                  { value: 7, label: "minutos/dia" },
-                  { value: 5000, suffix: "+", label: "vidas transformadas" },
-                  { value: 94, suffix: "%", label: "mantêm a rotina" },
-                ].map((stat, i) => (
-                  <div key={i} className="text-center lg:text-left">
-                    <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#A3E635]">
-                      {stat.value.toLocaleString()}{stat.suffix || ""}
-                    </span>
-                    <p className="text-sm text-slate-500 mt-1">{stat.label}</p>
-                  </div>
-                ))}
+                <p className="text-slate-600">
+                  A maioria das pessoas falha não por falta de disciplina mas porque tenta encaixar sistemas mirabolantes em uma vida real.
+                </p>
+                <p className="text-slate-600">
+                  <strong className="text-slate-900">Nenhuma rotina "perfeita" sobrevive</strong> a dias corridos, energia baixa, imprevistos, cansaço e estresse.
+                </p>
+                <p className="text-slate-600">
+                  <strong className="text-[#A3E635]">Antes de qualquer solução, vem a clareza.</strong>
+                </p>
               </motion.div>
 
               {/* CTA */}
@@ -445,15 +438,14 @@ const BoraLanding = () => {
                     size="lg"
                     className="group bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 text-base sm:text-lg px-8 py-6 rounded-full font-bold shadow-xl shadow-[#A3E635]/30"
                   >
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    QUERO MINHA ROTINA
+                    Quero entender minha rotina
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </motion.div>
-                <p className="text-sm text-slate-500 flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-[#A3E635]" />
-                  Garantia de 7 dias
-                </p>
+                <div className="text-center lg:text-left space-y-1">
+                  <p className="text-sm text-slate-500">Leva cerca de 2 minutos</p>
+                  <p className="text-sm text-slate-500">100% gratuito • Resultado imediato</p>
+                </div>
               </motion.div>
             </motion.div>
 
@@ -498,13 +490,14 @@ const BoraLanding = () => {
           >
             <Badge className="mb-4 bg-[#A3E635] text-slate-900 border-0 shadow-lg shadow-[#A3E635]/30">
               <Zap className="w-3 h-3 mr-1" />
-              Por que funciona
+              Como funciona
             </Badge>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
-              O BORA é <span className="text-[#A3E635]">diferente</span>
+              Aqui não é sobre <span className="text-[#A3E635]">mudar quem você é</span>
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Três pilares que fazem a transformação acontecer
+              É só sobre entender como sua vida realmente funciona hoje.<br/>
+              Sem comparação. Sem cobrança. Sem julgamento.
             </p>
           </motion.div>
 
@@ -713,8 +706,7 @@ const BoraLanding = () => {
                 onClick={() => handleCTA("timeline")}
                 className="bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 font-bold px-8 py-6 rounded-full shadow-xl shadow-[#A3E635]/30"
               >
-                <Sparkles className="w-5 h-5 mr-2" />
-                COMEÇAR MINHA TRANSFORMAÇÃO
+                Quero entender minha rotina
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </motion.div>
@@ -739,13 +731,15 @@ const BoraLanding = () => {
           >
             <Badge className="bg-[#A3E635] text-slate-900 border-0 mb-4 shadow-lg shadow-[#A3E635]/30">
               <Sparkles className="w-4 h-4 mr-2" />
-              Experimente agora
+              Diagnóstico gratuito
             </Badge>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
-              Descubra sua <span className="text-[#A3E635]">rotina ideal</span>
+              Por isso criamos um <span className="text-[#A3E635]">diagnóstico simples</span>
             </h2>
             <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-              Responda algumas perguntas e receba sua rotina personalizada em 2 minutos
+              Algumas perguntas rápidas para mapear como são seus dias de verdade, onde você costuma travar, quanto tempo você realmente tem.
+              <br/><br/>
+              <strong className="text-slate-900">Sem certo ou errado. Sem resposta ideal. Só a sua realidade.</strong>
             </p>
           </motion.div>
 
@@ -767,10 +761,10 @@ const BoraLanding = () => {
                   <Sparkles className="w-12 h-12 text-white" />
                 </motion.div>
                 <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                  Quiz de Rotina Personalizada
+                  Não é um teste. Não é um compromisso.
                 </h3>
                 <p className="text-slate-600 max-w-md mx-auto">
-                  Baseado nas suas respostas, nosso algoritmo cria uma rotina única para você
+                  Você não precisa se preparar. Não precisa "estar motivado". Não precisa continuar se não quiser.
                 </p>
               </div>
 
@@ -804,13 +798,12 @@ const BoraLanding = () => {
                     size="lg"
                     className="bg-[#A3E635] hover:bg-[#84cc16] text-slate-900 font-bold text-lg px-10 py-7 rounded-full shadow-xl shadow-[#A3E635]/30"
                   >
-                    <Play className="w-5 h-5 mr-2" />
-                    FAZER QUIZ GRATUITO
+                    Quero entender minha rotina
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </motion.div>
                 <p className="text-xs text-slate-400 mt-4">
-                  Sem cadastro • 100% gratuito • Resultado imediato
+                  Leva poucos minutos • Sem cadastro • Sem pressão • Sem promessa vazia • Só clareza
                 </p>
               </div>
             </div>
@@ -1289,10 +1282,10 @@ const BoraLanding = () => {
           viewport={{ once: true }}
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-            Falta só <span className="text-[#A3E635]">2 minutos</span> pro teste grátis
+            Falta só <span className="text-[#A3E635]">2 minutos</span> para começar
           </h2>
           <p className="text-slate-600 text-lg mb-8 max-w-xl mx-auto">
-            Responde o quiz. Recebe sua rotina. Testa grátis por 3 dias. Simples assim.
+            Responde o quiz. Recebe sua rotina. Começa sua transformação. Simples assim.
           </p>
 
           {/* APP MOCKUP */}
@@ -1323,8 +1316,7 @@ const BoraLanding = () => {
               size="lg"
               className="group bg-[#A3E635] text-slate-900 hover:bg-[#A3E635]/90 text-lg px-10 py-7 rounded-full font-bold shadow-2xl shadow-[#A3E635]/40"
             >
-              <Sparkles className="w-5 h-5 mr-2" />
-              QUERO MINHA ROTINA
+              Quero entender minha rotina
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </motion.div>

@@ -42,33 +42,19 @@ export const FeedbackTimeStep = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.3 }}
-        className="text-center mb-6 px-4"
+        className="text-center mb-6 px-4 max-w-md"
       >
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
-          Com <span className="text-lime-600">{timeText}</span> é extremamente possível mudar!
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
+          Pouco tempo já é <span className="text-lime-600">suficiente</span>
         </h2>
-        <p className="text-base text-slate-700">
-          O mais importante é a consistência, mesmo nos dias que você não está afim de cumprir a rotina
+        <p className="text-base text-slate-700 mb-3">
+          Não é sobre fazer tudo.
+          <br />
+          É sobre fazer algo que caiba até nos dias cansativos.
         </p>
-      </motion.div>
-
-      {/* Statistic Card */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.4, duration: 0.3 }}
-        className="w-full max-w-md"
-      >
-        <div className="bg-gradient-to-br from-lime-50 to-lime-100 border-2 border-lime-200 rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center gap-3 mb-3">
-            <TrendingUp className="w-6 h-6 text-lime-600" />
-            <h3 className="text-lg font-bold text-slate-900">Consistência comprovada</h3>
-          </div>
-          <p className="text-3xl font-bold text-lime-700 mb-2">94%</p>
-          <p className="text-sm text-slate-700">
-            dos usuários do Bora mantém a consistência de <strong>80%</strong> nos seus hábitos ideais
-          </p>
-        </div>
+        <p className="text-base text-slate-700">
+          <strong className="text-slate-900">Rotinas pequenas são mais fáceis de manter</strong> — especialmente quando o dia não ajuda.
+        </p>
       </motion.div>
 
       {/* Continue */}

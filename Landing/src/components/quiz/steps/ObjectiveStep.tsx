@@ -30,10 +30,10 @@ export const ObjectiveStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Qual é o seu principal objetivo com a sua nova rotina?
+          O que você mais gostaria de melhorar na sua rotina agora?
         </h2>
         <p className="text-sm text-slate-500">
-          Nos ajuda a traçar uma rotina que te ajuda a conquistar o que você sempre sonhou
+          Isso nos ajuda a entender onde sua energia faz mais diferença hoje.
         </p>
       </motion.div>
 

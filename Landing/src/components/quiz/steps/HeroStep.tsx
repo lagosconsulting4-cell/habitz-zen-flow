@@ -36,11 +36,15 @@ export const HeroStep = () => {
         className="text-center mb-8"
       >
         <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">
-          Tenha uma rotina saudável
+          Vamos entender como sua rotina
         </h1>
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-          em apenas <span className="text-lime-600">7 minutos por dia</span>
+          <span className="text-lime-600">realmente funciona hoje</span>
         </h2>
+        <p className="text-base text-slate-600 mt-4">
+          Sem fórmulas prontas. Sem cobrança.<br/>
+          Só algumas perguntas para mapear sua realidade.
+        </p>
       </motion.div>
 
       {/* CTA Button */}
@@ -48,15 +52,27 @@ export const HeroStep = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, duration: 0.3 }}
-        className="w-full max-w-md mb-6"
+        className="w-full max-w-md mb-2"
       >
         <Button
           size="lg"
           onClick={nextStep}
           className="w-full h-14 text-lg font-bold bg-lime-500 hover:bg-lime-600 text-slate-900"
         >
-          Iniciar Quiz
+          Começar agora
         </Button>
+      </motion.div>
+
+      {/* Microtexto */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.3 }}
+        className="text-center mb-6"
+      >
+        <p className="text-sm text-slate-500">
+          Leva cerca de 2 minutos • Sem compromisso
+        </p>
       </motion.div>
 
       {/* Login Link */}
