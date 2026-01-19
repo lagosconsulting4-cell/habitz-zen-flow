@@ -275,6 +275,7 @@ const BoraUpsell = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showExitIntent, setShowExitIntent] = useState(false);
   const [showPixModal, setShowPixModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string>("annual");
   const { trackCTA, trackScrollDepth } = useTracking();
 
   // Exit intent detection
@@ -331,30 +332,23 @@ const BoraUpsell = () => {
 
   const handleCTA = (planId: string, location: string) => {
     trackCTA(`${location}_${planId}`);
-
-    // Se for plano anual, mostra modal PIX primeiro
-    if (planId === "annual") {
-      setShowPixModal(true);
-      return;
-    }
-
-    const plan = pricingPlans.find((p) => p.id === planId);
-    if (plan) {
-      window.location.href = plan.stripeLink;
-    }
+    setSelectedPlan(planId);
+    setShowPixModal(true);
   };
 
   const handlePixAccept = () => {
     trackCTA("pix_modal_accepted");
+    // Sempre redireciona para o link PIX do plano anual (20% desconto)
     window.location.href = STRIPE_LINK_ANNUAL_PIX;
   };
 
   const handlePixDecline = () => {
     trackCTA("pix_modal_declined");
     setShowPixModal(false);
-    const annualPlan = pricingPlans.find((p) => p.id === "annual");
-    if (annualPlan) {
-      window.location.href = annualPlan.stripeLink;
+    // Redireciona para o plano que foi originalmente escolhido
+    const plan = pricingPlans.find((p) => p.id === selectedPlan);
+    if (plan) {
+      window.location.href = plan.stripeLink;
     }
   };
 

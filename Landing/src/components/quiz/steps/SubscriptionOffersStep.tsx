@@ -14,27 +14,26 @@ const STRIPE_LINK_ANNUAL_PIX = "https://payfast.greenn.com.br/154673/offer/x31A0
 
 export const SubscriptionOffersStep = () => {
   const [showPixModal, setShowPixModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<"weekly" | "monthly" | "annual">("annual");
 
   const handleSubscribe = (plan: "weekly" | "monthly" | "annual") => {
-    if (plan === "annual") {
-      // Mostra modal PIX para plano anual
-      setShowPixModal(true);
-      return;
-    }
-
-    let link = STRIPE_LINK_MONTHLY;
-    if (plan === "weekly") link = STRIPE_LINK_WEEKLY;
-    if (plan === "monthly") link = STRIPE_LINK_MONTHLY;
-    window.location.href = link;
+    setSelectedPlan(plan);
+    setShowPixModal(true);
   };
 
   const handlePixAccept = () => {
+    // Sempre redireciona para o link PIX do plano anual (20% desconto)
     window.location.href = STRIPE_LINK_ANNUAL_PIX;
   };
 
   const handlePixDecline = () => {
     setShowPixModal(false);
-    window.location.href = STRIPE_LINK_ANNUAL;
+    // Redireciona para o plano que foi originalmente escolhido
+    let link = STRIPE_LINK_MONTHLY;
+    if (selectedPlan === "weekly") link = STRIPE_LINK_WEEKLY;
+    if (selectedPlan === "monthly") link = STRIPE_LINK_MONTHLY;
+    if (selectedPlan === "annual") link = STRIPE_LINK_ANNUAL;
+    window.location.href = link;
   };
 
   return (
