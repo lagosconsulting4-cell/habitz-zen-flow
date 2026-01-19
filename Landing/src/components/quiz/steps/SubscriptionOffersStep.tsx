@@ -3,19 +3,38 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Sparkles, Zap, Crown, Gift } from "lucide-react";
 import { buttonHoverTap } from "@/hooks/useAnimations";
+import { useState } from "react";
+import { PixIncentiveModal } from "@/components/PixIncentiveModal";
 
-// Links de pagamento do Stripe - COM TESTE DE 3 DIAS
+// Links de pagamento
 const STRIPE_LINK_WEEKLY = "https://buy.stripe.com/14A4gz7r62b01ocdBW9oc02";
 const STRIPE_LINK_MONTHLY = "https://buy.stripe.com/cNidR9dPuaHwaYM41m9oc03";
-const STRIPE_LINK_ANNUAL = "https://buy.stripe.com/14AeVd9zedTI7MA69u9oc04";
+const STRIPE_LINK_ANNUAL = "https://payfast.greenn.com.br/154673";
+const STRIPE_LINK_ANNUAL_PIX = "https://payfast.greenn.com.br/154673/offer/x31A0y";
 
 export const SubscriptionOffersStep = () => {
+  const [showPixModal, setShowPixModal] = useState(false);
+
   const handleSubscribe = (plan: "weekly" | "monthly" | "annual") => {
+    if (plan === "annual") {
+      // Mostra modal PIX para plano anual
+      setShowPixModal(true);
+      return;
+    }
+
     let link = STRIPE_LINK_MONTHLY;
     if (plan === "weekly") link = STRIPE_LINK_WEEKLY;
     if (plan === "monthly") link = STRIPE_LINK_MONTHLY;
-    if (plan === "annual") link = STRIPE_LINK_ANNUAL;
     window.location.href = link;
+  };
+
+  const handlePixAccept = () => {
+    window.location.href = STRIPE_LINK_ANNUAL_PIX;
+  };
+
+  const handlePixDecline = () => {
+    setShowPixModal(false);
+    window.location.href = STRIPE_LINK_ANNUAL;
   };
 
   return (
@@ -193,7 +212,7 @@ export const SubscriptionOffersStep = () => {
                   <span className="text-base text-slate-900/70">/ano</span>
                 </div>
                 <p className="text-sm text-slate-900/80 mt-2 font-bold">
-                  Só R$ 10,82/mês
+                  Ou 12x de R$ 13,36
                 </p>
               </div>
 
@@ -278,6 +297,14 @@ export const SubscriptionOffersStep = () => {
           </div>
         </motion.div>
       </motion.div>
+
+      {/* PIX Incentive Modal */}
+      <PixIncentiveModal
+        isOpen={showPixModal}
+        onClose={handlePixDecline}
+        onAccept={handlePixAccept}
+        planType="annual"
+      />
     </div>
   );
 };

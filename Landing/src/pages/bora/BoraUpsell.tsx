@@ -47,6 +47,7 @@ import { staggerContainer, staggerItem } from "@/hooks/useAnimations";
 import { useTracking } from "@/hooks/useTracking";
 import { useExitIntent } from "@/hooks/useExitIntent";
 import { ExitIntentModal } from "@/components/ExitIntentModal";
+import { PixIncentiveModal } from "@/components/PixIncentiveModal";
 
 // ============ DATA ============
 
@@ -245,8 +246,8 @@ const pricingPlans = [
     name: "Anual",
     price: "129,90",
     period: "por ano",
-    monthlyPrice: "10,82",
-    stripeLink: "https://buy.stripe.com/bJeaEXh1G9Ds8QE2Xi9oc05",
+    monthlyPrice: "13,36",
+    stripeLink: "https://payfast.greenn.com.br/154673",
     features: [
       "Tudo do plano Mensal +",
       "🏆 Programa completo de 12 meses",
@@ -254,7 +255,7 @@ const pricingPlans = [
       "📖 Biblioteca de desenvolvimento",
       "🔥 Comprometimento total com mudança",
       "💰 Economia de 64% vs mensal",
-      "🌟 Apenas R$10,82/mês",
+      "🌟 12x de R$13,36 ou R$129,90/ano",
       "Garantia de 7 dias",
     ],
     badge: "MELHOR OFERTA",
@@ -267,9 +268,13 @@ const pricingPlans = [
 
 // ============ MAIN COMPONENT ============
 
+// Links de checkout
+const STRIPE_LINK_ANNUAL_PIX = "https://payfast.greenn.com.br/154673/offer/x31A0y";
+
 const BoraUpsell = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showExitIntent, setShowExitIntent] = useState(false);
+  const [showPixModal, setShowPixModal] = useState(false);
   const { trackCTA, trackScrollDepth } = useTracking();
 
   // Exit intent detection
@@ -326,9 +331,30 @@ const BoraUpsell = () => {
 
   const handleCTA = (planId: string, location: string) => {
     trackCTA(`${location}_${planId}`);
+
+    // Se for plano anual, mostra modal PIX primeiro
+    if (planId === "annual") {
+      setShowPixModal(true);
+      return;
+    }
+
     const plan = pricingPlans.find((p) => p.id === planId);
     if (plan) {
       window.location.href = plan.stripeLink;
+    }
+  };
+
+  const handlePixAccept = () => {
+    trackCTA("pix_modal_accepted");
+    window.location.href = STRIPE_LINK_ANNUAL_PIX;
+  };
+
+  const handlePixDecline = () => {
+    trackCTA("pix_modal_declined");
+    setShowPixModal(false);
+    const annualPlan = pricingPlans.find((p) => p.id === "annual");
+    if (annualPlan) {
+      window.location.href = annualPlan.stripeLink;
     }
   };
 
@@ -1246,7 +1272,7 @@ const BoraUpsell = () => {
                         <p className={`${
                           plan.mostPopular ? "text-amber-600" : "text-[#A3E635]"
                         } font-bold text-lg`}>
-                          Apenas R${plan.monthlyPrice}/mês
+                          12x de R${plan.monthlyPrice}
                         </p>
                       </div>
                     )}
@@ -1496,6 +1522,14 @@ const BoraUpsell = () => {
           </div>
         </div>
       </footer>
+
+      {/* PIX Incentive Modal */}
+      <PixIncentiveModal
+        isOpen={showPixModal}
+        onClose={handlePixDecline}
+        onAccept={handlePixAccept}
+        planType="annual"
+      />
 
       {/* Exit Intent Modal */}
       <ExitIntentModal
