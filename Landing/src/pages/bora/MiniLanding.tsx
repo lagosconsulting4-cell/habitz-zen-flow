@@ -12,7 +12,6 @@ import {
   Target,
   Calendar,
   Users,
-  Shield,
   Eye,
   Lightbulb,
   TrendingUp,
@@ -136,14 +135,6 @@ const MiniLanding = () => {
               initial="initial"
               animate="animate"
             >
-              {/* Badge */}
-              <motion.div variants={staggerItem} className="flex justify-center lg:justify-start">
-                <Badge className="px-4 py-2 bg-[#A3E635] text-slate-900 border-0 text-sm font-semibold shadow-lg shadow-[#A3E635]/30">
-                  <Shield className="w-4 h-4 mr-2" />
-                  Sem pressão, sem culpa
-                </Badge>
-              </motion.div>
-
               {/* Title */}
               <motion.h1
                 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.1] text-slate-900"
@@ -174,10 +165,12 @@ const MiniLanding = () => {
                   <Button
                     onClick={() => handleCTA("hero")}
                     size="lg"
-                    className="group bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 text-base sm:text-lg px-8 py-6 rounded-full font-bold shadow-xl shadow-[#A3E635]/30"
+                    className="group bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 text-base px-8 py-6 rounded-full font-bold shadow-xl shadow-[#A3E635]/30 whitespace-normal h-auto"
                   >
-                    👉 Quero organizar minha rotina do meu jeito
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                    <span className="flex items-center gap-2">
+                      👉 Quero organizar minha rotina do meu jeito
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                    </span>
                   </Button>
                 </motion.div>
               </motion.div>
