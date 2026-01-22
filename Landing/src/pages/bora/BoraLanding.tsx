@@ -396,20 +396,32 @@ const BoraLanding = () => {
                 <strong className="text-slate-900">isso não significa que tem algo errado com você.</strong>
               </motion.p>
 
-              {/* Stats badges */}
+              {/* Stats cards */}
               <motion.div
-                className="pt-4 max-w-xl mx-auto lg:mx-0"
+                className="pt-4 max-w-xl mx-auto lg:mx-0 space-y-4"
                 variants={staggerItem}
               >
-                <div className="flex flex-wrap gap-3 items-center mb-3">
-                  <Badge className="bg-red-100 text-red-700 border-red-300 text-base px-4 py-2 shadow-md">
-                    📊 92% falham
-                  </Badge>
-                  <Badge className="bg-blue-100 text-blue-700 border-blue-300 text-base px-4 py-2 shadow-md">
-                    📉 Apenas 9% conseguem
-                  </Badge>
-                  <span className="text-sm text-slate-500">— Ohio State University</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Card 92% */}
+                  <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition-shadow">
+                    <div className="text-4xl font-black text-red-600 mb-2">92%</div>
+                    <p className="text-sm text-slate-700">
+                      abandonam suas metas (não por falta de disciplina)
+                    </p>
+                  </div>
+
+                  {/* Card 9% */}
+                  <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition-shadow">
+                    <div className="text-4xl font-black text-blue-600 mb-2">9%</div>
+                    <p className="text-sm text-slate-700">
+                      conseguem manter por mais de 3 meses
+                    </p>
+                  </div>
                 </div>
+
+                <p className="text-sm text-slate-500 text-center">
+                  — Ohio State University
+                </p>
 
                 <p className="text-slate-600">
                   <strong className="text-[#A3E635]">A falha não é sua — é do sistema. Antes de qualquer solução, vem a clareza.</strong>
