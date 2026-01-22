@@ -62,7 +62,18 @@ const RecAqLanding = () => {
 
   const handleCTA = (location: string) => {
     trackCTA(location);
-    window.location.href = CHECKOUT_LINK;
+
+    // Header and hero CTAs scroll to offer section
+    if (location === "header" || location === "hero") {
+      const offerSection = document.getElementById("offer");
+      if (offerSection) {
+        offerSection.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+    // Only offer CTA goes to checkout
+    else if (location === "offer") {
+      window.location.href = CHECKOUT_LINK;
+    }
   };
 
   return (
@@ -177,9 +188,9 @@ const RecAqLanding = () => {
               <div className="relative w-full max-w-md">
                 <div className="absolute inset-0 bg-gradient-to-r from-[#A3E635]/20 to-lime-400/20 rounded-3xl blur-3xl" />
                 <picture>
-                  <source srcSet="/images/lp/dashboard_mockup.webp" type="image/webp" />
+                  <source srcSet="/images/lp/hero_mockup.webp" type="image/webp" />
                   <img
-                    src="/images/lp/dashboard_mockup.png"
+                    src="/images/lp/mockup-app-vertical.png"
                     alt="Bora App Interface"
                     className="relative z-10 w-full h-auto drop-shadow-2xl"
                   />
@@ -479,7 +490,7 @@ const RecAqLanding = () => {
       </section>
 
       {/* ============ BLOCO 6 — OFERTA ============ */}
-      <section className="py-16 md:py-24 px-4 md:px-6 bg-gradient-to-b from-white to-slate-50">
+      <section id="offer" className="py-16 md:py-24 px-4 md:px-6 bg-gradient-to-b from-white to-slate-50">
         <div className="max-w-2xl mx-auto">
           <motion.div
             className="text-center space-y-8"
