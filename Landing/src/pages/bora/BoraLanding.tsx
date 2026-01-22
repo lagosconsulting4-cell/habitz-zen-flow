@@ -42,6 +42,7 @@ import {
   Heart,
   ChevronRight,
   Play,
+  Trophy,
   // Ícones para seção "A diferença que o BORA faz"
   Moon,
   Pause,
@@ -59,25 +60,25 @@ import { useTracking } from "@/hooks/useTracking";
 const pillars = [
   {
     title: "Entender",
-    subtitle: "Como são seus dias de verdade",
+    subtitle: "Como você funciona de verdade",
     description: "Mapeamos sua rotina real, não a ideal. Onde você trava, quanto tempo realmente tem, o que te desgasta.",
     icon: Brain,
     gradient: "from-[#A3E635] to-lime-300",
     bgGlow: "bg-[#A3E635]/20",
   },
   {
-    title: "Adaptar",
-    subtitle: "Uma rotina que caiba na sua vida",
-    description: "Não sobre fazer tudo certo. É sobre fazer algo que funcione até nos dias cansativos.",
-    icon: Target,
+    title: "Aplicar neurociência",
+    subtitle: "Ciência de hábitos que funciona",
+    description: "Seu cérebro aprende pelo que você repete. Criamos hábitos pequenos e fáceis que viram automáticos — sem força de vontade.",
+    icon: Zap,
     gradient: "from-[#A3E635] to-lime-400",
     bgGlow: "bg-[#A3E635]/20",
   },
   {
-    title: "Clareza",
-    subtitle: "Sem certo ou errado",
-    description: "Só a sua realidade. Sem comparação. Sem cobrança. Só dar nome ao caos já traz alívio.",
-    icon: Zap,
+    title: "Transformação",
+    subtitle: "Resultados reais e sustentáveis",
+    description: "Mudança que acontece sem sofrimento. Consistência natural que cabe na sua vida, até nos dias difíceis.",
+    icon: Trophy,
     gradient: "from-[#A3E635] to-lime-300",
     bgGlow: "bg-[#A3E635]/20",
   },
@@ -391,23 +392,27 @@ const BoraLanding = () => {
                 className="text-lg md:text-xl text-slate-600 max-w-xl mx-auto lg:mx-0"
                 variants={staggerItem}
               >
-                Se você já tentou criar uma rotina, manter hábitos ou organizar seus dias e não conseguiu sustentar por muito tempo…{" "}
+                Se você já tentou criar uma rotina e não conseguiu manter...{" "}
                 <strong className="text-slate-900">isso não significa que tem algo errado com você.</strong>
               </motion.p>
 
-              {/* Key points */}
+              {/* Stats badges */}
               <motion.div
-                className="space-y-3 pt-4 text-left max-w-xl mx-auto lg:mx-0"
+                className="pt-4 max-w-xl mx-auto lg:mx-0"
                 variants={staggerItem}
               >
+                <div className="flex flex-wrap gap-3 items-center mb-3">
+                  <Badge className="bg-red-100 text-red-700 border-red-300 text-base px-4 py-2 shadow-md">
+                    📊 92% falham
+                  </Badge>
+                  <Badge className="bg-blue-100 text-blue-700 border-blue-300 text-base px-4 py-2 shadow-md">
+                    📉 Apenas 9% conseguem
+                  </Badge>
+                  <span className="text-sm text-slate-500">— Ohio State University</span>
+                </div>
+
                 <p className="text-slate-600">
-                  Estudos mostram que <strong className="text-slate-900">92% das pessoas abandonam suas metas de mudança de hábitos.</strong> Não por falta de disciplina, mas porque tentam encaixar sistemas complexos demais em uma vida real.
-                </p>
-                <p className="text-slate-600">
-                  Pesquisas da Ohio State University confirmam: apenas <strong className="text-slate-900">9% conseguem manter resoluções por mais de 3 meses.</strong> A falha não é sua — é do sistema.
-                </p>
-                <p className="text-slate-600">
-                  <strong className="text-[#A3E635]">Antes de qualquer solução, vem a clareza.</strong>
+                  <strong className="text-[#A3E635]">A falha não é sua — é do sistema. Antes de qualquer solução, vem a clareza.</strong>
                 </p>
               </motion.div>
 
@@ -480,22 +485,6 @@ const BoraLanding = () => {
               É só sobre entender como sua vida realmente funciona hoje.<br/>
               Sem comparação. Sem cobrança. Sem julgamento.
             </p>
-          </motion.div>
-
-          {/* Explicação científica */}
-          <motion.div
-            className="max-w-3xl mx-auto mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-          >
-            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-              <p className="text-sm text-slate-700">
-                <strong className="text-[#A3E635]">Como funciona:</strong>{" "}
-                Estudos comprovam: seu cérebro aprende pelo que você repete. Quanto mais fácil e pequeno o hábito, mais rápido vira automático. É ciência, não força de vontade.
-              </p>
-            </div>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
