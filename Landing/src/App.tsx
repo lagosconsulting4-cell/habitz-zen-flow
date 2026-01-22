@@ -24,6 +24,7 @@ const AntigoOffer = lazy(() => import("./pages/antigo/DirectOffer"));
 const BoraLanding = lazy(() => import("./pages/bora/BoraLanding"));
 const BoraUpsell = lazy(() => import("./pages/bora/BoraUpsell"));
 const BoraDownsell = lazy(() => import("./pages/bora/BoraDownsell"));
+const RecAqLanding = lazy(() => import("./pages/bora/RecAqLanding"));
 
 const queryClient = new QueryClient();
 
@@ -155,6 +156,16 @@ const App = () => (
               element={
                 <PathPrefixProvider prefix="/downsell-bora">
                   <BoraDownsell />
+                </PathPrefixProvider>
+              }
+            />
+
+            {/* Rec-Aq Landing Page - Warm lead recovery page */}
+            <Route
+              path="/rec-aq"
+              element={
+                <PathPrefixProvider prefix="/rec-aq">
+                  <RecAqLanding />
                 </PathPrefixProvider>
               }
             />
