@@ -25,6 +25,7 @@ const BoraLanding = lazy(() => import("./pages/bora/BoraLanding"));
 const BoraUpsell = lazy(() => import("./pages/bora/BoraUpsell"));
 const BoraDownsell = lazy(() => import("./pages/bora/BoraDownsell"));
 const RecAqLanding = lazy(() => import("./pages/bora/RecAqLanding"));
+const MiniLanding = lazy(() => import("./pages/bora/MiniLanding"));
 
 const queryClient = new QueryClient();
 
@@ -166,6 +167,16 @@ const App = () => (
               element={
                 <PathPrefixProvider prefix="/rec-aq">
                   <RecAqLanding />
+                </PathPrefixProvider>
+              }
+            />
+
+            {/* Mini Landing Page - Simplified conversion page */}
+            <Route
+              path="/mini"
+              element={
+                <PathPrefixProvider prefix="/mini">
+                  <MiniLanding />
                 </PathPrefixProvider>
               }
             />
