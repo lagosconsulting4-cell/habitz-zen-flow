@@ -112,7 +112,7 @@ export const PixIncentiveModal = ({
                 {/* Big Discount */}
                 <div className="mb-4">
                   <div className="text-6xl font-black text-[#A3E635] leading-none mb-1">
-                    20%
+                    25%
                   </div>
                   <p className="text-sm text-slate-700 font-medium">
                     de desconto exclusivo
@@ -130,7 +130,7 @@ export const PixIncentiveModal = ({
                     De R$ 129,90
                   </div>
                   <div className="text-3xl font-bold text-slate-900">
-                    R$ 103,92<span className="text-base text-slate-600">/ano</span>
+                    R$ 97,00<span className="text-base text-slate-600">/ano</span>
                   </div>
                 </div>
 

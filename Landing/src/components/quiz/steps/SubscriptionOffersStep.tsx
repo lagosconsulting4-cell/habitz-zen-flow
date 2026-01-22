@@ -16,7 +16,7 @@ import {
 const STRIPE_LINK_WEEKLY = "https://buy.stripe.com/14A4gz7r62b01ocdBW9oc02";
 const STRIPE_LINK_MONTHLY = "https://buy.stripe.com/cNidR9dPuaHwaYM41m9oc03";
 const STRIPE_LINK_ANNUAL = "https://payfast.greenn.com.br/154673";
-const STRIPE_LINK_ANNUAL_PIX = "https://payfast.greenn.com.br/154673/offer/x31A0y";
+const STRIPE_LINK_ANNUAL_PIX = "https://payfast.greenn.com.br/154673/offer/IdSMYu";
 
 // FAQ
 const faqs = [
