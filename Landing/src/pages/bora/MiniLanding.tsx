@@ -636,8 +636,7 @@ const MiniLanding = () => {
                     size="lg"
                     className="w-full bg-slate-900 hover:bg-slate-800 text-white text-lg font-bold py-6 rounded-xl shadow-2xl"
                   >
-                    👉 Quero construir a minha melhor versão
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    Quero construir a minha melhor versão
                   </Button>
                 </motion.div>
               </div>
