@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
-import { Target, CheckCircle, AlertCircle, Sparkles } from "lucide-react";
+import { Target, CheckCircle, AlertCircle, Sparkles, Brain } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface LoadingPhase {
@@ -16,6 +16,12 @@ const LOADING_PHASES: LoadingPhase[] = [
     icon: Target,
     duration: 1000,
     color: "text-blue-600"
+  },
+  {
+    label: "Aplicando ciência de hábitos...",
+    icon: Brain,
+    duration: 1200,
+    color: "text-purple-600"
   },
   {
     label: "Mapeando objetivos...",
@@ -172,7 +178,7 @@ export const LoadingStep: React.FC<LoadingStepProps> = ({ onComplete }) => {
         className="mt-8 text-center px-4"
       >
         <p className="text-sm text-slate-600 max-w-md">
-          Estamos considerando seu tempo disponível, objetivos, horários e desafios para criar uma rotina que realmente funciona para você.
+          Criando uma rotina que funciona com o jeito que seu cérebro aprende — pequena, repetida, e fácil de virar automática.
         </p>
       </motion.div>
     </div>

@@ -235,25 +235,6 @@ const bonusItems = [
   },
 ];
 
-const faqs = [
-  {
-    question: "Quanto tempo preciso dedicar por dia?",
-    answer: "De 5 a 15 minutos na média. O app se adapta ao SEU tempo disponível. Se você disse que tem 5 minutos, vai receber só hábitos de 5 minutos. Sem forçar.",
-  },
-  {
-    question: "Funciona mesmo se eu já tentei de tudo?",
-    answer: "Sim! O BORA é diferente porque funciona automático. Você não precisa 'aprender' nada ou fazer esforço. Só seguir o que o app manda. Simples assim.",
-  },
-  {
-    question: "E se eu não gostar?",
-    answer: "Tem garantia de 7 dias. Não curtiu? Pega o dinheiro de volta. Sem enrolação, sem perguntas.",
-  },
-  {
-    question: "Preciso baixar algum app?",
-    answer: "Não precisa baixar nada! Funciona direto no navegador do seu celular. Salva na tela inicial e usa como app. Offline e tudo.",
-  },
-];
-
 // ============ COMPONENTS ============
 
 const AnimatedCounter = ({ value, suffix = "" }: { value: number; suffix?: string }) => {
@@ -420,10 +401,10 @@ const BoraLanding = () => {
                 variants={staggerItem}
               >
                 <p className="text-slate-600">
-                  A maioria das pessoas falha não por falta de disciplina mas porque tenta encaixar sistemas mirabolantes em uma vida real.
+                  Estudos mostram que <strong className="text-slate-900">92% das pessoas abandonam suas metas de mudança de hábitos.</strong> Não por falta de disciplina, mas porque tentam encaixar sistemas complexos demais em uma vida real.
                 </p>
                 <p className="text-slate-600">
-                  <strong className="text-slate-900">Nenhuma rotina "perfeita" sobrevive</strong> a dias corridos, energia baixa, imprevistos, cansaço e estresse.
+                  Pesquisas da Ohio State University confirmam: apenas <strong className="text-slate-900">9% conseguem manter resoluções por mais de 3 meses.</strong> A falha não é sua — é do sistema.
                 </p>
                 <p className="text-slate-600">
                   <strong className="text-[#A3E635]">Antes de qualquer solução, vem a clareza.</strong>
@@ -499,6 +480,22 @@ const BoraLanding = () => {
               É só sobre entender como sua vida realmente funciona hoje.<br/>
               Sem comparação. Sem cobrança. Sem julgamento.
             </p>
+          </motion.div>
+
+          {/* Explicação científica */}
+          <motion.div
+            className="max-w-3xl mx-auto mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
+              <p className="text-sm text-slate-700">
+                <strong className="text-[#A3E635]">Como funciona:</strong>{" "}
+                Estudos comprovam: seu cérebro aprende pelo que você repete. Quanto mais fácil e pequeno o hábito, mais rápido vira automático. É ciência, não força de vontade.
+              </p>
+            </div>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1225,50 +1222,6 @@ const BoraLanding = () => {
           </motion.div>
         </div>
       </section> */}
-
-      {/* ============ FAQ SECTION ============ */}
-      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
-        <div className="max-w-3xl mx-auto relative z-10">
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              Tire suas dúvidas
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
-              Perguntas <span className="text-primary font-extrabold">frequentes</span>
-            </h2>
-          </motion.div>
-
-          <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <AccordionItem
-                  value={`faq-${index}`}
-                  className="bg-slate-50 rounded-2xl border border-slate-200 px-6 shadow-lg hover:border-primary/20 transition-colors data-[state=open]:border-primary/30 data-[state=open]:shadow-xl data-[state=open]:border-l-4 data-[state=open]:border-l-primary"
-                >
-                  <AccordionTrigger className="text-left font-semibold hover:no-underline py-5 text-lg text-slate-900">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-slate-600 pb-5 text-base leading-relaxed">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              </motion.div>
-            ))}
-          </Accordion>
-        </div>
-      </section>
 
       {/* ============ FINAL CTA ============ */}
       <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">

@@ -1,16 +1,42 @@
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Sparkles, Zap, Crown, Gift } from "lucide-react";
+import { Check, Sparkles, Zap, Crown, Gift, HelpCircle } from "lucide-react";
 import { buttonHoverTap } from "@/hooks/useAnimations";
 import { useState } from "react";
 import { PixIncentiveModal } from "@/components/PixIncentiveModal";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 // Links de pagamento
 const STRIPE_LINK_WEEKLY = "https://buy.stripe.com/14A4gz7r62b01ocdBW9oc02";
 const STRIPE_LINK_MONTHLY = "https://buy.stripe.com/cNidR9dPuaHwaYM41m9oc03";
 const STRIPE_LINK_ANNUAL = "https://payfast.greenn.com.br/154673";
 const STRIPE_LINK_ANNUAL_PIX = "https://payfast.greenn.com.br/154673/offer/x31A0y";
+
+// FAQ
+const faqs = [
+  {
+    question: "Quanto tempo preciso dedicar por dia?",
+    answer: "De 5 a 15 minutos na média. O app se adapta ao SEU tempo disponível. Se você disse que tem 5 minutos, vai receber só hábitos de 5 minutos. Sem forçar.",
+  },
+  {
+    question: "Funciona mesmo se eu já tentei de tudo?",
+    answer: "Sim! O BORA é diferente porque funciona automático. Você não precisa 'aprender' nada ou fazer esforço. Só seguir o que o app manda. Simples assim.",
+  },
+  {
+    question: "E se eu não gostar?",
+    answer: "Tem garantia de 7 dias. Não curtiu? Pega o dinheiro de volta. Sem enrolação, sem perguntas.",
+  },
+  {
+    question: "Preciso baixar algum app?",
+    answer: "Não precisa baixar nada! Funciona direto no navegador do seu celular. Salva na tela inicial e usa como app. Offline e tudo.",
+  },
+];
 
 export const SubscriptionOffersStep = () => {
   const [showPixModal, setShowPixModal] = useState(false);
@@ -284,6 +310,40 @@ export const SubscriptionOffersStep = () => {
               </p>
             </div>
           </div>
+        </motion.div>
+
+        {/* FAQ Section */}
+        <motion.div
+          className="max-w-2xl mx-auto mt-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.0 }}
+        >
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center gap-2 mb-2">
+              <HelpCircle className="w-5 h-5 text-[#A3E635]" />
+              <h3 className="text-xl font-bold text-slate-900">
+                Dúvidas frequentes
+              </h3>
+            </div>
+          </div>
+
+          <Accordion type="single" collapsible className="space-y-3">
+            {faqs.map((faq, index) => (
+              <AccordionItem
+                key={index}
+                value={`faq-${index}`}
+                className="bg-white rounded-xl border border-slate-200 px-5 shadow-sm hover:border-[#A3E635]/30 transition-colors data-[state=open]:border-[#A3E635]/50 data-[state=open]:shadow-md"
+              >
+                <AccordionTrigger className="text-left font-semibold hover:no-underline py-4 text-sm text-slate-900">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-slate-600 pb-4 text-sm leading-relaxed">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </motion.div>
       </motion.div>
 

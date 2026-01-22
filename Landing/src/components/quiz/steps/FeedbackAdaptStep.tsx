@@ -81,6 +81,11 @@ export const FeedbackAdaptStep = () => {
             <strong className="text-blue-800">{professionText}</strong>{" "}
             mantém os hábitos e finalmente conquistam a vida dos sonhos
           </p>
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <p className="text-xs text-blue-700">
+              <strong>🧠 Como funciona:</strong> Repetir a mesma coisa no mesmo horário "treina" seu cérebro. Com o tempo, você faz no automático — tipo escovar os dentes.
+            </p>
+          </div>
         </div>
       </motion.div>
 

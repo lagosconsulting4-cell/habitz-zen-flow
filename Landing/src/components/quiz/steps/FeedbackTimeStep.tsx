@@ -57,6 +57,21 @@ export const FeedbackTimeStep = () => {
         </p>
       </motion.div>
 
+      {/* Science tip */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.3 }}
+        className="w-full max-w-md px-4 mb-6"
+      >
+        <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs text-slate-600">
+            <strong className="text-lime-600">💡 Ciência:</strong>{" "}
+            Hábitos pequenos grudam mais. É tipo criar um caminho — quanto mais curto, mais fácil de repetir todo dia até virar automático.
+          </p>
+        </div>
+      </motion.div>
+
       {/* Continue */}
       <ContinueButton />
     </div>

@@ -109,6 +109,7 @@ export const TestimonialsStep = () => {
             key={index}
             name={testimonial.name}
             role={testimonial.role}
+            avatar={testimonial.avatar}
             quote={testimonial.quote}
             rating={testimonial.rating}
             beforeAfter={testimonial.beforeAfter}
