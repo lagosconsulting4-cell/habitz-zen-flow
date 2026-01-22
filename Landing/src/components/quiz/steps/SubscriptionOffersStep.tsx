@@ -58,142 +58,29 @@ export const SubscriptionOffersStep = () => {
           </motion.div>
 
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
-            Escolha seu plano e comece{" "}
-            <span className="text-[#A3E635]">sua transformação</span>
+            Falta só isso para <span className="text-[#A3E635]">começar</span>
           </h2>
 
           <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto">
-            Você pode testar com calma. Se não fizer sentido, é só cancelar. Sem pressão. Sem pegadinha.
+            Seu plano está pronto. Escolha seu acesso e comece agora mesmo. Teste com calma - cancele quando quiser.
           </p>
         </div>
 
         {/* Pricing Cards - 3 PLANOS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {/* Card Semanal */}
+          {/* Card Anual - PRIMEIRO */}
           <motion.div
-            className="relative bg-white rounded-3xl p-6 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+            className="relative bg-gradient-to-br from-[#A3E635] to-lime-400 rounded-3xl p-6 shadow-2xl hover:shadow-[#A3E635]/50 transition-all duration-300 hover:-translate-y-2 border-2 border-[#84cc16]"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            whileHover={{ scale: 1.02 }}
-          >
-            <div className="space-y-5">
-              {/* Badge */}
-              <Badge className="bg-slate-500 text-white border-0 text-xs px-3 py-1">
-                FLEXÍVEL
-              </Badge>
-
-              {/* Plan Name */}
-              <div>
-                <h3 className="text-2xl font-bold text-slate-900">Semanal</h3>
-                <p className="text-sm text-slate-600 mt-1">Ideal pra estudante</p>
-              </div>
-
-              {/* Price */}
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-black text-slate-900">R$ 19,90</span>
-                <span className="text-base text-slate-600">/semana</span>
-              </div>
-
-              {/* Features */}
-              <ul className="space-y-2.5">
-                {[
-                  "Rotina personalizada",
-                  "Checklists diários",
-                  "Progresso visual",
-                  "Lembretes inteligentes",
-                  "Cancele quando quiser",
-                ].map((feature, index) => (
-                  <li key={index} className="flex items-start gap-2.5">
-                    <Check className="w-4 h-4 text-[#A3E635] flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-slate-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA Button */}
-              <motion.div {...buttonHoverTap}>
-                <Button
-                  onClick={() => handleSubscribe("weekly")}
-                  variant="outline"
-                  size="lg"
-                  className="w-full text-base font-bold py-5 rounded-xl border-2 border-slate-900 hover:bg-slate-900 hover:text-white"
-                >
-                  Começar agora
-                </Button>
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* Card Mensal */}
-          <motion.div
-            className="relative bg-white rounded-3xl p-6 border-2 border-blue-500 shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-2"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            whileHover={{ scale: 1.02 }}
-          >
-            <div className="space-y-5">
-              {/* Badge */}
-              <Badge className="bg-blue-500 text-white border-0 text-xs px-3 py-1">
-                MELHOR CUSTO-BENEFÍCIO
-              </Badge>
-
-              {/* Plan Name */}
-              <div>
-                <h3 className="text-2xl font-bold text-slate-900">Mensal</h3>
-                <p className="text-sm text-slate-600 mt-1">Equilíbrio perfeito</p>
-              </div>
-
-              {/* Price */}
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-black text-slate-900">R$ 29,90</span>
-                <span className="text-base text-slate-600">/mês</span>
-              </div>
-
-              {/* Features */}
-              <ul className="space-y-2.5">
-                {[
-                  "Tudo do Semanal +",
-                  "🧘 Meditações guiadas",
-                  "📚 Hub de livros",
-                  "🎯 Jornada guiada de 30 dias",
-                  "Economia de 25%",
-                ].map((feature, index) => (
-                  <li key={index} className="flex items-start gap-2.5">
-                    <Check className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" strokeWidth={2.5} />
-                    <span className="text-sm text-slate-700 font-medium">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA Button */}
-              <motion.div {...buttonHoverTap}>
-                <Button
-                  onClick={() => handleSubscribe("monthly")}
-                  size="lg"
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white text-base font-bold py-5 rounded-xl shadow-xl"
-                >
-                  <Crown className="w-4 h-4 mr-2" />
-                  Começar agora
-                </Button>
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* Card Anual */}
-          <motion.div
-            className="relative bg-gradient-to-br from-[#A3E635] to-lime-400 rounded-3xl p-6 shadow-2xl hover:shadow-[#A3E635]/50 transition-all duration-300 hover:-translate-y-2 border-2 border-[#84cc16]"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
             whileHover={{ scale: 1.05 }}
             style={{ transform: 'scale(1.05)' }}
           >
             <div className="space-y-5">
               {/* Badge */}
               <Badge className="bg-white/30 backdrop-blur-sm text-slate-900 border-0 text-xs px-3 py-1 font-bold">
-                ACOMPANHAMENTO COMPLETO
+                MELHOR CUSTO-BENEFÍCIO
               </Badge>
 
               {/* Plan Name */}
@@ -246,6 +133,109 @@ export const SubscriptionOffersStep = () => {
                   className="w-full bg-slate-900 hover:bg-slate-800 text-white text-base font-bold py-5 rounded-xl shadow-2xl"
                 >
                   <Crown className="w-4 h-4 mr-2" />
+                  Começar agora
+                </Button>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Card Mensal */}
+          <motion.div
+            className="relative bg-white rounded-3xl p-6 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <div className="space-y-5">
+
+              {/* Plan Name */}
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900">Mensal</h3>
+                <p className="text-sm text-slate-600 mt-1">Equilíbrio perfeito</p>
+              </div>
+
+              {/* Price */}
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-black text-slate-900">R$ 29,90</span>
+                <span className="text-base text-slate-600">/mês</span>
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-2.5">
+                {[
+                  "Tudo do Semanal +",
+                  "🧘 Meditações guiadas",
+                  "📚 Hub de livros",
+                  "🎯 Jornada guiada de 30 dias",
+                  "Economia de 25%",
+                ].map((feature, index) => (
+                  <li key={index} className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#A3E635] flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-slate-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA Button */}
+              <motion.div {...buttonHoverTap}>
+                <Button
+                  onClick={() => handleSubscribe("monthly")}
+                  variant="outline"
+                  size="lg"
+                  className="w-full text-base font-bold py-5 rounded-xl border-2 border-slate-900 hover:bg-slate-900 hover:text-white"
+                >
+                  Começar agora
+                </Button>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Card Semanal */}
+          <motion.div
+            className="relative bg-white rounded-3xl p-6 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <div className="space-y-5">
+              {/* Plan Name */}
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900">Semanal</h3>
+                <p className="text-sm text-slate-600 mt-1">Ideal pra estudante</p>
+              </div>
+
+              {/* Price */}
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-black text-slate-900">R$ 19,90</span>
+                <span className="text-base text-slate-600">/semana</span>
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-2.5">
+                {[
+                  "Rotina personalizada",
+                  "Checklists diários",
+                  "Progresso visual",
+                  "Lembretes inteligentes",
+                  "Cancele quando quiser",
+                ].map((feature, index) => (
+                  <li key={index} className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#A3E635] flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-slate-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA Button */}
+              <motion.div {...buttonHoverTap}>
+                <Button
+                  onClick={() => handleSubscribe("weekly")}
+                  variant="outline"
+                  size="lg"
+                  className="w-full text-base font-bold py-5 rounded-xl border-2 border-slate-900 hover:bg-slate-900 hover:text-white"
+                >
                   Começar agora
                 </Button>
               </motion.div>

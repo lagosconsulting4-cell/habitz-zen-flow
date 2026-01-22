@@ -160,11 +160,11 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   // State - Status
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
 
-  // 25 Steps: Hero, Objective, Time, FeedbackTime, Energy, WorkSchedule, Financial, FeedbackAdapt,
+  // 24 Steps: Hero, Objective, Time, FeedbackTime, Energy, WorkSchedule, Financial, FeedbackAdapt,
   // Age, FeedbackAgeChart, Challenges, Gender, SocialProofChart, ConsistencyFeeling,
   // ProjectedFeeling, Testimonials, YearsPromising, Urgency, PotentialChart, AppExplanation,
-  // Loading, PersonalizedPlan, DataCollection, SubscriptionOffersStep
-  const totalSteps = 25;
+  // Loading, DataCollection, SubscriptionOffersStep
+  const totalSteps = 24;
 
   // ============================================================================
   // NAVIGATION
@@ -257,11 +257,9 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
         return true;
       case 21: // LoadingStep - auto-advances
         return true;
-      case 22: // PersonalizedPlanView - summary screen
+      case 22: // DataCollectionStep - has its own validation
         return true;
-      case 23: // DataCollectionStep - has its own validation
-        return true;
-      case 24: // SubscriptionOffersStep - final step
+      case 23: // SubscriptionOffersStep - final step
         return true;
       default:
         return false;

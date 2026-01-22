@@ -35,7 +35,6 @@ import { PotentialChartStep } from "./steps/PotentialChartStep";
 // Steps - Final Flow
 import { LoadingStep } from "./steps/LoadingStep";
 import { CongratsStep } from "./steps/CongratsStep";
-import { PersonalizedPlanView } from "./steps/PersonalizedPlanView";
 import { DataCollectionStep } from "./steps/DataCollectionStep";
 import { SubscriptionOffersStep } from "./steps/SubscriptionOffersStep";
 
@@ -103,10 +102,8 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
       case 21:
         return <LoadingStep onComplete={nextStep} />;
       case 22:
-        return <PersonalizedPlanView />;
-      case 23:
         return <DataCollectionStep />;
-      case 24:
+      case 23:
         return <SubscriptionOffersStep />;
       default:
         return null;
