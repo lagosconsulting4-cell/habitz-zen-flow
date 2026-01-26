@@ -57,144 +57,72 @@ import { useTracking } from "@/hooks/useTracking";
 
 // ============ DATA ============
 
-const pillars = [
+
+
+
+
+
+
+const howItWorksNew = [
   {
-    title: "Entender",
-    subtitle: "Como você funciona de verdade",
-    description: "Mapeamos sua rotina real, não a ideal. Onde você trava, quanto tempo realmente tem, o que te desgasta.",
-    icon: Brain,
+    title: "Definição de Foco",
+    description: "Você escolhe a meta. O algoritmo quebra ela em tarefas pequenas que cabem no seu dia.",
+    icon: Target,
     gradient: "from-[#A3E635] to-lime-300",
     bgGlow: "bg-[#A3E635]/20",
   },
   {
-    title: "Aplicar neurociência",
-    subtitle: "Ciência de hábitos que funciona",
-    description: "Seu cérebro aprende pelo que você repete. Criamos hábitos pequenos e fáceis que viram automáticos — sem força de vontade.",
-    icon: Zap,
+    title: "Ajuste Dinâmico",
+    description: "Teve um dia ruim? O sistema recalcula a rota para você não quebrar a constância.",
+    icon: Brain,
     gradient: "from-[#A3E635] to-lime-400",
     bgGlow: "bg-[#A3E635]/20",
   },
   {
-    title: "Transformação",
-    subtitle: "Resultados reais e sustentáveis",
-    description: "Mudança que acontece sem sofrimento. Consistência natural que cabe na sua vida, até nos dias difíceis.",
-    icon: Trophy,
+    title: "Visualização de Progresso",
+    description: "Acompanhe sua evolução diária para gerar a dopamina que seu cérebro precisa.",
+    icon: LineChart,
     gradient: "from-[#A3E635] to-lime-300",
     bgGlow: "bg-[#A3E635]/20",
-  },
-];
-
-const features = [
-  { icon: Target, title: "Rotina Sob Medida", description: "Criada para seus objetivos", size: "large" },
-  { icon: Calendar, title: "Checklists Diários", description: "Simples e práticos", size: "small" },
-  { icon: LineChart, title: "Progresso Visual", description: "Veja sua evolução", size: "small" },
-  { icon: Bell, title: "Lembretes Inteligentes", description: "No momento certo", size: "medium" },
-  { icon: Brain, title: "Adapta ao Seu Ritmo", description: "Reorganiza quando precisa", size: "medium" },
-  { icon: Flame, title: "Streaks e Conquistas", description: "Gamificação motivadora", size: "small" },
-  { icon: Rocket, title: "Transformação Real", description: "7 min/dia, resultados em 30 dias", size: "large" },
-];
-
-const howItWorks = [
-  {
-    step: "01",
-    title: "Faça o Quiz",
-    description: "3 minutos para entendermos você em detalhes",
-    image: "/images/lp/quiz_mockup.png",
-  },
-  {
-    step: "02",
-    title: "Receba sua rotina",
-    description: "Plano único baseado nos seus objetivos e limites",
-    image: "/images/lp/quiz_mockup.png",
-  },
-  {
-    step: "03",
-    title: "Se organize de forma fácil e prática",
-    description: "Agenda visual e cards de ação para clarear seu dia",
-    image: "/images/lp/dashboard_mockup.png",
-  },
-  {
-    step: "04",
-    title: "Acompanhe seu progresso",
-    description: "Gráficos e streaks para manter a consistência sem esforço",
-    image: "/images/lp/progresso_mockup.png",
-  },
-];
-
-const beforeProblems: { icon: LucideIcon; text: string }[] = [
-  {
-    icon: Moon,
-    text: "Acordar sem energia ou motivação",
-  },
-  {
-    icon: Clock,
-    text: "Procrastinar tarefas importantes",
-  },
-  {
-    icon: Pause,
-    text: "Mente sobrecarregada e ansiosa",
-  },
-  {
-    icon: Ban,
-    text: "Dormir com sensação de fracasso",
-  },
-];
-
-const afterBenefits: { icon: LucideIcon; text: string }[] = [
-  {
-    icon: Sunrise,
-    text: "Despertar com clareza e energia",
-  },
-  {
-    icon: Target,
-    text: "Foco nas prioridades certas",
-  },
-  {
-    icon: ListChecks,
-    text: "Consistência sem esforço",
-  },
-  {
-    icon: Heart,
-    text: "Orgulho real das suas conquistas",
   },
 ];
 
 const testimonials = [
   {
-    name: "João Silva",
-    age: 23,
-    role: "Estudante de Concurso",
+    name: "Camila Souza",
+    age: 22,
+    role: "Fundadora de Startup",
     photo: "https://i.ibb.co/xtXmcTS3/Gemini-Generated-Image-ixzgp8ixzgp8ixzg.png",
-    quote: "Passei em 2 concursos estudando apenas 2h/dia com foco total. O BORA me ensinou a eliminar distrações e criar uma rotina que funciona mesmo cansado do trabalho.",
+    quote: "Meu negócio decolou depois que comecei a usar o Bora. Antes era só correria e incêndio pra apagar. Agora consigo focar no que realmente importa. Meu faturamento dobrou em 3 meses!",
     rating: 5,
-    metric: "2 aprovações em concursos",
+    metric: "Faturamento 2x em 3 meses",
   },
   {
-    name: "Matheus Costa",
-    age: 21,
-    role: "Estudante de Engenharia",
+    name: "Lucas Fernandes",
+    age: 20,
+    role: "Estagiário de Marketing",
     photo: "https://i.ibb.co/TMPp1Kw1/Gemini-Generated-Image-200v6k200v6k200v.png",
-    quote: "Melhorei meu foco nos estudos e passei no vestibular que eu queria. Antes eu procrastinava jogando o dia todo, agora consigo equilibrar estudo e lazer sem culpa.",
+    quote: "Achava que produtividade era pra 'gente grande', mas o Bora me mostrou que não. Entreguei todos os projetos no prazo e ainda tive tempo pra minha vida social. Me senti um pro!",
     rating: 5,
-    metric: "Aprovado no vestibular",
+    metric: "100% de projetos no prazo",
   },
   {
-    name: "Thiago Oliveira",
-    age: 26,
-    role: "Desenvolvedor",
+    name: "Ana Clara Lima",
+    age: 24,
+    role: "Designer Freelancer",
     photo: "https://i.ibb.co/Rkx7XcKT/Gemini-Generated-Image-vy66g8vy66g8vy66.png",
-    quote: "Consegui conciliar trampo CLT, academia 5x/semana e ainda sobra tempo pra games. Perdi 7kg em 2 meses sem sacrificar nada. Foco é tudo.",
+    quote: "Chega de procrastinar! O Bora me ajudou a organizar meus clientes, prazos e ainda sobrou tempo pra criar conteúdo pro meu portfólio. Finalmente consigo dar conta de tudo sem virar a noite.",
     rating: 5,
-    metric: "7kg perdidos + rotina equilibrada",
+    metric: "Mais clientes, menos stress",
   },
   {
-    name: "Ana Paula",
-    age: 29,
-    role: "Médica",
+    name: "Pedro Henrique",
+    age: 19,
+    role: "Estudante e Vendedor",
     photo: "https://i.ibb.co/7t5yRpDd/Gemini-Generated-Image-i7pejzi7pejzi7pe.png",
-    quote: "Mesmo com plantões de 24h, mantenho 87% de consistência nos meus hábitos. O BORA se adapta quando minha rotina muda e me ajuda a cuidar da saúde mental.",
+    quote: "Conciliar faculdade e trabalho era um caos. O Bora me deu um método pra otimizar meu tempo e energia. Agora consigo estudar, trabalhar e ainda ir pra academia sem me sentir esgotado.",
     rating: 5,
-    metric: "87% de consistência",
+    metric: "Equilíbrio vida-estudo-trabalho",
   },
 ];
 
@@ -366,21 +294,16 @@ const BoraLanding = () => {
               animate="animate"
             >
               {/* Badge */}
-              <motion.div variants={staggerItem} className="flex justify-center lg:justify-start">
-                <Badge className="px-4 py-2 bg-[#A3E635] text-slate-900 border-0 text-sm font-semibold shadow-lg shadow-[#A3E635]/30">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Transforme sua rotina em 30 dias
-                </Badge>
-              </motion.div>
+              
 
               {/* Title with gradient */}
               <motion.h1
                 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.1] text-slate-900"
                 variants={staggerItem}
               >
-                Se organizar não deveria{" "}
+                Pare de depender da Motivação.{" "}
                 <span className="text-[#A3E635] relative">
-                  ser tão difícil.
+                  Comece a depender de um Sistema.
                   <svg className="absolute -bottom-2 left-0 w-full h-3 text-[#A3E635]/30" viewBox="0 0 200 12" preserveAspectRatio="none">
                     <path d="M0,8 Q50,0 100,8 T200,8" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round"/>
                   </svg>
@@ -392,8 +315,8 @@ const BoraLanding = () => {
                 className="text-lg md:text-xl text-slate-600 max-w-xl mx-auto lg:mx-0"
                 variants={staggerItem}
               >
-                Se você já tentou criar uma rotina e não conseguiu manter...{" "}
-                <strong className="text-slate-900">isso não significa que tem algo errado com você.</strong>
+                O Bora converte suas metas em micro-hábitos automáticos.{" "}
+                <strong className="text-slate-900">Um Jornada Personalizada flexível que se adapta à sua rotina, sem cobrar perfeição.</strong>
               </motion.p>
 
               {/* Stats cards */}
@@ -401,20 +324,15 @@ const BoraLanding = () => {
                 className="pt-4 max-w-xl mx-auto lg:mx-0 space-y-4"
                 variants={staggerItem}
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
+                  Por que 92% das rotinas falham?
+                </h2>
+                <div className="grid grid-cols-1 gap-4">
                   {/* Card 92% */}
                   <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition-shadow">
                     <div className="text-4xl font-black text-red-600 mb-2">92%</div>
                     <p className="text-sm text-slate-700">
                       abandonam suas metas (não por falta de disciplina)
-                    </p>
-                  </div>
-
-                  {/* Card 9% */}
-                  <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition-shadow">
-                    <div className="text-4xl font-black text-blue-600 mb-2">9%</div>
-                    <p className="text-sm text-slate-700">
-                      conseguem manter por mais de 3 meses
                     </p>
                   </div>
                 </div>
@@ -424,7 +342,7 @@ const BoraLanding = () => {
                 </p>
 
                 <p className="text-slate-600">
-                  <strong className="text-[#A3E635]">A falha não é sua — é do sistema. Antes de qualquer solução, vem a clareza.</strong>
+                  <strong className="text-slate-900">Porque tentamos mudar tudo de uma vez. Isso gera sobrecarga mental. O Método Bora foca na 'Densidade de Foco': fazer o essencial, todos os dias, até virar automático.</strong>
                 </p>
               </motion.div>
 
@@ -436,14 +354,11 @@ const BoraLanding = () => {
                     size="lg"
                     className="group bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 text-base sm:text-lg px-8 py-6 rounded-full font-bold shadow-xl shadow-[#A3E635]/30"
                   >
-                    Quero entender minha rotina
+                    Calibrar meu Sistema Agora
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </motion.div>
-                <div className="text-center lg:text-left space-y-1">
-                  <p className="text-sm text-slate-500">Leva cerca de 2 minutos</p>
-                  <p className="text-sm text-slate-500">100% gratuito • Resultado imediato</p>
-                </div>
+                
               </motion.div>
             </motion.div>
 
@@ -477,7 +392,12 @@ const BoraLanding = () => {
        </div>
      </section>
 
-      {/* ============ 3 PILLARS SECTION ============ */}
+      
+
+      
+
+      
+      {/* ============ HOW IT WORKS SECTION ============ */}
       <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
         <div className="max-w-6xl mx-auto relative z-10">
           <motion.div
@@ -491,18 +411,17 @@ const BoraLanding = () => {
               Como funciona
             </Badge>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
-              Aqui não é sobre <span className="text-[#A3E635]">mudar quem você é</span>
+              O Loop do Sistema
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              É só sobre entender como sua vida realmente funciona hoje.<br/>
-              Sem comparação. Sem cobrança. Sem julgamento.
+              Um ciclo de 3 passos para construir consistência.
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {pillars.map((pillar, index) => (
+            {howItWorksNew.map((step, index) => (
               <motion.div
-                key={pillar.title}
+                key={step.title}
                 className="group relative"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -512,523 +431,36 @@ const BoraLanding = () => {
                 {/* Glassmorphism card */}
                 <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-[#A3E635]/30 overflow-hidden">
                   {/* Background glow on hover */}
-                  <div className={`absolute -top-20 -right-20 w-40 h-40 ${pillar.bgGlow} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                  <div className={`absolute -top-20 -right-20 w-40 h-40 ${step.bgGlow} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
                   {/* Icon */}
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${pillar.gradient} flex items-center justify-center mb-6 shadow-lg`}>
-                    <pillar.icon className="w-8 h-8 text-white" />
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.gradient} flex items-center justify-center mb-6 shadow-lg`}>
+                    <step.icon className="w-8 h-8 text-white" />
                   </div>
 
                   {/* Content */}
                   <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                    {pillar.title}
+                    {step.title}
                   </h3>
-                  <p className="text-primary font-semibold text-sm mb-3">
-                    {pillar.subtitle}
-                  </p>
                   <p className="text-slate-600">
-                    {pillar.description}
+                    {step.description}
                   </p>
 
                   {/* Animated underline */}
-                  <div className={`h-1 w-0 group-hover:w-16 bg-gradient-to-r ${pillar.gradient} rounded-full mt-6 transition-all duration-500`} />
+                  <div className={`h-1 w-0 group-hover:w-16 bg-gradient-to-r ${step.gradient} rounded-full mt-6 transition-all duration-500`} />
                 </div>
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ============ DAILY TIMELINE SECTION ============ */}
-      <section className="py-24 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-b from-white via-slate-50/50 to-white">
-        {/* Background subtle effects */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#A3E635]/5 rounded-full blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-[#A3E635]/5 rounded-full blur-[120px]" />
-
-        <div className="max-w-5xl mx-auto relative z-10">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Badge className="mb-4 bg-[#A3E635] text-slate-900 border-0 shadow-lg shadow-[#A3E635]/30">
-              <Clock className="w-3 h-3 mr-1" />
-              Um dia usando o BORA
-            </Badge>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
-              Sua jornada de <span className="text-[#A3E635]">transformação</span>
-            </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Veja como 7 minutos por dia mudam tudo
-            </p>
-          </motion.div>
-
-          {/* Timeline */}
-          <div className="relative">
-            {/* Central line */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-[#A3E635]/20 via-[#A3E635] to-[#A3E635]/20 hidden md:block" />
-
-            {/* Timeline items */}
-            {[
-              {
-                time: "06:00",
-                title: "Despertar",
-                description: "Rotina matinal de 7 minutos que energiza seu dia",
-                characterWebp: "/images/lp/personagem-manha.webp",
-                characterPng: "/images/lp/personagem-manha.png",
-                mood: "energizado",
-                features: ["3 micro-hábitos", "Checklist matinal", "Lembrete suave"],
-              },
-              {
-                time: "12:00",
-                title: "Meio do Dia",
-                description: "Check-in rápido para manter o foco e a produtividade",
-                characterWebp: "/images/lp/personagem-meio-dia.webp",
-                characterPng: "/images/lp/personagem-meio-dia.png",
-                mood: "focado",
-                features: ["Pausa consciente", "Revisão de tarefas", "Bloqueio de Distração"],
-              },
-              {
-                time: "18:00",
-                title: "Fim do Expediente",
-                description: "Revisão do progresso e celebração das conquistas do dia",
-                characterWebp: "/images/lp/personagem-tarde.webp",
-                characterPng: "/images/lp/personagem-tarde.png",
-                mood: "realizado",
-                features: ["Streak atualizado", "Progresso visual", "Recompensas desbloqueadas"],
-              },
-              {
-                time: "22:00",
-                title: "Noite",
-                description: "Desacelere a mente, cuide da saúde mental e prepare-se para um sono profundo",
-                characterWebp: "/images/lp/personagem-noite.webp",
-                characterPng: "/images/lp/personagem-noite.png",
-                mood: "tranquilo",
-                features: ["Meditação guiada", "Reflexão do dia", "Rotina de sono"],
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={item.time}
-                className={`relative flex items-center gap-8 mb-12 last:mb-0 ${
-                  index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-                }`}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.15 }}
-              >
-                {/* Time badge - center on desktop */}
-                <div className="absolute left-1/2 transform -translate-x-1/2 hidden md:flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-[#A3E635] flex items-center justify-center shadow-lg shadow-[#A3E635]/30 z-10">
-                    <span className="text-sm font-bold text-slate-900">{item.time}</span>
-                  </div>
-                </div>
-
-                {/* Content card */}
-                <div className={`flex-1 ${index % 2 === 0 ? "md:pr-16" : "md:pl-16"}`}>
-                  <motion.div
-                    className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-[#A3E635]/30"
-                    whileHover={{ y: -5 }}
-                  >
-                    {/* Mobile time badge */}
-                    <div className="flex items-center gap-3 mb-4 md:hidden">
-                      <div className="w-12 h-12 rounded-full bg-[#A3E635] flex items-center justify-center shadow-lg">
-                        <span className="text-xs font-bold text-slate-900">{item.time}</span>
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-slate-900">{item.title}</h3>
-                        <Badge className="bg-[#A3E635]/10 text-[#A3E635] border-[#A3E635]/20 text-xs">
-                          {item.mood}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {/* Desktop header */}
-                    <div className="hidden md:block mb-4">
-                      <h3 className="text-2xl font-bold text-slate-900 mb-1">{item.title}</h3>
-                      <Badge className="bg-[#A3E635]/10 text-[#A3E635] border-[#A3E635]/20 text-sm">
-                        {item.mood}
-                      </Badge>
-                    </div>
-
-                    <p className="text-slate-600 mb-4">{item.description}</p>
-
-                    {/* Features list */}
-                    <div className="flex flex-wrap gap-2">
-                      {item.features.map((feature) => (
-                        <span
-                          key={feature}
-                          className="px-3 py-1 bg-slate-100 text-slate-700 text-sm rounded-full"
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Character image */}
-                <div className={`hidden md:flex flex-1 items-center justify-center ${index % 2 === 0 ? "md:pl-16" : "md:pr-16"}`}>
-                  <motion.div
-                    animate={{ y: [0, -8, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
-                  >
-                    <picture>
-                      <source srcSet={item.characterWebp} type="image/webp" />
-                      <img
-                        src={item.characterPng}
-                        alt={`Personagem ${item.mood}`}
-                        className="w-40 h-auto drop-shadow-lg"
-                        loading="lazy"
-                      />
-                    </picture>
-                  </motion.div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* CTA after timeline */}
-          <motion.div
-            className="text-center mt-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <p className="text-slate-600 mb-6">
-              <strong className="text-[#A3E635]">7 minutos</strong> que transformam as outras <strong>23 horas e 53 minutos</strong> do seu dia
-            </p>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button
-                onClick={() => handleCTA("timeline")}
-                className="bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 font-bold px-8 py-6 rounded-full shadow-xl shadow-[#A3E635]/30"
-              >
-                Quero entender minha rotina
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ============ INTERACTIVE QUIZ SECTION ============ */}
-      <section className="py-24 px-4 sm:px-6 relative overflow-hidden bg-gradient-to-b from-[#A3E635]/5 via-white to-[#A3E635]/10">
-        {/* Background immersive effects */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#A3E635]/20 via-transparent to-transparent" />
-        </div>
-
-        <div className="relative z-10 max-w-4xl mx-auto">
-          {/* Header */}
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Badge className="bg-[#A3E635] text-slate-900 border-0 mb-4 shadow-lg shadow-[#A3E635]/30">
-              <Sparkles className="w-4 h-4 mr-2" />
-              Diagnóstico gratuito
-            </Badge>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
-              Por isso criamos um <span className="text-[#A3E635]">diagnóstico simples</span>
-            </h2>
-            <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-              Algumas perguntas rápidas para mapear como são seus dias de verdade, onde você costuma travar, quanto tempo você realmente tem.
-              <br/><br/>
-              <strong className="text-slate-900">Sem certo ou errado. Sem resposta ideal. Só a sua realidade.</strong>
-            </p>
-          </motion.div>
-
-          {/* Quiz CTA Card */}
-          <motion.div
-            className="bg-white/80 backdrop-blur-xl rounded-3xl border-2 border-[#A3E635]/30 shadow-2xl shadow-[#A3E635]/10 overflow-hidden"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <div className="p-8 md:p-12">
-              {/* Icon illustration */}
-              <div className="text-center mb-8">
-                <motion.div
-                  className="w-24 h-24 mx-auto bg-gradient-to-br from-[#A3E635] to-lime-400 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-[#A3E635]/30"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Sparkles className="w-12 h-12 text-white" />
-                </motion.div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                  Não é um teste. Não é um compromisso.
-                </h3>
-                <p className="text-slate-600 max-w-md mx-auto">
-                  Você não precisa se preparar. Não precisa "estar motivado". Não precisa continuar se não quiser.
-                </p>
-              </div>
-
-              {/* Features list */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                {[
-                  { icon: Clock, text: "2 minutos", subtext: "tempo estimado" },
-                  { icon: Target, text: "8 perguntas", subtext: "simples e rápidas" },
-                  { icon: Brain, text: "IA Personalizada", subtext: "algoritmo inteligente" },
-                ].map((item, index) => (
-                  <motion.div
-                    key={item.text}
-                    className="text-center p-4 bg-slate-50 rounded-xl"
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2 + index * 0.1 }}
-                  >
-                    <item.icon className="w-6 h-6 mx-auto mb-2 text-[#A3E635]" />
-                    <p className="font-semibold text-slate-900">{item.text}</p>
-                    <p className="text-xs text-slate-500">{item.subtext}</p>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* CTA Button */}
-              <div className="flex flex-col items-center">
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    onClick={() => handleCTA("quiz_section")}
-                    size="lg"
-                    className="bg-[#A3E635] hover:bg-[#84cc16] text-slate-900 font-bold text-lg px-10 py-7 rounded-full shadow-xl shadow-[#A3E635]/30"
-                  >
-                    Quero entender minha rotina
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </motion.div>
-                <p className="text-xs text-slate-400 mt-4">
-                  Leva poucos minutos • Sem cadastro • Sem pressão • Sem promessa vazia • Só clareza
-                </p>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </section>
 
       {/* Quiz Modal */}
       <QuizModal open={quizOpen} onClose={() => setQuizOpen(false)} />
 
-      {/* ============ HOW IT WORKS CAROUSEL ============ */}
-      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
-        <div className="max-w-6xl mx-auto relative z-10">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-              <Target className="w-3 h-3 mr-1" />
-              Passo a passo
-            </Badge>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-3">
-              Como <span className="text-primary">funciona</span>
-            </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Simples como deveria ser
-            </p>
-            <p className="text-xs sm:text-sm uppercase tracking-[0.35em] text-slate-400 mt-4">
-              {totalHowItWorksSteps} passos guiados • arraste para ver todos
-            </p>
-          </motion.div>
+      
 
-          <Carousel opts={{ align: "center", loop: true }} className="w-full max-w-4xl mx-auto">
-            <CarouselContent>
-              {howItWorks.map((step, index) => (
-                <CarouselItem key={index} className="md:basis-1/1 lg:basis-1/1">
-                  <motion.div
-                    className="p-2"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                  >
-                    <div className="relative bg-gradient-to-br from-slate-50 to-white rounded-3xl p-8 md:p-12 border border-slate-200/50 shadow-xl overflow-hidden">
-                      {/* Step number removido - usando dots abaixo */}
-
-                      <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-8 lg:gap-12">
-                        {/* Image - sem border extra */}
-                        <div className="w-full md:w-7/12">
-                          <img
-                            src={step.image}
-                            alt={step.title}
-                            className="w-full h-auto max-w-[420px] md:max-w-[580px] mx-auto rounded-[32px] shadow-2xl"
-                          />
-                        </div>
-
-                        {/* Content */}
-                        <div className="w-full md:w-5/12 text-center md:text-left">
-                          <Badge className="mb-4 bg-primary text-white border-0">
-                            Passo {step.step}
-                          </Badge>
-                          <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
-                            {step.title}
-                          </h3>
-                          <p className="text-lg text-slate-600">
-                            {step.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            {/* Navigation with dots */}
-            <div className="flex flex-col items-center gap-4 mt-8">
-              {/* Dots indicator */}
-              <div className="flex justify-center gap-2">
-                {howItWorks.map((_, index) => (
-                  <div
-                    key={index}
-                    className="w-2.5 h-2.5 rounded-full bg-primary/30 transition-all duration-300"
-                  />
-                ))}
-              </div>
-              {/* Navigation arrows */}
-              <div className="flex justify-center gap-4">
-                <CarouselPrevious className="static translate-y-0 bg-primary/10 border-primary/20 hover:bg-primary hover:text-white" />
-                <CarouselNext className="static translate-y-0 bg-primary/10 border-primary/20 hover:bg-primary hover:text-white" />
-              </div>
-            </div>
-          </Carousel>
-        </div>
-      </section>
-
-      {/* ============ BEFORE/AFTER SECTION ============ */}
-      <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-lime-50/80 to-white" />
-        <div className="max-w-4xl mx-auto relative z-10">
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Badge className="mb-4 bg-gradient-to-r from-primary to-lime-400 text-white border-0 shadow-lg shadow-primary/25">
-              <Zap className="w-3 h-3 mr-1" />
-              Transformação garantida
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
-              A diferença que o <span className="text-primary font-extrabold">BORA</span> faz
-            </h2>
-          </motion.div>
-
-          <Tabs defaultValue="after" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8 h-14 sm:h-16 p-1.5 sm:p-2 bg-slate-200 rounded-2xl border-0">
-              <TabsTrigger
-                value="before"
-                className="text-xs sm:text-base font-semibold rounded-xl h-full transition-all duration-300 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:text-slate-600 data-[state=inactive]:hover:text-slate-900 uppercase tracking-wide"
-              >
-                Sem o Bora
-              </TabsTrigger>
-              <TabsTrigger
-                value="after"
-                className="text-xs sm:text-base font-semibold rounded-xl h-full transition-all duration-300 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#A3E635] data-[state=active]:to-lime-300 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:text-slate-600 data-[state=inactive]:hover:text-slate-900 uppercase tracking-wide"
-              >
-                Com o Bora
-              </TabsTrigger>
-            </TabsList>
-
-            <AnimatePresence mode="wait">
-              <TabsContent value="before" className="mt-0">
-                <motion.div
-                  className="relative rounded-3xl bg-gradient-to-br from-red-50 via-white to-rose-50 border-2 border-red-200 p-6 sm:p-10 overflow-hidden shadow-xl"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                >
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-red-200/50 rounded-full blur-[100px]" />
-                  <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 relative z-10">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {beforeProblems.map((item, index) => (
-                        <motion.div
-                          key={index}
-                          className="flex items-start gap-4 p-5 rounded-2xl bg-white border border-red-200 shadow-lg"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                        >
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-500/30">
-                            <item.icon className="w-6 h-6 text-white" strokeWidth={2.5} />
-                          </div>
-                          <span className="text-slate-900 font-medium text-lg pt-2">{item.text}</span>
-                        </motion.div>
-                      ))}
-                    </div>
-                    <motion.div
-                      className="hidden md:flex items-center justify-center"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      <picture>
-                        <source srcSet="/images/lp/personagem_triste.webp" type="image/webp" />
-                        <img
-                          src="/images/lp/personagem_triste.png"
-                          alt="Pessoa estressada"
-                          className="w-40 lg:w-48 h-auto drop-shadow-lg"
-                          loading="lazy"
-                        />
-                      </picture>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              </TabsContent>
-
-              <TabsContent value="after" className="mt-0">
-                <motion.div
-                  className="relative rounded-3xl bg-gradient-to-br from-lime-50 via-white to-lime-50 border-2 border-primary/30 p-6 sm:p-10 overflow-hidden shadow-xl"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                >
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-lime-500/20 rounded-full blur-[80px]" />
-                  <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 relative z-10">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {afterBenefits.map((item, index) => (
-                        <motion.div
-                          key={index}
-                          className="flex items-start gap-4 p-5 rounded-2xl bg-white border border-primary/20 shadow-lg group hover:border-primary/40 transition-colors"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          whileHover={{ scale: 1.02 }}
-                        >
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-lime-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
-                            <item.icon className="w-6 h-6 text-white" strokeWidth={2.5} />
-                          </div>
-                          <span className="text-slate-900 font-medium text-lg pt-2">{item.text}</span>
-                        </motion.div>
-                      ))}
-                    </div>
-                    <motion.div
-                      className="hidden md:flex items-center justify-center"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      <picture>
-                        <source srcSet="/images/lp/meditação_personagem.webp" type="image/webp" />
-                        <img
-                          src="/images/lp/meditação_personagem.png"
-                          alt="Pessoa em paz meditando"
-                          className="w-40 lg:w-48 h-auto drop-shadow-lg"
-                          loading="lazy"
-                        />
-                      </picture>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              </TabsContent>
-            </AnimatePresence>
-          </Tabs>
-        </div>
-      </section>
+      
 
       {/* ============ TESTIMONIALS CAROUSEL ============ */}
       <section className="py-20 px-4 sm:px-6 relative overflow-hidden bg-white">
@@ -1047,7 +479,7 @@ const BoraLanding = () => {
               <span>Mais de 2000 transformações</span>
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
-              Mais de 2000 usuários transformaram suas vidas
+              Mais de 2000 usuários mudaram a sua vida
             </h2>
           </motion.div>
 
@@ -1236,29 +668,11 @@ const BoraLanding = () => {
           viewport={{ once: true }}
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-            Falta só <span className="text-[#A3E635]">2 minutos</span> para começar
+            Descubra onde está o seu <span className="text-[#A3E635]">gargalo.</span>
           </h2>
           <p className="text-slate-600 text-lg mb-8 max-w-xl mx-auto">
-            Responde o quiz. Recebe sua rotina. Começa sua transformação. Simples assim.
+            Responda algumas perguntas rápidas sobre sua idade e rotina. Vamos gerar um Jornada Personalizada Personalizada para destravar sua produtividade.
           </p>
-
-          {/* APP MOCKUP */}
-          <motion.div
-            className="relative mb-10"
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <picture>
-              <source srcSet="/images/lp/mockup-horizontal.webp" type="image/webp" />
-              <img
-                src="/images/lp/mockup-horizontal.png"
-                alt="App BORA - Telas do aplicativo"
-                className="w-full max-w-2xl mx-auto h-auto rounded-2xl shadow-2xl"
-                loading="lazy"
-              />
-            </picture>
-            <div className="absolute inset-0 -z-10 bg-white/10 blur-3xl opacity-50 scale-110" />
-          </motion.div>
 
           {/* CTA Button */}
           <motion.div
@@ -1270,25 +684,10 @@ const BoraLanding = () => {
               size="lg"
               className="group bg-[#A3E635] text-slate-900 hover:bg-[#A3E635]/90 text-lg px-10 py-7 rounded-full font-bold shadow-2xl shadow-[#A3E635]/40"
             >
-              Quero entender minha rotina
+              INICIAR ANÁLISE DE ROTINA
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </motion.div>
-
-          <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-slate-600 text-sm">
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />
-              <span>Garantia 7 dias</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              <span>Acesso imediato</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4" />
-              <span>Resultados rápidos</span>
-            </div>
-          </div>
         </motion.div>
       </section>
 

@@ -37,6 +37,7 @@ import { LoadingStep } from "./steps/LoadingStep";
 import { CongratsStep } from "./steps/CongratsStep";
 import { DataCollectionStep } from "./steps/DataCollectionStep";
 import { SubscriptionOffersStep } from "./steps/SubscriptionOffersStep";
+import { ValueBridgeStep } from "./steps/ValueBridgeStep";
 
 interface QuizModalProps {
   open: boolean;
@@ -104,6 +105,8 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
       case 22:
         return <DataCollectionStep />;
       case 23:
+        return <ValueBridgeStep />;
+      case 24:
         return <SubscriptionOffersStep />;
       default:
         return null;

@@ -164,7 +164,7 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   // Age, FeedbackAgeChart, Challenges, Gender, SocialProofChart, ConsistencyFeeling,
   // ProjectedFeeling, Testimonials, YearsPromising, Urgency, PotentialChart, AppExplanation,
   // Loading, DataCollection, SubscriptionOffersStep
-  const totalSteps = 24;
+  const totalSteps = 25;
 
   // ============================================================================
   // NAVIGATION

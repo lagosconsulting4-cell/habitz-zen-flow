@@ -39,26 +39,11 @@ const faqs = [
 ];
 
 export const SubscriptionOffersStep = () => {
-  const [showPixModal, setShowPixModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<"weekly" | "monthly" | "annual">("annual");
-
   const handleSubscribe = (plan: "weekly" | "monthly" | "annual") => {
-    setSelectedPlan(plan);
-    setShowPixModal(true);
-  };
-
-  const handlePixAccept = () => {
-    // Sempre redireciona para o link PIX do plano anual (20% desconto)
-    window.location.href = STRIPE_LINK_ANNUAL_PIX;
-  };
-
-  const handlePixDecline = () => {
-    setShowPixModal(false);
-    // Redireciona para o plano que foi originalmente escolhido
     let link = STRIPE_LINK_MONTHLY;
-    if (selectedPlan === "weekly") link = STRIPE_LINK_WEEKLY;
-    if (selectedPlan === "monthly") link = STRIPE_LINK_MONTHLY;
-    if (selectedPlan === "annual") link = STRIPE_LINK_ANNUAL;
+    if (plan === "weekly") link = STRIPE_LINK_WEEKLY;
+    if (plan === "monthly") link = STRIPE_LINK_MONTHLY;
+    if (plan === "annual") link = STRIPE_LINK_ANNUAL;
     window.location.href = link;
   };
 
@@ -119,19 +104,22 @@ export const SubscriptionOffersStep = () => {
 
               {/* Price */}
               <div>
+                <p className="text-sm text-slate-900/80 line-through">De R$ 129,90</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-black text-slate-900">R$ 129,90</span>
-                  <span className="text-base text-slate-900/70">/ano</span>
+                    <span className="text-4xl font-black text-slate-900">R$ 97,00</span>
                 </div>
-                <p className="text-sm text-slate-900/80 mt-2 font-bold">
-                  Ou 12x de R$ 13,36
+                <p className="text-sm text-slate-900/80 mt-2">
+                    À vista no Pix
+                </p>
+                <p className="text-sm text-slate-900/80 mt-1 font-bold">
+                    Ou 12x de R$ 13,36 no cartão
                 </p>
               </div>
 
               {/* Savings Badge */}
               <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full inline-block">
                 <span className="text-sm font-bold text-slate-900">
-                  💰 Economize R$ 229/ano (64%)
+                  Economize R$ 260/ano (64% OFF)
                 </span>
               </div>
 
@@ -347,13 +335,7 @@ export const SubscriptionOffersStep = () => {
         </motion.div>
       </motion.div>
 
-      {/* PIX Incentive Modal */}
-      <PixIncentiveModal
-        isOpen={showPixModal}
-        onClose={handlePixDecline}
-        onAccept={handlePixAccept}
-        planType="annual"
-      />
+
     </div>
   );
 };
