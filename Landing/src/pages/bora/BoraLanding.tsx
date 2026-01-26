@@ -89,37 +89,37 @@ const howItWorksNew = [
 
 const testimonials = [
   {
-    name: "Camila Souza",
+    name: "Camila Souza", // woman
     age: 22,
     role: "Fundadora de Startup",
-    photo: "https://i.ibb.co/7t5yRpDd/Gemini-Generated-Image-i7pejzi7pejzi7pe.png", // a woman
+    photo: "https://i.ibb.co/7t5yRpDd/Gemini-Generated-Image-i7pejzi7pejzi7pe.png", // WOMAN_PIC_1
     quote: "Meu negócio decolou depois que comecei a usar o Bora. Antes era só correria e incêndio pra apagar. Agora consigo focar no que realmente importa. Meu faturamento dobrou em 3 meses!",
     rating: 5,
     metric: "Faturamento 2x em 3 meses",
   },
   {
-    name: "Lucas Fernandes",
+    name: "Lucas Fernandes", // man
     age: 20,
     role: "Estagiário de Marketing",
-    photo: "https://i.ibb.co/TMPp1Kw1/Gemini-Generated-Image-200v6k200v6k200v.png", // a man
+    photo: "https://i.ibb.co/xtXmcTS3/Gemini-Generated-Image-ixzgp8ixzgp8ixzg.png", // MAN_PIC_1
     quote: "Achava que produtividade era pra 'gente grande', mas o Bora me mostrou que não. Entreguei todos os projetos no prazo e ainda tive tempo pra minha vida social. Me senti um pro!",
     rating: 5,
     metric: "100% de projetos no prazo",
   },
   {
-    name: "Ana Clara Lima",
+    name: "Ana Clara Lima", // woman
     age: 24,
     role: "Designer Freelancer",
-    photo: "https://picsum.photos/seed/woman/150/150", // NEW woman's picture
+    photo: "https://picsum.photos/seed/woman/150/150", // WOMAN_PIC_2_PLACEHOLDER
     quote: "Chega de procrastinar! O Bora me ajudou a organizar meus clientes, prazos e ainda sobrou tempo pra criar conteúdo pro meu portfólio. Finalmente consigo dar conta de tudo sem virar a noite.",
     rating: 5,
     metric: "Mais clientes, menos stress",
   },
   {
-    name: "Pedro Henrique",
+    name: "Pedro Henrique", // man
     age: 19,
     role: "Estudante e Vendedor",
-    photo: "https://i.ibb.co/xtXmcTS3/Gemini-Generated-Image-ixzgp8ixzgp8ixzg.png", // a man
+    photo: "https://i.ibb.co/TMPp1Kw1/Gemini-Generated-Image-200v6k200v6k200v.png", // MAN_PIC_2
     quote: "Conciliar faculdade e trabalho era um caos. O Bora me deu um método pra otimizar meu tempo e energia. Agora consigo estudar, trabalhar e ainda ir pra academia sem me sentir esgotado.",
     rating: 5,
     metric: "Equilíbrio vida-estudo-trabalho",
