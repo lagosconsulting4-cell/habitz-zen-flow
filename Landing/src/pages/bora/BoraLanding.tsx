@@ -325,8 +325,6 @@ const BoraLanding = () => {
                 <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
                   Por que 92% das rotinas falham?
                 </h2>
-                <div className="grid grid-cols-1 gap-4">
-
 
                 <p className="text-slate-600">
                   <strong className="text-slate-900">Porque tentamos mudar tudo de uma vez. Isso gera sobrecarga mental. O Método Bora foca na 'Densidade de Foco': fazer o essencial, todos os dias, até virar automático.</strong>
