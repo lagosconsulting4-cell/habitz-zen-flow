@@ -318,7 +318,7 @@ export const DataCollectionStep = () => {
               Criando sua conta...
             </>
           ) : (
-            "Criar Minha Conta Grátis"
+            "Criar Minha Conta"
           )}
         </Button>
       </motion.form>
