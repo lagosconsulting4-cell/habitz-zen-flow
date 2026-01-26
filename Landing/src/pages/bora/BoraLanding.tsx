@@ -302,12 +302,11 @@ const BoraLanding = () => {
               >
                 Pare de depender da Motivação.{" "}
                 <span className="text-[#A3E635] relative">
-                  Comece a depender de um Sistema.
+                  Automatize a sua disciplina.
                   <svg className="absolute -bottom-2 left-0 w-full h-3 text-[#A3E635]/30" viewBox="0 0 200 12" preserveAspectRatio="none">
                     <path d="M0,8 Q50,0 100,8 T200,8" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round"/>
                   </svg>
-                </span>
-              </motion.h1>
+                </span>              </motion.h1>
 
               {/* Subtitle */}
               <motion.p
@@ -315,7 +314,7 @@ const BoraLanding = () => {
                 variants={staggerItem}
               >
                 O Bora converte suas metas em micro-hábitos automáticos.{" "}
-                <strong className="text-slate-900">Um Jornada Personalizada flexível que se adapta à sua rotina, sem cobrar perfeição.</strong>
+                <strong className="text-slate-900">Uma Jornada Personalizada flexível que se adapta à sua rotina, sem cobrar perfeição.</strong>
               </motion.p>
 
               {/* Stats cards */}
@@ -327,18 +326,7 @@ const BoraLanding = () => {
                   Por que 92% das rotinas falham?
                 </h2>
                 <div className="grid grid-cols-1 gap-4">
-                  {/* Card 92% */}
-                  <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition-shadow">
-                    <div className="text-4xl font-black text-red-600 mb-2">92%</div>
-                    <p className="text-sm text-slate-700">
-                      abandonam suas metas (não por falta de disciplina)
-                    </p>
-                  </div>
-                </div>
 
-                <p className="text-sm text-slate-500 text-center">
-                  — Ohio State University
-                </p>
 
                 <p className="text-slate-600">
                   <strong className="text-slate-900">Porque tentamos mudar tudo de uma vez. Isso gera sobrecarga mental. O Método Bora foca na 'Densidade de Foco': fazer o essencial, todos os dias, até virar automático.</strong>
@@ -670,7 +658,7 @@ const BoraLanding = () => {
             Descubra onde está o seu <span className="text-[#A3E635]">gargalo.</span>
           </h2>
           <p className="text-slate-600 text-lg mb-8 max-w-xl mx-auto">
-            Responda algumas perguntas rápidas sobre sua idade e rotina. Vamos gerar um Jornada Personalizada Personalizada para destravar sua produtividade.
+            Responda algumas perguntas rápidas sobre sua idade e rotina. Vamos gerar uma Jornada Personalizada Personalizada para destravar sua produtividade.
           </p>
 
           {/* CTA Button */}
