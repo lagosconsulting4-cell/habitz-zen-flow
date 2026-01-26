@@ -39,13 +39,6 @@ const faqs = [
 ];
 
 export const SubscriptionOffersStep = () => {
-  const handleSubscribe = (plan: "weekly" | "monthly" | "annual") => {
-    let link = STRIPE_LINK_MONTHLY;
-    if (plan === "weekly") link = STRIPE_LINK_WEEKLY;
-    if (plan === "monthly") link = STRIPE_LINK_MONTHLY;
-    if (plan === "annual") link = STRIPE_LINK_ANNUAL;
-    window.location.href = link;
-  };
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden flex items-center justify-center p-6">
@@ -140,15 +133,18 @@ export const SubscriptionOffersStep = () => {
               </ul>
 
               {/* CTA Button */}
-              <motion.div {...buttonHoverTap}>
+              <motion.div {...buttonHoverTap} className="flex flex-col items-center">
                 <Button
-                  onClick={() => handleSubscribe("annual")}
+                  onClick={() => window.location.href = STRIPE_LINK_ANNUAL_PIX}
                   size="lg"
                   className="w-full bg-slate-900 hover:bg-slate-800 text-white text-base font-bold py-5 rounded-xl shadow-2xl"
                 >
                   <Crown className="w-4 h-4 mr-2" />
                   Começar agora
                 </Button>
+                <a href={STRIPE_LINK_ANNUAL} className="text-xs text-slate-900/70 mt-2 underline">
+                    Pagar com cartão de crédito
+                </a>
               </motion.div>
             </div>
           </motion.div>
@@ -194,7 +190,7 @@ export const SubscriptionOffersStep = () => {
               {/* CTA Button */}
               <motion.div {...buttonHoverTap}>
                 <Button
-                  onClick={() => handleSubscribe("monthly")}
+                  onClick={() => window.location.href = STRIPE_LINK_MONTHLY}
                   variant="outline"
                   size="lg"
                   className="w-full text-base font-bold py-5 rounded-xl border-2 border-slate-900 hover:bg-slate-900 hover:text-white"
@@ -245,7 +241,7 @@ export const SubscriptionOffersStep = () => {
               {/* CTA Button */}
               <motion.div {...buttonHoverTap}>
                 <Button
-                  onClick={() => handleSubscribe("weekly")}
+                  onClick={() => window.location.href = STRIPE_LINK_WEEKLY}
                   variant="outline"
                   size="lg"
                   className="w-full text-base font-bold py-5 rounded-xl border-2 border-slate-900 hover:bg-slate-900 hover:text-white"
