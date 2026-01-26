@@ -13,6 +13,7 @@ import { TimerModal } from "@/components/timer";
 import { NotificationPermissionDialog } from "@/components/pwa/NotificationPermissionDialog";
 import { StreakToast } from "@/components/StreakToast";
 import { XPToast } from "@/components/XPToast";
+import { GemToast, AchievementToast } from "@/components/gamification";
 import { useHabits } from "@/hooks/useHabits";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/integrations/supabase/auth";
@@ -508,6 +509,12 @@ const Dashboard = () => {
           type={xpGained.type}
         />
       )}
+
+      {/* NEW: Gems Toast */}
+      {isGamificationEnabled && <GemToast />}
+
+      {/* NEW: Achievement Toast */}
+      {isGamificationEnabled && <AchievementToast userId={user?.id} />}
     </div>
   );
 };

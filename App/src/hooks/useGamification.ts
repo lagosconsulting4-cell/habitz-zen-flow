@@ -50,6 +50,119 @@ export interface LevelConfig {
 }
 
 // ============================================================================
+// NEW GAMIFICATION TYPES (Gems, Avatars, Achievements, Freezes)
+// ============================================================================
+
+// GEMS
+export interface UserGems {
+  user_id: string;
+  current_gems: number;
+  lifetime_gems_earned: number;
+  lifetime_gems_spent: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GemTransaction {
+  id: string;
+  user_id: string;
+  amount: number;
+  transaction_type: string;
+  related_entity_type?: string;
+  related_entity_id?: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface AddGemsResult {
+  new_balance: number;
+  transaction_id: string;
+}
+
+// AVATARS
+export type AvatarTier = "common" | "rare" | "epic" | "legendary";
+
+export interface Avatar {
+  id: string;
+  name: string;
+  emoji: string;
+  tier: AvatarTier;
+  gem_cost: number | null;
+  unlock_level: number | null;
+  unlock_achievement_id: string | null;
+  is_premium_exclusive: boolean;
+  display_order: number;
+  created_at: string;
+}
+
+export interface UserAvatar {
+  user_id: string;
+  avatar_id: string;
+  is_equipped: boolean;
+  unlocked_at: string;
+  avatar?: Avatar; // Joined data
+}
+
+// ACHIEVEMENTS
+export type AchievementCategory = "habits" | "streaks" | "levels" | "special";
+export type AchievementTier = "common" | "uncommon" | "rare" | "epic" | "legendary";
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  emoji: string;
+  category: AchievementCategory;
+  tier: AchievementTier;
+  condition_type: string;
+  condition_value: number;
+  gem_reward: number;
+  is_secret: boolean;
+  display_order: number;
+  created_at: string;
+}
+
+export interface UserAchievement {
+  user_id: string;
+  achievement_id: string;
+  progress_snapshot: Record<string, unknown>;
+  unlocked_at: string;
+  achievement?: Achievement; // Joined data
+}
+
+// STREAK FREEZES
+export interface StreakFreezeInventory {
+  user_id: string;
+  available_freezes: number;
+  total_freezes_earned: number;
+  total_freezes_used: number;
+  last_free_freeze_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StreakFreezeEvent {
+  id: string;
+  user_id: string;
+  event_type: "earned" | "purchased" | "used";
+  source: string;
+  protected_date?: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+// GEM VALUES FOR ECONOMY
+export const GEM_VALUES = {
+  HABIT_COMPLETE: 10,
+  STREAK_3_BONUS: 15,
+  STREAK_7_BONUS: 50,
+  STREAK_30_BONUS: 150,
+  PERFECT_DAY: 20,
+  LEVEL_UP_BASE: 25,
+  STREAK_FREEZE_COST: 200,
+} as const;
+
+// ============================================================================
 // LEVEL CONFIGURATION
 // ============================================================================
 
@@ -168,6 +281,162 @@ export const useGamification = (userId?: string) => {
     },
     enabled: Boolean(userId),
     staleTime: 60_000, // Cache por 1 minuto
+  });
+
+  // ============================================================================
+  // NEW QUERIES: Gems, Avatars, Achievements, Streak Freezes
+  // ============================================================================
+
+  // Query: User Gems
+  const {
+    data: gems,
+    isLoading: gemsLoading,
+    refetch: refetchGems,
+  } = useQuery({
+    queryKey: ["user-gems", userId],
+    queryFn: async (): Promise<UserGems | null> => {
+      if (!userId) return null;
+
+      const { data, error } = await supabase
+        .from("user_gems")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as UserGems | null;
+    },
+    enabled: Boolean(userId),
+    staleTime: 10_000, // 10 segundos - gems mudam frequentemente
+  });
+
+  // Query: Gem Transactions (últimas 50)
+  const { data: gemTransactions } = useQuery({
+    queryKey: ["gem-transactions", userId],
+    queryFn: async (): Promise<GemTransaction[]> => {
+      if (!userId) return [];
+
+      const { data, error } = await supabase
+        .from("gem_transactions")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      return (data || []) as GemTransaction[];
+    },
+    enabled: Boolean(userId),
+    staleTime: 30_000,
+  });
+
+  // Query: Avatars Catalog (público, cacheable por mais tempo)
+  const { data: avatarsCatalog } = useQuery({
+    queryKey: ["avatars-catalog"],
+    queryFn: async (): Promise<Avatar[]> => {
+      const { data, error } = await supabase
+        .from("avatars")
+        .select("*")
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return (data || []) as Avatar[];
+    },
+    staleTime: 300_000, // 5 minutos - catálogo muda raramente
+  });
+
+  // Query: User Avatars (desbloqueados)
+  const {
+    data: userAvatars,
+    isLoading: userAvatarsLoading,
+    refetch: refetchUserAvatars,
+  } = useQuery({
+    queryKey: ["user-avatars", userId],
+    queryFn: async (): Promise<UserAvatar[]> => {
+      if (!userId) return [];
+
+      const { data, error } = await supabase
+        .from("user_avatars")
+        .select(`
+          user_id,
+          avatar_id,
+          is_equipped,
+          unlocked_at,
+          avatar:avatars(*)
+        `)
+        .eq("user_id", userId);
+
+      if (error) throw error;
+      return (data || []) as UserAvatar[];
+    },
+    enabled: Boolean(userId),
+    staleTime: 60_000,
+  });
+
+  // Query: Achievements Catalog (público)
+  const { data: achievementsCatalog } = useQuery({
+    queryKey: ["achievements-catalog"],
+    queryFn: async (): Promise<Achievement[]> => {
+      const { data, error } = await supabase
+        .from("achievements")
+        .select("*")
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return (data || []) as Achievement[];
+    },
+    staleTime: 300_000,
+  });
+
+  // Query: User Achievements (desbloqueados)
+  const {
+    data: userAchievements,
+    isLoading: userAchievementsLoading,
+    refetch: refetchUserAchievements,
+  } = useQuery({
+    queryKey: ["user-achievements", userId],
+    queryFn: async (): Promise<UserAchievement[]> => {
+      if (!userId) return [];
+
+      const { data, error } = await supabase
+        .from("user_achievements")
+        .select(`
+          user_id,
+          achievement_id,
+          progress_snapshot,
+          unlocked_at,
+          achievement:achievements(*)
+        `)
+        .eq("user_id", userId);
+
+      if (error) throw error;
+      return (data || []) as UserAchievement[];
+    },
+    enabled: Boolean(userId),
+    staleTime: 60_000,
+  });
+
+  // Query: Streak Freezes Inventory
+  const {
+    data: streakFreezes,
+    isLoading: streakFreezesLoading,
+    refetch: refetchStreakFreezes,
+  } = useQuery({
+    queryKey: ["streak-freezes", userId],
+    queryFn: async (): Promise<StreakFreezeInventory | null> => {
+      if (!userId) return null;
+
+      const { data, error } = await supabase
+        .from("user_streak_freezes")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as StreakFreezeInventory | null;
+    },
+    enabled: Boolean(userId),
+    staleTime: 30_000,
   });
 
   // Mutation: Add XP
@@ -338,6 +607,210 @@ export const useGamification = (userId?: string) => {
     },
   });
 
+  // ============================================================================
+  // NEW MUTATIONS: Gems, Avatars, Achievements, Streak Freezes
+  // ============================================================================
+
+  // Mutation: Add Gems
+  const addGemsMutation = useMutation({
+    mutationFn: async ({
+      amount,
+      transactionType,
+      relatedEntityType,
+      relatedEntityId,
+      metadata = {},
+    }: {
+      amount: number;
+      transactionType: string;
+      relatedEntityType?: string;
+      relatedEntityId?: string;
+      metadata?: Record<string, unknown>;
+    }): Promise<AddGemsResult> => {
+      if (!userId) throw new Error("User not authenticated");
+
+      const { data, error } = await supabase.rpc("add_gems", {
+        p_user_id: userId,
+        p_amount: amount,
+        p_transaction_type: transactionType,
+        p_related_entity_type: relatedEntityType || null,
+        p_related_entity_id: relatedEntityId || null,
+        p_metadata: metadata,
+      });
+
+      if (error) throw error;
+
+      const result = (data as AddGemsResult[] | null)?.[0];
+      if (!result) throw new Error("No result from add_gems");
+
+      return result;
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ["user-gems", userId] });
+      queryClient.invalidateQueries({ queryKey: ["gem-transactions", userId] });
+
+      // Disparar evento de gems ganhas/gastas
+      window.dispatchEvent(
+        new CustomEvent("gamification:gems-changed", {
+          detail: { userId, newBalance: result.new_balance },
+        })
+      );
+    },
+  });
+
+  // Mutation: Purchase Avatar
+  const purchaseAvatarMutation = useMutation({
+    mutationFn: async ({ avatarId }: { avatarId: string }): Promise<boolean> => {
+      if (!userId) throw new Error("User not authenticated");
+
+      // 1. Encontrar o custo do avatar
+      const avatar = avatarsCatalog?.find((a) => a.id === avatarId);
+      if (!avatar) throw new Error("Avatar not found");
+      if (!avatar.gem_cost) throw new Error("Avatar is not purchasable with gems");
+
+      // 2. Verificar saldo
+      const currentBalance = gems?.current_gems || 0;
+      if (currentBalance < avatar.gem_cost) {
+        throw new Error(`Insufficient gems. Need ${avatar.gem_cost}, have ${currentBalance}`);
+      }
+
+      // 3. Deduzir gems
+      const { error: gemsError } = await supabase.rpc("add_gems", {
+        p_user_id: userId,
+        p_amount: -avatar.gem_cost,
+        p_transaction_type: "purchase_avatar",
+        p_related_entity_type: "avatar",
+        p_related_entity_id: avatarId,
+        p_metadata: { avatar_name: avatar.name, avatar_tier: avatar.tier },
+      });
+
+      if (gemsError) throw gemsError;
+
+      // 4. Desbloquear avatar
+      const { data, error: unlockError } = await supabase.rpc("unlock_avatar", {
+        p_user_id: userId,
+        p_avatar_id: avatarId,
+        p_auto_equip: false,
+      });
+
+      if (unlockError) throw unlockError;
+
+      return Boolean(data);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["user-gems", userId] });
+      queryClient.invalidateQueries({ queryKey: ["gem-transactions", userId] });
+      queryClient.invalidateQueries({ queryKey: ["user-avatars", userId] });
+
+      // Disparar evento
+      window.dispatchEvent(
+        new CustomEvent("gamification:avatar-unlocked", {
+          detail: { userId, avatarId: variables.avatarId },
+        })
+      );
+    },
+  });
+
+  // Mutation: Equip Avatar
+  const equipAvatarMutation = useMutation({
+    mutationFn: async ({ avatarId }: { avatarId: string }): Promise<void> => {
+      if (!userId) throw new Error("User not authenticated");
+
+      const { error } = await supabase.rpc("equip_avatar", {
+        p_user_id: userId,
+        p_avatar_id: avatarId,
+      });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-avatars", userId] });
+      // Perfil também tem o avatar equipado (denormalizado)
+      queryClient.invalidateQueries({ queryKey: ["profiles", userId] });
+    },
+  });
+
+  // Mutation: Unlock Achievement (manual - geralmente via Edge Function)
+  const unlockAchievementMutation = useMutation({
+    mutationFn: async ({
+      achievementId,
+      progressSnapshot,
+    }: {
+      achievementId: string;
+      progressSnapshot: Record<string, unknown>;
+    }): Promise<number> => {
+      if (!userId) throw new Error("User not authenticated");
+
+      const { data, error } = await supabase.rpc("unlock_achievement", {
+        p_user_id: userId,
+        p_achievement_id: achievementId,
+        p_progress_snapshot: progressSnapshot,
+      });
+
+      if (error) throw error;
+
+      // Retorna gems ganhas
+      return typeof data === "number" ? data : 0;
+    },
+    onSuccess: (gemsEarned, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["user-achievements", userId] });
+      queryClient.invalidateQueries({ queryKey: ["user-gems", userId] });
+
+      // Disparar evento
+      window.dispatchEvent(
+        new CustomEvent("gamification:achievement-unlocked", {
+          detail: { userId, achievementId: variables.achievementId, gemsEarned },
+        })
+      );
+    },
+  });
+
+  // Mutation: Purchase Streak Freeze
+  const purchaseStreakFreezeMutation = useMutation({
+    mutationFn: async (): Promise<boolean> => {
+      if (!userId) throw new Error("User not authenticated");
+
+      const { data, error } = await supabase.rpc("purchase_streak_freeze", {
+        p_user_id: userId,
+      });
+
+      if (error) throw error;
+
+      return Boolean(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["streak-freezes", userId] });
+      queryClient.invalidateQueries({ queryKey: ["user-gems", userId] });
+      queryClient.invalidateQueries({ queryKey: ["gem-transactions", userId] });
+
+      window.dispatchEvent(
+        new CustomEvent("gamification:freeze-purchased", { detail: { userId } })
+      );
+    },
+  });
+
+  // Mutation: Use Streak Freeze
+  const useStreakFreezeMutation = useMutation({
+    mutationFn: async ({ protectedDate }: { protectedDate?: string }): Promise<boolean> => {
+      if (!userId) throw new Error("User not authenticated");
+
+      const { data, error } = await supabase.rpc("use_streak_freeze", {
+        p_user_id: userId,
+        p_protected_date: protectedDate || new Date().toISOString().split("T")[0],
+      });
+
+      if (error) throw error;
+
+      return Boolean(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["streak-freezes", userId] });
+
+      window.dispatchEvent(
+        new CustomEvent("gamification:freeze-used", { detail: { userId } })
+      );
+    },
+  });
+
   // Helper: Check if item is unlocked
   const isUnlocked = (
     unlockType: "icon" | "widget" | "meditation" | "template" | "journey",
@@ -355,13 +828,28 @@ export const useGamification = (userId?: string) => {
     return (unlocks || []).filter((unlock) => unlock.unlock_type === unlockType);
   };
 
-  // Helper: Award XP for habit completion
+  // Helper: Award XP for habit completion (ATUALIZADO: também dá gems)
   const awardHabitXP = async (habitId: string) => {
-    return addXPMutation.mutateAsync({
+    // 1. Dar XP (existente)
+    const xpResult = await addXPMutation.mutateAsync({
       amount: XP_VALUES.HABIT_COMPLETE,
       reason: "habit_complete",
       habitId,
     });
+
+    // 2. NOVO: Dar gems (economia liberal: 10 gems por hábito)
+    try {
+      await addGemsMutation.mutateAsync({
+        amount: GEM_VALUES.HABIT_COMPLETE,
+        transactionType: "habit_complete",
+        relatedEntityType: "habit",
+        relatedEntityId: habitId,
+      });
+    } catch (error) {
+      console.error("Failed to award gems for habit:", error);
+    }
+
+    return xpResult;
   };
 
   // Helper: Send streak milestone notification
@@ -418,6 +906,108 @@ export const useGamification = (userId?: string) => {
     });
   };
 
+  // ============================================================================
+  // NEW HELPERS: Avatars, Achievements, Streak Freezes
+  // ============================================================================
+
+  // Helper: Get equipped avatar
+  const equippedAvatar = userAvatars?.find((ua) => ua.is_equipped)?.avatar || null;
+
+  // Helper: Check if avatar is unlocked
+  const isAvatarUnlocked = (avatarId: string): boolean => {
+    return (userAvatars || []).some((ua) => ua.avatar_id === avatarId);
+  };
+
+  // Helper: Check if can purchase avatar
+  const canPurchaseAvatar = (avatarId: string): boolean => {
+    const avatar = avatarsCatalog?.find((a) => a.id === avatarId);
+    if (!avatar || !avatar.gem_cost) return false;
+    if (isAvatarUnlocked(avatarId)) return false;
+    return (gems?.current_gems || 0) >= avatar.gem_cost;
+  };
+
+  // Helper: Check if avatar can be unlocked by level
+  const canUnlockAvatarByLevel = (avatarId: string): boolean => {
+    const avatar = avatarsCatalog?.find((a) => a.id === avatarId);
+    if (!avatar || !avatar.unlock_level || !progress) return false;
+    if (isAvatarUnlocked(avatarId)) return false;
+    return progress.current_level >= avatar.unlock_level;
+  };
+
+  // Helper: Check if achievement is unlocked
+  const isAchievementUnlocked = (achievementId: string): boolean => {
+    return (userAchievements || []).some((ua) => ua.achievement_id === achievementId);
+  };
+
+  // Helper: Get achievement progress
+  const getAchievementProgress = (achievementId: string): { current: number; target: number; percentage: number } => {
+    const achievement = achievementsCatalog?.find((a) => a.id === achievementId);
+    if (!achievement || !progress) return { current: 0, target: 0, percentage: 0 };
+
+    let current = 0;
+    switch (achievement.condition_type) {
+      case "habit_count":
+        current = progress.total_habits_completed;
+        break;
+      case "streak_days":
+        current = progress.current_streak;
+        break;
+      case "perfect_days":
+        current = progress.perfect_days;
+        break;
+      case "level_reached":
+        current = progress.current_level;
+        break;
+      default:
+        current = 0;
+    }
+
+    return {
+      current,
+      target: achievement.condition_value,
+      percentage: Math.min((current / achievement.condition_value) * 100, 100),
+    };
+  };
+
+  // Helper: Check if has available freezes
+  const hasAvailableFreezes = (): boolean => {
+    return (streakFreezes?.available_freezes || 0) > 0;
+  };
+
+  // Helper: Check if can purchase freeze
+  const canPurchaseFreeze = (): boolean => {
+    return (gems?.current_gems || 0) >= GEM_VALUES.STREAK_FREEZE_COST;
+  };
+
+  // Helper: Award gems for streak milestone
+  const awardStreakGemsBonus = async (streakDays: number) => {
+    let amount = 0;
+
+    if (streakDays === 3) {
+      amount = GEM_VALUES.STREAK_3_BONUS;
+    } else if (streakDays === 7) {
+      amount = GEM_VALUES.STREAK_7_BONUS;
+    } else if (streakDays === 30) {
+      amount = GEM_VALUES.STREAK_30_BONUS;
+    }
+
+    if (amount > 0) {
+      return addGemsMutation.mutateAsync({
+        amount,
+        transactionType: `streak_bonus_${streakDays}`,
+        metadata: { streak_days: streakDays },
+      });
+    }
+  };
+
+  // Helper: Award gems for perfect day
+  const awardPerfectDayGemsBonus = async () => {
+    return addGemsMutation.mutateAsync({
+      amount: GEM_VALUES.PERFECT_DAY,
+      transactionType: "perfect_day",
+    });
+  };
+
   // Helper: Get current level config
   const currentLevelConfig = progress
     ? getLevelConfig(progress.current_level)
@@ -431,42 +1021,116 @@ export const useGamification = (userId?: string) => {
 
   // Return hook interface
   return {
-    // Data
+    // ========== EXISTING DATA ==========
     progress: progress || null,
     unlocks: unlocks || [],
     currentLevelConfig,
     currentLevelProgress,
     xpToNextLevel,
 
-    // Loading states
-    loading: progressLoading || unlocksLoading,
+    // ========== NEW: GEMS DATA ==========
+    gems: gems || null,
+    gemsBalance: gems?.current_gems || 0,
+    lifetimeGemsEarned: gems?.lifetime_gems_earned || 0,
+    lifetimeGemsSpent: gems?.lifetime_gems_spent || 0,
+    gemTransactions: gemTransactions || [],
+
+    // ========== NEW: AVATARS DATA ==========
+    avatarsCatalog: avatarsCatalog || [],
+    userAvatars: userAvatars || [],
+    equippedAvatar,
+
+    // ========== NEW: ACHIEVEMENTS DATA ==========
+    achievementsCatalog: achievementsCatalog || [],
+    userAchievements: userAchievements || [],
+
+    // ========== NEW: STREAK FREEZES DATA ==========
+    streakFreezes: streakFreezes || null,
+    availableFreezes: streakFreezes?.available_freezes || 0,
+    totalFreezesEarned: streakFreezes?.total_freezes_earned || 0,
+    totalFreezesUsed: streakFreezes?.total_freezes_used || 0,
+
+    // ========== LOADING STATES ==========
+    loading: progressLoading || unlocksLoading || gemsLoading || userAvatarsLoading || userAchievementsLoading || streakFreezesLoading,
     progressLoading,
     unlocksLoading,
+    gemsLoading,
+    userAvatarsLoading,
+    userAchievementsLoading,
+    streakFreezesLoading,
 
-    // Errors
+    // ========== ERRORS ==========
     error: progressError || unlocksError,
 
-    // Mutations
+    // ========== EXISTING MUTATIONS ==========
     addXP: addXPMutation.mutateAsync,
     updateStreak: updateStreakMutation.mutateAsync,
     unlockItem: unlockItemMutation.mutateAsync,
 
-    // Mutation states
+    // ========== NEW: GEMS MUTATIONS ==========
+    addGems: addGemsMutation.mutateAsync,
+    isAddingGems: addGemsMutation.isPending,
+
+    // ========== NEW: AVATARS MUTATIONS ==========
+    purchaseAvatar: purchaseAvatarMutation.mutateAsync,
+    isPurchasingAvatar: purchaseAvatarMutation.isPending,
+    equipAvatar: equipAvatarMutation.mutateAsync,
+    isEquippingAvatar: equipAvatarMutation.isPending,
+
+    // ========== NEW: ACHIEVEMENTS MUTATIONS ==========
+    unlockAchievement: unlockAchievementMutation.mutateAsync,
+    isUnlockingAchievement: unlockAchievementMutation.isPending,
+
+    // ========== NEW: STREAK FREEZES MUTATIONS ==========
+    purchaseStreakFreeze: purchaseStreakFreezeMutation.mutateAsync,
+    isPurchasingFreeze: purchaseStreakFreezeMutation.isPending,
+    useStreakFreeze: useStreakFreezeMutation.mutateAsync,
+    isUsingFreeze: useStreakFreezeMutation.isPending,
+
+    // ========== MUTATION STATES ==========
     isAddingXP: addXPMutation.isPending,
     isUpdatingStreak: updateStreakMutation.isPending,
     isUnlockingItem: unlockItemMutation.isPending,
 
-    // Helpers
+    // ========== EXISTING HELPERS ==========
     isUnlocked,
     getUnlocksByType,
     awardHabitXP,
     awardStreakBonus,
     awardPerfectDayBonus,
 
-    // Refresh
+    // ========== NEW: AVATAR HELPERS ==========
+    isAvatarUnlocked,
+    canPurchaseAvatar,
+    canUnlockAvatarByLevel,
+
+    // ========== NEW: ACHIEVEMENT HELPERS ==========
+    isAchievementUnlocked,
+    getAchievementProgress,
+
+    // ========== NEW: STREAK FREEZE HELPERS ==========
+    hasAvailableFreezes,
+    canPurchaseFreeze,
+
+    // ========== NEW: GEM HELPERS ==========
+    awardStreakGemsBonus,
+    awardPerfectDayGemsBonus,
+
+    // ========== REFETCH FUNCTIONS ==========
+    refetchGems,
+    refetchUserAvatars,
+    refetchUserAchievements,
+    refetchStreakFreezes,
+
+    // ========== REFRESH ALL ==========
     refresh: () => {
       queryClient.invalidateQueries({ queryKey: ["user-progress", userId] });
       queryClient.invalidateQueries({ queryKey: ["user-unlocks", userId] });
+      queryClient.invalidateQueries({ queryKey: ["user-gems", userId] });
+      queryClient.invalidateQueries({ queryKey: ["user-avatars", userId] });
+      queryClient.invalidateQueries({ queryKey: ["user-achievements", userId] });
+      queryClient.invalidateQueries({ queryKey: ["streak-freezes", userId] });
+      queryClient.invalidateQueries({ queryKey: ["gem-transactions", userId] });
     },
   };
 };

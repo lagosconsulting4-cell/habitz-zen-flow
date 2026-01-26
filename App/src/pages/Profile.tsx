@@ -20,6 +20,7 @@ import {
   Gift,
   ChevronRight,
   XCircle,
+  Trophy,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,10 +34,13 @@ import { usePremium } from "@/hooks/usePremium";
 import { useProfileInsights } from "@/hooks/useProfileInsights";
 import { useAppPreferences } from "@/hooks/useAppPreferences";
 import { useTheme } from "@/hooks/useTheme";
+import { useGamification } from "@/hooks/useGamification";
 import { toast } from "sonner";
 import { bonusSections } from "@/pages/Bonus";
 import { bonusFlags } from "@/config/bonusFlags";
 import { NotificationToggle } from "@/components/pwa/NotificationPermissionDialog";
+import { AvatarShopModal } from "@/components/gamification/AvatarShopModal";
+import { AchievementsGrid } from "@/components/gamification/AchievementsGrid";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -47,11 +51,13 @@ const Profile = () => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
+  const [avatarShopOpen, setAvatarShopOpen] = useState(false);
 
   const { isPremium, premiumSince } = usePremium(userId ?? undefined);
   const { insights, loading: insightsLoading } = useProfileInsights(userId ?? undefined);
   const { prefs, setPreferences } = useAppPreferences();
   const { theme, setTheme } = useTheme();
+  const { equippedAvatar, userAchievements, achievementsCatalog } = useGamification(userId ?? undefined);
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat("pt-BR"), []);
 
@@ -232,6 +238,38 @@ const Profile = () => {
           })}
         </div>
 
+        {/* Avatar Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.09 }}
+          className="mb-8"
+        >
+          <Card className="rounded-2xl bg-card border border-border p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-primary/30 shadow-md">
+                  <span className="text-4xl">{equippedAvatar?.emoji || "😊"}</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg text-foreground">{equippedAvatar?.name || "Sorriso Básico"}</h3>
+                  {equippedAvatar && (
+                    <Badge variant="secondary" className="mt-2">
+                      {equippedAvatar.tier}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <Button
+                onClick={() => setAvatarShopOpen(true)}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold whitespace-nowrap"
+              >
+                Mudar Avatar
+              </Button>
+            </div>
+          </Card>
+        </motion.div>
+
         {/* Bonus Content Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -334,10 +372,33 @@ const Profile = () => {
           </Card>
         </motion.div>
 
+        {/* Achievements Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.22 }}
+          transition={{ duration: 0.3, delay: 0.21 }}
+          className="mb-8"
+        >
+          <Card className="rounded-2xl bg-card border border-border p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Trophy className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-lg font-bold uppercase tracking-wide text-foreground">Conquistas</h2>
+                <p className="text-sm text-muted-foreground">
+                  {userAchievements.length} / {achievementsCatalog.length} desbloqueadas
+                </p>
+              </div>
+            </div>
+            <AchievementsGrid userId={userId ?? undefined} />
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.24 }}
         >
           <Card className="rounded-2xl bg-card border border-border p-6">
             <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Aparencia</h2>
@@ -540,6 +601,13 @@ const Profile = () => {
             <span className="font-semibold">Sair da conta</span>
           </Button>
         </motion.div>
+
+        {/* Avatar Shop Modal */}
+        <AvatarShopModal
+          isOpen={avatarShopOpen}
+          onClose={() => setAvatarShopOpen(false)}
+          userId={userId ?? undefined}
+        />
       </motion.div>
     </div>
   );
