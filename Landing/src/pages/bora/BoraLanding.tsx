@@ -229,8 +229,7 @@ const BoraLanding = () => {
     setQuizOpen(true);
   };
 
-  const totalHowItWorksSteps = howItWorks.length;
-  const formattedTotalHowItWorksSteps = totalHowItWorksSteps.toString().padStart(2, "0");
+
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden w-full max-w-full font-['Plus_Jakarta_Sans',sans-serif]">
