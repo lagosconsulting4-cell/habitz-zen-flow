@@ -92,7 +92,7 @@ const testimonials = [
     name: "Camila Souza",
     age: 22,
     role: "Fundadora de Startup",
-    photo: "https://i.ibb.co/7t5yRpDd/Gemini-Generated-Image-i7pejzi7pejzi7pe.png",
+    photo: "https://i.ibb.co/7t5yRpDd/Gemini-Generated-Image-i7pejzi7pejzi7pe.png", // a woman
     quote: "Meu negócio decolou depois que comecei a usar o Bora. Antes era só correria e incêndio pra apagar. Agora consigo focar no que realmente importa. Meu faturamento dobrou em 3 meses!",
     rating: 5,
     metric: "Faturamento 2x em 3 meses",
@@ -101,7 +101,7 @@ const testimonials = [
     name: "Lucas Fernandes",
     age: 20,
     role: "Estagiário de Marketing",
-    photo: "https://i.ibb.co/TMPp1Kw1/Gemini-Generated-Image-200v6k200v6k200v.png",
+    photo: "https://i.ibb.co/TMPp1Kw1/Gemini-Generated-Image-200v6k200v6k200v.png", // a man
     quote: "Achava que produtividade era pra 'gente grande', mas o Bora me mostrou que não. Entreguei todos os projetos no prazo e ainda tive tempo pra minha vida social. Me senti um pro!",
     rating: 5,
     metric: "100% de projetos no prazo",
@@ -110,7 +110,7 @@ const testimonials = [
     name: "Ana Clara Lima",
     age: 24,
     role: "Designer Freelancer",
-    photo: "https://i.ibb.co/Rkx7XcKT/Gemini-Generated-Image-vy66g8vy66g8vy66.png",
+    photo: "https://picsum.photos/seed/woman/150/150", // NEW woman's picture
     quote: "Chega de procrastinar! O Bora me ajudou a organizar meus clientes, prazos e ainda sobrou tempo pra criar conteúdo pro meu portfólio. Finalmente consigo dar conta de tudo sem virar a noite.",
     rating: 5,
     metric: "Mais clientes, menos stress",
@@ -119,7 +119,7 @@ const testimonials = [
     name: "Pedro Henrique",
     age: 19,
     role: "Estudante e Vendedor",
-    photo: "https://i.ibb.co/xtXmcTS3/Gemini-Generated-Image-ixzgp8ixzgp8ixzg.png",
+    photo: "https://i.ibb.co/xtXmcTS3/Gemini-Generated-Image-ixzgp8ixzgp8ixzg.png", // a man
     quote: "Conciliar faculdade e trabalho era um caos. O Bora me deu um método pra otimizar meu tempo e energia. Agora consigo estudar, trabalhar e ainda ir pra academia sem me sentir esgotado.",
     rating: 5,
     metric: "Equilíbrio vida-estudo-trabalho",
