@@ -140,8 +140,26 @@ const MiniLanding = () => {
               desenhado para a realidade — e não para um mundo perfeito que não existe.
             </motion.p>
 
+            {/* App Mockup */}
+            <motion.div
+              className="relative w-full max-w-sm mx-auto py-8"
+              variants={staggerItem}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#A3E635]/20 to-lime-400/20 rounded-3xl blur-3xl" />
+                <picture>
+                  <source srcSet="/images/lp/hero_mockup.webp" type="image/webp" />
+                  <img
+                    src="/images/lp/mockup-app-vertical.png"
+                    alt="Bora App Interface"
+                    className="relative z-10 w-full h-auto drop-shadow-2xl rounded-2xl"
+                  />
+                </picture>
+              </div>
+            </motion.div>
+
             {/* CTA Principal */}
-            <motion.div variants={staggerItem} className="pt-6">
+            <motion.div variants={staggerItem} className="pt-2">
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <Button
                   onClick={() => handleCTA("hero")}
@@ -421,11 +439,11 @@ const MiniLanding = () => {
                       </span>
                       <span className="text-2xl md:text-3xl text-slate-700">de</span>
                       <span className="text-5xl md:text-6xl font-black text-[#A3E635]">
-                        R$ 9,95
+                        R$ 8,95
                       </span>
                     </div>
                     <p className="text-base text-slate-600 mt-3 font-medium">
-                      no cartão de crédito
+                      por mês
                     </p>
                     <p className="text-sm text-slate-500 mt-1">
                       Plano Anual Completo
