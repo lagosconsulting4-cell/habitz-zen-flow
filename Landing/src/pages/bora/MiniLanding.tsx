@@ -426,27 +426,29 @@ const MiniLanding = () => {
               </CardHeader>
 
               <CardContent className="space-y-8 pt-6 pb-10">
+                {/* Badge de Desconto */}
+                <div className="flex justify-center">
+                  <Badge className="px-6 py-3 bg-red-500 hover:bg-red-500 text-white text-lg font-black border-0 shadow-lg">
+                    33% OFF
+                  </Badge>
+                </div>
+
                 {/* Preço De/Por */}
                 <div className="text-center">
-                  <p className="text-lg text-slate-500 line-through mb-3">De R$ 129,90</p>
+                  <p className="text-lg text-slate-500 line-through mb-4">De R$ 129,90</p>
 
                   {/* Preço Parcelado Simplificado */}
                   <div>
-                    <div className="flex items-baseline justify-center gap-2 flex-wrap">
-                      <span className="text-2xl md:text-3xl text-slate-700">Por apenas</span>
-                      <span className="text-5xl md:text-6xl font-black text-slate-900">
-                        12x
-                      </span>
-                      <span className="text-2xl md:text-3xl text-slate-700">de</span>
-                      <span className="text-5xl md:text-6xl font-black text-[#A3E635]">
+                    <div className="flex items-baseline justify-center gap-3">
+                      <span className="text-7xl md:text-8xl font-black text-[#A3E635]">
                         R$ 8,95
                       </span>
                     </div>
-                    <p className="text-base text-slate-600 mt-3 font-medium">
+                    <p className="text-xl text-slate-600 mt-4 font-semibold">
                       por mês
                     </p>
-                    <p className="text-sm text-slate-500 mt-1">
-                      Plano Anual Completo
+                    <p className="text-sm text-slate-500 mt-2">
+                      12 parcelas • Plano Anual Completo
                     </p>
                   </div>
                 </div>
