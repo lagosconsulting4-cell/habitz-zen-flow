@@ -16,6 +16,7 @@ import { XPToast } from "@/components/XPToast";
 import { GemToast, AchievementToast } from "@/components/gamification";
 import { FreezeUsedToast } from "@/components/gamification/FreezeUsedToast";
 import { FreezeBadge } from "@/components/gamification/FreezeBadge";
+import { XPBar } from "@/components/XPBar";
 import { useHabits } from "@/hooks/useHabits";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/integrations/supabase/auth";
@@ -335,6 +336,9 @@ const Dashboard = () => {
         transition={{ duration: 0.3 }}
         className="flex-1 px-4 pt-6 sm:pt-4 pb-navbar space-y-5"
       >
+        {/* XP Bar - Level, streak, gems */}
+        {isGamificationEnabled && <XPBar />}
+
         {/* Routine Card - Shows daily progress by period */}
         {todayHabits.length > 0 && (
           <RoutineCard

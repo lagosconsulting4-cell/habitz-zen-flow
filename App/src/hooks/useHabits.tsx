@@ -111,7 +111,7 @@ export const useHabits = () => {
         // Select only necessary columns to reduce payload
         const { data, error } = await supabase
           .from("habits")
-          .select("id, name, emoji, icon_key, category, period, days_of_week, streak, is_active, user_id, created_at, updated_at, color, unit, goal_value, frequency_type, times_per_week, times_per_month, every_n_days, reminder_time, notification_pref, auto_complete_source, times_per_day")
+          .select("id, name, emoji, category, period, days_of_week, streak, is_active, user_id, created_at, updated_at, reminder_time, times_per_day")
           .eq("user_id", user.id)
           .order("created_at", { ascending: true });
 
@@ -196,7 +196,7 @@ export const useHabits = () => {
         // Select only necessary columns to reduce payload
         const { data, error } = await supabase
           .from("habit_completions")
-          .select("id, habit_id, user_id, completed_at, created_at, value, note, completed_at_time, completion_count")
+          .select("id, habit_id, user_id, completed_at, created_at, completed_at_time, completion_count")
           .eq("completed_at", date);
 
         if (error) throw error;
