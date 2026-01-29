@@ -4,6 +4,7 @@ import { Trophy, Sparkles, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGamification, type Achievement } from "@/hooks/useGamification";
 import { useAuth } from "@/integrations/supabase/auth";
+import { getAchievementIcon } from "./AchievementIcons";
 
 interface AchievementNotification {
   id: number;
@@ -102,7 +103,13 @@ export const AchievementToast = ({ userId: propUserId }: AchievementToastProps) 
 
                 {/* Achievement Info */}
                 <div className="flex items-center gap-3">
-                  <div className="text-4xl">{achievement.emoji}</div>
+                  <div>
+                    {(() => {
+                      const IconComponent = getAchievementIcon(achievement.id as any);
+                      if (!IconComponent) return null;
+                      return <IconComponent width={48} height={48} className="text-yellow-900" />;
+                    })()}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-yellow-900 text-lg leading-tight">
                       {achievement.name}

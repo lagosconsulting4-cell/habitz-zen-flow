@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Lock, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type Achievement, type UserAchievement, type AchievementTier } from "@/hooks/useGamification";
+import { getAchievementIcon } from "./AchievementIcons";
 
 interface AchievementBadgeProps {
   achievement: Achievement;
@@ -66,7 +67,7 @@ export const AchievementBadge = ({
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={cn(
-        "relative flex flex-col items-center justify-center rounded-xl p-3 cursor-pointer",
+        "relative flex flex-col items-center justify-center rounded-xl p-3 cursor-pointer overflow-hidden isolate",
         "transition-all border",
         unlocked
           ? `bg-gradient-to-br ${tierColors.gradient}/10 border-${achievement.tier === 'legendary' ? 'yellow' : achievement.tier === 'epic' ? 'purple' : achievement.tier === 'rare' ? 'blue' : 'gray'}-500/30`
@@ -87,19 +88,25 @@ export const AchievementBadge = ({
       {/* Tier Badge */}
       <div
         className={cn(
-          "absolute -top-1 -right-1 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase",
+          "absolute top-1 right-1 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase",
           `bg-gradient-to-r ${tierColors.gradient} text-white`
         )}
       >
         {achievement.tier[0]}
       </div>
 
-      {/* Emoji or Lock */}
+      {/* Achievement Icon */}
       <div className="relative z-10 mb-1">
         {isSecret ? (
           <span className="text-3xl">❓</span>
         ) : (
-          <span className={cn(!unlocked && "grayscale-[50%]")}>{achievement.emoji}</span>
+          <div className={cn(!unlocked && "grayscale-[50%] opacity-70")}>
+            {(() => {
+              const IconComponent = getAchievementIcon(achievement.id as any);
+              if (!IconComponent) return null;
+              return <IconComponent width={32} height={32} />;
+            })()}
+          </div>
         )}
       </div>
 
@@ -117,7 +124,7 @@ export const AchievementBadge = ({
 
       {/* Gem Reward Badge */}
       {unlocked && achievement.gem_reward > 0 && (
-        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-600 text-[8px] font-bold text-white">
+        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-600 text-[8px] font-bold text-white">
           <Sparkles className="w-2 h-2" />
           {achievement.gem_reward}
         </div>

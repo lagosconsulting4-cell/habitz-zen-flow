@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getRewardsForLevel } from "@/data/levelRewards";
@@ -249,7 +250,7 @@ export const useGamification = (userId?: string) => {
 
       const { data, error } = await supabase
         .from("user_progress")
-        .select("user_id, current_streak, longest_streak, total_completions, level, xp")
+        .select("user_id, current_streak, longest_streak, total_habits_completed, current_level, total_xp")
         .eq("user_id", userId)
         .maybeSingle();
 
@@ -357,13 +358,7 @@ export const useGamification = (userId?: string) => {
 
       const { data, error } = await supabase
         .from("user_avatars")
-        .select(`
-          user_id,
-          avatar_id,
-          is_equipped,
-          unlocked_at,
-          avatar:avatars(*)
-        `)
+        .select("user_id, avatar_id, is_equipped, unlocked_at, avatar:avatars(*)")
         .eq("user_id", userId);
 
       if (error) throw error;
@@ -400,13 +395,7 @@ export const useGamification = (userId?: string) => {
 
       const { data, error } = await supabase
         .from("user_achievements")
-        .select(`
-          user_id,
-          achievement_id,
-          progress_snapshot,
-          unlocked_at,
-          achievement:achievements(*)
-        `)
+        .select("user_id, achievement_id, progress_snapshot, unlocked_at, achievement:achievements(*)")
         .eq("user_id", userId);
 
       if (error) throw error;
@@ -1018,6 +1007,60 @@ export const useGamification = (userId?: string) => {
 
   // Helper: Get XP to next level
   const xpToNextLevel = progress ? getXPToNextLevel(progress.total_xp) : 0;
+
+  // ============================================================================
+  // REALTIME LISTENER: Streak Freeze Events
+  // ============================================================================
+  // Listen for automatic freeze usage and dispatch UI events
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel(`freeze-events-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "streak_freeze_events",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const event = payload.new as any;
+
+          // Se freeze foi usado automaticamente para proteger streak
+          if (event.source === "auto_protection") {
+            const streakSaved = event.metadata?.streak_saved || 0;
+
+            // Dispatch evento customizado para UI (toast, efeito visual, etc)
+            window.dispatchEvent(
+              new CustomEvent("gamification:freeze-used", {
+                detail: {
+                  userId,
+                  streakSaved,
+                  autoConsumed: true,
+                },
+              })
+            );
+
+            // Invalidar queries para atualizar contadores
+            queryClient.invalidateQueries({ queryKey: ["user-progress", userId] });
+            queryClient.invalidateQueries({ queryKey: ["streak-freezes", userId] });
+          }
+
+          // Se freeze foi ganho (comprado ou mensal)
+          if (event.event_type === "earned") {
+            queryClient.invalidateQueries({ queryKey: ["streak-freezes", userId] });
+          }
+        }
+      )
+      .subscribe();
+
+    // Cleanup: Remover subscription ao desmontar
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, queryClient]);
 
   // Return hook interface
   return {

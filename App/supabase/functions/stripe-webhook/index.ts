@@ -92,7 +92,7 @@ serve(async (req) => {
   };
 
   // Helper: Create user account from Stripe customer
-  const createUserFromStripe = async (email: string, customerName?: string): Promise<string | null> => {
+  const createUserFromStripe = async (email: string, customerName?: string, customerPhone?: string): Promise<string | null> => {
     try {
       console.log(`Creating user account for: ${email}`);
 
@@ -143,6 +143,7 @@ serve(async (req) => {
                 user_id: existingUserId,
                 email: email.toLowerCase(),
                 display_name: customerName ?? "Cliente Stripe",
+                phone: customerPhone, // Phone capturado do Stripe Checkout
               })
               .single();
 
@@ -170,7 +171,24 @@ serve(async (req) => {
 
       const userId = authData.user.id;
       console.log(`✅ Auth user created: ${userId}`);
-      // Profile will be created by handle_new_user() trigger automatically
+
+      // Create profile with phone (don't rely on trigger for phone data)
+      const { error: profileError } = await supabaseAdmin
+        .from("profiles")
+        .insert({
+          user_id: userId,
+          email: email.toLowerCase(),
+          display_name: customerName ?? "Cliente Stripe",
+          phone: customerPhone, // Phone capturado do Stripe Checkout
+        })
+        .single();
+
+      if (profileError) {
+        console.warn(`⚠️ Failed to create profile for new user, trigger will handle it: ${profileError.message}`);
+      } else {
+        console.log(`✅ Profile created with phone for new user: ${userId}`);
+      }
+
       return userId;
     } catch (error) {
       console.error(`Error creating user from Stripe:`, error);
@@ -308,6 +326,12 @@ serve(async (req) => {
         let userId = session.metadata?.user_id;
         const customerEmail = session.customer_details?.email;
         const customerName = session.customer_details?.name ?? "Cliente Stripe";
+        const customerPhone = session.customer_details?.phone ?? undefined; // Captura phone do Stripe Checkout
+
+        if (customerPhone) {
+          console.log(`📱 Phone captured from checkout: ${customerPhone}`);
+        }
+
         let isNewUser = false;
 
         // If no user_id in metadata, try to find/create user by email
@@ -318,7 +342,7 @@ serve(async (req) => {
 
           if (!userId) {
             console.log(`User not found, creating account for: ${customerEmail}`);
-            userId = await createUserFromStripe(customerEmail, customerName);
+            userId = await createUserFromStripe(customerEmail, customerName, customerPhone);
             isNewUser = true;
 
             if (!userId) {
@@ -392,13 +416,19 @@ serve(async (req) => {
 
         const customerEmail = customer.email;
         const customerName = customer.name ?? "Cliente Stripe";
+        const customerPhone = customer.phone ?? undefined; // Captura phone do Customer Stripe
+
+        if (customerPhone) {
+          console.log(`📱 Phone captured from customer: ${customerPhone}`);
+        }
+
         let isNewUser = false;
 
         // Try to find existing user, or create if doesn't exist
         let userId = await findUserByEmail(customerEmail);
         if (!userId) {
           console.log(`User not found for ${customerEmail}, creating account...`);
-          userId = await createUserFromStripe(customerEmail, customerName);
+          userId = await createUserFromStripe(customerEmail, customerName, customerPhone);
           isNewUser = true;
 
           if (!userId) {

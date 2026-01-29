@@ -132,7 +132,7 @@ export const AchievementsGrid = ({ userId: propUserId, className }: Achievements
       {/* Achievements Grid */}
       <motion.div
         layout
-        className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3"
+        className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-5 isolate"
       >
         {filteredAchievements.map((achievement) => {
           const userAch = userAchievements.find((ua) => ua.achievement_id === achievement.id);

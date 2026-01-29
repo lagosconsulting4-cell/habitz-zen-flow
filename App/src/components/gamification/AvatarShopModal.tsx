@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useGamification, type Avatar, type AvatarTier } from "@/hooks/useGamification";
 import { useAuth } from "@/integrations/supabase/auth";
 import { GemCounter } from "./GemCounter";
+import { getAvatarIcon } from "./AvatarIcons";
 
 interface AvatarShopModalProps {
   isOpen: boolean;
@@ -214,8 +215,14 @@ export const AvatarShopModal = ({ isOpen, onClose, userId: propUserId }: AvatarS
                             {tierConfig.label[0]}
                           </div>
 
-                          {/* Avatar Emoji */}
-                          <div className="text-4xl text-center mb-2">{avatar.emoji}</div>
+                          {/* Avatar Icon */}
+                          <div className="flex items-center justify-center mb-2">
+                            {(() => {
+                              const IconComponent = getAvatarIcon(avatar.id as any);
+                              if (!IconComponent) return null;
+                              return <IconComponent width={48} height={48} />;
+                            })()}
+                          </div>
 
                           {/* Name */}
                           <p className="text-xs font-medium text-center truncate">{avatar.name}</p>

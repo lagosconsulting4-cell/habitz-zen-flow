@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Lock, Sparkles, CheckCircle2 } from "lucide-react";
 import { useGamification, type Achievement } from "@/hooks/useGamification";
 import { ShareAchievement } from "./ShareAchievement";
+import { getAchievementIcon } from "./AchievementIcons";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 
@@ -114,14 +115,22 @@ export function AchievementDetailModal({
           <div className="flex flex-col items-center justify-center">
             <div
               className={cn(
-                "w-32 h-32 rounded-2xl flex items-center justify-center text-6xl mb-4",
+                "w-32 h-32 rounded-2xl flex items-center justify-center mb-4",
                 "border-2",
                 tierColors.bg,
                 tierColors.border,
                 !unlocked && "grayscale opacity-50"
               )}
             >
-              {isSecret ? "❓" : achievement.emoji}
+              {isSecret ? (
+                <span className="text-6xl">❓</span>
+              ) : (
+                (() => {
+                  const IconComponent = getAchievementIcon(achievement.id as any);
+                  if (!IconComponent) return null;
+                  return <IconComponent width={48} height={48} />;
+                })()
+              )}
             </div>
 
             {unlocked && (

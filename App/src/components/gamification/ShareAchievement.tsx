@@ -21,14 +21,14 @@ export function ShareAchievement({
 }: ShareAchievementProps) {
   const [copied, setCopied] = useState(false);
 
-  const shareText = `🏆 Desbloqueei a conquista "${achievement.name}" no Habitz!
+  const shareText = `Desbloqueei a conquista "${achievement.name}" no Habitz!
 
 "${achievement.description}"
 
 Meu progresso:
-⭐ Nível: ${userStats?.level || "?"}
-🔥 Sequência: ${userStats?.streak || 0} dias
-💎 Gems: ${userStats?.gems || 0}
+Nível: ${userStats?.level || "?"}
+Sequência: ${userStats?.streak || 0} dias
+Gems: ${userStats?.gems || 0}
 
 Junte-se a mim em: https://habitz.app`;
 
