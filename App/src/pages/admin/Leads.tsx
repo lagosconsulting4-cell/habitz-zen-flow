@@ -2,9 +2,11 @@ import { useState, useMemo } from "react";
 import {
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
   type ColumnDef,
   type RowSelectionState,
+  type SortingState,
 } from "@tanstack/react-table";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -45,7 +47,7 @@ import { LeadsUTMTable } from "@/components/admin/LeadsUTMTable";
 import { LeadsTemporalChart } from "@/components/admin/LeadsTemporalChart";
 import { LeadsHeatmap } from "@/components/admin/LeadsHeatmap";
 import { exportLeadsToCSV, exportSelectedLeads } from "@/utils/csvExport";
-import { Search, ChevronLeft, ChevronRight, Download, MoreHorizontal, Filter, TrendingUp, Users, Target, Zap, AlertCircle } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Download, MoreHorizontal, Filter, TrendingUp, Users, Target, Zap, AlertCircle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -56,6 +58,21 @@ const AdminLeads = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [filters, setFilters] = useState<LeadFilters>({});
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "created_at", desc: true }
+  ]);
+
+  // Map TanStack sorting to our sortBy format
+  const sortBy = useMemo(() => {
+    if (sorting.length === 0) {
+      return { column: "created_at", direction: "desc" as const };
+    }
+    const sort = sorting[0];
+    return {
+      column: sort.id as "created_at" | "name" | "email" | "follow_up_status",
+      direction: sort.desc ? ("desc" as const) : ("asc" as const),
+    };
+  }, [sorting]);
 
   const {
     leads,
@@ -74,7 +91,7 @@ const AdminLeads = () => {
     pageSize: 25,
     search,
     filters,
-    sortBy: { column: "created_at", direction: "desc" },
+    sortBy,
   });
 
   // Analytics data
@@ -104,25 +121,80 @@ const AdminLeads = () => {
       },
       {
         accessorKey: "name",
-        header: "Nome",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="-ml-3 h-8"
+            >
+              Nome
+              {column.getIsSorted() === "asc" ? (
+                <ArrowUp className="ml-2 h-4 w-4" />
+              ) : column.getIsSorted() === "desc" ? (
+                <ArrowDown className="ml-2 h-4 w-4" />
+              ) : (
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+              )}
+            </Button>
+          );
+        },
         cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
+        enableSorting: true,
       },
       {
         accessorKey: "email",
-        header: "Email",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="-ml-3 h-8"
+            >
+              Email
+              {column.getIsSorted() === "asc" ? (
+                <ArrowUp className="ml-2 h-4 w-4" />
+              ) : column.getIsSorted() === "desc" ? (
+                <ArrowDown className="ml-2 h-4 w-4" />
+              ) : (
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+              )}
+            </Button>
+          );
+        },
         cell: ({ row }) => (
           <div className="text-sm text-muted-foreground">{row.original.email}</div>
         ),
+        enableSorting: true,
       },
       {
         accessorKey: "phone",
         header: "Telefone",
         cell: ({ row }) => <div className="text-sm">{row.original.phone}</div>,
+        enableSorting: false,
       },
       {
         accessorKey: "follow_up_status",
-        header: "Status",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="-ml-3 h-8"
+            >
+              Status
+              {column.getIsSorted() === "asc" ? (
+                <ArrowUp className="ml-2 h-4 w-4" />
+              ) : column.getIsSorted() === "desc" ? (
+                <ArrowDown className="ml-2 h-4 w-4" />
+              ) : (
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+              )}
+            </Button>
+          );
+        },
         cell: ({ row }) => <LeadStatusBadge status={row.original.follow_up_status} />,
+        enableSorting: true,
       },
       {
         accessorKey: "objective",
@@ -130,15 +202,34 @@ const AdminLeads = () => {
         cell: ({ row }) => (
           <div className="text-sm capitalize">{row.original.objective || "-"}</div>
         ),
+        enableSorting: false,
       },
       {
         accessorKey: "created_at",
-        header: "Data",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="-ml-3 h-8"
+            >
+              Data
+              {column.getIsSorted() === "asc" ? (
+                <ArrowUp className="ml-2 h-4 w-4" />
+              ) : column.getIsSorted() === "desc" ? (
+                <ArrowDown className="ml-2 h-4 w-4" />
+              ) : (
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+              )}
+            </Button>
+          );
+        },
         cell: ({ row }) => (
           <div className="text-sm text-muted-foreground">
             {format(new Date(row.original.created_at), "dd/MM/yyyy")}
           </div>
         ),
+        enableSorting: true,
       },
       {
         accessorKey: "source",
@@ -154,11 +245,15 @@ const AdminLeads = () => {
     data: leads,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
     state: {
       rowSelection,
+      sorting,
     },
     enableRowSelection: true,
+    manualSorting: true, // Server-side sorting
   });
 
   const selectedCount = Object.keys(rowSelection).length;
