@@ -41,6 +41,9 @@ import { bonusFlags } from "@/config/bonusFlags";
 import { NotificationToggle } from "@/components/pwa/NotificationPermissionDialog";
 import { AvatarShopModal } from "@/components/gamification/AvatarShopModal";
 import { AchievementsGrid } from "@/components/gamification/AchievementsGrid";
+import { GemCounter } from "@/components/gamification/GemCounter";
+import { StreakFreezeCard } from "@/components/gamification/StreakFreezeCard";
+import { getAvatarIcon } from "@/components/gamification/AvatarIcons";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -52,12 +55,13 @@ const Profile = () => {
   const [editedName, setEditedName] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
   const [avatarShopOpen, setAvatarShopOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const { isPremium, premiumSince } = usePremium(userId ?? undefined);
   const { insights, loading: insightsLoading } = useProfileInsights(userId ?? undefined);
   const { prefs, setPreferences } = useAppPreferences();
   const { theme, setTheme } = useTheme();
-  const { equippedAvatar, userAchievements, achievementsCatalog } = useGamification(userId ?? undefined);
+  const { equippedAvatar, userAchievements, achievementsCatalog, gemsBalance, availableFreezes } = useGamification(userId ?? undefined);
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat("pt-BR"), []);
 
@@ -75,12 +79,15 @@ const Profile = () => {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("display_name")
+        .select("display_name, is_admin")
         .eq("user_id", user.id)
         .single();
 
       if (profile?.display_name) {
         setDisplayName(profile.display_name);
+      }
+      if (profile?.is_admin) {
+        setIsAdmin(profile.is_admin);
       }
     };
 
@@ -160,6 +167,15 @@ const Profile = () => {
               {isPremium ? "Premium vitalício" : "Conta aguardando ativação"}
             </Badge>
           </div>
+          {isAdmin && (
+            <Button
+              onClick={() => navigate("/admin")}
+              className="mb-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 shadow-lg font-semibold"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              Painel de Admin
+            </Button>
+          )}
           {isEditingName ? (
             <div className="flex items-center justify-center gap-2 mb-2">
               <Input
@@ -249,7 +265,13 @@ const Profile = () => {
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-primary/30 shadow-md">
-                  <span className="text-4xl">{equippedAvatar?.emoji || "😊"}</span>
+                  {(() => {
+                    const IconComponent = equippedAvatar ? getAvatarIcon(equippedAvatar.id as any) : null;
+                    if (!IconComponent) {
+                      return <span className="text-2xl">👤</span>;
+                    }
+                    return <IconComponent width={40} height={40} />;
+                  })()}
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-lg text-foreground">{equippedAvatar?.name || "Sorriso Básico"}</h3>
@@ -266,6 +288,61 @@ const Profile = () => {
               >
                 Mudar Avatar
               </Button>
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* Gems and Freezes Recursos Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="mb-8"
+        >
+          <Card className="rounded-2xl bg-card border border-border p-6">
+            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Recursos</h2>
+            <div className="space-y-3">
+              {/* Gems Display */}
+              <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-purple-500/20">
+                    <Sparkles className="w-5 h-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Gems</p>
+                    <p className="text-2xl font-bold text-foreground">{gemsBalance.toLocaleString()}</p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setAvatarShopOpen(true)}
+                  className="text-purple-600 hover:bg-purple-500/20"
+                >
+                  Loja <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+
+              {/* Freezes Display */}
+              <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-blue-500/20">
+                    <Shield className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Streak Freezes</p>
+                    <p className="text-2xl font-bold text-foreground">{availableFreezes}</p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setAvatarShopOpen(true)}
+                  className="text-blue-600 hover:bg-blue-500/20"
+                >
+                  Comprar <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
             </div>
           </Card>
         </motion.div>
@@ -304,7 +381,7 @@ const Profile = () => {
           </Card>
         </motion.div>
 
-        <motion.div
+        {false && <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.15 }}
@@ -338,10 +415,10 @@ const Profile = () => {
               </Button>
             )}
           </Card>
-        </motion.div>
+        </motion.div>}
 
         {/* Affiliate Program Section */}
-        <motion.div
+        {false && <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.18 }}
@@ -370,7 +447,7 @@ const Profile = () => {
               </Button>
             </a>
           </Card>
-        </motion.div>
+        </motion.div>}
 
         {/* Achievements Section */}
         <motion.div
@@ -476,7 +553,7 @@ const Profile = () => {
         </motion.div>
 
         {/* Sound & Feedback Settings */}
-        <motion.div
+        {false && <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.27 }}
@@ -549,7 +626,7 @@ const Profile = () => {
               </div>
             </div>
           </Card>
-        </motion.div>
+        </motion.div>}
 
         {/* Notifications Settings */}
         <motion.div
