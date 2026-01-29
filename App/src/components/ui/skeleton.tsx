@@ -123,4 +123,56 @@ function DashboardSkeleton() {
   );
 }
 
-export { Skeleton, HabitCardSkeleton, XPBarSkeleton, RoutineCardSkeleton, DashboardSkeleton };
+// Table skeleton for admin pages
+function TableSkeleton({ rows = 5, columns = 6 }: { rows?: number; columns?: number }) {
+  return (
+    <div className="space-y-4">
+      {/* Table header */}
+      <div className="flex gap-4 pb-3 border-b">
+        {[...Array(columns)].map((_, i) => (
+          <Skeleton key={`header-${i}`} className="h-4 flex-1" />
+        ))}
+      </div>
+      {/* Table rows */}
+      {[...Array(rows)].map((_, rowIndex) => (
+        <div key={`row-${rowIndex}`} className="flex gap-4 py-3">
+          {[...Array(columns)].map((_, colIndex) => (
+            <Skeleton key={`cell-${rowIndex}-${colIndex}`} className="h-5 flex-1" />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Analytics loading skeleton
+function AnalyticsSkeleton() {
+  return (
+    <div className="space-y-6">
+      {/* KPI Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={`kpi-${i}`} className="p-4 border rounded-lg space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-8 w-16" />
+            <Skeleton className="h-3 w-32" />
+          </div>
+        ))}
+      </div>
+      {/* Chart placeholders */}
+      <Skeleton className="h-[300px] w-full rounded-lg" />
+      <Skeleton className="h-[400px] w-full rounded-lg" />
+      <Skeleton className="h-[300px] w-full rounded-lg" />
+    </div>
+  );
+}
+
+export {
+  Skeleton,
+  HabitCardSkeleton,
+  XPBarSkeleton,
+  RoutineCardSkeleton,
+  DashboardSkeleton,
+  TableSkeleton,
+  AnalyticsSkeleton,
+};

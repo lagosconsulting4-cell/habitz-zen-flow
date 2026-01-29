@@ -50,6 +50,7 @@ const AdminUsers = lazy(() => import("./pages/admin/Users"));
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
 const AdminContent = lazy(() => import("./pages/admin/Content"));
 const AdminAudit = lazy(() => import("./pages/admin/Audit"));
+const AdminLeads = lazy(() => import("./pages/admin/Leads"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -182,6 +183,7 @@ const App = () => (
             <Route element={<ProtectedRoute adminOnly><ProtectedLayout /></ProtectedRoute>}>
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/leads" element={<AdminLeads />} />
               <Route path="/admin/analytics" element={<AdminAnalytics />} />
               <Route path="/admin/content" element={<AdminContent />} />
               <Route path="/admin/audit" element={<AdminAudit />} />

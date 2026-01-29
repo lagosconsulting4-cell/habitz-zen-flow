@@ -1020,6 +1020,171 @@ export type Database = {
           }
         ]
       }
+      quiz_responses: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          phone: string
+          age_range: string | null
+          profession: string | null
+          work_schedule: string | null
+          gender: string | null
+          financial_range: string | null
+          energy_peak: string | null
+          time_available: string | null
+          objective: string | null
+          challenges: Json
+          consistency_feeling: string | null
+          projected_feeling: string | null
+          years_promising: string | null
+          week_days: Json
+          week_days_preset: string | null
+          recommended_habits: Json
+          created_at: string
+          updated_at: string
+          completed: boolean
+          converted_to_customer: boolean
+          user_id: string | null
+          source: string
+          utm_source: string | null
+          utm_medium: string | null
+          utm_campaign: string | null
+          follow_up_status: string
+          notes: string | null
+          tags: string[]
+          assigned_to: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          email: string
+          phone: string
+          age_range?: string | null
+          profession?: string | null
+          work_schedule?: string | null
+          gender?: string | null
+          financial_range?: string | null
+          energy_peak?: string | null
+          time_available?: string | null
+          objective?: string | null
+          challenges?: Json
+          consistency_feeling?: string | null
+          projected_feeling?: string | null
+          years_promising?: string | null
+          week_days?: Json
+          week_days_preset?: string | null
+          recommended_habits?: Json
+          created_at?: string
+          updated_at?: string
+          completed?: boolean
+          converted_to_customer?: boolean
+          user_id?: string | null
+          source?: string
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          follow_up_status?: string
+          notes?: string | null
+          tags?: string[]
+          assigned_to?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string
+          phone?: string
+          age_range?: string | null
+          profession?: string | null
+          work_schedule?: string | null
+          gender?: string | null
+          financial_range?: string | null
+          energy_peak?: string | null
+          time_available?: string | null
+          objective?: string | null
+          challenges?: Json
+          consistency_feeling?: string | null
+          projected_feeling?: string | null
+          years_promising?: string | null
+          week_days?: Json
+          week_days_preset?: string | null
+          recommended_habits?: Json
+          created_at?: string
+          updated_at?: string
+          completed?: boolean
+          converted_to_customer?: boolean
+          user_id?: string | null
+          source?: string
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          follow_up_status?: string
+          notes?: string | null
+          tags?: string[]
+          assigned_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_responses_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      lead_interactions: {
+        Row: {
+          id: string
+          lead_id: string
+          admin_user_id: string
+          type: string
+          content: string | null
+          metadata: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          lead_id: string
+          admin_user_id: string
+          type: string
+          content?: string | null
+          metadata?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          lead_id?: string
+          admin_user_id?: string
+          type?: string
+          content?: string | null
+          metadata?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_interactions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_responses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_interactions_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
