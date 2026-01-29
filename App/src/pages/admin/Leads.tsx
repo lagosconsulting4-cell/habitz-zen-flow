@@ -63,6 +63,8 @@ const AdminLeads = () => {
     totalPages,
     currentPage,
     isLoading,
+    isError,
+    error,
     summary,
     summaryLoading,
     bulkUpdateStatus,
