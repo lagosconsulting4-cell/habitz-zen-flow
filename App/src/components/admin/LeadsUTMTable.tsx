@@ -22,9 +22,9 @@ interface LeadsUTMTableProps {
 export const LeadsUTMTable = ({ data, loading }: LeadsUTMTableProps) => {
   if (loading) {
     return (
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <h3 className="text-lg font-semibold mb-4">Performance por UTM</h3>
-        <div className="h-[400px] flex items-center justify-center">
+        <div className="h-[300px] sm:h-[400px] flex items-center justify-center">
           <p className="text-muted-foreground">Carregando...</p>
         </div>
       </Card>
@@ -33,9 +33,9 @@ export const LeadsUTMTable = ({ data, loading }: LeadsUTMTableProps) => {
 
   if (!data || data.length === 0) {
     return (
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <h3 className="text-lg font-semibold mb-4">Performance por UTM</h3>
-        <div className="h-[400px] flex items-center justify-center">
+        <div className="h-[300px] sm:h-[400px] flex items-center justify-center">
           <p className="text-muted-foreground">Sem dados de UTM disponíveis</p>
         </div>
       </Card>
@@ -47,10 +47,10 @@ export const LeadsUTMTable = ({ data, loading }: LeadsUTMTableProps) => {
   const avgConversionRate = totalLeads > 0 ? (totalConverted / totalLeads) * 100 : 0;
 
   return (
-    <Card className="p-6">
+    <Card className="p-4 sm:p-6">
       <div className="mb-6">
         <h3 className="text-lg font-semibold mb-2">Performance por UTM</h3>
-        <div className="flex gap-6 text-sm">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 text-sm">
           <div>
             <span className="text-muted-foreground">Total de Leads:</span>
             <span className="ml-2 font-semibold">{totalLeads}</span>
@@ -89,7 +89,7 @@ export const LeadsUTMTable = ({ data, loading }: LeadsUTMTableProps) => {
                   <Badge variant="outline">{row.utm_medium}</Badge>
                 </td>
                 <td className="p-3">
-                  <Badge variant="outline" className="max-w-[200px] truncate">
+                  <Badge variant="outline" className="max-w-[120px] sm:max-w-[200px] truncate">
                     {row.utm_campaign}
                   </Badge>
                 </td>
