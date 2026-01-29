@@ -193,6 +193,7 @@ const CreateHabit = () => {
   const [timesPerWeek, setTimesPerWeek] = useState<number | undefined>(undefined);
   const [timesPerMonth, setTimesPerMonth] = useState<number | undefined>(undefined);
   const [everyNDays, setEveryNDays] = useState<number | undefined>(undefined);
+  const [timesPerDay, setTimesPerDay] = useState<number>(1);
   const [selectedPeriod, setSelectedPeriod] = useState<typeof periods[number]["id"]>(periods[0].id);
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
@@ -387,6 +388,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         times_per_week: null,
         times_per_month: null,
         every_n_days: null,
+        times_per_day: timesPerDay,
         reminder_time: notificationsEnabled ? reminderTime : null,
         notification_pref: notificationsEnabled
           ? {
@@ -936,6 +938,46 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         </div>
       </div>
 
+      {/* Times Per Day Selector Card */}
+      <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
+        <div className="flex items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
+              <Target className={`h-6 w-6 ${themeColors.iconColor}`} />
+            </div>
+            <div>
+              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+                Vezes por Dia
+              </p>
+              <p className={`text-base font-semibold ${themeColors.bodyText}`}>
+                {timesPerDay === 1 ? "1 vez" : `${timesPerDay} vezes`}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className={`border-t px-4 py-4 space-y-3 ${themeColors.headerBorder}`}>
+          <div className="flex gap-2 flex-wrap">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((count) => (
+              <button
+                key={count}
+                type="button"
+                onClick={() => setTimesPerDay(count)}
+                className={`w-10 h-10 rounded-full text-xs font-semibold transition-all duration-200 ${
+                  timesPerDay === count
+                    ? themeColors.buttonActive
+                    : themeColors.buttonInactive
+                }`}
+              >
+                {count}x
+              </button>
+            ))}
+          </div>
+          <p className={`text-xs ${themeColors.sectionTitle}`}>
+            Cada clique no Dashboard incrementa o contador até completar
+          </p>
+        </div>
+      </div>
+
       {/* Period Selector Card */}
       <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
         <div className="flex items-center justify-between px-4 py-4">
@@ -1174,6 +1216,25 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             </div>
           </div>
         </div>
+
+        {/* Times Per Day Summary */}
+        {timesPerDay > 1 && (
+          <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
+            <div className="flex items-center gap-3">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
+                <Target className={`h-5 w-5 ${themeColors.iconColor}`} />
+              </div>
+              <div>
+                <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+                  Vezes por Dia
+                </p>
+                <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
+                  {timesPerDay} vezes
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Period Summary */}
         <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>

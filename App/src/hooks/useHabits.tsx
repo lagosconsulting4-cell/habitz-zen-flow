@@ -48,6 +48,7 @@ export interface Habit {
   notification_pref?: HabitNotificationPref | null;
   auto_complete_source?: "manual" | "health" | null;
   reminder_time?: string | null;
+  times_per_day?: number | null;
 }
 
 export interface HabitCompletion {
@@ -60,6 +61,7 @@ export interface HabitCompletion {
   value?: number | null;
   note?: string | null;
   completed_at_time?: string | null;
+  completion_count?: number | null;
 }
 
 export interface HabitNotificationPref {
@@ -109,7 +111,7 @@ export const useHabits = () => {
         // Select only necessary columns to reduce payload
         const { data, error } = await supabase
           .from("habits")
-          .select("id, name, emoji, icon_key, category, period, days_of_week, streak, is_active, user_id, created_at, updated_at, color, unit, goal_value, frequency_type, times_per_week, times_per_month, every_n_days, reminder_time, notification_pref, auto_complete_source")
+          .select("id, name, emoji, icon_key, category, period, days_of_week, streak, is_active, user_id, created_at, updated_at, color, unit, goal_value, frequency_type, times_per_week, times_per_month, every_n_days, reminder_time, notification_pref, auto_complete_source, times_per_day")
           .eq("user_id", user.id)
           .order("created_at", { ascending: true });
 
@@ -194,7 +196,7 @@ export const useHabits = () => {
         // Select only necessary columns to reduce payload
         const { data, error } = await supabase
           .from("habit_completions")
-          .select("id, habit_id, user_id, completed_at, created_at, value, note, completed_at_time")
+          .select("id, habit_id, user_id, completed_at, created_at, value, note, completed_at_time, completion_count")
           .eq("completed_at", date);
 
         if (error) throw error;
@@ -597,31 +599,48 @@ export const useHabits = () => {
 
         // Update local state based on RPC response using React Query cache
         if (data) {
+          const completionCount = data.completion_count ?? 0;
+
           if (data.action === 'added') {
-            // Adding completion
+            // Nova completion criada (count=1)
             const newCompletion: HabitCompletion = {
               id: data.completion_id,
               habit_id: habitId,
               user_id: user.id,
               completed_at: targetDate,
               created_at: new Date().toISOString(),
+              completion_count: completionCount,
             };
             queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
               [...old, newCompletion]
             );
-            // Track completion event
+          } else if (data.action === 'incremented' || data.action === 'decremented') {
+            // Atualizar count na completion existente
+            queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
+              old.map((c) =>
+                c.habit_id === habitId && c.completed_at === targetDate
+                  ? { ...c, completion_count: completionCount }
+                  : c
+              )
+            );
+          } else if (data.action === 'removed') {
+            // Deletar completion (count chegou a 0)
+            queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
+              old.filter((c) => !(c.habit_id === habitId && c.completed_at === targetDate))
+            );
+          }
+
+          // Track events
+          if (data.is_fully_completed && (data.action === 'added' || data.action === 'incremented')) {
             trackEventGlobal("habit_completed", {
               habit_id: habitId,
               habit_name: targetHabit?.name,
               date: targetDate,
               new_streak: data.new_streak,
+              completion_count: completionCount,
+              times_per_day: data.times_per_day,
             });
-          } else if (data.action === 'removed') {
-            // Removing completion
-            queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
-              old.filter((c) => !(c.habit_id === habitId && c.completed_at === targetDate))
-            );
-            // Track uncompletion event
+          } else if (!data.is_fully_completed && data.action === 'decremented') {
             trackEventGlobal("habit_uncompleted", {
               habit_id: habitId,
               date: targetDate,
@@ -799,7 +818,25 @@ export const useHabits = () => {
     if (!targetDate || completionsDate !== targetDate) {
       return false;
     }
-    return completions.some((c) => c.habit_id === habitId);
+    const habit = habits.find(h => h.id === habitId);
+    const timesPerDay = habit?.times_per_day ?? 1;
+    const completion = completions.find((c) => c.habit_id === habitId);
+    if (!completion) return false;
+    return (completion.completion_count ?? 1) >= timesPerDay;
+  };
+
+  const getHabitCompletionCount = (habitId: string, date?: string): { current: number; target: number } => {
+    const targetDate = date ?? completionsDate;
+    const habit = habits.find(h => h.id === habitId);
+    const target = habit?.times_per_day ?? 1;
+    if (!targetDate || completionsDate !== targetDate) {
+      return { current: 0, target };
+    }
+    const completion = completions.find((c) => c.habit_id === habitId);
+    return {
+      current: completion?.completion_count ?? 0,
+      target,
+    };
   };
 
   // Optimistic update methods for immediate UI feedback
@@ -827,6 +864,7 @@ export const useHabits = () => {
     toggleHabit,
     getHabitsForDate,
     getHabitCompletionStatus,
+    getHabitCompletionCount,
     fetchHabits,
     fetchCompletionsForDate,
     completions,

@@ -14,6 +14,8 @@ import { NotificationPermissionDialog } from "@/components/pwa/NotificationPermi
 import { StreakToast } from "@/components/StreakToast";
 import { XPToast } from "@/components/XPToast";
 import { GemToast, AchievementToast } from "@/components/gamification";
+import { FreezeUsedToast } from "@/components/gamification/FreezeUsedToast";
+import { FreezeBadge } from "@/components/gamification/FreezeBadge";
 import { useHabits } from "@/hooks/useHabits";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/integrations/supabase/auth";
@@ -29,7 +31,7 @@ const isTimedHabit = (unit?: string | null): boolean => {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { habits, loading, toggleHabit, getHabitCompletionStatus, addCompletionOptimistic, removeCompletionOptimistic, getHabitsForDate } = useHabits();
+  const { habits, loading, toggleHabit, getHabitCompletionStatus, getHabitCompletionCount, addCompletionOptimistic, removeCompletionOptimistic, getHabitsForDate } = useHabits();
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const { user } = useAuth();
@@ -134,16 +136,10 @@ const Dashboard = () => {
 
   // Calculate progress for each habit (0-100) - memoized
   const calculateProgress = useCallback((habit: Habit): number => {
-    const completed = getHabitCompletionStatus(habit.id);
-
-    // If has numeric goal
-    if (habit.goal_value && habit.goal_value > 0) {
-      return completed ? 100 : 0;
-    }
-
-    // Binary completion
-    return completed ? 100 : 0;
-  }, [getHabitCompletionStatus]);
+    const { current, target } = getHabitCompletionCount(habit.id);
+    if (target <= 0) return 0;
+    return Math.min(100, (current / target) * 100);
+  }, [getHabitCompletionCount]);
 
   // Check if habit is completed today - memoized
   const isCompletedToday = useCallback((habitId: string): boolean => {
@@ -166,108 +162,78 @@ const Dashboard = () => {
     setXpToastQueue((prev) => [...prev, toast]);
   };
 
-  // Handle habit toggle - opens timer for timed habits (memoized to prevent recreation)
+  // Handle habit toggle - supports times_per_day increment/decrement
   const handleToggle = useCallback(async (habit: Habit) => {
-    const wasCompleted = getHabitCompletionStatus(habit.id);
-    const targetDate = new Date().toISOString().split("T")[0];
+    const wasFullyCompleted = getHabitCompletionStatus(habit.id);
+    const { current: prevCount, target } = getHabitCompletionCount(habit.id);
 
     // If it's a timed habit and not completed, open timer
-    if (isTimedHabit(habit.unit) && !wasCompleted && habit.goal_value && habit.goal_value > 0) {
+    if (isTimedHabit(habit.unit) && !wasFullyCompleted && habit.goal_value && habit.goal_value > 0) {
       setTimerHabit(habit);
       return;
     }
 
-    // OPTIMISTIC: Create completion object immediately
-    const optimisticCompletion = {
-      id: crypto.randomUUID(),
-      habit_id: habit.id,
-      user_id: user?.id || "",
-      completed_at: targetDate,
-      created_at: new Date().toISOString(),
-    };
+    try {
+      // RPC handles increment/decrement + cache update atomically
+      await toggleHabit(habit.id);
 
-    // If completing (not uncompleting), trigger celebration IMMEDIATELY
-    if (!wasCompleted) {
-      // Add completion optimistically
-      addCompletionOptimistic(optimisticCompletion);
+      // After toggle, check new state for celebrations
+      const { current: newCount } = getHabitCompletionCount(habit.id);
+      const isNowFullyCompleted = newCount >= target;
 
-      if (isGamificationEnabled) {
-        // Queue XP toast IMMEDIATELY (will show after brief delay)
-        queueXpToast({
-          amount: XP_VALUES.HABIT_COMPLETE,
-          habitId: habit.id,
-          type: "habit",
-        });
-      }
-
-      // Check for streak milestones (3, 7, 30 days)
-      const newStreak = habit.streak + 1; // Optimistic - actual value comes from DB
-      if (awardStreakBonus && (newStreak === 3 || newStreak === 7 || newStreak === 30)) {
+      // Celebrations only when transitioning to fully completed
+      if (isNowFullyCompleted && !wasFullyCompleted) {
         if (isGamificationEnabled) {
-          // Queue streak milestone IMMEDIATELY
-          setStreakMilestone(newStreak);
-          const streakXpAmount =
-            newStreak === 3
-              ? XP_VALUES.STREAK_BONUS_3
-              : newStreak === 7
-                ? XP_VALUES.STREAK_BONUS_7
-                : XP_VALUES.STREAK_BONUS_30;
           queueXpToast({
-            amount: streakXpAmount,
-            type: "streak",
+            amount: XP_VALUES.HABIT_COMPLETE,
+            habitId: habit.id,
+            type: "habit",
           });
         }
-      }
 
-      // Check for Perfect Day (all habits completed)
-      // Use requestAnimationFrame to ensure state is updated
-      requestAnimationFrame(() => {
-        // Need to re-check completion status after optimistic update
-        const allCompleted = todayHabits.every(
-          (h) => h.id === habit.id || getHabitCompletionStatus(h.id)
-        );
-
-        if (allCompleted && awardPerfectDayBonus) {
-          // Show special celebration for perfect day
-          celebrations.perfectDay();
+        // Check for streak milestones
+        const newStreak = habit.streak + 1;
+        if (awardStreakBonus && (newStreak === 3 || newStreak === 7 || newStreak === 30)) {
           if (isGamificationEnabled) {
-            // Queue XP toast for perfect day bonus
+            setStreakMilestone(newStreak);
+            const streakXpAmount =
+              newStreak === 3
+                ? XP_VALUES.STREAK_BONUS_3
+                : newStreak === 7
+                  ? XP_VALUES.STREAK_BONUS_7
+                  : XP_VALUES.STREAK_BONUS_30;
             queueXpToast({
-              amount: XP_VALUES.PERFECT_DAY,
-              type: "perfect_day",
+              amount: streakXpAmount,
+              type: "streak",
             });
           }
         }
-      });
-    } else {
-      // Remove completion optimistically
-      removeCompletionOptimistic(habit.id, targetDate);
-    }
 
-    // BACKGROUND: Sync with backend (non-blocking)
-    // RPC function now handles: completion toggle, XP award, and streak update atomically
-    try {
-      await toggleHabit(habit.id);
+        // Check for Perfect Day
+        requestAnimationFrame(() => {
+          const allCompleted = todayHabits.every(
+            (h) => h.id === habit.id || getHabitCompletionStatus(h.id)
+          );
 
-      // Note: XP and streak awards are now handled atomically in the RPC function
-      // The calls below (awardStreakBonus, awardPerfectDayBonus) may be for additional
-      // bonuses or UI side effects, but XP awards are already handled by RPC
+          if (allCompleted && awardPerfectDayBonus) {
+            celebrations.perfectDay();
+            if (isGamificationEnabled) {
+              queueXpToast({
+                amount: XP_VALUES.PERFECT_DAY,
+                type: "perfect_day",
+              });
+            }
+          }
+        });
+      }
     } catch (error) {
       console.error("Toggle sync failed:", error);
-      // ROLLBACK: Revert optimistic update on error
-      if (!wasCompleted) {
-        removeCompletionOptimistic(habit.id, targetDate);
-      } else {
-        addCompletionOptimistic(optimisticCompletion);
-      }
     }
   }, [
     getHabitCompletionStatus,
+    getHabitCompletionCount,
     isTimedHabit,
     setTimerHabit,
-    user,
-    addCompletionOptimistic,
-    removeCompletionOptimistic,
     queueXpToast,
     awardStreakBonus,
     setStreakMilestone,
@@ -453,6 +419,8 @@ const Dashboard = () => {
                   completed={isCompletedToday(habit.id)}
                   onToggle={() => handleToggle(habit as Habit)}
                   streakDays={habit.streak}
+                  completionCount={getHabitCompletionCount(habit.id).current}
+                  timesPerDay={(habit as Habit).times_per_day ?? 1}
                   isTimedHabit={isTimedHabit(habit.unit)}
                   onTimerClick={() => setTimerHabit(habit as Habit)}
                 />
@@ -515,6 +483,9 @@ const Dashboard = () => {
 
       {/* NEW: Achievement Toast */}
       {isGamificationEnabled && <AchievementToast userId={user?.id} />}
+
+      {/* NEW: Freeze Used Toast */}
+      {isGamificationEnabled && <FreezeUsedToast />}
     </div>
   );
 };

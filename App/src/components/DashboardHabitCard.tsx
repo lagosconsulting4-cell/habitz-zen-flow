@@ -15,6 +15,7 @@ export interface Habit {
   category?: string;
   goal_value?: number | null;
   unit?: string | null;
+  times_per_day?: number | null;
 }
 
 interface DashboardHabitCardProps {
@@ -26,6 +27,8 @@ interface DashboardHabitCardProps {
   className?: string;
   isTimedHabit?: boolean;
   onTimerClick?: () => void;
+  completionCount?: number;
+  timesPerDay?: number;
 }
 
 // Progress ring constants - defined outside to avoid recalculation
@@ -47,32 +50,43 @@ const DashboardHabitCardComponent = ({
   className,
   isTimedHabit,
   onTimerClick,
+  completionCount = 0,
+  timesPerDay = 1,
 }: DashboardHabitCardProps) => {
   // Memoized progress offset calculation
   const offset = useMemo(() => CIRCUMFERENCE - (progress / 100) * CIRCUMFERENCE, [progress]);
   const miniOffset = useMemo(() => MINI_RING_CIRCUMFERENCE - (progress / 100) * MINI_RING_CIRCUMFERENCE, [progress]);
 
-  // Track completion changes for haptic feedback only
-  const [wasCompleted, setWasCompleted] = useState(completed);
+  // Track completion changes for haptic feedback
+  const [prevProgress, setPrevProgress] = useState(progress);
 
   useEffect(() => {
-    if (completed && !wasCompleted) {
-      // Haptic feedback on completion
-      if ("vibrate" in navigator) {
-        navigator.vibrate([15, 50, 25]);
+    if (progress !== prevProgress) {
+      if (progress >= 100 && prevProgress < 100) {
+        // Fully completed - triple haptic
+        if ("vibrate" in navigator) {
+          navigator.vibrate([15, 50, 25]);
+        }
+      } else if (progress > prevProgress) {
+        // Incremented - light haptic
+        if ("vibrate" in navigator) {
+          navigator.vibrate(10);
+        }
+      } else if (progress < prevProgress) {
+        // Decremented - light haptic
+        if ("vibrate" in navigator) {
+          navigator.vibrate(10);
+        }
       }
-    } else if (!completed && wasCompleted) {
-      // Light haptic on unmark
-      if ("vibrate" in navigator) {
-        navigator.vibrate(10);
-      }
+      setPrevProgress(progress);
     }
-    setWasCompleted(completed);
-  }, [completed, wasCompleted]);
+  }, [progress, prevProgress]);
 
   const handleClick = useCallback(() => {
     onToggle();
   }, [onToggle]);
+
+  const showCounter = timesPerDay > 1;
 
   return (
     <motion.button
@@ -90,7 +104,7 @@ const DashboardHabitCardComponent = ({
         className
       )}
       type="button"
-      aria-label={`${completed ? 'Desmarcar' : 'Marcar'} hábito ${habit.name}`}
+      aria-label={`${completed ? 'Desmarcar' : 'Marcar'} hábito ${habit.name}${showCounter ? ` (${completionCount}/${timesPerDay})` : ''}`}
       aria-pressed={completed}
     >
       {/* Main Progress Ring with Icon Inside */}
@@ -201,6 +215,24 @@ const DashboardHabitCardComponent = ({
           </button>
         )}
 
+        {/* Completion Counter Badge - Bottom right (only when times_per_day > 1) */}
+        {showCounter && (
+          <div className="absolute -bottom-1 -right-1 z-20 flex items-center justify-center">
+            <div
+              className={cn(
+                "rounded-full px-1.5 py-0.5 border-2 min-w-[32px] text-center",
+                completed
+                  ? "bg-primary border-primary text-primary-foreground"
+                  : "bg-background border-primary/60 text-foreground"
+              )}
+            >
+              <span className="text-[10px] font-bold leading-none">
+                {completionCount}/{timesPerDay}
+              </span>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* Habit Name */}
@@ -219,6 +251,8 @@ export const DashboardHabitCard = React.memo(DashboardHabitCardComponent, (prevP
     prevProps.progress === nextProps.progress &&
     prevProps.completed === nextProps.completed &&
     prevProps.streakDays === nextProps.streakDays &&
+    prevProps.completionCount === nextProps.completionCount &&
+    prevProps.timesPerDay === nextProps.timesPerDay &&
     prevProps.habit.icon_key === nextProps.habit.icon_key &&
     prevProps.habit.name === nextProps.habit.name &&
     prevProps.habit.goal_value === nextProps.habit.goal_value &&

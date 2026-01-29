@@ -133,10 +133,12 @@ export type Database = {
           note: string | null
           user_id: string
           value: number | null
+          completion_count: number
         }
         Insert: {
           completed_at: string
           completed_at_time?: string | null
+          completion_count?: number
           created_at?: string
           habit_id: string
           id?: string
@@ -147,6 +149,7 @@ export type Database = {
         Update: {
           completed_at?: string
           completed_at_time?: string | null
+          completion_count?: number
           created_at?: string
           habit_id?: string
           id?: string
@@ -306,6 +309,7 @@ export type Database = {
           template_id: string | null
           recommendation_score: number | null
           source: string | null
+          times_per_day: number
         }
         Insert: {
           auto_complete_source?: Database["public"]["Enums"]["habit_auto_complete_source"] | null
@@ -336,6 +340,7 @@ export type Database = {
           template_id?: string | null
           recommendation_score?: number | null
           source?: string | null
+          times_per_day?: number
         }
         Update: {
           auto_complete_source?: Database["public"]["Enums"]["habit_auto_complete_source"] | null
@@ -366,6 +371,7 @@ export type Database = {
           template_id?: string | null
           recommendation_score?: number | null
           source?: string | null
+          times_per_day?: number
         }
         Relationships: []
       }
