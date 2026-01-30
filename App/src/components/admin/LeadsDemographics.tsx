@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { useIsMobile, useIsTablet } from "@/hooks/useMediaQuery";
 
 interface DemographicData {
   age_range?: string;
@@ -33,9 +34,21 @@ const DemographicChart = ({
   nameKey: keyof DemographicData;
   title: string;
 }) => {
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+
+  // Responsive chart configuration
+  const chartHeight = isMobile ? 250 : isTablet ? 280 : 300;
+  const xAxisConfig = {
+    fontSize: isMobile ? 10 : 12,
+    angle: -45,
+    textAnchor: "end" as const,
+    height: isMobile ? 80 : 100,
+  };
+
   if (!data || data.length === 0) {
     return (
-      <div className="h-[400px] flex items-center justify-center">
+      <div className="h-[300px] sm:h-[400px] flex items-center justify-center">
         <p className="text-muted-foreground">Sem dados disponíveis</p>
       </div>
     );
@@ -49,20 +62,24 @@ const DemographicChart = ({
   }));
 
   return (
-    <div className="space-y-6">
-      <div className="grid md:grid-cols-2 gap-6">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Pie Chart */}
         <div>
-          <h4 className="text-sm font-semibold mb-4">Distribuição por {title}</h4>
-          <ResponsiveContainer width="100%" height={300}>
+          <h4 className="text-sm font-semibold mb-3 sm:mb-4">Distribuição por {title}</h4>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={80}
+                label={({ name, percent }) =>
+                  isMobile
+                    ? `${(percent * 100).toFixed(0)}%`
+                    : `${name}: ${(percent * 100).toFixed(0)}%`
+                }
+                outerRadius={isMobile ? 70 : 80}
                 fill="#8884d8"
                 dataKey="value"
               >
@@ -77,18 +94,25 @@ const DemographicChart = ({
                   borderRadius: "var(--radius)",
                 }}
               />
+              {isMobile && <Legend wrapperStyle={{ fontSize: "11px" }} />}
             </PieChart>
           </ResponsiveContainer>
         </div>
 
         {/* Bar Chart - Conversion Rate */}
         <div>
-          <h4 className="text-sm font-semibold mb-4">Taxa de Conversão por {title}</h4>
-          <ResponsiveContainer width="100%" height={300}>
+          <h4 className="text-sm font-semibold mb-3 sm:mb-4">Taxa de Conversão por {title}</h4>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-              <YAxis />
+              <XAxis
+                dataKey="name"
+                angle={xAxisConfig.angle}
+                textAnchor={xAxisConfig.textAnchor}
+                height={xAxisConfig.height}
+                tick={{ fontSize: xAxisConfig.fontSize }}
+              />
+              <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
               <Tooltip
                 formatter={(value, name) => {
                   if (name === "conversionRate") return `${value}%`;
@@ -107,23 +131,23 @@ const DemographicChart = ({
       </div>
 
       {/* Data Table */}
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/50">
-              <th className="p-3 text-left font-semibold">{title}</th>
-              <th className="p-3 text-right font-semibold">Total</th>
-              <th className="p-3 text-right font-semibold">Convertidos</th>
-              <th className="p-3 text-right font-semibold">Taxa</th>
+              <th className="p-2 sm:p-3 text-left font-semibold whitespace-nowrap">{title}</th>
+              <th className="p-2 sm:p-3 text-right font-semibold whitespace-nowrap">Total</th>
+              <th className="p-2 sm:p-3 text-right font-semibold whitespace-nowrap">Convertidos</th>
+              <th className="p-2 sm:p-3 text-right font-semibold whitespace-nowrap">Taxa</th>
             </tr>
           </thead>
           <tbody>
             {chartData.map((row, index) => (
               <tr key={index} className="border-b last:border-0 hover:bg-muted/30">
-                <td className="p-3 capitalize">{row.name}</td>
-                <td className="p-3 text-right">{row.value}</td>
-                <td className="p-3 text-right text-green-600">{row.converted}</td>
-                <td className="p-3 text-right font-semibold">{row.conversionRate}%</td>
+                <td className="p-2 sm:p-3 capitalize whitespace-nowrap">{row.name}</td>
+                <td className="p-2 sm:p-3 text-right">{row.value}</td>
+                <td className="p-2 sm:p-3 text-right text-green-600">{row.converted}</td>
+                <td className="p-2 sm:p-3 text-right font-semibold">{row.conversionRate}%</td>
               </tr>
             ))}
           </tbody>
@@ -141,11 +165,13 @@ export const LeadsDemographics = ({
   byGender,
   loading,
 }: LeadsDemographicsProps) => {
+  const isMobile = useIsMobile();
+
   if (loading) {
     return (
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <h3 className="text-lg font-semibold mb-4">Segmentação Demográfica</h3>
-        <div className="h-[400px] flex items-center justify-center">
+        <div className="h-[300px] sm:h-[400px] flex items-center justify-center">
           <p className="text-muted-foreground">Carregando...</p>
         </div>
       </Card>
@@ -153,34 +179,44 @@ export const LeadsDemographics = ({
   }
 
   return (
-    <Card className="p-6">
+    <Card className="p-4 sm:p-6">
       <h3 className="text-lg font-semibold mb-4">Segmentação Demográfica</h3>
       <Tabs defaultValue="age" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="age">Idade</TabsTrigger>
-          <TabsTrigger value="profession">Profissão</TabsTrigger>
-          <TabsTrigger value="objective">Objetivo</TabsTrigger>
-          <TabsTrigger value="income">Renda</TabsTrigger>
-          <TabsTrigger value="gender">Gênero</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1">
+          <TabsTrigger value="age" className="text-xs sm:text-sm">
+            Idade
+          </TabsTrigger>
+          <TabsTrigger value="profession" className="text-xs sm:text-sm">
+            {isMobile ? "Prof." : "Profissão"}
+          </TabsTrigger>
+          <TabsTrigger value="objective" className="text-xs sm:text-sm">
+            Objetivo
+          </TabsTrigger>
+          <TabsTrigger value="income" className="text-xs sm:text-sm">
+            Renda
+          </TabsTrigger>
+          <TabsTrigger value="gender" className="text-xs sm:text-sm">
+            Gênero
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="age" className="mt-6">
+        <TabsContent value="age" className="mt-4 sm:mt-6">
           <DemographicChart data={byAge} nameKey="age_range" title="Faixa Etária" />
         </TabsContent>
 
-        <TabsContent value="profession" className="mt-6">
+        <TabsContent value="profession" className="mt-4 sm:mt-6">
           <DemographicChart data={byProfession} nameKey="profession" title="Profissão" />
         </TabsContent>
 
-        <TabsContent value="objective" className="mt-6">
+        <TabsContent value="objective" className="mt-4 sm:mt-6">
           <DemographicChart data={byObjective} nameKey="objective" title="Objetivo" />
         </TabsContent>
 
-        <TabsContent value="income" className="mt-6">
+        <TabsContent value="income" className="mt-4 sm:mt-6">
           <DemographicChart data={byFinancialRange} nameKey="financial_range" title="Faixa Salarial" />
         </TabsContent>
 
-        <TabsContent value="gender" className="mt-6">
+        <TabsContent value="gender" className="mt-4 sm:mt-6">
           <DemographicChart data={byGender} nameKey="gender" title="Gênero" />
         </TabsContent>
       </Tabs>
