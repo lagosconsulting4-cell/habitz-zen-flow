@@ -1,3 +1,4 @@
+// Force HMR update
 import { motion } from "motion/react";
 import { Clock, Target, CloudFog, BedDouble, AlertCircle, Flame, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
@@ -9,13 +10,13 @@ const CHALLENGE_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { id: "procrastination", label: "Procrastino muito", icon: Clock },
-  { id: "focus", label: "Falta de foco", icon: Target },
-  { id: "forgetfulness", label: "Esquecimentos", icon: CloudFog },
-  { id: "tiredness", label: "Cansaço", icon: BedDouble },
-  { id: "anxiety", label: "Ansiedade", icon: AlertCircle },
-  { id: "motivation", label: "Motivação", icon: Flame },
-];
+    { id: "procrastination", label: "Quando sento pra fazer algo chato (empurro com a barriga)", icon: Clock },
+    { id: "focus", label: "Minha mente não para quieta (penso em 10 coisas ao mesmo tempo)", icon: Target },
+    { id: "forgetfulness", label: "Só lembro do que tinha que fazer quando já é tarde", icon: CloudFog },
+    { id: "tiredness", label: "Acordo já sem bateria, parece que um caminhão passou", icon: BedDouble },
+    { id: "anxiety", label: "Fico ansioso só de olhar o tanto de coisa que tenho pra fazer", icon: AlertCircle },
+    { id: "motivation", label: "Quando algo sai do planejado, eu largo tudo", icon: Flame },
+  ];
 
 export const ChallengesStep = () => {
   const { challenges, toggleChallenge } = useQuiz();
@@ -29,10 +30,10 @@ export const ChallengesStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Quais são os seus maiores desafios para ter a vida dos sonhos?
+        <h2 className="text-2xl font-bold text-white mb-2">
+          Em qual desses momentos você trava?
         </h2>
-        <p className="text-sm text-slate-500">Selecione todos que se aplicam</p>
+        <p className="text-sm text-slate-400">Seja sincero. Ninguém vai ver suas respostas.</p>
       </motion.div>
 
       {/* Selection Grid */}
@@ -42,7 +43,7 @@ export const ChallengesStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex items-center justify-center"
       >
-        <SelectionCardGrid columns={2} gap={3} className="w-full max-w-md">
+        <SelectionCardGrid columns={1} gap={3} className="w-full max-w-md">
           {CHALLENGE_OPTIONS.map((option, index) => (
             <motion.div
               key={option.id}

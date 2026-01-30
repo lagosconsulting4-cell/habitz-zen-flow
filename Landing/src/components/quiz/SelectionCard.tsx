@@ -35,100 +35,90 @@ export const SelectionCard = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ scale: disabled ? 1 : 1.02 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      whileHover={{ scale: disabled ? 1 : 1.02, y: disabled ? 0 : -2 }}
       whileTap={{ scale: disabled ? 1 : 0.98 }}
+      className={cn("h-full", className)}
     >
       <div
         className={cn(
-          "relative cursor-pointer transition-all duration-300 rounded-xl",
-          "border-2 bg-white",
+          "relative cursor-pointer h-full transition-all duration-300 rounded-2xl group",
+          "border bg-[#121214]",
           selected
-            ? "border-[#A3E635] bg-[#A3E635]/5 shadow-md shadow-[#A3E635]/20"
-            : "border-slate-200 hover:border-[#A3E635]/50 hover:shadow-sm",
-          disabled && "opacity-50 cursor-not-allowed",
-          isIconOnly ? "p-4" : isMini ? "py-3 px-4" : isCompact ? "p-4" : "p-6",
-          className
+            ? "border-lime-500 bg-lime-500/10 ring-2 ring-lime-500/20 shadow-lg shadow-lime-500/10"
+            : "border-white/10 hover:border-lime-500/40 hover:bg-[#1A1A1C] hover:shadow-xl hover:shadow-lime-500/5",
+          disabled && "opacity-50 cursor-not-allowed grayscale",
+          isIconOnly ? "p-4" : isMini ? "py-3 px-4" : isCompact ? "p-5" : "p-6"
         )}
         onClick={disabled ? undefined : onClick}
       >
-        {/* Selection Indicator */}
+        {/* Selection Indicator - Apple Style Checkbox */}
         <motion.div
           className={cn(
-            "absolute inset-y-0 flex items-center justify-center",
-            isMini ? "right-2" : "right-3"
+            "absolute flex items-center justify-center pointer-events-none transition-all duration-300",
+            isMini ? "right-3 top-1/2 -translate-y-1/2" : "top-4 right-4"
           )}
-          initial={{ scale: 0, opacity: 0 }}
           animate={{
-            scale: selected ? 1 : multiselect ? 1 : 0,
-            opacity: selected ? 1 : multiselect ? 1 : 0,
-          }}
-          transition={{
-            type: "spring",
-            stiffness: 200,
-            damping: 15,
-            duration: 0.4,
+            scale: selected ? 1 : 0.9,
+            opacity: selected ? 1 : 0.4
           }}
         >
           <div
             className={cn(
-              "rounded-full flex items-center justify-center",
-              isMini ? "w-4 h-4" : "w-5 h-5",
+              "rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
+              isMini ? "w-5 h-5" : "w-6 h-6",
               selected
-                ? "bg-[#A3E635] text-slate-900"
-                : multiselect
-                  ? "border-2 border-slate-200"
-                  : ""
+                ? "bg-lime-500 text-slate-900 shadow-lime-500/40"
+                : "bg-white/5 text-transparent border border-white/20"
             )}
           >
-            {selected && (
-              <Check className={cn(isMini ? "h-2.5 w-2.5" : "h-3 w-3")} strokeWidth={3} />
-            )}
+            <Check className={cn("text-slate-900", isMini ? "h-3 w-3" : "h-3.5 w-3.5")} strokeWidth={4} />
           </div>
         </motion.div>
 
-        {/* Content */}
+        {/* Content Container */}
         <div
           className={cn(
-            "flex items-center",
-            isMini ? "gap-2" : "gap-4",
-            isIconOnly ? "flex-col justify-center text-center" : "flex-row"
+            "flex items-start",
+            isMini ? "gap-3" : "gap-5",
+            isIconOnly ? "flex-col justify-center text-center items-center h-full gap-3" : "flex-row"
           )}
         >
-          {/* Icon/Emoji */}
+          {/* Icon/Emoji Container - Glassy & Soft */}
           {(icon || emoji) && (
-            <motion.div
+            <div
               className={cn(
-                "flex-shrink-0 flex items-center justify-center rounded-xl",
+                "flex-shrink-0 flex items-center justify-center rounded-2xl transition-all duration-300",
                 isIconOnly
-                  ? "w-16 h-16 text-4xl"
+                  ? "w-16 h-16 text-4xl mb-1"
                   : isMini
-                    ? "w-10 h-10 text-xl"
+                    ? "w-10 h-10 text-lg"
                     : isCompact
-                      ? "w-12 h-12 text-2xl"
-                      : "w-14 h-14 text-3xl",
-                !emoji && (isMini ? "bg-slate-100 p-2" : "bg-slate-100 p-3")
+                      ? "w-12 h-12 text-xl"
+                      : "w-14 h-14 text-2xl",
+                selected
+                  ? "bg-lime-500 text-slate-900 shadow-lg shadow-lime-500/25 rotate-3 scale-110"
+                  : "bg-white/5 text-slate-400 group-hover:bg-lime-500/20 group-hover:text-lime-400 group-hover:scale-105"
               )}
-              animate={{ rotate: selected ? [0, -10, 10, 0] : 0 }}
-              transition={{ duration: 0.3 }}
             >
               {emoji ? emoji : icon}
-            </motion.div>
+            </div>
           )}
 
           {/* Text Content */}
-          <div className={cn("flex-1 min-w-0", isIconOnly && "w-full")}>
+          <div className={cn("flex-1 min-w-0 flex flex-col justify-center", !isIconOnly && (isCompact ? "min-h-[3rem]" : "min-h-[3.5rem]"))}>
             <h3
               className={cn(
-                "font-bold text-slate-900 leading-tight",
+                "font-bold leading-snug transition-colors",
+                selected ? "text-white" : "text-slate-200 group-hover:text-lime-400",
                 isIconOnly
-                  ? "text-sm mt-2"
+                  ? "text-sm"
                   : isMini
-                    ? "text-sm leading-tight"
+                    ? "text-sm"
                     : isCompact
-                      ? "text-base"
+                      ? "text-[0.95rem]"
                       : "text-lg"
               )}
             >
@@ -136,7 +126,7 @@ export const SelectionCard = ({
             </h3>
 
             {description && !isIconOnly && !isMini && (
-              <p className={cn("text-slate-500 mt-1", isCompact ? "text-xs" : "text-sm")}>
+              <p className={cn("text-slate-400 mt-1.5 font-medium leading-relaxed", isCompact ? "text-xs" : "text-sm")}>
                 {description}
               </p>
             )}

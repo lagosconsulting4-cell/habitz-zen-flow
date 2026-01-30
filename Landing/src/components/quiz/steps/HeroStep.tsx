@@ -35,15 +35,15 @@ export const HeroStep = () => {
         transition={{ delay: 0.2, duration: 0.3 }}
         className="text-center mb-8"
       >
-        <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">
-          Vamos entender como sua rotina
+        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3 tracking-tight">
+          Por que você começa,
         </h1>
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-          <span className="text-lime-600">realmente funciona hoje</span>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          <span className="text-lime-400">mas nunca termina?</span>
         </h2>
-        <p className="text-base text-slate-600 mt-4">
-          Sem fórmulas prontas. Sem cobrança.<br/>
-          Só algumas perguntas para mapear sua realidade.
+        <p className="text-base text-slate-400 mt-4 max-w-xs mx-auto leading-relaxed">
+          Não é preguiça.<br />
+          É que sua rotina não foi feita pra sua realidade.
         </p>
       </motion.div>
 
@@ -57,7 +57,7 @@ export const HeroStep = () => {
         <Button
           size="lg"
           onClick={nextStep}
-          className="w-full h-14 text-lg font-bold bg-lime-500 hover:bg-lime-600 text-slate-900"
+          className="w-full h-14 text-lg font-bold bg-lime-400 hover:bg-lime-500 text-slate-900 shadow-[0_0_20px_rgba(163,230,53,0.3)] hover:shadow-[0_0_30px_rgba(163,230,53,0.5)] transition-all"
         >
           Começar agora
         </Button>
@@ -70,7 +70,7 @@ export const HeroStep = () => {
         transition={{ delay: 0.5, duration: 0.3 }}
         className="text-center mb-6"
       >
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-400">
           Leva cerca de 2 minutos • Sem compromisso
         </p>
       </motion.div>
@@ -83,7 +83,7 @@ export const HeroStep = () => {
       >
         <a
           href="/app/login"
-          className="text-sm text-slate-600 hover:text-slate-900 underline"
+          className="text-sm text-slate-400 hover:text-white underline"
         >
           Já tem uma conta? Entre Aqui
         </a>

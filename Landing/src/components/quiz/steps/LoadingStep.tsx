@@ -136,10 +136,10 @@ export const LoadingStep: React.FC<LoadingStepProps> = ({ onComplete }) => {
           transition={{ duration: 0.3 }}
           className="text-center mb-8"
         >
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
             {LOADING_PHASES[currentPhase]?.label}
           </h2>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-400">
             Estamos criando seu plano personalizado
           </p>
         </motion.div>
@@ -148,7 +148,7 @@ export const LoadingStep: React.FC<LoadingStepProps> = ({ onComplete }) => {
       {/* Progress Bar */}
       <div className="w-full max-w-md px-4">
         <Progress value={progress} className="h-3 mb-2" />
-        <p className="text-center text-xs text-slate-500">
+        <p className="text-center text-xs text-slate-400">
           {Math.round(progress)}% concluído
         </p>
       </div>
@@ -161,11 +161,10 @@ export const LoadingStep: React.FC<LoadingStepProps> = ({ onComplete }) => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: index * 0.1 }}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index <= currentPhase
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${index <= currentPhase
                 ? "bg-lime-500 scale-125"
                 : "bg-slate-300"
-            }`}
+              }`}
           />
         ))}
       </div>
@@ -177,7 +176,7 @@ export const LoadingStep: React.FC<LoadingStepProps> = ({ onComplete }) => {
         transition={{ delay: 0.5 }}
         className="mt-8 text-center px-4"
       >
-        <p className="text-sm text-slate-600 max-w-md">
+        <p className="text-sm text-slate-400 max-w-md">
           Criando uma rotina que funciona com o jeito que seu cérebro aprende — pequena, repetida, e fácil de virar automática.
         </p>
       </motion.div>

@@ -10,12 +10,12 @@ const PROFESSION_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { value: "student", label: "Estudante", icon: GraduationCap },
-  { value: "employed", label: "CLT", icon: Briefcase },
-  { value: "entrepreneur", label: "Empreendedor", icon: Rocket },
-  { value: "freelancer", label: "Freelancer", icon: Laptop },
-  { value: "other", label: "Outro", icon: Sparkles },
-];
+    { value: "student", label: "Estudante", icon: GraduationCap },
+    { value: "employed", label: "CLT", icon: Briefcase },
+    { value: "entrepreneur", label: "Empreendedor", icon: Rocket },
+    { value: "freelancer", label: "Freelancer", icon: Laptop },
+    { value: "other", label: "Outro", icon: Sparkles },
+  ];
 
 export const ProfessionStep = () => {
   const { profession, setProfession } = useQuiz();
@@ -29,10 +29,10 @@ export const ProfessionStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        <h2 className="text-2xl font-bold text-white mb-2">
           Qual sua ocupação?
         </h2>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-400">
           Adaptamos a rotina para sua realidade
         </p>
       </motion.div>
@@ -55,7 +55,7 @@ export const ProfessionStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                icon={<option.icon className="w-5 h-5 text-slate-600" />}
+                icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={profession === option.value}
                 onClick={() => setProfession(option.value)}
                 variant="compact"

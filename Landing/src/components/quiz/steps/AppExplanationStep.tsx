@@ -1,211 +1,125 @@
 import { motion } from "motion/react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Trophy, Gift, Calendar, Timer, Star } from "lucide-react";
+import { Brain, Zap, Clock, X, Check } from "lucide-react";
 import { ContinueButton } from "../ContinueButton";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+
+const TABS = [
+  { id: "dopamine", label: "Otimização de Dopamina", icon: Zap },
+  { id: "biology", label: "Ritmo Biológico", icon: Clock },
+  { id: "mental-load", label: "Carga Mental Zero", icon: Brain },
+];
 
 export const AppExplanationStep = () => {
+  const [activeTab, setActiveTab] = useState("dopamine");
+
+  const tabContent = {
+    dopamine: {
+      title: "Seu cérebro precisa de vitórias rápidas",
+      description: "A maioria das rotinas falha porque exige esforço antes da recompensa. O BORA inverte isso.",
+      before: "Rotina comum: Esforço enorme → Nenhuma recompensa imediata → Cérebro desiste.",
+      after: "Método BORA: Micro-vitória → Liberação de dopamina → Vontade de fazer mais.",
+      image: "https://placehold.co/600x400/1e293b/a3e635?text=Dopamine+Loop",
+    },
+    biology: {
+      title: "Pare de lutar contra seu relógio biológico",
+      description: "Você tenta ser produtivo quando seu corpo pede descanso. Isso gera o ciclo de exaustão.",
+      before: "Forçar produtividade às 14h (pico de cansaço natural).",
+      after: "Tarefas de foca às 10h e tarefas automáticas às 14h.",
+      image: "https://placehold.co/600x400/1e293b/a3e635?text=Bio+Rhythm",
+    },
+    "mental-load": {
+      title: "Não gaste energia decidindo o que fazer",
+      description: "Decidir cansa mais que fazer. Removemos o peso da decisão das suas costas.",
+      before: "Acordar e pensar: 'O que tenho que fazer hoje?' (Gasta 20% da bateria mental).",
+      after: "Acordar e executar o que já está pronto. (Foco total na ação).",
+      image: "https://placehold.co/600x400/1e293b/a3e635?text=Zero+Decision",
+    },
+  };
+
+  const content = tabContent[activeTab as keyof typeof tabContent];
+
   return (
-    <div className="flex flex-col">
-      {/* Header */}
+    <div className="flex flex-col h-full">
+      {/* Header with improved copy */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="text-center mb-6 px-4"
+        className="text-center mb-6"
       >
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-          Como o Bora vai mudar sua vida
+        <h2 className="text-2xl font-bold text-white mb-2">
+          Não é mágica. <span className="text-lime-400">É neurociência aplicada.</span>
         </h2>
-        <p className="text-base text-slate-600">
-          Três áreas principais que vão transformar sua rotina
+        <p className="text-sm text-slate-400">
+          Entenda por que o método BORA funciona onde outros falharam.
         </p>
       </motion.div>
 
-      {/* Tabs */}
+      {/* Modern Tabs */}
+      <div className="flex flex-wrap justify-center mb-6 gap-2">
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap border",
+                isActive
+                  ? "bg-lime-500/10 text-lime-400 border-lime-500/20 shadow-[0_0_15px_rgba(132,204,22,0.1)]"
+                  : "bg-white/5 text-slate-400 border-white/5 hover:bg-white/10"
+              )}
+            >
+              <tab.icon className={cn("w-3 h-3", isActive ? "text-lime-400" : "text-slate-400")} />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Content Card with Glassmorphism */}
       <motion.div
+        key={activeTab}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2, duration: 0.3 }}
-        className="w-full max-w-3xl mx-auto px-4"
+        transition={{ duration: 0.3 }}
+        className="flex-1 bg-[#121214] rounded-2xl p-5 border border-white/10 mb-6 flex flex-col sm:flex-row gap-6 shadow-xl"
       >
-        <Tabs defaultValue="routine" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="routine" className="text-xs sm:text-sm">
-              <Calendar className="w-4 h-4 mr-1" />
-              Rotina
-            </TabsTrigger>
-            <TabsTrigger value="completion" className="text-xs sm:text-sm">
-              <CheckCircle className="w-4 h-4 mr-1" />
-              Conclusão
-            </TabsTrigger>
-            <TabsTrigger value="bonus" className="text-xs sm:text-sm">
-              <Gift className="w-4 h-4 mr-1" />
-              Bônus
-            </TabsTrigger>
-          </TabsList>
+        <div className="flex-1 space-y-4">
+          <h3 className="text-lg font-bold text-white leading-tight">
+            {content.title}
+          </h3>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            {content.description}
+          </p>
 
-          {/* Tab 1: Routine */}
-          <TabsContent value="routine" className="space-y-4">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-6">
-              {/* Screenshot */}
-              <div className="aspect-video bg-slate-100 rounded-xl mb-4 overflow-hidden">
-                <img
-                  src="/images/lp/mockup-app-vertical.webp"
-                  alt="Rotina personalizada do app Bora"
-                  className="w-full h-full object-cover"
-                />
+          {/* Transformation Box - Before/After */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-start gap-3 p-3 bg-red-500/5 rounded-xl border border-red-500/10">
+              <div className="mt-0.5 bg-red-500/10 p-1 rounded-full text-red-500">
+                <X className="w-3 h-3" strokeWidth={3} />
               </div>
-
-              <h3 className="text-xl font-bold text-slate-900 mb-3">
-                Sua Rotina Personalizada
-              </h3>
-
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <Timer className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-slate-900">Horários otimizados</p>
-                    <p className="text-sm text-slate-700">
-                      Hábitos agendados nos seus melhores horários de energia
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-slate-900">Check diário simples</p>
-                    <p className="text-sm text-slate-700">
-                      Um toque para marcar como feito - sem complicação
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Star className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-slate-900">Adaptação inteligente</p>
-                    <p className="text-sm text-slate-700">
-                      A rotina se ajusta automaticamente à sua realidade
-                    </p>
-                  </div>
-                </div>
+              <div>
+                <span className="text-xs font-bold text-red-400 uppercase tracking-wider">Como é hoje</span>
+                <p className="text-xs text-red-300/80 mt-0.5 font-medium">
+                  {content.before}
+                </p>
               </div>
             </div>
-          </TabsContent>
 
-          {/* Tab 2: Completion */}
-          <TabsContent value="completion" className="space-y-4">
-            <div className="bg-gradient-to-br from-lime-50 to-lime-100 border-2 border-lime-200 rounded-2xl p-6">
-              {/* Screenshot */}
-              <div className="aspect-video bg-slate-100 rounded-xl mb-4 overflow-hidden">
-                <img
-                  src="/direct/images/dashboard/img16.webp"
-                  alt="Conclusão de hábitos no app Bora"
-                  className="w-full h-full object-cover"
-                />
+            <div className="flex items-start gap-3 p-3 bg-lime-500/5 rounded-xl border border-lime-500/10 shadow-sm">
+              <div className="mt-0.5 bg-lime-500/10 p-1 rounded-full text-lime-500">
+                <Check className="w-3 h-3" strokeWidth={3} />
               </div>
-
-              <h3 className="text-xl font-bold text-slate-900 mb-3">
-                Conclusão de Hábitos
-              </h3>
-
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-lime-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-slate-900">Sequências motivadoras</p>
-                    <p className="text-sm text-slate-700">
-                      Veja seus dias consecutivos crescerem e sinta o progresso
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Trophy className="w-5 h-5 text-lime-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-slate-900">Celebração visual</p>
-                    <p className="text-sm text-slate-700">
-                      Animações especiais quando você completa marcos importantes
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Star className="w-5 h-5 text-lime-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-slate-900">Estatísticas claras</p>
-                    <p className="text-sm text-slate-700">
-                      Acompanhe sua taxa de consistência e evolução semanal
-                    </p>
-                  </div>
-                </div>
+              <div>
+                <span className="text-xs font-bold text-lime-400 uppercase tracking-wider">Com o BORA</span>
+                <p className="text-xs text-lime-300/80 mt-0.5 font-medium">
+                  {content.after}
+                </p>
               </div>
             </div>
-          </TabsContent>
-
-          {/* Tab 3: Bonus */}
-          <TabsContent value="bonus" className="space-y-4">
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-2xl p-6">
-              {/* Screenshot */}
-              <div className="aspect-video bg-slate-100 rounded-xl mb-4 overflow-hidden">
-                <img
-                  src="/direct/images/dashboard/img17.webp"
-                  alt="Área de bônus do app Bora"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <h3 className="text-xl font-bold text-slate-900 mb-3">
-                Área de Bônus
-              </h3>
-
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <Gift className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-slate-900">Recompensas exclusivas</p>
-                    <p className="text-sm text-slate-700">
-                      Ganhe pontos e desbloqueie benefícios à medida que evolui
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Trophy className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-slate-900">Conquistas especiais</p>
-                    <p className="text-sm text-slate-700">
-                      Badges e troféus para celebrar suas vitórias
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Star className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-slate-900">Conteúdo premium</p>
-                    <p className="text-sm text-slate-700">
-                      Acesso a dicas, guias e recursos exclusivos para membros
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </motion.div>
-
-      {/* Bottom Message */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4, duration: 0.3 }}
-        className="text-center mt-6 px-4"
-      >
-        <p className="text-sm text-slate-600">
-          Tudo isso vai estar disponível para você em alguns minutos
-        </p>
+          </div>
+        </div>
       </motion.div>
 
       <ContinueButton />

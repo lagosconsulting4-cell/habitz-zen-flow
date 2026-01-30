@@ -28,17 +28,19 @@ export const NameStep = () => {
 
   return (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#A3E635]/10 flex items-center justify-center">
-          <User className="w-8 h-8 text-[#A3E635]" />
-        </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
+        className="text-center mb-8 px-4"
+      >
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
           Como podemos te chamar?
         </h2>
-        <p className="text-slate-600">
-          Queremos personalizar sua experiência
+        <p className="text-base text-slate-400">
+          Para personalizar seu plano
         </p>
-      </div>
+      </motion.div>
 
       <div className="max-w-md mx-auto">
         <Input

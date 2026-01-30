@@ -10,11 +10,11 @@ const FINANCIAL_RANGE_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { value: "1600-3000", label: "R$ 1.600 - 3.000", icon: Wallet },
-  { value: "3000-7000", label: "R$ 3.000 - 7.000", icon: DollarSign },
-  { value: "7000-20000", label: "R$ 7.000 - 20.000", icon: TrendingUp },
-  { value: "20000+", label: "R$ 20.000+", icon: Banknote },
-];
+    { value: "1600-3000", label: "R$ 1.600 - 3.000", icon: Wallet },
+    { value: "3000-7000", label: "R$ 3.000 - 7.000", icon: DollarSign },
+    { value: "7000-20000", label: "R$ 7.000 - 20.000", icon: TrendingUp },
+    { value: "20000+", label: "R$ 20.000+", icon: Banknote },
+  ];
 
 export const FinancialRangeStep = () => {
   const { financialRange, setFinancialRange } = useQuiz();
@@ -28,10 +28,10 @@ export const FinancialRangeStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        <h2 className="text-2xl font-bold text-white mb-2">
           Qual faixa de renda mais se aproxima da sua realidade atual?
         </h2>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-400">
           Isso não muda o acesso ao plano. Serve apenas para sugerir hábitos possíveis dentro do seu contexto.
         </p>
       </motion.div>
@@ -54,7 +54,7 @@ export const FinancialRangeStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                icon={<option.icon className="w-5 h-5 text-slate-600" />}
+                icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={financialRange === option.value}
                 onClick={() => setFinancialRange(option.value)}
                 variant="compact"

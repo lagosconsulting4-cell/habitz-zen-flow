@@ -10,12 +10,12 @@ const OBJECTIVE_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { value: "productivity", label: "Ser mais produtivo", icon: BarChart3 },
-  { value: "health", label: "Melhorar a minha saúde física", icon: Dumbbell },
-  { value: "routine", label: "Ser mais organizado", icon: Calendar },
-  { value: "avoid", label: "Eliminar vícios", icon: Ban },
-  { value: "mental", label: "Ter uma qualidade de Vida Melhor", icon: Brain },
-];
+    { value: "productivity", label: "Chego no fim do dia exausto e sem ter feito nada", icon: BarChart3 },
+    { value: "health", label: "Tenho o corpo e a energia de alguém com o dobro da minha idade", icon: Dumbbell },
+    { value: "routine", label: "Começo a semana bem, mas na quarta já desisto", icon: Calendar },
+    { value: "avoid", label: "O celular me engole e perco horas rolando feed", icon: Ban },
+    { value: "mental", label: "Minha cabeça não desliga nem na hora de dormir", icon: Brain },
+  ];
 
 export const ObjectiveStep = () => {
   const { objective, setObjective } = useQuiz();
@@ -29,11 +29,11 @@ export const ObjectiveStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          O que você mais gostaria de melhorar na sua rotina agora?
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">
+          Qual seu principal objetivo com o <span className="text-lime-400">Bora?</span>
         </h2>
-        <p className="text-sm text-slate-500">
-          Isso nos ajuda a entender onde sua energia faz mais diferença hoje.
+        <p className="text-sm text-slate-400">
+          Vamos direto ao ponto. Qual dessas frases é a sua realidade?
         </p>
       </motion.div>
 
@@ -44,7 +44,7 @@ export const ObjectiveStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex items-center justify-center"
       >
-        <SelectionCardGrid columns={2} gap={3} className="w-full max-w-md">
+        <SelectionCardGrid columns={1} gap={3} className="w-full max-w-md">
           {OBJECTIVE_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}

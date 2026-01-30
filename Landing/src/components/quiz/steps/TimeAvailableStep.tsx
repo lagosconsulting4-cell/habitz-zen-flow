@@ -11,11 +11,11 @@ const TIME_OPTIONS: Array<{
   icon: LucideIcon;
   habits: string;
 }> = [
-  { value: "5min", label: "5 minutos", icon: Zap, habits: "2 hábitos" },
-  { value: "15min", label: "15 minutos", icon: Clock, habits: "3 hábitos" },
-  { value: "30min", label: "30 minutos", icon: Target, habits: "4-5 hábitos" },
-  { value: "1h", label: "1 hora", icon: Dumbbell, habits: "6-7 hábitos" },
-];
+    { value: "5min", label: "5 minutos", icon: Zap, habits: "2 hábitos" },
+    { value: "15min", label: "15 minutos", icon: Clock, habits: "3 hábitos" },
+    { value: "30min", label: "30 minutos", icon: Target, habits: "4-5 hábitos" },
+    { value: "1h", label: "1 hora", icon: Dumbbell, habits: "6-7 hábitos" },
+  ];
 
 export const TimeAvailableStep = () => {
   const { timeAvailable, setTimeAvailable } = useQuiz();
@@ -31,7 +31,7 @@ export const TimeAvailableStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        <h2 className="text-2xl font-bold text-white mb-2">
           Quanto tempo você se sente confortável para se dedicar por dia?
         </h2>
         <p className="text-sm text-slate-500">

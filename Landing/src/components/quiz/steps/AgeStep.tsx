@@ -10,12 +10,12 @@ const AGE_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { value: "18-24", label: "18-24 anos", icon: GraduationCap },
-  { value: "25-34", label: "25-34 anos", icon: Briefcase },
-  { value: "35-44", label: "35-44 anos", icon: Home },
-  { value: "45-54", label: "45-54 anos", icon: Star },
-  { value: "55+", label: "55+ anos", icon: Sparkles },
-];
+    { value: "18-24", label: "18-24 anos", icon: GraduationCap },
+    { value: "25-34", label: "25-34 anos", icon: Briefcase },
+    { value: "35-44", label: "35-44 anos", icon: Home },
+    { value: "45-54", label: "45-54 anos", icon: Star },
+    { value: "55+", label: "55+ anos", icon: Sparkles },
+  ];
 
 export const AgeStep = () => {
   const { ageRange, setAgeRange } = useQuiz();
@@ -29,10 +29,10 @@ export const AgeStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        <h2 className="text-2xl font-bold text-white mb-2">
           Quantos anos você tem?
         </h2>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-400">
           Isso será usado para recomendar hábitos adequados para seu momento de vida
         </p>
       </motion.div>
@@ -55,7 +55,7 @@ export const AgeStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                icon={<option.icon className="w-5 h-5 text-slate-600" />}
+                icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={ageRange === option.value}
                 onClick={() => setAgeRange(option.value)}
                 variant="compact"

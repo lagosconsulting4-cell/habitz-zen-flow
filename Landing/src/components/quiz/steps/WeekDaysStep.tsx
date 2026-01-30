@@ -10,10 +10,10 @@ const PRESET_OPTIONS: Array<{
   icon: LucideIcon;
   days: number[];
 }> = [
-  { value: "weekdays", label: "Seg-Sex", icon: Briefcase, days: [1, 2, 3, 4, 5] },
-  { value: "everyday", label: "Todo dia", icon: RefreshCw, days: [0, 1, 2, 3, 4, 5, 6] },
-  { value: "custom", label: "Custom", icon: Sparkles, days: [] },
-];
+    { value: "weekdays", label: "Seg-Sex", icon: Briefcase, days: [1, 2, 3, 4, 5] },
+    { value: "everyday", label: "Todo dia", icon: RefreshCw, days: [0, 1, 2, 3, 4, 5, 6] },
+    { value: "custom", label: "Custom", icon: Sparkles, days: [] },
+  ];
 
 const WEEK_DAYS = [
   { id: 0, label: "D" },
@@ -54,10 +54,10 @@ export const WeekDaysStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        <h2 className="text-2xl font-bold text-white mb-2">
           Quais dias da semana?
         </h2>
-        <p className="text-sm text-slate-500">Escolha quando manter seus hábitos</p>
+        <p className="text-sm text-slate-400">Escolha quando manter seus hábitos</p>
       </motion.div>
 
       {/* Preset Selection */}
@@ -78,7 +78,7 @@ export const WeekDaysStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                icon={<option.icon className="w-5 h-5 text-slate-600" />}
+                icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={weekDaysPreset === option.value}
                 onClick={() => handlePresetChange(option.value)}
                 variant="compact"
@@ -117,7 +117,7 @@ export const WeekDaysStep = () => {
                       "active:scale-95",
                       weekDays.includes(day.id)
                         ? "bg-[#A3E635] text-slate-900 border-[#A3E635]"
-                        : "bg-white border-slate-200"
+                        : "bg-[#1A1A1C] border-white/10 text-slate-400 hover:border-white/20"
                     )}
                   >
                     <span className="text-xs font-bold">{day.label}</span>

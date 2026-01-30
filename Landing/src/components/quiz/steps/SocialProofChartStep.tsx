@@ -41,10 +41,10 @@ export const SocialProofChartStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        <h2 className="text-2xl font-bold text-white mb-2">
           Quem tem um plano personalizado consegue alcançar 5x mais seus objetivos
         </h2>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-400">
           Estudos mostram que uma rotina personalizada aumenta drasticamente sua taxa de sucesso
         </p>
       </motion.div>
@@ -59,20 +59,21 @@ export const SocialProofChartStep = () => {
         <div className="w-full max-w-lg">
           <ChartContainer config={chartConfig} className="h-80 w-full">
             <BarChart
-              data={COMPARISON_DATA}
+              data={COMPARISON_DATA.map(d => ({ ...d, fill: d.approach.includes("Bora") ? "hsl(84, 81%, 55%)" : "rgba(255,255,255,0.1)" }))}
               margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
               <XAxis
                 dataKey="approach"
                 angle={-15}
                 textAnchor="end"
                 height={80}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: "#94a3b8" }}
               />
-              <YAxis domain={[0, 100]} />
+              <YAxis domain={[0, 100]} tick={{ fill: "#94a3b8" }} />
               <ChartTooltip
-                content={<ChartTooltipContent />}
+                cursor={{ fill: "rgba(255,255,255,0.05)" }}
+                content={<ChartTooltipContent className="bg-[#1A1A1C] border-white/10 text-white" />}
                 formatter={(value) => [`${value}%`, "Taxa de Sucesso"]}
               />
               <Bar dataKey="successRate" radius={[8, 8, 0, 0]} maxBarSize={120} />
@@ -88,12 +89,14 @@ export const SocialProofChartStep = () => {
         transition={{ delay: 0.4, duration: 0.3 }}
         className="text-center mt-4 px-4"
       >
-        <p className="text-sm text-slate-600">
-          O Bora facilita e te mantém comprometido
-        </p>
-        <p className="text-lg font-semibold text-lime-600 mt-2">
-          94% vs 18% = 5.2x mais chances de sucesso
-        </p>
+        <div className="inline-block p-4 rounded-xl bg-[#1A1A1C] border border-white/5">
+          <p className="text-sm text-slate-400 mb-1">
+            O Bora facilita e te mantém comprometido
+          </p>
+          <p className="text-lg font-bold text-lime-400">
+            94% vs 18% = 5.2x mais chances de sucesso
+          </p>
+        </div>
       </motion.div>
 
       <ContinueButton />

@@ -11,10 +11,10 @@ const WORK_SCHEDULE_OPTIONS: Array<{
   icon: LucideIcon;
   hours: string;
 }> = [
-  { value: "commercial", label: "Comercial", icon: Building2, hours: "9h-18h" },
-  { value: "morning", label: "Manhã", icon: Sunrise, hours: "6h-14h" },
-  { value: "evening", label: "Noite", icon: Moon, hours: "18h-02h" },
-];
+    { value: "commercial", label: "Comercial", icon: Building2, hours: "9h-18h" },
+    { value: "morning", label: "Manhã", icon: Sunrise, hours: "6h-14h" },
+    { value: "evening", label: "Noite", icon: Moon, hours: "18h-02h" },
+  ];
 
 export const WorkScheduleStep = () => {
   const { workSchedule, setWorkSchedule } = useQuiz();
@@ -30,11 +30,11 @@ export const WorkScheduleStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Qual é o seu horário de trabalho?
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          Como é sua rotina de trabalho?
         </h2>
-        <p className="text-sm text-slate-500">
-          Adaptamos a sua rotina de acordo com a sua disponibilidade de tempo
+        <p className="text-base text-slate-400">
+          Vamos adaptar o plano aos seus horários
         </p>
       </motion.div>
 

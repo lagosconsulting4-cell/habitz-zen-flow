@@ -10,11 +10,11 @@ const CONSISTENCY_FEELING_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { value: "frustrado", label: "Frustrado e arrependido por não ter agido antes", icon: Frown },
-  { value: "evitando", label: "Evitando situações e se escondendo de novo", icon: EyeOff },
-  { value: "conformado", label: "Conformado, já acostumei com isso", icon: Meh },
-  { value: "determinado", label: "Determinado a mudar esse ano", icon: Flame },
-];
+    { value: "frustrado", label: "Frustrado e arrependido por não ter agido antes", icon: Frown },
+    { value: "evitando", label: "Evitando situações e se escondendo de novo", icon: EyeOff },
+    { value: "conformado", label: "Conformado, já acostumei com isso", icon: Meh },
+    { value: "determinado", label: "Determinado a mudar esse ano", icon: Flame },
+  ];
 
 export const ConsistencyFeelingStep = () => {
   const { consistencyFeeling, setConsistencyFeeling } = useQuiz();
@@ -28,10 +28,10 @@ export const ConsistencyFeelingStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        <h2 className="text-2xl font-bold text-white mb-2">
           Um ano novo começando e você ainda não conseguiu ter consistência...
         </h2>
-        <p className="text-lg font-medium text-slate-700 mb-1">
+        <p className="text-lg font-medium text-slate-400 mb-1">
           Como você se sente?
         </p>
       </motion.div>
@@ -54,7 +54,7 @@ export const ConsistencyFeelingStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                icon={<option.icon className="w-5 h-5 text-slate-600" />}
+                icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={consistencyFeeling === option.value}
                 onClick={() => setConsistencyFeeling(option.value)}
                 variant="compact"

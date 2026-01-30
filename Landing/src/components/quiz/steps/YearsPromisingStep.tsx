@@ -10,11 +10,11 @@ const YEARS_PROMISING_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { value: "primeiro_ano", label: "Esse seria o primeiro", icon: Calendar },
-  { value: "2-3_anos", label: "2-3 anos desperdiçados", icon: CalendarDays },
-  { value: "4-5_anos", label: "4-5 anos... já perdi a conta", icon: CalendarRange },
-  { value: "perdi_conta", label: "Prefiro não pensar nisso", icon: HelpCircle },
-];
+    { value: "primeiro_ano", label: "Esse seria o primeiro", icon: Calendar },
+    { value: "2-3_anos", label: "2-3 anos desperdiçados", icon: CalendarDays },
+    { value: "4-5_anos", label: "4-5 anos... já perdi a conta", icon: CalendarRange },
+    { value: "perdi_conta", label: "Prefiro não pensar nisso", icon: HelpCircle },
+  ];
 
 export const YearsPromisingStep = () => {
   const { yearsPromising, setYearsPromising, objective } = useQuiz();
@@ -39,7 +39,7 @@ export const YearsPromisingStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        <h2 className="text-2xl font-bold text-white mb-2">
           Há quantos anos você promete que vai {objectiveVerb}?
         </h2>
       </motion.div>
@@ -62,7 +62,7 @@ export const YearsPromisingStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                icon={<option.icon className="w-5 h-5 text-slate-600" />}
+                icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={yearsPromising === option.value}
                 onClick={() => setYearsPromising(option.value)}
                 variant="compact"

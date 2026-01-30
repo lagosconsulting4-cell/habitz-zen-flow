@@ -65,8 +65,8 @@ export const UrgencyStep = () => {
         transition={{ type: "spring", stiffness: 200, damping: 15 }}
         className="mb-6"
       >
-        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">
-          <AlertCircle className="w-10 h-10 text-red-600" />
+        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center ring-1 ring-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.15)]">
+          <AlertCircle className="w-10 h-10 text-red-500" />
         </div>
       </motion.div>
 
@@ -77,13 +77,13 @@ export const UrgencyStep = () => {
         transition={{ delay: 0.2, duration: 0.3 }}
         className="text-center mb-6 px-4"
       >
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
           {feelingText}
         </h2>
-        <p className="text-base text-slate-700 mb-2">
-          Você identificou que <strong className="text-red-600">{challengeText}</strong> está impedindo você de {objectiveText}.
+        <p className="text-base text-slate-400 mb-2">
+          Você identificou que <strong className="text-red-400">{challengeText}</strong> está impedindo você de {objectiveText}.
         </p>
-        <p className="text-base text-slate-700">
+        <p className="text-base text-slate-400">
           Cada dia que passa é um dia a menos para conquistar o que você sempre quis.
         </p>
       </motion.div>
@@ -95,25 +95,27 @@ export const UrgencyStep = () => {
         transition={{ delay: 0.4, duration: 0.3 }}
         className="w-full max-w-md mb-6"
       >
-        <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center gap-3 mb-4">
-            <Clock className="w-6 h-6 text-red-600" />
-            <h3 className="text-lg font-bold text-slate-900">O tempo está passando</h3>
+        <div className="bg-[#121214] border border-red-500/20 rounded-2xl p-6 shadow-lg shadow-red-500/5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[150px] h-[150px] bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="flex items-center gap-3 mb-4 relative z-10">
+            <Clock className="w-6 h-6 text-red-500" />
+            <h3 className="text-lg font-bold text-white">O tempo está passando</h3>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 relative z-10">
             <div className="flex justify-between items-baseline">
-              <span className="text-sm text-slate-700">Dia do ano:</span>
-              <span className="text-2xl font-bold text-red-600">{dayOfYear}</span>
+              <span className="text-sm text-slate-400">Dia do ano:</span>
+              <span className="text-2xl font-bold text-red-500">{dayOfYear}</span>
             </div>
             <div className="flex justify-between items-baseline">
-              <span className="text-sm text-slate-700">Dias restantes em {today.getFullYear()}:</span>
-              <span className="text-2xl font-bold text-orange-600">{daysRemaining}</span>
+              <span className="text-sm text-slate-400">Dias restantes em {today.getFullYear()}:</span>
+              <span className="text-2xl font-bold text-orange-500">{daysRemaining}</span>
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-red-200">
-            <p className="text-sm font-semibold text-red-800">
+          <div className="mt-4 pt-4 border-t border-white/10 relative z-10">
+            <p className="text-sm font-semibold text-red-400">
               Não deixe mais um ano passar sem conquistar seus objetivos
             </p>
           </div>
@@ -127,20 +129,22 @@ export const UrgencyStep = () => {
         transition={{ delay: 0.6, duration: 0.3 }}
         className="w-full max-w-md"
       >
-        <div className="bg-gradient-to-br from-lime-50 to-lime-100 border-2 border-lime-200 rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center gap-3 mb-3">
-            <TrendingUp className="w-6 h-6 text-lime-600" />
-            <h3 className="text-lg font-bold text-slate-900">Mas ainda há tempo!</h3>
+        <div className="bg-[#121214] border border-lime-500/20 rounded-2xl p-6 shadow-lg shadow-lime-500/5 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-[150px] h-[150px] bg-lime-500/5 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="flex items-center gap-3 mb-3 relative z-10">
+            <TrendingUp className="w-6 h-6 text-lime-400" />
+            <h3 className="text-lg font-bold text-white">Mas ainda há tempo!</h3>
           </div>
 
-          <p className="text-3xl font-bold text-lime-700 mb-2">12 semanas</p>
-          <p className="text-sm text-slate-700">
+          <p className="text-3xl font-bold text-lime-400 mb-2 relative z-10">12 semanas</p>
+          <p className="text-sm text-slate-400 relative z-10">
             É tudo que você precisa para transformar completamente sua vida com o Bora
           </p>
 
-          <div className="mt-4 pt-4 border-t border-lime-200">
-            <p className="text-sm font-semibold text-lime-800">
-              Usuários que começam hoje têm <strong>94% de chance</strong> de alcançar seus objetivos em 3 meses
+          <div className="mt-4 pt-4 border-t border-white/10 relative z-10">
+            <p className="text-sm font-semibold text-lime-300/80">
+              Usuários que começam hoje têm <strong className="text-lime-400">94% de chance</strong> de alcançar seus objetivos em 3 meses
             </p>
           </div>
         </div>

@@ -10,10 +10,10 @@ const GENDER_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { value: "masculino", label: "Masculino", icon: User },
-  { value: "feminino", label: "Feminino", icon: Users },
-  { value: "outro", label: "Outro", icon: Sparkles },
-];
+    { value: "masculino", label: "Masculino", icon: User },
+    { value: "feminino", label: "Feminino", icon: Users },
+    { value: "outro", label: "Outro", icon: Sparkles },
+  ];
 
 export const GenderStep = () => {
   const { gender, setGender } = useQuiz();
@@ -27,10 +27,10 @@ export const GenderStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        <h2 className="text-2xl font-bold text-white mb-2">
           Escolhe o seu gênero
         </h2>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-400">
           Isso será usado para gerar a sua rotina personalizada
         </p>
       </motion.div>
@@ -53,7 +53,7 @@ export const GenderStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                icon={<option.icon className="w-5 h-5 text-slate-600" />}
+                icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={gender === option.value}
                 onClick={() => setGender(option.value)}
                 variant="compact"

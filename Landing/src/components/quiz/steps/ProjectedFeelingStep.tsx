@@ -10,11 +10,11 @@ const PROJECTED_FEELING_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { value: "sem_mudanca", label: "Não ia mudar nada", icon: MinusCircle },
-  { value: "muito_feliz", label: "Iria ficar muito feliz", icon: Smile },
-  { value: "sem_insegurancas", label: "Não teria mais inseguranças", icon: Shield },
-  { value: "realizado", label: "Me sentiria realizado", icon: Trophy },
-];
+    { value: "sem_mudanca", label: "Não ia mudar nada", icon: MinusCircle },
+    { value: "muito_feliz", label: "Iria ficar muito feliz", icon: Smile },
+    { value: "sem_insegurancas", label: "Não teria mais inseguranças", icon: Shield },
+    { value: "realizado", label: "Me sentiria realizado", icon: Trophy },
+  ];
 
 export const ProjectedFeelingStep = () => {
   const { projectedFeeling, setProjectedFeeling, objective } = useQuiz();
@@ -39,7 +39,7 @@ export const ProjectedFeelingStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        <h2 className="text-2xl font-bold text-white mb-2">
           Como você se sentiria se no final desse ano, você estivesse {objectiveText}?
         </h2>
       </motion.div>
@@ -62,7 +62,7 @@ export const ProjectedFeelingStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                icon={<option.icon className="w-5 h-5 text-slate-600" />}
+                icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={projectedFeeling === option.value}
                 onClick={() => setProjectedFeeling(option.value)}
                 variant="compact"

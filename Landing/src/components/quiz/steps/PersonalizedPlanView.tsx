@@ -144,11 +144,11 @@ const DetailedHabitCard = ({
     animate={{ opacity: 1, x: 0 }}
     transition={{ delay: index * 0.05 }}
   >
-    <Card className="hover:shadow-md transition-all duration-200 hover:border-lime-200">
+    <Card className="hover:shadow-md transition-all duration-200 hover:border-lime-500/30 bg-[#1A1A1C] border-white/10">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           {/* Ícone */}
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-lime-100 text-lime-700">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-lime-500/10 text-lime-400">
             <HabitIcon emoji={habit.icon} className="w-6 h-6" />
           </div>
 
@@ -156,16 +156,16 @@ const DetailedHabitCard = ({
           <div className="flex-1 min-w-0">
             {/* Nome + Categoria */}
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <h4 className="font-bold text-base text-slate-900">
+              <h4 className="font-bold text-base text-white">
                 {habit.name}
               </h4>
-              <Badge variant="outline" className="text-xs text-lime-700 bg-lime-50 border-lime-200">
+              <Badge variant="outline" className="text-xs text-lime-400 bg-lime-500/10 border-lime-500/20">
                 {categoryLabels[habit.category] || habit.category}
               </Badge>
             </div>
 
             {/* Horário e Duração */}
-            <div className="flex items-center gap-3 text-sm text-slate-600 mb-2">
+            <div className="flex items-center gap-3 text-sm text-slate-400 mb-2">
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 {habit.suggested_time}
@@ -176,8 +176,8 @@ const DetailedHabitCard = ({
 
             {/* Meta */}
             <div className="flex items-center gap-2 text-sm mb-1">
-              <Target className="w-3 h-3 text-lime-600" />
-              <span className="text-slate-700">
+              <Target className="w-3 h-3 text-lime-400" />
+              <span className="text-slate-300">
                 Meta: {habit.goal_value}{" "}
                 {goalUnitLabels[habit.goal_unit] || habit.goal_unit}
               </span>
@@ -263,10 +263,10 @@ const PeriodSection = ({
       className="space-y-3"
     >
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-100">
-          <Icon className="w-5 h-5 text-slate-700" />
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/5">
+          <Icon className="w-5 h-5 text-slate-400" />
         </div>
-        <h3 className="font-bold text-lg text-slate-900">{title}</h3>
+        <h3 className="font-bold text-lg text-white">{title}</h3>
         <Badge variant="secondary" className="ml-auto">{habits.length} hábitos</Badge>
       </div>
 
@@ -291,7 +291,7 @@ const RoadmapView = ({ habits }: { habits: RecommendedHabit[] }) => {
   return (
     <div className="space-y-4">
       {/* Fase 1: Semanas 1-4 */}
-      <Card>
+      <Card className="bg-[#1A1A1C] border-white/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Calendar className="w-5 h-5 text-blue-600" />
@@ -299,7 +299,7 @@ const RoadmapView = ({ habits }: { habits: RecommendedHabit[] }) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-400">
             Foco em criar consistência com{" "}
             <strong>{highPriority.length} hábitos essenciais</strong>
           </p>
@@ -320,7 +320,7 @@ const RoadmapView = ({ habits }: { habits: RecommendedHabit[] }) => {
       </Card>
 
       {/* Fase 2: Semanas 5-8 */}
-      <Card>
+      <Card className="bg-[#1A1A1C] border-white/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <TrendingUp className="w-5 h-5 text-lime-600" />
@@ -349,7 +349,7 @@ const RoadmapView = ({ habits }: { habits: RecommendedHabit[] }) => {
       </Card>
 
       {/* Fase 3: Semanas 9-12 */}
-      <Card>
+      <Card className="bg-[#1A1A1C] border-white/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Trophy className="w-5 h-5 text-orange-600" />
@@ -361,23 +361,23 @@ const RoadmapView = ({ habits }: { habits: RecommendedHabit[] }) => {
             Rotina completa com todos os <strong>{habits.length} hábitos</strong>
           </p>
           <div className="grid grid-cols-3 gap-3">
-            <div className="p-3 bg-blue-50 rounded-lg text-center">
-              <div className="text-2xl font-bold text-blue-600">
+            <div className="p-3 bg-blue-500/10 rounded-lg text-center">
+              <div className="text-2xl font-bold text-blue-500">
                 {highPriority.length}
               </div>
-              <div className="text-xs text-slate-600">Essenciais</div>
+              <div className="text-xs text-slate-400">Essenciais</div>
             </div>
-            <div className="p-3 bg-lime-50 rounded-lg text-center">
-              <div className="text-2xl font-bold text-lime-600">
+            <div className="p-3 bg-lime-500/10 rounded-lg text-center">
+              <div className="text-2xl font-bold text-lime-500">
                 {mediumPriority.length}
               </div>
-              <div className="text-xs text-slate-600">Suporte</div>
+              <div className="text-xs text-slate-400">Suporte</div>
             </div>
-            <div className="p-3 bg-orange-50 rounded-lg text-center">
-              <div className="text-2xl font-bold text-orange-600">
+            <div className="p-3 bg-orange-500/10 rounded-lg text-center">
+              <div className="text-2xl font-bold text-orange-500">
                 {lowerPriority.length}
               </div>
-              <div className="text-xs text-slate-600">Bônus</div>
+              <div className="text-xs text-slate-400">Bônus</div>
             </div>
           </div>
           <Separator />
@@ -402,7 +402,7 @@ export const PersonalizedPlanView = () => {
   );
   const averageScore = Math.round(
     recommendedHabits.reduce((sum, h) => sum + h.recommendation_score, 0) /
-      recommendedHabits.length
+    recommendedHabits.length
   );
   const { morning, afternoon, evening } = groupByPeriod(recommendedHabits);
 
@@ -442,10 +442,10 @@ export const PersonalizedPlanView = () => {
           transition={{ delay: 0.3, duration: 0.3 }}
           className="text-center mb-8 px-4"
         >
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
             Personalizado!
           </h1>
-          <p className="text-lg text-slate-700">
+          <p className="text-lg text-slate-400">
             {recommendedHabits.length} hábitos criados especialmente para você
           </p>
         </motion.div>
@@ -459,12 +459,12 @@ export const PersonalizedPlanView = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card>
+          <Card className="bg-[#1A1A1C] border-white/10">
             <CardContent className="p-4 flex items-center gap-3">
-              <Target className="w-8 h-8 text-blue-600" />
+              <Target className="w-8 h-8 text-blue-500" />
               <div>
-                <p className="text-xs text-slate-500">Objetivo Principal</p>
-                <p className="font-bold text-slate-900">
+                <p className="text-xs text-slate-400">Objetivo Principal</p>
+                <p className="font-bold text-white">
                   {objectiveLabels[objective || ""] || "Seu Objetivo"}
                 </p>
               </div>
@@ -478,12 +478,12 @@ export const PersonalizedPlanView = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card>
+          <Card className="bg-[#1A1A1C] border-white/10">
             <CardContent className="p-4 flex items-center gap-3">
-              <Clock className="w-8 h-8 text-lime-600" />
+              <Clock className="w-8 h-8 text-lime-500" />
               <div>
-                <p className="text-xs text-slate-500">Tempo Diário</p>
-                <p className="font-bold text-slate-900">
+                <p className="text-xs text-slate-400">Tempo Diário</p>
+                <p className="font-bold text-white">
                   ~{totalDailyMinutes} min
                 </p>
               </div>
@@ -497,7 +497,7 @@ export const PersonalizedPlanView = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <Card>
+          <Card className="bg-[#1A1A1C] border-white/10">
             <CardContent className="p-4 flex items-center gap-3">
               <div className="flex gap-1">
                 <Sun className="w-5 h-5 text-orange-500" />
@@ -505,8 +505,8 @@ export const PersonalizedPlanView = () => {
                 <Moon className="w-5 h-5 text-purple-500" />
               </div>
               <div>
-                <p className="text-xs text-slate-500">Distribuição</p>
-                <p className="font-bold text-slate-900 text-sm">
+                <p className="text-xs text-slate-400">Distribuição</p>
+                <p className="font-bold text-white text-sm">
                   {morning.length} manhã, {afternoon.length} tarde,{" "}
                   {evening.length} noite
                 </p>
@@ -521,12 +521,12 @@ export const PersonalizedPlanView = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.7 }}
         >
-          <Card>
+          <Card className="bg-[#1A1A1C] border-white/10">
             <CardContent className="p-4 flex items-center gap-3">
-              <TrendingUp className="w-8 h-8 text-orange-600" />
+              <TrendingUp className="w-8 h-8 text-orange-500" />
               <div>
-                <p className="text-xs text-slate-500">Score de Relevância</p>
-                <p className="font-bold text-slate-900">{averageScore}%</p>
+                <p className="text-xs text-slate-400">Score de Relevância</p>
+                <p className="font-bold text-white">{averageScore}%</p>
               </div>
             </CardContent>
           </Card>

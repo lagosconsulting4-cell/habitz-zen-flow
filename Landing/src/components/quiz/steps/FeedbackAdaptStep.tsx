@@ -42,8 +42,8 @@ export const FeedbackAdaptStep = () => {
         transition={{ type: "spring", stiffness: 200, damping: 15 }}
         className="mb-6"
       >
-        <div className="w-20 h-20 bg-lime-100 rounded-full flex items-center justify-center">
-          <Heart className="w-10 h-10 text-lime-600" />
+        <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center ring-1 ring-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.15)]">
+          <Heart className="w-10 h-10 text-blue-400" />
         </div>
       </motion.div>
 
@@ -54,10 +54,10 @@ export const FeedbackAdaptStep = () => {
         transition={{ delay: 0.2, duration: 0.3 }}
         className="text-center mb-6 px-4"
       >
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
           Fique Tranquilo!
         </h2>
-        <p className="text-base text-slate-700 mb-4">
+        <p className="text-base text-slate-400 mb-4 leading-relaxed">
           O Bora foi feito para se adaptar à sua rotina e realidade, sem planos surreais e impossíveis de serem cumpridos.
         </p>
       </motion.div>
@@ -69,21 +69,20 @@ export const FeedbackAdaptStep = () => {
         transition={{ delay: 0.4, duration: 0.3 }}
         className="w-full max-w-md"
       >
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center gap-3 mb-3">
-            <Users className="w-6 h-6 text-blue-600" />
-            <h3 className="text-lg font-bold text-slate-900">Comunidade forte</h3>
+        <div className="bg-[#121214] border border-blue-500/20 rounded-2xl p-6 shadow-lg shadow-blue-500/5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[100px] h-[100px] bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="flex items-center gap-3 mb-3 relative z-10">
+            <Users className="w-6 h-6 text-blue-400" />
+            <h3 className="text-lg font-bold text-white">Comunidade forte</h3>
           </div>
-          <p className="text-3xl font-bold text-blue-700 mb-2">+87%</p>
-          <p className="text-sm text-slate-700">
-            dos nossos usuários com{" "}
-            <strong className="text-blue-800">{rangeText}</strong> e{" "}
-            <strong className="text-blue-800">{professionText}</strong>{" "}
-            mantém os hábitos e finalmente conquistam a vida dos sonhos
+          <p className="text-4xl font-bold text-blue-400 mb-2 relative z-10">+87%</p>
+          <p className="text-sm text-slate-400 relative z-10 leading-relaxed">
+            dos nossos usuários com <strong className="text-blue-300">{rangeText}</strong> e <strong className="text-blue-300">{professionText}</strong> mantém os hábitos e finalmente conquistam a vida dos sonhos
           </p>
-          <div className="mt-3 pt-3 border-t border-blue-200">
-            <p className="text-xs text-blue-700">
-              <strong>🧠 Como funciona:</strong> Repetir a mesma coisa no mesmo horário "treina" seu cérebro. Com o tempo, você faz no automático — tipo escovar os dentes.
+          <div className="mt-3 pt-3 border-t border-white/10 relative z-10">
+            <p className="text-xs text-blue-300/80">
+              <strong className="text-blue-400">🧠 Como funciona:</strong> Repetir a mesma coisa no mesmo horário "treina" seu cérebro. Com o tempo, você faz no automático — tipo escovar os dentes.
             </p>
           </div>
         </div>
