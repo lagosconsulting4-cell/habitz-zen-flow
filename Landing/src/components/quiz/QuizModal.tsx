@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { X, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { QuizProvider, useQuiz } from "./QuizProvider";
@@ -53,6 +53,14 @@ interface QuizModalProps {
 // Componente interno que usa o context
 const QuizContent = ({ onClose }: { onClose: () => void }) => {
   const { currentStep, generateRoutine, canGoBack, prevStep, nextStep } = useQuiz();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentStep]);
 
   // Routine generation removed - only using AnalysisLoadingStep now
 
@@ -158,7 +166,7 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
       </div>
 
       {/* Conteúdo do Step */}
-      <div className="flex-1 overflow-y-auto">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto px-4 pt-12 pb-8">
           <AnimatePresence mode="wait">
             <motion.div
