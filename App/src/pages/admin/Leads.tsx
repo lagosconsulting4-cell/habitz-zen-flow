@@ -558,11 +558,11 @@ const AdminLeads = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-6">
+        <TabsContent value="analytics" className="space-y-3 sm:space-y-4 lg:space-y-6">
           {analytics.funnel.isLoading ? (
             <AnalyticsSkeleton />
           ) : analytics.funnel.isError ? (
-            <Card className="p-8">
+            <Card className="p-6 sm:p-8">
               <div className="flex flex-col items-center justify-center text-center space-y-4">
                 <AlertCircle className="h-12 w-12 text-destructive" />
                 <div>
@@ -579,7 +579,7 @@ const AdminLeads = () => {
           ) : (
             <>
               {/* KPI Cards */}
-              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+              <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-4">
             <MetricCard
               title="Taxa de Conversão"
               value={`${analytics.funnel.data?.conversion_rate || 0}%`}
