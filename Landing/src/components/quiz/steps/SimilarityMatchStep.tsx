@@ -172,13 +172,12 @@ const SimilarityMatchStep: React.FC = () => {
                 </div>
             </motion.div>
 
-
             {/* CTA */}
             <Button
                 onClick={nextStep}
                 className="w-full bg-lime-400 hover:bg-lime-500 text-slate-900 h-14 rounded-xl font-bold text-base shadow-[0_0_20px_rgba(163,230,53,0.3)] transition-all"
             >
-                Descobrir o Segredo do {persona.name}
+                Quero a Minha Transformação
                 <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
 
