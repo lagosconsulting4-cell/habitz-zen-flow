@@ -164,7 +164,8 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   // Age, FeedbackAgeChart, Challenges, Gender, SocialProofChart, ConsistencyFeeling,
   // ProjectedFeeling, Testimonials, YearsPromising, Urgency, PotentialChart, AppExplanation,
   // Loading, DataCollection, SubscriptionOffersStep
-  const totalSteps = 25;
+  // 29 Steps: Hero...AppExplanation(21), Loading(22), Analysis(23), Diagnosis(24), Similarity(25), Commitment(26), DataCollection(27), Subscription(28)
+  const totalSteps = 29;
 
   // ============================================================================
   // NAVIGATION
@@ -255,11 +256,19 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
         return true;
       case 20: // AppExplanationStep - explanation screen
         return true;
-      case 21: // LoadingStep - auto-advances
+      case 21: // DataCollectionStep
+        return false; // Requires form submission
+      case 22: // AnalysisLoadingStep (after form submission)
         return true;
-      case 22: // DataCollectionStep - has its own validation
+      case 23: // DiagnosisStep (diagnosis results)
         return true;
-      case 23: // SubscriptionOffersStep - final step
+      case 24: // SimilarityMatchStep (social proof)
+        return true;
+      case 25: // CommitmentStep
+        return true;
+      case 26: // SubscriptionOffersStep
+        return true;
+      case 28: // SubscriptionOffersStep
         return true;
       default:
         return false;

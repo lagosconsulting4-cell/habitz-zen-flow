@@ -39,6 +39,12 @@ import { DataCollectionStep } from "./steps/DataCollectionStep";
 import { SubscriptionOffersStep } from "./steps/SubscriptionOffersStep";
 import { ValueBridgeStep } from "./steps/ValueBridgeStep";
 
+// New Deep Bridge Steps
+import AnalysisLoadingStep from "./steps/AnalysisLoadingStep";
+import DiagnosisStep from "./steps/DiagnosisStep";
+import SimilarityMatchStep from "./steps/SimilarityMatchStep";
+import CommitmentStep from "./steps/CommitmentStep";
+
 interface QuizModalProps {
   open: boolean;
   onClose: () => void;
@@ -48,12 +54,7 @@ interface QuizModalProps {
 const QuizContent = ({ onClose }: { onClose: () => void }) => {
   const { currentStep, generateRoutine, canGoBack, prevStep, nextStep } = useQuiz();
 
-  // Gera a rotina quando chega no LoadingStep (step 20)
-  useEffect(() => {
-    if (currentStep === 20) {
-      generateRoutine();
-    }
-  }, [currentStep, generateRoutine]);
+  // Routine generation removed - only using AnalysisLoadingStep now
 
   // Renderiza o step atual
   const renderStep = () => {
@@ -100,13 +101,24 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
         return <PotentialChartStep />;
       case 20:
         return <AppExplanationStep />;
+
+      // === DEEP BRIDGE START ===
       case 21:
-        return <LoadingStep onComplete={nextStep} />;
-      case 22:
+        // Data Collection - user submits form
         return <DataCollectionStep />;
+      case 22:
+        // Analysis happens AFTER form submission
+        return <AnalysisLoadingStep />;
       case 23:
-        return <ValueBridgeStep />;
+        // Show diagnosis results
+        return <DiagnosisStep />;
       case 24:
+        // Show "Veja quem resolveu isso" - social proof
+        return <SimilarityMatchStep />;
+      case 25:
+        // Now Commitment comes after SimilarityMatch (using real name)
+        return <CommitmentStep />;
+      case 26:
         return <SubscriptionOffersStep />;
       default:
         return null;
@@ -116,13 +128,13 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
   return (
     <div className="flex flex-col h-full">
       {/* Header com progresso */}
-      <div className="sticky top-0 bg-white border-b border-slate-100 z-10">
+      <div className="sticky top-0 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/5 z-10">
         <div className="flex items-center justify-between p-4 gap-3">
           {/* Botão Voltar à esquerda */}
           {canGoBack ? (
             <button
               onClick={prevStep}
-              className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+              className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -138,7 +150,7 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
           {/* Botão Fechar à direita */}
           <button
             onClick={onClose}
-            className="flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors"
+            className="flex items-center gap-2 text-slate-500 hover:text-red-400 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -212,7 +224,7 @@ export const QuizModal = ({ open, onClose }: QuizModalProps) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 bg-white"
+          className="fixed inset-0 z-50 bg-[#0A0A0B] text-slate-50 overflow-y-auto"
         >
           <QuizProvider>
             <QuizContent onClose={onClose} />
