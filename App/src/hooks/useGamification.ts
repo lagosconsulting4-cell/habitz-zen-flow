@@ -2,7 +2,9 @@ import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getRewardsForLevel } from "@/data/levelRewards";
+import { getLocalDateString } from "@/utils/date";
 import { getUnlockable } from "@/data/unlockables";
+import { toast } from "sonner";
 
 // ============================================================================
 // TYPES
@@ -428,6 +430,38 @@ export const useGamification = (userId?: string) => {
     staleTime: 30_000,
   });
 
+  // Query: Weekly Freeze Purchases Tracking
+  const { data: weeklyFreezePurchases } = useQuery({
+    queryKey: ["weekly-freeze-purchases", userId],
+    queryFn: async () => {
+      if (!userId) return null;
+
+      const { data, error } = await supabase
+        .from("user_streak_freezes")
+        .select("weekly_purchases_count, last_purchase_week")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') throw error;
+
+      // Calcular se ainda é a mesma semana
+      const currentWeekStart = new Date();
+      currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1);
+      currentWeekStart.setHours(0, 0, 0, 0);
+
+      const lastPurchaseWeek = data?.last_purchase_week ? new Date(data.last_purchase_week) : null;
+      const isSameWeek = lastPurchaseWeek && lastPurchaseWeek >= currentWeekStart;
+
+      return {
+        count: isSameWeek ? (data?.weekly_purchases_count || 0) : 0,
+        limit: 3,
+        canPurchase: (isSameWeek ? (data?.weekly_purchases_count || 0) : 0) < 3
+      };
+    },
+    enabled: Boolean(userId),
+    staleTime: 60_000, // 1 minuto
+  });
+
   // Mutation: Add XP
   const addXPMutation = useMutation({
     mutationFn: async ({
@@ -755,25 +789,53 @@ export const useGamification = (userId?: string) => {
 
   // Mutation: Purchase Streak Freeze
   const purchaseStreakFreezeMutation = useMutation({
-    mutationFn: async (): Promise<boolean> => {
+    mutationFn: async () => {
       if (!userId) throw new Error("User not authenticated");
 
-      const { data, error } = await supabase.rpc("purchase_streak_freeze", {
+      const { data, error } = await supabase.rpc("purchase_streak_freeze_with_limit", {
         p_user_id: userId,
       });
 
       if (error) throw error;
 
-      return Boolean(data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["streak-freezes", userId] });
-      queryClient.invalidateQueries({ queryKey: ["user-gems", userId] });
-      queryClient.invalidateQueries({ queryKey: ["gem-transactions", userId] });
+      // Verificar se retornou erro de negócio
+      if (data && !data.success) {
+        throw new Error(data.message);
+      }
 
-      window.dispatchEvent(
-        new CustomEvent("gamification:freeze-purchased", { detail: { userId } })
-      );
+      return data;
+    },
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: ["streak-freezes", userId] });
+        queryClient.invalidateQueries({ queryKey: ["user-gems", userId] });
+        queryClient.invalidateQueries({ queryKey: ["gem-transactions", userId] });
+        queryClient.invalidateQueries({ queryKey: ["weekly-freeze-purchases", userId] });
+
+        toast.success("Freeze comprado!", {
+          description: `Você tem ${result.available_freezes} freezes disponíveis`,
+          icon: "❄️",
+        });
+
+        window.dispatchEvent(
+          new CustomEvent("gamification:freeze-purchased", { detail: { userId } })
+        );
+      }
+    },
+    onError: (error: Error) => {
+      if (error.message.includes("limite semanal") || error.message.includes("3 freezes")) {
+        toast.error("Limite Semanal Atingido", {
+          description: "Você já comprou 3 freezes esta semana. Volte na próxima!",
+        });
+      } else if (error.message.includes("gems") || error.message.includes("Faltam")) {
+        toast.error("Gems Insuficientes", {
+          description: error.message,
+        });
+      } else {
+        toast.error("Erro na Compra", {
+          description: "Tente novamente",
+        });
+      }
     },
   });
 
@@ -784,7 +846,7 @@ export const useGamification = (userId?: string) => {
 
       const { data, error } = await supabase.rpc("use_streak_freeze", {
         p_user_id: userId,
-        p_protected_date: protectedDate || new Date().toISOString().split("T")[0],
+        p_protected_date: protectedDate || getLocalDateString(),
       });
 
       if (error) throw error;
@@ -1092,6 +1154,7 @@ export const useGamification = (userId?: string) => {
     availableFreezes: streakFreezes?.available_freezes || 0,
     totalFreezesEarned: streakFreezes?.total_freezes_earned || 0,
     totalFreezesUsed: streakFreezes?.total_freezes_used || 0,
+    weeklyFreezePurchases: weeklyFreezePurchases || null,
 
     // ========== LOADING STATES ==========
     loading: progressLoading || unlocksLoading || gemsLoading || userAvatarsLoading || userAchievementsLoading || streakFreezesLoading,

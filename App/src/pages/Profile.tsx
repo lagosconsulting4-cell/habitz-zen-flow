@@ -6,7 +6,10 @@ import {
   LogOut,
   User,
   Mail,
+  Diamond,
+  Snowflake,
   Shield,
+  Sparkles,
   Pencil,
   Check,
   X,
@@ -15,7 +18,6 @@ import {
   Moon,
   Volume2,
   VolumeX,
-  Sparkles,
   Vibrate,
   Gift,
   ChevronRight,
@@ -40,7 +42,7 @@ import { bonusSections } from "@/pages/Bonus";
 import { bonusFlags } from "@/config/bonusFlags";
 import { NotificationToggle } from "@/components/pwa/NotificationPermissionDialog";
 import { AvatarShopModal } from "@/components/gamification/AvatarShopModal";
-import { AchievementsGrid } from "@/components/gamification/AchievementsGrid";
+import { FreezeShopModal } from "@/components/gamification/FreezeShopModal";
 import { GemCounter } from "@/components/gamification/GemCounter";
 import { StreakFreezeCard } from "@/components/gamification/StreakFreezeCard";
 import { getAvatarIcon } from "@/components/gamification/AvatarIcons";
@@ -55,6 +57,7 @@ const Profile = () => {
   const [editedName, setEditedName] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
   const [avatarShopOpen, setAvatarShopOpen] = useState(false);
+  const [freezeShopOpen, setFreezeShopOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const { isPremium, premiumSince } = usePremium(userId ?? undefined);
@@ -282,12 +285,14 @@ const Profile = () => {
                   )}
                 </div>
               </div>
+              {/* SPRINT 0: Botão "Mudar Avatar" temporariamente oculto - avatares não estão gerando engajamento
               <Button
                 onClick={() => setAvatarShopOpen(true)}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold whitespace-nowrap"
               >
                 Mudar Avatar
               </Button>
+              */}
             </div>
           </Card>
         </motion.div>
@@ -303,10 +308,10 @@ const Profile = () => {
             <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Recursos</h2>
             <div className="space-y-3">
               {/* Gems Display */}
-              <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-purple-500/20">
-                    <Sparkles className="w-5 h-5 text-purple-500" />
+                  <div className="p-2 rounded-lg bg-primary/20">
+                    <Diamond className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-muted-foreground uppercase">Gems</p>
@@ -316,18 +321,22 @@ const Profile = () => {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => setAvatarShopOpen(true)}
-                  className="text-purple-600 hover:bg-purple-500/20"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setFreezeShopOpen(true);
+                  }}
+                  className="text-primary hover:bg-primary/20"
                 >
                   Loja <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
 
               {/* Freezes Display */}
-              <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-foreground/5 to-foreground/10 border border-border">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-500/20">
-                    <Shield className="w-5 h-5 text-blue-500" />
+                  <div className="p-2 rounded-lg bg-foreground/10">
+                    <Snowflake className="w-5 h-5 text-foreground" />
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-muted-foreground uppercase">Streak Freezes</p>
@@ -337,8 +346,12 @@ const Profile = () => {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => setAvatarShopOpen(true)}
-                  className="text-blue-600 hover:bg-blue-500/20"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setFreezeShopOpen(true);
+                  }}
+                  className="text-foreground hover:bg-foreground/10"
                 >
                   Comprar <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
@@ -457,18 +470,26 @@ const Profile = () => {
           className="mb-8"
         >
           <Card className="rounded-2xl bg-card border border-border p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Trophy className="w-5 h-5 text-primary" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Trophy className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold uppercase tracking-wide text-foreground">Conquistas</h2>
+                  <p className="text-sm text-muted-foreground">
+                    {userAchievements.length} / {achievementsCatalog.length} desbloqueadas
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h2 className="text-lg font-bold uppercase tracking-wide text-foreground">Conquistas</h2>
-                <p className="text-sm text-muted-foreground">
-                  {userAchievements.length} / {achievementsCatalog.length} desbloqueadas
-                </p>
-              </div>
+              <Button
+                onClick={() => navigate("/achievements")}
+                variant="ghost"
+                className="text-foreground"
+              >
+                Ver Todas <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
             </div>
-            <AchievementsGrid userId={userId ?? undefined} />
           </Card>
         </motion.div>
 
@@ -683,6 +704,13 @@ const Profile = () => {
         <AvatarShopModal
           isOpen={avatarShopOpen}
           onClose={() => setAvatarShopOpen(false)}
+          userId={userId ?? undefined}
+        />
+
+        {/* SPRINT 0: Nova Freeze Shop Modal - Loja focada em utility (freezes) ao invés de cosméticos (avatares) */}
+        <FreezeShopModal
+          isOpen={freezeShopOpen}
+          onClose={() => setFreezeShopOpen(false)}
           userId={userId ?? undefined}
         />
       </motion.div>
