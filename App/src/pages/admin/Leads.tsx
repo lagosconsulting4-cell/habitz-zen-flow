@@ -40,18 +40,21 @@ import { useLeads, type Lead, type LeadFilters } from "@/hooks/useLeads";
 import { useLeadsAnalytics } from "@/hooks/useLeadsAnalytics";
 import { LeadStatusBadge } from "@/components/admin/LeadStatusBadge";
 import { LeadDetailSheet } from "@/components/admin/LeadDetailSheet";
+import { LeadCard } from "@/components/admin/LeadCard";
 import { MetricCard } from "@/components/admin/MetricCard";
 import { LeadsFunnel } from "@/components/admin/LeadsFunnel";
 import { LeadsDemographics } from "@/components/admin/LeadsDemographics";
 import { LeadsUTMTable } from "@/components/admin/LeadsUTMTable";
 import { LeadsTemporalChart } from "@/components/admin/LeadsTemporalChart";
 import { LeadsHeatmap } from "@/components/admin/LeadsHeatmap";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import { exportLeadsToCSV, exportSelectedLeads } from "@/utils/csvExport";
 import { Search, ChevronLeft, ChevronRight, Download, MoreHorizontal, Filter, TrendingUp, Users, Target, Zap, AlertCircle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
 const AdminLeads = () => {
+  const isMobile = useIsMobile();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -300,12 +303,12 @@ const AdminLeads = () => {
   // Show error state if there's an error loading leads
   if (isError && error) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Leads</h1>
-          <p className="text-muted-foreground">Gerencie e acompanhe todos os leads do quiz</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Leads</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Gerencie e acompanhe todos os leads do quiz</p>
         </div>
-        <Card className="p-8">
+        <Card className="p-6 sm:p-8">
           <div className="flex flex-col items-center justify-center text-center space-y-4">
             <AlertCircle className="h-12 w-12 text-destructive" />
             <div>
@@ -324,30 +327,30 @@ const AdminLeads = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Leads</h1>
-        <p className="text-muted-foreground">Gerencie e acompanhe todos os leads do quiz</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Leads</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Gerencie e acompanhe todos os leads do quiz</p>
       </div>
 
       {/* KPI Cards */}
       {!summaryLoading && summary && (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="p-4">
-            <div className="text-sm font-medium text-muted-foreground">Total de Leads</div>
-            <div className="text-2xl font-bold">{summary.total_leads}</div>
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="p-3 sm:p-4">
+            <div className="text-xs sm:text-sm font-medium text-muted-foreground">Total de Leads</div>
+            <div className="text-xl sm:text-2xl font-bold">{summary.total_leads}</div>
           </Card>
-          <Card className="p-4">
-            <div className="text-sm font-medium text-muted-foreground">Novos</div>
-            <div className="text-2xl font-bold text-blue-500">{summary.new_leads}</div>
+          <Card className="p-3 sm:p-4">
+            <div className="text-xs sm:text-sm font-medium text-muted-foreground">Novos</div>
+            <div className="text-xl sm:text-2xl font-bold text-blue-500">{summary.new_leads}</div>
           </Card>
-          <Card className="p-4">
-            <div className="text-sm font-medium text-muted-foreground">Convertidos</div>
-            <div className="text-2xl font-bold text-green-500">{summary.converted_leads}</div>
+          <Card className="p-3 sm:p-4">
+            <div className="text-xs sm:text-sm font-medium text-muted-foreground">Convertidos</div>
+            <div className="text-xl sm:text-2xl font-bold text-green-500">{summary.converted_leads}</div>
           </Card>
-          <Card className="p-4">
-            <div className="text-sm font-medium text-muted-foreground">Taxa de Conversão</div>
-            <div className="text-2xl font-bold">{summary.conversion_rate_percent}%</div>
+          <Card className="p-3 sm:p-4">
+            <div className="text-xs sm:text-sm font-medium text-muted-foreground">Taxa de Conversão</div>
+            <div className="text-xl sm:text-2xl font-bold">{summary.conversion_rate_percent}%</div>
           </Card>
         </div>
       )}
@@ -360,22 +363,25 @@ const AdminLeads = () => {
 
         <TabsContent value="list" className="space-y-4">
           <Card>
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {/* Toolbar */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-4 gap-4">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1">
-                  <div className="relative flex-1 max-w-sm">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Buscar por nome, email ou telefone..."
-                      value={search}
-                      onChange={(e) => {
-                        setSearch(e.target.value);
-                        setPage(1);
-                      }}
-                      className="pl-9"
-                    />
-                  </div>
+              <div className="flex flex-col gap-2 sm:gap-4 mb-4">
+                {/* Row 1: Search */}
+                <div className="relative w-full sm:max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por nome, email ou telefone..."
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
+                    className="pl-9"
+                  />
+                </div>
+
+                {/* Row 2: Filters and Actions */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4">
                   <Select
                     value={filters.follow_up_status?.[0] || "all"}
                     onValueChange={(value) => {
@@ -386,7 +392,7 @@ const AdminLeads = () => {
                       setPage(1);
                     }}
                   >
-                    <SelectTrigger className="w-[150px]">
+                    <SelectTrigger className="w-full sm:w-auto">
                       <Filter className="h-4 w-4 mr-2" />
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
@@ -398,41 +404,44 @@ const AdminLeads = () => {
                       <SelectItem value="perdido">Perdido</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
 
-                <div className="flex items-center gap-2">
-                  {selectedCount > 0 ? (
-                    <>
-                      <Badge variant="secondary">{selectedCount} selecionados</Badge>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm" disabled={isBulkUpdating}>
-                            <MoreHorizontal className="h-4 w-4" />
-                            Ações em Massa
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleBulkStatusChange("contactado")}>
-                            Marcar como Contactado
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleBulkStatusChange("convertido")}>
-                            Marcar como Convertido
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleBulkStatusChange("perdido")}>
-                            Marcar como Perdido
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={handleExportSelected}>
-                            Exportar Selecionados
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </>
-                  ) : (
-                    <Button variant="outline" size="sm" onClick={handleExportAll}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Exportar CSV
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {selectedCount > 0 ? (
+                      <>
+                        <Badge variant="secondary" className="whitespace-nowrap">
+                          {selectedCount} selecionados
+                        </Badge>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" disabled={isBulkUpdating} className="flex-1 sm:flex-initial">
+                              <MoreHorizontal className="h-4 w-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Ações em Massa</span>
+                              <span className="sm:hidden">Ações</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleBulkStatusChange("contactado")}>
+                              Marcar como Contactado
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleBulkStatusChange("convertido")}>
+                              Marcar como Convertido
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleBulkStatusChange("perdido")}>
+                              Marcar como Perdido
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleExportSelected}>
+                              Exportar Selecionados
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </>
+                    ) : (
+                      <Button variant="outline" size="sm" onClick={handleExportAll} className="w-full sm:w-auto">
+                        <Download className="h-4 w-4 mr-2" />
+                        Exportar CSV
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -441,7 +450,27 @@ const AdminLeads = () => {
                 <div className="rounded-md border p-4">
                   <TableSkeleton rows={10} columns={8} />
                 </div>
+              ) : isMobile ? (
+                // Mobile: Card view
+                <div className="space-y-3">
+                  {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <LeadCard
+                        key={row.id}
+                        lead={row.original}
+                        isSelected={row.getIsSelected()}
+                        onSelect={(checked) => row.toggleSelected(!!checked)}
+                        onClick={() => handleRowClick(row.original)}
+                      />
+                    ))
+                  ) : (
+                    <div className="rounded-md border p-8 text-center text-muted-foreground">
+                      Nenhum lead encontrado.
+                    </div>
+                  )}
+                </div>
               ) : (
+                // Desktop: Table view
                 <div className="rounded-md border overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -495,13 +524,13 @@ const AdminLeads = () => {
               )}
 
               {/* Pagination */}
-              <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-4">
-                <div className="text-sm text-muted-foreground text-center sm:text-left">
+              <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-3 sm:gap-4">
+                <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
                   Mostrando <span className="font-medium">{(currentPage - 1) * 25 + 1}</span> a{" "}
                   <span className="font-medium">{Math.min(currentPage * 25, totalCount)}</span> de{" "}
                   <span className="font-medium">{totalCount}</span> leads
                 </div>
-                <div className="flex items-center gap-2 w-full sm:w-auto justify-center">
+                <div className="flex items-center justify-between sm:justify-center gap-2 w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="sm"
@@ -509,9 +538,9 @@ const AdminLeads = () => {
                     disabled={currentPage === 1}
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    Anterior
+                    <span className="hidden sm:inline ml-2">Anterior</span>
                   </Button>
-                  <div className="text-sm">
+                  <div className="text-xs sm:text-sm px-2">
                     Página {currentPage} de {totalPages}
                   </div>
                   <Button
@@ -520,7 +549,7 @@ const AdminLeads = () => {
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
                   >
-                    Próxima
+                    <span className="hidden sm:inline mr-2">Próxima</span>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
