@@ -444,13 +444,16 @@ export const useGamification = (userId?: string) => {
 
       if (error && error.code !== 'PGRST116') throw error;
 
-      // Calcular se ainda é a mesma semana
-      const currentWeekStart = new Date();
+      // Calcular se ainda é a mesma semana (comparar apenas datas, ignorar horas)
+      const today = new Date();
+      const currentWeekStart = new Date(today);
       currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1);
-      currentWeekStart.setHours(0, 0, 0, 0);
 
-      const lastPurchaseWeek = data?.last_purchase_week ? new Date(data.last_purchase_week) : null;
-      const isSameWeek = lastPurchaseWeek && lastPurchaseWeek >= currentWeekStart;
+      // Normalizar para YYYY-MM-DD (comparação de strings evita problemas de timezone)
+      const currentWeekStartString = currentWeekStart.toISOString().split('T')[0];
+      const lastPurchaseWeekString = data?.last_purchase_week || null;
+
+      const isSameWeek = lastPurchaseWeekString && lastPurchaseWeekString >= currentWeekStartString;
 
       return {
         count: isSameWeek ? (data?.weekly_purchases_count || 0) : 0,
@@ -459,7 +462,7 @@ export const useGamification = (userId?: string) => {
       };
     },
     enabled: Boolean(userId),
-    staleTime: 60_000, // 1 minuto
+    staleTime: 0, // Refetch imediato após invalidação
   });
 
   // Mutation: Add XP

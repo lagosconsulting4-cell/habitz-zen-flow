@@ -1,4 +1,5 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -58,12 +59,13 @@ export const FreezeShopModal = ({ isOpen, onClose, userId }: FreezeShopModalProp
     gemsBalance,
     streakFreezes,
     purchaseStreakFreeze,
+    isPurchasingFreeze,
     progress,
     weeklyFreezePurchases,
   } = useGamification(userId);
 
   const WEEKLY_LIMIT = 3;
-  const currentGems = gemsBalance?.current_gems || 0;
+  const currentGems = gemsBalance || 0;
   const availableFreezes = streakFreezes?.available_freezes || 0;
   const currentStreak = progress?.current_streak || 0;
   const weeklyPurchases = weeklyFreezePurchases?.count || 0;
@@ -73,14 +75,21 @@ export const FreezeShopModal = ({ isOpen, onClose, userId }: FreezeShopModalProp
 
   const handlePurchase = async () => {
     if (!canPurchase) return;
-    purchaseStreakFreeze.mutate();
+    try {
+      await purchaseStreakFreeze();
+    } catch (error) {
+      console.error('Erro ao comprar freeze:', error);
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-describedby="freeze-shop-description">
+        <VisuallyHidden>
+          <DialogTitle>Loja de Streak Freezes</DialogTitle>
+        </VisuallyHidden>
         {/* Hero Section with 3D Effect */}
-        <div className="flex flex-col items-center text-center py-6">
+        <div className="flex flex-col items-center text-center py-6" id="freeze-shop-description">
           <div className="relative mb-4">
             <div className="absolute inset-0 bg-blue-400 blur-2xl opacity-30 rounded-full"></div>
             <div className="relative bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900 dark:to-blue-800 rounded-full p-8">
@@ -147,7 +156,7 @@ export const FreezeShopModal = ({ isOpen, onClose, userId }: FreezeShopModalProp
           <Button
             size="lg"
             className="w-full"
-            disabled={!canPurchase || purchaseStreakFreeze.isPending}
+            disabled={!canPurchase || isPurchasingFreeze}
             onClick={handlePurchase}
           >
             {weeklyPurchases >= WEEKLY_LIMIT ? (
