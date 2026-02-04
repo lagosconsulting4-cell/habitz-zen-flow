@@ -16,7 +16,7 @@ import { fadeInUp, staggerContainer, staggerItem } from "@/hooks/useAnimations";
 import { useTracking } from "@/hooks/useTracking";
 
 // Checkout link for Exclusive Condition offer
-const CHECKOUT_LINK = "https://payfast.greenn.com.br/154673/offer/Y5uyP3";
+const CHECKOUT_LINK = "https://pay.kirvano.com/e2d8d592-3697-4bb3-8ccf-6614a197ac77";
 
 const MiniLanding = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -112,9 +112,9 @@ const MiniLanding = () => {
               className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.15] text-slate-900"
               variants={staggerItem}
             >
-              Pare de brigar com o seu cérebro.{" "}
+              Pare de aceitar menos do que você merece.{" "}
               <span className="text-[#A3E635] relative inline-block">
-                O sistema que funciona nos seus "dias ruins" está pronto.
+                O Sistema que ativa a sua Melhor Versão finalmente está pronto.
                 <svg
                   className="absolute -bottom-2 left-0 w-full h-3 text-[#A3E635]/30"
                   viewBox="0 0 200 12"
@@ -136,8 +136,8 @@ const MiniLanding = () => {
               className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed"
               variants={staggerItem}
             >
-              Você já entendeu que a rigidez destrói a constância. Agora, ative o único sistema
-              desenhado para a realidade — e não para um mundo perfeito que não existe.
+              Você não precisa de mais disciplina, precisa de um ambiente que te puxe para cima.
+              O Bora não é apenas um app, é o catalisador de quem você nasceu para ser.
             </motion.p>
 
             {/* App Mockup */}
@@ -166,7 +166,7 @@ const MiniLanding = () => {
                   size="lg"
                   className="group bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 text-lg font-bold px-10 py-7 rounded-xl shadow-2xl shadow-[#A3E635]/40 transition-all"
                 >
-                  QUERO MUDAR A MINHA ROTINA
+                  QUERO ATIVAR MINHA MELHOR VERSÃO
                   <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </motion.div>
@@ -196,15 +196,13 @@ const MiniLanding = () => {
             <Card className="border-2 border-[#A3E635]/30 shadow-xl bg-white">
               <CardHeader className="text-center pb-4">
                 <CardTitle className="text-2xl md:text-3xl font-bold text-slate-900">
-                  Por que esse preço especial?
+                  Por que o Bora é diferente?
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-5 text-base md:text-lg text-slate-700 leading-relaxed">
                 <p>
-                  Se você chegou aqui, é porque nós conversamos no WhatsApp. Você faz parte de um
-                  grupo seleto que já entendeu a verdade: o problema não é a sua{" "}
-                  <strong className="text-slate-900">"falta de vergonha na cara"</strong>, é um{" "}
-                  <strong className="text-[#A3E635]">Erro de Design de Rotina</strong>.
+                  O problema nunca foi você. O problema é que a sua rotina atual foi desenhada para
+                  te manter pequeno.
                 </p>
 
                 <p>
@@ -213,10 +211,8 @@ const MiniLanding = () => {
                 </p>
 
                 <p>
-                  Eu não quero que o preço seja uma barreira para você testar essa nova lógica.{" "}
-                  <strong className="text-slate-900">
-                    Por isso, liberei manualmente esta condição para o seu perfil.
-                  </strong>
+                  O Bora foi criado para liberar seu potencial máximo, removendo o atrito entre quem
+                  você é hoje e <strong className="text-[#A3E635]">quem você quer se tornar.</strong>
                 </p>
               </CardContent>
             </Card>
@@ -254,12 +250,13 @@ const MiniLanding = () => {
                       <X className="w-8 h-8 text-[#A3E635]" strokeWidth={2.5} />
                     </div>
                     <CardTitle className="text-xl font-bold text-slate-900">
-                      Adeus, Culpa
+                      Foco no Progresso
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-slate-600 text-center leading-relaxed">
-                      Se você não marcar "feito", o sistema não te pune. Ele recalcula a rota.
+                      Esqueça a culpa. O sistema foca em cada vitória sua, construindo a identidade
+                      de alguém que vence.
                     </p>
                   </CardContent>
                 </Card>
@@ -278,12 +275,13 @@ const MiniLanding = () => {
                       <RefreshCw className="w-8 h-8 text-[#A3E635]" strokeWidth={2.5} />
                     </div>
                     <CardTitle className="text-xl font-bold text-slate-900">
-                      Adaptação Automática
+                      Ritmo Natural
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-slate-600 text-center leading-relaxed">
-                      Dias de baixa energia? O sistema sugere o mínimo viável. Dias de alta energia? Ele libera o fluxo.
+                      Respeita sua energia para que você nunca pare. A consistência real vem de não
+                      desistir, não de ser um robô.
                     </p>
                   </CardContent>
                 </Card>
@@ -302,12 +300,13 @@ const MiniLanding = () => {
                       <Brain className="w-8 h-8 text-[#A3E635]" strokeWidth={2.5} />
                     </div>
                     <CardTitle className="text-xl font-bold text-slate-900">
-                      Neuro-Compatível
+                      Expansão de Identidade
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-slate-600 text-center leading-relaxed">
-                      Desenhado para liberar dopamina pelo progresso, não pela perfeição.
+                      Cada "feito" é um voto na pessoa que você está se tornando. Dopamina real para
+                      crescimento real.
                     </p>
                   </CardContent>
                 </Card>
@@ -323,8 +322,8 @@ const MiniLanding = () => {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <p className="text-2xl md:text-3xl font-bold text-slate-900">
-                Não é sobre fazer mais.{" "}
-                <span className="text-[#A3E635]">É sobre fazer caber.</span>
+                Não é sobre organizar tarefas.{" "}
+                <span className="text-[#A3E635]">É sobre se tornar quem você admira.</span>
               </p>
             </motion.div>
           </motion.div>
@@ -349,21 +348,20 @@ const MiniLanding = () => {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center leading-tight">
               Uma pergunta sincera:{" "}
               <span className="text-[#A3E635]">
-                Quanto custa continuar exatamente como você está?
+                Quanto custa continuar sendo uma "versão rascunho" de si mesmo?
               </span>
             </h2>
 
             {/* Texto principal */}
             <div className="space-y-6 text-base md:text-lg text-slate-300 leading-relaxed">
               <p>
-                Faça um exercício mental rápido. Imagine que é Janeiro do ano que vem. Você olha
-                para trás e vê que o ano passou voando.
+                Imagine chegar ao fim do ano e perceber que você ainda é a mesma pessoa, com os
+                mesmos bloqueios e as mesmas promessas não cumpridas.
               </p>
 
               <p>
-                Você sente aquela mesma angústia no peito. A sensação de que correu, correu, mas
-                não saiu do lugar. As mesmas metas engavetadas. A mesma culpa ao deitar no
-                travesseiro.
+                O custo de não mudar é viver uma vida menor do que a que você merece. É ver o
+                potencial escorrendo pelos dedos.
               </p>
 
               {/* Destaque */}
@@ -380,12 +378,12 @@ const MiniLanding = () => {
 
               <div className="space-y-4 pl-4 border-l-4 border-[#A3E635]/30">
                 <p>
-                  <strong className="text-white">1.</strong> Continuar tentando "na força do ódio"
-                  e falhando.
+                  <strong className="text-white">1.</strong> Continuar adiando sua melhor versão e
+                  aceitando menos.
                 </p>
                 <p>
-                  <strong className="text-white">2.</strong> Ou pagar o preço de um café por mês
-                  para ter um Sistema que carrega esse peso por você.
+                  <strong className="text-white">2.</strong> Ativar o Bora e começar a viver seu
+                  potencial máximo por menos de um café.
                 </p>
               </div>
 
@@ -429,7 +427,7 @@ const MiniLanding = () => {
                 {/* Badge de Desconto */}
                 <div className="flex justify-center">
                   <Badge className="px-6 py-3 bg-red-500 hover:bg-red-500 text-white text-lg font-black border-0 shadow-lg">
-                    33% OFF
+                    37% OFF
                   </Badge>
                 </div>
 
@@ -441,7 +439,7 @@ const MiniLanding = () => {
                   <div>
                     <div className="flex items-baseline justify-center gap-3">
                       <span className="text-7xl md:text-8xl font-black text-[#A3E635]">
-                        R$ 8,95
+                        R$ 6,86
                       </span>
                     </div>
                     <p className="text-xl text-slate-600 mt-4 font-semibold">
@@ -504,7 +502,7 @@ const MiniLanding = () => {
                     size="lg"
                     className="w-full bg-gradient-to-r from-[#A3E635] to-lime-400 hover:from-[#A3E635]/90 hover:to-lime-400/90 text-slate-900 text-xl font-black py-8 rounded-xl shadow-2xl shadow-[#A3E635]/40 border-2 border-[#84cc16]"
                   >
-                    🎯 ATIVAR MINHA ROTINA AGORA
+                    🎯 QUERO MINHA MELHOR VERSÃO AGORA
                   </Button>
                 </motion.div>
 
