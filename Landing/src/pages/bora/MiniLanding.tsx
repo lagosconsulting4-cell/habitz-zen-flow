@@ -76,28 +76,27 @@ const MiniLanding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden w-full max-w-full font-['Plus_Jakarta_Sans',sans-serif]">
+    <div className="min-h-screen bg-[#0A0A0B] overflow-x-hidden w-full max-w-full font-['Plus_Jakarta_Sans',sans-serif]">
       {/* ============ TOP BAR (STICKY) ============ */}
       <motion.div
-        className="fixed top-0 left-0 right-0 z-50 bg-[#A3E635]/10 backdrop-blur-sm border-b border-[#A3E635]/20"
+        className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0B]/80 backdrop-blur-xl border-b border-white/5"
         initial={{ y: -50 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.4 }}
       >
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-2">
-          <Lock className="w-4 h-4 text-[#A3E635]" />
-          <p className="text-sm font-medium text-slate-700">
-            <span className="font-semibold">Status:</span> Condição de Condição Exclusiva liberada para o seu perfil.
+          <Lock className="w-4 h-4 text-lime-400" />
+          <p className="text-sm font-medium text-slate-300">
+            <span className="font-semibold text-white">Status:</span> Condição de Condição Exclusiva liberada para o seu perfil.
           </p>
         </div>
       </motion.div>
 
       {/* ============ HERO SECTION ============ */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 md:px-6 pt-32 pb-20 w-full overflow-hidden bg-gradient-to-b from-white via-[#A3E635]/5 to-white">
+      <section className="relative min-h-screen flex items-center justify-center px-4 md:px-6 pt-32 pb-20 w-full overflow-hidden bg-[#0A0A0B]">
         {/* Background decorative elements */}
-        <div className="absolute inset-0 bg-[radial-gradient(#A3E635_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.08]" />
-        <div className="absolute top-40 right-0 w-[400px] h-[400px] bg-[#A3E635]/15 rounded-full blur-[120px]" />
-        <div className="absolute bottom-20 left-0 w-[350px] h-[350px] bg-[#A3E635]/10 rounded-full blur-[100px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-lime-500/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-yellow-500/5 rounded-full blur-[130px] pointer-events-none" />
 
         <div className="relative z-10 w-full max-w-4xl mx-auto text-center">
           <motion.div
@@ -109,14 +108,14 @@ const MiniLanding = () => {
           >
             {/* Headline */}
             <motion.h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.15] text-slate-900"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.15] text-white"
               variants={staggerItem}
             >
-              Pare de aceitar menos do que você merece.{" "}
-              <span className="text-[#A3E635] relative inline-block">
-                O Sistema que ativa a sua Melhor Versão finalmente está pronto.
+              Pare de depender da sorte{" "}
+              <span className="text-lime-400 relative inline-block">
+                para ser sua melhor versão.
                 <svg
-                  className="absolute -bottom-2 left-0 w-full h-3 text-[#A3E635]/30"
+                  className="absolute -bottom-2 left-0 w-full h-3 text-lime-400/30"
                   viewBox="0 0 200 12"
                   preserveAspectRatio="none"
                 >
@@ -133,11 +132,12 @@ const MiniLanding = () => {
 
             {/* Subheadline */}
             <motion.p
-              className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed"
+              className="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed"
               variants={staggerItem}
             >
-              Você não precisa de mais disciplina, precisa de um ambiente que te puxe para cima.
-              O Bora não é apenas um app, é o catalisador de quem você nasceu para ser.
+              O erro é achar que você precisa de um "dia bom" para produzir. Você não precisa de
+              mais força de vontade. Você precisa de um sistema que elimine a necessidade de decidir
+              e torne sua evolução inevitável.
             </motion.p>
 
             {/* App Mockup */}
@@ -164,9 +164,9 @@ const MiniLanding = () => {
                 <Button
                   onClick={() => handleCTA("hero")}
                   size="lg"
-                  className="group bg-[#A3E635] hover:bg-[#A3E635]/90 text-slate-900 text-lg font-bold px-10 py-7 rounded-xl shadow-2xl shadow-[#A3E635]/40 transition-all"
+                  className="group bg-lime-400 hover:bg-lime-500 text-slate-950 text-lg font-bold px-10 py-7 rounded-full shadow-[0_0_30px_rgba(163,230,53,0.3)] hover:shadow-[0_0_50px_rgba(163,230,53,0.5)] transition-all"
                 >
-                  QUERO ATIVAR MINHA MELHOR VERSÃO
+                  QUERO INSTALAR MEU SISTEMA
                   <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </motion.div>
@@ -176,7 +176,7 @@ const MiniLanding = () => {
                 className="text-sm text-slate-500 mt-4 flex items-center justify-center gap-2"
                 variants={staggerItem}
               >
-                <CheckCircle2 className="w-4 h-4 text-[#A3E635]" />
+                <CheckCircle2 className="w-4 h-4 text-lime-400" />
                 Garantia Blindada de 7 dias ou seu dinheiro de volta
               </motion.p>
             </motion.div>
@@ -185,34 +185,36 @@ const MiniLanding = () => {
       </section>
 
       {/* ============ SEÇÃO: A PONTE LÓGICA ============ */}
-      <section className="py-16 md:py-24 px-4 md:px-6 bg-slate-50">
-        <div className="max-w-3xl mx-auto">
+      {/* ============ SEÇÃO: A PONTE LÓGICA ============ */}
+      <section className="py-16 md:py-24 px-4 md:px-6 bg-[#0A0A0B] relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0B] via-[#0A0A0B] to-[#121214] opacity-50" />
+        <div className="max-w-3xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <Card className="border-2 border-[#A3E635]/30 shadow-xl bg-white">
+            <Card className="bg-[#121214] border border-white/5 shadow-none">
               <CardHeader className="text-center pb-4">
-                <CardTitle className="text-2xl md:text-3xl font-bold text-slate-900">
-                  Por que o Bora é diferente?
+                <CardTitle className="text-2xl md:text-3xl font-bold text-white">
+                  Por que você falha com rotinas comuns?
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-5 text-base md:text-lg text-slate-700 leading-relaxed">
+              <CardContent className="space-y-5 text-base md:text-lg text-slate-400 leading-relaxed">
                 <p>
-                  O problema nunca foi você. O problema é que a sua rotina atual foi desenhada para
-                  te manter pequeno.
+                  Sua mente foi desenhada para economizar energia, não para realizar sonhos.
                 </p>
 
                 <p>
-                  A maioria dos apps exige que você seja um robô.{" "}
-                  <strong className="text-slate-900">O Bora foi desenhado para humanos.</strong>
+                  Quando você tenta "se esforçar" sem um sistema, você está lutando contra a sua
+                  própria biologia. <strong className="text-lime-400">E você vai perder.</strong>
                 </p>
 
                 <p>
-                  O Bora foi criado para liberar seu potencial máximo, removendo o atrito entre quem
-                  você é hoje e <strong className="text-[#A3E635]">quem você quer se tornar.</strong>
+                  O segredo do Bora não é te dar mais tarefas. É te dar{" "}
+                  <strong className="text-lime-400">menos decisões</strong>. O sistema não pergunta
+                  "se" você está com vontade; ele apenas te mostra o próximo passo.
                 </p>
               </CardContent>
             </Card>
@@ -221,7 +223,7 @@ const MiniLanding = () => {
       </section>
 
       {/* ============ SEÇÃO: O MECANISMO ============ */}
-      <section className="py-16 md:py-24 px-4 md:px-6 bg-white">
+      <section className="py-16 md:py-24 px-4 md:px-6 bg-[#0A0A0B]">
         <div className="max-w-5xl mx-auto">
           <motion.div
             className="space-y-12"
@@ -231,82 +233,84 @@ const MiniLanding = () => {
             transition={{ duration: 0.6 }}
           >
             {/* Título */}
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white text-center">
               O que muda quando você ativa o Bora:
             </h2>
 
             {/* Grid de 3 Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Card 1: Adeus, Culpa */}
+              {/* Card 1: Progresso Visível */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
-                <Card className="h-full border-2 border-slate-200 hover:border-[#A3E635]/50 transition-colors shadow-md hover:shadow-xl">
+                <Card className="h-full bg-[#121214] border border-white/5 hover:border-lime-500/30 transition-colors shadow-none">
                   <CardHeader className="text-center pb-3">
-                    <div className="w-16 h-16 bg-[#A3E635]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <X className="w-8 h-8 text-[#A3E635]" strokeWidth={2.5} />
+                    <div className="w-16 h-16 bg-lime-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <X className="w-8 h-8 text-lime-400" strokeWidth={2.5} />
                     </div>
-                    <CardTitle className="text-xl font-bold text-slate-900">
-                      Foco no Progresso
+                    <CardTitle className="text-xl font-bold text-white">
+                      Progresso Visível
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-slate-600 text-center leading-relaxed">
-                      Esqueça a culpa. O sistema foca em cada vitória sua, construindo a identidade
-                      de alguém que vence.
+                    <p className="text-slate-400 text-center leading-relaxed">
+                      Esqueça a culpa da falha. O sistema foca em registrar cada pequena vitória. É
+                      o fim da sensação de que você "fez muito e não saiu do lugar".
                     </p>
                   </CardContent>
                 </Card>
               </motion.div>
 
-              {/* Card 2: Adaptação Automática */}
+              {/* Card 2: Zero Decisão */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <Card className="h-full border-2 border-slate-200 hover:border-[#A3E635]/50 transition-colors shadow-md hover:shadow-xl">
+                <Card className="h-full bg-[#121214] border border-white/5 hover:border-lime-500/30 transition-colors shadow-none">
                   <CardHeader className="text-center pb-3">
-                    <div className="w-16 h-16 bg-[#A3E635]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <RefreshCw className="w-8 h-8 text-[#A3E635]" strokeWidth={2.5} />
+                    <div className="w-16 h-16 bg-lime-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <RefreshCw className="w-8 h-8 text-lime-400" strokeWidth={2.5} />
                     </div>
-                    <CardTitle className="text-xl font-bold text-slate-900">
-                      Ritmo Natural
+                    <CardTitle className="text-xl font-bold text-white">
+                      Zero Decisão
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-slate-600 text-center leading-relaxed">
-                      Respeita sua energia para que você nunca pare. A consistência real vem de não
-                      desistir, não de ser um robô.
+                    <p className="text-slate-400 text-center leading-relaxed">
+                      Pare de negociar com sua mente. No dia em que você para de decidir "o que
+                      fazer" e deixa o sistema decidir por você, a execução se torna automática.
+                      Menos atrito, mais ação.
                     </p>
                   </CardContent>
                 </Card>
               </motion.div>
 
-              {/* Card 3: Neuro-Compatível */}
+              {/* Card 3: Expansão de Identidade */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <Card className="h-full border-2 border-slate-200 hover:border-[#A3E635]/50 transition-colors shadow-md hover:shadow-xl">
+                <Card className="h-full bg-[#121214] border border-white/5 hover:border-lime-500/30 transition-colors shadow-none">
                   <CardHeader className="text-center pb-3">
-                    <div className="w-16 h-16 bg-[#A3E635]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <Brain className="w-8 h-8 text-[#A3E635]" strokeWidth={2.5} />
+                    <div className="w-16 h-16 bg-lime-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <Brain className="w-8 h-8 text-lime-400" strokeWidth={2.5} />
                     </div>
-                    <CardTitle className="text-xl font-bold text-slate-900">
+                    <CardTitle className="text-xl font-bold text-white">
                       Expansão de Identidade
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-slate-600 text-center leading-relaxed">
-                      Cada "feito" é um voto na pessoa que você está se tornando. Dopamina real para
-                      crescimento real.
+                    <p className="text-slate-400 text-center leading-relaxed">
+                      Dopamina real. Cada check não é apenas uma tarefa cumprida, é um voto na
+                      pessoa que você está se tornando. Construa a identidade de quem vence, dia
+                      após dia.
                     </p>
                   </CardContent>
                 </Card>
@@ -321,9 +325,9 @@ const MiniLanding = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <p className="text-2xl md:text-3xl font-bold text-slate-900">
-                Não é sobre organizar tarefas.{" "}
-                <span className="text-[#A3E635]">É sobre se tornar quem você admira.</span>
+              <p className="text-2xl md:text-3xl font-bold text-white">
+                O Bora tira o peso de "ter que se organizar" das suas costas e faz você{" "}
+                <span className="text-[#A3E635]">apenas seguir o fluxo.</span>
               </p>
             </motion.div>
           </motion.div>
@@ -331,10 +335,11 @@ const MiniLanding = () => {
       </section>
 
       {/* ============ SEÇÃO: AVERSÃO À PERDA (Fundo Escuro) ============ */}
-      <section className="py-20 md:py-32 px-4 md:px-6 bg-slate-900 text-white relative overflow-hidden">
+      {/* ============ SEÇÃO: AVERSÃO À PERDA (Fundo Escuro) ============ */}
+      <section className="py-20 md:py-32 px-4 md:px-6 bg-[#0A0A0B] text-white relative overflow-hidden">
         {/* Decorative gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-black opacity-90" />
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#A3E635]/5 rounded-full blur-[150px]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-[#0A0A0B]" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-lime-500/5 rounded-full blur-[150px]" />
 
         <div className="max-w-4xl mx-auto relative z-10">
           <motion.div
@@ -346,60 +351,40 @@ const MiniLanding = () => {
           >
             {/* Headline */}
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center leading-tight">
-              Uma pergunta sincera:{" "}
-              <span className="text-[#A3E635]">
-                Quanto custa continuar sendo uma "versão rascunho" de si mesmo?
-              </span>
+              Amanhã, você tem <span className="text-lime-400">dois caminhos.</span>
             </h2>
 
             {/* Texto principal */}
             <div className="space-y-6 text-base md:text-lg text-slate-300 leading-relaxed">
-              <p>
-                Imagine chegar ao fim do ano e perceber que você ainda é a mesma pessoa, com os
-                mesmos bloqueios e as mesmas promessas não cumpridas.
-              </p>
+              <div className="space-y-4 pl-4 border-l-4 border-lime-500/30">
+                <p>
+                  <strong className="text-red-400">❌ 1.</strong> Continuar dependendo da sorte:
+                  Acordar esperando estar inspirado (e desistir na primeira dificuldade).
+                </p>
+                <p>
+                  <strong className="text-lime-400">✅ 2. Instalar o sistema:</strong> Começar a
+                  construir sua melhor versão em cima de uma base sólida e previsível.
+                </p>
+              </div>
 
-              <p>
-                O custo de não mudar é viver uma vida menor do que a que você merece. É ver o
-                potencial escorrendo pelos dedos.
-              </p>
-
-              {/* Destaque */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 my-8">
                 <p className="text-xl md:text-2xl font-bold text-white text-center">
-                  Esse é o custo real. Não é sobre o dinheiro.{" "}
-                  <span className="text-[#A3E635]">É sobre o tempo de vida que não volta.</span>
+                  O custo de não mudar é viver preso num looping de dias ruins.{" "}
+                  <span className="text-lime-400">
+                    O sistema está pronto. Só falta você entrar.
+                  </span>
                 </p>
               </div>
-
-              <p>
-                Você tem <strong className="text-white">dois caminhos</strong> agora:
-              </p>
-
-              <div className="space-y-4 pl-4 border-l-4 border-[#A3E635]/30">
-                <p>
-                  <strong className="text-white">1.</strong> Continuar adiando sua melhor versão e
-                  aceitando menos.
-                </p>
-                <p>
-                  <strong className="text-white">2.</strong> Ativar o Bora e começar a viver seu
-                  potencial máximo por menos de um café.
-                </p>
-              </div>
-
-              <p className="text-xl font-semibold text-white text-center pt-6">
-                Não deixe mais um ano passar no "quase".
-              </p>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* ============ SEÇÃO DE OFERTA (Pricing Card Destacado) ============ */}
-      <section id="offer" className="py-20 md:py-32 px-4 md:px-6 bg-gradient-to-b from-white via-slate-50 to-white relative overflow-hidden">
+      <section id="offer" className="py-20 px-4 md:px-6 bg-[#0A0A0B] relative overflow-hidden">
         {/* Decorative background */}
         <div className="absolute inset-0 bg-[radial-gradient(#A3E635_1px,transparent_1px)] bg-[size:30px_30px] opacity-[0.05]" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#A3E635]/10 rounded-full blur-[150px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-lime-500/10 rounded-full blur-[150px]" />
 
         <div className="max-w-2xl mx-auto relative z-10">
           <motion.div
@@ -410,15 +395,15 @@ const MiniLanding = () => {
             transition={{ duration: 0.7 }}
           >
             {/* Pricing Card */}
-            <Card className="border-4 border-[#A3E635] shadow-2xl bg-white overflow-hidden">
+            <Card className="border border-lime-500/50 shadow-2xl bg-[#121214] overflow-hidden">
               {/* Header com Badge */}
-              <CardHeader className="text-center bg-gradient-to-br from-[#A3E635]/10 to-transparent pb-8">
-                <Badge className="mx-auto mb-4 px-4 py-2 bg-[#A3E635] text-slate-900 text-sm font-bold border-0">
+              <CardHeader className="text-center bg-gradient-to-br from-lime-500/10 to-transparent pb-8">
+                <Badge className="mx-auto mb-4 px-4 py-2 bg-lime-400 text-slate-900 text-sm font-bold border-0">
                   <Sparkles className="w-4 h-4 mr-2" />
                   Sua condição de Condição Exclusiva
                 </Badge>
 
-                <CardTitle className="text-3xl md:text-4xl font-black text-slate-900">
+                <CardTitle className="text-3xl md:text-4xl font-black text-white">
                   Ative agora por:
                 </CardTitle>
               </CardHeader>
@@ -433,16 +418,20 @@ const MiniLanding = () => {
 
                 {/* Preço De/Por */}
                 <div className="text-center">
+                  <p className="text-sm md:text-base text-slate-400 max-w-xs mx-auto mb-4 font-medium">
+                    Por menos de R$ 0,23 ao dia. É literalmente mais barato que uma bala para
+                    remover a dúvida da sua rotina.
+                  </p>
                   <p className="text-lg text-slate-500 line-through mb-4">De R$ 129,90</p>
 
                   {/* Preço Parcelado Simplificado */}
                   <div>
                     <div className="flex items-baseline justify-center gap-3">
-                      <span className="text-7xl md:text-8xl font-black text-[#A3E635]">
+                      <span className="text-7xl md:text-8xl font-black text-lime-400">
                         R$ 6,86
                       </span>
                     </div>
-                    <p className="text-xl text-slate-600 mt-4 font-semibold">
+                    <p className="text-xl text-slate-400 mt-4 font-semibold">
                       por mês
                     </p>
                     <p className="text-sm text-slate-500 mt-2">
@@ -454,42 +443,42 @@ const MiniLanding = () => {
                 {/* Lista de Benefícios */}
                 <ul className="space-y-4 max-w-md mx-auto">
                   <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-[#A3E635] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle2 className="w-4 h-4 text-white" strokeWidth={3} />
+                    <div className="w-6 h-6 bg-lime-400 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle2 className="w-4 h-4 text-slate-900" strokeWidth={3} />
                     </div>
-                    <span className="text-base text-slate-700 font-medium">
+                    <span className="text-base text-slate-300 font-medium">
                       ✅ Acesso Total ao App Bora
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-[#A3E635] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle2 className="w-4 h-4 text-white" strokeWidth={3} />
+                    <div className="w-6 h-6 bg-lime-400 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle2 className="w-4 h-4 text-slate-900" strokeWidth={3} />
                     </div>
-                    <span className="text-base text-slate-700 font-medium">
+                    <span className="text-base text-slate-300 font-medium">
                       ✅ Atualizações do Sistema Flexível
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-[#A3E635] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle2 className="w-4 h-4 text-white" strokeWidth={3} />
+                    <div className="w-6 h-6 bg-lime-400 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle2 className="w-4 h-4 text-slate-900" strokeWidth={3} />
                     </div>
-                    <span className="text-base text-slate-700 font-medium">
+                    <span className="text-base text-slate-300 font-medium">
                       ✅ Garantia de 7 dias (Risco Zero)
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-[#A3E635] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle2 className="w-4 h-4 text-white" strokeWidth={3} />
+                    <div className="w-6 h-6 bg-lime-400 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle2 className="w-4 h-4 text-slate-900" strokeWidth={3} />
                     </div>
-                    <span className="text-base text-slate-700 font-medium">
+                    <span className="text-base text-slate-300 font-medium">
                       ✅ Suporte Direto (WhatsApp)
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-[#A3E635] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle2 className="w-4 h-4 text-white" strokeWidth={3} />
+                    <div className="w-6 h-6 bg-lime-400 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle2 className="w-4 h-4 text-slate-900" strokeWidth={3} />
                     </div>
-                    <span className="text-base text-slate-700 font-medium">
+                    <span className="text-base text-slate-300 font-medium">
                       ✅ Estrutura Prontinha (Comece em 3 min)
                     </span>
                   </li>
@@ -500,7 +489,7 @@ const MiniLanding = () => {
                   <Button
                     onClick={() => handleCTA("offer")}
                     size="lg"
-                    className="w-full bg-gradient-to-r from-[#A3E635] to-lime-400 hover:from-[#A3E635]/90 hover:to-lime-400/90 text-slate-900 text-xl font-black py-8 rounded-xl shadow-2xl shadow-[#A3E635]/40 border-2 border-[#84cc16]"
+                    className="w-full bg-lime-400 hover:bg-lime-500 text-slate-950 text-xl font-black py-8 rounded-full shadow-[0_0_40px_rgba(163,230,53,0.4)]"
                   >
                     🎯 QUERO MINHA MELHOR VERSÃO AGORA
                   </Button>
@@ -509,15 +498,15 @@ const MiniLanding = () => {
                 {/* Trust Indicators */}
                 <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500 pt-4">
                   <div className="flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5 text-[#A3E635]" />
+                    <Lock className="w-3.5 h-3.5 text-lime-400" />
                     <span>Pagamento 100% seguro</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#A3E635]" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-lime-400" />
                     <span>Cancele quando quiser</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#A3E635]" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-lime-400" />
                     <span>Sem fidelidade</span>
                   </div>
                 </div>
@@ -526,14 +515,14 @@ const MiniLanding = () => {
 
             {/* Garantia Reforçada */}
             <motion.div
-              className="bg-slate-900 rounded-2xl p-8 text-center border-2 border-slate-700"
+              className="bg-[#121214] rounded-2xl p-8 text-center border border-white/5"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <div className="w-16 h-16 bg-[#A3E635]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="w-8 h-8 text-[#A3E635]" />
+              <div className="w-16 h-16 bg-lime-400/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 className="w-8 h-8 text-lime-400" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">
                 Garantia Blindada de 7 Dias
@@ -548,7 +537,7 @@ const MiniLanding = () => {
       </section>
 
       {/* ============ FOOTER ============ */}
-      <footer className="py-12 px-4 md:px-6 bg-slate-900 text-slate-300 border-t border-slate-800">
+      <footer className="py-12 px-4 md:px-6 bg-[#0A0A0B] text-slate-300 border-t border-white/5">
         <div className="max-w-7xl mx-auto text-center space-y-4">
           <picture>
             <source srcSet="/assets/logo_bora.webp" type="image/webp" />
