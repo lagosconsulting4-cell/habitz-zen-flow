@@ -38,10 +38,10 @@ export const PotentialChartStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-white mb-2">
-          Você tem um potencial grande para conquistar o que sempre quis
+          Seu potencial de consistência é alto quando o sistema joga a seu favor
         </h2>
         <p className="text-sm text-slate-400">
-          Com foco em uma rotina saudável, você consegue chegar lá, mesmo com pouco tempo
+          Não é sobre ter força de vontade infinita. É sobre ter um método que não deixa você cair.
         </p>
       </motion.div>
 

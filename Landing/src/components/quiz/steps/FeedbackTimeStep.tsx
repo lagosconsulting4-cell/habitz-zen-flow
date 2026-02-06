@@ -45,15 +45,13 @@ export const FeedbackTimeStep = () => {
         className="text-center mb-6 px-4 max-w-md"
       >
         <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-          Pouco tempo já é <span className="text-lime-400">suficiente</span>
+          O sistema torna sua evolução <span className="text-lime-400">inevitável</span>
         </h2>
         <p className="text-base text-slate-400 mb-3 leading-relaxed">
-          Não é sobre fazer tudo.
-          <br />
-          É sobre fazer algo que caiba até nos dias cansativos.
+          Mesmo com {timeText}, o algoritmo ajusta a intensidade para você nunca travar.
         </p>
         <p className="text-base text-slate-400 leading-relaxed">
-          <strong className="text-white">Rotinas pequenas são mais fáceis de manter</strong> — especialmente quando o dia não ajuda.
+          <strong className="text-white">A constância vence a intensidade.</strong> O Bora garante que você faça o pouco que gera muito resultado.
         </p>
       </motion.div>
 

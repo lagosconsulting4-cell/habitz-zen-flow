@@ -61,7 +61,7 @@ export const SubscriptionOffersStep = () => {
           </motion.div>
 
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
-            Falta só isso para <span className="text-lime-400">começar</span>
+            Seu Protocolo de <span className="text-lime-400">Desbloqueio</span> está pronto
           </h2>
 
           <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto">

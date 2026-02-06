@@ -15,24 +15,24 @@ export const AppExplanationStep = () => {
 
   const tabContent = {
     dopamine: {
-      title: "Seu cérebro precisa de vitórias rápidas",
-      description: "A maioria das rotinas falha porque exige esforço antes da recompensa. O BORA inverte isso.",
-      before: "Rotina comum: Esforço enorme → Nenhuma recompensa imediata → Cérebro desiste.",
-      after: "Método BORA: Micro-vitória → Liberação de dopamina → Vontade de fazer mais.",
+      title: "Vitórias Rápidas",
+      description: "O cérebro desiste quando o esforço é maior que a recompensa. Invertemos isso.",
+      before: "Esforço alto → Sem recompensa → Desistência.",
+      after: "Micro-passo → Dopamina imediata → Vontade de continuar.",
       image: "https://placehold.co/600x400/1e293b/a3e635?text=Dopamine+Loop",
     },
     biology: {
-      title: "Pare de lutar contra seu relógio biológico",
-      description: "Você tenta ser produtivo quando seu corpo pede descanso. Isso gera o ciclo de exaustão.",
-      before: "Forçar produtividade às 14h (pico de cansaço natural).",
-      after: "Tarefas de foca às 10h e tarefas automáticas às 14h.",
+      title: "Ritmo Biológico",
+      description: "Você tenta ser produtivo na hora errada. O sistema ajusta a tarefa à sua energia.",
+      before: "Forçar foco quando o corpo pede descanso.",
+      after: "Tarefas certas nos horários de pico de energia.",
       image: "https://placehold.co/600x400/1e293b/a3e635?text=Bio+Rhythm",
     },
     "mental-load": {
-      title: "Não gaste energia decidindo o que fazer",
-      description: "Decidir cansa mais que fazer. Removemos o peso da decisão das suas costas.",
-      before: "Acordar e pensar: 'O que tenho que fazer hoje?' (Gasta 20% da bateria mental).",
-      after: "Acordar e executar o que já está pronto. (Foco total na ação).",
+      title: "Decisão Zero",
+      description: "Decidir o que fazer cansa. O Bora já te entrega o próximo passo pronto.",
+      before: "Acordar e gastar energia planejando o dia.",
+      after: "Acordar e apenas executar o plano pronto.",
       image: "https://placehold.co/600x400/1e293b/a3e635?text=Zero+Decision",
     },
   };

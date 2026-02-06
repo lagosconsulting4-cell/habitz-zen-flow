@@ -33,7 +33,7 @@ export const ObjectiveStep = () => {
           Qual seu principal objetivo com o <span className="text-lime-400">Bora?</span>
         </h2>
         <p className="text-sm text-slate-400">
-          Vamos direto ao ponto. Qual dessas frases é a sua realidade?
+          Onde o sistema atual está falhando com você?
         </p>
       </motion.div>
 

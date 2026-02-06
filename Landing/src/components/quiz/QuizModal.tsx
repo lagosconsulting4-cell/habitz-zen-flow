@@ -10,8 +10,8 @@ import { HeroStep } from "./steps/HeroStep";
 import { ObjectiveStep } from "./steps/ObjectiveStep";
 import { TimeAvailableStep } from "./steps/TimeAvailableStep";
 import { EnergyPeakStep } from "./steps/EnergyPeakStep";
-import { WorkScheduleStep } from "./steps/WorkScheduleStep";
-import { FinancialRangeStep } from "./steps/FinancialRangeStep";
+// import { WorkScheduleStep } from "./steps/WorkScheduleStep"; // Removed
+// import { FinancialRangeStep } from "./steps/FinancialRangeStep"; // Removed
 import { AgeStep } from "./steps/AgeStep";
 import { ProfessionStep } from "./steps/ProfessionStep";
 import { ChallengesStep } from "./steps/ChallengesStep";
@@ -43,6 +43,7 @@ import { ValueBridgeStep } from "./steps/ValueBridgeStep";
 import AnalysisLoadingStep from "./steps/AnalysisLoadingStep";
 import DiagnosisStep from "./steps/DiagnosisStep";
 import SimilarityMatchStep from "./steps/SimilarityMatchStep";
+import { ObjectionHandlingStep } from "./steps/ObjectionHandlingStep";
 import CommitmentStep from "./steps/CommitmentStep";
 
 interface QuizModalProps {
@@ -77,56 +78,56 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
         return <FeedbackTimeStep />;
       case 4:
         return <EnergyPeakStep />;
+      // Removed 5 (WorkSchedule) and 6 (Financial)
       case 5:
-        return <WorkScheduleStep />;
-      case 6:
-        return <FinancialRangeStep />;
-      case 7:
         return <ProfessionStep />;
-      case 8:
+      case 6:
         return <FeedbackAdaptStep />;
-      case 9:
+      case 7:
         return <AgeStep />;
-      case 10:
+      case 8:
         return <FeedbackAgeChartStep />;
-      case 11:
+      case 9:
         return <ChallengesStep />;
-      case 12:
+      case 10:
         return <GenderStep />;
-      case 13:
+      case 11:
         return <SocialProofChartStep />;
-      case 14:
+      case 12:
         return <ConsistencyFeelingStep />;
-      case 15:
+      case 13:
         return <ProjectedFeelingStep />;
-      case 16:
+      case 14:
         return <TestimonialsStep />;
-      case 17:
+      case 15:
         return <YearsPromisingStep />;
-      case 18:
+      case 16:
         return <UrgencyStep />;
-      case 19:
+      case 17:
         return <PotentialChartStep />;
-      case 20:
+      case 18:
         return <AppExplanationStep />;
 
       // === DEEP BRIDGE START ===
-      case 21:
+      case 19:
         // Data Collection - user submits form
         return <DataCollectionStep />;
-      case 22:
+      case 20:
         // Analysis happens AFTER form submission
         return <AnalysisLoadingStep />;
-      case 23:
+      case 21:
         // Show diagnosis results
         return <DiagnosisStep />;
-      case 24:
+      case 22:
         // Show "Veja quem resolveu isso" - social proof
         return <SimilarityMatchStep />;
-      case 25:
-        // Now Commitment comes after SimilarityMatch (using real name)
+      case 23:
+        // Objection Handling (Parece bom demais?)
+        return <ObjectionHandlingStep />;
+      case 24:
+        // Now Commitment comes after Similarity/Objection
         return <CommitmentStep />;
-      case 26:
+      case 25:
         return <SubscriptionOffersStep />;
       default:
         return null;

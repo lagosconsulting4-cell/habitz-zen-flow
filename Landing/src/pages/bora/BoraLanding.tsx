@@ -14,10 +14,11 @@ import {
   Zap,
   Star,
   Users,
-  BadgeCheck,
+  ShieldCheck,
   Brain,
   Target,
   LineChart,
+  Sparkles,
 } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/hooks/useAnimations";
 import { QuizModal } from "@/components/quiz/QuizModal";
@@ -27,25 +28,28 @@ import { useTracking } from "@/hooks/useTracking";
 
 const howItWorksNew = [
   {
-    title: "Definição de Foco",
-    description: "Você escolhe a meta. O algoritmo quebra ela em tarefas pequenas que cabem no seu dia.",
-    icon: Target,
-    gradient: "from-lime-400 to-lime-600",
+    title: "Caminho do Menor Esforço",
+    description: "Não dependa de força de vontade. Tornamos o comportamento certo a ação mais fácil do seu dia.",
+    icon: Zap,
+    gradient: "from-lime-400/20 to-lime-600/20",
     className: "col-span-1 md:col-span-2 lg:col-span-1",
+    number: "01",
   },
   {
-    title: "Ajuste Dinâmico",
-    description: "Teve um dia ruim? O sistema recalcula a rota para você não quebrar a constância.",
+    title: "Identidade > Hábito",
+    description: "Pare de 'tentar' e comece a 'ser'. Moldamos sua autoimagem para que a disciplina venha de dentro para fora, sem sofrimento.",
     icon: Brain,
-    gradient: "from-emerald-400 to-emerald-600",
+    gradient: "from-emerald-400/20 to-emerald-600/20",
     className: "col-span-1 md:col-span-2 lg:col-span-1",
+    number: "02",
   },
   {
-    title: "Visualização de Progresso",
-    description: "Acompanhe sua evolução diária para gerar a dopamina que seu cérebro precisa.",
+    title: "O Poder do 1%",
+    description: "Melhore 1% todos os dias. Em um ano, você será 37x melhor. O algoritmo garante que você nunca estagne.",
     icon: LineChart,
-    gradient: "from-lime-300 to-emerald-400",
+    gradient: "from-lime-300/20 to-emerald-400/20",
     className: "col-span-1 md:col-span-2 lg:col-span-1",
+    number: "03",
   },
 ];
 
@@ -186,11 +190,11 @@ const BoraLanding = () => {
               className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tighter text-white"
               variants={staggerItem}
             >
-              Pare de depender da <span className="text-white/40">Motivação.</span><br />
-              Automatize a sua <span className="text-lime-400">Disciplina.</span>
+              Seja a sua <br />
+              <span className="text-lime-400">melhor versão.</span>
             </motion.h1>
 
-            {/* Mobile Mockup Position (Visible on Mobile only/Interleaved) - user requested "entre headline e subhead" */}
+            {/* Mobile Mockup Position (Visible on Mobile only/Interleaved) */}
             <motion.div
               className="lg:hidden relative w-full flex justify-center py-6"
               initial={{ opacity: 0, scale: 0.9 }}
@@ -204,11 +208,13 @@ const BoraLanding = () => {
               />
             </motion.div>
 
+
+
             <motion.p
               className="text-xl text-slate-400 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               variants={staggerItem}
             >
-              O Bora converte suas metas em micro-hábitos automáticos. Uma Rotina Personalizada que se adapta à sua rotina, sem cobrar perfeição.
+              Para ser sua melhor versão, você não precisa de sorte, precisa de um sistema. O Bora organiza sua rotina para que seus objetivos se tornem inevitáveis.
             </motion.p>
 
             <motion.div
@@ -220,18 +226,52 @@ const BoraLanding = () => {
                 size="lg"
                 className="bg-lime-400 hover:bg-lime-500 text-slate-950 text-lg px-8 py-7 rounded-full font-bold shadow-[0_0_30px_rgba(163,230,53,0.3)] hover:shadow-[0_0_50px_rgba(163,230,53,0.5)] transition-all duration-500"
               >
-                Calibrar meu Sistema
+                Construir o meu novo eu
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </motion.div>
 
-            {/* Stats/Hook */}
-            <motion.div variants={staggerItem} className="pt-8 border-t border-white/10 flex flex-col gap-2">
-              <p className="text-slate-500 text-sm uppercase tracking-wider font-bold">Por que 92% falham?</p>
-              <p className="text-slate-300 max-w-md mx-auto lg:mx-0">
-                Tentamos mudar tudo de uma vez. O Método Bora foca na <span className="text-lime-300 font-bold">'Densidade de Foco'</span>: fazer o essencial, todos os dias.
-              </p>
+            {/* Authority / Trust Badges */}
+            <motion.div variants={staggerItem} className="pt-8 flex flex-wrap gap-6 justify-center lg:justify-start items-center opacity-80">
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-3">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="w-8 h-8 rounded-full border-2 border-[#0A0A0B] bg-slate-700 flex items-center justify-center text-[10px] text-white overflow-hidden">
+                      <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-white font-bold text-sm">2.000+</span>
+                  <span className="text-slate-400 text-xs">Membros Ativos</span>
+                </div>
+              </div>
+
+              <div className="w-px h-8 bg-white/10 hidden sm:block" />
+
+              <div className="flex items-center gap-2">
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-lime-400 fill-lime-400" />
+                  ))}
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-white font-bold text-sm">4.9/5</span>
+                  <span className="text-slate-400 text-xs">Avaliação Média</span>
+                </div>
+              </div>
+
+              <div className="w-px h-8 bg-white/10 hidden sm:block" />
+
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-lime-400" />
+                <div className="flex flex-col text-left">
+                  <span className="text-white font-bold text-sm">Privacidade</span>
+                  <span className="text-slate-400 text-xs">Dados Seguros</span>
+                </div>
+              </div>
             </motion.div>
+
           </motion.div>
 
           {/* Desktop Mockup (Hidden on Mobile) */}
@@ -264,10 +304,10 @@ const BoraLanding = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              O Loop do <span className="text-lime-400">Sistema</span>
+              O Sistema <span className="text-lime-400">Bora</span>
             </h2>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              Um ciclo de 3 passos projetado com neurociência para transformar intenção em ação automática.
+              Como o Bora ajuda você a construir sua melhor versão, dia após dia.
             </p>
           </motion.div>
 
@@ -281,13 +321,18 @@ const BoraLanding = () => {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ y: -5 }}
-                className={`relative group bg-white/[0.03] border border-white/5 rounded-[2rem] p-8 overflow-hidden hover:bg-white/[0.05] transition-colors duration-500 ${feature.className}`}
+                className={`relative group bg-[#121214] border border-white/5 rounded-[2rem] p-8 overflow-hidden hover:border-lime-500/20 transition-all duration-500 ${feature.className}`}
               >
                 {/* Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-lime-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl`} />
 
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br from-lime-400 to-yellow-400 flex items-center justify-center mb-6 shadow-lg shadow-lime-900/20`}>
-                  <feature.icon className="w-7 h-7 text-[#0A0A0B]" strokeWidth={2.5} />
+                <div className="relative z-10 flex items-start justify-between mb-6">
+                  <div className={`w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    <feature.icon className="w-7 h-7 text-lime-400" strokeWidth={1.5} />
+                  </div>
+                  <span className="text-4xl font-bold text-white/5 font-mono group-hover:text-white/10 transition-colors">
+                    {feature.number}
+                  </span>
                 </div>
 
                 <h3 className="text-2xl font-bold text-white mb-3 relative z-10">{feature.title}</h3>
@@ -348,17 +393,17 @@ const BoraLanding = () => {
 
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 tracking-tight">
-            Descubra onde está o seu <span className="text-lime-400">gargalo.</span>
+            Torne seus objetivos <span className="text-lime-400">inevitáveis.</span>
           </h2>
           <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
-            Responda algumas perguntas rápidas. Vamos gerar uma Rotina Personalizada para destravar sua produtividade em 2 minutos.
+            Pare de lutar contra sua rotina. O sistema Bora alinha seus hábitos diários com quem você quer se tornar — automaticamente.
           </p>
 
           <Button
             onClick={() => handleCTA("final_cta")}
             className="group bg-white text-slate-900 hover:bg-lime-400 text-lg px-12 py-8 rounded-full font-bold shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_60px_rgba(163,230,53,0.4)] transition-all duration-500"
           >
-            INICIAR ANÁLISE DE ROTINA
+            INICIAR ANÁLISE
             <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>

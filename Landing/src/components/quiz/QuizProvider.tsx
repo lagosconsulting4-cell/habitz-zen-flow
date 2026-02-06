@@ -165,7 +165,8 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   // ProjectedFeeling, Testimonials, YearsPromising, Urgency, PotentialChart, AppExplanation,
   // Loading, DataCollection, SubscriptionOffersStep
   // 29 Steps: Hero...AppExplanation(21), Loading(22), Analysis(23), Diagnosis(24), Similarity(25), Commitment(26), DataCollection(27), Subscription(28)
-  const totalSteps = 29;
+  // Adjusted for removal of WorkSchedule (-1), Financial (-1), and addition of ObjectionHandling (+1) -> Net -1
+  const totalSteps = 28;
 
   // ============================================================================
   // NAVIGATION
@@ -224,51 +225,49 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
         return true;
       case 4: // EnergyPeakStep
         return energyPeak !== null;
-      case 5: // WorkScheduleStep
-        return workSchedule !== null;
-      case 6: // FinancialRangeStep
-        return financialRange !== null;
-      case 7: // ProfessionStep
+      // REMOVED: Case 5 (WorkSchedule) and 6 (Financial)
+
+      case 5: // ProfessionStep (Prev 7)
         return profession !== null;
-      case 8: // FeedbackAdaptStep - feedback screen
+      case 6: // FeedbackAdaptStep (Prev 8)
         return true;
-      case 9: // AgeStep
+      case 7: // AgeStep (Prev 9)
         return ageRange !== null;
-      case 10: // FeedbackAgeChartStep - chart screen
+      case 8: // FeedbackAgeChartStep (Prev 10)
         return true;
-      case 11: // ChallengesStep
+      case 9: // ChallengesStep (Prev 11)
         return challenges.length > 0;
-      case 12: // GenderStep
+      case 10: // GenderStep (Prev 12)
         return gender !== null;
-      case 13: // SocialProofChartStep - chart screen
+      case 11: // SocialProofChartStep (Prev 13)
         return true;
-      case 14: // ConsistencyFeelingStep
+      case 12: // ConsistencyFeelingStep (Prev 14)
         return consistencyFeeling !== null;
-      case 15: // ProjectedFeelingStep
+      case 13: // ProjectedFeelingStep (Prev 15)
         return projectedFeeling !== null;
-      case 16: // TestimonialsStep - feedback screen
+      case 14: // TestimonialsStep (Prev 16)
         return true;
-      case 17: // YearsPromisingStep
+      case 15: // YearsPromisingStep (Prev 17)
         return yearsPromising !== null;
-      case 18: // UrgencyStep - feedback screen
+      case 16: // UrgencyStep (Prev 18)
         return true;
-      case 19: // PotentialChartStep - chart screen
+      case 17: // PotentialChartStep (Prev 19)
         return true;
-      case 20: // AppExplanationStep - explanation screen
+      case 18: // AppExplanationStep (Prev 20)
         return true;
-      case 21: // DataCollectionStep
+      case 19: // DataCollectionStep (Prev 21)
         return false; // Requires form submission
-      case 22: // AnalysisLoadingStep (after form submission)
+      case 20: // AnalysisLoadingStep (Prev 22)
         return true;
-      case 23: // DiagnosisStep (diagnosis results)
+      case 21: // DiagnosisStep (Prev 23)
         return true;
-      case 24: // SimilarityMatchStep (social proof)
+      case 22: // SimilarityMatchStep (Prev 24)
         return true;
-      case 25: // CommitmentStep
+      case 23: // ObjectionHandlingStep (NEW)
         return true;
-      case 26: // SubscriptionOffersStep
+      case 24: // CommitmentStep (Prev 25)
         return true;
-      case 28: // SubscriptionOffersStep
+      case 25: // SubscriptionOffersStep (Prev 26)
         return true;
       default:
         return false;

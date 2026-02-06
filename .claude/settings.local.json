@@ -74,13 +74,35 @@
       "Bash(cat:*)",
       "mcp__n8n-mcp__n8n_list_executions",
       "mcp__n8n-mcp__n8n_get_execution",
-      "mcp__playwright__browser_snapshot"
+      "mcp__playwright__browser_snapshot",
+      "WebFetch(domain:utmify.help.center)",
+      "Bash(node fix-user-thiago.js:*)",
+      "Bash(del fix-user-thiago.js fix-thiago.sql fix-thiago-completo.sql fix-thiago-purchase.sql)",
+      "Bash(del /Q fix-*.js fix-*.sql)",
+      "Bash(del create-free-user.sql fix-thiago-completo.sql fix-thiago-purchase.sql fix-thiago.sql fix-user-thiago.js LandingNUL NUL)",
+      "Bash(del check-igor-user.sql create-igor-user.sql check-igor-status.sql)",
+      "Bash(del /Q check-igor-status.sql check-igor-user.sql create-free-user.sql create-igor-user.sql fix-thiago-completo.sql fix-thiago-purchase.sql fix-thiago.sql fix-user-thiago.js NUL LandingNUL)",
+      "Bash(git rm:*)",
+      "Bash(git fetch:*)",
+      "Bash(python:*)",
+      "Bash(del \"C:\\\\Users\\\\Bruno\\\\habitz-zen-flow\\\\fix-encoding.py\")",
+      "Bash(git apply:*)",
+      "Bash(node fix-enc.js:*)",
+      "Bash(node fix-comment.js:*)",
+      "Bash(del fix-comment.js)",
+      "Bash(del /Q fix-comment.js:*)",
+      "Bash(if exist fix-comment.js del fix-comment.js)",
+      "Bash(npm view:*)",
+      "WebFetch(domain:www.habitz.life)",
+      "Bash(git stash:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "shadcn"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }
