@@ -25,7 +25,7 @@ export const HeroStep = () => {
       <div className="relative z-10 flex flex-col items-center justify-between min-h-[100dvh] max-h-[100dvh] px-6 py-6">
 
         {/* Top Section - Logo + Headline */}
-        <div className="flex flex-col items-center pt-[1vh]">
+        <div className="flex flex-col items-center -mt-[1vh]">
           {/* Logo Bora - Top */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
