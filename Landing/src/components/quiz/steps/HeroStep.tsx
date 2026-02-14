@@ -24,7 +24,7 @@ export const HeroStep = () => {
       </div>
 
       {/* Content Overlay - Button only */}
-      <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col items-center pb-28">
+      <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col items-center pb-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
