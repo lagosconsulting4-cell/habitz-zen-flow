@@ -22,29 +22,29 @@ export const HeroStep = () => {
       </div>
 
       {/* Content Overlay */}
-      <div className="relative z-10 flex flex-col items-center min-h-[100dvh] px-6 pt-8 pb-6">
+      <div className="relative z-10 flex flex-col items-center justify-between min-h-[100dvh] max-h-[100dvh] px-6 py-6">
 
         {/* Logo Bora - Top */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-6"
+          className="flex-shrink-0"
         >
           <img
             src="https://i.ibb.co/CstYtpdH/meditar.png"
             alt="Bora"
-            className="w-12 h-12 object-contain"
+            className="w-10 h-10 object-contain"
           />
         </motion.div>
 
         {/* Headline - Top area */}
-        <div className="text-center space-y-3 mb-auto">
+        <div className="text-center space-y-2 flex-shrink-0">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-[32px] font-bold text-white leading-tight px-4"
+            className="text-[28px] font-bold text-white leading-tight px-4"
           >
             Vire a sua melhor versão
           </motion.h1>
@@ -53,28 +53,28 @@ export const HeroStep = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-lg text-white/90 italic font-medium"
+            className="text-base text-white/90 italic font-medium"
           >
             Não é mágica. É ciência
           </motion.p>
         </div>
 
         {/* Universities + CTA - Bottom */}
-        <div className="w-full max-w-sm space-y-6 mt-auto pt-32">
+        <div className="w-full max-w-sm space-y-4 flex-shrink-0">
           {/* Universities Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
-            className="text-center space-y-4"
+            className="text-center space-y-3"
           >
-            <p className="text-xs text-white/80 italic px-4">
+            <p className="text-[11px] text-white/80 italic px-4 leading-tight">
               Desenvolvido com base em + de 2.847 estudos de universidades como:
             </p>
             <img
               src="https://i.ibb.co/67K16Ttk/Headline-6.png"
               alt="Yale e Stanford"
-              className="w-full max-w-[320px] mx-auto h-auto object-contain"
+              className="w-full max-w-[240px] mx-auto h-auto object-contain"
             />
           </motion.div>
 
@@ -87,7 +87,7 @@ export const HeroStep = () => {
             <Button
               size="lg"
               onClick={nextStep}
-              className="w-full h-14 text-base font-bold uppercase tracking-wide bg-lime-400 hover:bg-lime-500 text-slate-900 shadow-[0_0_20px_rgba(163,230,53,0.4)] hover:shadow-[0_0_30px_rgba(163,230,53,0.6)] transition-all rounded-full"
+              className="w-full h-12 text-sm font-bold uppercase tracking-wide bg-lime-400 hover:bg-lime-500 text-slate-900 shadow-[0_0_20px_rgba(163,230,53,0.4)] hover:shadow-[0_0_30px_rgba(163,230,53,0.6)] transition-all rounded-full"
             >
               Iniciar jornada
             </Button>
