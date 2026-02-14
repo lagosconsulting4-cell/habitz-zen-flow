@@ -10,7 +10,7 @@ export const HeroStep = () => {
       {/* Background Image - Full Screen */}
       <div className="absolute inset-0 w-full h-full bg-[#0A0A0B]">
         <img
-          src="https://i.ibb.co/dwTpGdc8/Headline-5.png"
+          src="https://i.ibb.co/cXCVSpgL/Headline-7.png"
           alt="Vire a sua melhor versão"
           className="w-full h-full object-cover object-center"
           onError={(e) => {
@@ -24,22 +24,24 @@ export const HeroStep = () => {
       {/* Content Overlay */}
       <div className="relative z-10 flex flex-col items-center justify-between min-h-[100dvh] max-h-[100dvh] px-6 py-6">
 
-        {/* Logo Bora - Top */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex-shrink-0"
-        >
-          <img
-            src="https://i.ibb.co/CstYtpdH/meditar.png"
-            alt="Bora"
-            className="w-10 h-10 object-contain"
-          />
-        </motion.div>
+        {/* Top Section - Logo + Headline */}
+        <div className="flex flex-col items-center pt-[3vh]">
+          {/* Logo Bora - Top */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="flex-shrink-0 mb-6"
+          >
+            <img
+              src="https://i.ibb.co/CstYtpdH/meditar.png"
+              alt="Bora"
+              className="w-10 h-10 object-contain"
+            />
+          </motion.div>
 
-        {/* Headline - Center */}
-        <div className="text-center space-y-2 mb-auto">
+          {/* Headline - Center */}
+          <div className="text-center space-y-2">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -57,29 +59,16 @@ export const HeroStep = () => {
           >
             Não é mágica. É ciência
           </motion.p>
+          </div>
         </div>
 
-        {/* Universities + CTA - Bottom */}
-        <div className="w-full max-w-sm space-y-4 mt-auto">
-          {/* Universities Logos */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-            className="text-center"
-          >
-            <img
-              src="https://i.ibb.co/67K16Ttk/Headline-6.png"
-              alt="Yale e Stanford"
-              className="w-full max-w-[288px] mx-auto h-auto object-contain"
-            />
-          </motion.div>
-
+        {/* CTA - Bottom */}
+        <div className="w-full max-w-sm mt-auto pb-[8vh]">
           {/* CTA Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
           >
             <Button
               size="lg"

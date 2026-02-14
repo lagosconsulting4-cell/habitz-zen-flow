@@ -54,12 +54,9 @@ export const DataCollectionStep = () => {
         transition={{ delay: 0.2, duration: 0.3 }}
         className="text-center mb-8 px-4"
       >
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-          Salve seu diagnóstico
+        <h2 className="text-2xl sm:text-3xl font-bold text-white">
+          Salve o seu plano personalizado
         </h2>
-        <p className="text-sm text-slate-400">
-          Para onde enviamos seu plano personalizado?
-        </p>
       </motion.div>
 
       {/* Form */}

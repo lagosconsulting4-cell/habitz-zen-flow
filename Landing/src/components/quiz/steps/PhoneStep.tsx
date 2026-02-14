@@ -145,12 +145,9 @@ export const PhoneStep = () => {
                 transition={{ delay: 0.2, duration: 0.3 }}
                 className="text-center mb-8 px-4"
             >
-                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-                    Última informação!
+                <h2 className="text-2xl sm:text-3xl font-bold text-white">
+                    Qual é o seu melhor número?
                 </h2>
-                <p className="text-sm text-slate-400">
-                    Você receberá um convite para a comunidade gratuita
-                </p>
             </motion.div>
 
             {/* Form */}
@@ -195,7 +192,7 @@ export const PhoneStep = () => {
                     className="w-full h-14 text-lg font-bold bg-lime-500 hover:bg-lime-600 text-slate-900 transition-all shadow-[0_0_20px_rgba(132,204,22,0.3)]"
                     disabled={isSubmitting || phoneInput.replace(/\D/g, "").length < 10}
                 >
-                    {isSubmitting ? "Enviando..." : "Ver meu diagnóstico"}
+                    {isSubmitting ? "Enviando..." : "Criar meu Plano"}
                 </Button>
             </motion.form>
         </div>

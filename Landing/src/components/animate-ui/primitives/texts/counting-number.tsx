@@ -20,8 +20,13 @@ export const CountingNumber = ({
   suffix = "",
   prefix = "",
 }: CountingNumberProps) => {
+  const motionValue = useMotionValue(fromNumber);
+  const spring = useSpring(motionValue, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
   const [displayValue, setDisplayValue] = useState(fromNumber);
-  const spring = useSpring(fromNumber, { duration: duration * 1000 });
 
   useEffect(() => {
     const unsubscribe = spring.on("change", (latest) => {
@@ -29,14 +34,14 @@ export const CountingNumber = ({
     });
 
     const timeout = setTimeout(() => {
-      spring.set(number);
+      motionValue.set(number);
     }, delay * 1000);
 
     return () => {
       clearTimeout(timeout);
       unsubscribe();
     };
-  }, [spring, number, delay]);
+  }, [number, delay, motionValue, spring]);
 
   return (
     <span className={className}>
