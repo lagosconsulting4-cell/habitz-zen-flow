@@ -19,70 +19,62 @@ export const HeroStep = () => {
             target.src = "https://images.unsplash.com/photo-1544367563-12123d896589?q=80&w=1080&auto=format&fit=crop";
           }}
         />
-        {/* Gradient overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0B]/40 via-transparent to-[#0A0A0B]/80" />
       </div>
 
       {/* Content Overlay */}
-      <div className="relative z-10 flex flex-col items-center justify-between min-h-[100dvh] px-6 py-8">
+      <div className="relative z-10 flex flex-col items-center min-h-[100dvh] px-6 pt-8 pb-6">
 
         {/* Logo Bora - Top */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="w-full flex justify-center pt-4"
+          className="mb-8"
         >
-          <div className="w-16 h-16 bg-lime-400/10 rounded-2xl p-3 backdrop-blur-sm">
-            <img
-              src="https://i.ibb.co/CstYtpdH/meditar.png"
-              alt="Bora"
-              className="w-full h-full object-contain"
-            />
-          </div>
+          <img
+            src="https://i.ibb.co/CstYtpdH/meditar.png"
+            alt="Bora"
+            className="w-12 h-12 object-contain"
+          />
         </motion.div>
 
-        {/* Headline - Center */}
-        <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 max-w-md">
+        {/* Headline - Top area */}
+        <div className="text-center space-y-3 mb-auto">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-4xl md:text-5xl font-bold text-white leading-tight"
+            className="text-3xl font-bold text-white leading-tight px-4"
           >
             Vire a sua melhor versão
           </motion.h1>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="inline-block"
+            className="text-base text-white/90 italic font-medium"
           >
-            <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 border-2 border-purple-500/50 rounded-lg px-6 py-2 backdrop-blur-sm">
-              <p className="text-lg md:text-xl font-semibold text-white italic">
-                Não é mágica. É ciência
-              </p>
-            </div>
-          </motion.div>
+            Não é mágica. É ciência
+          </motion.p>
         </div>
 
         {/* Universities + CTA - Bottom */}
-        <div className="w-full max-w-md space-y-6">
+        <div className="w-full max-w-sm space-y-6 mt-auto">
           {/* Universities Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
-            className="text-center space-y-4"
+            className="text-center space-y-3"
           >
-            <p className="text-sm text-white/90 font-medium italic px-4">
+            <p className="text-xs text-white/80 italic px-4">
               Desenvolvido com base em + de 2.847 estudos de universidades como:
             </p>
             <img
               src="https://i.ibb.co/67K16Ttk/Headline-6.png"
               alt="Yale e Stanford"
-              className="w-full max-w-[280px] mx-auto h-auto object-contain"
+              className="w-full max-w-[200px] mx-auto h-auto object-contain"
             />
           </motion.div>
 
@@ -95,7 +87,7 @@ export const HeroStep = () => {
             <Button
               size="lg"
               onClick={nextStep}
-              className="w-full h-14 text-lg font-bold uppercase tracking-wide bg-lime-400 hover:bg-lime-500 text-slate-900 shadow-[0_0_20px_rgba(163,230,53,0.4)] hover:shadow-[0_0_30px_rgba(163,230,53,0.6)] transition-all rounded-full"
+              className="w-full h-14 text-base font-bold uppercase tracking-wide bg-lime-400 hover:bg-lime-500 text-slate-900 shadow-[0_0_20px_rgba(163,230,53,0.4)] hover:shadow-[0_0_30px_rgba(163,230,53,0.6)] transition-all rounded-full"
             >
               Iniciar jornada
             </Button>
