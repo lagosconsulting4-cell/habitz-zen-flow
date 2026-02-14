@@ -38,8 +38,8 @@ export const HeroStep = () => {
           />
         </motion.div>
 
-        {/* Headline - Top area */}
-        <div className="text-center space-y-2 flex-shrink-0">
+        {/* Headline - Center */}
+        <div className="text-center space-y-2 mb-auto">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -59,21 +59,15 @@ export const HeroStep = () => {
           </motion.p>
         </div>
 
-        {/* Spacer - pushes universities to last third */}
-        <div className="flex-1" />
-
         {/* Universities + CTA - Bottom */}
-        <div className="w-full max-w-sm space-y-3 flex-shrink-0">
-          {/* Universities Section */}
+        <div className="w-full max-w-sm space-y-4 mt-auto">
+          {/* Universities Logos */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
-            className="text-center space-y-3"
+            className="text-center"
           >
-            <p className="text-[11px] text-white/80 italic px-4 leading-tight">
-              Desenvolvido com base em + de 2.847 estudos de universidades como:
-            </p>
             <img
               src="https://i.ibb.co/67K16Ttk/Headline-6.png"
               alt="Yale e Stanford"
