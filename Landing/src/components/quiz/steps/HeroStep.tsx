@@ -59,8 +59,11 @@ export const HeroStep = () => {
           </motion.p>
         </div>
 
+        {/* Spacer - pushes universities to last third */}
+        <div className="flex-1" />
+
         {/* Universities + CTA - Bottom */}
-        <div className="w-full max-w-sm space-y-4 flex-shrink-0">
+        <div className="w-full max-w-sm space-y-3 flex-shrink-0">
           {/* Universities Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -74,7 +77,7 @@ export const HeroStep = () => {
             <img
               src="https://i.ibb.co/67K16Ttk/Headline-6.png"
               alt="Yale e Stanford"
-              className="w-full max-w-[240px] mx-auto h-auto object-contain"
+              className="w-full max-w-[288px] mx-auto h-auto object-contain"
             />
           </motion.div>
 
