@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Crown, HelpCircle, Shield, Zap } from "lucide-react";
 import { buttonHoverTap } from "@/hooks/useAnimations";
+import { useTracking } from "@/hooks/useTracking";
 import {
   Accordion,
   AccordionContent,
@@ -34,6 +35,29 @@ const faqs = [
 ];
 
 export const SubscriptionOffersStep = () => {
+  const { trackEvent } = useTracking();
+
+  const handleAnnualCheckout = () => {
+    trackEvent("checkout_button_clicked", {
+      plan: "annual",
+      price: 9.86,
+      total_price: 118.32,
+      provider: "kirvano",
+      checkout_url: STRIPE_LINK_ANNUAL,
+    });
+    window.location.href = STRIPE_LINK_ANNUAL;
+  };
+
+  const handleMonthlyCheckout = () => {
+    trackEvent("checkout_button_clicked", {
+      plan: "monthly",
+      price: 29.90,
+      provider: "stripe",
+      checkout_url: STRIPE_LINK_MONTHLY,
+    });
+    window.location.href = STRIPE_LINK_MONTHLY;
+  };
+
   return (
     <div className="w-full flex flex-col items-center">
       <motion.div
@@ -109,7 +133,7 @@ export const SubscriptionOffersStep = () => {
               {/* CTA */}
               <motion.div {...buttonHoverTap}>
                 <Button
-                  onClick={() => (window.location.href = STRIPE_LINK_ANNUAL)}
+                  onClick={handleAnnualCheckout}
                   size="lg"
                   className="w-full bg-lime-400 hover:bg-lime-500 text-slate-900 text-base font-bold py-6 rounded-xl shadow-[0_0_25px_rgba(163,230,53,0.3)] hover:shadow-[0_0_35px_rgba(163,230,53,0.5)] transition-all"
                 >
@@ -155,7 +179,7 @@ export const SubscriptionOffersStep = () => {
 
               <motion.div {...buttonHoverTap}>
                 <Button
-                  onClick={() => (window.location.href = STRIPE_LINK_MONTHLY)}
+                  onClick={handleMonthlyCheckout}
                   variant="outline"
                   size="lg"
                   className="w-full text-base font-bold py-5 rounded-xl border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-lime-500/50 transition-all"
