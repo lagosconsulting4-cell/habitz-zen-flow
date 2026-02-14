@@ -12,7 +12,7 @@ import {
 
 // Links de pagamento
 const STRIPE_LINK_MONTHLY = "https://buy.stripe.com/cNidR9dPuaHwaYM41m9oc03";
-const STRIPE_LINK_ANNUAL = "https://pay.hub.la/91TKYeHy1alHwSXn8yJz";
+const STRIPE_LINK_ANNUAL = "https://pay.kirvano.com/5dc4f0b1-fc02-490a-863d-dd1c680f1cac";
 
 const faqs = [
   {
