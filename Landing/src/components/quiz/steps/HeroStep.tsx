@@ -29,7 +29,7 @@ export const HeroStep = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-8"
+          className="mb-6"
         >
           <img
             src="https://i.ibb.co/CstYtpdH/meditar.png"
@@ -44,7 +44,7 @@ export const HeroStep = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-3xl font-bold text-white leading-tight px-4"
+            className="text-[32px] font-bold text-white leading-tight px-4"
           >
             Vire a sua melhor versão
           </motion.h1>
@@ -53,20 +53,20 @@ export const HeroStep = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-base text-white/90 italic font-medium"
+            className="text-lg text-white/90 italic font-medium"
           >
             Não é mágica. É ciência
           </motion.p>
         </div>
 
         {/* Universities + CTA - Bottom */}
-        <div className="w-full max-w-sm space-y-6 mt-auto">
+        <div className="w-full max-w-sm space-y-6 mt-auto pt-12">
           {/* Universities Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
-            className="text-center space-y-3"
+            className="text-center space-y-4"
           >
             <p className="text-xs text-white/80 italic px-4">
               Desenvolvido com base em + de 2.847 estudos de universidades como:
@@ -74,7 +74,7 @@ export const HeroStep = () => {
             <img
               src="https://i.ibb.co/67K16Ttk/Headline-6.png"
               alt="Yale e Stanford"
-              className="w-full max-w-[200px] mx-auto h-auto object-contain"
+              className="w-full max-w-[260px] mx-auto h-auto object-contain"
             />
           </motion.div>
 
