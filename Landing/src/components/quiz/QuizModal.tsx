@@ -4,14 +4,16 @@ import { motion, AnimatePresence } from "motion/react";
 import { QuizProvider, useQuiz } from "./QuizProvider";
 import posthog from "posthog-js";
 import { QuizProgress } from "./QuizProgress";
+import { cn } from "@/lib/utils";
 
 // Steps - Question Steps
 import { HeroStep } from "./steps/HeroStep";
+import { PainRecognitionStep } from "./steps/PainRecognitionStep";
+import { MindRacingStep } from "./steps/MindRacingStep";
+import { CycleAwarenessStep } from "./steps/CycleAwarenessStep";
 import { ObjectiveStep } from "./steps/ObjectiveStep";
 import { TimeAvailableStep } from "./steps/TimeAvailableStep";
 import { EnergyPeakStep } from "./steps/EnergyPeakStep";
-// import { WorkScheduleStep } from "./steps/WorkScheduleStep"; // Removed
-// import { FinancialRangeStep } from "./steps/FinancialRangeStep"; // Removed
 import { AgeStep } from "./steps/AgeStep";
 import { ProfessionStep } from "./steps/ProfessionStep";
 import { ChallengesStep } from "./steps/ChallengesStep";
@@ -19,6 +21,9 @@ import { GenderStep } from "./steps/GenderStep";
 import { ConsistencyFeelingStep } from "./steps/ConsistencyFeelingStep";
 import { ProjectedFeelingStep } from "./steps/ProjectedFeelingStep";
 import { YearsPromisingStep } from "./steps/YearsPromisingStep";
+import { FeatureSeedingStep } from "./steps/FeatureSeedingStep";
+import { ScientificProofStep } from "./steps/ScientificProofStep";
+import { NameStep } from "./steps/NameStep";
 
 // Steps - Feedback & Special Screens
 import { FeedbackTimeStep } from "./steps/FeedbackTimeStep";
@@ -43,16 +48,16 @@ import { ValueBridgeStep } from "./steps/ValueBridgeStep";
 import AnalysisLoadingStep from "./steps/AnalysisLoadingStep";
 import DiagnosisStep from "./steps/DiagnosisStep";
 import SimilarityMatchStep from "./steps/SimilarityMatchStep";
-import { ObjectionHandlingStep } from "./steps/ObjectionHandlingStep";
-import CommitmentStep from "./steps/CommitmentStep";
+import { LoadingPlanStep } from "./steps/LoadingPlanStep";
+import { PhoneStep } from "./steps/PhoneStep";
 
 interface QuizModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-// Componente interno que usa o context
-const QuizContent = ({ onClose }: { onClose: () => void }) => {
+// Componente que usa o context - exportado para uso standalone em BoraQuizPage
+export const QuizContent = ({ onClose }: { onClose?: () => void }) => {
   const { currentStep, generateRoutine, canGoBack, prevStep, nextStep } = useQuiz();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -71,63 +76,72 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
       case 0:
         return <HeroStep />;
       case 1:
-        return <ObjectiveStep />;
+        return <PainRecognitionStep />;
       case 2:
-        return <TimeAvailableStep />;
+        return <MindRacingStep />;
       case 3:
-        return <FeedbackTimeStep />;
+        return <CycleAwarenessStep />;
       case 4:
-        return <EnergyPeakStep />;
-      // Removed 5 (WorkSchedule) and 6 (Financial)
+        return <ObjectiveStep />;
       case 5:
-        return <ProfessionStep />;
+        return <TimeAvailableStep />;
       case 6:
-        return <FeedbackAdaptStep />;
+        return <FeedbackTimeStep />;
       case 7:
-        return <AgeStep />;
+        return <EnergyPeakStep />;
       case 8:
-        return <FeedbackAgeChartStep />;
+        return <ProfessionStep />;
       case 9:
-        return <ChallengesStep />;
+        return <FeedbackAdaptStep />;
       case 10:
-        return <GenderStep />;
+        return <AgeStep />;
       case 11:
-        return <SocialProofChartStep />;
+        return <FeedbackAgeChartStep />;
       case 12:
-        return <ConsistencyFeelingStep />;
+        return <ChallengesStep />;
       case 13:
-        return <ProjectedFeelingStep />;
+        return <GenderStep />;
       case 14:
-        return <TestimonialsStep />;
+        return <SocialProofChartStep />;
       case 15:
-        return <YearsPromisingStep />;
+        return <ConsistencyFeelingStep />;
       case 16:
-        return <UrgencyStep />;
+        return <ProjectedFeelingStep />;
       case 17:
-        return <PotentialChartStep />;
+        return <TestimonialsStep />;
       case 18:
+        return <YearsPromisingStep />;
+      case 19:
+        return <UrgencyStep />;
+      case 20:
+        return <PotentialChartStep />;
+      case 21:
+        return <FeatureSeedingStep />;
+      case 22:
+        return <ScientificProofStep />;
+      case 23:
         return <AppExplanationStep />;
 
-      // === DEEP BRIDGE START ===
-      case 19:
-        // Data Collection - user submits form
-        return <DataCollectionStep />;
-      case 20:
-        // Analysis happens AFTER form submission
-        return <AnalysisLoadingStep />;
-      case 21:
-        // Show diagnosis results
-        return <DiagnosisStep />;
-      case 22:
-        // Show "Veja quem resolveu isso" - social proof
-        return <SimilarityMatchStep />;
-      case 23:
-        // Objection Handling (Parece bom demais?)
-        return <ObjectionHandlingStep />;
+      // === DEEP BRIDGE ===
       case 24:
-        // Now Commitment comes after Similarity/Objection
-        return <CommitmentStep />;
+        return <AnalysisLoadingStep />;
       case 25:
+        return <DiagnosisStep />;
+      case 26:
+        return <SimilarityMatchStep />;
+
+      // === DATA COLLECTION ===
+      case 27:
+        return <DataCollectionStep />;
+      case 28:
+        return <NameStep />;
+      case 29:
+        return <PhoneStep />;
+
+      // === LOADING + OFFER ===
+      case 30:
+        return <LoadingPlanStep />;
+      case 31:
         return <SubscriptionOffersStep />;
       default:
         return null;
@@ -136,8 +150,11 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header com progresso */}
-      <div className="sticky top-0 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/5 z-10">
+      {/* Header com progresso - Oculto no Hero (0), FeedbackAdapt (9), Testimonials (17), ScientificProof (22), AppExplanation (23) */}
+      <div className={cn(
+        "sticky top-0 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/5 z-10",
+        (currentStep === 0 || currentStep === 9 || currentStep === 17 || currentStep === 22 || currentStep === 23) && "hidden"
+      )}>
         <div className="flex items-center justify-between p-4 gap-3">
           {/* Botão Voltar à esquerda */}
           {canGoBack ? (
@@ -151,24 +168,38 @@ const QuizContent = ({ onClose }: { onClose: () => void }) => {
             <div className="w-9" /> /* Spacer quando não tem voltar */
           )}
 
+          {/* Logo Bora */}
+          <img
+            src="https://i.ibb.co/CstYtpdH/meditar.png"
+            alt="BORA"
+            className="w-7 h-7 object-contain flex-shrink-0"
+          />
+
           {/* QuizProgress centralizado */}
           <div className="flex-1 max-w-md mx-auto">
             <QuizProgress />
           </div>
 
-          {/* Botão Fechar à direita */}
-          <button
-            onClick={onClose}
-            className="flex items-center gap-2 text-slate-500 hover:text-red-400 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {/* Botão Fechar à direita (só aparece quando usado como modal) */}
+          {onClose ? (
+            <button
+              onClick={onClose}
+              className="flex items-center gap-2 text-slate-500 hover:text-red-400 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          ) : (
+            <div className="w-5" />
+          )}
         </div>
       </div>
 
       {/* Conteúdo do Step */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-4 pt-12 pb-8">
+        <div className={cn(
+          "max-w-2xl mx-auto min-h-full",
+          (currentStep === 0 || currentStep === 9 || currentStep === 17 || currentStep === 22 || currentStep === 23) ? "p-0" : "px-4 pt-12 pb-8"
+        )}>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}

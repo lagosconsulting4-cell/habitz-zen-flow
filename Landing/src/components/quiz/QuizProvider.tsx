@@ -47,10 +47,18 @@ export interface QuizState {
   objective: Objective | null;
   challenges: string[];
 
+  // Pain Mapping
+  painFrequency: string | null;
+  mindRacing: string | null;
+  cycleAwareness: string | null;
+
   // Emotional/Psychological
   consistencyFeeling: ConsistencyFeeling | null;
   projectedFeeling: ProjectedFeeling | null;
   yearsPromising: YearsPromising | null;
+
+  // Feature Seeding
+  featureNeeds: string[];
 
   // Routine Configuration
   weekDays: number[];
@@ -93,6 +101,10 @@ export interface QuizContextType extends QuizState {
   setConsistencyFeeling: (feeling: ConsistencyFeeling) => void;
   setProjectedFeeling: (feeling: ProjectedFeeling) => void;
   setYearsPromising: (years: YearsPromising) => void;
+  setPainFrequency: (freq: string) => void;
+  setMindRacing: (val: string) => void;
+  setCycleAwareness: (val: string) => void;
+  toggleFeatureNeed: (need: string) => void;
   setWeekDaysPreset: (preset: WeekDaysPreset) => void;
   setWeekDays: (days: number[]) => void;
   setPwaInstallPromptShown: (shown: boolean) => void;
@@ -139,10 +151,18 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   const [objective, setObjective] = useState<Objective | null>(null);
   const [challenges, setChallenges] = useState<string[]>([]);
 
+  // State - Pain Mapping
+  const [painFrequency, setPainFrequency] = useState<string | null>(null);
+  const [mindRacing, setMindRacing] = useState<string | null>(null);
+  const [cycleAwareness, setCycleAwareness] = useState<string | null>(null);
+
   // State - Emotional/Psychological
   const [consistencyFeeling, setConsistencyFeeling] = useState<ConsistencyFeeling | null>(null);
   const [projectedFeeling, setProjectedFeeling] = useState<ProjectedFeeling | null>(null);
   const [yearsPromising, setYearsPromising] = useState<YearsPromising | null>(null);
+
+  // State - Feature Seeding
+  const [featureNeeds, setFeatureNeeds] = useState<string[]>([]);
 
   // State - Routine
   const [weekDaysPreset, setWeekDaysPreset] = useState<WeekDaysPreset>("weekdays");
@@ -160,13 +180,15 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   // State - Status
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
 
-  // 24 Steps: Hero, Objective, Time, FeedbackTime, Energy, WorkSchedule, Financial, FeedbackAdapt,
-  // Age, FeedbackAgeChart, Challenges, Gender, SocialProofChart, ConsistencyFeeling,
-  // ProjectedFeeling, Testimonials, YearsPromising, Urgency, PotentialChart, AppExplanation,
-  // Loading, DataCollection, SubscriptionOffersStep
-  // 29 Steps: Hero...AppExplanation(21), Loading(22), Analysis(23), Diagnosis(24), Similarity(25), Commitment(26), DataCollection(27), Subscription(28)
-  // Adjusted for removal of WorkSchedule (-1), Financial (-1), and addition of ObjectionHandling (+1) -> Net -1
-  const totalSteps = 28;
+  // 33 Steps: Hero(0), PainRecognition(1), MindRacing(2), CycleAwareness(3),
+  // Objective(4), Time(5), FeedbackTime(6), Energy(7), Profession(8), FeedbackAdapt(9),
+  // Age(10), FeedbackAgeChart(11), Challenges(12), Gender(13), SocialProofChart(14),
+  // ConsistencyFeeling(15), ProjectedFeeling[SLIDER](16), Testimonials(17), YearsPromising[EMOJI](18),
+  // Urgency(19), PotentialChart(20), FeatureSeeding[MULTI](21), ScientificProof(22), AppExplanation(23),
+  // DataCollection[EMAIL](24), NameStep(25), PhoneStep[WPP](26),
+  // AnalysisLoading[TESTIMONIALS](27), Diagnosis(28), Similarity(29),
+  // ObjectionHandling(30), Commitment(31), SubscriptionOffers[+EXIT](32)
+  const totalSteps = 33;
 
   // ============================================================================
   // NAVIGATION
@@ -213,66 +235,50 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   // VALIDATION
   // ============================================================================
 
+  const toggleFeatureNeed = useCallback((need: string) => {
+    setFeatureNeeds((prev) =>
+      prev.includes(need) ? prev.filter((n) => n !== need) : [...prev, need]
+    );
+  }, []);
+
   const isStepValid = useCallback((): boolean => {
     switch (currentStep) {
-      case 0: // HeroStep - intro screen
-        return true;
-      case 1: // ObjectiveStep
-        return objective !== null;
-      case 2: // TimeAvailableStep
-        return timeAvailable !== null;
-      case 3: // FeedbackTimeStep - feedback screen
-        return true;
-      case 4: // EnergyPeakStep
-        return energyPeak !== null;
-      // REMOVED: Case 5 (WorkSchedule) and 6 (Financial)
-
-      case 5: // ProfessionStep (Prev 7)
-        return profession !== null;
-      case 6: // FeedbackAdaptStep (Prev 8)
-        return true;
-      case 7: // AgeStep (Prev 9)
-        return ageRange !== null;
-      case 8: // FeedbackAgeChartStep (Prev 10)
-        return true;
-      case 9: // ChallengesStep (Prev 11)
-        return challenges.length > 0;
-      case 10: // GenderStep (Prev 12)
-        return gender !== null;
-      case 11: // SocialProofChartStep (Prev 13)
-        return true;
-      case 12: // ConsistencyFeelingStep (Prev 14)
-        return consistencyFeeling !== null;
-      case 13: // ProjectedFeelingStep (Prev 15)
-        return projectedFeeling !== null;
-      case 14: // TestimonialsStep (Prev 16)
-        return true;
-      case 15: // YearsPromisingStep (Prev 17)
-        return yearsPromising !== null;
-      case 16: // UrgencyStep (Prev 18)
-        return true;
-      case 17: // PotentialChartStep (Prev 19)
-        return true;
-      case 18: // AppExplanationStep (Prev 20)
-        return true;
-      case 19: // DataCollectionStep (Prev 21)
-        return false; // Requires form submission
-      case 20: // AnalysisLoadingStep (Prev 22)
-        return true;
-      case 21: // DiagnosisStep (Prev 23)
-        return true;
-      case 22: // SimilarityMatchStep (Prev 24)
-        return true;
-      case 23: // ObjectionHandlingStep (NEW)
-        return true;
-      case 24: // CommitmentStep (Prev 25)
-        return true;
-      case 25: // SubscriptionOffersStep (Prev 26)
-        return true;
-      default:
-        return false;
+      case 0: return true; // HeroStep
+      case 1: return painFrequency !== null; // PainRecognition
+      case 2: return mindRacing !== null; // MindRacing
+      case 3: return cycleAwareness !== null; // CycleAwareness
+      case 4: return objective !== null; // Objective
+      case 5: return timeAvailable !== null; // TimeAvailable
+      case 6: return true; // FeedbackTime
+      case 7: return energyPeak !== null; // EnergyPeak
+      case 8: return profession !== null; // Profession
+      case 9: return true; // FeedbackAdapt
+      case 10: return ageRange !== null; // Age
+      case 11: return true; // FeedbackAgeChart
+      case 12: return challenges.length > 0; // Challenges
+      case 13: return gender !== null; // Gender
+      case 14: return true; // SocialProofChart
+      case 15: return consistencyFeeling !== null; // ConsistencyFeeling
+      case 16: return projectedFeeling !== null; // ProjectedFeeling[SLIDER]
+      case 17: return true; // Testimonials
+      case 18: return yearsPromising !== null; // YearsPromising[EMOJI]
+      case 19: return true; // Urgency
+      case 20: return true; // PotentialChart
+      case 21: return featureNeeds.length > 0; // FeatureSeeding[MULTI]
+      case 22: return true; // ScientificProof
+      case 23: return true; // AppExplanation
+      case 24: return false; // DataCollection[EMAIL] (form submit)
+      case 25: return false; // NameStep (form submit)
+      case 26: return false; // PhoneStep[WPP] (form submit)
+      case 27: return true; // AnalysisLoading[TESTIMONIALS]
+      case 28: return true; // Diagnosis
+      case 29: return true; // Similarity
+      case 30: return true; // ObjectionHandling
+      case 31: return true; // Commitment
+      case 32: return true; // SubscriptionOffers[+EXIT]
+      default: return false;
     }
-  }, [currentStep, objective, timeAvailable, energyPeak, workSchedule, financialRange, profession, ageRange, challenges, gender, consistencyFeeling, projectedFeeling, yearsPromising]);
+  }, [currentStep, objective, timeAvailable, energyPeak, profession, ageRange, challenges, gender, consistencyFeeling, projectedFeeling, yearsPromising, painFrequency, mindRacing, cycleAwareness, featureNeeds]);
 
   // ============================================================================
   // HABIT MANAGEMENT
@@ -374,8 +380,12 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
       timeAvailable,
       objective,
       challenges,
+      painFrequency,
+      mindRacing,
+      cycleAwareness,
       consistencyFeeling,
       projectedFeeling,
+      featureNeeds,
       yearsPromising,
       weekDaysPreset,
       weekDays,
@@ -407,6 +417,10 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
       setConsistencyFeeling,
       setProjectedFeeling,
       setYearsPromising,
+      setPainFrequency,
+      setMindRacing,
+      setCycleAwareness,
+      toggleFeatureNeed,
       setWeekDaysPreset,
       setWeekDays,
       setPwaInstallPromptShown,
@@ -434,6 +448,10 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
       timeAvailable,
       objective,
       challenges,
+      painFrequency,
+      mindRacing,
+      cycleAwareness,
+      featureNeeds,
       consistencyFeeling,
       projectedFeeling,
       yearsPromising,

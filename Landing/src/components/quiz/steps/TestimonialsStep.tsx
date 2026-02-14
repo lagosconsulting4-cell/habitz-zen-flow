@@ -1,139 +1,181 @@
 import { motion } from "motion/react";
-import { TestimonialCard } from "@/components/premium/TestimonialCard";
-import { Users, Star } from "lucide-react";
 import { useEffect } from "react";
 import { useTracking } from "@/hooks/useTracking";
 import { ContinueButton } from "../ContinueButton";
+import { CountingNumber } from "@/components/animate-ui/primitives/texts/counting-number";
+import { AvatarGroup } from "@/components/animate-ui/components/animate/avatar-group";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Star } from "lucide-react";
 
-const TESTIMONIALS = [
+const USER_AVATARS = [
   {
-    name: "João Vitor",
-    role: "Estudante de Engenharia",
-    avatar: "https://i.ibb.co/xtXmcTS3/Gemini-Generated-Image-ixzgp8ixzgp8ixzg.png",
-    quote: "Consegui conciliar faculdade e estágio sem surtar. O app me ajudou a organizar meu tempo de um jeito que realmente funciona.",
-    rating: 5,
-    beforeAfter: {
-      before: "Procrastinava no TikTok",
-      after: "1h de estudo sem sofrer"
-    }
+    src: "https://i.pravatar.cc/150?img=1",
+    fallback: "JV",
   },
   {
-    name: "Beatriz Oliveira",
-    role: "Analista Júnior",
-    avatar: "https://i.ibb.co/TMPp1Kw1/Gemini-Generated-Image-200v6k200v6k200v.png",
-    quote: "Trabalho 8h por dia e antes não sobrava energia pra nada. Agora consigo treinar, ler e ainda ter tempo livre sem me sentir culpada.",
-    rating: 5,
-    beforeAfter: {
-      before: "Zero energia à noite",
-      after: "Treino rápido + Leitura"
-    }
+    src: "https://i.pravatar.cc/150?img=5",
+    fallback: "BO",
   },
   {
-    name: "Lucas Santos",
-    role: "Designer Freelancer",
-    avatar: "https://i.pravatar.cc/150?u=joao",
-    quote: "Minha rotina era um caos total. Agora tenho horário pra tudo, entrego projetos no prazo e ainda sobra tempo pro lazer. Mudou minha vida!",
-    rating: 5,
-    beforeAfter: {
-      before: "Caos total",
-      after: "Rotina organizada"
-    }
-  }
+    src: "https://i.pravatar.cc/150?img=9",
+    fallback: "LS",
+  },
+  {
+    src: "https://i.pravatar.cc/150?img=12",
+    fallback: "MC",
+  },
+  {
+    src: "https://i.pravatar.cc/150?img=17",
+    fallback: "AR",
+  },
+  {
+    src: "https://i.pravatar.cc/150?img=20",
+    fallback: "FS",
+  },
 ];
 
 export const TestimonialsStep = () => {
   const { trackTestimonialsView } = useTracking();
 
   useEffect(() => {
-    trackTestimonialsView(TESTIMONIALS.length);
+    trackTestimonialsView(6);
   }, [trackTestimonialsView]);
 
   return (
-    <div className="flex flex-col">
-      {/* Header with Stats */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="text-center mb-8"
-      >
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <Users className="w-6 h-6 text-lime-500" />
-          <h3 className="text-lg font-bold text-white">
-            Mais de 2.000 usuários transformaram suas vidas
-          </h3>
-        </div>
+    <div className="relative w-full h-full min-h-[100dvh] overflow-hidden">
+      {/* Background Image - Full Screen */}
+      <div className="absolute inset-0 w-full h-full">
+        <img
+          src="/images/network-bg.png"
+          alt="Network Background"
+          className="w-full h-full object-cover object-center"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.onerror = null;
+            target.src = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1920&auto=format&fit=crop";
+          }}
+        />
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0B]/70 via-[#0A0A0B]/85 to-[#0A0A0B]" />
+      </div>
 
-        {/* 5-star rating display */}
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="flex gap-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className="h-5 w-5 text-lime-500 fill-lime-500"
-              />
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[100dvh] px-6 py-20 text-center">
+        {/* Headline */}
+        <motion.h2
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6 max-w-4xl leading-tight"
+        >
+          Mais de{" "}
+          <span className="text-lime-400">
+            <CountingNumber
+              number={2000}
+              fromNumber={0}
+              delay={0.5}
+              duration={2}
+              suffix="+"
+              className="inline"
+            />
+          </span>{" "}
+          pessoas já transformaram suas vidas
+        </motion.h2>
+
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="text-lg md:text-xl text-slate-300 mb-12 max-w-2xl"
+        >
+          Junte-se a milhares de pessoas que estão construindo hábitos que realmente duram
+        </motion.p>
+
+        {/* Avatar Group */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          className="mb-12"
+        >
+          <AvatarGroup max={6}>
+            {USER_AVATARS.map((avatar, index) => (
+              <Avatar key={index} className="w-16 h-16 md:w-20 md:h-20 border-4 border-[#0A0A0B]">
+                <AvatarImage src={avatar.src} alt={avatar.fallback} />
+                <AvatarFallback className="bg-gradient-to-br from-lime-500 to-lime-600 text-white font-bold text-lg">
+                  {avatar.fallback}
+                </AvatarFallback>
+              </Avatar>
             ))}
+          </AvatarGroup>
+        </motion.div>
+
+        {/* Stats Row */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 0.5 }}
+          className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 mb-16"
+        >
+          {/* Community Count */}
+          <div className="text-center">
+            <div className="text-5xl md:text-6xl font-black text-lime-400 mb-2">
+              <CountingNumber
+                number={2000}
+                fromNumber={0}
+                delay={1.2}
+                duration={2}
+                suffix="+"
+              />
+            </div>
+            <div className="text-sm md:text-base text-slate-400 font-semibold uppercase tracking-wider">
+              Usuários ativos
+            </div>
           </div>
-          <span className="text-sm font-semibold text-slate-300">5.0</span>
-        </div>
 
-        <p className="text-sm text-slate-500">
-          Avaliação média de nossos usuários
-        </p>
-      </motion.div>
+          {/* Divider */}
+          <div className="hidden md:block w-px h-16 bg-slate-700" />
 
-      {/* Main Title */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.3 }}
-        className="text-center mb-6 px-4"
-      >
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-          Veja o que nossos usuários falam
-        </h2>
-        <p className="text-base text-slate-400">
-          Pessoas reais com resultados reais
-        </p>
-      </motion.div>
+          {/* Rating Score */}
+          <div className="text-center">
+            <div className="flex flex-col items-center gap-3 mb-2">
+              <div className="text-5xl md:text-6xl font-black text-lime-400">
+                <CountingNumber
+                  number={5.0}
+                  fromNumber={0}
+                  delay={1.5}
+                  duration={2}
+                />
+              </div>
+              <div className="flex gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 2 + (i * 0.1), duration: 0.3 }}
+                  >
+                    <Star className="w-6 h-6 md:w-7 md:h-7 text-lime-400 fill-lime-400" />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+            <div className="text-sm md:text-base text-slate-400 font-semibold uppercase tracking-wider">
+              Avaliação média
+            </div>
+          </div>
+        </motion.div>
 
-      {/* Testimonials Grid */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.4 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 mb-6"
-      >
-        {TESTIMONIALS.map((testimonial, index) => (
-          <TestimonialCard
-            key={index}
-            name={testimonial.name}
-            role={testimonial.role}
-            avatar={testimonial.avatar}
-            quote={testimonial.quote}
-            rating={testimonial.rating}
-            beforeAfter={testimonial.beforeAfter}
-            index={index}
-            className=""
-          />
-        ))}
-      </motion.div>
-
-      {/* Bottom CTA message */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.3 }}
-        className="text-center px-4"
-      >
-        <div className="bg-[#1A1A1C] border border-lime-500/20 rounded-xl p-4 inline-block">
-          <p className="text-sm font-semibold text-lime-400">
-            Você também pode alcançar esses resultados. Continue para criar seu plano personalizado.
-          </p>
-        </div>
-      </motion.div>
-
-      <ContinueButton />
+        {/* CTA Button */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2.5 }}
+        >
+          <ContinueButton />
+        </motion.div>
+      </div>
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, User, TrendingUp } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 
-// Persona Database - More tangible and specific
+// Persona Database
 const personas = {
     productivity: {
         name: "André",
@@ -56,10 +56,8 @@ const SimilarityMatchStep: React.FC = () => {
     const { nextStep, objective, name } = useQuiz();
     const [showCards, setShowCards] = useState(false);
 
-    // Simple logic to pick persona based on Objective
     const getPersona = () => {
         if (!objective) return personas.default;
-        // Direct mapping to persona keys
         if (objective === "productivity") return personas.productivity;
         if (objective === "health") return personas.health;
         if (objective === "routine") return personas.routine;
@@ -69,7 +67,6 @@ const SimilarityMatchStep: React.FC = () => {
     const persona = getPersona();
 
     useEffect(() => {
-        // Small delay to simulate "Finding match"
         const timer = setTimeout(() => setShowCards(true), 1500);
         return () => clearTimeout(timer);
     }, []);
@@ -144,8 +141,7 @@ const SimilarityMatchStep: React.FC = () => {
 
             </div>
 
-
-            {/* Result Stats - More detailed */}
+            {/* Result Stats */}
             <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}

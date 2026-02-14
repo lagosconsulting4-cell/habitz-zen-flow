@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Frown, EyeOff, Meh, Flame, type LucideIcon } from "lucide-react";
+import { Frown, EyeOff, Meh, Flame, Smile, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 import { ContinueButton } from "../ContinueButton";
@@ -10,10 +10,11 @@ const CONSISTENCY_FEELING_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-    { value: "frustrado", label: "Frustrado e arrependido por não ter agido antes", icon: Frown },
-    { value: "evitando", label: "Evitando situações e se escondendo de novo", icon: EyeOff },
-    { value: "conformado", label: "Conformado, já acostumei com isso", icon: Meh },
-    { value: "determinado", label: "Determinado a mudar esse ano", icon: Flame },
+    { value: "frustrado", label: "Frustrado", icon: Frown },
+    { value: "evitando", label: "Evitando", icon: EyeOff },
+    { value: "conformado", label: "Conformado", icon: Meh },
+    { value: "determinado", label: "Determinado", icon: Flame },
+    { value: "bem" as ConsistencyFeeling, label: "Estou bem com isso", icon: Smile },
   ];
 
 export const ConsistencyFeelingStep = () => {
@@ -29,11 +30,8 @@ export const ConsistencyFeelingStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-white mb-2">
-          Um ano novo começando e você ainda não conseguiu ter consistência...
+          Sobre ter consistência... como você se sente?
         </h2>
-        <p className="text-lg font-medium text-slate-400 mb-1">
-          Como você se sente?
-        </p>
       </motion.div>
 
       {/* Selection Grid */}

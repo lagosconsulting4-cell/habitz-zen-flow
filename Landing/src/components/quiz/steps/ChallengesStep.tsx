@@ -10,12 +10,12 @@ const CHALLENGE_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-    { id: "procrastination", label: "Quando sento pra fazer algo chato (empurro com a barriga)", icon: Clock },
-    { id: "focus", label: "Minha mente não para quieta (penso em 10 coisas ao mesmo tempo)", icon: Target },
-    { id: "forgetfulness", label: "Só lembro do que tinha que fazer quando já é tarde", icon: CloudFog },
-    { id: "tiredness", label: "Acordo já sem bateria, parece que um caminhão passou", icon: BedDouble },
-    { id: "anxiety", label: "Fico ansioso só de olhar o tanto de coisa que tenho pra fazer", icon: AlertCircle },
-    { id: "motivation", label: "Quando algo sai do planejado, eu largo tudo", icon: Flame },
+    { id: "procrastination", label: "Procrastino tarefas chatas", icon: Clock },
+    { id: "focus", label: "Mente agitada, sem foco", icon: Target },
+    { id: "forgetfulness", label: "Esqueço as coisas", icon: CloudFog },
+    { id: "tiredness", label: "Acordo sem energia", icon: BedDouble },
+    { id: "anxiety", label: "Ansiedade com tarefas", icon: AlertCircle },
+    { id: "motivation", label: "Desisto fácil", icon: Flame },
   ];
 
 export const ChallengesStep = () => {
@@ -30,10 +30,9 @@ export const ChallengesStep = () => {
         transition={{ duration: 0.3 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl font-bold text-white mb-2">
+        <h2 className="text-2xl font-bold text-white">
           Em qual desses momentos você trava?
         </h2>
-        <p className="text-sm text-slate-400">Seja sincero. Ninguém vai ver suas respostas.</p>
       </motion.div>
 
       {/* Selection Grid */}

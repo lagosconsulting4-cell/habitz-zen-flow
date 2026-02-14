@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { BarChart3, Dumbbell, Brain, Calendar, Ban, type LucideIcon } from "lucide-react";
+import { BatteryLow, ZapOff, TrendingDown, Smartphone, BrainCircuit, type LucideIcon } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 import { ContinueButton } from "../ContinueButton";
@@ -10,11 +10,11 @@ const OBJECTIVE_OPTIONS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-    { value: "productivity", label: "Chego no fim do dia exausto e sem ter feito nada", icon: BarChart3 },
-    { value: "health", label: "Tenho o corpo e a energia de alguém com o dobro da minha idade", icon: Dumbbell },
-    { value: "routine", label: "Começo a semana bem, mas na quarta já desisto", icon: Calendar },
-    { value: "avoid", label: "O celular me engole e perco horas rolando feed", icon: Ban },
-    { value: "mental", label: "Minha cabeça não desliga nem na hora de dormir", icon: Brain },
+    { value: "productivity", label: "Exaustão sem resultado", icon: BatteryLow },
+    { value: "health", label: "Corpo e energia lá embaixo", icon: ZapOff },
+    { value: "routine", label: "Começo forte, paro rápido", icon: TrendingDown },
+    { value: "avoid", label: "Preso no celular", icon: Smartphone },
+    { value: "mental", label: "Mente que não desliga", icon: BrainCircuit },
   ];
 
 export const ObjectiveStep = () => {
@@ -30,11 +30,8 @@ export const ObjectiveStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">
-          Qual seu principal objetivo com o <span className="text-lime-400">Bora?</span>
+          Na sua vida, o que mais te <span className="text-lime-400">trava?</span>
         </h2>
-        <p className="text-sm text-slate-400">
-          Onde o sistema atual está falhando com você?
-        </p>
       </motion.div>
 
       {/* Selection Grid */}

@@ -22,6 +22,7 @@ const AntigoOffer = lazy(() => import("./pages/antigo/DirectOffer"));
 
 // Bora landing page - single page optimized for conversion
 const BoraLanding = lazy(() => import("./pages/bora/BoraLanding"));
+const BoraQuizPage = lazy(() => import("./pages/bora/BoraQuizPage"));
 const BoraUpsell = lazy(() => import("./pages/bora/BoraUpsell"));
 const BoraDownsell = lazy(() => import("./pages/bora/BoraDownsell"));
 const RecAqLanding = lazy(() => import("./pages/bora/RecAqLanding"));
@@ -131,9 +132,19 @@ const App = () => (
               }
             />
 
-            {/* Bora Landing Page - Single page optimized for conversion */}
+            {/* Bora Quiz - Fullscreen (primary for TikTok ads) */}
             <Route
               path="/bora"
+              element={
+                <PathPrefixProvider prefix="/bora">
+                  <BoraQuizPage />
+                </PathPrefixProvider>
+              }
+            />
+
+            {/* Bora Landing - Fallback / SEO / A-B test */}
+            <Route
+              path="/bora/landing"
               element={
                 <PathPrefixProvider prefix="/bora">
                   <BoraLanding />

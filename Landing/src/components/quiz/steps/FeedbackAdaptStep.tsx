@@ -1,23 +1,38 @@
 import { motion } from "motion/react";
 import { useQuiz } from "../QuizProvider";
-import { Heart, Users } from "lucide-react";
 import { useEffect } from "react";
 import { useTracking } from "@/hooks/useTracking";
 import { ContinueButton } from "../ContinueButton";
+import { CountingNumber } from "@/components/animate-ui/primitives/texts/counting-number";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+
+const COMMUNITY_AVATARS = [
+  {
+    src: "https://i.pravatar.cc/150?img=1",
+    fallback: "JD",
+  },
+  {
+    src: "https://i.pravatar.cc/150?img=5",
+    fallback: "MR",
+  },
+  {
+    src: "https://i.pravatar.cc/150?img=9",
+    fallback: "LC",
+  },
+  {
+    src: "https://i.pravatar.cc/150?img=12",
+    fallback: "AS",
+  },
+  {
+    src: "https://i.pravatar.cc/150?img=17",
+    fallback: "FT",
+  },
+];
 
 export const FeedbackAdaptStep = () => {
   const { financialRange, profession } = useQuiz();
   const { trackFeedbackView } = useTracking();
 
-  // Map financial range to readable format
-  const rangeLabels: Record<string, string> = {
-    "1600-3000": "R$1.600-3.000",
-    "3000-7000": "R$3.000-7.000",
-    "7000-20000": "R$7.000-20.000",
-    "20000+": "R$20.000+",
-  };
-
-  // Map profession to readable format
   const professionLabels: Record<string, string> = {
     student: "estudantes",
     employed: "empregados",
@@ -26,70 +41,128 @@ export const FeedbackAdaptStep = () => {
     other: "profissionais",
   };
 
-  const rangeText = financialRange ? rangeLabels[financialRange] || "sua faixa de renda" : "sua faixa de renda";
   const professionText = profession ? professionLabels[profession] || "profissionais" : "profissionais";
 
   useEffect(() => {
-    trackFeedbackView("adapt", { financialRange: rangeText, profession: professionText });
-  }, [trackFeedbackView, rangeText, professionText]);
+    trackFeedbackView("adapt", { profession: professionText });
+  }, [trackFeedbackView, professionText]);
 
   return (
-    <div className="flex flex-col items-center">
-      {/* Icon */}
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 200, damping: 15 }}
-        className="mb-6"
-      >
-        <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center ring-1 ring-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.15)]">
-          <Heart className="w-10 h-10 text-blue-400" />
-        </div>
-      </motion.div>
+    <div className="relative w-full h-full min-h-[100dvh] overflow-hidden">
+      {/* Background Image */}
+      <div className="absolute inset-0 w-full h-full">
+        <img
+          src="/images/community-bg.png"
+          alt="Community Background"
+          className="w-full h-full object-cover object-center"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.onerror = null;
+            target.src = "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1920&auto=format&fit=crop";
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0B]/70 via-[#0A0A0B]/85 to-[#0A0A0B]" />
+      </div>
 
-      {/* Main Message */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.3 }}
-        className="text-center mb-6 px-4"
-      >
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[100dvh] px-6 py-20">
+        {/* Headline */}
+        <motion.h2
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl md:text-5xl font-black text-white mb-3 text-center leading-tight"
+        >
           Fique Tranquilo!
-        </h2>
-        <p className="text-base text-slate-400 mb-4 leading-relaxed">
-          O Bora foi feito para se adaptar à sua rotina e realidade, sem planos surreais e impossíveis de serem cumpridos.
-        </p>
-      </motion.div>
+        </motion.h2>
 
-      {/* Statistic Card */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.4, duration: 0.3 }}
-        className="w-full max-w-md"
-      >
-        <div className="bg-[#121214] border border-blue-500/20 rounded-2xl p-6 shadow-lg shadow-blue-500/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-[100px] h-[100px] bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="text-lg md:text-xl text-slate-400 mb-16 text-center"
+        >
+          O sistema se adapta à sua realidade
+        </motion.p>
 
-          <div className="flex items-center gap-3 mb-3 relative z-10">
-            <Users className="w-6 h-6 text-blue-400" />
-            <h3 className="text-lg font-bold text-white">Comunidade forte</h3>
+        {/* Community Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          className="w-full max-w-md mb-16"
+        >
+          <div className="bg-[#0A0A0B]/40 backdrop-blur-md border border-white/10 rounded-3xl p-8 text-center">
+            {/* Avatars */}
+            <div className="flex justify-center mb-6 -space-x-3">
+              {COMMUNITY_AVATARS.map((avatar, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.8 + index * 0.1, duration: 0.3 }}
+                >
+                  <Avatar className="w-14 h-14 border-4 border-[#0A0A0B]">
+                    <AvatarImage src={avatar.src} alt={avatar.fallback} />
+                    <AvatarFallback className="bg-gradient-to-br from-lime-500 to-lime-600 text-white font-bold">
+                      {avatar.fallback}
+                    </AvatarFallback>
+                  </Avatar>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Label */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.3 }}
+              className="text-lime-400 text-sm font-bold uppercase tracking-wider mb-4"
+            >
+              Comunidade Forte
+            </motion.p>
+
+            {/* Percentage */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.5, duration: 0.5, type: "spring" }}
+              className="mb-4"
+            >
+              <CountingNumber
+                number={87}
+                fromNumber={0}
+                delay={1.6}
+                duration={2}
+                prefix="+"
+                suffix="%"
+                className="text-7xl md:text-8xl font-black text-lime-400"
+              />
+            </motion.div>
+
+            {/* Description */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.8 }}
+              className="text-slate-300 text-base leading-relaxed"
+            >
+              dos <span className="text-white font-bold">{professionText}</span> mantêm hábitos <br />
+              por <span className="text-lime-400 font-bold">6+ meses</span> com o Bora.
+            </motion.p>
           </div>
-          <p className="text-4xl font-bold text-blue-400 mb-2 relative z-10">+87%</p>
-          <p className="text-sm text-slate-400 relative z-10 leading-relaxed">
-            dos nossos usuários com <strong className="text-blue-300">{rangeText}</strong> e <strong className="text-blue-300">{professionText}</strong> mantém os hábitos e finalmente conquistam a vida dos sonhos
-          </p>
-          <div className="mt-3 pt-3 border-t border-white/10 relative z-10">
-            <p className="text-xs text-blue-300/80">
-              <strong className="text-blue-400">🧠 Como funciona:</strong> Repetir a mesma coisa no mesmo horário "treina" seu cérebro. Com o tempo, você faz no automático — tipo escovar os dentes.
-            </p>
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
 
-      {/* Continue */}
-      <ContinueButton />
+        {/* CTA Button */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2 }}
+        >
+          <ContinueButton />
+        </motion.div>
+      </div>
     </div>
   );
 };

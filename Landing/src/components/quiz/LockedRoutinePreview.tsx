@@ -140,7 +140,7 @@ export const LockedRoutinePreview = ({ onClose }: LockedRoutinePreviewProps) => 
   // Handler para navegar para o OfferSlide (step 10)
   const handleUnlock = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    goToStep(10);
+    goToStep(15);
   };
 
   if (isGeneratingRoutine) {

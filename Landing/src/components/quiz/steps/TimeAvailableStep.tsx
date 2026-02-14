@@ -32,7 +32,7 @@ export const TimeAvailableStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-white mb-2">
-          Quanto tempo você se sente confortável para se dedicar por dia?
+          Quanto tempo você tem disponível por dia?
         </h2>
         <p className="text-sm text-slate-500">
           Isso nos ajuda a traçar um plano que você consiga cumprir

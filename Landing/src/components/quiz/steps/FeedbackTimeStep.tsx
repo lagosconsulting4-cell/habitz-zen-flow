@@ -1,15 +1,14 @@
 import { motion } from "motion/react";
 import { useQuiz } from "../QuizProvider";
-import { Clock, TrendingUp } from "lucide-react";
 import { useEffect } from "react";
 import { useTracking } from "@/hooks/useTracking";
 import { ContinueButton } from "../ContinueButton";
+import { TypingText } from "@/components/animate-ui/primitives/texts/typing";
 
 export const FeedbackTimeStep = () => {
   const { timeAvailable } = useQuiz();
   const { trackFeedbackView } = useTracking();
 
-  // Map time to readable format
   const timeLabels: Record<string, string> = {
     "5min": "5 minutos",
     "15min": "15 minutos",
@@ -24,55 +23,51 @@ export const FeedbackTimeStep = () => {
   }, [trackFeedbackView, timeText]);
 
   return (
-    <div className="flex flex-col items-center">
-      {/* Icon */}
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 200, damping: 15 }}
-        className="mb-6"
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+      {/* Main Title */}
+      <motion.h2
+        className="text-5xl md:text-6xl font-bold text-white mb-8 text-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
       >
-        <div className="w-20 h-20 bg-lime-500/10 rounded-full flex items-center justify-center ring-1 ring-lime-500/20 shadow-[0_0_30px_rgba(132,204,22,0.15)]">
-          <Clock className="w-10 h-10 text-lime-400" />
-        </div>
-      </motion.div>
+        Perfeito.
+      </motion.h2>
 
-      {/* Main Message */}
-      <motion.div
+      {/* Description */}
+      <motion.p
+        className="text-xl md:text-2xl text-slate-300 mb-12 text-center max-w-2xl leading-relaxed"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.3 }}
-        className="text-center mb-6 px-4 max-w-md"
+        transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-          O sistema torna sua evolução <span className="text-lime-400">inevitável</span>
-        </h2>
-        <p className="text-base text-slate-400 mb-3 leading-relaxed">
-          Mesmo com {timeText}, o algoritmo ajusta a intensidade para você nunca travar.
-        </p>
-        <p className="text-base text-slate-400 leading-relaxed">
-          <strong className="text-white">A constância vence a intensidade.</strong> O Bora garante que você faça o pouco que gera muito resultado.
-        </p>
-      </motion.div>
+        Com <strong className="text-white font-bold">{timeText}</strong>, o sistema ajusta tudo pra você evoluir sem travar.
+      </motion.p>
 
-      {/* Science tip */}
+      {/* Typing Text - Constância > Intensidade */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.3 }}
-        className="w-full max-w-md px-4 mb-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+        className="mb-12"
       >
-        <div className="bg-[#121214] rounded-xl border border-white/10 p-5 shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-1 h-full bg-lime-500/50" />
-          <p className="text-sm text-slate-300 leading-relaxed pl-2">
-            <strong className="text-lime-400 block mb-1 text-xs uppercase tracking-wider">💡 Ciência</strong>
-            Hábitos pequenos grudam mais. É tipo criar um caminho — quanto mais curto, mais fácil de repetir todo dia até virar automático.
-          </p>
-        </div>
+        <TypingText
+          text="Constância > Intensidade"
+          className="text-3xl md:text-4xl font-bold text-lime-400"
+          delay={0.8}
+          duration={1.5}
+          cursor={false}
+        />
       </motion.div>
 
-      {/* Continue */}
-      <ContinueButton />
+      {/* Continue Button */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2.5 }}
+      >
+        <ContinueButton />
+      </motion.div>
     </div>
   );
 };

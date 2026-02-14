@@ -29,11 +29,8 @@ export const EnergyPeakStep = () => {
         className="text-center mb-6"
       >
         <h2 className="text-2xl font-bold text-white mb-2">
-          Quando você se sente mais disposto no seu dia?
+          Quando você rende mais?
         </h2>
-        <p className="text-sm text-slate-400">
-          Colocamos hábitos mais importantes no horário que você se sente mais comprometido
-        </p>
       </motion.div>
 
       {/* Selection Grid */}

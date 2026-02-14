@@ -6,100 +6,40 @@ export const HeroStep = () => {
   const { nextStep } = useQuiz();
 
   return (
-    <div className="flex flex-col items-center">
-      {/* Video Section */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-sm mb-8"
-      >
-        <div className="relative aspect-[9/16] bg-slate-900 rounded-2xl overflow-hidden shadow-2xl">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="w-full h-full object-cover"
+    <div className="relative w-full h-full min-h-[100dvh] bg-[#0A0A0B] overflow-hidden">
+      {/* Background Image - Full Screen */}
+      <div className="absolute inset-0 w-full h-full bg-[#0A0A0B]">
+        <img
+          src="/images/hero-cover.png"
+          alt="Vire a sua melhor versão"
+          className="w-full h-full object-cover object-top"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.onerror = null;
+            target.src = "https://images.unsplash.com/photo-1544367563-12123d896589?q=80&w=1080&auto=format&fit=crop";
+          }}
+        />
+        {/* Shadow overlay at bottom to ensure button visibility */}
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0A0A0B] via-[#0A0A0B]/60 to-transparent" />
+      </div>
+
+      {/* Content Overlay - Button only */}
+      <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col items-center pb-28">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="w-auto"
+        >
+          <Button
+            size="lg"
+            onClick={nextStep}
+            className="w-auto px-10 min-w-[16rem] h-14 text-lg font-bold uppercase tracking-wide bg-lime-400 hover:bg-lime-500 text-slate-900 shadow-[0_0_20px_rgba(163,230,53,0.4)] hover:shadow-[0_0_30px_rgba(163,230,53,0.6)] transition-all rounded-full"
           >
-            <source src="/videos/quiz-hero.mp4" type="video/mp4" />
-            Seu navegador não suporta vídeo HTML5.
-          </video>
-        </div>
-      </motion.div>
-
-      {/* Main Title */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.3 }}
-        className="text-center mb-8"
-      >
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3 tracking-tight">
-          Por que você começa,
-        </h1>
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-          <span className="text-lime-400">mas nunca termina?</span>
-        </h2>
-        <p className="text-base text-slate-400 mt-4 max-w-xs mx-auto leading-relaxed">
-          Não é preguiça.<br />
-          É que sua rotina não foi feita pra sua realidade.
-        </p>
-      </motion.div>
-
-      {/* CTA Button */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.3 }}
-        className="w-full max-w-md mb-2"
-      >
-        <Button
-          size="lg"
-          onClick={nextStep}
-          className="w-full h-14 text-lg font-bold bg-lime-400 hover:bg-lime-500 text-slate-900 shadow-[0_0_20px_rgba(163,230,53,0.3)] hover:shadow-[0_0_30px_rgba(163,230,53,0.5)] transition-all"
-        >
-          Começar agora
-        </Button>
-      </motion.div>
-
-      {/* Microtexto */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.3 }}
-        className="text-center mb-6"
-      >
-        <p className="text-sm text-slate-400">
-          Leva cerca de 2 minutos • Sem compromisso
-        </p>
-      </motion.div>
-
-      {/* Login Link */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6, duration: 0.3 }}
-      >
-        <a
-          href="/app/login"
-          className="text-sm text-slate-400 hover:text-white underline"
-        >
-          Já tem uma conta? Entre Aqui
-        </a>
-      </motion.div>
-
-      {/* Language Selector (Optional) */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.3 }}
-        className="absolute top-4 right-4"
-      >
-        <button className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1">
-          🇧🇷 PT-BR
-        </button>
-      </motion.div>
+            INICIAR JORNADA
+          </Button>
+        </motion.div>
+      </div>
     </div>
   );
 };
