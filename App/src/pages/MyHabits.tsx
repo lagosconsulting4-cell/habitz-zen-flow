@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useHabits, Habit } from "@/hooks/useHabits";
-import { Loader2, MoreVertical, Copy, Edit, Trash2, Target, Flame, TrendingUp, ArrowUpDown, ChevronRight, Sparkles } from "lucide-react";
+import { Loader2, MoreVertical, Copy, Edit, Trash2, Target, Flame, TrendingUp, ArrowUpDown, ChevronRight, Sparkles, Plus } from "lucide-react";
 import { HabitIconKey } from "@/components/icons/HabitIcons";
 import { HabitGlyph } from "@/components/icons/HabitGlyph";
 
@@ -178,7 +178,10 @@ const MyHabits = () => {
             </p>
           </div>
           <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
-            <Link to="/create">Adicionar novo hábito</Link>
+            <Link to="/create">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Hábito
+            </Link>
           </Button>
         </div>
 
@@ -448,18 +451,16 @@ const MyHabits = () => {
           </motion.div>
         ) : (
           <AnimatePresence mode="popLayout">
-            <motion.div layout className="space-y-3">
+            <div className="space-y-3">
               {filteredHabits.map((habit, index) => {
                 const archived = !habit.is_active;
                 return (
                   <motion.div
                     key={habit.id}
-                    layout
-                    layoutId={habit.id}
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                    transition={{ duration: 0.3, delay: index * 0.03 }}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                    transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.16) }}
                   >
                     <Card
                       className={cn(
@@ -559,7 +560,7 @@ const MyHabits = () => {
                   </motion.div>
                 );
               })}
-            </motion.div>
+            </div>
           </AnimatePresence>
         )}
       </motion.div>

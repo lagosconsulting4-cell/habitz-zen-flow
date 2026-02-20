@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getRewardsForLevel } from "@/data/levelRewards";
@@ -107,7 +107,7 @@ export interface UserAvatar {
 }
 
 // ACHIEVEMENTS
-export type AchievementCategory = "habits" | "streaks" | "levels" | "special";
+export type AchievementCategory = "habits" | "streaks" | "levels" | "special" | "journey";
 export type AchievementTier = "common" | "uncommon" | "rare" | "epic" | "legendary";
 
 export interface Achievement {
@@ -163,6 +163,11 @@ export const GEM_VALUES = {
   PERFECT_DAY: 20,
   LEVEL_UP_BASE: 25,
   STREAK_FREEZE_COST: 200,
+  // Journey gems
+  JOURNEY_DAY_COMPLETE: 5,
+  JOURNEY_PHASE_COMPLETE: 25,
+  JOURNEY_L1_COMPLETE: 100,
+  JOURNEY_L2_COMPLETE: 200,
 } as const;
 
 // ============================================================================
@@ -407,6 +412,39 @@ export const useGamification = (userId?: string) => {
     staleTime: 60_000,
   });
 
+  // Query: Journey Stats (for journey achievements progress)
+  const { data: journeyStats } = useQuery({
+    queryKey: ["journey-stats", userId],
+    queryFn: async () => {
+      if (!userId) return { started: 0, l1_complete: 0, l2_complete: 0, phases_complete: 0 };
+
+      const { data, error } = await supabase
+        .from("user_journey_state")
+        .select("status, journeys!inner(level)")
+        .eq("user_id", userId);
+
+      if (error) throw error;
+      const rows = (data || []) as Array<{ status: string; journeys: { level: number } }>;
+
+      const started = rows.length;
+      const l1_complete = rows.filter(r => r.status === "completed" && r.journeys.level === 1).length;
+      const l2_complete = rows.filter(r => r.status === "completed" && r.journeys.level === 2).length;
+
+      // Count completed phases from day completions
+      const { count } = await supabase
+        .from("user_journey_day_completions")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
+
+      // Rough estimate: every 7 day completions ≈ 1 phase (will be refined)
+      const phases_complete = Math.floor((count || 0) / 7);
+
+      return { started, l1_complete, l2_complete, phases_complete };
+    },
+    enabled: Boolean(userId),
+    staleTime: 60_000,
+  });
+
   // Query: Streak Freezes Inventory
   const {
     data: streakFreezes,
@@ -462,7 +500,7 @@ export const useGamification = (userId?: string) => {
       };
     },
     enabled: Boolean(userId),
-    staleTime: 0, // Refetch imediato após invalidação
+    staleTime: 60_000, // 1 minute — invalidated on purchase anyway
   });
 
   // Mutation: Add XP
@@ -866,21 +904,21 @@ export const useGamification = (userId?: string) => {
   });
 
   // Helper: Check if item is unlocked
-  const isUnlocked = (
+  const isUnlocked = useCallback((
     unlockType: "icon" | "widget" | "meditation" | "template" | "journey",
     unlockId: string
   ): boolean => {
     return (unlocks || []).some(
       (unlock) => unlock.unlock_type === unlockType && unlock.unlock_id === unlockId
     );
-  };
+  }, [unlocks]);
 
   // Helper: Get unlocks by type
-  const getUnlocksByType = (
+  const getUnlocksByType = useCallback((
     unlockType: "icon" | "widget" | "meditation" | "template" | "journey"
   ): UserUnlock[] => {
     return (unlocks || []).filter((unlock) => unlock.unlock_type === unlockType);
-  };
+  }, [unlocks]);
 
   // Helper: Award XP for habit completion (ATUALIZADO: também dá gems)
   const awardHabitXP = async (habitId: string) => {
@@ -965,36 +1003,39 @@ export const useGamification = (userId?: string) => {
   // ============================================================================
 
   // Helper: Get equipped avatar
-  const equippedAvatar = userAvatars?.find((ua) => ua.is_equipped)?.avatar || null;
+  const equippedAvatar = useMemo(
+    () => userAvatars?.find((ua) => ua.is_equipped)?.avatar || null,
+    [userAvatars]
+  );
 
   // Helper: Check if avatar is unlocked
-  const isAvatarUnlocked = (avatarId: string): boolean => {
+  const isAvatarUnlocked = useCallback((avatarId: string): boolean => {
     return (userAvatars || []).some((ua) => ua.avatar_id === avatarId);
-  };
+  }, [userAvatars]);
 
   // Helper: Check if can purchase avatar
-  const canPurchaseAvatar = (avatarId: string): boolean => {
+  const canPurchaseAvatar = useCallback((avatarId: string): boolean => {
     const avatar = avatarsCatalog?.find((a) => a.id === avatarId);
     if (!avatar || !avatar.gem_cost) return false;
-    if (isAvatarUnlocked(avatarId)) return false;
+    if ((userAvatars || []).some((ua) => ua.avatar_id === avatarId)) return false;
     return (gems?.current_gems || 0) >= avatar.gem_cost;
-  };
+  }, [avatarsCatalog, userAvatars, gems]);
 
   // Helper: Check if avatar can be unlocked by level
-  const canUnlockAvatarByLevel = (avatarId: string): boolean => {
+  const canUnlockAvatarByLevel = useCallback((avatarId: string): boolean => {
     const avatar = avatarsCatalog?.find((a) => a.id === avatarId);
     if (!avatar || !avatar.unlock_level || !progress) return false;
-    if (isAvatarUnlocked(avatarId)) return false;
+    if ((userAvatars || []).some((ua) => ua.avatar_id === avatarId)) return false;
     return progress.current_level >= avatar.unlock_level;
-  };
+  }, [avatarsCatalog, userAvatars, progress]);
 
   // Helper: Check if achievement is unlocked
-  const isAchievementUnlocked = (achievementId: string): boolean => {
+  const isAchievementUnlocked = useCallback((achievementId: string): boolean => {
     return (userAchievements || []).some((ua) => ua.achievement_id === achievementId);
-  };
+  }, [userAchievements]);
 
   // Helper: Get achievement progress
-  const getAchievementProgress = (achievementId: string): { current: number; target: number; percentage: number } => {
+  const getAchievementProgress = useCallback((achievementId: string): { current: number; target: number; percentage: number } => {
     const achievement = achievementsCatalog?.find((a) => a.id === achievementId);
     if (!achievement || !progress) return { current: 0, target: 0, percentage: 0 };
 
@@ -1012,6 +1053,18 @@ export const useGamification = (userId?: string) => {
       case "level_reached":
         current = progress.current_level;
         break;
+      case "journey_started":
+        current = journeyStats?.started || 0;
+        break;
+      case "journey_phase_complete":
+        current = journeyStats?.phases_complete || 0;
+        break;
+      case "journey_l1_complete":
+        current = journeyStats?.l1_complete || 0;
+        break;
+      case "journey_l2_complete":
+        current = journeyStats?.l2_complete || 0;
+        break;
       default:
         current = 0;
     }
@@ -1021,17 +1074,17 @@ export const useGamification = (userId?: string) => {
       target: achievement.condition_value,
       percentage: Math.min((current / achievement.condition_value) * 100, 100),
     };
-  };
+  }, [achievementsCatalog, progress, journeyStats]);
 
   // Helper: Check if has available freezes
-  const hasAvailableFreezes = (): boolean => {
+  const hasAvailableFreezes = useCallback((): boolean => {
     return (streakFreezes?.available_freezes || 0) > 0;
-  };
+  }, [streakFreezes]);
 
   // Helper: Check if can purchase freeze
-  const canPurchaseFreeze = (): boolean => {
+  const canPurchaseFreeze = useCallback((): boolean => {
     return (gems?.current_gems || 0) >= GEM_VALUES.STREAK_FREEZE_COST;
-  };
+  }, [gems]);
 
   // Helper: Award gems for streak milestone
   const awardStreakGemsBonus = async (streakDays: number) => {
@@ -1062,16 +1115,56 @@ export const useGamification = (userId?: string) => {
     });
   };
 
+  // Helper: Award gems for journey day completion
+  const awardJourneyDayGems = async (journeyId: string, dayNumber: number) => {
+    return addGemsMutation.mutateAsync({
+      amount: GEM_VALUES.JOURNEY_DAY_COMPLETE,
+      transactionType: "journey_day_complete",
+      relatedEntityType: "journey",
+      relatedEntityId: journeyId,
+      metadata: { day_number: dayNumber },
+    });
+  };
+
+  // Helper: Award gems for journey phase completion
+  const awardJourneyPhaseGems = async (journeyId: string, phaseNumber: number) => {
+    return addGemsMutation.mutateAsync({
+      amount: GEM_VALUES.JOURNEY_PHASE_COMPLETE,
+      transactionType: "journey_phase_complete",
+      relatedEntityType: "journey",
+      relatedEntityId: journeyId,
+      metadata: { phase_number: phaseNumber },
+    });
+  };
+
+  // Helper: Award gems for journey completion (L1 or L2)
+  const awardJourneyCompleteGems = async (journeyId: string, level: number) => {
+    return addGemsMutation.mutateAsync({
+      amount: level === 2 ? GEM_VALUES.JOURNEY_L2_COMPLETE : GEM_VALUES.JOURNEY_L1_COMPLETE,
+      transactionType: "journey_complete",
+      relatedEntityType: "journey",
+      relatedEntityId: journeyId,
+      metadata: { level },
+    });
+  };
+
   // Helper: Get current level config
-  const currentLevelConfig = progress
-    ? getLevelConfig(progress.current_level)
-    : LEVEL_CONFIGS[0];
+  const currentLevelConfig = useMemo(
+    () => progress ? getLevelConfig(progress.current_level) : LEVEL_CONFIGS[0],
+    [progress]
+  );
 
   // Helper: Get progress in current level
-  const currentLevelProgress = progress ? getLevelProgress(progress.total_xp) : 0;
+  const currentLevelProgress = useMemo(
+    () => progress ? getLevelProgress(progress.total_xp) : 0,
+    [progress]
+  );
 
   // Helper: Get XP to next level
-  const xpToNextLevel = progress ? getXPToNextLevel(progress.total_xp) : 0;
+  const xpToNextLevel = useMemo(
+    () => progress ? getXPToNextLevel(progress.total_xp) : 0,
+    [progress]
+  );
 
   // ============================================================================
   // REALTIME LISTENER: Streak Freeze Events
@@ -1224,6 +1317,9 @@ export const useGamification = (userId?: string) => {
     // ========== NEW: GEM HELPERS ==========
     awardStreakGemsBonus,
     awardPerfectDayGemsBonus,
+    awardJourneyDayGems,
+    awardJourneyPhaseGems,
+    awardJourneyCompleteGems,
 
     // ========== REFETCH FUNCTIONS ==========
     refetchGems,

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useMemo, useState } from "react";
+import { useCallback, useRef, useMemo, useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
@@ -41,7 +41,7 @@ export interface Habit {
   icon_key?: string | null;
   unit?: "none" | "steps" | "minutes" | "km" | "custom" | null;
   goal_value?: number | null;
-  frequency_type?: "fixed_days" | "times_per_week" | "times_per_month" | "every_n_days" | "daily" | null;
+  frequency_type?: "fixed_days" | "times_per_week" | "times_per_month" | "every_n_days" | "daily" | "once" | null;
   times_per_week?: number | null;
   times_per_month?: number | null;
   every_n_days?: number | null;
@@ -49,6 +49,8 @@ export interface Habit {
   auto_complete_source?: "manual" | "health" | null;
   reminder_time?: string | null;
   times_per_day?: number | null;
+  source?: string | null;
+  due_date?: string | null;
 }
 
 export interface HabitCompletion {
@@ -111,7 +113,7 @@ export const useHabits = () => {
         // Select only necessary columns to reduce payload
         const { data, error } = await supabase
           .from("habits")
-          .select("id, name, emoji, category, period, days_of_week, streak, is_active, user_id, created_at, updated_at, reminder_time, times_per_day")
+          .select("id, name, emoji, category, period, days_of_week, streak, is_active, user_id, created_at, updated_at, reminder_time, times_per_day, source, icon_key, goal_value, unit, frequency_type, due_date")
           .eq("user_id", user.id)
           .order("created_at", { ascending: true });
 
@@ -194,9 +196,11 @@ export const useHabits = () => {
       if (isOnline) {
         // ONLINE: Fetch from Supabase
         // Select only necessary columns to reduce payload
+        if (!user) return [];
         const { data, error } = await supabase
           .from("habit_completions")
           .select("id, habit_id, user_id, completed_at, created_at, completed_at_time, completion_count")
+          .eq("user_id", user.id)
           .eq("completed_at", date);
 
         if (error) throw error;
@@ -246,8 +250,18 @@ export const useHabits = () => {
     }
   }, []);
 
-  // Track current completions date
-  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
+  // Track current completions date — reactive to midnight rollover
+  const [today, setToday] = useState(() => new Date().toISOString().split("T")[0]);
+  useEffect(() => {
+    const now = new Date();
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const msUntilMidnight = tomorrow.getTime() - now.getTime();
+    const timer = setTimeout(() => {
+      setToday(new Date().toISOString().split("T")[0]);
+    }, msUntilMidnight + 100); // small buffer past midnight
+    return () => clearTimeout(timer);
+  }, [today]); // re-schedule whenever `today` changes
+
   const [completionsDate, setCompletionsDateState] = useState<string>(today);
 
   // React Query for completions
@@ -255,7 +269,7 @@ export const useHabits = () => {
     data: completions = [],
     refetch: refetchCompletions,
   } = useQuery({
-    queryKey: ['completions', completionsDate],
+    queryKey: ['completions', user?.id, completionsDate],
     queryFn: () => fetchCompletionsQuery(completionsDate),
     staleTime: 5 * 60 * 1000, // 5 minutes
     enabled: !!user,
@@ -266,7 +280,7 @@ export const useHabits = () => {
     setCompletionsDateState(date);
     // This will trigger the query to refetch with the new date
     return queryClient.fetchQuery({
-      queryKey: ['completions', date],
+      queryKey: ['completions', user?.id, date],
       queryFn: () => fetchCompletionsQuery(date),
     });
   }, [queryClient, fetchCompletionsQuery]);
@@ -368,7 +382,8 @@ export const useHabits = () => {
         "every_n_days" |
         "notification_pref" |
         "auto_complete_source" |
-        "reminder_time"
+        "reminder_time" |
+        "due_date"
       >>;
     }) => {
       // Map unit to valid database value if present
@@ -422,7 +437,8 @@ export const useHabits = () => {
         "every_n_days" |
         "notification_pref" |
         "auto_complete_source" |
-        "reminder_time"
+        "reminder_time" |
+        "due_date"
       >>
     ) => {
       return updateHabitMutation.mutateAsync({ habitId, updates });
@@ -432,7 +448,7 @@ export const useHabits = () => {
 
   const setHabitActive = async (habitId: string, isActive: boolean) => {
     await updateHabit(habitId, { is_active: isActive });
-    await fetchHabits();
+    // updateHabit already updates query cache via setQueryData — no need for fetchHabits()
   };
 
   const archiveHabit = async (habitId: string) => {
@@ -611,12 +627,12 @@ export const useHabits = () => {
               created_at: new Date().toISOString(),
               completion_count: completionCount,
             };
-            queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
+            queryClient.setQueryData(['completions', user?.id, targetDate], (old: HabitCompletion[] = []) =>
               [...old, newCompletion]
             );
           } else if (data.action === 'incremented' || data.action === 'decremented') {
             // Atualizar count na completion existente
-            queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
+            queryClient.setQueryData(['completions', user?.id, targetDate], (old: HabitCompletion[] = []) =>
               old.map((c) =>
                 c.habit_id === habitId && c.completed_at === targetDate
                   ? { ...c, completion_count: completionCount }
@@ -625,7 +641,7 @@ export const useHabits = () => {
             );
           } else if (data.action === 'removed') {
             // Deletar completion (count chegou a 0)
-            queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
+            queryClient.setQueryData(['completions', user?.id, targetDate], (old: HabitCompletion[] = []) =>
               old.filter((c) => !(c.habit_id === habitId && c.completed_at === targetDate))
             );
           }
@@ -662,7 +678,7 @@ export const useHabits = () => {
 
         if (existingCompletion) {
           // Remove completion optimistically
-          queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
+          queryClient.setQueryData(['completions', user?.id, targetDate], (old: HabitCompletion[] = []) =>
             old.filter((c) => c.id !== existingCompletion.id)
           );
 
@@ -689,7 +705,7 @@ export const useHabits = () => {
             created_at: new Date().toISOString(),
           };
 
-          queryClient.setQueryData(['completions', targetDate], (old: HabitCompletion[] = []) =>
+          queryClient.setQueryData(['completions', user?.id, targetDate], (old: HabitCompletion[] = []) =>
             [...old, newCompletion]
           );
 
@@ -764,7 +780,7 @@ export const useHabits = () => {
     }
   };
 
-  const getHabitsForDate = (date: Date) => {
+  const getHabitsForDate = useCallback((date: Date) => {
     const weekday = date.getDay();
     const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
@@ -779,24 +795,26 @@ export const useHabits = () => {
 
       switch (frequencyType) {
         case "daily":
-          // Show every day
           return true;
 
         case "fixed_days":
-          // Check if today is in days_of_week
           return habit.days_of_week.includes(weekday);
 
+        case "once": {
+          if (!habit.due_date) return false;
+          const dueDate = new Date(habit.due_date + "T00:00:00");
+          return dueDate.getFullYear() === dateOnly.getFullYear()
+            && dueDate.getMonth() === dateOnly.getMonth()
+            && dueDate.getDate() === dateOnly.getDate();
+        }
+
         case "times_per_week":
-          // Show every day - user decides when to complete N times per week
-          // The UI/Dashboard can show progress like "2/3 this week"
           return true;
 
         case "times_per_month":
-          // Show every day - user decides when to complete N times per month
           return true;
 
         case "every_n_days": {
-          // Calculate if today is a day to show this habit
           const everyN = habit.every_n_days ?? 1;
           const daysSinceCreation = Math.floor(
             (dateOnly.getTime() - createdDateOnly.getTime()) / (1000 * 60 * 60 * 24)
@@ -805,52 +823,67 @@ export const useHabits = () => {
         }
 
         default:
-          // Fallback to fixed_days behavior
           return habit.days_of_week.includes(weekday);
       }
     });
-  };
+  }, [habits]);
 
+  // Pre-compute O(1) lookup map for completions by habit_id
+  const completionsMap = useMemo(() => {
+    const map = new Map<string, HabitCompletion>();
+    for (const c of completions) {
+      map.set(c.habit_id, c);
+    }
+    return map;
+  }, [completions]);
 
+  // Pre-compute O(1) lookup map for habits by id (for timesPerDay lookups)
+  const habitsMap = useMemo(() => {
+    const map = new Map<string, Habit>();
+    for (const h of habits) {
+      map.set(h.id, h);
+    }
+    return map;
+  }, [habits]);
 
-  const getHabitCompletionStatus = (habitId: string, date?: string) => {
+  const getHabitCompletionStatus = useCallback((habitId: string, date?: string) => {
     const targetDate = date ?? completionsDate;
     if (!targetDate || completionsDate !== targetDate) {
       return false;
     }
-    const habit = habits.find(h => h.id === habitId);
+    const habit = habitsMap.get(habitId);
     const timesPerDay = habit?.times_per_day ?? 1;
-    const completion = completions.find((c) => c.habit_id === habitId);
+    const completion = completionsMap.get(habitId);
     if (!completion) return false;
     return (completion.completion_count ?? 1) >= timesPerDay;
-  };
+  }, [completionsMap, habitsMap, completionsDate]);
 
-  const getHabitCompletionCount = (habitId: string, date?: string): { current: number; target: number } => {
+  const getHabitCompletionCount = useCallback((habitId: string, date?: string): { current: number; target: number } => {
     const targetDate = date ?? completionsDate;
-    const habit = habits.find(h => h.id === habitId);
+    const habit = habitsMap.get(habitId);
     const target = habit?.times_per_day ?? 1;
     if (!targetDate || completionsDate !== targetDate) {
       return { current: 0, target };
     }
-    const completion = completions.find((c) => c.habit_id === habitId);
+    const completion = completionsMap.get(habitId);
     return {
       current: completion?.completion_count ?? 0,
       target,
     };
-  };
+  }, [completionsMap, habitsMap, completionsDate]);
 
   // Optimistic update methods for immediate UI feedback
   const addCompletionOptimistic = useCallback((completion: HabitCompletion) => {
-    queryClient.setQueryData(['completions', completion.completed_at], (old: HabitCompletion[] = []) =>
+    queryClient.setQueryData(['completions', user?.id, completion.completed_at], (old: HabitCompletion[] = []) =>
       [...old, completion]
     );
-  }, [queryClient]);
+  }, [queryClient, user?.id]);
 
   const removeCompletionOptimistic = useCallback((habitId: string, date: string) => {
-    queryClient.setQueryData(['completions', date], (old: HabitCompletion[] = []) =>
+    queryClient.setQueryData(['completions', user?.id, date], (old: HabitCompletion[] = []) =>
       old.filter(c => !(c.habit_id === habitId && c.completed_at === date))
     );
-  }, [queryClient]);
+  }, [queryClient, user?.id]);
 
   return {
     habits,
@@ -881,7 +914,7 @@ export const useHabits = () => {
         if (error) throw error;
 
         // Invalidate completions cache to refetch with updated note
-        await queryClient.invalidateQueries({ queryKey: ['completions', date] });
+        await queryClient.invalidateQueries({ queryKey: ['completions', user?.id, date] });
         return true;
       } catch (err) {
         console.error("Erro ao salvar nota", err);

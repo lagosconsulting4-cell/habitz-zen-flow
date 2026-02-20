@@ -72,7 +72,7 @@ const categories = [
 ];
 
 type Step = "details" | "confirm";
-type FrequencyType = "daily" | "fixed_days";
+type FrequencyType = "daily" | "fixed_days" | "once";
 
 const UNIFIED_COLOR = "#A3E635";
 
@@ -95,6 +95,7 @@ const EditHabit = () => {
   const [frequencyType, setFrequencyType] = useState<FrequencyType>("daily");
   const [selectedPeriod, setSelectedPeriod] = useState<typeof periods[number]["id"]>("morning");
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
+  const [dueDate, setDueDate] = useState<string>("");
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [notificationSound, setNotificationSound] = useState<"default" | "soft" | "bright">("default");
   const [reminderTime, setReminderTime] = useState<string>("08:00");
@@ -122,8 +123,11 @@ const EditHabit = () => {
       setSelectedPeriod(habit.period);
       setSelectedDays(habit.days_of_week ?? [1, 2, 3, 4, 5, 6, 0]);
 
-      // Determine frequency type from days
-      if (habit.days_of_week?.length === 7) {
+      // Determine frequency type
+      if (habit.frequency_type === "once") {
+        setFrequencyType("once");
+        setDueDate(habit.due_date ?? "");
+      } else if (habit.days_of_week?.length === 7) {
         setFrequencyType("daily");
       } else {
         setFrequencyType("fixed_days");
@@ -212,12 +216,23 @@ const EditHabit = () => {
       return;
     }
 
+    if (frequencyType === "once" && !dueDate) {
+      toast({
+        title: "Selecione uma data",
+        description: "Escolha a data para esta tarefa",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsSaving(true);
       const days =
         frequencyType === "daily"
           ? [0, 1, 2, 3, 4, 5, 6]
-          : [...selectedDays].sort((a, b) => a - b);
+          : frequencyType === "once"
+            ? [new Date(dueDate + "T00:00:00").getDay()]
+            : [...selectedDays].sort((a, b) => a - b);
 
       await updateHabit(habit.id, {
         name: habitName.trim(),
@@ -239,6 +254,7 @@ const EditHabit = () => {
               time_sensitive: false,
             }
           : null,
+        due_date: frequencyType === "once" ? dueDate : null,
       });
 
       toast({ title: "Hábito atualizado com sucesso!" });
@@ -251,6 +267,24 @@ const EditHabit = () => {
   };
 
   const renderFrequencyFields = () => {
+    if (frequencyType === "once") {
+      return (
+        <div className="space-y-2">
+          <input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            min={new Date().toISOString().split("T")[0]}
+            className={`h-11 w-full rounded-xl px-3 ${themeColors.input}`}
+          />
+          {dueDate && (
+            <p className={`text-xs ${themeColors.bodyTextSecondary}`}>
+              {new Date(dueDate + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
+            </p>
+          )}
+        </div>
+      );
+    }
     if (frequencyType === "fixed_days") {
       return (
         <div className="space-y-3">
@@ -295,6 +329,10 @@ const EditHabit = () => {
 
   const getFrequencyText = () => {
     if (frequencyType === "daily") return "Todos os dias";
+    if (frequencyType === "once") {
+      if (!dueDate) return "Uma vez";
+      return new Date(dueDate + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" });
+    }
     if (frequencyType === "fixed_days") {
       const sortedDays = [...selectedDays].sort((a, b) => {
         const order = [1, 2, 3, 4, 5, 6, 0];
@@ -510,16 +548,17 @@ const EditHabit = () => {
                 Frequência
               </p>
               <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {frequencyType === "daily" ? "Todo dia" : "Dias específicos"}
+                {frequencyType === "daily" ? "Todo dia" : frequencyType === "once" ? "Uma vez" : "Dias específicos"}
               </p>
             </div>
           </div>
         </div>
         <div className={`border-t px-4 py-4 space-y-3 ${themeColors.headerBorder}`}>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {[
               { value: "daily", label: "Todo dia" },
               { value: "fixed_days", label: "Dias específicos" },
+              { value: "once", label: "Uma vez" },
             ].map((freqOption) => (
               <button
                 key={freqOption.value}

@@ -235,6 +235,9 @@ export const CATEGORY_ICON_MAP: Record<string, HabitIconKey> = {
   "work": "deep_work",
   "study": "study",
   "wellness": "heart",
+  // Journey-specific categories
+  "mente": "focus",
+  "corpo": "activity_rings",
   // Fallbacks por nome de categoria
   "Produtividade": "plan",
   "Saúde/Fitness": "run",

@@ -14,6 +14,7 @@ import { EnergyPeakStep } from "./steps/EnergyPeakStep";
 import { TimeAvailableStep } from "./steps/TimeAvailableStep";
 import { ObjectiveStep } from "./steps/ObjectiveStep";
 import { ChallengesStep } from "./steps/ChallengesStep";
+import { JourneySelectionStep } from "./steps/JourneySelectionStep";
 import { WeekDaysStep } from "./steps/WeekDaysStep";
 import { RoutinePreviewStep } from "./steps/RoutinePreviewStep";
 import { NotificationStep } from "./steps/NotificationStep";
@@ -26,28 +27,29 @@ import { CelebrationStep } from "./steps/CelebrationStep";
 const OnboardingFlowContent = () => {
   const { currentStep, generateRoutine } = useOnboarding();
 
-  // Generate routine when reaching preview step (step 10 - after WeekDays)
+  // Generate routine when reaching preview step (step 11 - after WeekDays)
   useEffect(() => {
-    if (currentStep === 10) {
+    if (currentStep === 11) {
       generateRoutine();
     }
   }, [currentStep, generateRoutine]);
 
-  // All 13 steps (including Theme and Notification steps)
+  // All 14 steps (including Theme, JourneySelection, and Notification)
   const steps = [
-    <WelcomeStep key="welcome" />,        // 0
-    <ThemeStep key="theme" />,            // 1
-    <AgeStep key="age" />,                // 2
-    <ProfessionStep key="profession" />,  // 3
-    <WorkScheduleStep key="work-schedule" />, // 4
-    <EnergyPeakStep key="energy" />,      // 5
-    <TimeAvailableStep key="time" />,     // 6
-    <ObjectiveStep key="objective" />,    // 7
-    <ChallengesStep key="challenges" />,  // 8
-    <WeekDaysStep key="weekdays" />,      // 9
-    <RoutinePreviewStep key="preview" />, // 10
-    <NotificationStep key="notification" />, // 11
-    <CelebrationStep key="celebration" />,// 12
+    <WelcomeStep key="welcome" />,              // 0
+    <ThemeStep key="theme" />,                  // 1
+    <AgeStep key="age" />,                      // 2
+    <ProfessionStep key="profession" />,        // 3
+    <WorkScheduleStep key="work-schedule" />,   // 4
+    <EnergyPeakStep key="energy" />,            // 5
+    <TimeAvailableStep key="time" />,           // 6
+    <ObjectiveStep key="objective" />,          // 7
+    <ChallengesStep key="challenges" />,        // 8
+    <JourneySelectionStep key="journeys" />,    // 9
+    <WeekDaysStep key="weekdays" />,            // 10
+    <RoutinePreviewStep key="preview" />,       // 11
+    <NotificationStep key="notification" />,    // 12
+    <CelebrationStep key="celebration" />,      // 13
   ];
 
   return (

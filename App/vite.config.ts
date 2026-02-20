@@ -53,6 +53,11 @@ export default defineConfig(({ mode }) => {
               "@radix-ui/react-toggle-group",
               "@radix-ui/react-toast",
               "@radix-ui/react-tooltip",
+              "@radix-ui/react-popover",
+              "@radix-ui/react-radio-group",
+              "@radix-ui/react-slider",
+              "@radix-ui/react-aspect-ratio",
+              "@radix-ui/react-toggle",
             ],
             // Charts
             "chart-vendor": ["recharts"],
@@ -76,9 +81,15 @@ export default defineConfig(({ mode }) => {
         includeAssets: ["favicon.ico", "icons/*.png"],
         manifest: false, // Usar manifest.json manual em public/
         injectManifest: {
-          globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+          globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
           globIgnores: [
             "**/particles-vendor*.js", // Tsparticles usado apenas no onboarding - carregar sob demanda
+            "icons/icon-72.png",
+            "icons/icon-96.png",
+            "icons/icon-128.png",
+            "icons/icon-144.png",
+            "icons/icon-152.png",
+            "icons/icon-384.png",
           ],
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
         },

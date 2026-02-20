@@ -63,7 +63,7 @@ const soundOptions: Array<{ value: "default" | "soft" | "bright"; label: string;
 ];
 
 type Step = "select" | "details" | "confirm";
-type FrequencyType = "daily" | "fixed_days";
+type FrequencyType = "daily" | "fixed_days" | "once";
 
 // Cor unificada para todas as categorias - verde lime premium
 const UNIFIED_COLOR = "#A3E635";
@@ -199,6 +199,8 @@ const CreateHabit = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [reminderTime, setReminderTime] = useState<string>("08:00");
   const [notificationSound, setNotificationSound] = useState<"default" | "soft" | "bright">("default");
+  const [dueDate, setDueDate] = useState<string>("");
+  const [dueTime, setDueTime] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string; iconKey?: HabitIconKey } | null>(null);
@@ -357,6 +359,15 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       return;
     }
 
+    if (frequencyType === "once" && !dueDate) {
+      toast({
+        title: "Selecione uma data",
+        description: "Escolha a data para esta tarefa",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (goalValue !== undefined && goalValue !== null && Number.isNaN(Number(goalValue))) {
       toast({
         title: "Meta inválida",
@@ -371,7 +382,9 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       const days =
         frequencyType === "daily"
           ? [0, 1, 2, 3, 4, 5, 6]
-          : [...selectedDays].sort((a, b) => a - b);
+          : frequencyType === "once"
+            ? [new Date(dueDate + "T00:00:00").getDay()]
+            : [...selectedDays].sort((a, b) => a - b);
       // Usa selectedCategoryData.id que sempre vem de CATEGORY_DATA com valores válidos
       const categoryValue = selectedCategoryData?.id || selectedCategory;
       await createHabit({
@@ -399,6 +412,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             }
           : null,
         auto_complete_source: "manual",
+        due_date: frequencyType === "once" ? dueDate : null,
       });
       navigate("/dashboard");
     } catch (error) {
@@ -445,6 +459,50 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
           placeholder="Ex.: a cada 2 dias"
           className={`rounded-xl ${themeColors.input}`}
         />
+      );
+    }
+    if (frequencyType === "once") {
+      return (
+        <div className="space-y-2">
+          <input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            min={new Date().toISOString().split("T")[0]}
+            className={`h-11 w-full rounded-xl px-3 ${themeColors.input}`}
+          />
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <input
+              type="time"
+              value={dueTime}
+              onChange={(e) => {
+                setDueTime(e.target.value);
+                if (e.target.value) {
+                  setReminderTime(e.target.value);
+                  setNotificationsEnabled(true);
+                }
+              }}
+              placeholder="Horário (opcional)"
+              className={`h-11 w-full rounded-xl px-3 ${themeColors.input}`}
+            />
+            {dueTime && (
+              <button
+                type="button"
+                onClick={() => setDueTime("")}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          {dueDate && (
+            <p className={`text-xs ${themeColors.bodyTextSecondary}`}>
+              {new Date(dueDate + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
+              {dueTime && ` às ${dueTime}`}
+            </p>
+          )}
+        </div>
       );
     }
     if (frequencyType === "fixed_days") {
@@ -843,7 +901,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                   </span>
                   <span className={`text-xs ${themeColors.bodyTextMuted}`}>•</span>
                   <span className={`text-xs ${themeColors.bodyTextSecondary}`}>
-                    {frequencyType === "daily" ? "Diário" : `${selectedDays.length} dias`}
+                    {frequencyType === "daily" ? "Diário" : frequencyType === "once" ? "Uma vez" : `${selectedDays.length} dias`}
                   </span>
                 </div>
               </div>
@@ -909,16 +967,17 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                 Frequência
               </p>
               <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {frequencyType === "daily" ? "Todo dia" : "Dias específicos"}
+                {frequencyType === "daily" ? "Todo dia" : frequencyType === "once" ? "Uma vez" : "Dias específicos"}
               </p>
             </div>
           </div>
         </div>
         <div className={`border-t px-4 py-4 space-y-3 ${themeColors.headerBorder}`}>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {[
               { value: "daily", label: "Todo dia" },
               { value: "fixed_days", label: "Dias específicos" },
+              { value: "once", label: "Uma vez" },
             ].map((freqOption) => (
               <button
                 key={freqOption.value}
@@ -1089,6 +1148,10 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
   // Helper to format frequency text for confirmation
   const getFrequencyText = () => {
     if (frequencyType === "daily") return "Todos os dias";
+    if (frequencyType === "once") {
+      if (!dueDate) return "Uma vez";
+      return new Date(dueDate + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" });
+    }
     if (frequencyType === "fixed_days") {
       const sortedDays = [...selectedDays].sort((a, b) => {
         const order = [1, 2, 3, 4, 5, 6, 0];

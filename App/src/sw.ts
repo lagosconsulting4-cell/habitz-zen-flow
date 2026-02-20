@@ -15,12 +15,12 @@ precacheAndRoute(self.__WB_MANIFEST);
 
 // Runtime caching strategies
 
-// Cache Supabase API responses (stale-while-revalidate)
-// Note: StaleWhileRevalidate returns cache instantly and updates in background,
-// so networkTimeout is not needed - no waiting for network, preventing hangs.
-// This provides better UX than NetworkFirst with timeout (which would wait).
+// Cache Supabase API GET responses only (stale-while-revalidate)
+// IMPORTANT: Only cache GET requests — POST/PATCH/DELETE mutations must never be cached
 registerRoute(
-  /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
+  ({ url, request }) =>
+    /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i.test(url.href) &&
+    request.method === "GET",
   new StaleWhileRevalidate({
     cacheName: "supabase-api-cache",
     plugins: [
@@ -94,13 +94,13 @@ interface NotificationData {
  */
 self.addEventListener("push", (event) => {
   if (!event.data) {
-    console.log("[SW] Push received but no data");
+    // Push received but no data
     return;
   }
 
   try {
     const payload = event.data.json();
-    console.log("[SW] Push received:", payload);
+    // Push received
 
     const options: NotificationOptions = {
       body: payload.body || "Você tem hábitos pendentes!",
@@ -128,7 +128,7 @@ self.addEventListener("push", (event) => {
  * Handle notification click events
  */
 self.addEventListener("notificationclick", (event) => {
-  console.log("[SW] Notification clicked:", event.action);
+  // Notification clicked
 
   event.notification.close();
 
@@ -204,7 +204,7 @@ self.addEventListener("notificationclick", (event) => {
  * Handle notification close events
  */
 self.addEventListener("notificationclose", (event) => {
-  console.log("[SW] Notification closed:", event.notification.tag);
+  // Notification closed
 });
 
 // ============================================
@@ -216,7 +216,7 @@ self.addEventListener("notificationclose", (event) => {
  * Complementa o useOfflineSync do app layer
  */
 self.addEventListener("sync", (event) => {
-  console.log("[SW] Background sync event:", event.tag);
+  // Background sync event
 
   if (event.tag === "sync-offline-queue") {
     event.waitUntil(syncOfflineQueue());
@@ -228,18 +228,15 @@ self.addEventListener("sync", (event) => {
  */
 async function syncOfflineQueue(): Promise<void> {
   try {
-    console.log("[SW] Starting background sync...");
+    // Starting background sync
 
     // Abrir IndexedDB para acessar a fila
     const db = await openOfflineDB();
     const queue = await getQueueFromDB(db);
 
     if (queue.length === 0) {
-      console.log("[SW] Sync queue is empty");
       return;
     }
-
-    console.log(`[SW] Processing ${queue.length} queued items`);
     let successCount = 0;
 
     for (const item of queue) {
@@ -254,8 +251,6 @@ async function syncOfflineQueue(): Promise<void> {
         await incrementRetriesInDB(db, item.id);
       }
     }
-
-    console.log(`[SW] Sync completed: ${successCount}/${queue.length} items`);
 
     // Notificar app se estiver aberto
     const clients = await self.clients.matchAll();
@@ -339,8 +334,9 @@ async function incrementRetriesInDB(db: IDBDatabase, id: string): Promise<void> 
 async function processQueueItemInSW(item: any): Promise<void> {
   // Nota: Service Worker não tem acesso ao supabase client
   // Então fazemos requests HTTP diretos para a API
-  const supabaseUrl = "https://jbucnphyrziaxupdsnbn.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impic2NucGh5cnppYXh1cGRzYmJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMxMzI3NzQsImV4cCI6MjA0ODcwODc3NH0.wHUpGNb_pOPBGGfEPx3bWCwJ3JEV5w5PSRlUfKPxfUQ";
+  // Vite injects env vars at build time for SW files
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
   const headers = {
     "Content-Type": "application/json",
@@ -411,4 +407,4 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-console.log("[SW] Service Worker loaded - Bora Hábitos v1.0");
+// Service Worker loaded

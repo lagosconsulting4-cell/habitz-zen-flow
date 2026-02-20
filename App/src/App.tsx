@@ -32,7 +32,9 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Meditation = lazy(() => import("./pages/Meditation"));
 const BooksHub = lazy(() => import("./pages/BooksHub"));
 const Tips = lazy(() => import("./pages/Tips"));
-const GuidedJourney = lazy(() => import("./pages/GuidedJourney"));
+const JourneyHub = lazy(() => import("./pages/JourneyHub"));
+const JourneyDetail = lazy(() => import("./pages/JourneyDetail"));
+const JourneyDayCard = lazy(() => import("./pages/JourneyDayCard"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Calendar = lazy(() => import("./pages/Calendar"));
 const Pricing = lazy(() => import("./pages/Pricing"));
@@ -65,8 +67,11 @@ const queryClient = new QueryClient({
       staleTime: 5 * 60 * 1000, // 5 minutos - dados frescos
       gcTime: 30 * 60 * 1000, // 30 minutos - manter no cache
       retry: (failureCount, error) => {
-        // Não tentar novamente se estiver offline
+        // Don't retry if offline
         if (!navigator.onLine) return false;
+        // Don't retry auth errors — they won't resolve with retries
+        const status = (error as any)?.status ?? (error as any)?.code;
+        if (status === 401 || status === 403) return false;
         return failureCount < 3;
       },
       refetchOnWindowFocus: false, // Evitar refetch excessivo
@@ -173,7 +178,10 @@ const App = () => (
               <Route path="/meditation" element={<Meditation />} />
               <Route path="/books" element={<BooksHub />} />
               <Route path="/tips" element={<Tips />} />
-              <Route path="/guided" element={<GuidedJourney />} />
+              <Route path="/guided" element={<Navigate to="/journeys" replace />} />
+              <Route path="/journeys" element={<JourneyHub />} />
+              <Route path="/journeys/:slug" element={<JourneyDetail />} />
+              <Route path="/journeys/:slug/day/:day" element={<JourneyDayCard />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/cancel-subscription" element={<CancelSubscription />} />
               <Route path="/bonus" element={<Bonus />} />

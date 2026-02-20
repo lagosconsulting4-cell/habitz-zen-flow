@@ -14,7 +14,7 @@ export interface NavItem {
 export const navItems: NavItem[] = [
   { id: "dashboard", label: "Home", path: "/dashboard", icon: "home", variant: "primary", requiresAuth: true, includeInMoreMenu: true },
   { id: "progress", label: "Streaks", path: "/progress", icon: "trending-up", variant: "primary", requiresAuth: true },
-  { id: "create", label: "Adicionar", path: "/create", icon: "plus", variant: "primary", requiresAuth: true },
+  { id: "journeys", label: "Jornadas", path: "/journeys", icon: "compass", variant: "primary", requiresAuth: true },
   {
     id: "my-habits",
     label: "Hábitos",

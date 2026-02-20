@@ -129,6 +129,46 @@ export const useAnalytics = () => {
     staleTime: 60_000,
   });
 
+  // Journey Totals
+  const journeyTotals = useQuery({
+    queryKey: ["analytics-journey-totals"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admin_journey_totals")
+        .select("*")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 60_000,
+  });
+
+  // Journey Overview (per journey)
+  const journeyOverview = useQuery({
+    queryKey: ["analytics-journey-overview"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admin_journey_overview")
+        .select("*");
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 60_000,
+  });
+
+  // Journey Drop-off (active users by day)
+  const journeyDropoff = useQuery({
+    queryKey: ["analytics-journey-dropoff"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admin_journey_dropoff")
+        .select("*");
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 60_000,
+  });
+
   return {
     northStar,
     dauMauWau,
@@ -139,5 +179,8 @@ export const useAnalytics = () => {
     completionByCategory,
     sessionMetrics,
     userStats,
+    journeyTotals,
+    journeyOverview,
+    journeyDropoff,
   };
 };

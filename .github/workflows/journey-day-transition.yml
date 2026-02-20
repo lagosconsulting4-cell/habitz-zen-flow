@@ -1,0 +1,32 @@
+name: Journey Day Transition
+
+on:
+  schedule:
+    # Runs daily at 04:00 UTC (01:00 BRT) — after midnight in Brazil
+    - cron: '0 4 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  transition:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger journey day transition
+        run: |
+          response=$(curl -s -w "\n%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/functions/v1/journey-day-transition" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{}')
+
+          http_code=$(echo "$response" | tail -1)
+          body=$(echo "$response" | head -n -1)
+
+          echo "Response code: $http_code"
+          echo "Body: $body"
+
+          if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 400 ]; then
+            echo "Day transition completed successfully"
+          else
+            echo "::error::Day transition failed with status $http_code"
+            exit 1
+          fi

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
 import { useGamification } from "@/hooks/useGamification";
+import { useJourneyActions } from "@/hooks/useJourney";
 import { generateRecommendations } from "./generateRecommendations";
 
 // ============================================================================
@@ -72,6 +73,9 @@ export interface OnboardingState {
   weekDays: number[];
   weekDaysPreset: WeekDaysPreset;
 
+  // Journey Selection
+  selectedJourneyIds: Set<string>;
+
   // Recommended Habits
   recommendedHabits: RecommendedHabit[];
   selectedHabitIds: Set<string>;
@@ -96,6 +100,7 @@ export interface OnboardingContextType extends OnboardingState {
   setTimeAvailable: (time: TimeAvailable) => void;
   setObjective: (objective: Objective) => void;
   toggleChallenge: (challenge: string) => void;
+  toggleJourney: (journeyId: string) => void;
   setWeekDaysPreset: (preset: WeekDaysPreset) => void;
   setWeekDays: (days: number[]) => void;
 
@@ -128,6 +133,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addXP } = useGamification(user?.id);
+  const { startJourney } = useJourneyActions();
 
   // State
   const [currentStep, setCurrentStep] = useState(0);
@@ -143,10 +149,11 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [weekDays, setWeekDays] = useState<number[]>([1, 2, 3, 4, 5]); // Mon-Fri
   const [recommendedHabits, setRecommendedHabits] = useState<RecommendedHabit[]>([]);
   const [selectedHabitIds, setSelectedHabitIds] = useState<Set<string>>(new Set());
+  const [selectedJourneyIds, setSelectedJourneyIds] = useState<Set<string>>(new Set());
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const totalSteps = 13; // Welcome, Theme, Age, Profession, WorkSchedule, EnergyPeak, TimeAvailable, Objective, Challenges, WeekDays, Preview, Notification, Celebration
+  const totalSteps = 14; // Welcome, Theme, Age, Profession, WorkSchedule, EnergyPeak, TimeAvailable, Objective, Challenges, JourneySelection, WeekDays, Preview, Notification, Celebration
 
   // ============================================================================
   // NAVIGATION
@@ -197,13 +204,15 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         return objective !== null;
       case 8: // Challenges
         return challenges.length > 0;
-      case 9: // Week Days
+      case 9: // Journey Selection
+        return true; // Optional — user can skip
+      case 10: // Week Days
         return weekDays.length > 0;
-      case 10: // Preview
+      case 11: // Preview
         return selectedHabitIds.size >= 3;
-      case 11: // Notification
+      case 12: // Notification
         return true; // Notification step always valid (user can skip)
-      case 12: // Celebration (auto-submits)
+      case 13: // Celebration (auto-submits)
         return true;
       default:
         return false;
@@ -252,6 +261,15 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     setChallenges((prev) =>
       prev.includes(challenge) ? prev.filter((c) => c !== challenge) : [...prev, challenge]
     );
+  }, []);
+
+  const toggleJourney = useCallback((journeyId: string) => {
+    setSelectedJourneyIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(journeyId)) next.delete(journeyId);
+      else next.add(journeyId);
+      return next;
+    });
   }, []);
 
   const toggleHabit = useCallback((habitId: string) => {
@@ -416,6 +434,15 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         console.error("Failed to update profile:", profileError);
       }
 
+      // Start selected journeys
+      for (const journeyId of selectedJourneyIds) {
+        try {
+          await startJourney(journeyId);
+        } catch (err) {
+          console.error("Failed to start journey:", journeyId, err);
+        }
+      }
+
       // Award welcome XP
       if (addXP) {
         await addXP({
@@ -456,6 +483,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     timeAvailable,
     objective,
     challenges,
+    selectedJourneyIds,
     weekDaysPreset,
     weekDays,
     recommendedHabits,
@@ -477,6 +505,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     setTimeAvailable,
     setObjective,
     toggleChallenge,
+    toggleJourney,
     setWeekDaysPreset,
     setWeekDays,
 
@@ -506,6 +535,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     timeAvailable,
     objective,
     challenges,
+    selectedJourneyIds,
     weekDaysPreset,
     weekDays,
     recommendedHabits,
@@ -523,6 +553,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     setTimeAvailable,
     setObjective,
     toggleChallenge,
+    toggleJourney,
     setWeekDaysPreset,
     setWeekDays,
     generateRoutine,

@@ -1,5 +1,6 @@
+import { memo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, ListChecks, TrendingUp, Plus, User } from "lucide-react";
+import { Home, ListChecks, TrendingUp, Compass, User } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
@@ -10,22 +11,21 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   path: string;
-  index?: number; // Optional - Create doesn't have an index
-  isAction?: boolean;
+  index?: number; // Optional - Journeys doesn't have an index (not swipeable)
 }
 
-// Navigation items - Create is separate (modal), others are swipeable
+// Navigation items - Journeys navigates normally, others are swipeable
 const navItems: NavItem[] = [
   { id: "home", label: "Home", icon: Home, path: "/dashboard", index: 0 },
   { id: "habits", label: "Hábitos", icon: ListChecks, path: "/habits", index: 1 },
-  { id: "create", label: "Criar", icon: Plus, path: "/create", isAction: true },
+  { id: "journeys", label: "Jornadas", icon: Compass, path: "/journeys" },
   { id: "progress", label: "Streaks", icon: TrendingUp, path: "/progress", index: 2 },
   { id: "profile", label: "Perfil", icon: User, path: "/profile", index: 3 },
 ];
 
 const transition = { type: "spring", bounce: 0.2, duration: 0.35 } as const;
 
-const NavigationBar = () => {
+const NavigationBar = memo(() => {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentIndex, navigateTo, isSwipeable } = useSwipeNavigation();
@@ -35,15 +35,12 @@ const NavigationBar = () => {
       navigator.vibrate(8);
     }
 
-    // Create is a modal - use regular navigation
-    if (item.isAction) {
-      navigate(item.path);
-      return;
-    }
-
     // Swipeable routes - use carousel navigation
     if (item.index !== undefined) {
       navigateTo(item.index);
+    } else {
+      // Non-swipeable routes (e.g. Journeys) - regular navigation
+      navigate(item.path);
     }
   };
 
@@ -83,37 +80,10 @@ const NavigationBar = () => {
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         {navItems.map((item) => {
-          const isActive = item.index !== undefined && activeIndex === item.index;
+          const isActive = item.index !== undefined
+            ? activeIndex === item.index
+            : location.pathname.startsWith(item.path);
           const Icon = item.icon;
-
-          // Special styling for action button (Create)
-          if (item.isAction) {
-            return (
-              <motion.button
-                key={item.id}
-                type="button"
-                onClick={() => handleNavigate(item)}
-                aria-label={item.label}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.92 }}
-                className={cn(
-                  "relative flex items-center justify-center",
-                  "w-14 h-14 -mt-4 rounded-full",
-                  "bg-primary",
-                  "shadow-lg shadow-primary/30",
-                  "transition-shadow duration-200",
-                  "hover:shadow-xl hover:shadow-primary/40",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                )}
-              >
-                <Icon
-                  size={26}
-                  strokeWidth={2.5}
-                  className="text-primary-foreground"
-                />
-              </motion.button>
-            );
-          }
 
           return (
             <motion.button
@@ -149,6 +119,7 @@ const NavigationBar = () => {
       </motion.div>
     </nav>
   );
-};
+});
 
+NavigationBar.displayName = "NavigationBar";
 export default NavigationBar;

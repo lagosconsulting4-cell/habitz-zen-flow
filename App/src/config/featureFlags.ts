@@ -5,3 +5,9 @@ const rawHideGamification = import.meta.env.VITE_HIDE_GAMIFICATION;
  * Defaults to true so the feature is opt-in via `VITE_HIDE_GAMIFICATION=false`.
  */
 export const hideGamification = rawHideGamification !== "false";
+
+/**
+ * When true, the Journeys feature is visible.
+ * Defaults to true (enabled). Set `VITE_SHOW_JOURNEYS=false` to hide.
+ */
+export const showJourneys = import.meta.env.VITE_SHOW_JOURNEYS !== "false";

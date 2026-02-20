@@ -4,9 +4,10 @@ import { StreakDistribution } from "@/components/admin/StreakDistribution";
 import { CompletionRateChart } from "@/components/admin/CompletionRateChart";
 import { NotificationMetrics } from "@/components/admin/NotificationMetrics";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { LineChart as LineChartIcon, BarChart3, Users, Zap, TrendingUp, Target, DollarSign } from "lucide-react";
+import { LineChart as LineChartIcon, BarChart3, Users, Zap, TrendingUp, Target, DollarSign, Compass, CheckCircle, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Progress } from "@/components/ui/progress";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { format } from "date-fns";
 
 const AdminAnalytics = () => {
@@ -20,6 +21,9 @@ const AdminAnalytics = () => {
     completionByCategory,
     sessionMetrics,
     userStats,
+    journeyTotals,
+    journeyOverview,
+    journeyDropoff,
   } = useAnalytics();
 
   const isLoadingAny =
@@ -218,6 +222,128 @@ const AdminAnalytics = () => {
           </Card>
         </div>
       )}
+
+      {/* Section 9: Journey Analytics */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Journey Analytics</h2>
+
+        {/* Journey Totals */}
+        <div className="grid gap-4 md:grid-cols-4 mb-6">
+          <MetricCard
+            title="Total Enrollments"
+            value={journeyTotals.data?.total_enrollments || 0}
+            description={`${journeyTotals.data?.unique_users || 0} unique users`}
+            icon={<Compass className="h-5 w-5" />}
+            loading={journeyTotals.isLoading}
+          />
+          <MetricCard
+            title="Active Journeys"
+            value={journeyTotals.data?.active_journeys || 0}
+            description="Currently in progress"
+            icon={<TrendingUp className="h-5 w-5" />}
+            loading={journeyTotals.isLoading}
+          />
+          <MetricCard
+            title="Completed"
+            value={journeyTotals.data?.completed_journeys || 0}
+            description={`${journeyTotals.data?.overall_completion_rate || 0}% completion rate`}
+            icon={<CheckCircle className="h-5 w-5" />}
+            loading={journeyTotals.isLoading}
+          />
+          <MetricCard
+            title="Completion Rate"
+            value={`${journeyTotals.data?.overall_completion_rate || 0}%`}
+            description="Overall journey completion"
+            benchmark="Target: 40% good, 60% excellent"
+            icon={<Target className="h-5 w-5" />}
+            loading={journeyTotals.isLoading}
+          />
+        </div>
+
+        {/* Per-Journey Breakdown */}
+        {journeyOverview.data && journeyOverview.data.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Journey Performance</CardTitle>
+              <CardDescription>Enrollment and completion by journey</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {journeyOverview.data.map((j) => (
+                  <div key={j.journey_id} className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-sm">
+                          {j.title} <span className="text-muted-foreground">L{j.level}</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {j.total_enrollments} enrolled · {j.active_users} active · {j.completed_users} completed · {j.abandoned_users} abandoned
+                        </p>
+                      </div>
+                      <span className="text-sm font-bold">{j.completion_rate}%</span>
+                    </div>
+                    <Progress value={Number(j.completion_rate)} className="h-2" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Drop-off Chart (The Cliff detection) */}
+        {journeyDropoff.data && journeyDropoff.data.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                Drop-off by Day
+                <AlertTriangle className="h-4 w-4 text-yellow-500" />
+              </CardTitle>
+              <CardDescription>
+                Active users per day — days 10-14 highlighted as "The Cliff" zone
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={journeyDropoff.data}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="day_number" label={{ value: "Day", position: "insideBottom", offset: -5 }} />
+                  <YAxis label={{ value: "Users", angle: -90, position: "insideLeft" }} />
+                  <Tooltip
+                    formatter={(value: number, name: string) => [value, name === "users_on_day" ? "Active users" : name]}
+                    labelFormatter={(label) => `Day ${label}`}
+                  />
+                  <Bar
+                    dataKey="users_on_day"
+                    fill="#3b82f6"
+                    radius={[4, 4, 0, 0]}
+                    // Cliff zone bars get a different color
+                    shape={(props: Record<string, unknown>) => {
+                      const { x, y, width, height, payload } = props as {
+                        x: number;
+                        y: number;
+                        width: number;
+                        height: number;
+                        payload: { is_cliff_zone: boolean };
+                      };
+                      return (
+                        <rect
+                          x={x}
+                          y={y}
+                          width={width}
+                          height={height}
+                          fill={payload.is_cliff_zone ? "#f59e0b" : "#3b82f6"}
+                          rx={4}
+                          ry={4}
+                        />
+                      );
+                    }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

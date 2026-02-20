@@ -1191,12 +1191,404 @@ export type Database = {
           }
         ]
       }
+      // ============================================
+      // JOURNEY TABLES (added by journeys migration)
+      // ============================================
+      journeys: {
+        Row: {
+          id: string
+          slug: string
+          theme_slug: string
+          title: string
+          subtitle: string | null
+          promise: string | null
+          description: string | null
+          level: number
+          duration_days: number
+          illustration_key: string
+          cover_image_url: string | null
+          target_audience: string | null
+          expected_result: string | null
+          prerequisite_journey_slug: string | null
+          prerequisite_min_percent: number | null
+          tags: string[]
+          is_active: boolean
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          theme_slug: string
+          title: string
+          subtitle?: string | null
+          promise?: string | null
+          description?: string | null
+          level?: number
+          duration_days?: number
+          illustration_key: string
+          cover_image_url?: string | null
+          target_audience?: string | null
+          expected_result?: string | null
+          prerequisite_journey_slug?: string | null
+          prerequisite_min_percent?: number | null
+          tags?: string[]
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          theme_slug?: string
+          title?: string
+          subtitle?: string | null
+          promise?: string | null
+          description?: string | null
+          level?: number
+          duration_days?: number
+          illustration_key?: string
+          cover_image_url?: string | null
+          target_audience?: string | null
+          expected_result?: string | null
+          prerequisite_journey_slug?: string | null
+          prerequisite_min_percent?: number | null
+          tags?: string[]
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      journey_phases: {
+        Row: {
+          id: string
+          journey_id: string
+          phase_number: number
+          title: string
+          subtitle: string | null
+          description: string | null
+          day_start: number
+          day_end: number
+          badge_illustration_key: string | null
+          badge_name: string | null
+        }
+        Insert: {
+          id?: string
+          journey_id: string
+          phase_number: number
+          title: string
+          subtitle?: string | null
+          description?: string | null
+          day_start: number
+          day_end: number
+          badge_illustration_key?: string | null
+          badge_name?: string | null
+        }
+        Update: {
+          id?: string
+          journey_id?: string
+          phase_number?: number
+          title?: string
+          subtitle?: string | null
+          description?: string | null
+          day_start?: number
+          day_end?: number
+          badge_illustration_key?: string | null
+          badge_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journey_phases_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      journey_days: {
+        Row: {
+          id: string
+          journey_id: string
+          phase_id: string
+          day_number: number
+          title: string
+          card_content: string
+          motivational_note: string | null
+          is_rest_day: boolean
+          is_review_day: boolean
+          is_cliff_day: boolean
+          estimated_minutes: number | null
+        }
+        Insert: {
+          id?: string
+          journey_id: string
+          phase_id: string
+          day_number: number
+          title: string
+          card_content: string
+          motivational_note?: string | null
+          is_rest_day?: boolean
+          is_review_day?: boolean
+          is_cliff_day?: boolean
+          estimated_minutes?: number | null
+        }
+        Update: {
+          id?: string
+          journey_id?: string
+          phase_id?: string
+          day_number?: number
+          title?: string
+          card_content?: string
+          motivational_note?: string | null
+          is_rest_day?: boolean
+          is_review_day?: boolean
+          is_cliff_day?: boolean
+          estimated_minutes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journey_days_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journey_days_phase_id_fkey"
+            columns: ["phase_id"]
+            isOneToOne: false
+            referencedRelation: "journey_phases"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      journey_habit_templates: {
+        Row: {
+          id: string
+          journey_id: string
+          name: string
+          emoji: string
+          illustration_key: string | null
+          category: string
+          period: string
+          tracking_type: string
+          unit: string
+          initial_goal_value: number | null
+          start_day: number
+          end_day: number | null
+          frequency_type: string
+          days_of_week: number[]
+          goal_progression: Json
+          canonical_key: string | null
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          journey_id: string
+          name: string
+          emoji?: string
+          illustration_key?: string | null
+          category?: string
+          period?: string
+          tracking_type?: string
+          unit?: string
+          initial_goal_value?: number | null
+          start_day?: number
+          end_day?: number | null
+          frequency_type?: string
+          days_of_week?: number[]
+          goal_progression?: Json
+          canonical_key?: string | null
+          sort_order?: number
+        }
+        Update: {
+          id?: string
+          journey_id?: string
+          name?: string
+          emoji?: string
+          illustration_key?: string | null
+          category?: string
+          period?: string
+          tracking_type?: string
+          unit?: string
+          initial_goal_value?: number | null
+          start_day?: number
+          end_day?: number | null
+          frequency_type?: string
+          days_of_week?: number[]
+          goal_progression?: Json
+          canonical_key?: string | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journey_habit_templates_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_journey_state: {
+        Row: {
+          id: string
+          user_id: string
+          journey_id: string
+          started_at: string
+          current_day: number
+          current_phase: number
+          status: string
+          days_completed: number
+          completion_percent: number
+          completed_at: string | null
+          paused_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          journey_id: string
+          started_at?: string
+          current_day?: number
+          current_phase?: number
+          status?: string
+          days_completed?: number
+          completion_percent?: number
+          completed_at?: string | null
+          paused_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          journey_id?: string
+          started_at?: string
+          current_day?: number
+          current_phase?: number
+          status?: string
+          days_completed?: number
+          completion_percent?: number
+          completed_at?: string | null
+          paused_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_journey_state_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_journey_day_completions: {
+        Row: {
+          id: string
+          user_id: string
+          journey_id: string
+          day_number: number
+          completed_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          journey_id: string
+          day_number: number
+          completed_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          journey_id?: string
+          day_number?: number
+          completed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_journey_day_completions_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_journey_habits: {
+        Row: {
+          id: string
+          user_id: string
+          journey_id: string
+          habit_id: string
+          journey_habit_template_id: string | null
+          canonical_key: string | null
+          introduced_on_day: number
+          expires_on_day: number | null
+          current_goal_value: number | null
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          journey_id: string
+          habit_id: string
+          journey_habit_template_id?: string | null
+          canonical_key?: string | null
+          introduced_on_day: number
+          expires_on_day?: number | null
+          current_goal_value?: number | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          journey_id?: string
+          habit_id?: string
+          journey_habit_template_id?: string | null
+          canonical_key?: string | null
+          introduced_on_day?: number
+          expires_on_day?: number | null
+          current_goal_value?: number | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_journey_habits_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_journey_habits_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      advance_journey_to_next_day: {
+        Args: {
+          p_user_id: string
+          p_journey_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       habit_auto_complete_source: "manual" | "health"
