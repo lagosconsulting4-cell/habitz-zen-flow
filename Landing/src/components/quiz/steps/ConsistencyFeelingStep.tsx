@@ -18,7 +18,7 @@ const CONSISTENCY_FEELING_OPTIONS: Array<{
   ];
 
 export const ConsistencyFeelingStep = () => {
-  const { consistencyFeeling, setConsistencyFeeling } = useQuiz();
+  const { consistencyFeeling, setConsistencyFeeling, nextStep } = useQuiz();
 
   return (
     <div className="flex flex-col">
@@ -54,7 +54,7 @@ export const ConsistencyFeelingStep = () => {
                 title={option.label}
                 icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={consistencyFeeling === option.value}
-                onClick={() => setConsistencyFeeling(option.value)}
+                onClick={() => { setConsistencyFeeling(option.value); setTimeout(nextStep, 350); }}
                 variant="compact"
               />
             </motion.div>
@@ -62,8 +62,6 @@ export const ConsistencyFeelingStep = () => {
         </SelectionCardGrid>
       </motion.div>
 
-      {/* Continue Button */}
-      <ContinueButton disabled={!consistencyFeeling} />
     </div>
   );
 };

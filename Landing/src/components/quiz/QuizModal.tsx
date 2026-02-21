@@ -47,6 +47,7 @@ import { ValueBridgeStep } from "./steps/ValueBridgeStep";
 // New Deep Bridge Steps
 import AnalysisLoadingStep from "./steps/AnalysisLoadingStep";
 import DiagnosisStep from "./steps/DiagnosisStep";
+import TransformationStep from "./steps/TransformationStep";
 import SimilarityMatchStep from "./steps/SimilarityMatchStep";
 import { LoadingPlanStep } from "./steps/LoadingPlanStep";
 import { PhoneStep } from "./steps/PhoneStep";
@@ -128,20 +129,22 @@ export const QuizContent = ({ onClose }: { onClose?: () => void }) => {
       case 25:
         return <DiagnosisStep />;
       case 26:
+        return <TransformationStep />;
+      case 27:
         return <SimilarityMatchStep />;
 
       // === DATA COLLECTION ===
-      case 27:
-        return <DataCollectionStep />;
       case 28:
-        return <NameStep />;
+        return <DataCollectionStep />;
       case 29:
+        return <NameStep />;
+      case 30:
         return <PhoneStep />;
 
       // === LOADING + OFFER ===
-      case 30:
-        return <LoadingPlanStep />;
       case 31:
+        return <LoadingPlanStep />;
+      case 32:
         return <SubscriptionOffersStep />;
       default:
         return null;
@@ -153,7 +156,7 @@ export const QuizContent = ({ onClose }: { onClose?: () => void }) => {
       {/* Header com progresso - Oculto no Hero (0), FeedbackAdapt (9), Testimonials (17), ScientificProof (22), AppExplanation (23) */}
       <div className={cn(
         "sticky top-0 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/5 z-10",
-        (currentStep === 0 || currentStep === 9 || currentStep === 17 || currentStep === 22 || currentStep === 23) && "hidden"
+        (currentStep === 0 || currentStep === 9 || currentStep === 17 || currentStep === 22 || currentStep === 23 || currentStep === 32) && "hidden"
       )}>
         <div className="flex items-center justify-between p-4 gap-3">
           {/* Botão Voltar à esquerda */}
@@ -198,7 +201,7 @@ export const QuizContent = ({ onClose }: { onClose?: () => void }) => {
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         <div className={cn(
           "max-w-2xl mx-auto min-h-full",
-          (currentStep === 0 || currentStep === 9 || currentStep === 17 || currentStep === 22 || currentStep === 23) ? "p-0" : "px-4 pt-12 pb-8"
+          (currentStep === 0 || currentStep === 9 || currentStep === 17 || currentStep === 22 || currentStep === 23) ? "p-0" : currentStep === 32 ? "px-4 pt-6 pb-8" : "px-4 pt-12 pb-8"
         )}>
           <AnimatePresence mode="wait">
             <motion.div

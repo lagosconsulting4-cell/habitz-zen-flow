@@ -8,24 +8,24 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const COMMUNITY_AVATARS = [
   {
-    src: "https://i.pravatar.cc/150?img=1",
-    fallback: "JD",
+    src: "https://i.ibb.co/8vZWj0M/pedrogodyebue-alo-alo-bahia.jpg",
+    fallback: "PG",
   },
   {
-    src: "https://i.pravatar.cc/150?img=5",
-    fallback: "MR",
+    src: "https://i.ibb.co/cSMHmLND/jovem-brasileira-cria-gel-combate-aedes-aegypti-2-conexao-planeta.jpg",
+    fallback: "JB",
   },
   {
-    src: "https://i.pravatar.cc/150?img=9",
+    src: "https://i.ibb.co/yFqB0xsb/images.jpg",
     fallback: "LC",
   },
   {
-    src: "https://i.pravatar.cc/150?img=12",
-    fallback: "AS",
+    src: "https://i.ibb.co/vvk56XT8/homem-elegante-e-confiante-com-tatuagens-posando-na-varanda-do-apartamento-74855-2711.avif",
+    fallback: "HE",
   },
   {
-    src: "https://i.pravatar.cc/150?img=17",
-    fallback: "FT",
+    src: "https://i.ibb.co/LhQHgZxb/photo-1695927621677-ec96e048dce2.avif",
+    fallback: "MB",
   },
 ];
 
@@ -104,7 +104,7 @@ export const FeedbackAdaptStep = () => {
                   transition={{ delay: 0.8 + index * 0.1, duration: 0.3 }}
                 >
                   <Avatar className="w-14 h-14 border-4 border-[#0A0A0B]">
-                    <AvatarImage src={avatar.src} alt={avatar.fallback} />
+                    <AvatarImage src={avatar.src} alt={avatar.fallback} className="object-cover object-center" />
                     <AvatarFallback className="bg-gradient-to-br from-lime-500 to-lime-600 text-white font-bold">
                       {avatar.fallback}
                     </AvatarFallback>

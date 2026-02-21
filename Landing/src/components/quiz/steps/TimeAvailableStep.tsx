@@ -18,9 +18,7 @@ const TIME_OPTIONS: Array<{
   ];
 
 export const TimeAvailableStep = () => {
-  const { timeAvailable, setTimeAvailable } = useQuiz();
-
-  const selectedOption = TIME_OPTIONS.find((o) => o.value === timeAvailable);
+  const { timeAvailable, setTimeAvailable, nextStep } = useQuiz();
 
   return (
     <div className="flex flex-col">
@@ -60,7 +58,7 @@ export const TimeAvailableStep = () => {
                 description={option.habits}
                 icon={<option.icon className="w-5 h-5 text-slate-600" />}
                 selected={timeAvailable === option.value}
-                onClick={() => setTimeAvailable(option.value)}
+                onClick={() => { setTimeAvailable(option.value); setTimeout(nextStep, 350); }}
                 variant="compact"
               />
             </motion.div>
@@ -75,11 +73,8 @@ export const TimeAvailableStep = () => {
         transition={{ delay: 0.3, duration: 0.3 }}
         className="text-center text-xs text-slate-400 mt-4"
       >
-        {selectedOption ? `Recomendamos: ${selectedOption.habits}` : "Qualidade > Quantidade"}
+        Qualidade &gt; Quantidade
       </motion.p>
-
-      {/* Continue Button */}
-      <ContinueButton disabled={!timeAvailable} />
     </div>
   );
 };

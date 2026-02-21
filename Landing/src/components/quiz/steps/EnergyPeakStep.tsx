@@ -17,7 +17,7 @@ const ENERGY_PEAK_OPTIONS: Array<{
   ];
 
 export const EnergyPeakStep = () => {
-  const { energyPeak, setEnergyPeak } = useQuiz();
+  const { energyPeak, setEnergyPeak, nextStep } = useQuiz();
 
   return (
     <div className="flex flex-col">
@@ -54,7 +54,7 @@ export const EnergyPeakStep = () => {
                 description={option.description}
                 icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={energyPeak === option.value}
-                onClick={() => setEnergyPeak(option.value)}
+                onClick={() => { setEnergyPeak(option.value); setTimeout(nextStep, 350); }}
                 variant="compact"
               />
             </motion.div>
@@ -62,8 +62,6 @@ export const EnergyPeakStep = () => {
         </SelectionCardGrid>
       </motion.div>
 
-      {/* Continue Button */}
-      <ContinueButton disabled={!energyPeak} />
     </div>
   );
 };

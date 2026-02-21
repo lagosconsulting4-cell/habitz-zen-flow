@@ -18,7 +18,7 @@ const AGE_OPTIONS: Array<{
   ];
 
 export const AgeStep = () => {
-  const { ageRange, setAgeRange } = useQuiz();
+  const { ageRange, setAgeRange, nextStep } = useQuiz();
 
   return (
     <div className="flex flex-col">
@@ -57,7 +57,7 @@ export const AgeStep = () => {
                 title={option.label}
                 icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={ageRange === option.value}
-                onClick={() => setAgeRange(option.value)}
+                onClick={() => { setAgeRange(option.value); setTimeout(nextStep, 350); }}
                 variant="compact"
               />
             </motion.div>
@@ -65,8 +65,6 @@ export const AgeStep = () => {
         </SelectionCardGrid>
       </motion.div>
 
-      {/* Continue Button */}
-      <ContinueButton disabled={!ageRange} />
     </div>
   );
 };

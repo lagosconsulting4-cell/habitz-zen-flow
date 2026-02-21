@@ -59,6 +59,16 @@ export const ProjectedFeelingStep = () => {
         </h2>
       </motion.div>
 
+      {/* Imagination Prompt */}
+      <motion.p
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.3 }}
+        className="text-slate-400 text-base text-center max-w-sm px-4 -mt-4 mb-6"
+      >
+        Imagine acordar amanhã já sentindo que está no caminho certo.
+      </motion.p>
+
       {/* Current Emoji + Label */}
       <motion.div
         key={sliderValue}

@@ -9,27 +9,27 @@ import { Star } from "lucide-react";
 
 const USER_AVATARS = [
   {
-    src: "https://i.pravatar.cc/150?img=1",
+    src: "https://i.ibb.co/VYFg60D5/images-1.jpg",
     fallback: "JV",
   },
   {
-    src: "https://i.pravatar.cc/150?img=5",
+    src: "https://i.ibb.co/3t9Gz73/163684537661904740a5094-1636845376-3x2-md.jpg",
     fallback: "BO",
   },
   {
-    src: "https://i.pravatar.cc/150?img=9",
+    src: "https://i.ibb.co/hRW0GZbj/young-brazilian-woman-isolated-on-260nw-2605475869.webp",
     fallback: "LS",
   },
   {
-    src: "https://i.pravatar.cc/150?img=12",
+    src: "https://i.ibb.co/6RvR1xnL/istockphoto-852415974-612x612.jpg",
     fallback: "MC",
   },
   {
-    src: "https://i.pravatar.cc/150?img=17",
+    src: "https://i.ibb.co/VcnRgK1z/jovem-e-bonita-mulher-brasileira-ao-ar-livre-com-oculos-1368-499497.avif",
     fallback: "AR",
   },
   {
-    src: "https://i.pravatar.cc/150?img=20",
+    src: "https://i.ibb.co/r9RXQ3x/10592418-m.jpg",
     fallback: "FS",
   },
 ];
@@ -102,7 +102,7 @@ export const TestimonialsStep = () => {
           <AvatarGroup max={6}>
             {USER_AVATARS.map((avatar, index) => (
               <Avatar key={index} className="w-16 h-16 md:w-20 md:h-20 border-4 border-[#0A0A0B]">
-                <AvatarImage src={avatar.src} alt={avatar.fallback} />
+                <AvatarImage src={avatar.src} alt={avatar.fallback} className="object-cover object-center" />
                 <AvatarFallback className="bg-gradient-to-br from-lime-500 to-lime-600 text-white font-bold text-lg">
                   {avatar.fallback}
                 </AvatarFallback>

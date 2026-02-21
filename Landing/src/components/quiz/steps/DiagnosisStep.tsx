@@ -7,7 +7,6 @@ import { useQuiz } from "../QuizProvider";
 const DiagnosisStep: React.FC = () => {
     const { nextStep, primaryChallenge, name, gender } = useQuiz();
 
-    // Map challenges to "Technical Diagnoses"
     const getDiagnosis = () => {
         const challenge = primaryChallenge || "Foco";
 
@@ -19,7 +18,7 @@ const DiagnosisStep: React.FC = () => {
                 mainDifficulty: "Lidar com Procrastinação",
                 challengingPeriod: "Manhãs e início de tarefas",
                 trigger: "Ansiedade antecipatória",
-                level: 85, // 0-100
+                level: 85,
             };
         }
         if (challenge.includes("Foco") || challenge.includes("Distra")) {
@@ -45,13 +44,12 @@ const DiagnosisStep: React.FC = () => {
             };
         }
 
-        // Default fallback
         return {
             title: "Desalinhamento Neuroquímico",
             code: "ERR_SYSTEM_FATIGUE",
             description: "Sua rotina atual está lutando contra sua biologia, gerando atrito desnecessário em cada tarefa.",
             mainDifficulty: "Energia e Foco",
-            challengingPeriod: "Variável",
+            challengingPeriod: "Final de semana e mudanças de rotina",
             trigger: "Sobrecarga cognitiva",
             level: 78,
         };
@@ -59,12 +57,10 @@ const DiagnosisStep: React.FC = () => {
 
     const diagnosis = getDiagnosis();
 
-    // Determine avatar based on gender
     const avatarSrc = gender === "Feminino"
         ? "/images/avatar-female.png"
         : "/images/avatar-male.png";
 
-    // Calculate level color and position
     const getLevelColor = (level: number) => {
         if (level >= 70) return "text-red-500";
         if (level >= 40) return "text-orange-500";
@@ -115,7 +111,6 @@ const DiagnosisStep: React.FC = () => {
                 transition={{ delay: 0.2 }}
                 className="bg-[#121214] border border-white/10 rounded-2xl p-6 space-y-4"
             >
-                {/* Level Header */}
                 <div className="flex items-center justify-between">
                     <p className="text-sm text-slate-400">Nível de efeitos negativos</p>
                     <span className={`text-xs font-bold px-3 py-1 rounded-full bg-red-500/10 ${getLevelColor(diagnosis.level)}`}>
@@ -123,12 +118,8 @@ const DiagnosisStep: React.FC = () => {
                     </span>
                 </div>
 
-                {/* Gradient Bar */}
                 <div className="relative h-3 bg-slate-800 rounded-full overflow-hidden">
-                    {/* Full gradient background */}
                     <div className="absolute inset-0 bg-gradient-to-r from-lime-500 via-orange-500 to-red-500" />
-
-                    {/* Indicator */}
                     <div
                         className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-slate-900 transition-all"
                         style={{ left: `${diagnosis.level}%`, transform: 'translate(-50%, -50%)' }}
@@ -143,7 +134,6 @@ const DiagnosisStep: React.FC = () => {
                 transition={{ delay: 0.3 }}
                 className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6 space-y-4"
             >
-                {/* Alert Badge */}
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
                     <AlertTriangle size={16} className="text-red-400" />
                     <span className="text-red-400 text-xs font-bold uppercase tracking-wider">
@@ -151,12 +141,10 @@ const DiagnosisStep: React.FC = () => {
                     </span>
                 </div>
 
-                {/* Description */}
                 <p className="text-sm text-slate-300 leading-relaxed">
                     {diagnosis.description}
                 </p>
 
-                {/* Info Grid */}
                 <div className="space-y-3 pt-2">
                     <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
@@ -190,21 +178,14 @@ const DiagnosisStep: React.FC = () => {
                 </div>
             </motion.div>
 
-            {/* Bridge Text */}
-            <p className="text-center text-slate-400 text-sm px-4">
-                Identificamos esse padrão em 92% dos perfis analisados. <br />
-                <strong className="text-white">Mas existe uma exceção...</strong>
-            </p>
-
             {/* CTA */}
             <Button
                 onClick={nextStep}
                 className="w-full bg-white text-slate-900 hover:bg-slate-200 h-14 rounded-xl font-bold text-base shadow-lg shadow-white/5 transition-all"
             >
-                Continuar
+                Ver com o Bora
                 <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-
         </div>
     );
 };

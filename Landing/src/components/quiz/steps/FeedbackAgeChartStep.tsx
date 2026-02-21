@@ -47,7 +47,7 @@ export const FeedbackAgeChartStep = () => {
           Nunca é tarde para construir a vida que você merece
         </h2>
         <p className="text-lg text-slate-300 mb-1">
-          87% dos usuários do Bora com a sua idade mantém consistência por 6+ meses
+          9 em cada 10 usuários do Bora com a sua faixa etária mantêm consistência por 6+ meses
         </p>
         <p className="text-sm text-slate-500">
           O segredo está na distribuição e construção de hábitos inteligentes

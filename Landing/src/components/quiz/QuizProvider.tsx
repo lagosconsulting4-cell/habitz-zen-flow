@@ -188,7 +188,7 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   // DataCollection[EMAIL](24), NameStep(25), PhoneStep[WPP](26),
   // AnalysisLoading[TESTIMONIALS](27), Diagnosis(28), Similarity(29),
   // ObjectionHandling(30), Commitment(31), SubscriptionOffers[+EXIT](32)
-  const totalSteps = 33;
+  const totalSteps = 34;
 
   // ============================================================================
   // NAVIGATION
@@ -267,14 +267,14 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
       case 21: return featureNeeds.length > 0; // FeatureSeeding[MULTI]
       case 22: return true; // ScientificProof
       case 23: return true; // AppExplanation
-      case 24: return false; // DataCollection[EMAIL] (form submit)
-      case 25: return false; // NameStep (form submit)
-      case 26: return false; // PhoneStep[WPP] (form submit)
-      case 27: return true; // AnalysisLoading[TESTIMONIALS]
-      case 28: return true; // Diagnosis
-      case 29: return true; // Similarity
-      case 30: return true; // ObjectionHandling
-      case 31: return true; // Commitment
+      case 24: return true; // AnalysisLoading
+      case 25: return true; // Diagnosis
+      case 26: return true; // Transformation (new)
+      case 27: return true; // Similarity
+      case 28: return false; // DataCollection[EMAIL] (form submit)
+      case 29: return false; // NameStep (form submit)
+      case 30: return false; // PhoneStep[WPP] (form submit)
+      case 31: return true; // LoadingPlan
       case 32: return true; // SubscriptionOffers[+EXIT]
       default: return false;
     }

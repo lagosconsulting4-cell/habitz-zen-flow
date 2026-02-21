@@ -18,7 +18,7 @@ const PROFESSION_OPTIONS: Array<{
   ];
 
 export const ProfessionStep = () => {
-  const { profession, setProfession } = useQuiz();
+  const { profession, setProfession, nextStep } = useQuiz();
 
   return (
     <div className="flex flex-col">
@@ -57,7 +57,7 @@ export const ProfessionStep = () => {
                 title={option.label}
                 icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={profession === option.value}
-                onClick={() => setProfession(option.value)}
+                onClick={() => { setProfession(option.value); setTimeout(nextStep, 350); }}
                 variant="compact"
               />
             </motion.div>
@@ -65,8 +65,6 @@ export const ProfessionStep = () => {
         </SelectionCardGrid>
       </motion.div>
 
-      {/* Continue Button */}
-      <ContinueButton disabled={!profession} />
     </div>
   );
 };

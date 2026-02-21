@@ -18,7 +18,7 @@ const OBJECTIVE_OPTIONS: Array<{
   ];
 
 export const ObjectiveStep = () => {
-  const { objective, setObjective } = useQuiz();
+  const { objective, setObjective, nextStep } = useQuiz();
 
   return (
     <div className="flex flex-col">
@@ -54,7 +54,7 @@ export const ObjectiveStep = () => {
                 title={option.label}
                 icon={<option.icon className="w-5 h-5 text-slate-600" />}
                 selected={objective === option.value}
-                onClick={() => setObjective(option.value)}
+                onClick={() => { setObjective(option.value); setTimeout(nextStep, 350); }}
                 variant="compact"
               />
             </motion.div>
@@ -62,8 +62,6 @@ export const ObjectiveStep = () => {
         </SelectionCardGrid>
       </motion.div>
 
-      {/* Continue Button */}
-      <ContinueButton disabled={!objective} />
     </div>
   );
 };

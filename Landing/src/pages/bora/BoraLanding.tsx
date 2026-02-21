@@ -235,9 +235,16 @@ const BoraLanding = () => {
             <motion.div variants={staggerItem} className="pt-8 flex flex-wrap gap-6 justify-center lg:justify-start items-center opacity-80">
               <div className="flex items-center gap-2">
                 <div className="flex -space-x-3">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="w-8 h-8 rounded-full border-2 border-[#0A0A0B] bg-slate-700 flex items-center justify-center text-[10px] text-white overflow-hidden">
-                      <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" />
+                  {[
+                    "https://i.ibb.co/VYFg60D5/images-1.jpg",
+                    "https://i.ibb.co/3t9Gz73/163684537661904740a5094-1636845376-3x2-md.jpg",
+                    "https://i.ibb.co/hRW0GZbj/young-brazilian-woman-isolated-on-260nw-2605475869.webp",
+                    "https://i.ibb.co/6RvR1xnL/istockphoto-852415974-612x612.jpg",
+                    "https://i.ibb.co/VcnRgK1z/jovem-e-bonita-mulher-brasileira-ao-ar-livre-com-oculos-1368-499497.avif",
+                    "https://i.ibb.co/r9RXQ3x/10592418-m.jpg",
+                  ].map((src, i) => (
+                    <div key={i} className="w-8 h-8 rounded-full border-2 border-[#0A0A0B] bg-slate-700 overflow-hidden flex-shrink-0">
+                      <img src={src} alt="Membro" className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>

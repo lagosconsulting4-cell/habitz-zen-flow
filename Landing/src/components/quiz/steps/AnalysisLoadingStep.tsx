@@ -34,7 +34,7 @@ const TASKS = [
 ];
 
 const AnalysisLoadingStep: React.FC = () => {
-    const { nextStep, name } = useQuiz();
+    const { nextStep } = useQuiz();
     const [progress, setProgress] = useState(0);
     const [currentTask, setCurrentTask] = useState("");
     const [testimonialIndex, setTestimonialIndex] = useState(0);
@@ -103,7 +103,7 @@ const AnalysisLoadingStep: React.FC = () => {
             </motion.h2>
 
             <p className="text-slate-500 text-sm mb-6">
-                Analisando perfil de <span className="text-lime-400 font-mono">{name || "Usuário"}</span>
+                Mapeando seu perfil exclusivo...
             </p>
 
             {/* Progress Bar */}

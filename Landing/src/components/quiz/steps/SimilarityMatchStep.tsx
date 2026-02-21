@@ -75,8 +75,8 @@ const SimilarityMatchStep: React.FC = () => {
         return (
             <div className="h-[400px] flex flex-col items-center justify-center text-center">
                 <div className="w-16 h-16 rounded-full border-4 border-lime-500/30 border-t-lime-500 animate-spin mb-6" />
-                <h3 className="text-xl font-bold text-white">Buscando casos similares...</h3>
-                <p className="text-slate-500">Cruzando com base nos seus gargalos</p>
+                <h3 className="text-xl font-bold text-white">Encontrando o seu match...</h3>
+                <p className="text-slate-500">Cruzando seu perfil com {(15420).toLocaleString('pt-BR')} perfis analisados</p>
             </div>
         );
     }
@@ -87,13 +87,13 @@ const SimilarityMatchStep: React.FC = () => {
             <div className="text-center">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-400 text-xs font-mono tracking-wider mb-2">
                     <Check size={12} />
-                    MATCH ENCONTRADO (94%)
+                    MATCH ENCONTRADO — 94% de similaridade
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-2">
-                    Você não está sozinho.
+                    Era exatamente isso.
                 </h2>
                 <p className="text-slate-400 text-sm">
-                    Encontramos o caso do <strong>{persona.name}</strong>, que tinha o mesmo perfil que o seu.
+                    <strong className="text-white">{persona.name}</strong> tinha o mesmo perfil que o seu — e mudou completamente.
                 </p>
             </div>
 

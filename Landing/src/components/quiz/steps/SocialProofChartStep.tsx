@@ -82,23 +82,6 @@ export const SocialProofChartStep = () => {
         </div>
       </motion.div>
 
-      {/* Explanation */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4, duration: 0.3 }}
-        className="text-center mt-4 px-4"
-      >
-        <div className="inline-block p-4 rounded-xl bg-[#1A1A1C] border border-white/5">
-          <p className="text-sm text-slate-400 mb-1">
-            O Bora facilita e te mantém comprometido
-          </p>
-          <p className="text-lg font-bold text-lime-400">
-            94% vs 18% = 5.2x mais chances de sucesso
-          </p>
-        </div>
-      </motion.div>
-
       <ContinueButton />
     </div>
   );

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Crown, HelpCircle, Shield, Zap } from "lucide-react";
 import { buttonHoverTap } from "@/hooks/useAnimations";
 import { useTracking } from "@/hooks/useTracking";
+import { useQuiz } from "../QuizProvider";
 import {
   Accordion,
   AccordionContent,
@@ -36,6 +37,7 @@ const faqs = [
 
 export const SubscriptionOffersStep = () => {
   const { trackEvent } = useTracking();
+  const { name } = useQuiz();
 
   const handleAnnualCheckout = () => {
     trackEvent("checkout_button_clicked", {
@@ -61,7 +63,7 @@ export const SubscriptionOffersStep = () => {
   return (
     <div className="w-full flex flex-col items-center">
       <motion.div
-        className="relative z-10 max-w-6xl w-full space-y-8"
+        className="relative z-10 max-w-6xl w-full space-y-8 pt-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -69,10 +71,14 @@ export const SubscriptionOffersStep = () => {
         {/* Header */}
         <div className="text-center space-y-3">
           <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">
-            Seu plano de <span className="text-lime-400">evolução personalizado</span> está pronto
+            {name ? (
+              <>{name}, seu plano de <span className="text-lime-400">evolução personalizado</span> está pronto</>
+            ) : (
+              <>Seu plano de <span className="text-lime-400">evolução personalizado</span> está pronto</>
+            )}
           </h2>
           <p className="text-base text-slate-400 max-w-xl mx-auto">
-            Escolha o plano que faz mais sentido para você
+            Desbloqueie seu acesso abaixo
           </p>
         </div>
 
@@ -96,7 +102,7 @@ export const SubscriptionOffersStep = () => {
             <div className="space-y-5 pt-2">
               <div>
                 <h3 className="text-2xl font-bold text-white">Anual</h3>
-                <p className="text-sm text-lime-400 mt-1 font-semibold">Comprometimento total</p>
+                <p className="text-sm text-lime-400 mt-1 font-semibold">Melhor Custo-Benefício</p>
               </div>
 
               {/* Price */}
@@ -116,15 +122,17 @@ export const SubscriptionOffersStep = () => {
               {/* Features */}
               <ul className="space-y-2.5">
                 {[
-                  "Rotina personalizada por IA",
-                  "Meditações guiadas",
-                  "Hub de livros completo",
-                  "Programa de 12 meses",
-                  "27 dicas práticas exclusivas",
+                  "Acesso ilimitado ao app",
+                  "Rotina Personalizada de Alta Performance",
+                  "Biblioteca de Sabedoria Curada",
+                  "Meditações Guiadas Atualizadas",
+                  "27 Protocolos de Alta Performance",
                   "Suporte prioritário",
                 ].map((feature, index) => (
                   <li key={index} className="flex items-start gap-2.5">
-                    <Check className="w-4 h-4 text-lime-400 flex-shrink-0 mt-0.5" strokeWidth={3} />
+                    <div className="w-5 h-5 rounded-full bg-lime-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-3 h-3 text-slate-900" strokeWidth={3.5} />
+                    </div>
                     <span className="text-sm text-slate-200 font-medium">{feature}</span>
                   </li>
                 ))}

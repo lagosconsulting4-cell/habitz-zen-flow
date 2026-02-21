@@ -97,17 +97,9 @@ export const PotentialChartStep = () => {
         transition={{ delay: 0.4, duration: 0.3 }}
         className="text-center mt-4 px-4"
       >
-        <p className="text-base font-medium text-slate-300">
-          Evolução média dos usuários do Bora
+        <p className="text-sm text-slate-400">
+          Evolução média dos usuários do Bora nas primeiras 12 semanas
         </p>
-        <p className="text-sm text-slate-400 mt-1">
-          De 45% de consistência na primeira semana para 91% em 12 semanas
-        </p>
-        <div className="mt-4 p-4 bg-lime-500/10 border border-lime-500/20 rounded-lg">
-          <p className="text-sm font-semibold text-lime-400">
-            Não deixe isso virar uma bola de neve. Resolva isso enquanto ainda há tempo.
-          </p>
-        </div>
       </motion.div>
 
       <ContinueButton />

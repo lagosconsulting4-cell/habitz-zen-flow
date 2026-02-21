@@ -16,7 +16,7 @@ const GENDER_OPTIONS: Array<{
   ];
 
 export const GenderStep = () => {
-  const { gender, setGender } = useQuiz();
+  const { gender, setGender, nextStep } = useQuiz();
 
   return (
     <div className="flex flex-col">
@@ -55,7 +55,7 @@ export const GenderStep = () => {
                 title={option.label}
                 icon={<option.icon className="w-5 h-5 text-slate-400" />}
                 selected={gender === option.value}
-                onClick={() => setGender(option.value)}
+                onClick={() => { setGender(option.value); setTimeout(nextStep, 350); }}
                 variant="compact"
               />
             </motion.div>
@@ -63,8 +63,6 @@ export const GenderStep = () => {
         </SelectionCardGrid>
       </motion.div>
 
-      {/* Continue Button */}
-      <ContinueButton disabled={!gender} />
     </div>
   );
 };

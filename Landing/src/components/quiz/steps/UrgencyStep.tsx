@@ -60,14 +60,16 @@ export const UrgencyStep = () => {
     <div className="flex flex-col items-center">
       {/* Icon */}
       <motion.div
-        initial={{ scale: 0, rotate: -180 }}
+        initial={{ scale: 0, rotate: -15 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: "spring", stiffness: 200, damping: 15 }}
         className="mb-6"
       >
-        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center ring-1 ring-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.15)]">
-          <AlertCircle className="w-10 h-10 text-red-500" />
-        </div>
+        <img
+          src="https://i.ibb.co/1GzHD2QR/time-3d-icon-png-download-13124854.webp"
+          alt="Tempo passando"
+          className="w-24 h-24 object-contain drop-shadow-[0_0_20px_rgba(239,68,68,0.3)]"
+        />
       </motion.div>
 
       {/* Main Message */}
@@ -80,11 +82,8 @@ export const UrgencyStep = () => {
         <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
           {feelingText}
         </h2>
-        <p className="text-base text-slate-400 mb-2">
-          Você identificou que <strong className="text-red-400">{challengeText}</strong> está impedindo você de {objectiveText}.
-        </p>
         <p className="text-base text-slate-400">
-          Cada dia que passa é um dia a menos para conquistar o que você sempre quis.
+          Você identificou que <strong className="text-red-400">{challengeText}</strong> está no caminho. Cada dia sem agir é mais um dia perdido.
         </p>
       </motion.div>
 
@@ -114,13 +113,19 @@ export const UrgencyStep = () => {
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-white/10 relative z-10">
-            <p className="text-sm font-semibold text-red-400">
-              Não deixe mais um ano passar sem conquistar seus objetivos
-            </p>
-          </div>
         </div>
       </motion.div>
+
+      {/* Debriefing */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.3 }}
+        className="text-sm text-center text-slate-400 px-4 max-w-md my-4"
+      >
+        Não é falta de força de vontade. Nunca foi.{" "}
+        <span className="text-white font-semibold">É que você nunca teve o sistema certo.</span>
+      </motion.p>
 
       {/* Success Stat */}
       <motion.div
@@ -134,19 +139,12 @@ export const UrgencyStep = () => {
 
           <div className="flex items-center gap-3 mb-3 relative z-10">
             <TrendingUp className="w-6 h-6 text-lime-400" />
-            <h3 className="text-lg font-bold text-white">Mas ainda há tempo!</h3>
+            <h3 className="text-lg font-bold text-white">12 semanas mudam tudo</h3>
           </div>
 
-          <p className="text-3xl font-bold text-lime-400 mb-2 relative z-10">12 semanas</p>
-          <p className="text-sm text-slate-400 relative z-10">
-            É tudo que você precisa para transformar completamente sua vida com o Bora
+          <p className="text-sm font-semibold text-lime-300/80 relative z-10">
+            Quem começa hoje tem <strong className="text-lime-400">94% de chance</strong> de alcançar seus objetivos em 3 meses
           </p>
-
-          <div className="mt-4 pt-4 border-t border-white/10 relative z-10">
-            <p className="text-sm font-semibold text-lime-300/80">
-              Usuários que começam hoje têm <strong className="text-lime-400">94% de chance</strong> de alcançar seus objetivos em 3 meses
-            </p>
-          </div>
         </div>
       </motion.div>
 
