@@ -53,7 +53,7 @@ const JourneyDetail = () => {
       <div
         className="px-4 pt-4 pb-6 space-y-4 relative overflow-hidden"
         style={{
-          background: `${theme.headerGlow}, ${theme.ambientPattern}, linear-gradient(180deg, ${theme.color}0D 0%, transparent 100%)`,
+          background: `linear-gradient(180deg, ${theme.color}0D 0%, transparent 100%)`,
         }}
       >
         <button

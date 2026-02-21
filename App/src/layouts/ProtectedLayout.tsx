@@ -29,7 +29,10 @@ const ProtectedLayout = () => {
           <SwipeableCarousel />
         ) : (
           // Non-swipeable routes use traditional layout with Outlet
-          <div className={`mx-auto flex w-full ${containerWidth} flex-col gap-6 px-4 pt-4 md:flex-row md:px-8 ${bottomPadding}`}>
+          <div
+            className={`mx-auto flex w-full ${containerWidth} flex-col gap-6 px-4 md:flex-row md:px-8 ${bottomPadding}`}
+            style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}
+          >
             {showSidebar && <AppSidebar />}
             <main className="flex-1">
               <Outlet />

@@ -560,7 +560,7 @@ const JourneyDayCard = () => {
             "border backdrop-blur-sm"
           )}
           style={{
-            background: `${theme.headerGlow}, var(--card)`,
+            background: 'var(--card)',
             borderColor: `${theme.color}26`,
             boxShadow: `0 4px 24px ${theme.color}0D`,
           }}
@@ -569,7 +569,7 @@ const JourneyDayCard = () => {
           <div className="h-1.5 relative overflow-hidden">
             <div
               className="absolute inset-0"
-              style={{ background: `linear-gradient(90deg, ${theme.accentColor}, ${theme.color}, ${theme.accentColor})` }}
+              style={{ background: theme.color }}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent" />
           </div>

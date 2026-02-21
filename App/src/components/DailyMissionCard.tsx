@@ -75,7 +75,7 @@ const JourneyProgressSection = ({
             style={{
               background: isDayComplete
                 ? `linear-gradient(135deg, ${theme.color}18 0%, ${theme.color}08 100%)`
-                : theme.headerGlow,
+                : undefined,
               ...(isDayComplete ? { ["--tw-ring-color" as string]: `${theme.color}30` } : {}),
             }}
             animate={isDayComplete ? { scale: [1, 1.01, 1] } : {}}

@@ -140,29 +140,15 @@ export const JourneySelectionStep = () => {
                 style={{
                   background: selected
                     ? `linear-gradient(135deg, ${theme.color}18 0%, ${theme.color}08 100%)`
-                    : `${theme.headerGlow}, var(--card)`,
+                    : 'var(--card)',
                   borderColor: selected ? `${theme.color}66` : `${theme.color}26`,
                 }}
               >
-                {/* Ambient pattern layer */}
-                <div
-                  className="absolute inset-0 opacity-20 rounded-2xl pointer-events-none"
-                  style={{ background: theme.ambientPattern }}
-                />
-
                 {/* Top accent stripe */}
                 <div
                   className="absolute top-0 inset-x-0 h-0.5 rounded-t-2xl"
                   style={{ backgroundColor: theme.color }}
                 />
-
-                {/* Breathing glow when selected */}
-                {selected && !reducedMotion && (
-                  <div
-                    className="absolute inset-0 rounded-2xl pointer-events-none animate-breathe"
-                    style={{ boxShadow: `0 4px 24px ${theme.color}33` }}
-                  />
-                )}
 
                 {/* Content wrapper — above decorative layers */}
                 <div className="flex items-start gap-3 relative z-10">
@@ -227,13 +213,6 @@ export const JourneySelectionStep = () => {
                   )}
                 </div>
 
-                {/* Decorative emoji */}
-                <span
-                  className="absolute bottom-1.5 right-2 text-lg opacity-[0.08] select-none pointer-events-none"
-                  aria-hidden="true"
-                >
-                  {theme.decorGlyph}
-                </span>
               </motion.button>
             );
           })

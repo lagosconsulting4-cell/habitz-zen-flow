@@ -502,7 +502,8 @@ const Dashboard = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 px-4 pt-6 sm:pt-4 pb-navbar space-y-5"
+        className="flex-1 px-4 pb-navbar space-y-5"
+        style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
         {/* DailyMissionCard - Journey progress + daily habit progress */}
         {todayHabits.length > 0 && (

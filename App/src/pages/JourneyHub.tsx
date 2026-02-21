@@ -40,18 +40,11 @@ const ActiveJourneyCard = ({ journey }: { journey: JourneyWithState }) => {
         "border transition-all"
       )}
       style={{
-        background: `${theme.headerGlow}, var(--card)`,
+        background: 'var(--card)',
         borderColor: `${theme.color}33`,
         boxShadow: `0 4px 24px ${theme.color}1A`,
       }}
     >
-      {/* Ambient pattern */}
-      <div className="absolute inset-0 opacity-20 rounded-2xl pointer-events-none" style={{ background: theme.ambientPattern }} />
-      {/* Breathing glow — uses opacity instead of boxShadow for GPU compositing */}
-      <div
-        className="absolute inset-0 rounded-2xl pointer-events-none animate-breathe"
-        style={{ boxShadow: `0 4px 24px ${theme.color}33` }}
-      />
       <div className="flex items-center gap-4 relative z-10">
         {/* Progress ring */}
         <div className="relative flex-shrink-0">
@@ -144,7 +137,7 @@ const JourneyCatalogCard = ({
           : "transition-all"
       )}
       style={{
-        background: isLocked ? 'var(--card)' : `${theme.headerGlow}, var(--card)`,
+        background: 'var(--card)',
         borderColor: isLocked ? 'var(--border)' : `${theme.color}26`,
         boxShadow: isLocked ? undefined : `0 2px 16px ${theme.color}0D`,
       }}
@@ -154,13 +147,6 @@ const JourneyCatalogCard = ({
         className="absolute top-0 inset-x-0 h-0.5"
         style={{ backgroundColor: isLocked ? 'var(--muted-foreground)' : theme.color }}
       />
-      {/* Ambient pattern */}
-      {!isLocked && (
-        <div
-          className="absolute inset-0 opacity-10 rounded-2xl pointer-events-none"
-          style={{ background: theme.ambientPattern }}
-        />
-      )}
       <div className="flex items-center gap-3 relative z-10">
         <JourneyIllustration
           illustrationKey={journey.illustration_key}
