@@ -264,6 +264,21 @@ export const useHabits = () => {
 
   const [completionsDate, setCompletionsDateState] = useState<string>(today);
 
+  // Sync completionsDate when midnight rolls over (only if viewing "today")
+  useEffect(() => {
+    setCompletionsDateState((prev) => {
+      // Only auto-advance if the user was viewing the previous "today"
+      // (not if they navigated to a specific past/future date via Calendar)
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split("T")[0];
+      if (prev === yesterdayStr) {
+        return today;
+      }
+      return prev;
+    });
+  }, [today]);
+
   // React Query for completions
   const {
     data: completions = [],
