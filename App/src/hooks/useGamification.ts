@@ -42,6 +42,7 @@ export interface AddXPResult {
 export interface UpdateStreakResult {
   current_streak: number;
   is_new_record: boolean;
+  freeze_used: boolean;
 }
 
 export interface LevelConfig {
@@ -501,6 +502,27 @@ export const useGamification = (userId?: string) => {
     },
     enabled: Boolean(userId),
     staleTime: 60_000, // 1 minute — invalidated on purchase anyway
+  });
+
+  // Query: Freeze Used Today (auto_protection event today)
+  const { data: freezeUsedToday } = useQuery({
+    queryKey: ["freeze-used-today", userId],
+    queryFn: async (): Promise<boolean> => {
+      if (!userId) return false;
+      const today = new Date().toISOString().split("T")[0];
+      const { data, error } = await supabase
+        .from("streak_freeze_events")
+        .select("created_at")
+        .eq("user_id", userId)
+        .eq("event_type", "used")
+        .eq("source", "auto_protection")
+        .gte("created_at", `${today}T00:00:00`)
+        .limit(1)
+        .maybeSingle();
+      return !!data && !error;
+    },
+    enabled: Boolean(userId),
+    staleTime: 60_000,
   });
 
   // Mutation: Add XP
@@ -1204,6 +1226,7 @@ export const useGamification = (userId?: string) => {
             // Invalidar queries para atualizar contadores
             queryClient.invalidateQueries({ queryKey: ["user-progress", userId] });
             queryClient.invalidateQueries({ queryKey: ["streak-freezes", userId] });
+            queryClient.invalidateQueries({ queryKey: ["freeze-used-today", userId] });
           }
 
           // Se freeze foi ganho (comprado ou mensal)
@@ -1251,6 +1274,7 @@ export const useGamification = (userId?: string) => {
     totalFreezesEarned: streakFreezes?.total_freezes_earned || 0,
     totalFreezesUsed: streakFreezes?.total_freezes_used || 0,
     weeklyFreezePurchases: weeklyFreezePurchases || null,
+    freezeUsedToday: freezeUsedToday ?? false,
 
     // ========== LOADING STATES ==========
     loading: progressLoading || unlocksLoading || gemsLoading || userAvatarsLoading || userAchievementsLoading || streakFreezesLoading,
@@ -1336,6 +1360,7 @@ export const useGamification = (userId?: string) => {
       queryClient.invalidateQueries({ queryKey: ["user-achievements", userId] });
       queryClient.invalidateQueries({ queryKey: ["streak-freezes", userId] });
       queryClient.invalidateQueries({ queryKey: ["gem-transactions", userId] });
+      queryClient.invalidateQueries({ queryKey: ["freeze-used-today", userId] });
     },
   };
 };

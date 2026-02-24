@@ -4,8 +4,6 @@ import { cn } from "@/lib/utils";
 import { useGamification, getLevelConfig } from "@/hooks/useGamification";
 import { useAuth } from "@/integrations/supabase/auth";
 import { FrozenIconEffect } from "@/components/gamification/FrozenIconEffect";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface XPBarProps {
   className?: string;
@@ -13,63 +11,14 @@ interface XPBarProps {
 
 export const XPBar = ({ className }: XPBarProps) => {
   const { user } = useAuth();
-  const [freezeUsedToday, setFreezeUsedToday] = useState(false);
   const {
     progress,
     currentLevelConfig,
     currentLevelProgress,
     xpToNextLevel,
     loading,
+    freezeUsedToday,
   } = useGamification(user?.id);
-
-  // Verificar se freeze foi usado hoje
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const checkFreezeUsage = async () => {
-      try {
-        const today = new Date().toISOString().split("T")[0];
-        const { data, error } = await supabase
-          .from("streak_freeze_events")
-          .select("created_at")
-          .eq("user_id", user.id)
-          .eq("event_type", "used")
-          .eq("source", "auto_protection")
-          .gte("created_at", `${today}T00:00:00`)
-          .single();
-
-        setFreezeUsedToday(!!data && !error);
-      } catch (error) {
-        console.error("Error checking freeze usage:", error);
-      }
-    };
-
-    checkFreezeUsage();
-
-    // Escutar atualizações em tempo real
-    const channel = supabase
-      .channel(`freeze-usage-${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "streak_freeze_events",
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          const event = payload.new as any;
-          if (event.source === "auto_protection") {
-            setFreezeUsedToday(true);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id]);
 
   // Don't show if loading or no progress
   if (loading || !progress) {

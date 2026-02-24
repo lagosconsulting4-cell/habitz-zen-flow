@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HabitGlyph } from "@/components/icons/HabitGlyph";
+import { FrozenIconEffect } from "@/components/gamification/FrozenIconEffect";
 
 export interface Habit {
   id: string;
@@ -33,6 +34,7 @@ interface DashboardHabitCardProps {
   completionCount?: number;
   timesPerDay?: number;
   journeyThemeSlug?: string | null;
+  isFrozen?: boolean;
 }
 
 // Progress ring constants - defined outside to avoid recalculation
@@ -63,6 +65,7 @@ const DashboardHabitCardComponent = ({
   completionCount = 0,
   timesPerDay = 1,
   journeyThemeSlug,
+  isFrozen,
 }: DashboardHabitCardProps) => {
   const isJourney = !!journeyThemeSlug;
 
@@ -221,22 +224,24 @@ const DashboardHabitCardComponent = ({
 
         {/* Icon Container - Centered inside ring, fills to ring edge */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div
-            className={cn(
-              "flex items-center justify-center rounded-full w-[104px] h-[104px] transition-colors duration-200",
-              completed
-                ? "bg-primary text-primary-foreground"
-                : "bg-transparent text-muted-foreground dark:text-white/70"
-            )}
-          >
-            <HabitGlyph
-              iconKey={habit.icon_key}
-              category={habit.category}
-              size="2xl"
-              tone="inherit"
-              className="shrink-0"
-            />
-          </div>
+          <FrozenIconEffect isFrozen={!!isFrozen && !completed} size="xl">
+            <div
+              className={cn(
+                "flex items-center justify-center rounded-full w-[104px] h-[104px] transition-colors duration-200",
+                completed
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-transparent text-muted-foreground dark:text-white/70"
+              )}
+            >
+              <HabitGlyph
+                iconKey={habit.icon_key}
+                category={habit.category}
+                size="2xl"
+                tone="inherit"
+                className="shrink-0"
+              />
+            </div>
+          </FrozenIconEffect>
         </div>
 
         {/* Play Button - Bottom left (for timed habits only) */}
@@ -316,7 +321,8 @@ export const DashboardHabitCard = React.memo(DashboardHabitCardComponent, (prevP
     prevProps.habit.frequency_type === nextProps.habit.frequency_type &&
     prevProps.habit.reminder_time === nextProps.habit.reminder_time &&
     prevProps.isTimedHabit === nextProps.isTimedHabit &&
-    prevProps.journeyThemeSlug === nextProps.journeyThemeSlug
+    prevProps.journeyThemeSlug === nextProps.journeyThemeSlug &&
+    prevProps.isFrozen === nextProps.isFrozen
   );
 });
 

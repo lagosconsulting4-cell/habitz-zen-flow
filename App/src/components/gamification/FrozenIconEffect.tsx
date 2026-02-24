@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 interface FrozenIconEffectProps {
   children: ReactNode;
   isFrozen: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 // Tamanhos da esfera de gelo
@@ -13,6 +13,7 @@ const SPHERE_SIZES = {
   sm: "w-10 h-10", // 40px
   md: "w-14 h-14", // 56px
   lg: "w-20 h-20", // 80px
+  xl: "w-[104px] h-[104px]", // 104px - DashboardHabitCard icon container
 };
 
 /**

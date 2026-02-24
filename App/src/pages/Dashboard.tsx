@@ -38,7 +38,7 @@ const Dashboard = () => {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const { user } = useAuth();
-  const { awardHabitXP, awardStreakBonus, awardPerfectDayBonus, awardJourneyDayGems, awardJourneyPhaseGems, awardJourneyCompleteGems, unlockAchievement, isAchievementUnlocked, getAchievementProgress } = useGamification(user?.id);
+  const { awardHabitXP, awardStreakBonus, awardPerfectDayBonus, awardJourneyDayGems, awardJourneyPhaseGems, awardJourneyCompleteGems, unlockAchievement, isAchievementUnlocked, getAchievementProgress, updateStreak, freezeUsedToday } = useGamification(user?.id);
   const isGamificationEnabled = !hideGamification;
 
   // Journey hooks — multi-journey support
@@ -166,6 +166,12 @@ const Dashboard = () => {
       window.removeEventListener("gamification:xp-gained", handleXPGained as EventListener);
     };
   }, [isGamificationEnabled]);
+
+  // Call updateStreak on mount to trigger auto-freeze consumption
+  useEffect(() => {
+    if (!user?.id) return;
+    updateStreak().catch((err) => console.error("[Dashboard] streak check:", err));
+  }, [user?.id]);
 
   // Listen for notification-triggered habit completion
   useEffect(() => {
@@ -597,6 +603,7 @@ const Dashboard = () => {
                   isTimedHabit={isTimedHabit(habit.unit)}
                   onTimerClick={() => setTimerHabit(habit as Habit)}
                   journeyThemeSlug={habitThemeMap.get(habit.id) || (habit.source === 'journey' ? defaultThemeSlug : null)}
+                  isFrozen={freezeUsedToday && (habit.streak ?? 0) > 0}
                 />
               </motion.div>
             ))}
