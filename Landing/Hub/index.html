@@ -50,28 +50,41 @@
     <!-- Expande ?v=perfil para UTMs completos ANTES do UTMify capturar -->
     <script>
       (function() {
-        var params = new URLSearchParams(window.location.search);
-        var perfil = params.get('v');
-        if (!perfil) return;
+        function initTracking() {
+          var params = new URLSearchParams(window.location.search);
+          var perfil = params.get('v');
+          
+          if (perfil) {
+            // Escreve UTMs completos na URL atual (UTMify vai ler isso)
+            var url = new URL(window.location.href);
+            url.searchParams.set('utm_source', 'tiktok');
+            url.searchParams.set('utm_medium', 'organic');
+            url.searchParams.set('utm_content', perfil);
+            url.searchParams.delete('v');
+            window.history.replaceState({}, '', url.href);
 
-        // Escreve UTMs completos na URL atual (UTMify vai ler isso)
-        var url = new URL(window.location.href);
-        url.searchParams.set('utm_source', 'tiktok');
-        url.searchParams.set('utm_medium', 'organic');
-        url.searchParams.set('utm_content', perfil);
-        url.searchParams.delete('v');
-        window.history.replaceState({}, '', url.href);
+            // Propaga para todos os links da página
+            document.querySelectorAll('a[href]').forEach(function(link) {
+              try {
+                var dest = new URL(link.href);
+                // Evita loops se for link interno, mas garante UTMs em links externos importantes
+                if (dest.hostname.includes('habitz.life') || dest.hostname.includes('foquinhaai.life')) {
+                  dest.searchParams.set('utm_source', 'tiktok');
+                  dest.searchParams.set('utm_medium', 'organic');
+                  dest.searchParams.set('utm_content', perfil);
+                  link.href = dest.href;
+                }
+              } catch(e) {}
+            });
+          }
+        }
 
-        // Propaga UTMs para os links dos banners
-        document.querySelectorAll('a[href]').forEach(function(link) {
-          try {
-            var dest = new URL(link.href);
-            dest.searchParams.set('utm_source', 'tiktok');
-            dest.searchParams.set('utm_medium', 'organic');
-            dest.searchParams.set('utm_content', perfil);
-            link.href = dest.href;
-          } catch(e) {}
-        });
+        // Roda ao carregar e garante que os elementos já existem
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initTracking);
+        } else {
+          initTracking();
+        }
       })();
     </script>
 
