@@ -10,7 +10,8 @@ export const QuizProgress = () => {
       {/* Progress Bar */}
       <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-lime-500 rounded-full"
+          className="h-full rounded-full"
+          style={{ backgroundColor: "var(--q-primary)" }}
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.3, ease: "easeOut" }}

@@ -25,7 +25,11 @@ export const ContinueButton: React.FC<ContinueButtonProps> = ({
         size="lg"
         onClick={nextStep}
         disabled={disabled}
-        className="w-full h-14 text-lg font-bold bg-lime-500 hover:bg-lime-400 text-slate-900 disabled:opacity-50 transition-all font-bold shadow-[0_0_20px_rgba(163,230,53,0.3)]"
+        className="w-full h-14 text-lg font-bold text-slate-900 disabled:opacity-50 transition-all"
+        style={{
+          backgroundColor: "var(--q-primary)",
+          boxShadow: "0 0 20px var(--q-glow)",
+        }}
       >
         {label}
         <ArrowRight className="ml-2 w-5 h-5" />

@@ -1,177 +1,169 @@
 import React from "react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Brain, Zap, Calendar, ArrowRight } from "lucide-react";
+import { ArrowRight, Calendar, AlertTriangle, Zap, Target } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 
 const DiagnosisStep: React.FC = () => {
-    const { nextStep, primaryChallenge, name, gender } = useQuiz();
+    const { nextStep, primaryChallenge, name } = useQuiz();
 
     const getDiagnosis = () => {
         const challenge = primaryChallenge || "Foco";
 
         if (challenge.includes("Procrastina") || challenge.includes("Começar")) {
             return {
-                title: "Paralisia por Sobrecarga Cognitiva",
-                code: "ERR_DOPAMINE_LOW",
-                description: "Seu cérebro associa o início de tarefas a dor, bloqueando a liberação de dopamina antes mesmo de começar.",
-                mainDifficulty: "Lidar com Procrastinação",
-                challengingPeriod: "Manhãs e início de tarefas",
-                trigger: "Ansiedade antecipatória",
+                title: "Você fica travado na hora de começar",
+                description: "Você sabe o que precisa fazer, mas na hora H a cabeça trava e você adia. É mais comum do que parece — e tem solução.",
+                mainDifficulty: "Sair do modo 'depois eu faço'",
+                challengingPeriod: "Logo de manhã e início de tarefas",
+                trigger: "Sensação de que a tarefa é grande demais",
                 level: 85,
             };
         }
         if (challenge.includes("Foco") || challenge.includes("Distra")) {
             return {
-                title: "Déficit de Atenção Seletiva",
-                code: "ERR_FOCUS_FRAGILE",
-                description: "Seu sistema de filtragem de estímulos está enfraquecido, permitindo que micro-distrações quebrem seu fluxo profundo.",
-                mainDifficulty: "Lidar com TDAH",
-                challengingPeriod: "Período da tarde",
-                trigger: "Distrações externas",
+                title: "Você perde o fio do raciocínio fácil",
+                description: "Seu celular vira inimigo, o ambiente conspira contra você. Não é falta de vontade — é que seu cérebro não tem um escudo contra distração.",
+                mainDifficulty: "Manter o foco sem depender de fone ou silêncio total",
+                challengingPeriod: "Parte da tarde e noite",
+                trigger: "Notificações e ambiente agitado",
                 level: 80,
             };
         }
         if (challenge.includes("Constância") || challenge.includes("Desiste")) {
             return {
-                title: "Ciclo de Ruptura de Hábito",
-                code: "ERR_CONSISTENCY_BREAK",
-                description: "Você depende de motivação (recurso finito) em vez de automação comportamental (recurso infinito).",
-                mainDifficulty: "Manter Consistência",
-                challengingPeriod: "Após 3-5 dias",
-                trigger: "Queda de motivação",
+                title: "Você começa com tudo e não termina",
+                description: "Na semana 1 é euforia. Na semana 2 já some. Não é fraqueza — é que sem um sistema, a motivação sozinha não sustenta ninguém.",
+                mainDifficulty: "Passar da segunda semana sem desistir",
+                challengingPeriod: "Após os primeiros 3-5 dias",
+                trigger: "Motivação caindo no dia ruim",
                 level: 75,
+            };
+        }
+        if (challenge.includes("Energia") || challenge.includes("Cansaç")) {
+            return {
+                title: "Você acorda já cansado",
+                description: "O dia mal começa e já parece pesado. Você tenta, mas o corpo não responde. Isso tem a ver com rotina — e dá pra resolver.",
+                mainDifficulty: "Ter energia real do início ao fim do dia",
+                challengingPeriod: "Manhã e após almoço",
+                trigger: "Noite mal dormida e rotina sem ritmo",
+                level: 78,
             };
         }
 
         return {
-            title: "Desalinhamento Neuroquímico",
-            code: "ERR_SYSTEM_FATIGUE",
-            description: "Sua rotina atual está lutando contra sua biologia, gerando atrito desnecessário em cada tarefa.",
-            mainDifficulty: "Energia e Foco",
-            challengingPeriod: "Final de semana e mudanças de rotina",
-            trigger: "Sobrecarga cognitiva",
+            title: "Sua rotina atual tá te pesando",
+            description: "Você sente que poderia render muito mais, mas algo sempre atrapalha. A boa notícia: não é culpa sua — é o método que faltava.",
+            mainDifficulty: "Energia e clareza mental",
+            challengingPeriod: "Final de semana e mudança de rotina",
+            trigger: "Excesso de tarefas sem prioridade clara",
             level: 78,
         };
     };
 
     const diagnosis = getDiagnosis();
 
-    const avatarSrc = gender === "Feminino"
-        ? "/images/avatar-female.png"
-        : "/images/avatar-male.png";
-
-    const getLevelColor = (level: number) => {
-        if (level >= 70) return "text-red-500";
-        if (level >= 40) return "text-orange-500";
-        return "text-lime-500";
-    };
-
     const getLevelLabel = (level: number) => {
-        if (level >= 70) return "Alto";
+        if (level >= 70) return "Alto impacto";
         if (level >= 40) return "Médio";
-        return "Baixo";
+        return "Leve";
     };
 
     return (
-        <div className="w-full max-w-md mx-auto flex flex-col gap-6">
-
+        <div className="w-full max-w-md mx-auto flex flex-col gap-5">
             {/* Title */}
-            <div className="text-center">
-                <h2 className="text-xl font-bold text-white">
-                    Resumo do seu Perfil de Bem-Estar
-                </h2>
-            </div>
-
-            {/* Avatar */}
             <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 200 }}
-                className="flex justify-center -mb-4"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35 }}
+                className="text-center"
             >
-                <div className="relative">
-                    <img
-                        src={avatarSrc}
-                        alt="Avatar"
-                        className="w-40 h-40 object-contain"
-                        onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.onerror = null;
-                            target.src = `https://ui-avatars.com/api/?name=${name || 'User'}&size=200&background=84cc16&color=fff&bold=true`;
-                        }}
-                    />
-                </div>
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">
+                    Seu perfil, {name || "você"}
+                </p>
+                <h2 className="text-xl font-bold text-white">
+                    Resumo do que encontramos
+                </h2>
             </motion.div>
 
-            {/* Level Meter */}
+            {/* Impact meter */}
             <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-[#121214] border border-white/10 rounded-2xl p-6 space-y-4"
+                transition={{ delay: 0.1 }}
+                className="bg-[#121214] border border-white/10 rounded-2xl p-4 space-y-3"
             >
                 <div className="flex items-center justify-between">
-                    <p className="text-sm text-slate-400">Nível de efeitos negativos</p>
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full bg-red-500/10 ${getLevelColor(diagnosis.level)}`}>
+                    <p className="text-sm text-slate-400">Nível de impacto na sua rotina</p>
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-red-500/10 text-red-400">
                         {getLevelLabel(diagnosis.level)}
                     </span>
                 </div>
 
                 <div className="relative h-3 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-lime-500 via-orange-500 to-red-500" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-lime-500 via-amber-400 to-red-500" />
                     <div
-                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-slate-900 transition-all"
-                        style={{ left: `${diagnosis.level}%`, transform: 'translate(-50%, -50%)' }}
+                        className="absolute top-1/2 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-slate-900"
+                        style={{ left: `${diagnosis.level}%`, transform: "translate(-50%, -50%)" }}
                     />
+                </div>
+
+                <div className="flex justify-between text-[10px] text-slate-600">
+                    <span>Tranquilo</span>
+                    <span>Moderado</span>
+                    <span>Puxado</span>
                 </div>
             </motion.div>
 
             {/* Diagnosis Card */}
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.97 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 }}
-                className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6 space-y-4"
+                transition={{ delay: 0.2 }}
+                className="bg-red-500/5 border border-red-500/20 rounded-2xl p-5 space-y-4"
             >
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
-                    <AlertTriangle size={16} className="text-red-400" />
+                    <AlertTriangle size={14} className="text-red-400" />
                     <span className="text-red-400 text-xs font-bold uppercase tracking-wider">
-                        Nível {getLevelLabel(diagnosis.level)}
+                        Detectado
                     </span>
                 </div>
+
+                <h3 className="text-base font-bold text-white leading-snug">
+                    {diagnosis.title}
+                </h3>
 
                 <p className="text-sm text-slate-300 leading-relaxed">
                     {diagnosis.description}
                 </p>
 
-                <div className="space-y-3 pt-2">
+                <div className="space-y-3 pt-1">
                     <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                            <Brain size={16} className="text-purple-400" />
+                            <Target size={14} className="text-purple-400" />
                         </div>
                         <div>
-                            <p className="text-xs text-slate-500 font-semibold">Principal dificuldade:</p>
+                            <p className="text-xs text-slate-500 font-semibold">Principal desafio:</p>
                             <p className="text-sm text-white font-medium">{diagnosis.mainDifficulty}</p>
                         </div>
                     </div>
 
                     <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                            <Calendar size={16} className="text-blue-400" />
+                            <Calendar size={14} className="text-blue-400" />
                         </div>
                         <div>
-                            <p className="text-xs text-slate-500 font-semibold">Período desafiador:</p>
+                            <p className="text-xs text-slate-500 font-semibold">Momento mais crítico:</p>
                             <p className="text-sm text-white font-medium">{diagnosis.challengingPeriod}</p>
                         </div>
                     </div>
 
                     <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
-                            <Zap size={16} className="text-orange-400" />
+                            <Zap size={14} className="text-orange-400" />
                         </div>
                         <div>
-                            <p className="text-xs text-slate-500 font-semibold">Gatilho:</p>
+                            <p className="text-xs text-slate-500 font-semibold">O que aciona:</p>
                             <p className="text-sm text-white font-medium">{diagnosis.trigger}</p>
                         </div>
                     </div>
@@ -179,13 +171,19 @@ const DiagnosisStep: React.FC = () => {
             </motion.div>
 
             {/* CTA */}
-            <Button
-                onClick={nextStep}
-                className="w-full bg-white text-slate-900 hover:bg-slate-200 h-14 rounded-xl font-bold text-base shadow-lg shadow-white/5 transition-all"
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
             >
-                Ver com o Bora
-                <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+                <Button
+                    onClick={nextStep}
+                    className="w-full bg-lime-400 hover:bg-lime-500 text-slate-900 h-14 rounded-xl font-bold text-base shadow-[0_0_20px_rgba(163,230,53,0.3)] hover:shadow-[0_0_30px_rgba(163,230,53,0.5)] transition-all"
+                >
+                    Ver como o Bora resolve isso
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+            </motion.div>
         </div>
     );
 };

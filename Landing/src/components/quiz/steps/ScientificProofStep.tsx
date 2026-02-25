@@ -1,142 +1,83 @@
 import { motion } from "motion/react";
 import { ContinueButton } from "../ContinueButton";
-import { CountingNumber } from "@/components/animate-ui/primitives/texts/counting-number";
 
-const UNIVERSITIES = [
+const BENEFITS = [
   {
-    name: "Harvard University",
-    field: "Psicologia Comportamental",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Harvard_University_coat_of_arms.svg/240px-Harvard_University_coat_of_arms.svg.png",
+    emoji: "🏆",
+    number: "89%",
+    title: "Mantêm hábitos por 3 meses ou mais",
+    sub: "Sem academia cara, sem dieta impossível",
+    delay: 0.15,
   },
   {
-    name: "Stanford University",
-    field: "Neurociência do Hábito",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Seal_of_Leland_Stanford_Junior_University.svg/240px-Seal_of_Leland_Stanford_Junior_University.svg.png",
+    emoji: "⏱️",
+    number: "8 min",
+    title: "É tudo que você precisa por dia",
+    sub: "Menos de um episódio de Reels",
+    delay: 0.3,
   },
   {
-    name: "Yale University",
-    field: "Ciência da Motivação",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Yale_University_Shield_1.svg/240px-Yale_University_Shield_1.svg.png",
+    emoji: "😴",
+    number: "1ª semana",
+    title: "Já dormem melhor",
+    sub: "Mais energia logo nos primeiros dias",
+    delay: 0.45,
   },
 ];
 
 export const ScientificProofStep = () => {
   return (
-    <div className="relative w-full h-full min-h-[100dvh] overflow-hidden">
-      {/* Background Image - DNA */}
-      <div className="absolute inset-0 w-full h-full">
-        <img
-          src="/images/dna-bg.jpg"
-          alt="DNA Background"
-          className="w-full h-full object-cover object-center"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.onerror = null;
-            target.src = "https://images.unsplash.com/photo-1530973428-5bf2db2e4d71?q=80&w=1920&auto=format&fit=crop";
-          }}
-        />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0B]/70 via-[#0A0A0B]/85 to-[#0A0A0B]" />
-      </div>
+    <div className="relative w-full min-h-[100dvh] flex flex-col overflow-hidden">
+      {/* Subtle lime glow top */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(132,204,22,0.12) 0%, transparent 70%)" }}
+      />
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-[100dvh] px-6 py-20 text-center">
-        {/* Headline */}
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 max-w-4xl leading-tight"
-        >
-          Baseado em{" "}
-          <span className="text-lime-400">milhares</span>{" "}
-          de artigos científicos
-        </motion.h2>
-
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="text-lg md:text-xl text-slate-300 mb-16 max-w-2xl"
-        >
-          O método Bora foi construído com base em pesquisas das melhores universidades do mundo
-        </motion.p>
-
-        {/* University Logos - Horizontal Line */}
+      <div className="relative z-10 flex flex-col flex-1 items-center justify-center px-5 py-16 text-center gap-8">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
-          className="flex items-center justify-center gap-12 md:gap-20 mb-16"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="space-y-3"
         >
-          {UNIVERSITIES.map((uni, index) => (
+          <p className="text-xs font-bold uppercase tracking-widest text-lime-400">O que o Bora entrega</p>
+          <h2 className="text-3xl font-black text-white leading-tight max-w-sm mx-auto">
+            Resultados reais,{" "}
+            <span className="text-lime-400">em semanas</span>
+          </h2>
+        </motion.div>
+
+        {/* Benefit Cards */}
+        <div className="flex flex-col gap-4 w-full max-w-sm">
+          {BENEFITS.map((b) => (
             <motion.div
-              key={uni.name}
+              key={b.number}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 + index * 0.2, duration: 0.5 }}
-              className="group"
+              transition={{ delay: b.delay, duration: 0.4 }}
+              className="flex items-center gap-4 bg-[#141416] border border-white/8 rounded-2xl p-4 text-left"
             >
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="relative"
-              >
-                {/* Logo */}
-                <img
-                  src={uni.logo}
-                  alt={uni.name}
-                  className="w-20 h-20 md:w-28 md:h-28 object-contain filter brightness-90 group-hover:brightness-110 transition-all duration-300"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.onerror = null;
-                    target.src = `https://ui-avatars.com/api/?name=${uni.name.charAt(0)}&size=200&background=84cc16&color=fff&bold=true`;
-                  }}
-                />
-
-                {/* Glow Effect on Hover */}
-                <div className="absolute inset-0 rounded-full bg-lime-400/0 group-hover:bg-lime-400/10 blur-xl transition-all duration-300" />
-              </motion.div>
-
-              {/* University Name - Visible on Hover */}
-              <motion.p
-                initial={{ opacity: 0, y: 5 }}
-                whileHover={{ opacity: 1, y: 0 }}
-                className="mt-3 text-xs md:text-sm text-slate-400 font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              >
-                {uni.name}
-              </motion.p>
+              {/* Emoji circle */}
+              <div className="w-14 h-14 rounded-2xl bg-lime-500/10 border border-lime-500/20 flex items-center justify-center flex-shrink-0 text-2xl">
+                {b.emoji}
+              </div>
+              <div>
+                <p className="text-2xl font-black text-lime-400 leading-none">{b.number}</p>
+                <p className="text-sm font-semibold text-white mt-0.5">{b.title}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{b.sub}</p>
+              </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
 
-        {/* Stats - 2.847+ */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.6, duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <div className="text-6xl md:text-7xl font-black text-lime-400 mb-3">
-            <CountingNumber
-              number={2847}
-              fromNumber={0}
-              delay={1.8}
-              duration={2.5}
-              suffix="+"
-            />
-          </div>
-          <p className="text-base md:text-lg text-slate-300 font-medium">
-            artigos revisados para criar seu protocolo
-          </p>
-        </motion.div>
-
-        {/* CTA Button */}
+        {/* CTA */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 3 }}
+          transition={{ delay: 0.75, duration: 0.4 }}
+          className="w-full max-w-sm"
         >
           <ContinueButton />
         </motion.div>

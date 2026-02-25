@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
 import { generateRecommendations } from "@/lib/generateRecommendations";
 import posthog from "posthog-js";
+import type { QuizTheme } from "@/lib/quizThemes";
 import type {
   AgeRange,
   Profession,
@@ -67,6 +68,9 @@ export interface QuizState {
   // Recommended Habits
   recommendedHabits: RecommendedHabit[];
 
+  // Theme
+  theme: QuizTheme;
+
   // Tracking/Display
   currentDate: string;
   primaryChallenge: string | null;
@@ -105,6 +109,7 @@ export interface QuizContextType extends QuizState {
   setMindRacing: (val: string) => void;
   setCycleAwareness: (val: string) => void;
   toggleFeatureNeed: (need: string) => void;
+  setTheme: (theme: QuizTheme) => void;
   setWeekDaysPreset: (preset: WeekDaysPreset) => void;
   setWeekDays: (days: number[]) => void;
   setPwaInstallPromptShown: (shown: boolean) => void;
@@ -169,6 +174,9 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   const [weekDays, setWeekDays] = useState<number[]>([1, 2, 3, 4, 5]); // Mon-Fri
   const [recommendedHabits, setRecommendedHabits] = useState<RecommendedHabit[]>([]);
 
+  // State - Theme
+  const [theme, setTheme] = useState<QuizTheme>("jade");
+
   // State - Tracking/Display
   const [currentDate] = useState<string>(new Date().toLocaleDateString("pt-BR"));
   const [primaryChallenge, setPrimaryChallenge] = useState<string | null>(null);
@@ -180,15 +188,16 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   // State - Status
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
 
-  // 33 Steps: Hero(0), PainRecognition(1), MindRacing(2), CycleAwareness(3),
+  // TODO: ThemeSelectionStep (personalização de tema) será reintroduzido em breve como step 1
+  // 32 Steps: Hero(0), PainRecognition(1), MindRacing(2), CycleAwareness(3),
   // Objective(4), Time(5), FeedbackTime(6), Energy(7), Profession(8), FeedbackAdapt(9),
   // Age(10), FeedbackAgeChart(11), Challenges(12), Gender(13), SocialProofChart(14),
   // ConsistencyFeeling(15), ProjectedFeeling[SLIDER](16), Testimonials(17), YearsPromising[EMOJI](18),
   // Urgency(19), PotentialChart(20), FeatureSeeding[MULTI](21), ScientificProof(22), AppExplanation(23),
-  // DataCollection[EMAIL](24), NameStep(25), PhoneStep[WPP](26),
-  // AnalysisLoading[TESTIMONIALS](27), Diagnosis(28), Similarity(29),
-  // ObjectionHandling(30), Commitment(31), SubscriptionOffers[+EXIT](32)
-  const totalSteps = 34;
+  // AnalysisLoading(24), Diagnosis(25), Transformation(26), Similarity(27),
+  // DataCollection[EMAIL](28), NameStep(29), PhoneStep[WPP](30),
+  // LoadingPlan(31), SubscriptionOffers[+EXIT](32)
+  const totalSteps = 33;
 
   // ============================================================================
   // NAVIGATION
@@ -243,7 +252,8 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
 
   const isStepValid = useCallback((): boolean => {
     switch (currentStep) {
-      case 0: return true; // HeroStep
+      case 0: return true;  // HeroStep
+      // TODO: case 1 será ThemeSelectionStep quando reintroduzido
       case 1: return painFrequency !== null; // PainRecognition
       case 2: return mindRacing !== null; // MindRacing
       case 3: return cycleAwareness !== null; // CycleAwareness
@@ -269,13 +279,13 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
       case 23: return true; // AppExplanation
       case 24: return true; // AnalysisLoading
       case 25: return true; // Diagnosis
-      case 26: return true; // Transformation (new)
+      case 26: return true; // Transformation
       case 27: return true; // Similarity
       case 28: return false; // DataCollection[EMAIL] (form submit)
       case 29: return false; // NameStep (form submit)
       case 30: return false; // PhoneStep[WPP] (form submit)
       case 31: return true; // LoadingPlan
-      case 32: return true; // SubscriptionOffers[+EXIT]
+      case 32: return true; // SubscriptionOffers
       default: return false;
     }
   }, [currentStep, objective, timeAvailable, energyPeak, profession, ageRange, challenges, gender, consistencyFeeling, projectedFeeling, yearsPromising, painFrequency, mindRacing, cycleAwareness, featureNeeds]);
@@ -390,6 +400,7 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
       weekDaysPreset,
       weekDays,
       recommendedHabits,
+      theme,
       currentDate,
       primaryChallenge,
       pwaInstallPromptShown,
@@ -421,6 +432,7 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
       setMindRacing,
       setCycleAwareness,
       toggleFeatureNeed,
+      setTheme,
       setWeekDaysPreset,
       setWeekDays,
       setPwaInstallPromptShown,
@@ -455,6 +467,7 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
       consistencyFeeling,
       projectedFeeling,
       yearsPromising,
+      theme,
       weekDaysPreset,
       weekDays,
       recommendedHabits,

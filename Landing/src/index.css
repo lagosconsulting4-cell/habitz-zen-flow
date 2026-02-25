@@ -657,3 +657,166 @@
 .scrollbar-premium::-webkit-scrollbar-thumb:hover {
   background: var(--muted-foreground);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   QUIZ THEME SYSTEM
+   CSS custom properties per theme + Tailwind lime-* class overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* --- Jade (default — lime, no overrides needed) --- */
+.quiz-theme-jade {
+  --q-primary: #a3e635;
+  --q-primary-dark: #84cc16;
+  --q-glow: rgba(163, 230, 53, 0.3);
+  --q-bg: #0a0a0b;
+  --q-bg-tint: rgba(163, 230, 53, 0.06);
+}
+
+/* --- Aurora (violet/purple) --- */
+.quiz-theme-aurora {
+  --q-primary: #a78bfa;
+  --q-primary-dark: #8b5cf6;
+  --q-glow: rgba(167, 139, 250, 0.3);
+  --q-bg: #0d0a1a;
+  --q-bg-tint: rgba(139, 92, 246, 0.1);
+}
+
+/* --- Chama (orange) --- */
+.quiz-theme-chama {
+  --q-primary: #fb923c;
+  --q-primary-dark: #f97316;
+  --q-glow: rgba(251, 146, 60, 0.3);
+  --q-bg: #130a04;
+  --q-bg-tint: rgba(249, 115, 22, 0.09);
+}
+
+/* --- Gelo (cyan) --- */
+.quiz-theme-gelo {
+  --q-primary: #22d3ee;
+  --q-primary-dark: #06b6d4;
+  --q-glow: rgba(34, 211, 238, 0.3);
+  --q-bg: #040f14;
+  --q-bg-tint: rgba(6, 182, 212, 0.08);
+}
+
+/* ── TEXT ─────────────────────────────────────────────────────────────── */
+.quiz-theme-aurora .text-lime-300,
+.quiz-theme-aurora .text-lime-400 { color: #a78bfa !important; }
+.quiz-theme-aurora .text-lime-500 { color: #8b5cf6 !important; }
+.quiz-theme-aurora .hover\:text-lime-400:hover { color: #a78bfa !important; }
+
+.quiz-theme-chama .text-lime-300,
+.quiz-theme-chama .text-lime-400 { color: #fb923c !important; }
+.quiz-theme-chama .text-lime-500 { color: #f97316 !important; }
+.quiz-theme-chama .hover\:text-lime-400:hover { color: #fb923c !important; }
+
+.quiz-theme-gelo .text-lime-300,
+.quiz-theme-gelo .text-lime-400 { color: #22d3ee !important; }
+.quiz-theme-gelo .text-lime-500 { color: #06b6d4 !important; }
+.quiz-theme-gelo .hover\:text-lime-400:hover { color: #22d3ee !important; }
+
+/* ── BACKGROUND (solid) ───────────────────────────────────────────────── */
+.quiz-theme-aurora .bg-lime-400 { background-color: #a78bfa !important; }
+.quiz-theme-aurora .bg-lime-500 { background-color: #8b5cf6 !important; }
+.quiz-theme-aurora .bg-lime-600 { background-color: #7c3aed !important; }
+.quiz-theme-aurora .hover\:bg-lime-400:hover { background-color: #a78bfa !important; }
+.quiz-theme-aurora .hover\:bg-lime-500:hover { background-color: #8b5cf6 !important; }
+.quiz-theme-aurora .hover\:bg-lime-600:hover { background-color: #7c3aed !important; }
+
+.quiz-theme-chama .bg-lime-400 { background-color: #fb923c !important; }
+.quiz-theme-chama .bg-lime-500 { background-color: #f97316 !important; }
+.quiz-theme-chama .bg-lime-600 { background-color: #ea580c !important; }
+.quiz-theme-chama .hover\:bg-lime-400:hover { background-color: #fb923c !important; }
+.quiz-theme-chama .hover\:bg-lime-500:hover { background-color: #f97316 !important; }
+.quiz-theme-chama .hover\:bg-lime-600:hover { background-color: #ea580c !important; }
+
+.quiz-theme-gelo .bg-lime-400 { background-color: #22d3ee !important; }
+.quiz-theme-gelo .bg-lime-500 { background-color: #06b6d4 !important; }
+.quiz-theme-gelo .bg-lime-600 { background-color: #0891b2 !important; }
+.quiz-theme-gelo .hover\:bg-lime-400:hover { background-color: #22d3ee !important; }
+.quiz-theme-gelo .hover\:bg-lime-500:hover { background-color: #06b6d4 !important; }
+.quiz-theme-gelo .hover\:bg-lime-600:hover { background-color: #0891b2 !important; }
+
+/* ── BACKGROUND (with opacity) ────────────────────────────────────────── */
+.quiz-theme-aurora .bg-lime-400\/10 { background-color: rgba(167,139,250,0.1) !important; }
+.quiz-theme-aurora .bg-lime-500\/5  { background-color: rgba(139,92,246,0.05) !important; }
+.quiz-theme-aurora .bg-lime-500\/10 { background-color: rgba(139,92,246,0.1) !important; }
+.quiz-theme-aurora .bg-lime-500\/20 { background-color: rgba(139,92,246,0.2) !important; }
+.quiz-theme-aurora .bg-lime-500\/30 { background-color: rgba(139,92,246,0.3) !important; }
+
+.quiz-theme-chama .bg-lime-400\/10 { background-color: rgba(251,146,60,0.1) !important; }
+.quiz-theme-chama .bg-lime-500\/5  { background-color: rgba(249,115,22,0.05) !important; }
+.quiz-theme-chama .bg-lime-500\/10 { background-color: rgba(249,115,22,0.1) !important; }
+.quiz-theme-chama .bg-lime-500\/20 { background-color: rgba(249,115,22,0.2) !important; }
+.quiz-theme-chama .bg-lime-500\/30 { background-color: rgba(249,115,22,0.3) !important; }
+
+.quiz-theme-gelo .bg-lime-400\/10 { background-color: rgba(34,211,238,0.1) !important; }
+.quiz-theme-gelo .bg-lime-500\/5  { background-color: rgba(6,182,212,0.05) !important; }
+.quiz-theme-gelo .bg-lime-500\/10 { background-color: rgba(6,182,212,0.1) !important; }
+.quiz-theme-gelo .bg-lime-500\/20 { background-color: rgba(6,182,212,0.2) !important; }
+.quiz-theme-gelo .bg-lime-500\/30 { background-color: rgba(6,182,212,0.3) !important; }
+
+/* ── BORDER ───────────────────────────────────────────────────────────── */
+.quiz-theme-aurora .border-lime-400    { border-color: #a78bfa !important; }
+.quiz-theme-aurora .border-lime-500    { border-color: #8b5cf6 !important; }
+.quiz-theme-aurora .border-lime-500\/20 { border-color: rgba(139,92,246,0.2) !important; }
+.quiz-theme-aurora .border-lime-500\/30 { border-color: rgba(139,92,246,0.3) !important; }
+.quiz-theme-aurora .border-lime-500\/40 { border-color: rgba(139,92,246,0.4) !important; }
+.quiz-theme-aurora .border-lime-500\/50 { border-color: rgba(139,92,246,0.5) !important; }
+.quiz-theme-aurora .hover\:border-lime-500\/30:hover { border-color: rgba(139,92,246,0.3) !important; }
+.quiz-theme-aurora .hover\:border-lime-500\/50:hover { border-color: rgba(139,92,246,0.5) !important; }
+
+.quiz-theme-chama .border-lime-400    { border-color: #fb923c !important; }
+.quiz-theme-chama .border-lime-500    { border-color: #f97316 !important; }
+.quiz-theme-chama .border-lime-500\/20 { border-color: rgba(249,115,22,0.2) !important; }
+.quiz-theme-chama .border-lime-500\/30 { border-color: rgba(249,115,22,0.3) !important; }
+.quiz-theme-chama .border-lime-500\/40 { border-color: rgba(249,115,22,0.4) !important; }
+.quiz-theme-chama .border-lime-500\/50 { border-color: rgba(249,115,22,0.5) !important; }
+.quiz-theme-chama .hover\:border-lime-500\/30:hover { border-color: rgba(249,115,22,0.3) !important; }
+.quiz-theme-chama .hover\:border-lime-500\/50:hover { border-color: rgba(249,115,22,0.5) !important; }
+
+.quiz-theme-gelo .border-lime-400    { border-color: #22d3ee !important; }
+.quiz-theme-gelo .border-lime-500    { border-color: #06b6d4 !important; }
+.quiz-theme-gelo .border-lime-500\/20 { border-color: rgba(6,182,212,0.2) !important; }
+.quiz-theme-gelo .border-lime-500\/30 { border-color: rgba(6,182,212,0.3) !important; }
+.quiz-theme-gelo .border-lime-500\/40 { border-color: rgba(6,182,212,0.4) !important; }
+.quiz-theme-gelo .border-lime-500\/50 { border-color: rgba(6,182,212,0.5) !important; }
+.quiz-theme-gelo .hover\:border-lime-500\/30:hover { border-color: rgba(6,182,212,0.3) !important; }
+.quiz-theme-gelo .hover\:border-lime-500\/50:hover { border-color: rgba(6,182,212,0.5) !important; }
+
+/* ── FILL (SVG) ───────────────────────────────────────────────────────── */
+.quiz-theme-aurora .fill-lime-400 { fill: #a78bfa !important; }
+.quiz-theme-chama  .fill-lime-400 { fill: #fb923c !important; }
+.quiz-theme-gelo   .fill-lime-400 { fill: #22d3ee !important; }
+
+/* ── GRADIENTS ────────────────────────────────────────────────────────── */
+.quiz-theme-aurora .from-lime-400    { --tw-gradient-from: #a78bfa var(--tw-gradient-from-position) !important; }
+.quiz-theme-aurora .from-lime-500    { --tw-gradient-from: #8b5cf6 var(--tw-gradient-from-position) !important; }
+.quiz-theme-aurora .to-lime-600      { --tw-gradient-to: #7c3aed var(--tw-gradient-to-position) !important; }
+
+.quiz-theme-chama .from-lime-400    { --tw-gradient-from: #fb923c var(--tw-gradient-from-position) !important; }
+.quiz-theme-chama .from-lime-500    { --tw-gradient-from: #f97316 var(--tw-gradient-from-position) !important; }
+.quiz-theme-chama .to-lime-600      { --tw-gradient-to: #ea580c var(--tw-gradient-to-position) !important; }
+
+.quiz-theme-gelo .from-lime-400    { --tw-gradient-from: #22d3ee var(--tw-gradient-from-position) !important; }
+.quiz-theme-gelo .from-lime-500    { --tw-gradient-from: #06b6d4 var(--tw-gradient-from-position) !important; }
+.quiz-theme-gelo .to-lime-600      { --tw-gradient-to: #0891b2 var(--tw-gradient-to-position) !important; }
+
+/* ── SHADOW (Tailwind shadow-lime-* utilities) ────────────────────────── */
+.quiz-theme-aurora .shadow-lime-500\/5  { --tw-shadow-color: rgba(139,92,246,0.05) !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+.quiz-theme-aurora .shadow-lime-500\/10 { --tw-shadow-color: rgba(139,92,246,0.1)  !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+.quiz-theme-aurora .shadow-lime-500\/20 { --tw-shadow-color: rgba(139,92,246,0.2)  !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+.quiz-theme-aurora .shadow-lime-500\/25 { --tw-shadow-color: rgba(139,92,246,0.25) !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+.quiz-theme-aurora .shadow-lime-500\/40 { --tw-shadow-color: rgba(139,92,246,0.4)  !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+
+.quiz-theme-chama .shadow-lime-500\/5  { --tw-shadow-color: rgba(249,115,22,0.05) !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+.quiz-theme-chama .shadow-lime-500\/10 { --tw-shadow-color: rgba(249,115,22,0.1)  !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+.quiz-theme-chama .shadow-lime-500\/20 { --tw-shadow-color: rgba(249,115,22,0.2)  !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+.quiz-theme-chama .shadow-lime-500\/25 { --tw-shadow-color: rgba(249,115,22,0.25) !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+.quiz-theme-chama .shadow-lime-500\/40 { --tw-shadow-color: rgba(249,115,22,0.4)  !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+
+.quiz-theme-gelo .shadow-lime-500\/5  { --tw-shadow-color: rgba(6,182,212,0.05) !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+.quiz-theme-gelo .shadow-lime-500\/10 { --tw-shadow-color: rgba(6,182,212,0.1)  !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+.quiz-theme-gelo .shadow-lime-500\/20 { --tw-shadow-color: rgba(6,182,212,0.2)  !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+.quiz-theme-gelo .shadow-lime-500\/25 { --tw-shadow-color: rgba(6,182,212,0.25) !important; --tw-shadow: var(--tw-shadow-colored) !important; }
+.quiz-theme-gelo .shadow-lime-500\/40 { --tw-shadow-color: rgba(6,182,212,0.4)  !important; --tw-shadow: var(--tw-shadow-colored) !important; }

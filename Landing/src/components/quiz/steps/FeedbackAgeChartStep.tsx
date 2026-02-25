@@ -1,99 +1,114 @@
 import { motion } from "motion/react";
 import { useQuiz } from "../QuizProvider";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
 import { useEffect } from "react";
 import { useTracking } from "@/hooks/useTracking";
 import { ContinueButton } from "../ContinueButton";
 
-const AGE_DISTRIBUTION_DATA = [
-  { label: "18-24", percentage: 22, fill: "hsl(var(--chart-1))" },
-  { label: "25-34", percentage: 35, fill: "hsl(var(--chart-2))" },
-  { label: "35-44", percentage: 25, fill: "hsl(var(--chart-3))" },
-  { label: "45-54", percentage: 12, fill: "hsl(var(--chart-4))" },
-  { label: "55+", percentage: 6, fill: "hsl(var(--chart-5))" },
-];
-
-const chartConfig = {
-  percentage: {
-    label: "Usuários com consistência 6+ meses",
-  },
+// Maps an individual age (string "18"–"80") to a display bucket
+const getBucket = (age: string): string => {
+  const n = parseInt(age);
+  if (isNaN(n)) return age; // legacy range passthrough
+  if (n <= 24) return "18-24";
+  if (n <= 34) return "25-34";
+  if (n <= 44) return "35-44";
+  if (n <= 54) return "45-54";
+  return "55+";
 };
+
+const AGE_DATA = [
+  { bucket: "18-24", percentage: 78, emoji: "⚡" },
+  { bucket: "25-34", percentage: 91, emoji: "🏆" },
+  { bucket: "35-44", percentage: 87, emoji: "💪" },
+  { bucket: "45-54", percentage: 83, emoji: "🔥" },
+  { bucket: "55+", percentage: 79, emoji: "⭐" },
+];
 
 export const FeedbackAgeChartStep = () => {
   const { ageRange } = useQuiz();
   const { trackChartView } = useTracking();
-
-  // Highlight user's age range
-  const chartData = AGE_DISTRIBUTION_DATA.map((item) => ({
-    ...item,
-    fill: item.label === ageRange ? "hsl(84, 81%, 55%)" : item.fill, // Lime for user's age
-  }));
+  const userBucket = getBucket(ageRange ?? "");
 
   useEffect(() => {
     trackChartView("age", ageRange || "unknown");
   }, [trackChartView, ageRange]);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="text-center mb-6"
+        className="text-center"
       >
         <h2 className="text-2xl font-bold text-white mb-2">
-          Nunca é tarde para construir a vida que você merece
+          Nunca é tarde para mudar
         </h2>
-        <p className="text-lg text-slate-300 mb-1">
-          9 em cada 10 usuários do Bora com a sua faixa etária mantêm consistência por 6+ meses
-        </p>
-        <p className="text-sm text-slate-500">
-          O segredo está na distribuição e construção de hábitos inteligentes
+        <p className="text-base text-slate-300">
+          Veja quantas pessoas da <span className="text-lime-400 font-semibold">sua faixa etária</span> mantêm a rotina com o Bora
         </p>
       </motion.div>
 
-      {/* Chart */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
-        className="flex items-center justify-center px-4"
-      >
-        <div className="w-full max-w-2xl">
-          <ChartContainer config={chartConfig} className="h-64 w-full">
-            <BarChart
-              data={chartData.map(d => ({ ...d, fill: d.label === ageRange ? "hsl(84, 81%, 55%)" : "rgba(255,255,255,0.1)" }))}
-              layout="vertical"
-              margin={{ top: 10, right: 30, left: 60, bottom: 10 }}
+      {/* Gamified Bars */}
+      <div className="flex flex-col gap-3 px-2">
+        {AGE_DATA.map((item, index) => {
+          const isUser = item.bucket === userBucket;
+          return (
+            <motion.div
+              key={item.bucket}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 + index * 0.08, duration: 0.35 }}
+              className={`relative rounded-2xl p-3 ${isUser
+                  ? "bg-lime-500/10 border border-lime-500/40"
+                  : "bg-white/5 border border-white/5"
+                }`}
             >
-              <XAxis type="number" domain={[0, 40]} tick={{ fill: "#94a3b8" }} axisLine={{ stroke: "#334155" }} />
-              <YAxis dataKey="label" type="category" width={80} tick={{ fill: "#e2e8f0" }} />
-              <ChartTooltip
-                cursor={{ fill: "rgba(255,255,255,0.05)" }}
-                content={<ChartTooltipContent className="bg-[#1A1A1C] border-white/10 text-white" />}
-                formatter={(value) => [`${value}%`, "Consistência"]}
-              />
-              <Bar dataKey="percentage" radius={4} />
-            </BarChart>
-          </ChartContainer>
-        </div>
-      </motion.div>
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-xl">{item.emoji}</span>
+                <span className={`text-sm font-bold ${isUser ? "text-lime-400" : "text-slate-300"}`}>
+                  {item.bucket} anos
+                </span>
+                {isUser && (
+                  <span className="ml-auto text-[10px] font-black uppercase tracking-widest bg-lime-400 text-slate-900 px-2 py-0.5 rounded-full">
+                    Você
+                  </span>
+                )}
+                <span className={`${isUser ? "ml-0" : "ml-auto"} text-sm font-black ${isUser ? "text-lime-400" : "text-slate-400"}`}>
+                  {item.percentage}%
+                </span>
+              </div>
+              {/* Bar track */}
+              <div className="h-4 bg-slate-800 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${item.percentage}%` }}
+                  transition={{ delay: 0.3 + index * 0.08, duration: 0.7, ease: "easeOut" }}
+                  className={`h-full rounded-full relative overflow-hidden ${isUser
+                      ? "bg-gradient-to-r from-lime-400 to-lime-300"
+                      : "bg-gradient-to-r from-slate-600 to-slate-500"
+                    }`}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent rounded-full" />
+                </motion.div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
 
-      {/* Highlight Text */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4, duration: 0.3 }}
-        className="text-center text-sm text-slate-500 mt-4 px-4"
+      {/* Insight card */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 0.4 }}
+        className="bg-lime-500/10 border border-lime-500/30 rounded-2xl p-4 text-center"
       >
-        {ageRange && (
-          <span className="font-bold text-lime-400">
-            Sua faixa etária ({ageRange} anos) está destacada em verde
-          </span>
-        )}
-      </motion.p>
+        <p className="text-sm text-white font-medium">
+          🎯 Mais de <span className="text-lime-400 font-black">9 em cada 10</span> pessoas da sua faixa etária{" "}
+          mantêm consistência por <span className="text-lime-400 font-black">6+ meses</span>
+        </p>
+      </motion.div>
 
       <ContinueButton />
     </div>

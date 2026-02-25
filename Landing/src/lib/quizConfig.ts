@@ -13,7 +13,7 @@
 // TYPES (Self-contained for Landing)
 // ============================================================================
 
-export type AgeRange = "18-24" | "25-34" | "35-44" | "45-54" | "55+";
+export type AgeRange = string; // individual age "18" – "80", or legacy range
 export type Profession = "student" | "employed" | "entrepreneur" | "freelancer" | "other";
 export type WorkSchedule = "morning" | "commercial" | "evening" | "flexible";
 export type EnergyPeak = "morning" | "afternoon" | "evening";

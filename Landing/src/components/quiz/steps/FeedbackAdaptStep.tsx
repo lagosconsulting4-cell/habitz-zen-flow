@@ -62,6 +62,7 @@ export const FeedbackAdaptStep = () => {
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0B]/70 via-[#0A0A0B]/85 to-[#0A0A0B]" />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at top, var(--q-bg-tint) 0%, transparent 65%)" }} />
       </div>
 
       {/* Content */}

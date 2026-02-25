@@ -47,6 +47,38 @@
         font-family: system-ui, -apple-system, sans-serif;
       }
     </style>
+    <!-- Expande ?v=perfil para UTMs completos ANTES do UTMify capturar -->
+    <script>
+      (function() {
+        var params = new URLSearchParams(window.location.search);
+        var perfil = params.get('v');
+        if (!perfil) return;
+
+        // Escreve UTMs completos na URL atual (UTMify vai ler isso)
+        var url = new URL(window.location.href);
+        url.searchParams.set('utm_source', 'tiktok');
+        url.searchParams.set('utm_medium', 'organic');
+        url.searchParams.set('utm_content', perfil);
+        url.searchParams.delete('v');
+        window.history.replaceState({}, '', url.href);
+
+        // Propaga UTMs para os links dos banners
+        document.querySelectorAll('a[href]').forEach(function(link) {
+          try {
+            var dest = new URL(link.href);
+            dest.searchParams.set('utm_source', 'tiktok');
+            dest.searchParams.set('utm_medium', 'organic');
+            dest.searchParams.set('utm_content', perfil);
+            link.href = dest.href;
+          } catch(e) {}
+        });
+      })();
+    </script>
+
+    <!-- UTMify - Captura UTMs (roda após o replaceState acima) -->
+    <script async src="https://cdn.utmify.com.br/scripts/utms/latest.js"></script>
+    <!-- End UTMify -->
+
     <!-- PostHog Analytics -->
     <script>
       !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);

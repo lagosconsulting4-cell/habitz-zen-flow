@@ -2,35 +2,43 @@ import { motion } from "motion/react";
 import { useEffect } from "react";
 import { useTracking } from "@/hooks/useTracking";
 import { ContinueButton } from "../ContinueButton";
-import { CountingNumber } from "@/components/animate-ui/primitives/texts/counting-number";
-import { AvatarGroup } from "@/components/animate-ui/components/animate/avatar-group";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Star } from "lucide-react";
 
-const USER_AVATARS = [
+const TESTIMONIALS = [
   {
-    src: "https://i.ibb.co/VYFg60D5/images-1.jpg",
-    fallback: "JV",
+    name: "Marcos A.",
+    city: "São Paulo, SP",
+    avatar: "MA",
+    avatarBg: "from-blue-500 to-blue-700",
+    quote: "cara eu to sem palavras... na segunda semana ja tava acordando sem precisar de alarme. nunca achei q ia conseguir isso",
+    result: "✅ 4 meses de consistência",
+    src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop&crop=face&q=80",
   },
   {
-    src: "https://i.ibb.co/3t9Gz73/163684537661904740a5094-1636845376-3x2-md.jpg",
-    fallback: "BO",
-  },
-  {
+    name: "Juliana S.",
+    city: "Belo Horizonte, MG",
+    avatar: "JS",
+    avatarBg: "from-pink-500 to-rose-600",
+    quote: "tentei de tudo mesmo. planner, academia, dieta... nada durava. o Bora foi o unico q se adaptou a mim, nao eu a ele 😅",
+    result: "✅ Perdeu 6kg em 10 semanas",
     src: "https://i.ibb.co/hRW0GZbj/young-brazilian-woman-isolated-on-260nw-2605475869.webp",
-    fallback: "LS",
   },
   {
-    src: "https://i.ibb.co/6RvR1xnL/istockphoto-852415974-612x612.jpg",
-    fallback: "MC",
-  },
-  {
-    src: "https://i.ibb.co/VcnRgK1z/jovem-e-bonita-mulher-brasileira-ao-ar-livre-com-oculos-1368-499497.avif",
-    fallback: "AR",
-  },
-  {
+    name: "Rafael C.",
+    city: "Fortaleza, CE",
+    avatar: "RC",
+    avatarBg: "from-orange-500 to-amber-600",
+    quote: "to mais disposto, dormindo melhor, mais focado no trampo. tudo isso sem mudar minha vida de cabeca pra baixo",
+    result: "✅ Produtividade no pico",
     src: "https://i.ibb.co/r9RXQ3x/10592418-m.jpg",
-    fallback: "FS",
+  },
+  {
+    name: "Larissa M.",
+    city: "Recife, PE",
+    avatar: "LM",
+    avatarBg: "from-purple-500 to-violet-600",
+    quote: "achei q ia ser complicado mas e muito simples. tipo o duolingo mas pra habitos. ja to a 2 meses sem pular um dia 🔥",
+    result: "✅ 2 meses sem pular um dia",
+    src: "https://i.ibb.co/VcnRgK1z/jovem-e-bonita-mulher-brasileira-ao-ar-livre-com-oculos-1368-499497.avif",
   },
 ];
 
@@ -38,140 +46,91 @@ export const TestimonialsStep = () => {
   const { trackTestimonialsView } = useTracking();
 
   useEffect(() => {
-    trackTestimonialsView(6);
+    trackTestimonialsView(TESTIMONIALS.length);
   }, [trackTestimonialsView]);
 
   return (
-    <div className="relative w-full h-full min-h-[100dvh] overflow-hidden">
-      {/* Background Image - Full Screen */}
-      <div className="absolute inset-0 w-full h-full">
-        <img
-          src="/images/network-bg.png"
-          alt="Network Background"
-          className="w-full h-full object-cover object-center"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.onerror = null;
-            target.src = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1920&auto=format&fit=crop";
-          }}
-        />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0B]/70 via-[#0A0A0B]/85 to-[#0A0A0B]" />
-      </div>
+    <div className="relative w-full min-h-[100dvh] flex flex-col">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0B] via-[#0d1a0d] to-[#0A0A0B] pointer-events-none" />
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-[100dvh] px-6 py-20 text-center">
-        {/* Headline */}
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6 max-w-4xl leading-tight"
-        >
-          Mais de{" "}
-          <span className="text-lime-400">
-            <CountingNumber
-              number={2000}
-              fromNumber={0}
-              delay={0.5}
-              duration={2}
-              suffix="+"
-              className="inline"
-            />
-          </span>{" "}
-          pessoas já transformaram suas vidas
-        </motion.h2>
-
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="text-lg md:text-xl text-slate-300 mb-12 max-w-2xl"
-        >
-          Junte-se a milhares de pessoas que estão construindo hábitos que realmente duram
-        </motion.p>
-
-        {/* Avatar Group */}
+      <div className="relative z-10 flex flex-col flex-1 px-4 pt-10 pb-8">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="mb-12"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-8"
         >
-          <AvatarGroup max={6}>
-            {USER_AVATARS.map((avatar, index) => (
-              <Avatar key={index} className="w-16 h-16 md:w-20 md:h-20 border-4 border-[#0A0A0B]">
-                <AvatarImage src={avatar.src} alt={avatar.fallback} className="object-cover object-center" />
-                <AvatarFallback className="bg-gradient-to-br from-lime-500 to-lime-600 text-white font-bold text-lg">
-                  {avatar.fallback}
-                </AvatarFallback>
-              </Avatar>
-            ))}
-          </AvatarGroup>
+          <p className="text-xs font-bold uppercase tracking-widest text-lime-400 mb-2">Quem já mudou</p>
+          <h2 className="text-3xl font-black text-white leading-tight">
+            Mais de <span className="text-lime-400">2.000 pessoas</span>{" "}
+            já transformaram suas vidas
+          </h2>
         </motion.div>
 
-        {/* Stats Row */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.5 }}
-          className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 mb-16"
-        >
-          {/* Community Count */}
-          <div className="text-center">
-            <div className="text-5xl md:text-6xl font-black text-lime-400 mb-2">
-              <CountingNumber
-                number={2000}
-                fromNumber={0}
-                delay={1.2}
-                duration={2}
-                suffix="+"
-              />
-            </div>
-            <div className="text-sm md:text-base text-slate-400 font-semibold uppercase tracking-wider">
-              Usuários ativos
-            </div>
-          </div>
+        {/* Testimonial cards */}
+        <div className="flex flex-col gap-4 flex-1">
+          {TESTIMONIALS.map((t, index) => (
+            <motion.div
+              key={t.name}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 + index * 0.12, duration: 0.4 }}
+              className="bg-[#141416] border border-white/8 rounded-2xl p-4 flex flex-col gap-3"
+            >
+              {/* Quote mark */}
+              <span className="text-4xl leading-none text-lime-500 font-black select-none" aria-hidden>❝</span>
 
-          {/* Divider */}
-          <div className="hidden md:block w-px h-16 bg-slate-700" />
+              {/* Quote text */}
+              <p className="text-sm text-slate-200 leading-relaxed -mt-3">
+                {t.quote}
+              </p>
 
-          {/* Rating Score */}
-          <div className="text-center">
-            <div className="flex flex-col items-center gap-3 mb-2">
-              <div className="text-5xl md:text-6xl font-black text-lime-400">
-                <CountingNumber
-                  number={5.0}
-                  fromNumber={0}
-                  delay={1.5}
-                  duration={2}
-                />
+              {/* Result badge */}
+              <div className="inline-flex self-start items-center gap-1.5 bg-lime-500/10 border border-lime-500/25 rounded-full px-3 py-1">
+                <span className="text-xs font-semibold text-lime-400">{t.result}</span>
               </div>
-              <div className="flex gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 2 + (i * 0.1), duration: 0.3 }}
-                  >
-                    <Star className="w-6 h-6 md:w-7 md:h-7 text-lime-400 fill-lime-400" />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-            <div className="text-sm md:text-base text-slate-400 font-semibold uppercase tracking-wider">
-              Avaliação média
-            </div>
-          </div>
-        </motion.div>
 
-        {/* CTA Button */}
+              {/* Author */}
+              <div className="flex items-center gap-3 pt-1 border-t border-white/5">
+                <div className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
+                  <img
+                    src={t.src}
+                    alt={t.name}
+                    className="w-full h-full object-cover object-center"
+                    onError={(e) => {
+                      const el = e.target as HTMLImageElement;
+                      el.style.display = "none";
+                      const parent = el.parentElement;
+                      if (parent) {
+                        parent.classList.add(`bg-gradient-to-br`, ...t.avatarBg.split(" "));
+                        parent.innerHTML = `<span class="w-full h-full flex items-center justify-center text-white text-xs font-bold">${t.avatar}</span>`;
+                      }
+                    }}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">{t.name}</p>
+                  <p className="text-xs text-slate-500">{t.city}</p>
+                </div>
+                {/* Stars */}
+                <div className="ml-auto flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <span key={i} className="text-lime-400 text-xs">★</span>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* CTA */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 2.5 }}
+          transition={{ delay: 0.8, duration: 0.4 }}
+          className="mt-6"
         >
           <ContinueButton />
         </motion.div>

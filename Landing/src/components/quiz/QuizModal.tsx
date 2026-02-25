@@ -51,6 +51,9 @@ import TransformationStep from "./steps/TransformationStep";
 import SimilarityMatchStep from "./steps/SimilarityMatchStep";
 import { LoadingPlanStep } from "./steps/LoadingPlanStep";
 import { PhoneStep } from "./steps/PhoneStep";
+// TODO: ThemeSelectionStep reintroduzida em breve (personalização de tema por objetivo)
+// import { ThemeSelectionStep } from "./steps/ThemeSelectionStep";
+import { getThemeConfig } from "@/lib/quizThemes";
 
 interface QuizModalProps {
   open: boolean;
@@ -59,7 +62,8 @@ interface QuizModalProps {
 
 // Componente que usa o context - exportado para uso standalone em BoraQuizPage
 export const QuizContent = ({ onClose }: { onClose?: () => void }) => {
-  const { currentStep, generateRoutine, canGoBack, prevStep, nextStep } = useQuiz();
+  const { currentStep, generateRoutine, canGoBack, prevStep, nextStep, theme } = useQuiz();
+  const themeConfig = getThemeConfig(theme);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top when step changes
@@ -76,6 +80,7 @@ export const QuizContent = ({ onClose }: { onClose?: () => void }) => {
     switch (currentStep) {
       case 0:
         return <HeroStep />;
+      // case 1 (ThemeSelectionStep) removido temporariamente — volta em breve
       case 1:
         return <PainRecognitionStep />;
       case 2:
@@ -152,8 +157,8 @@ export const QuizContent = ({ onClose }: { onClose?: () => void }) => {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header com progresso - Oculto no Hero (0), FeedbackAdapt (9), Testimonials (17), ScientificProof (22), AppExplanation (23) */}
+    <div className={cn("flex flex-col h-full", themeConfig.cssClass)} style={{ backgroundColor: "var(--q-bg)" }}>
+      {/* Header com progresso - Oculto no Hero (0), FeedbackAdapt (9), Testimonials (17), ScientificProof (22), AppExplanation (23), Offer (32) */}
       <div className={cn(
         "sticky top-0 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/5 z-10",
         (currentStep === 0 || currentStep === 9 || currentStep === 17 || currentStep === 22 || currentStep === 23 || currentStep === 32) && "hidden"
