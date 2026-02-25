@@ -48,6 +48,7 @@ const PhoneMockup = () => (
       src="https://i.ibb.co/8gCMLMS8/image-10.png"
       alt="App Bora"
       className="relative w-full object-contain drop-shadow-2xl"
+      loading="lazy"
     />
   </div>
 );

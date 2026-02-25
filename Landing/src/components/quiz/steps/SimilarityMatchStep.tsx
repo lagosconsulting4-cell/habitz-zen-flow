@@ -132,6 +132,7 @@ const SimilarityMatchStep: React.FC = () => {
                         src={persona.image}
                         alt={persona.name}
                         className="w-12 h-12 rounded-full border-2 border-lime-500 object-cover mb-3 relative z-10"
+                        loading="lazy"
                     />
                     <p className="text-white font-bold text-sm mb-1 relative z-10">{persona.name}</p>
                     <div className="text-xs text-lime-300 font-bold bg-lime-500/10 px-2 py-1 rounded-md relative z-10">

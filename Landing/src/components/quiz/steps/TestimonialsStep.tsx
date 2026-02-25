@@ -99,6 +99,7 @@ export const TestimonialsStep = () => {
                     src={t.src}
                     alt={t.name}
                     className="w-full h-full object-cover object-center"
+                    loading="lazy"
                     onError={(e) => {
                       const el = e.target as HTMLImageElement;
                       el.style.display = "none";

@@ -69,6 +69,7 @@ export const UrgencyStep = () => {
           src="https://i.ibb.co/1GzHD2QR/time-3d-icon-png-download-13124854.webp"
           alt="Tempo passando"
           className="w-24 h-24 object-contain drop-shadow-[0_0_20px_rgba(239,68,68,0.3)]"
+          loading="lazy"
         />
       </motion.div>
 

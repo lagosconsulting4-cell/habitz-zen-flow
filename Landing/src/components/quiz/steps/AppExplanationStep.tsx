@@ -42,6 +42,7 @@ export const AppExplanationStep = () => {
           src="/images/brain-bg.png"
           alt="Brain Background"
           className="w-full h-full object-cover object-center"
+          loading="lazy"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.onerror = null;
@@ -152,6 +153,7 @@ export const AppExplanationStep = () => {
                                 src="https://i.ibb.co/CstYtpdH/meditar.png"
                                 alt="BORA Logo"
                                 className="w-full h-full object-contain"
+                                loading="lazy"
                               />
                             </div>
                             <h4 className="text-base font-bold text-lime-400 uppercase tracking-wide">

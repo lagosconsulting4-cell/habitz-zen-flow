@@ -181,6 +181,7 @@ export const QuizContent = ({ onClose }: { onClose?: () => void }) => {
             src="https://i.ibb.co/CstYtpdH/meditar.png"
             alt="BORA"
             className="w-7 h-7 object-contain flex-shrink-0"
+            loading="lazy"
           />
 
           {/* QuizProgress centralizado */}

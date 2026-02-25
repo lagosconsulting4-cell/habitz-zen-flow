@@ -14,11 +14,18 @@ export const HeroStep = () => {
         alt=""
         className="absolute inset-0 w-full h-full object-cover object-center"
         style={{ transform: "scale(1.05)", transformOrigin: "center center" }}
+        loading="eager"
         aria-hidden
       />
 
       {/* Dark scrim */}
       <div className="absolute inset-0 bg-[#080809]/55 pointer-events-none" />
+
+      {/* Bottom fade — covers Gemini watermark */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+        style={{ background: "linear-gradient(to top, #080809 0%, transparent 100%)" }}
+      />
 
       {/* Content */}
       <div
@@ -37,6 +44,7 @@ export const HeroStep = () => {
               src="https://i.ibb.co/CstYtpdH/meditar.png"
               alt="Bora"
               className="w-10 h-10 object-contain"
+              loading="lazy"
             />
           </motion.div>
 

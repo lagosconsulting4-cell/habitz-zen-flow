@@ -57,7 +57,7 @@ const TransformationStep: React.FC = () => {
 
     const transformation = getTransformation(primaryChallenge);
 
-    const avatarSrc = gender === "Feminino"
+    const avatarSrc = String(gender) === "Feminino"
         ? "https://i.ibb.co/GQ416tfd/Gemini-Generated-Image-wjwqrnwjwqrnwjwq-removebg-preview.png"
         : "https://i.ibb.co/bMwPTcQv/Gemini-Generated-Image-w9p96jw9p96jw9p9-removebg-preview.png";
 
@@ -84,6 +84,7 @@ const TransformationStep: React.FC = () => {
                         src={avatarSrc}
                         alt="Avatar"
                         className="relative w-40 h-40 object-contain drop-shadow-[0_0_20px_rgba(163,230,53,0.35)]"
+                        loading="lazy"
                         onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.onerror = null;
