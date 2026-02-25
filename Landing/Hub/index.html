@@ -1,183 +1,170 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Habitz Hub | TikTok</title>
-    <meta
-      name="description"
-      content="Acesse rapidamente as principais ofertas e experiências do ecossistema Habitz."
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/tiktok/style.css" />
-    <style>
-      #page-loader {
-        position: fixed;
-        inset: 0;
-        background: #fff;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        gap: 1rem;
-        z-index: 9999;
-      }
-      #page-loader.show {
-        display: flex;
-      }
-      .spinner {
-        width: 40px;
-        height: 40px;
-        border: 3px solid #f3f4f6;
-        border-top-color: #3b82f6;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-      .loader-text {
-        color: #6b7280;
-        font-size: 14px;
-        font-family: system-ui, -apple-system, sans-serif;
-      }
-    </style>
-    <!-- Expande ?v=perfil para UTMs completos ANTES do UTMify capturar -->
-    <script>
-      (function() {
-        function initTracking() {
-          var params = new URLSearchParams(window.location.search);
-          var perfil = params.get('v');
-          
-          if (perfil) {
-            // Escreve UTMs completos na URL atual (UTMify vai ler isso)
-            var url = new URL(window.location.href);
-            url.searchParams.set('utm_source', 'tiktok');
-            url.searchParams.set('utm_medium', 'organic');
-            url.searchParams.set('utm_content', perfil);
-            url.searchParams.delete('v');
-            window.history.replaceState({}, '', url.href);
 
-            // Propaga para todos os links da página
-            document.querySelectorAll('a[href]').forEach(function(link) {
-              try {
-                var dest = new URL(link.href);
-                // Evita loops se for link interno, mas garante UTMs em links externos importantes
-                if (dest.hostname.includes('habitz.life') || dest.hostname.includes('foquinhaai.life')) {
-                  dest.searchParams.set('utm_source', 'tiktok');
-                  dest.searchParams.set('utm_medium', 'organic');
-                  dest.searchParams.set('utm_content', perfil);
-                  link.href = dest.href;
-                }
-              } catch(e) {}
-            });
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Minhas Indicações</title>
+  <meta name="description" content="Acesse as minhas recomendações e ofertas exclusivas." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="/tiktok/style.css" />
+  <style>
+    #page-loader {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+      z-index: 9999;
+    }
+
+    #page-loader.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #f3f4f6;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loader-text {
+      color: #6b7280;
+      font-size: 14px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+  </style>
+  <!-- Expande ?v=perfil para UTMs completos ANTES do UTMify capturar -->
+  <script>
+    (function () {
+      function initTracking() {
+        var params = new URLSearchParams(window.location.search);
+        var perfil = params.get('v');
+
+        if (perfil) {
+          // Escreve UTMs completos na URL atual (UTMify vai ler isso)
+          var url = new URL(window.location.href);
+          url.searchParams.set('utm_source', 'tiktok');
+          url.searchParams.set('utm_medium', 'organic');
+          url.searchParams.set('utm_content', perfil);
+          url.searchParams.delete('v');
+          window.history.replaceState({}, '', url.href);
+
+          // Propaga para todos os links da página
+          document.querySelectorAll('a[href]').forEach(function (link) {
+            try {
+              var dest = new URL(link.href);
+              // Evita loops se for link interno, mas garante UTMs em links externos importantes
+              if (dest.hostname.includes('habitz.life') || dest.hostname.includes('foquinhaai.life')) {
+                dest.searchParams.set('utm_source', 'tiktok');
+                dest.searchParams.set('utm_medium', 'organic');
+                dest.searchParams.set('utm_content', perfil);
+                link.href = dest.href;
+              }
+            } catch (e) { }
+          });
+        }
+      }
+
+      // Roda ao carregar e garante que os elementos já existem
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initTracking);
+      } else {
+        initTracking();
+      }
+    })();
+  </script>
+
+  <!-- UTMify - Captura UTMs (roda após o replaceState acima) -->
+  <script async src="https://cdn.utmify.com.br/scripts/utms/latest.js"></script>
+  <!-- End UTMify -->
+
+  <!-- PostHog Analytics -->
+  <script>
+    !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
+
+    posthog.init('phc_v24AiLyNjGMoQcqVD0rmyGprSZKycW1bZdzP291O9oN', {
+      api_host: 'https://app.posthog.com',
+      loaded: function (posthog) {
+        console.log('PostHog inicializado com sucesso');
+      }
+    });
+  </script>
+</head>
+
+<body>
+  <div id="page-loader">
+    <div class="spinner"></div>
+    <div class="loader-text">Carregando...</div>
+  </div>
+  <main class="hub-shell">
+    <section class="banners" aria-label="Ofertas e experiências Habitz">
+      <a class="image-banner" href="https://habitz.life/bora" target="_blank" rel="noreferrer noopener"
+        aria-label="Bora"
+        onclick="if(window.posthog) posthog.capture('banner_click', { banner: 'bora', page: 'tiktok' })">
+        <img src="https://i.ibb.co/WvjrXknK/GANHE-AT-R-3-675-95-AINDA-ESSA-SEMANA-38.png" alt="Bora" decoding="async" />
+      </a>
+
+      <a class="image-banner" href="https://www.foquinhaai.life" target="_blank" rel="noreferrer noopener"
+        aria-label="Foquinha Aí"
+        onclick="if(window.posthog) posthog.capture('banner_click', { banner: 'foquinha', page: 'tiktok' })">
+        <img src="https://i.ibb.co/q37b4XsV/GANHE-AT-R-3-675-95-AINDA-ESSA-SEMANA-39.png" alt="Foquinha Aí"
+          decoding="async" />
+      </a>
+    </section>
+  </main>
+  <script>
+    (function () {
+      const loader = document.getElementById('page-loader');
+      const images = document.querySelectorAll('.image-banner img');
+      let imagesLoaded = 0;
+      let showLoader = false;
+      let loaderTimeout;
+
+      // Show loader only if loading takes more than 500ms
+      loaderTimeout = setTimeout(function () {
+        if (imagesLoaded < images.length) {
+          loader.classList.add('show');
+          showLoader = true;
+        }
+      }, 500);
+
+      function checkAllLoaded() {
+        imagesLoaded++;
+        if (imagesLoaded >= images.length) {
+          clearTimeout(loaderTimeout);
+          if (showLoader) {
+            loader.classList.remove('show');
           }
         }
+      }
 
-        // Roda ao carregar e garante que os elementos já existem
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', initTracking);
+      // Track image loading
+      images.forEach(function (img) {
+        if (img.complete) {
+          checkAllLoaded();
         } else {
-          initTracking();
-        }
-      })();
-    </script>
-
-    <!-- UTMify - Captura UTMs (roda após o replaceState acima) -->
-    <script async src="https://cdn.utmify.com.br/scripts/utms/latest.js"></script>
-    <!-- End UTMify -->
-
-    <!-- PostHog Analytics -->
-    <script>
-      !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-
-      posthog.init('phc_v24AiLyNjGMoQcqVD0rmyGprSZKycW1bZdzP291O9oN', {
-        api_host: 'https://app.posthog.com',
-        loaded: function(posthog) {
-          console.log('PostHog inicializado com sucesso');
+          img.addEventListener('load', checkAllLoaded);
+          img.addEventListener('error', checkAllLoaded);
         }
       });
-    </script>
-  </head>
-  <body>
-    <div id="page-loader">
-      <div class="spinner"></div>
-      <div class="loader-text">Carregando...</div>
-    </div>
-    <main class="hub-shell">
-      <section class="banners" aria-label="Ofertas e experiências Habitz">
-        <a
-          class="image-banner"
-          href="https://habitz.life/bora"
-          target="_blank"
-          rel="noreferrer noopener"
-          aria-label="Bora"
-          onclick="if(window.posthog) posthog.capture('banner_click', { banner: 'bora', page: 'tiktok' })"
-        >
-          <img
-            src="https://i.ibb.co/WvjrXknK/GANHE-AT-R-3-675-95-AINDA-ESSA-SEMANA-38.png"
-            alt="Bora"
-            decoding="async"
-          />
-        </a>
+    })();
+  </script>
+</body>
 
-        <a
-          class="image-banner"
-          href="https://www.foquinhaai.life"
-          target="_blank"
-          rel="noreferrer noopener"
-          aria-label="Foquinha Aí"
-          onclick="if(window.posthog) posthog.capture('banner_click', { banner: 'foquinha', page: 'tiktok' })"
-        >
-          <img
-            src="https://i.ibb.co/q37b4XsV/GANHE-AT-R-3-675-95-AINDA-ESSA-SEMANA-39.png"
-            alt="Foquinha Aí"
-            decoding="async"
-          />
-        </a>
-      </section>
-    </main>
-    <script>
-      (function() {
-        const loader = document.getElementById('page-loader');
-        const images = document.querySelectorAll('.image-banner img');
-        let imagesLoaded = 0;
-        let showLoader = false;
-        let loaderTimeout;
-
-        // Show loader only if loading takes more than 500ms
-        loaderTimeout = setTimeout(function() {
-          if (imagesLoaded < images.length) {
-            loader.classList.add('show');
-            showLoader = true;
-          }
-        }, 500);
-
-        function checkAllLoaded() {
-          imagesLoaded++;
-          if (imagesLoaded >= images.length) {
-            clearTimeout(loaderTimeout);
-            if (showLoader) {
-              loader.classList.remove('show');
-            }
-          }
-        }
-
-        // Track image loading
-        images.forEach(function(img) {
-          if (img.complete) {
-            checkAllLoaded();
-          } else {
-            img.addEventListener('load', checkAllLoaded);
-            img.addEventListener('error', checkAllLoaded);
-          }
-        });
-      })();
-    </script>
-  </body>
 </html>
