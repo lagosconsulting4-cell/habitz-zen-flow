@@ -8,23 +8,23 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const COMMUNITY_AVATARS = [
   {
-    src: "https://i.ibb.co/8vZWj0M/pedrogodyebue-alo-alo-bahia.jpg",
+    src: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=faces&q=80",
     fallback: "PG",
   },
   {
-    src: "https://i.ibb.co/cSMHmLND/jovem-brasileira-cria-gel-combate-aedes-aegypti-2-conexao-planeta.jpg",
+    src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces&q=80",
     fallback: "JB",
   },
   {
-    src: "https://i.ibb.co/yFqB0xsb/images.jpg",
+    src: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=faces&q=80",
     fallback: "LC",
   },
   {
-    src: "https://i.ibb.co/vvk56XT8/homem-elegante-e-confiante-com-tatuagens-posando-na-varanda-do-apartamento-74855-2711.avif",
+    src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces&q=80",
     fallback: "HE",
   },
   {
-    src: "https://i.ibb.co/LhQHgZxb/photo-1695927621677-ec96e048dce2.avif",
+    src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=faces&q=80",
     fallback: "MB",
   },
 ];

@@ -20,7 +20,6 @@ export const AgeStep = () => {
   const [selectedIndex, setSelectedIndex] = useState(initialIndex);
   const [confirmed, setConfirmed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const snapTimeout = useRef<number | null>(null);
 
   // Scroll to initial position on mount
   useEffect(() => {
@@ -39,19 +38,12 @@ export const AgeStep = () => {
   const handleScroll = useCallback(() => {
     if (!containerRef.current) return;
     const raw = Math.round(containerRef.current.scrollTop / ITEM_HEIGHT);
-    setSelectedIndex(Math.max(0, Math.min(AGES.length - 1, raw)));
+    const snapped = Math.max(0, Math.min(AGES.length - 1, raw));
 
-    if (snapTimeout.current) clearTimeout(snapTimeout.current);
-    snapTimeout.current = window.setTimeout(() => {
-      if (!containerRef.current) return;
-      const snapped = Math.max(
-        0,
-        Math.min(AGES.length - 1, Math.round(containerRef.current.scrollTop / ITEM_HEIGHT))
-      );
-      containerRef.current.scrollTo({ top: snapped * ITEM_HEIGHT, behavior: "smooth" });
+    if (snapped !== selectedIndex) {
       setSelectedIndex(snapped);
-    }, 80);
-  }, []);
+    }
+  }, [selectedIndex]);
 
   const handleConfirm = () => {
     setAgeRange(AGES[selectedIndex]);
@@ -99,7 +91,7 @@ export const AgeStep = () => {
           <div
             ref={containerRef}
             onScroll={handleScroll}
-            className="overflow-y-scroll"
+            className="overflow-y-scroll snap-y snap-mandatory"
             style={{
               height: ITEM_HEIGHT * 5,
               scrollbarWidth: "none",
@@ -118,7 +110,7 @@ export const AgeStep = () => {
                 <div
                   key={age}
                   onClick={() => snapToIndex(i)}
-                  className="flex items-center justify-center cursor-pointer"
+                  className="flex items-center justify-center cursor-pointer snap-center"
                   style={{ height: ITEM_HEIGHT }}
                 >
                   <span

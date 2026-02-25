@@ -11,7 +11,7 @@ const TESTIMONIALS = [
     avatarBg: "from-blue-500 to-blue-700",
     quote: "cara eu to sem palavras... na segunda semana ja tava acordando sem precisar de alarme. nunca achei q ia conseguir isso",
     result: "✅ 4 meses de consistência",
-    src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop&crop=face&q=80",
+    src: "https://i.ibb.co/5Wtxy3SP/download-15.jpg",
   },
   {
     name: "Juliana S.",
@@ -20,7 +20,7 @@ const TESTIMONIALS = [
     avatarBg: "from-pink-500 to-rose-600",
     quote: "tentei de tudo mesmo. planner, academia, dieta... nada durava. o Bora foi o unico q se adaptou a mim, nao eu a ele 😅",
     result: "✅ Perdeu 6kg em 10 semanas",
-    src: "https://i.ibb.co/hRW0GZbj/young-brazilian-woman-isolated-on-260nw-2605475869.webp",
+    src: "https://i.ibb.co/PZx78q3m/download-16.jpg",
   },
   {
     name: "Rafael C.",
@@ -29,7 +29,7 @@ const TESTIMONIALS = [
     avatarBg: "from-orange-500 to-amber-600",
     quote: "to mais disposto, dormindo melhor, mais focado no trampo. tudo isso sem mudar minha vida de cabeca pra baixo",
     result: "✅ Produtividade no pico",
-    src: "https://i.ibb.co/r9RXQ3x/10592418-m.jpg",
+    src: "https://i.ibb.co/5xYjH4q6/jin.jpg",
   },
   {
     name: "Larissa M.",
@@ -38,7 +38,7 @@ const TESTIMONIALS = [
     avatarBg: "from-purple-500 to-violet-600",
     quote: "achei q ia ser complicado mas e muito simples. tipo o duolingo mas pra habitos. ja to a 2 meses sem pular um dia 🔥",
     result: "✅ 2 meses sem pular um dia",
-    src: "https://i.ibb.co/VcnRgK1z/jovem-e-bonita-mulher-brasileira-ao-ar-livre-com-oculos-1368-499497.avif",
+    src: "https://i.ibb.co/V6PdXHc/download-17.jpg",
   },
 ];
 
