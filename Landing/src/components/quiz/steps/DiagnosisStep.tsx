@@ -5,7 +5,7 @@ import { ArrowRight, Calendar, AlertTriangle, Zap, Target } from "lucide-react";
 import { useQuiz } from "../QuizProvider";
 
 const DiagnosisStep: React.FC = () => {
-    const { nextStep, primaryChallenge, name } = useQuiz();
+    const { nextStep, primaryChallenge, name, gender } = useQuiz();
 
     const getDiagnosis = () => {
         const challenge = primaryChallenge || "Foco";
@@ -71,13 +71,27 @@ const DiagnosisStep: React.FC = () => {
 
     return (
         <div className="w-full max-w-md mx-auto flex flex-col gap-5">
-            {/* Title */}
+            {/* Title & Avatar */}
             <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35 }}
                 className="text-center"
             >
+                {/* User Avatar */}
+                <div className="flex justify-center mb-4">
+                    <div className="relative">
+                        <div className="absolute inset-0 rounded-full bg-lime-500/20 blur-xl scale-125" />
+                        <img
+                            src={String(gender) === "Feminino"
+                                ? "https://i.ibb.co/GQ416tfd/Gemini-Generated-Image-wjwqrnwjwqrnwjwq-removebg-preview.png"
+                                : "https://i.ibb.co/v6nZpDGK/Gemini-Generated-Image-wee9hnwee9hnwee9-removebg-preview.png"}
+                            alt="Seu Perfil"
+                            className="relative w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(163,230,53,0.3)]"
+                        />
+                    </div>
+                </div>
+
                 <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">
                     Seu perfil, {name || "você"}
                 </p>
@@ -180,7 +194,7 @@ const DiagnosisStep: React.FC = () => {
                     onClick={nextStep}
                     className="w-full bg-lime-400 hover:bg-lime-500 text-slate-900 h-14 rounded-xl font-bold text-base shadow-[0_0_20px_rgba(163,230,53,0.3)] hover:shadow-[0_0_30px_rgba(163,230,53,0.5)] transition-all"
                 >
-                    Ver como o Bora resolve isso
+                    Ver como eu resolvo isso
                     <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
             </motion.div>

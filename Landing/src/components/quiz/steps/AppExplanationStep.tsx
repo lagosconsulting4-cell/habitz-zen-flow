@@ -8,7 +8,7 @@ const CONCEPTS = [
   {
     id: 0,
     icon: Zap,
-    label: "Otimização de Dopamina",
+    label: "Ritmo de Conquistas",
     title: "Vitórias Rápidas",
     problem: "Esforço alto → Zero recompensa → Desiste",
     solution: "Micro-passo → Recompensa imediata → Continua",
@@ -16,7 +16,7 @@ const CONCEPTS = [
   {
     id: 1,
     icon: Clock,
-    label: "Ritmo Biológico",
+    label: "Seu Melhor Momento",
     title: "Sincronização Perfeita",
     problem: "Força foco no horário errado → Exaustão",
     solution: "Tarefa certa no horário certo → Energia",
@@ -24,8 +24,8 @@ const CONCEPTS = [
   {
     id: 2,
     icon: Brain,
-    label: "Carga Mental Zero",
-    title: "Decisão Zero",
+    label: "Mente Livre",
+    title: "Carga Mental Zero",
     problem: "Acordar → Decidir o que fazer → Energia gasta",
     solution: "Acordar → Plano pronto → Apenas executar",
   },
@@ -35,34 +35,34 @@ export const AppExplanationStep = () => {
   const [openIndex, setOpenIndex] = useState(-1);
 
   return (
-    <div className="relative w-full h-full min-h-[100dvh] overflow-hidden">
+    <div className="relative w-full h-full min-h-[100dvh] overflow-hidden bg-[#0A0A0B]">
       {/* Background Image */}
       <div className="absolute inset-0 w-full h-full">
         <img
-          src="/images/brain-bg.png"
-          alt="Brain Background"
-          className="w-full h-full object-cover object-center"
+          src="https://i.ibb.co/gZkmYTYs/Gemini-Generated-Image-kn41g5kn41g5kn41.png"
+          alt="App Explanation Background"
+          className="w-full h-full object-cover object-center opacity-50"
           loading="lazy"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.onerror = null;
-            target.src = "https://images.unsplash.com/photo-1559757175-5700dde675bc?q=80&w=1920&auto=format&fit=crop";
-          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0B]/80 via-[#0A0A0B]/90 to-[#0A0A0B]" />
+        <div className="absolute inset-0 bg-[#0A0A0B]/60" />
+        {/* Bottom vignette — hides watermark */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none"
+          style={{ background: "linear-gradient(to top, #0A0A0B 0%, transparent 100%)" }}
+        />
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at top, var(--q-bg-tint) 0%, transparent 65%)" }} />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-[100dvh] px-6 py-20">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[100dvh] px-6 py-20 pb-32">
         {/* Headline */}
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-4xl md:text-6xl font-black text-white mb-3 text-center max-w-4xl leading-tight"
+          className="text-4xl md:text-5xl font-black text-white mb-3 text-center max-w-4xl leading-tight"
         >
-          Não é mágica. <span className="text-lime-400">É neurociência aplicada.</span>
+          É o seu cérebro <span className="text-lime-400">trabalhando a seu favor.</span>
         </motion.h2>
 
         {/* Subtitle */}

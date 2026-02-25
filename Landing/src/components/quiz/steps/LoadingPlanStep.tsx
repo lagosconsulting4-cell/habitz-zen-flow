@@ -4,8 +4,8 @@ import { useQuiz } from "../QuizProvider";
 import { Star, Check } from "lucide-react";
 
 const LOADING_STEPS = [
-  { label: "Definindo metas", duration: 2000 },
-  { label: "Selecionando estratégias", duration: 2500 },
+  { label: "Preparando seu dia", duration: 2000 },
+  { label: "Escolhendo os melhores hábitos", duration: 2500 },
   { label: "Salvando seu plano", duration: 2000 },
 ];
 
@@ -115,25 +115,23 @@ export const LoadingPlanStep = () => {
                     <Check className="w-4 h-4 text-lime-400" />
                   )}
                   <span
-                    className={`text-sm font-semibold transition-colors ${
-                      isActive
+                    className={`text-sm font-semibold transition-colors ${isActive
                         ? "text-lime-400"
                         : isCompleted
-                        ? "text-slate-400"
-                        : "text-slate-600"
-                    }`}
+                          ? "text-slate-400"
+                          : "text-slate-600"
+                      }`}
                   >
                     {step.label}
                   </span>
                 </div>
                 <span
-                  className={`text-sm font-bold transition-colors ${
-                    isActive
+                  className={`text-sm font-bold transition-colors ${isActive
                       ? "text-lime-400"
                       : isCompleted
-                      ? "text-lime-400"
-                      : "text-slate-600"
-                  }`}
+                        ? "text-lime-400"
+                        : "text-slate-600"
+                    }`}
                 >
                   {stepProgress}%
                 </span>
@@ -142,9 +140,8 @@ export const LoadingPlanStep = () => {
               {/* Progress Bar */}
               <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all duration-100 ${
-                    isActive || isCompleted ? "bg-lime-400" : "bg-slate-700"
-                  }`}
+                  className={`h-full rounded-full transition-all duration-100 ${isActive || isCompleted ? "bg-lime-400" : "bg-slate-700"
+                    }`}
                   style={{ width: `${stepProgress}%` }}
                 />
               </div>
@@ -193,9 +190,8 @@ export const LoadingPlanStep = () => {
           {TESTIMONIALS.map((_, i) => (
             <div
               key={i}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === testimonialIndex ? "w-4 bg-lime-400" : "w-1.5 bg-white/20"
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${i === testimonialIndex ? "w-4 bg-lime-400" : "w-1.5 bg-white/20"
+                }`}
             />
           ))}
         </div>

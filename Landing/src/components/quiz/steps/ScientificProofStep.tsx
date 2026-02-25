@@ -27,7 +27,7 @@ const BENEFITS = [
 
 export const ScientificProofStep = () => {
   return (
-    <div className="relative w-full min-h-[100dvh] flex flex-col overflow-hidden">
+    <div className="relative w-full min-h-[100dvh] flex flex-col overflow-hidden bg-[#0A0A0B]">
       {/* Subtle lime glow top */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full pointer-events-none"

@@ -25,12 +25,12 @@ const TESTIMONIALS = [
 ];
 
 const TASKS = [
-    "Conectando ao núcleo neural...",
-    "Analisando padrões de resposta...",
-    "Calculando densidade de foco...",
-    "Identificando gargalos de dopamina...",
+    "Montando seu roteiro...",
+    "Cruzando seus dados...",
+    "Calculando sua rota...",
+    "Adaptando para sua rotina...",
     "Comparando com 15.420 perfis...",
-    "Gerando protocolo personalizado...",
+    "Gerando seu plano...",
 ];
 
 const AnalysisLoadingStep: React.FC = () => {

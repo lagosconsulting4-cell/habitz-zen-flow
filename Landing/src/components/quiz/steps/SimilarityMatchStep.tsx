@@ -74,7 +74,15 @@ const SimilarityMatchStep: React.FC = () => {
     if (!showCards) {
         return (
             <div className="h-[400px] flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 rounded-full border-4 border-lime-500/30 border-t-lime-500 animate-spin mb-6" />
+                <div className="relative mb-8">
+                    <div className="absolute inset-0 bg-lime-500/20 rounded-full animate-ping" />
+                    <img
+                        src={persona.image}
+                        alt="Loading..."
+                        className="w-20 h-20 rounded-full border-2 border-lime-500/50 object-cover relative z-10 opacity-50 blur-[2px]"
+                    />
+                </div>
+                <div className="w-12 h-12 rounded-full border-4 border-lime-500/30 border-t-lime-500 animate-spin mb-6 mx-auto" />
                 <h3 className="text-xl font-bold text-white">Encontrando o seu match...</h3>
                 <p className="text-slate-500">Cruzando seu perfil com {(15420).toLocaleString('pt-BR')} perfis analisados</p>
             </div>

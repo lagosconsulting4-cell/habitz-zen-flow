@@ -190,7 +190,7 @@ export const SubscriptionOffersStep = () => {
                 size="lg"
                 className="w-full bg-lime-400 hover:bg-lime-500 text-slate-900 text-lg font-black py-7 rounded-2xl shadow-[0_0_30px_rgba(163,230,53,0.45)] hover:shadow-[0_0_45px_rgba(163,230,53,0.65)] transition-all"
               >
-                Garantir meu plano
+                Quero evoluir
               </Button>
             </motion.div>
           </div>
