@@ -39,7 +39,7 @@ export const ObjectiveStep = () => {
         transition={{ delay: 0.1, duration: 0.3 }}
         className="flex-1 flex items-center justify-center"
       >
-        <SelectionCardGrid mobileColumns={3} gap={2} className="w-full max-w-sm">
+        <SelectionCardGrid mobileColumns={2} gap={2} className="w-full max-w-sm">
           {OBJECTIVE_OPTIONS.map((option, index) => (
             <motion.div
               key={option.value}

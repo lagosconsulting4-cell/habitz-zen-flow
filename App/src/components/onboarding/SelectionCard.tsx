@@ -51,7 +51,7 @@ export const SelectionCard = ({
             ? "border-primary bg-primary/5 dark:bg-primary/10 shadow-md shadow-primary/20"
             : "border-border hover:border-primary/50 hover:shadow-sm",
           disabled && "opacity-50 cursor-not-allowed",
-          isIconOnly ? "p-4" : isMini ? "py-2 px-3" : isCompact ? "p-4" : "p-6",
+          isIconOnly ? "p-4" : isMini ? "py-2 px-2" : isCompact ? "p-4" : "p-6",
           className
         )}
         onClick={disabled ? undefined : onClick}
@@ -60,7 +60,7 @@ export const SelectionCard = ({
         <motion.div
           className={cn(
             "absolute inset-y-0 flex items-center justify-center",
-            isMini ? "right-2" : "right-3",
+            isMini ? "right-1" : "right-3",
             selected
               ? "text-primary-foreground"
               : ""
@@ -126,7 +126,7 @@ export const SelectionCard = ({
             <h3
               className={cn(
                 "font-bold text-foreground leading-tight",
-                isIconOnly ? "text-sm mt-2" : isMini ? "text-sm truncate" : isCompact ? "text-base" : "text-lg"
+                isIconOnly ? "text-sm mt-2" : isMini ? "text-sm line-clamp-2" : isCompact ? "text-base" : "text-lg"
               )}
             >
               {title}

@@ -63,7 +63,7 @@ const OnboardingFlowContent = () => {
 
       {/* Step Content - Scrollable */}
       <div className="flex-1 overflow-y-auto">
-        <div className="container max-w-4xl mx-auto w-full pt-4 pb-4 px-4">
+        <div className="container max-w-4xl mx-auto w-full pt-4 pb-4 px-4 min-h-full">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -71,6 +71,7 @@ const OnboardingFlowContent = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
+              className="h-full"
             >
               {steps[currentStep]}
             </motion.div>
