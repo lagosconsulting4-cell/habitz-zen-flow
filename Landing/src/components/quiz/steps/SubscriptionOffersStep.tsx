@@ -88,7 +88,20 @@ export const SubscriptionOffersStep = () => {
       provider: "kirvano",
       checkout_url: STRIPE_LINK_ANNUAL,
     });
-    window.location.href = STRIPE_LINK_ANNUAL;
+
+    // Pass along UTM parameters to Hubla checkout link
+    const currentParams = window.location.search;
+    const separator = STRIPE_LINK_ANNUAL.includes("?") ? "&" : "?";
+
+    // Hubla supports UTM parameters and src. Copying utm_content to src as backup for some affiliate systems
+    let finalUrl = STRIPE_LINK_ANNUAL + (currentParams ? separator + currentParams.substring(1) : "");
+    const searchParams = new URLSearchParams(currentParams);
+    const utmContent = searchParams.get("utm_content") || searchParams.get("v");
+    if (utmContent && !finalUrl.includes("src=")) {
+      finalUrl += `&src=${utmContent}`;
+    }
+
+    window.location.href = finalUrl;
   };
 
   const handleMonthlyCheckout = () => {
@@ -98,7 +111,20 @@ export const SubscriptionOffersStep = () => {
       provider: "stripe",
       checkout_url: STRIPE_LINK_MONTHLY,
     });
-    window.location.href = STRIPE_LINK_MONTHLY;
+
+    // Pass along UTM parameters to Stripe checkout link
+    const currentParams = window.location.search;
+    const separator = STRIPE_LINK_MONTHLY.includes("?") ? "&" : "?";
+    let finalUrl = STRIPE_LINK_MONTHLY + (currentParams ? separator + currentParams.substring(1) : "");
+
+    // Add client_reference_id if we have utm_content so Stripe tracks it explicitly in webhooks
+    const searchParams = new URLSearchParams(currentParams);
+    const utmContent = searchParams.get("utm_content") || searchParams.get("v");
+    if (utmContent && !finalUrl.includes("client_reference_id=")) {
+      finalUrl += `&client_reference_id=${utmContent}`;
+    }
+
+    window.location.href = finalUrl;
   };
 
   return (
