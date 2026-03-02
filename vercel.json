@@ -19,6 +19,21 @@
       "source": "/bia",
       "destination": "/tiktok?v=biaa.ferrariii",
       "permanent": false
+    },
+    {
+      "source": "/lucas",
+      "destination": "/tiktok?v=lucas",
+      "permanent": false
+    },
+    {
+      "source": "/carlamuniz",
+      "destination": "/tiktok?v=carlamuniz",
+      "permanent": false
+    },
+    {
+      "source": "/luiza",
+      "destination": "/tiktok?v=luiza",
+      "permanent": false
     }
   ],
   "rewrites": [
