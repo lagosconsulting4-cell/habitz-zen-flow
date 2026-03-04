@@ -56,6 +56,13 @@ serve(async (req) => {
 
   const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
+  // Helper: Normalize phone to digits only (e.g. "+55 11 94959-6979" → "5511949596979")
+  const normalizePhone = (phone: string | null | undefined): string | undefined => {
+    if (!phone) return undefined;
+    const digits = phone.replace(/\D/g, "");
+    return digits.length >= 10 ? digits : undefined; // Min 10 digits (DDD + number)
+  };
+
   // Helper: Find user by email - check purchases and profiles tables (efficient)
   const findUserByEmail = async (email: string): Promise<string | null> => {
     const normalizedEmail = email.toLowerCase();
@@ -250,6 +257,45 @@ serve(async (req) => {
     }
   };
 
+  // Helper: Extract product name from Stripe objects
+  const getProductName = async (opts: {
+    session?: Stripe.Checkout.Session;
+    subscription?: Stripe.Subscription;
+    invoice?: Stripe.Invoice;
+  }): Promise<string> => {
+    // 1. Try from checkout session line items
+    if (opts.session) {
+      try {
+        const lineItems = await stripe.checkout.sessions.listLineItems(opts.session.id, { limit: 5 });
+        const names = lineItems.data.map(item => item.description).filter(Boolean);
+        if (names.length > 0) return names.join(", ");
+      } catch (e) {
+        console.warn("Failed to get checkout line items:", e);
+      }
+    }
+
+    // 2. Try from subscription product
+    if (opts.subscription) {
+      try {
+        const productId = opts.subscription.items.data[0]?.price?.product;
+        if (typeof productId === "string") {
+          const product = await stripe.products.retrieve(productId);
+          return product.name;
+        }
+      } catch (e) {
+        console.warn("Failed to get subscription product name:", e);
+      }
+    }
+
+    // 3. Try from invoice line items
+    if (opts.invoice) {
+      const desc = opts.invoice.lines?.data?.[0]?.description;
+      if (desc) return desc;
+    }
+
+    return "Habitz Premium (Stripe)";
+  };
+
   // Helper: Upsert purchase record
   const upsertPurchase = async (payload: {
     userId: string;
@@ -326,7 +372,7 @@ serve(async (req) => {
         let userId = session.metadata?.user_id;
         const customerEmail = session.customer_details?.email;
         const customerName = session.customer_details?.name ?? "Cliente Stripe";
-        const customerPhone = session.customer_details?.phone ?? undefined; // Captura phone do Stripe Checkout
+        const customerPhone = normalizePhone(session.customer_details?.phone);
 
         if (customerPhone) {
           console.log(`📱 Phone captured from checkout: ${customerPhone}`);
@@ -353,6 +399,17 @@ serve(async (req) => {
             console.log(`✅ User account created from checkout for ${customerEmail}`);
           } else {
             console.log(`✅ Found existing user for ${customerEmail}`);
+            // Update phone if available and profile doesn't have one yet
+            if (customerPhone && userId) {
+              const { error: phoneError } = await supabaseAdmin
+                .from("profiles")
+                .update({ phone: customerPhone })
+                .eq("user_id", userId)
+                .is("phone", null);
+              if (!phoneError) {
+                console.log(`📱 Phone updated for existing user: ${userId}`);
+              }
+            }
           }
         }
 
@@ -393,12 +450,14 @@ serve(async (req) => {
 
         // Notify N8N for welcome email workflow
         if (customerEmail) {
+          const productName = await getProductName({ session });
           await notifyN8N({
             event: "CHECKOUT_COMPLETED",
             email: customerEmail,
             customerName,
             userId,
             isNewUser,
+            productName,
             amount: session.amount_total ?? 0,
           });
         }
@@ -416,7 +475,7 @@ serve(async (req) => {
 
         const customerEmail = customer.email;
         const customerName = customer.name ?? "Cliente Stripe";
-        const customerPhone = customer.phone ?? undefined; // Captura phone do Customer Stripe
+        const customerPhone = normalizePhone(customer.phone);
 
         if (customerPhone) {
           console.log(`📱 Phone captured from customer: ${customerPhone}`);
@@ -437,6 +496,16 @@ serve(async (req) => {
           }
 
           console.log(`✅ User account created automatically for ${customerEmail}`);
+        } else if (customerPhone) {
+          // User already existed — update phone if profile doesn't have one yet
+          const { error: phoneError } = await supabaseAdmin
+            .from("profiles")
+            .update({ phone: customerPhone })
+            .eq("user_id", userId)
+            .is("phone", null);
+          if (!phoneError) {
+            console.log(`📱 Phone updated for existing user: ${userId}`);
+          }
         }
 
         const interval = subscription.items.data[0]?.price?.recurring?.interval;
@@ -459,12 +528,14 @@ serve(async (req) => {
         });
 
         // Notify N8N for welcome email workflow
+        const productName = await getProductName({ subscription });
         await notifyN8N({
           event: "SUBSCRIPTION_CREATED",
           email: customerEmail,
           customerName,
           userId,
           isNewUser,
+          productName,
           isTrial,
           trialEndDate,
           subscriptionId: subscription.id,
@@ -480,6 +551,7 @@ serve(async (req) => {
             customerName,
             userId,
             isNewUser,
+            productName,
             isTrial: true,
             trialEndDate,
             subscriptionId: subscription.id,
@@ -513,6 +585,7 @@ serve(async (req) => {
         // Notify N8N for churn/winback email sequence
         if (!customer.deleted && customer.email) {
           const userId = await findUserByEmail(customer.email);
+          const productName = await getProductName({ subscription });
 
           // Send to dedicated churn-winback workflow
           await notifyN8N({
@@ -521,6 +594,7 @@ serve(async (req) => {
             customerName: customer.name ?? "Cliente",
             userId: userId ?? "",
             isNewUser: false,
+            productName,
             subscriptionId: subscription.id,
           }, n8nSubscriptionCanceledUrl);
         }
@@ -545,12 +619,14 @@ serve(async (req) => {
 
         console.log(`📧 Trial ending in 3 days for ${customer.email}`);
 
+        const productName = await getProductName({ subscription });
         await notifyN8N({
           event: "TRIAL_ENDING_3D",
           email: customer.email,
           customerName: customer.name ?? "Cliente",
           userId: userId ?? "",
           isNewUser: false,
+          productName,
           isTrial: true,
           trialEndDate,
           subscriptionId: subscription.id,
@@ -600,12 +676,14 @@ serve(async (req) => {
           console.log(`✅ Payment recovered for subscription ${subscriptionId}`);
 
           // Notify N8N that payment was recovered (to stop recovery sequence)
+          const productName = await getProductName({ invoice });
           await notifyN8N({
             event: "PAYMENT_RECOVERED",
             email: invoice.customer_email,
             customerName: invoice.customer_name ?? "Cliente",
             userId,
             isNewUser: false,
+            productName,
             subscriptionId,
           });
         }
@@ -653,12 +731,14 @@ serve(async (req) => {
           const userId = purchase?.user_id ?? await findUserByEmail(invoice.customer_email);
 
           // Send to dedicated payment-failed workflow for recovery sequence
+          const productName = await getProductName({ invoice });
           await notifyN8N({
             event: "PAYMENT_FAILED",
             email: invoice.customer_email,
             customerName: invoice.customer_name ?? "Cliente",
             userId: userId ?? "",
             isNewUser: false,
+            productName,
             subscriptionId,
             failureCount: newFailureCount,
             amount: invoice.amount_due ?? 0,
