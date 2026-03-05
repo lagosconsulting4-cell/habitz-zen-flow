@@ -309,6 +309,7 @@ serve(async (req) => {
     status: "paid" | "open" | "failed" | "refunded";
     billingInterval?: "month" | "year";
     trialEndDate?: string;
+    productNames?: string;
   }) => {
     // Determine the best conflict resolution key based on available data
     // For subscription events, use stripe_subscription_id
@@ -333,6 +334,7 @@ serve(async (req) => {
           status: payload.status,
           billing_interval: payload.billingInterval,
           trial_end_date: payload.trialEndDate,
+          product_names: payload.productNames,
         },
         { onConflict: conflictKey }
       );
@@ -418,6 +420,9 @@ serve(async (req) => {
           break;
         }
 
+        // Extract product name before upsert so we can persist it
+        const productName = customerEmail ? await getProductName({ session }) : undefined;
+
         await upsertPurchase({
           userId,
           email: customerEmail,
@@ -428,6 +433,7 @@ serve(async (req) => {
           amount: session.amount_total ?? 0,
           currency: session.currency ?? "BRL",
           status: "paid",
+          productNames: productName,
         });
 
         // Update user_cohorts with acquisition_source and first_purchase_date
@@ -450,7 +456,6 @@ serve(async (req) => {
 
         // Notify N8N for welcome email workflow
         if (customerEmail) {
-          const productName = await getProductName({ session });
           await notifyN8N({
             event: "CHECKOUT_COMPLETED",
             email: customerEmail,
@@ -515,6 +520,9 @@ serve(async (req) => {
           ? new Date(subscription.trial_end * 1000).toISOString()
           : undefined;
 
+        // Extract product name before upsert so we can persist it
+        const productName = await getProductName({ subscription });
+
         await upsertPurchase({
           userId,
           email: customerEmail,
@@ -525,10 +533,10 @@ serve(async (req) => {
           status: subscription.status === "active" || subscription.status === "trialing" ? "paid" : "open",
           billingInterval: interval === "month" ? "month" : "year",
           trialEndDate,
+          productNames: productName,
         });
 
         // Notify N8N for welcome email workflow
-        const productName = await getProductName({ subscription });
         await notifyN8N({
           event: "SUBSCRIPTION_CREATED",
           email: customerEmail,

@@ -42,27 +42,40 @@ const JourneyProgressSection = ({
         if (!journey) return null;
         const theme = getJourneyTheme(journey.theme_slug || journey.illustration_key);
 
-        // Compute interpolated progress using live habit completion status
-        const todayHabitIds = allJourneyHabits
-          .filter(
-            (jh) =>
-              jh.journey_id === state.journey_id &&
-              jh.introduced_on_day <= state.current_day &&
-              (!jh.expires_on_day || jh.expires_on_day >= state.current_day)
-          )
-          .map((jh) => jh.habit_id);
+        // Detect if day was already advanced today (same guard as Dashboard.tsx:204-209)
+        const todayStr = new Date().toISOString().split("T")[0];
+        const wasAdvancedToday =
+          state.current_day > 1 &&
+          state.days_completed > 0 &&
+          state.updated_at?.split("T")[0] === todayStr;
 
-        const completedToday = todayHabitIds.filter((id) =>
-          getHabitCompletionStatus(id)
-        ).length;
-        const todayFraction =
-          todayHabitIds.length > 0 ? completedToday / todayHabitIds.length : 0;
+        const displayDay = wasAdvancedToday ? state.current_day - 1 : state.current_day;
 
-        // Daily habit progress (shown as main number)
-        const dailyPercent = todayHabitIds.length > 0
-          ? Math.round((completedToday / todayHabitIds.length) * 100)
-          : 0;
-        const isDayComplete = todayHabitIds.length > 0 && completedToday === todayHabitIds.length;
+        let dailyPercent: number;
+        let isDayComplete: boolean;
+
+        if (wasAdvancedToday) {
+          dailyPercent = 100;
+          isDayComplete = true;
+        } else {
+          const todayHabitIds = allJourneyHabits
+            .filter(
+              (jh) =>
+                jh.journey_id === state.journey_id &&
+                jh.introduced_on_day <= state.current_day &&
+                (!jh.expires_on_day || jh.expires_on_day >= state.current_day)
+            )
+            .map((jh) => jh.habit_id);
+
+          const completedToday = todayHabitIds.filter((id) =>
+            getHabitCompletionStatus(id)
+          ).length;
+
+          dailyPercent = todayHabitIds.length > 0
+            ? Math.round((completedToday / todayHabitIds.length) * 100)
+            : 0;
+          isDayComplete = todayHabitIds.length > 0 && completedToday === todayHabitIds.length;
+        }
 
         return (
           <motion.button
@@ -91,8 +104,8 @@ const JourneyProgressSection = ({
               </p>
               <p className="text-[10px] text-muted-foreground">
                 {isDayComplete
-                  ? `Dia ${state.current_day} concluído · Fase ${state.current_phase}`
-                  : `Dia ${state.current_day} de ${journey.duration_days} · Fase ${state.current_phase}`}
+                  ? `Dia ${displayDay} concluído · Fase ${state.current_phase}`
+                  : `Dia ${displayDay} de ${journey.duration_days} · Fase ${state.current_phase}`}
               </p>
               <div className="mt-1 w-full h-1.5 bg-muted/20 dark:bg-zinc-700/30 rounded-full overflow-hidden">
                 <motion.div

@@ -67,7 +67,7 @@ export const JourneyDayCompleteModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         className={cn(
-          "max-w-sm border-2 overflow-hidden",
+          "max-w-sm border-2 overflow-hidden text-white",
           "bg-gradient-to-br from-zinc-900/95 to-zinc-950/95"
         )}
         style={{

@@ -443,8 +443,10 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          email?: string | null
           id: string
           is_premium?: boolean | null
+          phone: string | null
           premium_since?: string | null
           has_completed_onboarding?: boolean | null
           onboarding_completed_at?: string | null
@@ -455,8 +457,10 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
           is_premium?: boolean | null
+          phone?: string | null
           premium_since?: string | null
           has_completed_onboarding?: boolean | null
           onboarding_completed_at?: string | null
@@ -467,13 +471,84 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
           is_premium?: boolean | null
+          phone?: string | null
           premium_since?: string | null
           has_completed_onboarding?: boolean | null
           onboarding_completed_at?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          id: string
+          user_id: string
+          provider: string
+          provider_session_id: string | null
+          provider_payment_intent: string | null
+          amount_cents: number
+          currency: string
+          status: string
+          created_at: string
+          updated_at: string
+          email: string | null
+          product_names: string | null
+          payment_method: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          billing_interval: string | null
+          trial_end_date: string | null
+          payment_failure_count: number
+          last_payment_failure_at: string | null
+          last_payment_recovered_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          provider?: string
+          provider_session_id?: string | null
+          provider_payment_intent?: string | null
+          amount_cents: number
+          currency?: string
+          status?: string
+          created_at?: string
+          updated_at?: string
+          email?: string | null
+          product_names?: string | null
+          payment_method?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          billing_interval?: string | null
+          trial_end_date?: string | null
+          payment_failure_count?: number
+          last_payment_failure_at?: string | null
+          last_payment_recovered_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          provider?: string
+          provider_session_id?: string | null
+          provider_payment_intent?: string | null
+          amount_cents?: number
+          currency?: string
+          status?: string
+          created_at?: string
+          updated_at?: string
+          email?: string | null
+          product_names?: string | null
+          payment_method?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          billing_interval?: string | null
+          trial_end_date?: string | null
+          payment_failure_count?: number
+          last_payment_failure_at?: string | null
+          last_payment_recovered_at?: string | null
         }
         Relationships: []
       }
