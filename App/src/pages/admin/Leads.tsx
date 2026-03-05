@@ -8,7 +8,7 @@ import {
   type RowSelectionState,
   type SortingState,
 } from "@tanstack/react-table";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,8 +48,8 @@ import { LeadsUTMTable } from "@/components/admin/LeadsUTMTable";
 import { LeadsTemporalChart } from "@/components/admin/LeadsTemporalChart";
 import { LeadsHeatmap } from "@/components/admin/LeadsHeatmap";
 import { useIsMobile } from "@/hooks/useMediaQuery";
-import { exportLeadsToCSV, exportSelectedLeads } from "@/utils/csvExport";
-import { Search, ChevronLeft, ChevronRight, Download, MoreHorizontal, Filter, TrendingUp, Users, Target, Zap, AlertCircle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { exportLeadsToCSV, exportSelectedLeads, exportUnconvertedLeadsToCSV } from "@/utils/csvExport";
+import { Search, ChevronLeft, ChevronRight, Download, MoreHorizontal, Filter, TrendingUp, Users, Target, Zap, AlertCircle, ArrowUpDown, ArrowUp, ArrowDown, Flame, ThermometerSun, Snowflake, UserX } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -640,6 +640,78 @@ const AdminLeads = () => {
 
               {/* UTM Performance */}
               <LeadsUTMTable data={analytics.byUTM.data} loading={analytics.byUTM.isLoading} />
+
+              {/* Unconverted Leads - Campaign Segment */}
+              <Card>
+                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <div>
+                    <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                      <UserX className="h-5 w-5 text-muted-foreground" />
+                      Leads Não Convertidos
+                    </CardTitle>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                      Completaram o quiz mas não efetuaram a compra
+                    </p>
+                  </div>
+                  {analytics.unconvertedLeads.data && analytics.unconvertedLeads.data.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        exportUnconvertedLeadsToCSV(
+                          analytics.unconvertedLeads.data!,
+                          `leads-nao-convertidos-${format(new Date(), "yyyy-MM-dd")}.csv`
+                        );
+                        toast.success(`${analytics.unconvertedLeads.data!.length} leads exportados`);
+                      }}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Exportar CSV
+                    </Button>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  {analytics.unconvertedSummary.isLoading ? (
+                    <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="h-20 animate-pulse rounded-lg bg-muted" />
+                      ))}
+                    </div>
+                  ) : analytics.unconvertedSummary.data ? (
+                    <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-5">
+                      <div className="rounded-lg border p-3 text-center">
+                        <div className="text-2xl font-bold">{analytics.unconvertedSummary.data.total_unconverted}</div>
+                        <div className="text-xs text-muted-foreground mt-1">Total</div>
+                      </div>
+                      <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950 p-3 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <Flame className="h-4 w-4 text-red-500" />
+                          <span className="text-2xl font-bold text-red-600 dark:text-red-400">{analytics.unconvertedSummary.data.hot_leads}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">Hot (7 dias)</div>
+                      </div>
+                      <div className="rounded-lg border border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950 p-3 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <ThermometerSun className="h-4 w-4 text-orange-500" />
+                          <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">{analytics.unconvertedSummary.data.warm_leads}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">Warm (30 dias)</div>
+                      </div>
+                      <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950 p-3 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <Snowflake className="h-4 w-4 text-blue-400" />
+                          <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{analytics.unconvertedSummary.data.cool_leads}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">Cool (90 dias)</div>
+                      </div>
+                      <div className="rounded-lg border p-3 text-center">
+                        <div className="text-2xl font-bold text-muted-foreground">{analytics.unconvertedSummary.data.cold_leads}</div>
+                        <div className="text-xs text-muted-foreground mt-1">Cold (90+ dias)</div>
+                      </div>
+                    </div>
+                  ) : null}
+                </CardContent>
+              </Card>
             </>
           )}
         </TabsContent>

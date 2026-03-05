@@ -173,6 +173,56 @@ export const useLeadsAnalytics = () => {
     staleTime: 60_000,
   });
 
+  // Unconverted Leads Summary (by temperature)
+  const unconvertedSummary = useQuery({
+    queryKey: ["leads-analytics-unconverted-summary"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admin_unconverted_leads_summary")
+        .select("*")
+        .single();
+      if (error) throw error;
+      return data as {
+        total_unconverted: number;
+        hot_leads: number;
+        warm_leads: number;
+        cool_leads: number;
+        cold_leads: number;
+      };
+    },
+    staleTime: 60_000,
+  });
+
+  // Unconverted Leads List (for campaign export)
+  const unconvertedLeads = useQuery({
+    queryKey: ["leads-analytics-unconverted-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admin_unconverted_leads")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as Array<{
+        id: string;
+        name: string;
+        email: string;
+        phone: string;
+        objective: string | null;
+        age_range: string | null;
+        profession: string | null;
+        financial_range: string | null;
+        utm_source: string | null;
+        utm_medium: string | null;
+        utm_campaign: string | null;
+        source: string | null;
+        follow_up_status: string;
+        created_at: string;
+        lead_temperature: string;
+      }>;
+    },
+    staleTime: 60_000,
+  });
+
   return {
     funnel,
     byAge,
@@ -186,5 +236,7 @@ export const useLeadsAnalytics = () => {
     heatmap,
     bySource,
     topChallenges,
+    unconvertedSummary,
+    unconvertedLeads,
   };
 };

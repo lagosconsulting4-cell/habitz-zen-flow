@@ -97,3 +97,52 @@ export const exportSelectedLeads = (
   const selectedLeads = allLeads.filter((lead) => selectedIds.includes(lead.id));
   exportLeadsToCSV(selectedLeads, filename);
 };
+
+/**
+ * Export unconverted leads (campaign leads) to CSV
+ */
+export const exportUnconvertedLeadsToCSV = (
+  leads: Array<Record<string, unknown>>,
+  filename: string = "leads-nao-convertidos.csv"
+) => {
+  if (leads.length === 0) return;
+
+  const columns = [
+    { key: "name", label: "Nome" },
+    { key: "email", label: "Email" },
+    { key: "phone", label: "Telefone" },
+    { key: "objective", label: "Objetivo" },
+    { key: "age_range", label: "Faixa Etária" },
+    { key: "profession", label: "Profissão" },
+    { key: "financial_range", label: "Faixa Salarial" },
+    { key: "utm_source", label: "UTM Source" },
+    { key: "utm_medium", label: "UTM Medium" },
+    { key: "utm_campaign", label: "UTM Campaign" },
+    { key: "source", label: "Origem" },
+    { key: "lead_temperature", label: "Temperatura" },
+    { key: "created_at", label: "Data do Quiz" },
+  ];
+
+  const header = columns.map((col) => `"${col.label}"`).join(",");
+  const rows = leads.map((lead) =>
+    columns
+      .map((col) => {
+        const value = lead[col.key];
+        if (value === null || value === undefined) return '""';
+        return `"${String(value).replace(/"/g, '""')}"`;
+      })
+      .join(",")
+  );
+
+  const csvContent = [header, ...rows].join("\n");
+  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
