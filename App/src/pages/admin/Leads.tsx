@@ -38,6 +38,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { TableSkeleton, AnalyticsSkeleton } from "@/components/ui/skeleton";
 import { useLeads, type Lead, type LeadFilters } from "@/hooks/useLeads";
 import { useLeadsAnalytics } from "@/hooks/useLeadsAnalytics";
+import { useUnconvertedLeads, type UnconvertedLead, type UnconvertedLeadFilters } from "@/hooks/useUnconvertedLeads";
 import { LeadStatusBadge } from "@/components/admin/LeadStatusBadge";
 import { LeadDetailSheet } from "@/components/admin/LeadDetailSheet";
 import { LeadCard } from "@/components/admin/LeadCard";
@@ -49,7 +50,7 @@ import { LeadsTemporalChart } from "@/components/admin/LeadsTemporalChart";
 import { LeadsHeatmap } from "@/components/admin/LeadsHeatmap";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { exportLeadsToCSV, exportSelectedLeads, exportUnconvertedLeadsToCSV } from "@/utils/csvExport";
-import { Search, ChevronLeft, ChevronRight, Download, MoreHorizontal, Filter, TrendingUp, Users, Target, Zap, AlertCircle, ArrowUpDown, ArrowUp, ArrowDown, Flame, ThermometerSun, Snowflake, UserX } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Download, MoreHorizontal, Filter, TrendingUp, Users, Target, Zap, AlertCircle, ArrowUpDown, ArrowUp, ArrowDown, Flame, ThermometerSun, Snowflake, UserX, Mail, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -99,6 +100,66 @@ const AdminLeads = () => {
 
   // Analytics data
   const analytics = useLeadsAnalytics();
+
+  // Campaign tab state
+  const [campaignSearch, setCampaignSearch] = useState("");
+  const [campaignPage, setCampaignPage] = useState(1);
+  const [campaignFilters, setCampaignFilters] = useState<UnconvertedLeadFilters>({ emailed: "new" });
+  const [campaignRowSelection, setCampaignRowSelection] = useState<RowSelectionState>({});
+
+  const campaign = useUnconvertedLeads({
+    page: campaignPage,
+    pageSize: 25,
+    search: campaignSearch,
+    filters: campaignFilters,
+  });
+
+  const campaignSelectedCount = Object.keys(campaignRowSelection).length;
+  const campaignSelectedIds = Object.keys(campaignRowSelection).map(
+    (index) => campaign.leads[parseInt(index)]?.id
+  ).filter(Boolean);
+
+  const handleCampaignExportFiltered = async () => {
+    try {
+      const allLeads = await campaign.fetchAllForExport();
+      exportUnconvertedLeadsToCSV(
+        allLeads,
+        `campanha-leads-${format(new Date(), "yyyy-MM-dd")}.csv`
+      );
+      toast.success(`${allLeads.length} leads exportados`);
+    } catch {
+      toast.error("Erro ao exportar leads");
+    }
+  };
+
+  const handleCampaignExportSelected = () => {
+    const selected = campaign.leads.filter((_, i) => campaignRowSelection[i]);
+    exportUnconvertedLeadsToCSV(
+      selected,
+      `campanha-selecionados-${format(new Date(), "yyyy-MM-dd")}.csv`
+    );
+    toast.success(`${selected.length} leads exportados`);
+  };
+
+  const handleMarkEmailed = async () => {
+    try {
+      const count = await campaign.markEmailed({ leadIds: campaignSelectedIds });
+      toast.success(`${count} leads marcados como email enviado`);
+      setCampaignRowSelection({});
+    } catch {
+      toast.error("Erro ao marcar leads");
+    }
+  };
+
+  const temperatureBadge = (temp: string) => {
+    switch (temp) {
+      case "hot": return <Badge className="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 border-0">Hot</Badge>;
+      case "warm": return <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300 border-0">Warm</Badge>;
+      case "cool": return <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 border-0">Cool</Badge>;
+      case "cold": return <Badge variant="secondary">Cold</Badge>;
+      default: return <Badge variant="outline">{temp}</Badge>;
+    }
+  };
 
   // TanStack Table columns
   const columns = useMemo<ColumnDef<Lead>[]>(
@@ -358,6 +419,7 @@ const AdminLeads = () => {
       <Tabs defaultValue="list" className="w-full">
         <TabsList>
           <TabsTrigger value="list">Lista</TabsTrigger>
+          <TabsTrigger value="campaign">Campanha</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
@@ -640,80 +702,278 @@ const AdminLeads = () => {
 
               {/* UTM Performance */}
               <LeadsUTMTable data={analytics.byUTM.data} loading={analytics.byUTM.isLoading} />
-
-              {/* Unconverted Leads - Campaign Segment */}
-              <Card>
-                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                  <div>
-                    <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                      <UserX className="h-5 w-5 text-muted-foreground" />
-                      Leads Não Convertidos
-                    </CardTitle>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                      Completaram o quiz mas não efetuaram a compra
-                    </p>
-                  </div>
-                  {analytics.unconvertedLeads.data && analytics.unconvertedLeads.data.length > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        exportUnconvertedLeadsToCSV(
-                          analytics.unconvertedLeads.data!,
-                          `leads-nao-convertidos-${format(new Date(), "yyyy-MM-dd")}.csv`
-                        );
-                        toast.success(`${analytics.unconvertedLeads.data!.length} leads exportados`);
-                      }}
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Exportar CSV
-                    </Button>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  {analytics.unconvertedSummary.isLoading ? (
-                    <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-5">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <div key={i} className="h-20 animate-pulse rounded-lg bg-muted" />
-                      ))}
-                    </div>
-                  ) : analytics.unconvertedSummary.data ? (
-                    <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-5">
-                      <div className="rounded-lg border p-3 text-center">
-                        <div className="text-2xl font-bold">{analytics.unconvertedSummary.data.total_unconverted}</div>
-                        <div className="text-xs text-muted-foreground mt-1">Total</div>
-                      </div>
-                      <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950 p-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <Flame className="h-4 w-4 text-red-500" />
-                          <span className="text-2xl font-bold text-red-600 dark:text-red-400">{analytics.unconvertedSummary.data.hot_leads}</span>
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">Hot (7 dias)</div>
-                      </div>
-                      <div className="rounded-lg border border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950 p-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <ThermometerSun className="h-4 w-4 text-orange-500" />
-                          <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">{analytics.unconvertedSummary.data.warm_leads}</span>
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">Warm (30 dias)</div>
-                      </div>
-                      <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950 p-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <Snowflake className="h-4 w-4 text-blue-400" />
-                          <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{analytics.unconvertedSummary.data.cool_leads}</span>
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">Cool (90 dias)</div>
-                      </div>
-                      <div className="rounded-lg border p-3 text-center">
-                        <div className="text-2xl font-bold text-muted-foreground">{analytics.unconvertedSummary.data.cold_leads}</div>
-                        <div className="text-xs text-muted-foreground mt-1">Cold (90+ dias)</div>
-                      </div>
-                    </div>
-                  ) : null}
-                </CardContent>
-              </Card>
             </>
           )}
+        </TabsContent>
+
+        {/* Campaign Tab */}
+        <TabsContent value="campaign" className="space-y-4">
+          {/* Temperature Summary Cards */}
+          {campaign.summaryLoading ? (
+            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-20 animate-pulse rounded-lg bg-muted" />
+              ))}
+            </div>
+          ) : campaign.summary ? (
+            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-5">
+              <div className="rounded-lg border p-3 text-center">
+                <div className="text-2xl font-bold">{campaign.summary.total_unconverted}</div>
+                <div className="text-xs text-muted-foreground mt-1">Total Não Convertidos</div>
+              </div>
+              <button
+                className={`rounded-lg border border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950 p-3 text-center transition-all ${campaignFilters.lead_temperature === "hot" ? "ring-2 ring-red-500" : "hover:ring-1 hover:ring-red-300"}`}
+                onClick={() => {
+                  setCampaignFilters(f => ({ ...f, lead_temperature: f.lead_temperature === "hot" ? undefined : "hot" }));
+                  setCampaignPage(1);
+                }}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  <Flame className="h-4 w-4 text-red-500" />
+                  <span className="text-2xl font-bold text-red-600 dark:text-red-400">{campaign.summary.hot_leads}</span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">Hot (7 dias)</div>
+              </button>
+              <button
+                className={`rounded-lg border border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950 p-3 text-center transition-all ${campaignFilters.lead_temperature === "warm" ? "ring-2 ring-orange-500" : "hover:ring-1 hover:ring-orange-300"}`}
+                onClick={() => {
+                  setCampaignFilters(f => ({ ...f, lead_temperature: f.lead_temperature === "warm" ? undefined : "warm" }));
+                  setCampaignPage(1);
+                }}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  <ThermometerSun className="h-4 w-4 text-orange-500" />
+                  <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">{campaign.summary.warm_leads}</span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">Warm (30 dias)</div>
+              </button>
+              <button
+                className={`rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950 p-3 text-center transition-all ${campaignFilters.lead_temperature === "cool" ? "ring-2 ring-blue-500" : "hover:ring-1 hover:ring-blue-300"}`}
+                onClick={() => {
+                  setCampaignFilters(f => ({ ...f, lead_temperature: f.lead_temperature === "cool" ? undefined : "cool" }));
+                  setCampaignPage(1);
+                }}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  <Snowflake className="h-4 w-4 text-blue-400" />
+                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{campaign.summary.cool_leads}</span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">Cool (90 dias)</div>
+              </button>
+              <button
+                className={`rounded-lg border p-3 text-center transition-all ${campaignFilters.lead_temperature === "cold" ? "ring-2 ring-gray-500" : "hover:ring-1 hover:ring-gray-300"}`}
+                onClick={() => {
+                  setCampaignFilters(f => ({ ...f, lead_temperature: f.lead_temperature === "cold" ? undefined : "cold" }));
+                  setCampaignPage(1);
+                }}
+              >
+                <div className="text-2xl font-bold text-muted-foreground">{campaign.summary.cold_leads}</div>
+                <div className="text-xs text-muted-foreground mt-1">Cold (90+ dias)</div>
+              </button>
+            </div>
+          ) : null}
+
+          {/* Campaign Table */}
+          <Card>
+            <div className="p-4 sm:p-6">
+              {/* Toolbar */}
+              <div className="flex flex-col gap-2 sm:gap-4 mb-4">
+                <div className="relative w-full sm:max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por nome, email ou telefone..."
+                    value={campaignSearch}
+                    onChange={(e) => {
+                      setCampaignSearch(e.target.value);
+                      setCampaignPage(1);
+                    }}
+                    className="pl-9"
+                  />
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Select
+                      value={campaignFilters.emailed || "all"}
+                      onValueChange={(value) => {
+                        setCampaignFilters(f => ({ ...f, emailed: value as "all" | "new" | "emailed" }));
+                        setCampaignPage(1);
+                      }}
+                    >
+                      <SelectTrigger className="w-full sm:w-auto">
+                        <Mail className="h-4 w-4 mr-2" />
+                        <SelectValue placeholder="Email" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="new">Novos (sem email)</SelectItem>
+                        <SelectItem value="emailed">Já receberam email</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {campaignFilters.lead_temperature && (
+                      <Badge
+                        variant="secondary"
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setCampaignFilters(f => ({ ...f, lead_temperature: undefined }));
+                          setCampaignPage(1);
+                        }}
+                      >
+                        {campaignFilters.lead_temperature} ✕
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {campaignSelectedCount > 0 ? (
+                      <>
+                        <Badge variant="secondary" className="whitespace-nowrap">
+                          {campaignSelectedCount} selecionados
+                        </Badge>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" disabled={campaign.isMarkingEmailed}>
+                              <MoreHorizontal className="h-4 w-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Ações</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={handleMarkEmailed}>
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              Marcar como Email Enviado
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleCampaignExportSelected}>
+                              <Download className="h-4 w-4 mr-2" />
+                              Exportar Selecionados
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </>
+                    ) : (
+                      <Button variant="outline" size="sm" onClick={handleCampaignExportFiltered} className="w-full sm:w-auto">
+                        <Download className="h-4 w-4 mr-2" />
+                        Exportar Filtrados
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Table */}
+              {campaign.isLoading ? (
+                <div className="rounded-md border p-4">
+                  <TableSkeleton rows={10} columns={7} />
+                </div>
+              ) : (
+                <div className="rounded-md border overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-10">
+                          <Checkbox
+                            checked={campaign.leads.length > 0 && Object.keys(campaignRowSelection).length === campaign.leads.length}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                const all: RowSelectionState = {};
+                                campaign.leads.forEach((_, i) => { all[i] = true; });
+                                setCampaignRowSelection(all);
+                              } else {
+                                setCampaignRowSelection({});
+                              }
+                            }}
+                          />
+                        </TableHead>
+                        <TableHead>Nome</TableHead>
+                        <TableHead>Email</TableHead>
+                        {!isMobile && <TableHead>Telefone</TableHead>}
+                        {!isMobile && <TableHead>Objetivo</TableHead>}
+                        <TableHead>Temperatura</TableHead>
+                        {!isMobile && <TableHead>UTM</TableHead>}
+                        <TableHead>Data Quiz</TableHead>
+                        {!isMobile && <TableHead>Último Email</TableHead>}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {campaign.leads.length > 0 ? (
+                        campaign.leads.map((lead, index) => (
+                          <TableRow key={lead.id} data-state={campaignRowSelection[index] && "selected"}>
+                            <TableCell>
+                              <Checkbox
+                                checked={!!campaignRowSelection[index]}
+                                onCheckedChange={(checked) => {
+                                  setCampaignRowSelection(prev => {
+                                    const next = { ...prev };
+                                    if (checked) { next[index] = true; } else { delete next[index]; }
+                                    return next;
+                                  });
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell className="font-medium">{lead.name}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">{lead.email}</TableCell>
+                            {!isMobile && <TableCell className="text-sm">{lead.phone}</TableCell>}
+                            {!isMobile && <TableCell className="text-sm capitalize">{lead.objective || "-"}</TableCell>}
+                            <TableCell>{temperatureBadge(lead.lead_temperature)}</TableCell>
+                            {!isMobile && <TableCell className="text-sm">{lead.utm_source || "-"}</TableCell>}
+                            <TableCell className="text-sm text-muted-foreground">
+                              {format(new Date(lead.created_at), "dd/MM/yyyy")}
+                            </TableCell>
+                            {!isMobile && (
+                              <TableCell className="text-sm text-muted-foreground">
+                                {lead.last_campaign_sent_at
+                                  ? format(new Date(lead.last_campaign_sent_at), "dd/MM/yyyy")
+                                  : <span className="text-yellow-600 dark:text-yellow-400">Novo</span>
+                                }
+                              </TableCell>
+                            )}
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={isMobile ? 5 : 9} className="h-24 text-center">
+                            Nenhum lead encontrado com os filtros atuais.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+
+              {/* Pagination */}
+              <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-3 sm:gap-4">
+                <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
+                  Mostrando <span className="font-medium">{campaign.totalCount > 0 ? (campaign.currentPage - 1) * 25 + 1 : 0}</span> a{" "}
+                  <span className="font-medium">{Math.min(campaign.currentPage * 25, campaign.totalCount)}</span> de{" "}
+                  <span className="font-medium">{campaign.totalCount}</span> leads
+                </div>
+                <div className="flex items-center justify-between sm:justify-center gap-2 w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCampaignPage(p => Math.max(1, p - 1))}
+                    disabled={campaign.currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline ml-2">Anterior</span>
+                  </Button>
+                  <div className="text-xs sm:text-sm px-2">
+                    Página {campaign.currentPage} de {campaign.totalPages || 1}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCampaignPage(p => Math.min(campaign.totalPages, p + 1))}
+                    disabled={campaign.currentPage === campaign.totalPages || campaign.totalPages === 0}
+                  >
+                    <span className="hidden sm:inline mr-2">Próxima</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
         </TabsContent>
       </Tabs>
 

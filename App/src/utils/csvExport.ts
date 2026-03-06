@@ -121,6 +121,7 @@ export const exportUnconvertedLeadsToCSV = (
     { key: "source", label: "Origem" },
     { key: "lead_temperature", label: "Temperatura" },
     { key: "created_at", label: "Data do Quiz" },
+    { key: "last_campaign_sent_at", label: "Último Email Enviado" },
   ];
 
   const header = columns.map((col) => `"${col.label}"`).join(",");
