@@ -43,6 +43,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const signOut = useCallback(async () => {
+    // Clean up push subscription to avoid orphaned endpoints
+    try {
+      const registration = await navigator.serviceWorker?.ready;
+      const subscription = await registration?.pushManager?.getSubscription();
+      if (subscription) {
+        await supabase
+          .from("push_subscriptions")
+          .delete()
+          .eq("endpoint", subscription.endpoint);
+        await subscription.unsubscribe();
+      }
+    } catch (e) {
+      console.warn("[Auth] Push cleanup failed:", e);
+    }
     await supabase.auth.signOut();
   }, []);
 

@@ -196,6 +196,25 @@ async function checkAlreadySentToday(
   return (data || []).length > 0;
 }
 
+/**
+ * Anti-burst: check if a push was sent to this user within the last N minutes.
+ * Prevents multiple crons from sending pushes simultaneously.
+ */
+async function checkRecentlySent(
+  supabase: any,
+  userId: string,
+  windowMinutes: number = 5
+): Promise<boolean> {
+  const cutoff = new Date(Date.now() - windowMinutes * 60 * 1000).toISOString();
+  const { data } = await supabase
+    .from("notification_history")
+    .select("id")
+    .eq("user_id", userId)
+    .gte("sent_at", cutoff)
+    .limit(1);
+  return (data || []).length > 0;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -254,6 +273,16 @@ serve(async (req) => {
       console.log(`[JourneyNotif] Skipped: already sent ${contextType} today for user ${userId}`);
       return new Response(
         JSON.stringify({ success: true, sent: false, reason: "already_sent_today" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Anti-burst: skip if push was sent < 5 min ago
+    const recentlySent = await checkRecentlySent(supabase, userId, 5);
+    if (recentlySent) {
+      console.log(`[JourneyNotif] Skipped: push sent < 5min ago for user ${userId}`);
+      return new Response(
+        JSON.stringify({ success: true, sent: false, reason: "anti_burst" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

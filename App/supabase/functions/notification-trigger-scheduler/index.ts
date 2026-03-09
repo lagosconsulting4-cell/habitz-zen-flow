@@ -278,69 +278,22 @@ async function selectTriggerCopy(
 }
 
 /**
- * Checks if sending a notification would exceed daily limits.
- * Limit: daily_limit (default 3) + extra_for_streaks (default 2) if streak >= 7
+ * Anti-burst: check if a push was sent to this user within the last N minutes.
+ * Prevents multiple crons from sending pushes simultaneously.
  */
-async function checkDailyLimit(
+async function checkRecentlySent(
   supabase: any,
   userId: string,
-  habitId: string | null
+  windowMinutes: number = 5
 ): Promise<boolean> {
-  const today = new Date().toISOString().split("T")[0];
-
-  // If habitId provided, check if this specific habit already got a notification today
-  if (habitId) {
-    const { data: habitNotif, error: habitError } = await supabase
-      .from("notification_history")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("habit_id", habitId)
-      .eq("notification_date", today)
-      .maybeSingle();
-
-    if (habitError) {
-      console.error("[Daily Limit] Error checking habit notifications:", habitError);
-      return true; // Allow on error
-    }
-
-    if (habitNotif) {
-      // Habit already got a notification today
-      return false;
-    }
-  }
-
-  // Count today's notifications for this user
-  const { data: todayNotifs, error: countError } = await supabase
+  const cutoff = new Date(Date.now() - windowMinutes * 60 * 1000).toISOString();
+  const { data } = await supabase
     .from("notification_history")
     .select("id")
     .eq("user_id", userId)
-    .eq("notification_date", today);
-
-  if (countError) {
-    console.error("[Daily Limit] Error counting notifications:", countError);
-    return true; // Allow on error
-  }
-
-  // Get user preferences (default: 3 base + 2 for streaks)
-  const { data: userProgress, error: prefError } = await supabase
-    .from("user_progress")
-    .select("notification_preferences, current_streak")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  const prefs = userProgress?.notification_preferences || {
-    daily_limit: 3,
-    extra_for_streaks: 2,
-  };
-
-  // Calculate effective limit based on streak
-  let effectiveLimit = prefs.daily_limit || 3;
-  if (userProgress?.current_streak >= 7) {
-    effectiveLimit += prefs.extra_for_streaks || 2;
-  }
-
-  const currentCount = (todayNotifs || []).length;
-  return currentCount < effectiveLimit;
+    .gte("sent_at", cutoff)
+    .limit(1);
+  return (data || []).length > 0;
 }
 
 /**
@@ -547,9 +500,12 @@ async function checkOnboardingTriggers(
   const today = brazilTime.toISOString().split("T")[0];
 
   for (const user of newUsers) {
-    const onboardDate = new Date(user.onboarding_completed_at);
-    const diffMs = brazilTime.getTime() - onboardDate.getTime();
-    const daysSinceOnboarding = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    // Use date-only comparison to avoid off-by-one for users created late at night
+    const todayStr = brazilTime.toISOString().split("T")[0];
+    const onboardStr = new Date(user.onboarding_completed_at).toISOString().split("T")[0];
+    const daysSinceOnboarding = Math.round(
+      (new Date(todayStr).getTime() - new Date(onboardStr).getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     for (const triggerDef of triggersForHour) {
       if (daysSinceOnboarding !== triggerDef.day) continue;
@@ -1009,10 +965,10 @@ serve(async (req) => {
         continue;
       }
 
-      // Check daily limit
-      const withinLimit = await checkDailyLimit(supabase, habit.userId, habit.habitId);
-      if (!withinLimit) {
-        console.log(`[EndOfDay] Skipping habit ${habit.habitId} - daily limit reached for user ${habit.userId}`);
+      // Anti-burst: skip if push was sent < 5 min ago
+      const eodRecentlySent = await checkRecentlySent(supabase, habit.userId, 5);
+      if (eodRecentlySent) {
+        console.log(`[EndOfDay] Skipped: push sent < 5min ago for user ${habit.userId}`);
         results.skipped++;
         continue;
       }
@@ -1048,10 +1004,18 @@ serve(async (req) => {
         continue;
       }
 
-      // Check daily limit
-      const withinLimit = await checkDailyLimit(supabase, user.userId, null);
-      if (!withinLimit) {
-        console.log(`[MultiplePending] Skipping user ${user.userId} - daily limit reached`);
+      // Dedup: skip if EOD was already sent today (EOD has priority over multiple_pending)
+      const eodAlreadySent = await checkAlreadySentToday(supabase, user.userId, null, "end_of_day");
+      if (eodAlreadySent) {
+        console.log(`[MultiplePending] Skipped: EOD already sent today for user ${user.userId}`);
+        results.skipped++;
+        continue;
+      }
+
+      // Anti-burst: skip if push was sent < 5 min ago
+      const mpRecentlySent = await checkRecentlySent(supabase, user.userId, 5);
+      if (mpRecentlySent) {
+        console.log(`[MultiplePending] Skipped: push sent < 5min ago for user ${user.userId}`);
         results.skipped++;
         continue;
       }

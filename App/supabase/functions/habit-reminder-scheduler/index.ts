@@ -449,7 +449,8 @@ type NotificationContext =
   | "category_exercise"
   | "category_reading"
   | "category_meditation"
-  | "category_hydration";
+  | "category_hydration"
+  | "streak_broken";
 
 /**
  * Detects the context for notification selection.
@@ -492,6 +493,11 @@ function detectContext(
     return "on_fire";
   }
 
+  // Streak broken: user lost their streak and hasn't completed anything today
+  if (habit && habit.streak === 0 && completedToday === 0 && currentHour >= 5 && currentHour < 22) {
+    return "streak_broken";
+  }
+
   // First of day: no habits completed yet today and it's morning
   if (completedToday === 0 && currentHour >= 5 && currentHour < 12) {
     return "first_of_day";
@@ -526,7 +532,8 @@ async function selectCopy(
   userId: string,
   context: NotificationContext,
   habit: Habit | null,
-  pendingCount: number
+  pendingCount: number,
+  recentKeysCache?: Map<string, Set<string>>
 ): Promise<{ key: string; title: string; body: string; contextType: string }> {
   const copyContext = COPY_BANK[context];
   if (!copyContext) {
@@ -539,20 +546,26 @@ async function selectCopy(
     };
   }
 
-  // Get recent messages for this user and context (last 5 to check rotation)
-  const { data: recentMessages, error } = await supabase
-    .from("notification_history")
-    .select("message_key")
-    .eq("user_id", userId)
-    .eq("context_type", context)
-    .order("sent_at", { ascending: false })
-    .limit(5);
+  // Use pre-loaded cache if available, otherwise query individually
+  let recentKeys: Set<string>;
+  const cacheKey = `${userId}:${context}`;
+  if (recentKeysCache?.has(cacheKey)) {
+    recentKeys = recentKeysCache.get(cacheKey)!;
+  } else {
+    const { data: recentMessages, error } = await supabase
+      .from("notification_history")
+      .select("message_key")
+      .eq("user_id", userId)
+      .eq("context_type", context)
+      .order("sent_at", { ascending: false })
+      .limit(5);
 
-  if (error) {
-    console.error("[Copy Engine] Error fetching recent messages:", error);
+    if (error) {
+      console.error("[Copy Engine] Error fetching recent messages:", error);
+    }
+
+    recentKeys = new Set((recentMessages || []).map((m: any) => m.message_key));
   }
-
-  const recentKeys = new Set((recentMessages || []).map((m: any) => m.message_key));
 
   // Decide: personalized if habit is provided and copies exist
   const usePersonalized = habit !== null && copyContext.personalized.length > 0;
@@ -574,10 +587,14 @@ async function selectCopy(
   let body = selected.body;
 
   if (habit && selected.personalized) {
+    const emoji = habit.emoji?.trim() || "";
+    const name = habit.name?.length > 30 ? habit.name.substring(0, 27) + "..." : (habit.name || "seu habito");
     body = body
-      .replace("{habitEmoji}", habit.emoji || "")
-      .replace("{habitName}", habit.name)
+      .replace("{habitEmoji}", emoji)
+      .replace("{habitName}", name)
       .replace("{count}", pendingCount.toString());
+    // Clean double spaces from empty emoji
+    body = body.replace(/  +/g, " ").trim();
   } else if (context === "multiple_pending") {
     body = body.replace("{count}", pendingCount.toString());
   }
@@ -591,67 +608,22 @@ async function selectCopy(
 }
 
 /**
- * Checks if sending a notification would exceed daily limits.
- * Limit: 1 per habit + 2 extras (can increase for streaks >= 7 days)
+ * Anti-burst: check if a push was sent to this user within the last N minutes.
+ * Prevents multiple crons from sending pushes simultaneously.
  */
-async function checkDailyLimit(
+async function checkRecentlySent(
   supabase: any,
   userId: string,
-  habitId: string
+  windowMinutes: number = 5
 ): Promise<boolean> {
-  const today = new Date().toISOString().split("T")[0];
-
-  // Check if this specific habit already got a notification today
-  const { data: habitNotif, error: habitError } = await supabase
+  const cutoff = new Date(Date.now() - windowMinutes * 60 * 1000).toISOString();
+  const { data } = await supabase
     .from("notification_history")
     .select("id")
     .eq("user_id", userId)
-    .eq("habit_id", habitId)
-    .eq("notification_date", today)
-    .maybeSingle();
-
-  if (habitError) {
-    console.error("[Daily Limit] Error checking habit notifications:", habitError);
-    return true; // Allow on error
-  }
-
-  if (habitNotif) {
-    // Habit already got a notification today
-    return false;
-  }
-
-  // Count today's notifications for this user
-  const { data: todayNotifs, error: countError } = await supabase
-    .from("notification_history")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("notification_date", today);
-
-  if (countError) {
-    console.error("[Daily Limit] Error counting notifications:", countError);
-    return true; // Allow on error
-  }
-
-  // Get user preferences (default: 3 base + 2 for streaks)
-  const { data: userProgress, error: prefError } = await supabase
-    .from("user_progress")
-    .select("notification_preferences, current_streak")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  const prefs = userProgress?.notification_preferences || {
-    daily_limit: 3,
-    extra_for_streaks: 2,
-  };
-
-  // Calculate effective limit based on streak
-  let effectiveLimit = prefs.daily_limit || 3;
-  if (userProgress?.current_streak >= 7) {
-    effectiveLimit += prefs.extra_for_streaks || 2;
-  }
-
-  const currentCount = (todayNotifs || []).length;
-  return currentCount < effectiveLimit;
+    .gte("sent_at", cutoff)
+    .limit(1);
+  return (data || []).length > 0;
 }
 
 serve(async (req) => {
@@ -867,6 +839,25 @@ serve(async (req) => {
     // Cache quiet hours check per user (avoid re-fetching for each habit)
     const quietHoursCache = new Map<string, boolean>();
 
+    // Batch load recent message keys for copy rotation (avoids N+1 queries)
+    const recentKeysCache = new Map<string, Set<string>>();
+    const uniqueUserIds = [...new Set(habitsWithPush.map(h => h.user_id))];
+    if (uniqueUserIds.length > 0) {
+      const { data: allRecentMessages } = await supabase
+        .from("notification_history")
+        .select("user_id, context_type, message_key")
+        .in("user_id", uniqueUserIds)
+        .order("sent_at", { ascending: false })
+        .limit(uniqueUserIds.length * 10);
+
+      for (const msg of allRecentMessages || []) {
+        const cacheKey = `${msg.user_id}:${msg.context_type}`;
+        if (!recentKeysCache.has(cacheKey)) recentKeysCache.set(cacheKey, new Set());
+        const keySet = recentKeysCache.get(cacheKey)!;
+        if (keySet.size < 5) keySet.add(msg.message_key);
+      }
+    }
+
     for (const habit of habitsWithPush) {
       try {
         // Check quiet hours + cache user prefs (cached per user)
@@ -892,15 +883,15 @@ serve(async (req) => {
           continue;
         }
 
-        // Check daily limit before sending
-        const withinLimit = await checkDailyLimit(supabase, habit.user_id, habit.id);
-        if (!withinLimit) {
-          console.log(`[Scheduler] Habit "${habit.name}" (${habit.id}) exceeded daily limit for user ${habit.user_id}`);
+        // Anti-burst: skip if push was sent < 5 min ago to this user
+        const recentlySent = await checkRecentlySent(supabase, habit.user_id, 5);
+        if (recentlySent) {
+          console.log(`[Scheduler] Skipped: push sent < 5min ago for user ${habit.user_id}`);
           results.push({
             habitId: habit.id,
             userId: habit.user_id,
             success: false,
-            error: "Daily limit exceeded",
+            error: "Anti-burst: recent push",
           });
           continue;
         }
@@ -923,7 +914,7 @@ serve(async (req) => {
         );
 
         // Select copy message with rotation
-        const copyMessage = await selectCopy(supabase, habit.user_id, context as NotificationContext, habit, pendingCount);
+        const copyMessage = await selectCopy(supabase, habit.user_id, context as NotificationContext, habit, pendingCount, recentKeysCache);
 
         // Insert history FIRST to get the ID for click tracking
         const { data: historyRow, error: historyInsertError } = await supabase
@@ -946,44 +937,52 @@ serve(async (req) => {
         }
 
         // Send push notification with selected copy
-        const pushResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-          },
-          body: JSON.stringify({
-            userId: habit.user_id,
-            title: copyMessage.title,
-            body: copyMessage.body,
-            icon: "/icons/icon-192.png",
-            badge: "/icons/badge-72.png",
-            tag: `habit-${habit.id}`,
-            data: {
-              type: "habit-reminder",
-              habitId: habit.id,
-              habitName: habit.name,
-              url: "/app/dashboard",
-              notificationHistoryId: historyRow?.id || undefined,
+        let isSuccess = false;
+        let pushError: string | undefined;
+        try {
+          const pushResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
             },
-            actions: [
-              { action: "complete", title: "Completar" },
-              { action: "dismiss", title: "Depois" },
-            ],
-          }),
-        });
+            body: JSON.stringify({
+              userId: habit.user_id,
+              title: copyMessage.title,
+              body: copyMessage.body,
+              icon: "/icons/icon-192.png",
+              badge: "/icons/badge-72.png",
+              tag: `habit-${habit.id}`,
+              data: {
+                type: "habit-reminder",
+                habitId: habit.id,
+                habitName: habit.name,
+                url: "/app/dashboard",
+                notificationHistoryId: historyRow?.id || undefined,
+              },
+              actions: [
+                { action: "complete", title: "Completar" },
+                { action: "dismiss", title: "Depois" },
+              ],
+            }),
+          });
 
-        const result = await pushResponse.json();
-        const isSuccess = pushResponse.ok && result.sent > 0;
+          const result = await pushResponse.json();
+          isSuccess = pushResponse.ok && result.sent > 0;
+          pushError = result.error || (!isSuccess ? `HTTP ${pushResponse.status}, sent: ${result.sent}` : undefined);
 
-        console.log(`[Scheduler] Push response for "${habit.name}":`, {
-          status: pushResponse.status,
-          ok: pushResponse.ok,
-          sent: result.sent,
-          failed: result.failed,
-          context,
-          messageKey: copyMessage.key,
-        });
+          console.log(`[Scheduler] Push response for "${habit.name}":`, {
+            status: pushResponse.status,
+            ok: pushResponse.ok,
+            sent: result.sent,
+            failed: result.failed,
+            context,
+            messageKey: copyMessage.key,
+          });
+        } catch (fetchErr) {
+          console.error(`[Scheduler] Push send failed for habit ${habit.id}:`, fetchErr);
+          pushError = `fetch error: ${String(fetchErr)}`;
+        }
 
         results.push({
           habitId: habit.id,
@@ -991,7 +990,7 @@ serve(async (req) => {
           success: isSuccess,
           context,
           messageKey: copyMessage.key,
-          error: result.error || (!isSuccess ? `HTTP ${pushResponse.status}, sent: ${result.sent}` : undefined),
+          error: pushError,
         });
 
         console.log(`[Scheduler] Sent reminder for "${habit.name}" to user ${habit.user_id} [${context}/${copyMessage.key}]: ${isSuccess ? "OK" : "FAILED"}`);
