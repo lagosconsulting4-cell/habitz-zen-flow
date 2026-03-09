@@ -27,6 +27,8 @@ const BoraUpsell = lazy(() => import("./pages/bora/BoraUpsell"));
 const BoraDownsell = lazy(() => import("./pages/bora/BoraDownsell"));
 const RecAqLanding = lazy(() => import("./pages/bora/RecAqLanding"));
 const MiniLanding = lazy(() => import("./pages/bora/MiniLanding"));
+const MetodoRendaSecreta = lazy(() => import("./pages/bora/MetodoRendaSecreta"));
+const MetodoRendaSecretaCombo = lazy(() => import("./pages/bora/MetodoRendaSecretaCombo"));
 
 const queryClient = new QueryClient();
 
@@ -188,6 +190,26 @@ const App = () => (
               element={
                 <PathPrefixProvider prefix="/mini">
                   <MiniLanding />
+                </PathPrefixProvider>
+              }
+            />
+
+            {/* Método Renda Secreta Landing - VSL (Upsell do Bora) */}
+            <Route
+              path="/metodo-rendasecreta"
+              element={
+                <PathPrefixProvider prefix="/metodo-rendasecreta">
+                  <MetodoRendaSecreta />
+                </PathPrefixProvider>
+              }
+            />
+
+            {/* Método Renda Secreta Landing - Combo App Bora Grátis */}
+            <Route
+              path="/metodo-rendasecreta-combo"
+              element={
+                <PathPrefixProvider prefix="/metodo-rendasecreta-combo">
+                  <MetodoRendaSecretaCombo />
                 </PathPrefixProvider>
               }
             />

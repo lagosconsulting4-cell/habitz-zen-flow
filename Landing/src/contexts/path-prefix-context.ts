@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import type { NavigateOptions } from "react-router-dom";
 
-export type PathPrefix = "" | "/direct";
+export type PathPrefix = "" | "/direct" | "/antigo" | "/bora" | "/upsell-bora" | "/downsell-bora" | "/rec-aq" | "/mini" | "/metodo-rendasecreta" | "/metodo-rendasecreta-combo";
 
 export interface PathPrefixContextValue {
   prefix: PathPrefix;
