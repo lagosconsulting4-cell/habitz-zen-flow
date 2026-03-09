@@ -3,6 +3,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldAlert, ArrowRight, CheckCircle2 } from 'lucide-react';
 
+const MOTIVOS_APP = [
+    { id: "whatsapp", label: "Dificuldades para conectar meu WhatsApp ou gerar o QR Code." },
+    { id: "ia", label: "Não consegui configurar a Inteligência Artificial (Foquinha)." },
+    { id: "campanhas", label: "Criação de campanhas/atendimentos no Bora pareceu complexa." },
+    { id: "bugs", label: "O aplicativo apresentou instabilidades, lentidão ou travou." },
+    { id: "lead", label: "Achei que o app venderia sozinho (sem eu captar leads)." },
+    { id: "tempo", label: "Falta de tempo, imprevistos financeiros ou peso na rotina." }
+];
+
+const PERGUNTAS_FOLLOWUP: Record<string, string> = {
+    "whatsapp": "Entendemos que integrações podem ser complicadas no início. Você chegou a acionar o suporte técnico da Lumen para te auxiliar nessa conexão?",
+    "ia": "A IA requer um treinamento inicial para absorver a personalidade correta. O que exatamente você achou mais confuso ao configurar a inteligência?",
+    "campanhas": "Sabemos que fluxos de vendas podem assustar no começo. Qual detalhe da interface do Bora ou tutorial mais faltou para você desenrolar o uso?",
+    "bugs": "Poxa, sentimos muito pela frustração! Pode nos descrever detalhadamente (e qual modelo de celular usava) onde a ferramenta mais travou?",
+    "lead": "Nossos apps automatizam o atendimento como mágica, mas você ainda precisava escalar tráfego. Você sentiu falta de aulas nossas de tráfego básico?",
+    "tempo": "Entendemos a sobrecarga da rotina. Você precisou paralisar agora, mas sob quais circunstâncias cogitaria usar ferramentas da Lumen no futuro?",
+    "outro": "Poderia nos dar um pouco mais de contexto técnico ou estratégico sobre por que o app escolhido não atendeu às suas expectativas?"
+};
+
 export default function Reembolsos() {
     useEffect(() => {
         document.title = "Auditoria de Cancelamento - Lumen";
@@ -13,31 +32,48 @@ export default function Reembolsos() {
 
     // Form States
     const [termoCiencia, setTermoCiencia] = useState(false);
-    const [identificacao, setIdentificacao] = useState({ email: '', produto: '', transacaoId: 'Não exigido' });
+    const [identificacao, setIdentificacao] = useState({ email: '', produto: '' });
     const [motivosSelecionados, setMotivosSelecionados] = useState<string[]>([]);
     const [outroMotivo, setOutroMotivo] = useState('');
-    const [subResposta, setSubResposta] = useState('');
-    const [justificativa, setJustificativa] = useState('');
 
-    // Final Checks
-    const [finalCheck1, setFinalCheck1] = useState(false);
-    const [finalCheck2, setFinalCheck2] = useState(false);
-    const [finalCheck3, setFinalCheck3] = useState(false);
-    const [finalCheck4, setFinalCheck4] = useState(false);
+    // Follow-up dynamics
+    const [currentFollowUpIndex, setCurrentFollowUpIndex] = useState(0);
+    const [subRespostas, setSubRespostas] = useState<Record<string, string>>({});
+
+    // Final
+    const [justificativa, setJustificativa] = useState('');
+    const [finalChecks, setFinalChecks] = useState({ c1: false, c2: false, c3: false, c4: false });
 
     // Validation
     const isStep2Valid = identificacao.email.includes('@') && identificacao.produto;
-    const isStep3Valid = motivosSelecionados.length > 0 && (!motivosSelecionados.includes('Outro') || outroMotivo.length >= 3);
+    const isStep3Valid = motivosSelecionados.length > 0 && (!motivosSelecionados.includes('outro') || outroMotivo.trim().length >= 3);
     const isJustificativaValid = justificativa.length >= 250;
-    const isFinalValid = finalCheck1 && finalCheck2 && finalCheck3 && finalCheck4;
+    const isFinalValid = finalChecks.c1 && finalChecks.c2 && finalChecks.c3 && finalChecks.c4;
+
+    const currentMotivoId = motivosSelecionados[currentFollowUpIndex];
+    const isSubRespostaValid = currentMotivoId && (subRespostas[currentMotivoId]?.trim().length >= 5);
 
     const nextStep = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setStep(step + 1);
     }
 
-    const toggleMotivo = (motivo: string) => {
-        setMotivosSelecionados(prev => prev.includes(motivo) ? prev.filter(m => m !== motivo) : [...prev, motivo]);
+    const nextFollowUp = () => {
+        if (currentFollowUpIndex < motivosSelecionados.length - 1) {
+            setCurrentFollowUpIndex(currentFollowUpIndex + 1);
+        } else {
+            nextStep();
+        }
+    }
+
+    const toggleMotivo = (id: string) => {
+        setMotivosSelecionados(prev => {
+            if (prev.includes(id)) {
+                const next = prev.filter(m => m !== id);
+                return next;
+            }
+            return [...prev, id];
+        });
     };
 
     const handlePaste = (e: React.ClipboardEvent) => {
@@ -47,20 +83,28 @@ export default function Reembolsos() {
 
     const submitAuditoria = async () => {
         setIsSubmitting(true);
-        const motivoFinal = motivosSelecionados.join(', ') + (motivosSelecionados.includes('Outro') ? ` - Específico: ${outroMotivo}` : '');
+
+        const formatMotivoLabel = (id: string) => {
+            if (id === 'outro') return `Outro: ${outroMotivo}`;
+            return MOTIVOS_APP.find(m => m.id === id)?.label || id;
+        };
+
+        const motivoFinal = motivosSelecionados.map(formatMotivoLabel).join(' | ');
+        const subRespostasFinal = motivosSelecionados.map(id => `[${formatMotivoLabel(id)}]: ${subRespostas[id] || 'Sem resposta'}`).join('\n\n');
+
         try {
             const { error } = await supabase.from('auditoria_reembolsos').insert({
                 email: identificacao.email,
                 produto: identificacao.produto,
                 transacao_id: 'Não exigida',
                 motivo_principal: motivoFinal,
-                sub_resposta: subResposta,
+                sub_resposta: subRespostasFinal,
                 justificativa_detalhada: justificativa
             });
 
             if (error) {
                 console.error("Erro no Supabase:", error);
-                alert("Ocorreu um erro técnico ao processar a auditoria. Tente novamente mais tarde.");
+                alert("Ocorreu um erro técnico na rede. Tente novamente mais tarde.");
                 setIsSubmitting(false);
                 return;
             }
@@ -88,11 +132,11 @@ export default function Reembolsos() {
             {/* Main Content */}
             <main className="flex-1 w-full max-w-2xl mx-auto px-4 py-12 md:py-16 flex flex-col">
 
-                {/* Progress Bar (Hidden on success) */}
+                {/* Progress Bar */}
                 {step < 7 && (
                     <div className="mb-10 animate-in fade-in duration-500">
                         <div className="flex justify-between text-xs font-semibold text-gray-400 mb-2 px-1 tracking-wider uppercase">
-                            <span>Auditoria</span>
+                            <span>Auditoria do Sistema</span>
                             <span>{step} de 6</span>
                         </div>
                         <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
@@ -116,26 +160,30 @@ export default function Reembolsos() {
                                 <motion.div key="step1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
                                     <div className="flex items-center gap-3 text-red-600 mb-2">
                                         <ShieldAlert size={28} />
-                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Desligamento de Ecossistema</h2>
+                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Análise de Qualidade</h2>
                                     </div>
 
-                                    <p className="text-gray-600 leading-relaxed text-[15px]">
-                                        A Lumen investe pesado em tecnologia e suporte para quem deseja escalar resultados. Ao prosseguir com o pedido de reembolso, você está ciente de que esta ação é considerada uma quebra de confiança com o ecossistema.
-                                    </p>
-                                    <p className="text-gray-600 leading-relaxed text-[15px] p-4 bg-red-50 rounded-xl border border-red-100">
-                                        Isso resultará na <strong>suspensão imediata e permanente</strong> do seu CPF/E-mail para futuras compras, atualizações ou novos lançamentos da Lumen (Bora, Foquinha, LOTER.IA e projetos futuros).
-                                    </p>
+                                    <div className="space-y-4 text-gray-600 leading-relaxed text-[15px]">
+                                        <p>
+                                            A Lumen investe pesado em tecnologia de automação inteligente (Bora/Foquinha). Entendemos que ferramentas robustas exigem alinhamento de expectativas. Ao prosseguir com a declaração de estorno, nós garantimos a devolução seguindo as diretrizes legais da plataforma de pagamento.
+                                        </p>
+                                        <div className="p-4 bg-red-50 rounded-xl border border-red-100">
+                                            <p>
+                                                Nosso sistema submete todos os relatórios abaixo à uma auditoria manual cruzada com os dados de uso do App no seu e-mail. Gostaríamos de pontuar que, em casos identificados de <strong>abuso das políticas, fraude ou má-fé pós-utilização intensiva</strong>, nos reservamos o direito contratual de suspender permanentemente esse CPF/E-mail do ecossistema de software da Lumen.
+                                            </p>
+                                        </div>
+                                    </div>
 
-                                    <label className="flex items-start gap-4 p-4 mt-4 cursor-pointer group hover:bg-gray-50 rounded-xl transition-colors border border-transparent hover:border-gray-200">
+                                    <label className="flex items-start gap-4 p-4 mt-2 cursor-pointer group hover:bg-gray-50 rounded-xl transition-colors border border-transparent hover:border-gray-200">
                                         <div className="mt-1 flex-shrink-0">
                                             <input type="checkbox" className="w-5 h-5 accent-black cursor-pointer rounded" checked={termoCiencia} onChange={(e) => setTermoCiencia(e.target.checked)} />
                                         </div>
                                         <span className="text-gray-700 font-medium leading-snug">
-                                            Compreendo o risco de banimento permanente e desejo prosseguir com a auditoria manual.
+                                            Compreendo as políticas de má-fé e de estorno da plataforma, e desejo prosseguir com a justificativa técnica.
                                         </span>
                                     </label>
 
-                                    <button disabled={!termoCiencia} onClick={nextStep} className="mt-6 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black focus:ring-4 focus:ring-gray-200">
+                                    <button disabled={!termoCiencia} onClick={nextStep} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black focus:ring-4 focus:ring-gray-200">
                                         Avançar <ArrowRight size={18} />
                                     </button>
                                 </motion.div>
@@ -146,23 +194,23 @@ export default function Reembolsos() {
                                 <motion.div key="step2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-8">
                                     <div>
                                         <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Identificação</h2>
-                                        <p className="text-gray-500">Por favor, confirme os dados da sua compra.</p>
+                                        <p className="text-gray-500">Vamos localizar sua licença do aplicativo.</p>
                                     </div>
 
                                     <div className="flex flex-col gap-8">
                                         <div className="group">
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2 transition-colors group-focus-within:text-black">E-mail utilizado na compra</label>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2 transition-colors group-focus-within:text-black">E-mail utilizado na compra/acesso da ferramenta</label>
                                             <input
                                                 type="email"
                                                 placeholder="seu@email.com"
                                                 value={identificacao.email}
                                                 onChange={(e) => setIdentificacao({ ...identificacao, email: e.target.value })}
-                                                className="w-full bg-transparent border-0 border-b-2 border-gray-200 px-0 py-3 text-gray-900 placeholder:text-gray-300 focus:ring-0 focus:border-black transition-colors outline-none"
+                                                className="w-full bg-transparent border-0 border-b-2 border-gray-200 px-0 py-3 text-[15px] text-gray-900 placeholder:text-gray-300 focus:ring-0 focus:border-black transition-colors outline-none"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-4">Produto que deseja cancelar</label>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-4">Qual ferramenta apresentou atrito?</label>
                                             <div className="grid grid-cols-2 gap-4">
                                                 {['Bora', 'Foquinha'].map(prod => (
                                                     <label key={prod} className={`flex items-center justify-center py-4 rounded-xl border-2 cursor-pointer transition-all ${identificacao.produto === prod ? 'border-black bg-gray-50 text-black font-semibold shadow-[0_4px_12px_rgba(0,0,0,0.05)]' : 'border-gray-100 hover:border-gray-200 text-gray-500 bg-white'}`}>
@@ -184,53 +232,45 @@ export default function Reembolsos() {
                             {step === 3 && (
                                 <motion.div key="step3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
                                     <div>
-                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Por que você está partindo?</h2>
-                                        <p className="text-gray-500">Selecione uma ou mais razões que o impedem de continuar.</p>
+                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Por que a ferramenta falhou para você?</h2>
+                                        <p className="text-gray-500 leading-relaxed text-[15px]">Nós otimizamos o software semanalmente. Selecione a(s) maior(es) pedra(s) no sapato que impediram sua escala.</p>
                                     </div>
 
                                     <div className="flex flex-col gap-3 mt-2">
-                                        {[
-                                            "Achei o processo muito complexo / Não consegui configurar.",
-                                            "Não tenho tempo suficiente para aplicar o método.",
-                                            "Achei que o resultado financeiro seria imediato.",
-                                            "Bug Técnico / App travou.",
-                                            "Imprevistos Financeiros e Pessoais."
-                                        ].map((motivo) => {
-                                            const isSelected = motivosSelecionados.includes(motivo);
+                                        {MOTIVOS_APP.map((m) => {
+                                            const isSelected = motivosSelecionados.includes(m.id);
                                             return (
                                                 <div
-                                                    key={motivo}
-                                                    onClick={() => toggleMotivo(motivo)}
+                                                    key={m.id}
+                                                    onClick={() => toggleMotivo(m.id)}
                                                     className={`p-4 rounded-xl cursor-pointer border-2 transition-all flex items-center gap-4 ${isSelected ? 'border-black bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.04)]' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
                                                 >
                                                     <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-black border-black' : 'border-gray-300'}`}>
                                                         {isSelected && <CheckCircle2 size={14} className="text-white" />}
                                                     </div>
-                                                    <span className={`text-[15px] ${isSelected ? 'font-medium text-black' : 'text-gray-600'}`}>{motivo}</span>
+                                                    <span className={`text-[15px] leading-snug ${isSelected ? 'font-medium text-black' : 'text-gray-600'}`}>{m.label}</span>
                                                 </div>
                                             );
                                         })}
 
                                         {/* "Outro" Custom Option */}
                                         <div
-                                            onClick={() => toggleMotivo('Outro')}
-                                            className={`p-4 rounded-xl cursor-pointer border-2 transition-all flex flex-col gap-4 ${motivosSelecionados.includes('Outro') ? 'border-black bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.04)]' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                                            className={`p-4 rounded-xl border-2 transition-all flex flex-col gap-4 ${motivosSelecionados.includes('outro') ? 'border-black bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.04)]' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
                                         >
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${motivosSelecionados.includes('Outro') ? 'bg-black border-black' : 'border-gray-300'}`}>
-                                                    {motivosSelecionados.includes('Outro') && <CheckCircle2 size={14} className="text-white" />}
+                                            <div className="flex items-center gap-4 cursor-pointer" onClick={() => toggleMotivo('outro')}>
+                                                <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${motivosSelecionados.includes('outro') ? 'bg-black border-black' : 'border-gray-300'}`}>
+                                                    {motivosSelecionados.includes('outro') && <CheckCircle2 size={14} className="text-white" />}
                                                 </div>
-                                                <span className={`text-[15px] ${motivosSelecionados.includes('Outro') ? 'font-medium text-black' : 'text-gray-600'}`}>Outro motivo específico</span>
+                                                <span className={`text-[15px] ${motivosSelecionados.includes('outro') ? 'font-medium text-black' : 'text-gray-600'}`}>Tive um problema completamente diferente.</span>
                                             </div>
 
-                                            {motivosSelecionados.includes('Outro') && (
-                                                <div className="pl-9 pb-1" onClick={e => e.stopPropagation()}>
+                                            {motivosSelecionados.includes('outro') && (
+                                                <div className="pl-9 pb-1">
                                                     <input
-                                                        autoFocus
                                                         type="text"
                                                         value={outroMotivo}
                                                         onChange={(e) => setOutroMotivo(e.target.value)}
-                                                        placeholder="Por exemplo, tive a conta suspensa..."
+                                                        placeholder="Sintetize em 3 palavras no máximo..."
                                                         className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-[14px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all shadow-sm"
                                                     />
                                                 </div>
@@ -244,43 +284,34 @@ export default function Reembolsos() {
                                 </motion.div>
                             )}
 
-                            {/* --- STEP 4 --- */}
-                            {step === 4 && (
-                                <motion.div key="step4" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-8">
+                            {/* --- STEP 4 (DYNAMIC FOLLOW-UPS) --- */}
+                            {step === 4 && currentMotivoId && (
+                                <motion.div key={`step4-${currentMotivoId}`} variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-8">
                                     <div>
-                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Poderia nos explicar?</h2>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Um passo atrás...</h2>
+                                            {motivosSelecionados.length > 1 && (
+                                                <span className="text-xs font-bold text-gray-400">Pergunta {currentFollowUpIndex + 1} de {motivosSelecionados.length}</span>
+                                            )}
+                                        </div>
                                         <p className="text-gray-500 leading-relaxed text-[15px]">
-                                            Percebemos que sua jornada não saiu como planejada. Para podermos te auxiliar ou concluir de vez sua rescisão, responda com sinceridade o principal ponto abaixo:
+                                            Precisamos isolar a fricção no seu caso para evoluirmos na Engenharia de Software e te ampararmos corretamente:
                                         </p>
                                     </div>
 
-                                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 flex flex-col gap-4 text-[15px] font-medium text-gray-800 shadow-inner">
-                                        {motivosSelecionados.some(m => m.includes("complexo")) && (
-                                            <p>Você chegou a tentar contato com nosso suporte técnico para que pudéssemos te ajudar na configuração inicial?</p>
-                                        )}
-                                        {motivosSelecionados.some(m => m.includes("tempo")) && (
-                                            <p>O aplicativo pode ser executado em 15 minutos. Você diria que não conseguiu encaixar esse tempo na rotina, ou acabou priorizando outras tarefas por falta de direcionamento nosso?</p>
-                                        )}
-                                        {motivosSelecionados.some(m => m.includes("imediato")) && (
-                                            <p>Na construção de um canal, consistência é tudo. Você conseguiu realizar as postagens de forma ininterrupta nos últimos 15 dias?</p>
-                                        )}
-                                        {motivosSelecionados.some(m => m.includes("Bug")) && (
-                                            <p>Sentimos muito pela frustração! Em qual funcionalidade a ferramenta travou para você? Isso limitou completamente sua conta?</p>
-                                        )}
-                                        {(motivosSelecionados.some(m => m.includes("Financeiros")) || motivosSelecionados.includes("Outro")) && (
-                                            <p>Entendemos perfeitamente o seu lado. Você precisou paralisar agora, mas cogita voltar a validar a estratégia no futuro?</p>
-                                        )}
+                                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 text-[15px] leading-relaxed font-medium text-gray-800 shadow-inner">
+                                        {PERGUNTAS_FOLLOWUP[currentMotivoId] || PERGUNTAS_FOLLOWUP['outro']}
                                     </div>
 
                                     <textarea
-                                        value={subResposta}
-                                        onChange={(e) => setSubResposta(e.target.value)}
-                                        placeholder="Sua resposta franca aqui..."
-                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-4 text-[15px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[120px] resize-y shadow-sm"
+                                        value={subRespostas[currentMotivoId] || ''}
+                                        onChange={(e) => setSubRespostas(prev => ({ ...prev, [currentMotivoId]: e.target.value }))}
+                                        placeholder="Sua resposta franca aqui. Detalhes são sempre bem-vindos..."
+                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-4 text-[15px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[140px] resize-y shadow-sm"
                                     />
 
-                                    <button disabled={subResposta.length < 5} onClick={nextStep} className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black">
-                                        Continuar <ArrowRight size={18} />
+                                    <button disabled={!isSubRespostaValid} onClick={nextFollowUp} className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black">
+                                        {currentFollowUpIndex < motivosSelecionados.length - 1 ? 'Próxima Questão' : 'Continuar'} <ArrowRight size={18} />
                                     </button>
                                 </motion.div>
                             )}
@@ -289,9 +320,9 @@ export default function Reembolsos() {
                             {step === 5 && (
                                 <motion.div key="step5" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
                                     <div>
-                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Seu feedback final</h2>
+                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Ato Final</h2>
                                         <p className="text-gray-500 leading-relaxed text-[15px]">
-                                            Valorizamos muito os comentários. Poderia nos explicar detalhadamente qual foi o seu principal obstáculo? Sua resposta é analisada diretamente pela equipe.
+                                            Obrigado por nos situar. Por fim, explique detalhadamente a soma de fatores que gerou sua decisão de arquivar o software.
                                         </p>
                                     </div>
 
@@ -300,8 +331,8 @@ export default function Reembolsos() {
                                             value={justificativa}
                                             onChange={(e) => setJustificativa(e.target.value)}
                                             onPaste={handlePaste}
-                                            placeholder="Conte-nos o que houve em detalhes. O que faltou para o sucesso da jornada?"
-                                            className="w-full bg-white border border-gray-200 rounded-xl px-5 py-5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[200px] pb-10 resize-none leading-relaxed shadow-sm"
+                                            placeholder="Detalhe todo o seu processo, sua operação atual, os gargalos e o motivo real por trás dessa solicitação. A área de T.I revisará pessoalmente (Mínimo de 250 letras)..."
+                                            className="w-full bg-white border border-gray-200 rounded-xl px-5 py-5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[220px] pb-10 resize-none leading-relaxed shadow-sm"
                                         />
                                         <div className={`absolute bottom-4 right-5 text-xs font-bold px-2 py-1 rounded bg-gray-50 ${justificativa.length >= 250 ? 'text-green-600' : 'text-red-500'}`}>
                                             {justificativa.length} / 250
@@ -318,24 +349,24 @@ export default function Reembolsos() {
                             {step === 6 && (
                                 <motion.div key="step6" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-8">
                                     <div>
-                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Assinatura de Rescisão</h2>
+                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Assinatura de Retirada</h2>
                                         <p className="text-gray-500 leading-relaxed text-[15px]">
-                                            Sua solicitação será encaminhada para nossa análise de qualidade. Para finalizar, confirme seu reconhecimento aos termos de quebra do serviço:
+                                            A equipe receberá seu laudo na mesa de auditoria. Para consumar o pedido na gateway, marque seu aval nos protocolos finais:
                                         </p>
                                     </div>
 
                                     <div className="flex flex-col gap-3">
                                         {[
-                                            { state: finalCheck1, setter: setFinalCheck1, text: "Confirmo que todos os meus dados e históricos serão apagados permanentemente." },
-                                            { state: finalCheck2, setter: setFinalCheck2, text: "O prazo de análise e resposta da equipe é de até 48 horas úteis." },
-                                            { state: finalCheck3, setter: setFinalCheck3, text: "O estorno depende da operadora e pode levar de 1 a 2 faturas." },
-                                            { state: finalCheck4, setter: setFinalCheck4, text: "Aceito a suspensão da minha conta em futuros produtos da Lumen." }
-                                        ].map((check, idx) => (
-                                            <label key={idx} className={`flex items-start gap-4 p-4 rounded-xl cursor-pointer border transition-colors ${check.state ? 'border-gray-300 bg-gray-50' : 'border-transparent hover:bg-gray-50'}`}>
+                                            { key: 'c1', text: "Declaro que interrompi os testes com a plataforma, e não reterei qualquer ativo gerado por automações nossas na má-fé." },
+                                            { key: 'c2', text: "O prazo base de conferência dos logs da base de dados e de resposta da equipe é de até 48 horas úteis." },
+                                            { key: 'c3', text: "O estorno é processado e liquidado pela operadora do cartão/banco, e pode cair entre 1 a 2 faturas subsequentes (Cartão)." },
+                                            { key: 'c4', text: "Compreendo e aceito a política rigorosa de suspensão do meu cadastro, caso constatados abusos nesta solicitação." }
+                                        ].map((check) => (
+                                            <label key={check.key} className={`flex items-start gap-4 p-4 rounded-xl cursor-pointer border transition-colors ${finalChecks[check.key as keyof typeof finalChecks] ? 'border-gray-300 bg-gray-50' : 'border-transparent hover:bg-gray-50'}`}>
                                                 <div className="mt-0.5 flex-shrink-0">
-                                                    <input type="checkbox" className="w-5 h-5 accent-black cursor-pointer rounded" checked={check.state} onChange={(e) => check.setter(e.target.checked)} />
+                                                    <input type="checkbox" className="w-5 h-5 accent-black cursor-pointer rounded" checked={finalChecks[check.key as keyof typeof finalChecks]} onChange={(e) => setFinalChecks(prev => ({ ...prev, [check.key]: e.target.checked }))} />
                                                 </div>
-                                                <span className={`text-[14px] leading-snug ${check.state ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>{check.text}</span>
+                                                <span className={`text-[14px] leading-snug ${finalChecks[check.key as keyof typeof finalChecks] ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>{check.text}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -344,10 +375,10 @@ export default function Reembolsos() {
                                         {isSubmitting ? (
                                             <div className="flex items-center gap-2">
                                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                Enviando ao Conselho...
+                                                Emitindo Laudo...
                                             </div>
                                         ) : (
-                                            "Finalizar Solicitação"
+                                            "Finalizar Solicitação e Auditar"
                                         )}
                                     </button>
                                 </motion.div>
@@ -360,19 +391,19 @@ export default function Reembolsos() {
                                         <CheckCircle2 size={40} className="text-green-600" />
                                     </div>
 
-                                    <h2 className="text-3xl font-semibold text-gray-900 tracking-tight">Solicitação Recebida</h2>
+                                    <h2 className="text-3xl font-semibold text-gray-900 tracking-tight">Ocorrência Protocolada</h2>
 
                                     <div className="flex flex-col gap-4 text-gray-500 max-w-md mx-auto text-[15px] leading-relaxed">
                                         <p>
-                                            O seu relatório de rescisão foi enviado diretamente para a nossa equipe de retenção e qualidade.
+                                            O seu formulário extenso de rescisão e depoimento técnico foram fixados no painel interno.
                                         </p>
                                         <p>
-                                            Para que possamos compreender sua frustração da melhor forma, avaliaremos manualmente as informações enviadas e entraremos em contato via e-mail ou WhatsApp em um prazo máximo de <strong>48 horas úteis</strong>.
+                                            Nossa área de T.I cruza os dados nos logs do seu e-mail de acesso. Confirmando a aderência aos termos, retornaremos um protocolo oficial (ou Pix imediato) via <strong>E-mail/WhatsApp</strong> dentro de 48 horas úteis.
                                         </p>
                                     </div>
 
                                     <div className="mt-4 text-xs font-semibold text-gray-400 uppercase tracking-widest">
-                                        Mesa de Auditoria Lumen
+                                        Lumen Audit System
                                     </div>
                                 </motion.div>
                             )}
@@ -383,7 +414,7 @@ export default function Reembolsos() {
 
                 {/* Footer */}
                 <footer className="mt-10 mb-4 text-center text-xs text-gray-400">
-                    &copy; {new Date().getFullYear()} Lumen. Todos os direitos reservados.
+                    &copy; {new Date().getFullYear()} Lumen Systems. Todos os direitos reservados.
                 </footer>
             </main>
         </div>
