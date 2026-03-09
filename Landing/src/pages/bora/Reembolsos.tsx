@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShieldAlert, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export default function Reembolsos() {
     useEffect(() => {
@@ -7,8 +9,9 @@ export default function Reembolsos() {
     }, []);
 
     const [step, setStep] = useState(1);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // States do Formulário
+    // Form States
     const [termoCiencia, setTermoCiencia] = useState(false);
     const [identificacao, setIdentificacao] = useState({ email: '', produto: '', transacaoId: 'Não exigido' });
     const [motivosSelecionados, setMotivosSelecionados] = useState<string[]>([]);
@@ -16,19 +19,22 @@ export default function Reembolsos() {
     const [subResposta, setSubResposta] = useState('');
     const [justificativa, setJustificativa] = useState('');
 
-    // States Aversao a perda final
+    // Final Checks
     const [finalCheck1, setFinalCheck1] = useState(false);
     const [finalCheck2, setFinalCheck2] = useState(false);
     const [finalCheck3, setFinalCheck3] = useState(false);
     const [finalCheck4, setFinalCheck4] = useState(false);
 
-    // Helpers
-    const nextStep = () => setStep(step + 1);
-
+    // Validation
     const isStep2Valid = identificacao.email.includes('@') && identificacao.produto;
     const isStep3Valid = motivosSelecionados.length > 0 && (!motivosSelecionados.includes('Outro') || outroMotivo.length >= 3);
     const isJustificativaValid = justificativa.length >= 250;
     const isFinalValid = finalCheck1 && finalCheck2 && finalCheck3 && finalCheck4;
+
+    const nextStep = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setStep(step + 1);
+    }
 
     const toggleMotivo = (motivo: string) => {
         setMotivosSelecionados(prev => prev.includes(motivo) ? prev.filter(m => m !== motivo) : [...prev, motivo]);
@@ -38,8 +44,6 @@ export default function Reembolsos() {
         e.preventDefault();
         alert("Para fins de auditoria, a justificativa deve ser digitada manualmente.");
     };
-
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const submitAuditoria = async () => {
         setIsSubmitting(true);
@@ -61,294 +65,327 @@ export default function Reembolsos() {
                 return;
             }
 
-            setStep(7); // Sucesso
+            setStep(7);
         } catch (err) {
             console.error(err);
             setIsSubmitting(false);
         }
     };
 
-    // Estilos compartilhados (Identidade Lumen enviada via HTML)
-    const styles = {
-        label: { display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 'bold' },
-        input: { width: '100%', padding: '12px 0', backgroundColor: 'transparent', border: 'none', borderBottom: '1px solid #ccc', borderRadius: '0', boxSizing: 'border-box' as const, marginBottom: '20px', fontSize: '14px', fontFamily: 'inherit', color: '#1a1a1a', outline: 'none' },
-        button: { width: '100%', padding: '15px', backgroundColor: '#000000', color: '#ffffff', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px', marginTop: '20px' },
-        buttonDisabled: { width: '100%', padding: '15px', backgroundColor: '#e0e0e0', color: '#888888', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'not-allowed', fontSize: '16px', marginTop: '20px' },
-        radioLabel: { display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '15px', cursor: 'pointer', fontSize: '14px' },
-        h2: { fontSize: '20px', marginBottom: '10px', marginTop: 0 },
-        p: { marginBottom: '20px', fontSize: '14px' },
+    const containerVariants = {
+        hidden: { opacity: 0, y: 15 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+        exit: { opacity: 0, y: -15, transition: { duration: 0.2 } }
     };
 
     return (
-        <div style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", backgroundColor: "#f9f9f9", minHeight: "100vh", padding: "40px 20px", color: "#1a1a1a", display: "flex", justifyContent: "center", alignItems: "flex-start", boxSizing: "border-box" }}>
-            <div style={{ width: "100%", maxWidth: "500px", backgroundColor: "#ffffff", borderRadius: "8px", overflow: "hidden", boxShadow: "0 4px 10px rgba(0,0,0,0.05)" }}>
+        <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900 selection:bg-gray-200">
+            {/* Header */}
+            <header className="bg-black text-white py-6 flex justify-center items-center shadow-lg z-10 sticky top-0">
+                <h1 className="text-xl tracking-[0.2em] font-light">LUMEN</h1>
+            </header>
 
-                {/* Header idêntico ao HTML enviado */}
-                <div style={{ backgroundColor: "#000000", color: "#ffffff", padding: "30px", textAlign: "center", letterSpacing: "2px" }}>
-                    <h1 style={{ margin: 0, fontSize: "24px", fontWeight: "normal" }}>LUMEN</h1>
-                </div>
+            {/* Main Content */}
+            <main className="flex-1 w-full max-w-2xl mx-auto px-4 py-12 md:py-16 flex flex-col">
 
-                <div style={{ padding: "40px", textAlign: "left" }}>
-
-                    {/* --- ETAPA 1: TERMO DE CIÊNCIA --- */}
-                    {step === 1 && (
-                        <div>
-                            <h2 style={styles.h2}>Solicitação de Desligamento de Ecossistema</h2>
-                            <p style={styles.p}>
-                                A Lumen investe pesado em tecnologia e suporte para quem deseja escalar resultados. Ao prosseguir com o pedido de reembolso, você está ciente de que esta ação é considerada uma quebra de confiança com o ecossistema. Isso resultará na suspensão imediata e permanente do seu CPF/E-mail para futuras compras, atualizações ou novos lançamentos da Lumen (Bora, Foquinha, LOTER.IA e projetos futuros).
-                            </p>
-
-                            <label style={styles.radioLabel}>
-                                <input
-                                    type="checkbox"
-                                    checked={termoCiencia}
-                                    onChange={(e) => setTermoCiencia(e.target.checked)}
-                                    style={{ marginTop: '3px' }}
-                                />
-                                <span>
-                                    Compreendo o risco de banimento permanente e desejo prosseguir com a auditoria manual.
-                                </span>
-                            </label>
-
-                            <button
-                                disabled={!termoCiencia}
-                                onClick={nextStep}
-                                style={termoCiencia ? styles.button : styles.buttonDisabled}
-                            >
-                                Próximo
-                            </button>
+                {/* Progress Bar (Hidden on success) */}
+                {step < 7 && (
+                    <div className="mb-10 animate-in fade-in duration-500">
+                        <div className="flex justify-between text-xs font-semibold text-gray-400 mb-2 px-1 tracking-wider uppercase">
+                            <span>Auditoria</span>
+                            <span>{step} de 6</span>
                         </div>
-                    )}
-
-                    {/* --- ETAPA 2: IDENTIFICAÇÃO --- */}
-                    {step === 2 && (
-                        <div>
-                            <h2 style={styles.h2}>Identificação do Pedido</h2>
-                            <p style={styles.p}>Por favor, confirme os dados da sua compra.</p>
-
-                            <label style={styles.label}>E-mail utilizado na compra</label>
-                            <input
-                                type="email"
-                                value={identificacao.email}
-                                onChange={(e) => setIdentificacao({ ...identificacao, email: e.target.value })}
-                                style={styles.input}
+                        <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full bg-black rounded-full"
+                                initial={{ width: `${((step - 1) / 6) * 100}%` }}
+                                animate={{ width: `${(step / 6) * 100}%` }}
+                                transition={{ duration: 0.5, ease: "easeInOut" }}
                             />
-
-                            <label style={styles.label}>Produto que deseja cancelar:</label>
-                            <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '14px' }}>
-                                    <input type="radio" checked={identificacao.produto === 'Bora'} onChange={() => setIdentificacao({ ...identificacao, produto: 'Bora' })} /> Bora
-                                </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '14px' }}>
-                                    <input type="radio" checked={identificacao.produto === 'Foquinha'} onChange={() => setIdentificacao({ ...identificacao, produto: 'Foquinha' })} /> Foquinha
-                                </label>
-                            </div>
-
-                            <button
-                                disabled={!isStep2Valid}
-                                onClick={nextStep}
-                                style={isStep2Valid ? styles.button : styles.buttonDisabled}
-                            >
-                                Próximo
-                            </button>
                         </div>
-                    )}
+                    </div>
+                )}
 
-                    {/* --- ETAPA 3: MAPEAMENTO DE FRUSTRAÇÃO --- */}
-                    {step === 3 && (
-                        <div>
-                            <h2 style={styles.h2}>Motivo do Cancelamento</h2>
+                {/* Form Card */}
+                <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+                    <div className="p-8 md:p-10">
+                        <AnimatePresence mode="wait">
 
-                            <label style={{ ...styles.label, fontWeight: 'normal', color: '#444' }}>Você pode selecionar mais de uma opção para nos ajudar a entender exatamente o que houve.</label>
-
-                            <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                {[
-                                    "Achei o processo muito complexo / Não consegui configurar.",
-                                    "Não tenho tempo suficiente para aplicar o método.",
-                                    "Achei que o resultado financeiro seria imediato.",
-                                    "Bug Técnico / App travou.",
-                                    "Imprevistos Financeiros e Pessoais.",
-                                    "Outro"
-                                ].map((motivo, idx) => (
-                                    <div
-                                        key={idx}
-                                        onClick={() => toggleMotivo(motivo)}
-                                        style={{
-                                            padding: '15px',
-                                            border: motivosSelecionados.includes(motivo) ? '2px solid #000' : '1px solid #e0e0e0',
-                                            borderRadius: '8px',
-                                            cursor: 'pointer',
-                                            backgroundColor: motivosSelecionados.includes(motivo) ? '#f4f4f4' : '#fff',
-                                            transition: 'all 0.2s',
-                                            fontWeight: motivosSelecionados.includes(motivo) ? 'bold' : 'normal'
-                                        }}
-                                    >
-                                        {motivo}
+                            {/* --- STEP 1 --- */}
+                            {step === 1 && (
+                                <motion.div key="step1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
+                                    <div className="flex items-center gap-3 text-red-600 mb-2">
+                                        <ShieldAlert size={28} />
+                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Desligamento de Ecossistema</h2>
                                     </div>
-                                ))}
-                            </div>
 
-                            {motivosSelecionados.includes('Outro') && (
-                                <div style={{ marginTop: '15px' }}>
-                                    <label style={styles.label}>Poderia nos detalhar brevemente o motivo?</label>
-                                    <input
-                                        type="text"
-                                        value={outroMotivo}
-                                        onChange={(e) => setOutroMotivo(e.target.value)}
-                                        placeholder="Ex: Minha conta do TikTok foi banida..."
-                                        style={styles.input}
+                                    <p className="text-gray-600 leading-relaxed text-[15px]">
+                                        A Lumen investe pesado em tecnologia e suporte para quem deseja escalar resultados. Ao prosseguir com o pedido de reembolso, você está ciente de que esta ação é considerada uma quebra de confiança com o ecossistema.
+                                    </p>
+                                    <p className="text-gray-600 leading-relaxed text-[15px] p-4 bg-red-50 rounded-xl border border-red-100">
+                                        Isso resultará na <strong>suspensão imediata e permanente</strong> do seu CPF/E-mail para futuras compras, atualizações ou novos lançamentos da Lumen (Bora, Foquinha, LOTER.IA e projetos futuros).
+                                    </p>
+
+                                    <label className="flex items-start gap-4 p-4 mt-4 cursor-pointer group hover:bg-gray-50 rounded-xl transition-colors border border-transparent hover:border-gray-200">
+                                        <div className="mt-1 flex-shrink-0">
+                                            <input type="checkbox" className="w-5 h-5 accent-black cursor-pointer rounded" checked={termoCiencia} onChange={(e) => setTermoCiencia(e.target.checked)} />
+                                        </div>
+                                        <span className="text-gray-700 font-medium leading-snug">
+                                            Compreendo o risco de banimento permanente e desejo prosseguir com a auditoria manual.
+                                        </span>
+                                    </label>
+
+                                    <button disabled={!termoCiencia} onClick={nextStep} className="mt-6 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black focus:ring-4 focus:ring-gray-200">
+                                        Avançar <ArrowRight size={18} />
+                                    </button>
+                                </motion.div>
+                            )}
+
+                            {/* --- STEP 2 --- */}
+                            {step === 2 && (
+                                <motion.div key="step2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-8">
+                                    <div>
+                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Identificação</h2>
+                                        <p className="text-gray-500">Por favor, confirme os dados da sua compra.</p>
+                                    </div>
+
+                                    <div className="flex flex-col gap-8">
+                                        <div className="group">
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2 transition-colors group-focus-within:text-black">E-mail utilizado na compra</label>
+                                            <input
+                                                type="email"
+                                                placeholder="seu@email.com"
+                                                value={identificacao.email}
+                                                onChange={(e) => setIdentificacao({ ...identificacao, email: e.target.value })}
+                                                className="w-full bg-transparent border-0 border-b-2 border-gray-200 px-0 py-3 text-gray-900 placeholder:text-gray-300 focus:ring-0 focus:border-black transition-colors outline-none"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-4">Produto que deseja cancelar</label>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {['Bora', 'Foquinha'].map(prod => (
+                                                    <label key={prod} className={`flex items-center justify-center py-4 rounded-xl border-2 cursor-pointer transition-all ${identificacao.produto === prod ? 'border-black bg-gray-50 text-black font-semibold shadow-[0_4px_12px_rgba(0,0,0,0.05)]' : 'border-gray-100 hover:border-gray-200 text-gray-500 bg-white'}`}>
+                                                        <input type="radio" className="sr-only" checked={identificacao.produto === prod} onChange={() => setIdentificacao({ ...identificacao, produto: prod })} />
+                                                        {prod}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button disabled={!isStep2Valid} onClick={nextStep} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black">
+                                        Continuar <ArrowRight size={18} />
+                                    </button>
+                                </motion.div>
+                            )}
+
+                            {/* --- STEP 3 --- */}
+                            {step === 3 && (
+                                <motion.div key="step3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
+                                    <div>
+                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Por que você está partindo?</h2>
+                                        <p className="text-gray-500">Selecione uma ou mais razões que o impedem de continuar.</p>
+                                    </div>
+
+                                    <div className="flex flex-col gap-3 mt-2">
+                                        {[
+                                            "Achei o processo muito complexo / Não consegui configurar.",
+                                            "Não tenho tempo suficiente para aplicar o método.",
+                                            "Achei que o resultado financeiro seria imediato.",
+                                            "Bug Técnico / App travou.",
+                                            "Imprevistos Financeiros e Pessoais."
+                                        ].map((motivo) => {
+                                            const isSelected = motivosSelecionados.includes(motivo);
+                                            return (
+                                                <div
+                                                    key={motivo}
+                                                    onClick={() => toggleMotivo(motivo)}
+                                                    className={`p-4 rounded-xl cursor-pointer border-2 transition-all flex items-center gap-4 ${isSelected ? 'border-black bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.04)]' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                                                >
+                                                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-black border-black' : 'border-gray-300'}`}>
+                                                        {isSelected && <CheckCircle2 size={14} className="text-white" />}
+                                                    </div>
+                                                    <span className={`text-[15px] ${isSelected ? 'font-medium text-black' : 'text-gray-600'}`}>{motivo}</span>
+                                                </div>
+                                            );
+                                        })}
+
+                                        {/* "Outro" Custom Option */}
+                                        <div
+                                            onClick={() => toggleMotivo('Outro')}
+                                            className={`p-4 rounded-xl cursor-pointer border-2 transition-all flex flex-col gap-4 ${motivosSelecionados.includes('Outro') ? 'border-black bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.04)]' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${motivosSelecionados.includes('Outro') ? 'bg-black border-black' : 'border-gray-300'}`}>
+                                                    {motivosSelecionados.includes('Outro') && <CheckCircle2 size={14} className="text-white" />}
+                                                </div>
+                                                <span className={`text-[15px] ${motivosSelecionados.includes('Outro') ? 'font-medium text-black' : 'text-gray-600'}`}>Outro motivo específico</span>
+                                            </div>
+
+                                            {motivosSelecionados.includes('Outro') && (
+                                                <div className="pl-9 pb-1" onClick={e => e.stopPropagation()}>
+                                                    <input
+                                                        autoFocus
+                                                        type="text"
+                                                        value={outroMotivo}
+                                                        onChange={(e) => setOutroMotivo(e.target.value)}
+                                                        placeholder="Por exemplo, tive a conta suspensa..."
+                                                        className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-[14px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all shadow-sm"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <button disabled={!isStep3Valid} onClick={nextStep} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black">
+                                        Continuar <ArrowRight size={18} />
+                                    </button>
+                                </motion.div>
+                            )}
+
+                            {/* --- STEP 4 --- */}
+                            {step === 4 && (
+                                <motion.div key="step4" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-8">
+                                    <div>
+                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Poderia nos explicar?</h2>
+                                        <p className="text-gray-500 leading-relaxed text-[15px]">
+                                            Percebemos que sua jornada não saiu como planejada. Para podermos te auxiliar ou concluir de vez sua rescisão, responda com sinceridade o principal ponto abaixo:
+                                        </p>
+                                    </div>
+
+                                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 flex flex-col gap-4 text-[15px] font-medium text-gray-800 shadow-inner">
+                                        {motivosSelecionados.some(m => m.includes("complexo")) && (
+                                            <p>Você chegou a tentar contato com nosso suporte técnico para que pudéssemos te ajudar na configuração inicial?</p>
+                                        )}
+                                        {motivosSelecionados.some(m => m.includes("tempo")) && (
+                                            <p>O aplicativo pode ser executado em 15 minutos. Você diria que não conseguiu encaixar esse tempo na rotina, ou acabou priorizando outras tarefas por falta de direcionamento nosso?</p>
+                                        )}
+                                        {motivosSelecionados.some(m => m.includes("imediato")) && (
+                                            <p>Na construção de um canal, consistência é tudo. Você conseguiu realizar as postagens de forma ininterrupta nos últimos 15 dias?</p>
+                                        )}
+                                        {motivosSelecionados.some(m => m.includes("Bug")) && (
+                                            <p>Sentimos muito pela frustração! Em qual funcionalidade a ferramenta travou para você? Isso limitou completamente sua conta?</p>
+                                        )}
+                                        {(motivosSelecionados.some(m => m.includes("Financeiros")) || motivosSelecionados.includes("Outro")) && (
+                                            <p>Entendemos perfeitamente o seu lado. Você precisou paralisar agora, mas cogita voltar a validar a estratégia no futuro?</p>
+                                        )}
+                                    </div>
+
+                                    <textarea
+                                        value={subResposta}
+                                        onChange={(e) => setSubResposta(e.target.value)}
+                                        placeholder="Sua resposta franca aqui..."
+                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-4 text-[15px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[120px] resize-y shadow-sm"
                                     />
-                                </div>
+
+                                    <button disabled={subResposta.length < 5} onClick={nextStep} className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black">
+                                        Continuar <ArrowRight size={18} />
+                                    </button>
+                                </motion.div>
                             )}
 
-                            <button
-                                disabled={!isStep3Valid}
-                                onClick={nextStep}
-                                style={isStep3Valid ? styles.button : styles.buttonDisabled}
-                            >
-                                Próximo
-                            </button>
-                        </div>
-                    )}
+                            {/* --- STEP 5 --- */}
+                            {step === 5 && (
+                                <motion.div key="step5" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
+                                    <div>
+                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Seu feedback final</h2>
+                                        <p className="text-gray-500 leading-relaxed text-[15px]">
+                                            Valorizamos muito os comentários. Poderia nos explicar detalhadamente qual foi o seu principal obstáculo? Sua resposta é analisada diretamente pela equipe.
+                                        </p>
+                                    </div>
 
-                    {/* --- ETAPA 4: ADAPTAÇÃO DO QUIZ --- */}
-                    {step === 4 && (
-                        <div>
-                            <h2 style={styles.h2}>Antes de continuarmos, queremos te ouvir...</h2>
-                            <p style={{ ...styles.label, fontWeight: 'normal', color: '#444', marginBottom: '20px' }}>
-                                Percebemos que sua jornada não saiu como planejada. Para podermos te auxiliar ou concluir de vez sua rescisão, responda com sinceridade o principal ponto abaixo:
-                            </p>
+                                    <div className="relative mt-2">
+                                        <textarea
+                                            value={justificativa}
+                                            onChange={(e) => setJustificativa(e.target.value)}
+                                            onPaste={handlePaste}
+                                            placeholder="Conte-nos o que houve em detalhes. O que faltou para o sucesso da jornada?"
+                                            className="w-full bg-white border border-gray-200 rounded-xl px-5 py-5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[200px] pb-10 resize-none leading-relaxed shadow-sm"
+                                        />
+                                        <div className={`absolute bottom-4 right-5 text-xs font-bold px-2 py-1 rounded bg-gray-50 ${justificativa.length >= 250 ? 'text-green-600' : 'text-red-500'}`}>
+                                            {justificativa.length} / 250
+                                        </div>
+                                    </div>
 
-                            {motivosSelecionados.some(m => m.includes("complexo")) && (
-                                <p style={styles.label}>Você chegou a tentar contato com nosso suporte técnico para que pudéssemos te ajudar na configuração inicial?</p>
+                                    <button disabled={!isJustificativaValid} onClick={nextStep} className="mt-2 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black">
+                                        Avançar <ArrowRight size={18} />
+                                    </button>
+                                </motion.div>
                             )}
 
-                            {motivosSelecionados.some(m => m.includes("tempo")) && (
-                                <p style={styles.label}>O aplicativo pode ser executado em 15 minutos. Você diria que não conseguiu encaixar esse tempo na rotina, ou acabou priorizando outras tarefas por falta de direcionamento nosso?</p>
+                            {/* --- STEP 6 --- */}
+                            {step === 6 && (
+                                <motion.div key="step6" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-8">
+                                    <div>
+                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Assinatura de Rescisão</h2>
+                                        <p className="text-gray-500 leading-relaxed text-[15px]">
+                                            Sua solicitação será encaminhada para nossa análise de qualidade. Para finalizar, confirme seu reconhecimento aos termos de quebra do serviço:
+                                        </p>
+                                    </div>
+
+                                    <div className="flex flex-col gap-3">
+                                        {[
+                                            { state: finalCheck1, setter: setFinalCheck1, text: "Confirmo que todos os meus dados e históricos serão apagados permanentemente." },
+                                            { state: finalCheck2, setter: setFinalCheck2, text: "O prazo de análise e resposta da equipe é de até 48 horas úteis." },
+                                            { state: finalCheck3, setter: setFinalCheck3, text: "O estorno depende da operadora e pode levar de 1 a 2 faturas." },
+                                            { state: finalCheck4, setter: setFinalCheck4, text: "Aceito a suspensão da minha conta em futuros produtos da Lumen." }
+                                        ].map((check, idx) => (
+                                            <label key={idx} className={`flex items-start gap-4 p-4 rounded-xl cursor-pointer border transition-colors ${check.state ? 'border-gray-300 bg-gray-50' : 'border-transparent hover:bg-gray-50'}`}>
+                                                <div className="mt-0.5 flex-shrink-0">
+                                                    <input type="checkbox" className="w-5 h-5 accent-black cursor-pointer rounded" checked={check.state} onChange={(e) => check.setter(e.target.checked)} />
+                                                </div>
+                                                <span className={`text-[14px] leading-snug ${check.state ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>{check.text}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+
+                                    <button disabled={!isFinalValid || isSubmitting} onClick={submitAuditoria} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black relative overflow-hidden">
+                                        {isSubmitting ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                Enviando ao Conselho...
+                                            </div>
+                                        ) : (
+                                            "Finalizar Solicitação"
+                                        )}
+                                    </button>
+                                </motion.div>
                             )}
 
-                            {motivosSelecionados.some(m => m.includes("imediato")) && (
-                                <p style={styles.label}>Na construção de um canal, consistência é tudo. Você conseguiu realizar as postagens de forma ininterrupta nos últimos 15 dias?</p>
+                            {/* --- STEP 7: SUCCESS --- */}
+                            {step === 7 && (
+                                <motion.div key="step7" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col items-center gap-6 py-10 md:py-16 text-center">
+                                    <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center mb-4">
+                                        <CheckCircle2 size={40} className="text-green-600" />
+                                    </div>
+
+                                    <h2 className="text-3xl font-semibold text-gray-900 tracking-tight">Solicitação Recebida</h2>
+
+                                    <div className="flex flex-col gap-4 text-gray-500 max-w-md mx-auto text-[15px] leading-relaxed">
+                                        <p>
+                                            O seu relatório de rescisão foi enviado diretamente para a nossa equipe de retenção e qualidade.
+                                        </p>
+                                        <p>
+                                            Para que possamos compreender sua frustração da melhor forma, avaliaremos manualmente as informações enviadas e entraremos em contato via e-mail ou WhatsApp em um prazo máximo de <strong>48 horas úteis</strong>.
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-4 text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                                        Mesa de Auditoria Lumen
+                                    </div>
+                                </motion.div>
                             )}
 
-                            {motivosSelecionados.some(m => m.includes("Bug")) && (
-                                <p style={styles.label}>Sentimos muito pela frustração! Em qual funcionalidade a ferramenta travou para você? Isso limitou completamente sua conta?</p>
-                            )}
-
-                            {(motivosSelecionados.some(m => m.includes("Financeiros")) || motivosSelecionados.includes("Outro")) && (
-                                <p style={styles.label}>Entendemos perfeitamente o seu lado e sabemos que imprevistos fogem do nosso controle. Você precisou paralisar agora, mas cogita voltar a validar a estratégia no futuro?</p>
-                            )}
-
-                            <textarea
-                                value={subResposta}
-                                onChange={(e) => setSubResposta(e.target.value)}
-                                style={{ ...styles.input, height: '100px', resize: 'vertical', marginTop: '10px' }}
-                            ></textarea>
-
-                            <button
-                                disabled={subResposta.length < 5}
-                                onClick={nextStep}
-                                style={subResposta.length >= 5 ? styles.button : styles.buttonDisabled}
-                            >
-                                Próximo
-                            </button>
-                        </div>
-                    )}
-
-                    {/* --- ETAPA 5: A GRANDE BARREIRA (400 CHARS) --- */}
-                    {step === 5 && (
-                        <div>
-                            <h2 style={styles.h2}>Apenas para concluirmos</h2>
-
-                            <label style={{ ...styles.label, fontWeight: 'normal', color: '#444' }}>
-                                Valorizamos muito os comentários dos nossos usuários. Poderia nos explicar detalhadamente qual foi o principal obstáculo? Sua resposta é analisada diretamente pela equipe para entender de fato a sua dor atual.
-                            </label>
-
-                            <textarea
-                                value={justificativa}
-                                onChange={(e) => setJustificativa(e.target.value)}
-                                onPaste={handlePaste}
-                                placeholder="Conte-nos o que houve em mais detalhes..."
-                                style={{ ...styles.input, height: '150px', resize: 'vertical' }}
-                            ></textarea>
-
-                            <div style={{ textAlign: 'right', fontSize: '12px', color: justificativa.length >= 250 ? '#2e7d32' : '#d32f2f', marginTop: '-15px', marginBottom: '15px', fontWeight: 'bold' }}>
-                                Caracteres digitados: {justificativa.length} / 250
-                            </div>
-
-                            <button
-                                disabled={!isJustificativaValid}
-                                onClick={nextStep}
-                                style={isJustificativaValid ? styles.button : styles.buttonDisabled}
-                            >
-                                Próximo
-                            </button>
-                        </div>
-                    )}
-
-                    {/* --- ETAPA 6: AVERSÃO À PERDA FINAL --- */}
-                    {step === 6 && (
-                        <div>
-                            <h2 style={styles.h2}>Finalização da Solicitação</h2>
-                            <p style={styles.p}>Sua solicitação será encaminhada para análise manual. Ao clicar em 'Finalizar Solicitação', você confirma que:</p>
-
-                            <div style={{ marginBottom: '20px' }}>
-                                <label style={styles.radioLabel}>
-                                    <input type="checkbox" checked={finalCheck1} onChange={(e) => setFinalCheck1(e.target.checked)} style={{ marginTop: '3px' }} />
-                                    <span>Confirmo que todos os meus dados e históricos serão apagados permanentemente em 24h.</span>
-                                </label>
-
-                                <label style={styles.radioLabel}>
-                                    <input type="checkbox" checked={finalCheck2} onChange={(e) => setFinalCheck2(e.target.checked)} style={{ marginTop: '3px' }} />
-                                    <span>Entendo que o prazo de análise e resposta do time comercial é de 48 horas úteis.</span>
-                                </label>
-
-                                <label style={styles.radioLabel}>
-                                    <input type="checkbox" checked={finalCheck3} onChange={(e) => setFinalCheck3(e.target.checked)} style={{ marginTop: '3px' }} />
-                                    <span>Reconheço que o estorno depende da operadora do cartão e pode levar até 2 faturas.</span>
-                                </label>
-
-                                <label style={styles.radioLabel}>
-                                    <input type="checkbox" checked={finalCheck4} onChange={(e) => setFinalCheck4(e.target.checked)} style={{ marginTop: '3px' }} />
-                                    <span>Declaro que li e aceito a suspensão do meu acesso a futuros produtos da Lumen.</span>
-                                </label>
-                            </div>
-
-                            <button
-                                disabled={!isFinalValid || isSubmitting}
-                                onClick={submitAuditoria}
-                                style={(isFinalValid && !isSubmitting) ? styles.button : styles.buttonDisabled}
-                            >
-                                {isSubmitting ? 'Enviando ao Conselho...' : 'Finalizar Solicitação'}
-                            </button>
-                        </div>
-                    )}
-
-                    {/* --- ETAPA 7: SUCESSO --- */}
-                    {step === 7 && (
-                        <div style={{ textAlign: "center", padding: "20px 0" }}>
-                            <div style={{ display: 'inline-block', backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '5px 15px', borderRadius: '20px', fontWeight: 'bold', fontSize: '14px', marginBottom: '20px' }}>
-                                Solicitação Recebida
-                            </div>
-
-                            <h2 style={{ fontSize: '20px', marginBottom: '15px', marginTop: 0 }}>Pedido em Análise</h2>
-
-                            <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#444' }}>
-                                Sua solicitação de estorno foi recebida com sucesso pela nossa equipe de qualidade.
-                            </p>
-
-                            <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#444' }}>
-                                Faremos a validação manual das suas respostas e você receberá um retorno da nossa equipe neste mesmo e-mail no prazo máximo de <strong>48 horas úteis</strong>.
-                            </p>
-                        </div>
-                    )}
+                        </AnimatePresence>
+                    </div>
                 </div>
 
-                {/* Footer idêntico ao HTML enviado */}
-                <div style={{ backgroundColor: "#f4f4f4", padding: "20px", textAlign: "center", fontSize: "12px", color: "#888888" }}>
-                    <p style={{ margin: 0 }}>&copy; {new Date().getFullYear()} Lumen. Todos os direitos reservados.</p>
-                </div>
-            </div>
+                {/* Footer */}
+                <footer className="mt-10 mb-4 text-center text-xs text-gray-400">
+                    &copy; {new Date().getFullYear()} Lumen. Todos os direitos reservados.
+                </footer>
+            </main>
         </div>
     );
 }
