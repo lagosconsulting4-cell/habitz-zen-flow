@@ -7,12 +7,6 @@ interface NotificationMessage {
   url?: string;
   habitId?: string;
   notificationHistoryId?: string;
-  data?: {
-    type?: string;
-    period?: string;
-    habitCount?: number;
-    habitIds?: string[];
-  };
 }
 
 /**

@@ -244,6 +244,7 @@ const Dashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
+    if (loading) return; // Wait for habits data before processing intent
     const completeHabitId = searchParams.get("complete");
     const nhid = searchParams.get("nhid");
 
@@ -277,7 +278,7 @@ const Dashboard = () => {
       searchParams.delete("nhid");
       setSearchParams(searchParams, { replace: true });
     }
-  }, [searchParams, user?.id]);
+  }, [searchParams, user?.id, loading]);
 
   // Journey day auto-completion detection — iterates ALL active journeys
   useEffect(() => {

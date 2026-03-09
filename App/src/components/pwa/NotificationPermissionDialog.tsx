@@ -128,14 +128,21 @@ export function NotificationPermissionDialog({
           "bg-black/50 backdrop-blur-sm animate-in fade-in duration-300",
           className
         )}
+        onClick={handleClose}
       >
-        <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-md shadow-xl animate-in slide-in-from-bottom-4 duration-300">
+        <div
+          className="bg-card border border-border rounded-2xl p-6 w-full max-w-md shadow-xl animate-in slide-in-from-bottom-4 duration-300"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="notif-dialog-title-ios"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex items-start gap-4">
             <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
               <Smartphone className="w-6 h-6 text-amber-500" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-lg text-foreground">
+              <h3 id="notif-dialog-title-ios" className="font-semibold text-lg text-foreground">
                 Instale o App Primeiro
               </h3>
               <p className="text-sm text-muted-foreground mt-1">
@@ -169,14 +176,21 @@ export function NotificationPermissionDialog({
         "bg-black/50 backdrop-blur-sm animate-in fade-in duration-300",
         className
       )}
+      onClick={handleClose}
     >
-      <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-md shadow-xl animate-in slide-in-from-bottom-4 duration-300">
+      <div
+        className="bg-card border border-border rounded-2xl p-6 w-full max-w-md shadow-xl animate-in slide-in-from-bottom-4 duration-300"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="notif-dialog-title"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
             <Bell className="w-6 h-6 text-primary" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-lg text-foreground">
+            <h3 id="notif-dialog-title" className="font-semibold text-lg text-foreground">
               Ativar Lembretes
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
@@ -238,7 +252,7 @@ export function NotificationPermissionDialog({
 
 // Botão simples para toggle de notificações (usar em Profile/Settings)
 export function NotificationToggle({ className }: { className?: string }) {
-  const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } = usePushNotifications();
+  const { isSupported, permission, isSubscribed, isLoading, subscribe, unsubscribe } = usePushNotifications();
   const { isIOS, isStandalone } = usePWA();
 
   // iOS não instalado
@@ -267,6 +281,22 @@ export function NotificationToggle({ className }: { className?: string }) {
             <p className="text-sm font-medium">Notificações</p>
             <p className="text-xs text-muted-foreground">
               Não suportado neste dispositivo
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (permission === "denied") {
+    return (
+      <div className={cn("flex items-center justify-between", className)}>
+        <div className="flex items-center gap-3">
+          <BellOff className="w-5 h-5 text-amber-500" />
+          <div>
+            <p className="text-sm font-medium">Notificações</p>
+            <p className="text-xs text-amber-500">
+              Bloqueado — ative nas configurações do navegador
             </p>
           </div>
         </div>

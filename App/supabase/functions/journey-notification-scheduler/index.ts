@@ -214,6 +214,15 @@ serve(async (req) => {
       .in("user_id", userIds)
       .eq("is_active", true);
 
+    // Build lookup map: "userId:journeyId:day" -> habits[] for O(1) access
+    const newHabitsMap = new Map<string, any[]>();
+    for (const h of (newHabits || []) as any[]) {
+      const key = `${h.user_id}:${h.journey_id}:${h.introduced_on_day}`;
+      const arr = newHabitsMap.get(key) || [];
+      arr.push(h);
+      newHabitsMap.set(key, arr);
+    }
+
     const results = {
       dailyReminder: 0,
       cliffSupport: 0,
@@ -308,13 +317,8 @@ serve(async (req) => {
         else results.skipped++;
       }
 
-      // Check for new habits unlocked on current day
-      const userNewHabits = (newHabits || []).filter(
-        (h: any) =>
-          h.user_id === userId &&
-          h.journey_id === journey.journey_id &&
-          h.introduced_on_day === currentDay
-      );
+      // Check for new habits unlocked on current day (O(1) Map lookup)
+      const userNewHabits = newHabitsMap.get(`${userId}:${journey.journey_id}:${currentDay}`) || [];
 
       for (const newHabit of userNewHabits) {
         const habitName = (newHabit as any).habits?.name;

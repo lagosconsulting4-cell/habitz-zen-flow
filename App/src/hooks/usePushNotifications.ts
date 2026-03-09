@@ -55,6 +55,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
   // Log de debug para diagnóstico de push notifications
   useEffect(() => {
+    if (!import.meta.env.DEV) return;
     console.log("[Push] Estado do suporte:", {
       vapidKeyPresent: !!VAPID_PUBLIC_KEY,
       vapidKeyLength: VAPID_PUBLIC_KEY.length,
