@@ -152,6 +152,7 @@ export function NotificationPermissionDialog({
             </div>
             <button
               onClick={handleClose}
+              aria-label="Fechar"
               className="flex-shrink-0 p-1 rounded-full hover:bg-muted transition-colors"
             >
               <X className="w-4 h-4 text-muted-foreground" />
@@ -200,6 +201,7 @@ export function NotificationPermissionDialog({
           </div>
           <button
             onClick={handleClose}
+            aria-label="Fechar"
             className="flex-shrink-0 p-1 rounded-full hover:bg-muted transition-colors"
           >
             <X className="w-4 h-4 text-muted-foreground" />

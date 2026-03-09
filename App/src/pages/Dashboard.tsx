@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { Sparkles, Plus, BookOpen, Bell, ChevronRight, Sun, Sunset, Moon } from "lucide-react";
+import { Sparkles, Plus, BookOpen, Bell, ChevronRight, Sun, Sunset, Moon, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { DashboardSkeleton } from "@/components/ui/skeleton";
@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Habit } from "@/components/DashboardHabitCard";
 import { hideGamification } from "@/config/featureFlags";
+import useProgress from "@/hooks/useProgress";
 import { useAllActiveJourneyHabits, useJourneyActions, useJourneyDay, CANONICAL_TO_ICON, type Journey } from "@/hooks/useJourney";
 import { JourneyIllustration, getJourneyTheme } from "@/components/JourneyIllustration";
 import { JourneyDayCompleteModal } from "@/components/JourneyDayCompleteModal";
@@ -46,6 +47,7 @@ const Dashboard = () => {
   const { awardHabitXP, awardStreakBonus, awardPerfectDayBonus, awardJourneyDayGems, awardJourneyPhaseGems, awardJourneyCompleteGems, unlockAchievement, isAchievementUnlocked, getAchievementProgress, updateStreak, freezeUsedToday } = useGamification(user?.id);
   const isGamificationEnabled = !hideGamification;
   const queryClient = useQueryClient();
+  const { weeklyInsight, loading: progressLoading } = useProgress();
 
   // Journey hooks — multi-journey support
   const { allJourneyHabits, activeStates } = useAllActiveJourneyHabits();
@@ -267,7 +269,7 @@ const Dashboard = () => {
       } else {
         console.log("[Dashboard] Completing habit from URL intent:", completeHabitId);
         toggleHabit(completeHabitId)
-          .then(() => toast.success("Habito completado!"))
+          .then(() => toast.success("Hábito completado!"))
           .catch((error) => {
             console.error("[Dashboard] Error completing habit from URL intent:", error);
           });
@@ -432,6 +434,12 @@ const Dashboard = () => {
 
   // Check if all today's habits are completed (Perfect Day)
   const checkPerfectDay = useCallback((): boolean => {
+    if (todayHabits.length === 0) return false;
+    return todayHabits.every((habit) => getHabitCompletionStatus(habit.id));
+  }, [todayHabits, getHabitCompletionStatus]);
+
+  // Perfect Day persistent banner state
+  const isPerfectDay = useMemo(() => {
     if (todayHabits.length === 0) return false;
     return todayHabits.every((habit) => getHabitCompletionStatus(habit.id));
   }, [todayHabits, getHabitCompletionStatus]);
@@ -722,6 +730,25 @@ const Dashboard = () => {
           );
         })()}
 
+        {/* Streak Protection Status */}
+        {isGamificationEnabled && (
+          <FreezeBadge userId={user?.id} variant="full" />
+        )}
+
+        {/* Freeze auto-used today banner */}
+        {isGamificationEnabled && freezeUsedToday && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20"
+          >
+            <Shield className="w-5 h-5 text-blue-400 flex-shrink-0" />
+            <p className="text-xs text-blue-600 dark:text-blue-300">
+              <strong>Streak salvo!</strong> Um freeze foi usado automaticamente hoje para proteger seu progresso.
+            </p>
+          </motion.div>
+        )}
+
         {/* First Day Banner — only on Day 1 of first active journey */}
         {isFirstDay && firstActiveJourney && firstJourneyTheme && todayDayContent && (
           <motion.div
@@ -853,6 +880,27 @@ const Dashboard = () => {
         ) : (
           /* Grid de hábitos - 2 colunas com section headers */
           <div className="space-y-4">
+            {/* Perfect Day Banner */}
+            <AnimatePresence>
+              {isPerfectDay && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="flex flex-col items-center gap-3 py-6 px-4 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 text-center"
+                >
+                  <div className="w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <Sparkles className="w-7 h-7 text-green-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-foreground">Dia Perfeito!</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Todos os {todayHabits.length} habitos concluidos. Voce arrasou!
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             {/* Journey section header */}
             {hasJourneyHabits && firstActiveJourney && firstJourneyTheme && (
               <motion.div
@@ -870,7 +918,7 @@ const Dashboard = () => {
               </motion.div>
             )}
 
-            <div className="grid grid-cols-2 gap-3 justify-items-center">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 justify-items-center">
               {todayHabits.filter((h) => h.source === "journey").map((habit, index) => (
                 <motion.div
                   key={habit.id}
@@ -939,7 +987,7 @@ const Dashboard = () => {
                   </span>
                 </motion.div>
 
-                <div className="grid grid-cols-2 gap-3 justify-items-center">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 justify-items-center">
                   {todayHabits.filter((h) => h.source !== "journey").map((habit, index) => (
                     <motion.div
                       key={habit.id}
@@ -969,6 +1017,41 @@ const Dashboard = () => {
               </>
             )}
           </div>
+        )}
+
+        {/* Weekly Insight Mini-Card */}
+        {!progressLoading && weeklyInsight && todayHabits.length > 0 && (
+          <button
+            onClick={() => navigate("/progress")}
+            className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/60 hover:bg-accent/5 transition-colors text-left"
+          >
+            <div className="flex-shrink-0 relative w-12 h-12">
+              <svg width={48} height={48} className="transform -rotate-90">
+                <circle cx={24} cy={24} r={20} stroke="currentColor" strokeWidth={3}
+                  fill="none" className="text-muted/20" />
+                <circle cx={24} cy={24} r={20} stroke="currentColor" strokeWidth={3}
+                  fill="none" strokeLinecap="round" className="text-primary"
+                  strokeDasharray={2 * Math.PI * 20}
+                  strokeDashoffset={2 * Math.PI * 20 * (1 - (weeklyInsight.thisWeekConsistency || 0) / 100)}
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-foreground">
+                {weeklyInsight.thisWeekConsistency || 0}%
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Esta semana</p>
+              <p className="text-xs text-muted-foreground">
+                {weeklyInsight.perfectDaysThisWeek || 0} {(weeklyInsight.perfectDaysThisWeek || 0) === 1 ? "dia perfeito" : "dias perfeitos"}
+                {weeklyInsight.delta !== 0 && (
+                  <span className={weeklyInsight.delta > 0 ? "text-green-500 ml-1" : "text-red-400 ml-1"}>
+                    {weeklyInsight.delta > 0 ? "+" : ""}{weeklyInsight.delta}%
+                  </span>
+                )}
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          </button>
         )}
       </motion.div>
 

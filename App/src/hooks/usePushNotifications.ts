@@ -134,14 +134,15 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     setIsLoading(true);
     setError(null);
 
+    let subscription: PushSubscription | null = null;
     try {
       // Criar subscription
-      const subscription = await swRegistration.pushManager.subscribe({
+      subscription = await swRegistration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       });
 
-      console.log("[Push] Subscription criada:", subscription.endpoint);
+      console.log("[Push] Subscription criada");
 
       // Obter usuário atual
       const { data: { user } } = await supabase.auth.getUser();
@@ -174,6 +175,10 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       console.log("[Push] Subscription salva no servidor");
       return true;
     } catch (err) {
+      // Clean up browser subscription if DB save failed (prevents orphaned state)
+      if (subscription) {
+        try { await subscription.unsubscribe(); } catch { /* ignore cleanup errors */ }
+      }
       console.error("[Push] Erro ao inscrever:", err);
       setError("Erro ao ativar notificações");
       return false;

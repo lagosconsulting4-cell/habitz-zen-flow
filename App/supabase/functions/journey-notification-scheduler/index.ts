@@ -76,6 +76,7 @@ async function sendJourneyNotification(
     type: string;
     userId: string;
     journeyTitle?: string;
+    journeySlug?: string;
     currentDay?: number;
     totalDays?: number;
     habitName?: string;
