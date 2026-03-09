@@ -5,7 +5,7 @@
 
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Circle, AlertTriangle, Plus } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Circle, AlertTriangle, Plus, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useJourneyDay, useJourneyDetail, useJourneyHabits, useJourneyActions, CANONICAL_TO_ICON, type JourneyHabitTemplate } from "@/hooks/useJourney";
@@ -526,6 +526,17 @@ const JourneyDayCard = () => {
   const hasNext = dayNumber < (journey?.duration_days || 30);
   const canAccessNext = userState ? dayNumber < userState.current_day : false;
 
+  // Implementation Intention callout — days 1-3 only
+  const showIntentionCallout = dayNumber <= 3 && !isDayCompleted && !!userState;
+  const firstHabitName = useMemo(() => {
+    if (!habitTemplates || habitTemplates.length === 0) return null;
+    const todayTemplates = habitTemplates.filter(
+      (t: JourneyHabitTemplate) =>
+        t.start_day <= dayNumber && (!t.end_day || t.end_day >= dayNumber)
+    );
+    return todayTemplates[0]?.name || null;
+  }, [habitTemplates, dayNumber]);
+
   if (loading || !day) {
     return <JourneyDaySkeleton />;
   }
@@ -644,6 +655,43 @@ const JourneyDayCard = () => {
                 currentDay={dayNumber}
                 themeColor={theme.color}
               />
+            )}
+
+            {/* Implementation Intention callout — days 1-3 */}
+            {showIntentionCallout && firstHabitName && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="p-3.5 rounded-xl border"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.color}08 0%, transparent 100%)`,
+                  borderColor: `${theme.color}20`,
+                }}
+              >
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ backgroundColor: `${theme.color}1A` }}
+                  >
+                    <Lightbulb className="w-3.5 h-3.5" style={{ color: theme.color }} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-foreground mb-1">
+                      Dica: Crie um gatilho mental
+                    </p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      "Quando <span className="text-foreground font-medium">[situação do seu dia]</span>, eu vou{' '}
+                      <span className="font-medium" style={{ color: theme.color }}>
+                        {firstHabitName}
+                      </span>"
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/60 mt-1.5 italic">
+                      Pesquisas mostram que definir quando e onde aumenta em 2-3x a chance de cumprir.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
             )}
 
             {/* Content */}

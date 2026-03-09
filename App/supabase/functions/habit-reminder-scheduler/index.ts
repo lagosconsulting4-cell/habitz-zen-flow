@@ -43,6 +43,8 @@ interface Habit {
   notification_pref: {
     reminder_enabled?: boolean;
   } | null;
+  source?: string;
+  template_id?: string;
 }
 
 // ============================================================================
@@ -373,6 +375,54 @@ const COPY_BANK: Record<string, CopyContext> = {
       { key: "hydration_p3", title: "Eai!", body: "{habitName} lembrando voce de beber agua 👀", personalized: true },
     ],
   },
+
+  // JOURNEY: Morning
+  journey_morning: {
+    contextType: "journey_morning",
+    generic: [],
+    personalized: [
+      { key: "jm_p1", title: "Dia {journeyDay}!", body: "{habitEmoji} {habitName} — {journeyTitle} te espera", personalized: true },
+      { key: "jm_p2", title: "Bom dia!", body: "{habitName} (Dia {journeyDay} de {journeyTitle})", personalized: true },
+      { key: "jm_p3", title: "Bora!", body: "{habitEmoji} {habitName} — mais um dia na sua jornada", personalized: true },
+      { key: "jm_p4", title: "Sua missao hoje", body: "{habitName} faz parte do Dia {journeyDay}. Vamos?", personalized: true },
+    ],
+  },
+
+  // JOURNEY: Afternoon
+  journey_afternoon: {
+    contextType: "journey_afternoon",
+    generic: [],
+    personalized: [
+      { key: "ja_p1", title: "Oi...", body: "{habitEmoji} {habitName} ta pendente (Dia {journeyDay}) 👀", personalized: true },
+      { key: "ja_p2", title: "Lembrete!", body: "{habitName} — Dia {journeyDay} de {journeyTitle}", personalized: true },
+      { key: "ja_p3", title: "Eai?", body: "{habitEmoji} {habitName} esperando... sua jornada precisa de voce", personalized: true },
+      { key: "ja_p4", title: "Nao esquece!", body: "{habitName} (Dia {journeyDay}). So faltam {remainingDays} dias!", personalized: true },
+    ],
+  },
+
+  // JOURNEY: Evening
+  journey_evening: {
+    contextType: "journey_evening",
+    generic: [],
+    personalized: [
+      { key: "je_p1", title: "Boa noite!", body: "{habitEmoji} {habitName} antes de dormir? (Dia {journeyDay})", personalized: true },
+      { key: "je_p2", title: "Ultimo lembrete", body: "{habitName} — feche o Dia {journeyDay} de {journeyTitle}", personalized: true },
+      { key: "je_p3", title: "Quase la!", body: "{habitEmoji} {habitName} e o dia ta completo 🌙", personalized: true },
+      { key: "je_p4", title: "Dia {journeyDay}", body: "{habitName} ainda ta pendente. Bora finalizar?", personalized: true },
+    ],
+  },
+
+  // JOURNEY: Cliff day (dias 10-14 — maior dropout)
+  journey_cliff_day: {
+    contextType: "journey_cliff_day",
+    generic: [],
+    personalized: [
+      { key: "jc_p1", title: "A maioria para aqui.", body: "Dia {journeyDay}. {habitName} te separa de quem desiste 💪", personalized: true },
+      { key: "jc_p2", title: "Fase crucial!", body: "{habitEmoji} {habitName} (Dia {journeyDay}). Quem passa dos 14 dias vence.", personalized: true },
+      { key: "jc_p3", title: "To aqui com voce", body: "Dia {journeyDay} de {journeyTitle}. So faz {habitName}. So isso.", personalized: true },
+      { key: "jc_p4", title: "Aguenta firme!", body: "{habitName} no Dia {journeyDay}. O desconforto e o habito se formando.", personalized: true },
+    ],
+  },
 };
 
 // Export for use in other functions (Sprint 3)
@@ -450,7 +500,11 @@ type NotificationContext =
   | "category_reading"
   | "category_meditation"
   | "category_hydration"
-  | "streak_broken";
+  | "streak_broken"
+  | "journey_morning"
+  | "journey_afternoon"
+  | "journey_evening"
+  | "journey_cliff_day";
 
 /**
  * Detects the context for notification selection.
@@ -486,6 +540,13 @@ function detectContext(
     if (cat === "reading" || cat === "leitura") return "category_reading";
     if (cat === "meditation" || cat === "meditacao" || cat === "mindfulness") return "category_meditation";
     if (cat === "hydration" || cat === "hidratacao" || cat === "agua") return "category_hydration";
+  }
+
+  // Journey-specific: use journey copy if source is journey
+  if (habit && habit.source === "journey") {
+    if (currentHour >= 5 && currentHour < 12) return "journey_morning";
+    if (currentHour >= 12 && currentHour < 18) return "journey_afternoon";
+    return "journey_evening";
   }
 
   // On fire: user completed 70%+ of today's habits
@@ -524,6 +585,17 @@ function isHabitDelayed(reminderTime: string, currentTime: Date, delayHours: num
 }
 
 /**
+ * Journey phase config for intensity modulation.
+ * Phase 1 (Awareness): normal | Phase 2 (Friction): increased | Phase 3 (Replacement): normal | Phase 4 (Integration): reduced
+ */
+function getJourneyPhaseConfig(currentDay: number): { delayHours: number; skipIfStreakAbove: number | null } {
+  if (currentDay <= 7) return { delayHours: 2, skipIfStreakAbove: null };
+  if (currentDay <= 14) return { delayHours: 1.5, skipIfStreakAbove: null };
+  if (currentDay <= 22) return { delayHours: 2, skipIfStreakAbove: null };
+  return { delayHours: 3, skipIfStreakAbove: 5 };
+}
+
+/**
  * Selects a copy message with rotation to avoid repetition.
  * Gets last message per context, filters it out from available copies.
  */
@@ -533,7 +605,8 @@ async function selectCopy(
   context: NotificationContext,
   habit: Habit | null,
   pendingCount: number,
-  recentKeysCache?: Map<string, Set<string>>
+  recentKeysCache?: Map<string, Set<string>>,
+  journeyMeta?: { journeyTitle: string; currentDay: number; totalDays: number } | null
 ): Promise<{ key: string; title: string; body: string; contextType: string }> {
   const copyContext = COPY_BANK[context];
   if (!copyContext) {
@@ -589,14 +662,29 @@ async function selectCopy(
   if (habit && selected.personalized) {
     const emoji = habit.emoji?.trim() || "";
     const name = habit.name?.length > 30 ? habit.name.substring(0, 27) + "..." : (habit.name || "seu habito");
+    // Remove emoji placeholder + trailing space when emoji is empty
+    if (!emoji) {
+      body = body.replace("{habitEmoji} ", "");
+    }
     body = body
       .replace("{habitEmoji}", emoji)
       .replace("{habitName}", name)
       .replace("{count}", pendingCount.toString());
-    // Clean double spaces from empty emoji
+    // Clean double spaces from any remaining edge cases
     body = body.replace(/  +/g, " ").trim();
   } else if (context === "multiple_pending") {
     body = body.replace("{count}", pendingCount.toString());
+  }
+
+  // Journey-specific variable replacement
+  if (habit && habit.source === "journey" && journeyMeta) {
+    body = body
+      .replace("{journeyDay}", String(journeyMeta.currentDay))
+      .replace("{journeyTitle}", journeyMeta.journeyTitle)
+      .replace("{remainingDays}", String(journeyMeta.totalDays - journeyMeta.currentDay));
+    title = title
+      .replace("{journeyDay}", String(journeyMeta.currentDay))
+      .replace("{journeyTitle}", journeyMeta.journeyTitle);
   }
 
   return {
@@ -673,7 +761,7 @@ serve(async (req) => {
     // Get all active habits with reminder_time set
     const { data: habits, error: habitsError } = await supabase
       .from("habits")
-      .select("id, name, emoji, period, user_id, reminder_time, days_of_week, notification_pref, category, streak")
+      .select("id, name, emoji, period, user_id, reminder_time, days_of_week, notification_pref, category, streak, source, template_id")
       .eq("is_active", true)
       .not("reminder_time", "is", null);
 
@@ -858,6 +946,34 @@ serve(async (req) => {
       }
     }
 
+    // Cache journey metadata for journey-specific copy (Sprint 2)
+    const journeyMetaCache = new Map<string, {
+      journeyTitle: string;
+      currentDay: number;
+      totalDays: number;
+    }>();
+
+    const journeyUserIds = [...new Set(
+      habitsWithPush.filter(h => h.source === "journey").map(h => h.user_id)
+    )];
+
+    if (journeyUserIds.length > 0) {
+      const { data: journeyStates } = await supabase
+        .from("user_journey_state")
+        .select("user_id, current_day, journeys(title, duration_days)")
+        .eq("status", "active")
+        .in("user_id", journeyUserIds);
+
+      for (const js of journeyStates || []) {
+        const jData = (js as any).journeys;
+        journeyMetaCache.set(js.user_id, {
+          journeyTitle: jData?.title || "sua jornada",
+          currentDay: js.current_day,
+          totalDays: jData?.duration_days || 30,
+        });
+      }
+    }
+
     for (const habit of habitsWithPush) {
       try {
         // Check quiet hours + cache user prefs (cached per user)
@@ -899,9 +1015,24 @@ serve(async (req) => {
         // Detect notification context
         const pendingCount = pendingByUser.get(habit.user_id) || 1;
         const prefs = userPrefsCache.get(habit.user_id) || {};
-        const delayHours = prefs.delayed_reminder_hours ?? 2;
+        let delayHours = prefs.delayed_reminder_hours ?? 2;
         const endOfDayEnabled = prefs.end_of_day_enabled ?? true;
-        const context = detectContext(
+
+        // Phase-based intensity for journey habits (Sprint 2)
+        const jMeta = habit.source === "journey" ? journeyMetaCache.get(habit.user_id) : undefined;
+        if (habit.source === "journey" && jMeta) {
+          const phaseConfig = getJourneyPhaseConfig(jMeta.currentDay);
+          delayHours = phaseConfig.delayHours;
+
+          // Phase 4: skip if user has strong streak (autonomy)
+          if (phaseConfig.skipIfStreakAbove !== null && habit.streak > phaseConfig.skipIfStreakAbove) {
+            console.log(`[Scheduler] Skip: Phase 4 autonomy, streak ${habit.streak}`);
+            results.push({ habitId: habit.id, userId: habit.user_id, success: false, error: "Phase 4 autonomy" });
+            continue;
+          }
+        }
+
+        let context = detectContext(
           currentHour,
           habit.reminder_time,
           pendingCount,
@@ -913,8 +1044,13 @@ serve(async (req) => {
           endOfDayEnabled
         );
 
-        // Select copy message with rotation
-        const copyMessage = await selectCopy(supabase, habit.user_id, context as NotificationContext, habit, pendingCount, recentKeysCache);
+        // Override: journey cliff day (days 10-14 — highest dropout)
+        if (habit.source === "journey" && jMeta && jMeta.currentDay >= 10 && jMeta.currentDay <= 14) {
+          context = "journey_cliff_day";
+        }
+
+        // Select copy message with rotation (pass journey metadata)
+        const copyMessage = await selectCopy(supabase, habit.user_id, context as NotificationContext, habit, pendingCount, recentKeysCache, jMeta || null);
 
         // Insert history FIRST to get the ID for click tracking
         const { data: historyRow, error: historyInsertError } = await supabase

@@ -456,14 +456,29 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         });
       }
 
-      // Navigate to dashboard
-      navigate("/dashboard", { replace: true });
+      // Navigate to first journey's day 1 if journey was selected, else dashboard
+      if (selectedJourneyIds.size > 0) {
+        const firstJourneyId = [...selectedJourneyIds][0];
+        const { data: firstJourney } = await supabase
+          .from("journeys")
+          .select("slug")
+          .eq("id", firstJourneyId)
+          .single();
+
+        if (firstJourney?.slug) {
+          navigate(`/journeys/${firstJourney.slug}/day/1`, { replace: true });
+        } else {
+          navigate("/dashboard", { replace: true });
+        }
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
     } catch (error) {
       console.error("Failed to submit onboarding:", error);
     } finally {
       setIsSubmitting(false);
     }
-  }, [user, recommendedHabits, selectedHabitIds, weekDays, objective, timeAvailable, addXP, navigate]);
+  }, [user, recommendedHabits, selectedHabitIds, selectedJourneyIds, weekDays, objective, timeAvailable, addXP, navigate]);
 
   // ============================================================================
   // CONTEXT VALUE

@@ -37,6 +37,7 @@ interface JourneyNotificationPayload {
   type: NotificationType;
   userId: string;
   journeyTitle?: string;
+  journeySlug?: string;
   currentDay?: number;
   totalDays?: number;
   habitName?: string;
@@ -236,7 +237,7 @@ serve(async (req) => {
 
   try {
     const payload: JourneyNotificationPayload = await req.json();
-    const { type, userId, journeyTitle, currentDay, totalDays, habitName, phaseName, badgeName, inactiveDays } = payload;
+    const { type, userId, journeyTitle, journeySlug, currentDay, totalDays, habitName, phaseName, badgeName, inactiveDays } = payload;
 
     if (!type || !userId) {
       return new Response(JSON.stringify({ error: "Missing type or userId" }), {
@@ -285,6 +286,20 @@ serve(async (req) => {
         JSON.stringify({ success: true, sent: false, reason: "anti_burst" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Soft validation: warn about missing template fields
+    const requiredFields: Partial<Record<NotificationType, string[]>> = {
+      daily_reminder: ["currentDay"],
+      new_habit: ["habitName"],
+      phase_complete: ["phaseName"],
+      cliff_support: ["currentDay"],
+      inactivity: ["inactiveDays"],
+    };
+    const required = requiredFields[type] || [];
+    const missing = required.filter((f) => payload[f as keyof JourneyNotificationPayload] == null);
+    if (missing.length > 0) {
+      console.warn(`[JourneyNotif] Missing fields for ${type}: ${missing.join(", ")}`);
     }
 
     // Build template vars
@@ -338,7 +353,7 @@ serve(async (req) => {
             type: `journey-${type}`,
             journeyTitle,
             currentDay,
-            url: "/app/dashboard",
+            url: journeySlug ? `/app/journeys/${journeySlug}` : "/app/dashboard",
             notificationHistoryId: historyRow?.id || undefined,
           },
         }),

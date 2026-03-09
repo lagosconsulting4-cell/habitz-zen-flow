@@ -24,6 +24,7 @@ import {
   ChevronRight,
   XCircle,
   Trophy,
+  Sunset,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,11 @@ const Profile = () => {
     quiet_hours_start?: string;
     quiet_hours_end?: string;
     end_of_day_enabled?: boolean;
+    preferred_reminder_times?: {
+      morning?: string;
+      afternoon?: string;
+      evening?: string;
+    };
   }>({});
 
   const { isPremium, premiumSince } = usePremium(userId ?? undefined);
@@ -113,7 +119,7 @@ const Profile = () => {
     loadProfile();
   }, []);
 
-  const updateNotifPref = async (key: string, value: boolean | string) => {
+  const updateNotifPref = async (key: string, value: boolean | string | Record<string, string | undefined>) => {
     if (!userId) return;
     const updated = { ...notifPrefs, [key]: value };
     setNotifPrefs(updated);
@@ -693,18 +699,66 @@ const Profile = () => {
               {/* Push Notifications Toggle */}
               <NotificationToggle />
 
+              {/* Preferred Reminder Times */}
+              <div className="border-t border-border pt-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                  Horarios dos Lembretes
+                </p>
+                <div className="space-y-3">
+                  {([
+                    { period: "morning" as const, label: "Manha", icon: Sun, defaultTime: "08:00" },
+                    { period: "afternoon" as const, label: "Tarde", icon: Sunset, defaultTime: "14:00" },
+                    { period: "evening" as const, label: "Noite", icon: Moon, defaultTime: "20:00" },
+                  ] as const).map(({ period, label, icon: Icon, defaultTime }) => (
+                    <div key={period} className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 flex-shrink-0">
+                        <Icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <p className="flex-1 text-sm font-medium text-foreground">{label}</p>
+                      <input
+                        type="time"
+                        value={notifPrefs.preferred_reminder_times?.[period] || defaultTime}
+                        onChange={(e) => {
+                          const updated = {
+                            ...notifPrefs.preferred_reminder_times,
+                            [period]: e.target.value,
+                          };
+                          updateNotifPref("preferred_reminder_times", updated);
+                        }}
+                        className="h-10 w-24 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground text-center"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] text-muted-foreground/60 mt-2 italic">
+                  Novos habitos de jornada usarao estes horarios.
+                </p>
+              </div>
+
               {/* Quiet Hours */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="border-t border-border pt-4">
+                <div className="flex items-center gap-3 mb-3">
                   <Moon className="w-5 h-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium">Horario Silencioso</p>
-                    <p className="text-xs text-muted-foreground">
-                      {notifPrefs.quiet_hours_start && notifPrefs.quiet_hours_end
-                        ? `${notifPrefs.quiet_hours_start} - ${notifPrefs.quiet_hours_end}`
-                        : "22:00 - 07:00 (padrao)"}
-                    </p>
+                    <p className="text-sm font-medium text-foreground">Nao Perturbe</p>
+                    <p className="text-xs text-muted-foreground">Sem notificacoes nesse horario</p>
                   </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground font-medium">Das</span>
+                  <input
+                    type="time"
+                    value={notifPrefs.quiet_hours_start || "22:00"}
+                    onChange={(e) => updateNotifPref("quiet_hours_start", e.target.value)}
+                    className="h-10 w-24 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground text-center"
+                  />
+                  <span className="text-xs text-muted-foreground font-medium">ate</span>
+                  <input
+                    type="time"
+                    value={notifPrefs.quiet_hours_end || "07:00"}
+                    onChange={(e) => updateNotifPref("quiet_hours_end", e.target.value)}
+                    className="h-10 w-24 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground text-center"
+                  />
                 </div>
               </div>
 

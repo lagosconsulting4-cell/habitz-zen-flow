@@ -134,7 +134,8 @@ serve(async (req) => {
         journey_id,
         journeys (
           title,
-          duration_days
+          duration_days,
+          slug
         )
       `)
       .eq("status", "active");
@@ -226,6 +227,7 @@ serve(async (req) => {
       const userId = journey.user_id;
       const journeyData = (journey as any).journeys;
       const journeyTitle = journeyData?.title || "sua jornada";
+      const journeySlug = journeyData?.slug || undefined;
       const totalDays = journeyData?.duration_days || 30;
       const currentDay = journey.current_day;
 
@@ -250,6 +252,14 @@ serve(async (req) => {
         inactiveDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
       }
 
+      // Phase 4 (Integration): reduce frequency — skip even days unless inactive (Sprint 2)
+      const phaseNumber = currentDay <= 7 ? 1 : currentDay <= 14 ? 2 : currentDay <= 22 ? 3 : 4;
+      if (phaseNumber === 4 && currentDay % 2 === 0 && inactiveDays < 2) {
+        console.log(`[JourneyScheduler] Phase 4: skip even day ${currentDay}`);
+        results.skipped++;
+        continue;
+      }
+
       // Determine notification type based on journey state
       let notificationType: string;
 
@@ -260,6 +270,7 @@ serve(async (req) => {
           type: "inactivity",
           userId,
           journeyTitle,
+          journeySlug,
           currentDay,
           totalDays,
           inactiveDays,
@@ -274,6 +285,7 @@ serve(async (req) => {
           type: "cliff_support",
           userId,
           journeyTitle,
+          journeySlug,
           currentDay,
           totalDays,
         });
@@ -287,6 +299,7 @@ serve(async (req) => {
           type: "daily_reminder",
           userId,
           journeyTitle,
+          journeySlug,
           currentDay,
           totalDays,
         });
@@ -311,6 +324,7 @@ serve(async (req) => {
           type: "new_habit",
           userId,
           journeyTitle,
+          journeySlug,
           currentDay,
           totalDays,
           habitName,

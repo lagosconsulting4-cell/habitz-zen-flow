@@ -635,10 +635,18 @@ export const useJourneyActions = () => {
       const newHabitInserts: Array<Record<string, unknown>> = [];
       const newHabitTemplateMap: Array<{ template: typeof templates[0]; insertIndex: number }> = [];
 
+      // Read user preferred reminder times (Sprint 2)
+      const { data: userProgress } = await supabase
+        .from("user_progress")
+        .select("notification_preferences")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const prefs = (userProgress?.notification_preferences as Record<string, unknown>) || {};
+      const preferredTimes = (prefs.preferred_reminder_times as Record<string, string>) || {};
       const periodToReminder: Record<string, string> = {
-        morning: "08:00",
-        afternoon: "14:00",
-        evening: "20:00",
+        morning: preferredTimes.morning || "08:00",
+        afternoon: preferredTimes.afternoon || "14:00",
+        evening: preferredTimes.evening || "20:00",
       };
 
       for (const template of templates || []) {
@@ -737,6 +745,13 @@ export const useJourneyActions = () => {
           detail: { trigger: "after-journey-start" },
         })
       );
+
+      // Prompt for preferred reminder times setup (Sprint 2)
+      window.dispatchEvent(
+        new CustomEvent("notification:setup-times", {
+          detail: { trigger: "after-journey-start" },
+        })
+      );
     },
   });
 
@@ -750,6 +765,20 @@ export const useJourneyActions = () => {
       journeyId: string;
     }) => {
       if (!user) throw new Error("Not authenticated");
+
+      // Fetch preferred reminder times for new habits (Sprint 2)
+      const { data: userProg } = await supabase
+        .from("user_progress")
+        .select("notification_preferences")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const userPrefs = (userProg?.notification_preferences as Record<string, unknown>) || {};
+      const prefTimes = (userPrefs.preferred_reminder_times as Record<string, string>) || {};
+      const cdPeriodToReminder: Record<string, string> = {
+        morning: prefTimes.morning || "08:00",
+        afternoon: prefTimes.afternoon || "14:00",
+        evening: prefTimes.evening || "20:00",
+      };
 
       // Call RPC to advance to next day
       const { data, error } = await supabase.rpc("advance_journey_to_next_day", {
@@ -859,6 +888,8 @@ export const useJourneyActions = () => {
             frequency_type: isOneTimeHabit ? "once" : template.frequency_type === "daily" ? "daily" : "fixed_days",
             unit: template.unit === "none" ? null : template.unit === "minutes" ? "minutes" : "custom",
             goal_value: template.initial_goal_value,
+            reminder_time: cdPeriodToReminder[template.period] || "08:00",
+            notification_pref: { reminder_enabled: true, reminder_time: cdPeriodToReminder[template.period] || "08:00" },
           };
           if (isOneTimeHabit) {
             newHabitInsert.due_date = new Date().toISOString().split("T")[0];

@@ -498,67 +498,62 @@ async function checkOnboardingTriggers(
   if (!newUsers || newUsers.length === 0) return [];
 
   const today = brazilTime.toISOString().split("T")[0];
+  const newUserIds = newUsers.map((u: any) => u.user_id);
+
+  // ── Batch loads (replaces N+1 per-user queries) ──
+  const onboardingContextTypes = triggersForHour.map((t: any) => t.type);
+
+  const [habitsRes, completionsRes, progressRes, dedupRes] = await Promise.all([
+    supabase.from("habits").select("user_id").in("user_id", newUserIds).eq("is_active", true),
+    supabase.from("habit_completions").select("user_id").in("user_id", newUserIds),
+    supabase.from("user_progress").select("user_id, current_streak, total_habits_completed").in("user_id", newUserIds),
+    supabase.from("notification_history").select("user_id, context_type").in("user_id", newUserIds).in("context_type", onboardingContextTypes).eq("notification_date", today),
+  ]);
+
+  // Build lookup maps
+  const usersWithHabits = new Set<string>((habitsRes.data || []).map((r: any) => r.user_id));
+  const usersWithCompletions = new Set<string>((completionsRes.data || []).map((r: any) => r.user_id));
+  const progressMap = new Map<string, any>();
+  for (const p of (progressRes.data || [])) {
+    progressMap.set(p.user_id, p);
+  }
+  const sentSet = new Set<string>();
+  for (const d of (dedupRes.data || [])) {
+    sentSet.add(`${d.user_id}:${d.context_type}`);
+  }
 
   for (const user of newUsers) {
     // Use date-only comparison to avoid off-by-one for users created late at night
-    const todayStr = brazilTime.toISOString().split("T")[0];
     const onboardStr = new Date(user.onboarding_completed_at).toISOString().split("T")[0];
     const daysSinceOnboarding = Math.round(
-      (new Date(todayStr).getTime() - new Date(onboardStr).getTime()) / (1000 * 60 * 60 * 24)
+      (new Date(today).getTime() - new Date(onboardStr).getTime()) / (1000 * 60 * 60 * 24)
     );
 
     for (const triggerDef of triggersForHour) {
       if (daysSinceOnboarding !== triggerDef.day) continue;
 
-      // Check condition if needed
+      // Check condition using batched data
       if (triggerDef.condition === "no_habits") {
-        const { data: habits } = await supabase
-          .from("habits")
-          .select("id")
-          .eq("user_id", user.user_id)
-          .eq("is_active", true)
-          .limit(1);
-        if (habits && habits.length > 0) continue; // Has habits, skip
+        if (usersWithHabits.has(user.user_id)) continue;
       }
 
       if (triggerDef.condition === "has_habit_no_completion") {
-        const { data: habits } = await supabase
-          .from("habits")
-          .select("id")
-          .eq("user_id", user.user_id)
-          .eq("is_active", true)
-          .limit(1);
-        if (!habits || habits.length === 0) continue; // No habits, skip
-
-        const { data: completions } = await supabase
-          .from("habit_completions")
-          .select("id")
-          .eq("user_id", user.user_id)
-          .limit(1);
-        if (completions && completions.length > 0) continue; // Has completions, skip
+        if (!usersWithHabits.has(user.user_id)) continue;
+        if (usersWithCompletions.has(user.user_id)) continue;
       }
 
       if (triggerDef.condition === "streak_3") {
-        const { data: progress } = await supabase
-          .from("user_progress")
-          .select("current_streak")
-          .eq("user_id", user.user_id)
-          .maybeSingle();
+        const progress = progressMap.get(user.user_id);
         if (!progress || progress.current_streak < 3) continue;
       }
 
-      // Check already sent
-      const alreadySent = await checkAlreadySentToday(supabase, user.user_id, null, triggerDef.type);
-      if (alreadySent) continue;
+      // Check already sent using batched dedup
+      if (sentSet.has(`${user.user_id}:${triggerDef.type}`)) continue;
 
-      // Get template vars
+      // Get template vars from batched progress
       const templateVars: Record<string, string | number> = {};
       if (triggerDef.type === "onboard_day_5" || triggerDef.type === "onboard_week") {
-        const { data: progress } = await supabase
-          .from("user_progress")
-          .select("total_habits_completed")
-          .eq("user_id", user.user_id)
-          .maybeSingle();
+        const progress = progressMap.get(user.user_id);
         templateVars.totalCompletions = progress?.total_habits_completed || 0;
       }
 
@@ -591,6 +586,9 @@ async function checkValueTriggers(
   const dayOfWeek = brazilTime.getDay(); // 0 = Sunday
   const dayOfMonth = brazilTime.getDate();
   const today = brazilTime.toISOString().split("T")[0];
+  const userIds = Array.from(usersWithPush);
+
+  if (userIds.length === 0) return [];
 
   // WEEKLY RECAP — Sunday at 10h
   if (dayOfWeek === 0) {
@@ -598,32 +596,35 @@ async function checkValueTriggers(
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const weekStart = sevenDaysAgo.toISOString().split("T")[0];
 
-    // Get all users with push who have completions this week
-    for (const userId of usersWithPush) {
-      const alreadySent = await checkAlreadySentToday(supabase, userId, null, "weekly_recap");
-      if (alreadySent) continue;
+    // ── Batch loads (replaces N+1 per-user queries) ──
+    const [dedupRes, completionsRes, progressRes] = await Promise.all([
+      supabase.from("notification_history").select("user_id").in("user_id", userIds).eq("context_type", "weekly_recap").eq("notification_date", today),
+      supabase.from("habit_completions").select("user_id").in("user_id", userIds).gte("completed_at", weekStart).lte("completed_at", today),
+      supabase.from("user_progress").select("user_id, current_streak").in("user_id", userIds),
+    ]);
 
-      const { data: completions, error: compError } = await supabase
-        .from("habit_completions")
-        .select("id")
-        .eq("user_id", userId)
-        .gte("completed_at", weekStart)
-        .lte("completed_at", today);
+    const alreadySentUsers = new Set<string>((dedupRes.data || []).map((r: any) => r.user_id));
+    // Count completions per user
+    const completionCountMap = new Map<string, number>();
+    for (const c of (completionsRes.data || [])) {
+      completionCountMap.set(c.user_id, (completionCountMap.get(c.user_id) || 0) + 1);
+    }
+    const progressMap = new Map<string, any>();
+    for (const p of (progressRes.data || [])) {
+      progressMap.set(p.user_id, p);
+    }
 
-      if (compError || !completions || completions.length === 0) continue;
-
-      const { data: progress } = await supabase
-        .from("user_progress")
-        .select("current_streak")
-        .eq("user_id", userId)
-        .maybeSingle();
+    for (const userId of userIds) {
+      if (alreadySentUsers.has(userId)) continue;
+      const weekCompletions = completionCountMap.get(userId) || 0;
+      if (weekCompletions === 0) continue;
 
       triggers.push({
         userId,
         triggerType: "weekly_recap",
         templateVars: {
-          weekCompletions: completions.length,
-          currentStreak: progress?.current_streak || 0,
+          weekCompletions,
+          currentStreak: progressMap.get(userId)?.current_streak || 0,
         },
       });
     }
@@ -637,33 +638,36 @@ async function checkValueTriggers(
     const monthEnd = `${brazilTime.getFullYear()}-${String(brazilTime.getMonth() + 1).padStart(2, "0")}-01`;
     const monthName = MONTH_NAMES_PT[lastMonth.getMonth()];
 
-    for (const userId of usersWithPush) {
-      const alreadySent = await checkAlreadySentToday(supabase, userId, null, "monthly_recap");
-      if (alreadySent) continue;
+    // ── Batch loads ──
+    const [dedupRes, completionsRes, progressRes] = await Promise.all([
+      supabase.from("notification_history").select("user_id").in("user_id", userIds).eq("context_type", "monthly_recap").eq("notification_date", today),
+      supabase.from("habit_completions").select("user_id").in("user_id", userIds).gte("completed_at", monthStart).lt("completed_at", monthEnd),
+      supabase.from("user_progress").select("user_id, longest_streak, perfect_days").in("user_id", userIds),
+    ]);
 
-      const { data: completions, error: compError } = await supabase
-        .from("habit_completions")
-        .select("id")
-        .eq("user_id", userId)
-        .gte("completed_at", monthStart)
-        .lt("completed_at", monthEnd);
+    const alreadySentUsers = new Set<string>((dedupRes.data || []).map((r: any) => r.user_id));
+    const completionCountMap = new Map<string, number>();
+    for (const c of (completionsRes.data || [])) {
+      completionCountMap.set(c.user_id, (completionCountMap.get(c.user_id) || 0) + 1);
+    }
+    const progressMap = new Map<string, any>();
+    for (const p of (progressRes.data || [])) {
+      progressMap.set(p.user_id, p);
+    }
 
-      if (compError || !completions || completions.length === 0) continue;
-
-      const { data: progress } = await supabase
-        .from("user_progress")
-        .select("longest_streak, perfect_days")
-        .eq("user_id", userId)
-        .maybeSingle();
+    for (const userId of userIds) {
+      if (alreadySentUsers.has(userId)) continue;
+      const monthCompletions = completionCountMap.get(userId) || 0;
+      if (monthCompletions === 0) continue;
 
       triggers.push({
         userId,
         triggerType: "monthly_recap",
         templateVars: {
           monthName,
-          monthCompletions: completions.length,
-          longestStreak: progress?.longest_streak || 0,
-          perfectDays: progress?.perfect_days || 0,
+          monthCompletions,
+          longestStreak: progressMap.get(userId)?.longest_streak || 0,
+          perfectDays: progressMap.get(userId)?.perfect_days || 0,
         },
       });
     }
@@ -778,36 +782,44 @@ async function sendTriggerNotification(
       console.error(`[TriggerNotification] Failed to save history: ${historyError}`);
     }
 
-    const pushResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      },
-      body: JSON.stringify({
-        userId,
-        title,
-        body,
-        icon: "/icons/icon-192.png",
-        badge: "/icons/badge-72.png",
-        tag: `trigger-${context}-${userId}`,
-        data: {
-          type: "trigger-notification",
-          context,
-          url: "/app/dashboard",
-          habitId: habitId || undefined,
-          notificationHistoryId: historyRow?.id || undefined,
+    let isSuccess = false;
+    try {
+      const pushResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
         },
-        actions: [
-          { action: "dismiss", title: "Depois" },
-        ],
-      }),
-    });
-
-    const result = await pushResponse.json();
-    return pushResponse.ok && result.sent > 0;
+        body: JSON.stringify({
+          userId,
+          title,
+          body,
+          icon: "/icons/icon-192.png",
+          badge: "/icons/badge-72.png",
+          tag: `trigger-${context}-${userId}`,
+          data: {
+            type: "trigger-notification",
+            context,
+            url: "/app/dashboard",
+            habitId: habitId || undefined,
+            notificationHistoryId: historyRow?.id || undefined,
+          },
+          actions: [
+            { action: "dismiss", title: "Depois" },
+          ],
+        }),
+      });
+      const result = await pushResponse.json();
+      isSuccess = pushResponse.ok && result.sent > 0;
+      if (!isSuccess) {
+        console.error(`[TriggerScheduler] Push not OK: HTTP ${pushResponse.status}`);
+      }
+    } catch (fetchErr) {
+      console.error(`[TriggerScheduler] Push send failed for user ${userId}:`, fetchErr);
+    }
+    return isSuccess;
   } catch (error) {
-    console.error(`[TriggerNotification] Failed to send: ${error}`);
+    console.error(`[TriggerScheduler] Failed to send: ${error}`);
     return false;
   }
 }

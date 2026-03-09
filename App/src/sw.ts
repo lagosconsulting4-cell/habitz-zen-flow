@@ -167,7 +167,7 @@ self.addEventListener("notificationclick", (event) => {
     return;
   }
 
-  // If user clicked "complete", send message to app without opening
+  // If user clicked "complete", send message to app or open with intent URL
   if (action === "complete" && data.habitId) {
     event.waitUntil(
       self.clients
@@ -182,6 +182,15 @@ self.addEventListener("notificationclick", (event) => {
               });
               return;
             }
+          }
+          // No open window — open app with intent URL so Dashboard auto-completes
+          const intentParams = new URLSearchParams({
+            complete: data.habitId!,
+            ...(data.notificationHistoryId ? { nhid: data.notificationHistoryId } : {}),
+          });
+          const intentUrl = new URL(`/app/dashboard?${intentParams.toString()}`, self.location.origin).href;
+          if (self.clients.openWindow) {
+            return self.clients.openWindow(intentUrl);
           }
         })
         .catch((error) => {

@@ -340,11 +340,11 @@ async function sendWebPush(
       return { success: true, status: response.status };
     } else {
       const errorText = await response.text();
-      console.error(`Push failed: ${response.status} - ${errorText}`);
+      console.error(`[SendPush] Push failed: ${response.status} - ${errorText}`);
       return { success: false, status: response.status, error: errorText };
     }
   } catch (error) {
-    console.error("Error sending push:", error);
+    console.error("[SendPush] Error sending push:", error);
     return { success: false, status: 0, error: String(error) };
   }
 }
@@ -369,7 +369,7 @@ serve(async (req) => {
 
   // Check environment variables
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    console.error("Missing required environment variables:", {
+    console.error("[SendPush] Missing required environment variables:", {
       hasVapidPublic: !!VAPID_PUBLIC_KEY,
       hasVapidPrivate: !!VAPID_PRIVATE_KEY,
       hasSupabaseUrl: !!SUPABASE_URL,
@@ -412,7 +412,7 @@ serve(async (req) => {
       .in("user_id", userIds);
 
     if (dbError) {
-      console.error("Database error:", dbError);
+      console.error("[SendPush] Database error:", dbError);
       return new Response(JSON.stringify({ error: "Database error" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -458,7 +458,7 @@ serve(async (req) => {
             .from("push_subscriptions")
             .delete()
             .eq("endpoint", sub.endpoint);
-          console.log(`Removed invalid subscription: ${sub.endpoint}`);
+          console.log(`[SendPush] Removed invalid subscription: ${sub.endpoint}`);
         }
 
         return { ...result, userId: sub.user_id };
@@ -475,7 +475,7 @@ serve(async (req) => {
       .filter((r) => r.status === "fulfilled" && !(r.value as { success: boolean }).success)
       .map((r) => (r as PromiseFulfilledResult<{ error?: string; userId: string }>).value);
 
-    console.log(`Push notifications: ${sent} sent, ${failed} failed`, { errors });
+    console.log(`[SendPush] Push notifications: ${sent} sent, ${failed} failed`, { errors });
 
     return new Response(JSON.stringify({
       success: true,
@@ -489,7 +489,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error("Error processing request:", error);
+    console.error("[SendPush] Error processing request:", error);
     return new Response(JSON.stringify({ error: "Internal server error", details: String(error) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -9,11 +9,11 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronDown, ChevronRight, Sunrise, Sun, Moon, CheckCircle2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Sunrise, Sun, Moon, CheckCircle2, BookOpen, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getHabitIconWithFallback } from "@/components/icons/HabitIcons";
 import { JourneyIllustration, getJourneyTheme } from "@/components/JourneyIllustration";
-import { useActiveJourneys, useAllActiveJourneyHabits } from "@/hooks/useJourney";
+import { useActiveJourneys, useAllActiveJourneyHabits, useJourneyDay } from "@/hooks/useJourney";
 import type { Habit } from "@/components/DashboardHabitCard";
 
 interface DailyMissionCardProps {
@@ -21,6 +21,137 @@ interface DailyMissionCardProps {
   getHabitCompletionStatus: (habitId: string) => boolean;
   className?: string;
 }
+
+// ============================================
+// Journey Progress Item (extracted for useJourneyDay hook)
+// ============================================
+const JourneyProgressItem = ({
+  state,
+  allJourneyHabits,
+  getHabitCompletionStatus,
+}: {
+  state: any;
+  allJourneyHabits: any[];
+  getHabitCompletionStatus: (habitId: string) => boolean;
+}) => {
+  const navigate = useNavigate();
+  const journey = state.journeys;
+  const theme = getJourneyTheme(journey?.theme_slug || journey?.illustration_key);
+
+  // Fetch day content for title preview (first 3 days only)
+  const { day: todayDay } = useJourneyDay(
+    journey?.slug || "",
+    state.current_day,
+    journey?.id
+  );
+
+  if (!journey) return null;
+
+  // Detect if day was already advanced today
+  const todayStr = new Date().toISOString().split("T")[0];
+  const wasAdvancedToday =
+    state.current_day > 1 &&
+    state.days_completed > 0 &&
+    state.updated_at?.split("T")[0] === todayStr;
+
+  const displayDay = wasAdvancedToday ? state.current_day - 1 : state.current_day;
+
+  let dailyPercent: number;
+  let isDayComplete: boolean;
+
+  if (wasAdvancedToday) {
+    dailyPercent = 100;
+    isDayComplete = true;
+  } else {
+    const todayHabitIds = allJourneyHabits
+      .filter(
+        (jh) =>
+          jh.journey_id === state.journey_id &&
+          jh.introduced_on_day <= state.current_day &&
+          (!jh.expires_on_day || jh.expires_on_day >= state.current_day)
+      )
+      .map((jh) => jh.habit_id);
+
+    const completedToday = todayHabitIds.filter((id) =>
+      getHabitCompletionStatus(id)
+    ).length;
+
+    dailyPercent = todayHabitIds.length > 0
+      ? Math.round((completedToday / todayHabitIds.length) * 100)
+      : 0;
+    isDayComplete = todayHabitIds.length > 0 && completedToday === todayHabitIds.length;
+  }
+
+  return (
+    <motion.button
+      onClick={() => navigate(`/journeys/${journey.slug}`)}
+      className={cn(
+        "w-full flex flex-col gap-0 p-2 rounded-xl transition-all hover:scale-[1.01]",
+        isDayComplete && "ring-1 ring-inset"
+      )}
+      style={{
+        background: isDayComplete
+          ? `linear-gradient(135deg, ${theme.color}18 0%, ${theme.color}08 100%)`
+          : undefined,
+        ...(isDayComplete ? { ["--tw-ring-color" as string]: `${theme.color}30` } : {}),
+      }}
+      animate={isDayComplete ? { scale: [1, 1.01, 1] } : {}}
+      transition={{ duration: 0.4 }}
+    >
+      <div className="w-full flex items-center gap-3">
+        <JourneyIllustration
+          illustrationKey={journey.illustration_key}
+          size="sm"
+        />
+        <div className="flex-1 min-w-0 text-left">
+          <p className="text-xs font-semibold text-foreground truncate">
+            {journey.title}
+          </p>
+          <p className="text-[10px] text-muted-foreground">
+            {isDayComplete
+              ? `Dia ${displayDay} concluído · Fase ${state.current_phase}`
+              : `Dia ${displayDay} de ${journey.duration_days} · Fase ${state.current_phase}`}
+          </p>
+          <div className="mt-1 w-full h-1.5 bg-muted/20 dark:bg-zinc-700/30 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: dailyPercent / 100 }}
+              transition={{ duration: 0.5 }}
+              className="h-full rounded-full relative overflow-hidden origin-left"
+              style={{ backgroundColor: theme.color }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-[shimmer_1.5s_infinite]" />
+            </motion.div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          {isDayComplete ? (
+            <CheckCircle2 className="w-4 h-4" style={{ color: theme.color }} />
+          ) : (
+            <span className="text-[10px] font-bold" style={{ color: theme.color }}>
+              {dailyPercent}%
+            </span>
+          )}
+          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+        </div>
+      </div>
+
+      {/* Day content preview — first 3 days for onboarding context */}
+      {state.current_day <= 3 && !wasAdvancedToday && todayDay && (
+        <div
+          className="mt-2 pt-2 border-t w-full flex items-center gap-2"
+          style={{ borderColor: `${theme.color}15` }}
+        >
+          <BookOpen className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.color }} />
+          <span className="text-[11px] text-muted-foreground truncate flex-1 text-left">
+            {todayDay.title}
+          </span>
+          <ArrowRight className="w-3 h-3 text-muted-foreground" />
+        </div>
+      )}
+    </motion.button>
+  );
+};
 
 // ============================================
 // Journey Progress Section
@@ -31,107 +162,19 @@ const JourneyProgressSection = ({
   getHabitCompletionStatus: (habitId: string) => boolean;
 }) => {
   const { allJourneyHabits, activeStates, loading } = useAllActiveJourneyHabits();
-  const navigate = useNavigate();
 
   if (loading || activeStates.length === 0) return null;
 
   return (
     <div className="space-y-2 mb-3">
-      {activeStates.map((state) => {
-        const journey = state.journeys;
-        if (!journey) return null;
-        const theme = getJourneyTheme(journey.theme_slug || journey.illustration_key);
-
-        // Detect if day was already advanced today (same guard as Dashboard.tsx:204-209)
-        const todayStr = new Date().toISOString().split("T")[0];
-        const wasAdvancedToday =
-          state.current_day > 1 &&
-          state.days_completed > 0 &&
-          state.updated_at?.split("T")[0] === todayStr;
-
-        const displayDay = wasAdvancedToday ? state.current_day - 1 : state.current_day;
-
-        let dailyPercent: number;
-        let isDayComplete: boolean;
-
-        if (wasAdvancedToday) {
-          dailyPercent = 100;
-          isDayComplete = true;
-        } else {
-          const todayHabitIds = allJourneyHabits
-            .filter(
-              (jh) =>
-                jh.journey_id === state.journey_id &&
-                jh.introduced_on_day <= state.current_day &&
-                (!jh.expires_on_day || jh.expires_on_day >= state.current_day)
-            )
-            .map((jh) => jh.habit_id);
-
-          const completedToday = todayHabitIds.filter((id) =>
-            getHabitCompletionStatus(id)
-          ).length;
-
-          dailyPercent = todayHabitIds.length > 0
-            ? Math.round((completedToday / todayHabitIds.length) * 100)
-            : 0;
-          isDayComplete = todayHabitIds.length > 0 && completedToday === todayHabitIds.length;
-        }
-
-        return (
-          <motion.button
-            key={state.id}
-            onClick={() => navigate(`/journeys/${journey.slug}`)}
-            className={cn(
-              "w-full flex items-center gap-3 p-2 rounded-xl transition-all hover:scale-[1.01]",
-              isDayComplete && "ring-1 ring-inset"
-            )}
-            style={{
-              background: isDayComplete
-                ? `linear-gradient(135deg, ${theme.color}18 0%, ${theme.color}08 100%)`
-                : undefined,
-              ...(isDayComplete ? { ["--tw-ring-color" as string]: `${theme.color}30` } : {}),
-            }}
-            animate={isDayComplete ? { scale: [1, 1.01, 1] } : {}}
-            transition={{ duration: 0.4 }}
-          >
-            <JourneyIllustration
-              illustrationKey={journey.illustration_key}
-              size="sm"
-            />
-            <div className="flex-1 min-w-0 text-left">
-              <p className="text-xs font-semibold text-foreground truncate">
-                {journey.title}
-              </p>
-              <p className="text-[10px] text-muted-foreground">
-                {isDayComplete
-                  ? `Dia ${displayDay} concluído · Fase ${state.current_phase}`
-                  : `Dia ${displayDay} de ${journey.duration_days} · Fase ${state.current_phase}`}
-              </p>
-              <div className="mt-1 w-full h-1.5 bg-muted/20 dark:bg-zinc-700/30 rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: dailyPercent / 100 }}
-                  transition={{ duration: 0.5 }}
-                  className="h-full rounded-full relative overflow-hidden origin-left"
-                  style={{ backgroundColor: theme.color }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-[shimmer_1.5s_infinite]" />
-                </motion.div>
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              {isDayComplete ? (
-                <CheckCircle2 className="w-4 h-4" style={{ color: theme.color }} />
-              ) : (
-                <span className="text-[10px] font-bold" style={{ color: theme.color }}>
-                  {dailyPercent}%
-                </span>
-              )}
-              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-            </div>
-          </motion.button>
-        );
-      })}
+      {activeStates.map((state) => (
+        <JourneyProgressItem
+          key={state.id}
+          state={state}
+          allJourneyHabits={allJourneyHabits}
+          getHabitCompletionStatus={getHabitCompletionStatus}
+        />
+      ))}
     </div>
   );
 };
@@ -195,9 +238,17 @@ export const DailyMissionCard = ({
   getHabitCompletionStatus,
   className,
 }: DailyMissionCardProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
   const { activeStates } = useActiveJourneys();
   const hasActiveJourney = activeStates.length > 0;
+
+  // Auto-expand on first 3 days of any active journey
+  const [isExpanded, setIsExpanded] = useState(() => {
+    if (activeStates.length > 0) {
+      const firstDay = activeStates[0]?.current_day ?? 99;
+      return firstDay <= 3;
+    }
+    return false;
+  });
 
   // Pre-compute completion status map
   const completionMap = useMemo(() => {
