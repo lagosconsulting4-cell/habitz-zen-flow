@@ -37,6 +37,48 @@ interface CopyContext {
   personalized: CopyMessage[];
 }
 
+// ============================================================================
+// QUIET HOURS - Respect user sleep/do-not-disturb preferences
+// ============================================================================
+
+/**
+ * Get current time in Brazil timezone (UTC-3)
+ */
+function getBrazilTime(): Date {
+  const now = new Date();
+  const brazilOffset = -3 * 60; // minutes
+  const utcOffset = now.getTimezoneOffset(); // minutes from UTC
+  return new Date(now.getTime() + (utcOffset + brazilOffset) * 60 * 1000);
+}
+
+/**
+ * Check if current time falls within user's quiet hours.
+ * Handles overnight ranges (e.g., 22:00 → 07:00).
+ */
+function isInQuietHours(
+  brazilTime: Date,
+  quietStart: string | null | undefined,
+  quietEnd: string | null | undefined
+): boolean {
+  if (!quietStart || !quietEnd) return false;
+
+  const [startH, startM] = quietStart.split(":").map(Number);
+  const [endH, endM] = quietEnd.split(":").map(Number);
+  const currentH = brazilTime.getHours();
+  const currentM = brazilTime.getMinutes();
+
+  const current = currentH * 60 + currentM;
+  const start = startH * 60 + startM;
+  const end = endH * 60 + endM;
+
+  if (start <= end) {
+    return current >= start && current < end;
+  } else {
+    // Overnight range (e.g., 22:00 → 07:00)
+    return current >= start || current < end;
+  }
+}
+
 /**
  * Copy bank for streak celebrations (from Sprint 1)
  */
@@ -45,36 +87,52 @@ const STREAK_COPY_BANK: Record<number, CopyContext> = {
     contextType: "streak_3",
     generic: [
       { key: "streak3_g1", title: "Opa!", body: "3 dias seguidos! ta virando rotina ein 👀", personalized: false },
+      { key: "streak3_g2", title: "3 dias! 🔥", body: "o comeco de um habito nasce em 3 dias. parabens!", personalized: false },
+      { key: "streak3_g3", title: "Olha quem ta firme!", body: "3 dias sem parar. isso e consistencia!", personalized: false },
     ],
     personalized: [
       { key: "streak3_p1", title: "Olha so!", body: "{habitEmoji} {habitName} - 3 dias firme! 🔥", personalized: true },
+      { key: "streak3_p2", title: "Triiiico! 🎯", body: "3 dias de {habitEmoji} {habitName}! to orgulhoso!", personalized: true },
+      { key: "streak3_p3", title: "Vai que vai!", body: "{habitEmoji} {habitName} por 3 dias! continue assim!", personalized: true },
     ],
   },
   7: {
     contextType: "streak_7",
     generic: [
-      { key: "streak7_g1", title: "Serio?!", body: "1 semana direto?! to orgulhoso de voce 🥹", personalized: false },
+      { key: "streak7_g1", title: "UMA SEMANA! 🎉", body: "7 dias mantendo o habito! respeito total", personalized: false },
+      { key: "streak7_g2", title: "7 dias! 🏆", body: "uma semana inteira! voce e mais disciplinado que 90% das pessoas", personalized: false },
+      { key: "streak7_g3", title: "Streak de 7!", body: "1 semana firme. isso ja e um habito formado!", personalized: false },
     ],
     personalized: [
-      { key: "streak7_p1", title: "Caramba!", body: "{habitName} - 7 dias seguidos! voce e brabo", personalized: true },
+      { key: "streak7_p1", title: "SEMANA COMPLETA!", body: "{habitEmoji} {habitName} - 7 dias! 🏆", personalized: true },
+      { key: "streak7_p2", title: "Impressionante!", body: "{habitEmoji} {habitName} por 7 dias direto! 🎉", personalized: true },
+      { key: "streak7_p3", title: "Uma semana de {habitEmoji}!", body: "{habitName} virou rotina. lindo de ver!", personalized: true },
     ],
   },
   14: {
     contextType: "streak_14",
     generic: [
-      { key: "streak14_g1", title: "UAU!", body: "2 semanas! ta virando maquina 💪", personalized: false },
+      { key: "streak14_g1", title: "DUAS SEMANAS! 💪", body: "14 dias! o habito ja faz parte de voce", personalized: false },
+      { key: "streak14_g2", title: "14 dias!", body: "2 semanas sem falhar. voce e uma maquina!", personalized: false },
+      { key: "streak14_g3", title: "Streak de 14! 🔥🔥", body: "metade de um mes. quem te para?", personalized: false },
     ],
     personalized: [
-      { key: "streak14_p1", title: "Incrivel!", body: "{habitEmoji} {habitName} - 14 dias! lenda", personalized: true },
+      { key: "streak14_p1", title: "IMPARAVEL!", body: "{habitEmoji} {habitName} - 14 dias! 💪", personalized: true },
+      { key: "streak14_p2", title: "2 semanas de {habitEmoji}!", body: "{habitName} por 14 dias. ta no automatico!", personalized: true },
+      { key: "streak14_p3", title: "Firme e forte!", body: "{habitEmoji} {habitName} - 2 semanas. impressionante!", personalized: true },
     ],
   },
   30: {
     contextType: "streak_30",
     generic: [
       { key: "streak30_g1", title: "LENDA!", body: "1 mes completo! to chorando de orgulho 🥹", personalized: false },
+      { key: "streak30_g2", title: "30 DIAS! 🏅", body: "um mes inteiro. voce provou que consegue!", personalized: false },
+      { key: "streak30_g3", title: "UM MES! 🎊", body: "30 dias mantendo o habito. isso e transformacao real!", personalized: false },
     ],
     personalized: [
       { key: "streak30_p1", title: "MONSTRO!", body: "{habitEmoji} {habitName} - 30 dias! respeito", personalized: true },
+      { key: "streak30_p2", title: "LENDARIO!", body: "{habitEmoji} {habitName} por 1 mes inteiro! 🥹", personalized: true },
+      { key: "streak30_p3", title: "30 dias de {habitEmoji}!", body: "{habitName} virou parte de quem voce e. incrivel!", personalized: true },
     ],
   },
 };
@@ -110,14 +168,20 @@ async function getHabitWithLongestStreak(
 }
 
 /**
- * Select copy message for streak milestone
+ * Select copy message for streak milestone with rotation.
+ * Gets last 5 message_keys from notification_history, filters them out.
  */
-function selectStreakCopy(milestone: 3 | 7 | 14 | 30, habit: { id: string; name: string; emoji: string } | null): {
+async function selectStreakCopy(
+  supabase: any,
+  userId: string,
+  milestone: 3 | 7 | 14 | 30,
+  habit: { id: string; name: string; emoji: string } | null
+): Promise<{
   key: string;
   title: string;
   body: string;
   contextType: string;
-} {
+}> {
   const copyContext = STREAK_COPY_BANK[milestone];
 
   if (!copyContext) {
@@ -129,19 +193,38 @@ function selectStreakCopy(milestone: 3 | 7 | 14 | 30, habit: { id: string; name:
     };
   }
 
+  // Get recent messages for rotation
+  const { data: recentMessages } = await supabase
+    .from("notification_history")
+    .select("message_key")
+    .eq("user_id", userId)
+    .eq("context_type", copyContext.contextType)
+    .order("sent_at", { ascending: false })
+    .limit(5);
+
+  const recentKeys = new Set((recentMessages || []).map((m: any) => m.message_key));
+
   // Prefer personalized if we have habit info
   const usePersonalized = habit !== null && copyContext.personalized.length > 0;
   const copyPool = usePersonalized ? copyContext.personalized : copyContext.generic;
-  const selected = copyPool[Math.floor(Math.random() * copyPool.length)];
+
+  // Filter out recently used copies (rotation)
+  let availableCopies = copyPool.filter(c => !recentKeys.has(c.key));
+  if (availableCopies.length === 0) {
+    availableCopies = copyPool; // Reset if all used
+  }
+
+  const selected = availableCopies[Math.floor(Math.random() * availableCopies.length)];
 
   // Personalize the copy
   let title = selected.title;
   let body = selected.body;
 
   if (habit && selected.personalized) {
+    title = title.replace("{habitEmoji}", habit.emoji || "");
     body = body
-      .replace("{habitEmoji}", habit.emoji || "")
-      .replace("{habitName}", habit.name);
+      .replace(/{habitEmoji}/g, habit.emoji || "")
+      .replace(/{habitName}/g, habit.name);
   }
 
   return {
@@ -150,6 +233,26 @@ function selectStreakCopy(milestone: 3 | 7 | 14 | 30, habit: { id: string; name:
     body,
     contextType: copyContext.contextType,
   };
+}
+
+/**
+ * Check if a notification of this type was already sent today for this user.
+ * Prevents duplicate notifications from React re-renders.
+ */
+async function checkAlreadySentToday(
+  supabase: any,
+  userId: string,
+  contextType: string
+): Promise<boolean> {
+  const today = new Date().toISOString().split("T")[0];
+  const { data } = await supabase
+    .from("notification_history")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("context_type", contextType)
+    .eq("notification_date", today)
+    .limit(1);
+  return (data || []).length > 0;
 }
 
 /**
@@ -279,11 +382,50 @@ serve(async (req) => {
       });
     }
 
+    // Check quiet hours before sending
+    const { data: userPrefs } = await supabase
+      .from("user_progress")
+      .select("notification_preferences")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const prefs = userPrefs?.notification_preferences || {};
+    const brazilTime = getBrazilTime();
+
+    if (isInQuietHours(brazilTime, prefs.quiet_hours_start, prefs.quiet_hours_end)) {
+      console.log(`[StreakNotif] Skipped: quiet hours for user ${userId}`);
+      return new Response(JSON.stringify({
+        success: true,
+        sent: false,
+        reason: "quiet_hours",
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check dedup - avoid sending same milestone notification twice (React re-renders)
+    const copyContext = STREAK_COPY_BANK[milestone];
+    if (copyContext) {
+      const alreadySent = await checkAlreadySentToday(supabase, userId, copyContext.contextType);
+      if (alreadySent) {
+        console.log(`[StreakNotif] Skipped: already sent ${copyContext.contextType} today for user ${userId}`);
+        return new Response(JSON.stringify({
+          success: true,
+          sent: false,
+          reason: "already_sent_today",
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Get habit with longest streak for personalization
     const habit = await getHabitWithLongestStreak(supabase, userId);
 
-    // Select copy message
-    const copyMessage = selectStreakCopy(milestone, habit);
+    // Select copy message with rotation
+    const copyMessage = await selectStreakCopy(supabase, userId, milestone, habit);
 
     // Send push notification
     const pushSuccess = await sendStreakPush(supabase, userId, milestone, copyMessage);

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import {
   Bell,
+  Clock,
   LogOut,
   User,
   Mail,
@@ -59,6 +60,11 @@ const Profile = () => {
   const [avatarShopOpen, setAvatarShopOpen] = useState(false);
   const [freezeShopOpen, setFreezeShopOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [notifPrefs, setNotifPrefs] = useState<{
+    quiet_hours_start?: string;
+    quiet_hours_end?: string;
+    end_of_day_enabled?: boolean;
+  }>({});
 
   const { isPremium, premiumSince } = usePremium(userId ?? undefined);
   const { insights, loading: insightsLoading } = useProfileInsights(userId ?? undefined);
@@ -92,10 +98,34 @@ const Profile = () => {
       if (profile?.is_admin) {
         setIsAdmin(profile.is_admin);
       }
+
+      // Load notification preferences
+      const { data: progress } = await supabase
+        .from("user_progress")
+        .select("notification_preferences")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (progress?.notification_preferences) {
+        setNotifPrefs(progress.notification_preferences);
+      }
     };
 
     loadProfile();
   }, []);
+
+  const updateNotifPref = async (key: string, value: boolean | string) => {
+    if (!userId) return;
+    const updated = { ...notifPrefs, [key]: value };
+    setNotifPrefs(updated);
+    const { error } = await supabase
+      .from("user_progress")
+      .update({ notification_preferences: updated })
+      .eq("user_id", userId);
+    if (error) {
+      toast.error("Erro ao salvar preferencia");
+      setNotifPrefs(notifPrefs); // revert
+    }
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -662,6 +692,36 @@ const Profile = () => {
             <div className="space-y-4">
               {/* Push Notifications Toggle */}
               <NotificationToggle />
+
+              {/* Quiet Hours */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Moon className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Horario Silencioso</p>
+                    <p className="text-xs text-muted-foreground">
+                      {notifPrefs.quiet_hours_start && notifPrefs.quiet_hours_end
+                        ? `${notifPrefs.quiet_hours_start} - ${notifPrefs.quiet_hours_end}`
+                        : "22:00 - 07:00 (padrao)"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* End of Day Reminder */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Lembrete Fim do Dia</p>
+                    <p className="text-xs text-muted-foreground">Notificar habitos pendentes as 22h</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={notifPrefs.end_of_day_enabled !== false}
+                  onCheckedChange={(checked) => updateNotifPref("end_of_day_enabled", checked)}
+                />
+              </div>
             </div>
           </Card>
         </motion.div>

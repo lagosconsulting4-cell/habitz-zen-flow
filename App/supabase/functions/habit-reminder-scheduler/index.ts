@@ -38,9 +38,45 @@ interface Habit {
   user_id: string;
   reminder_time: string | null;
   days_of_week: number[] | null;
+  category: string;
+  streak: number;
   notification_pref: {
     reminder_enabled?: boolean;
   } | null;
+}
+
+// ============================================================================
+// QUIET HOURS - Respect user sleep/do-not-disturb preferences
+// ============================================================================
+
+/**
+ * Check if current time falls within user's quiet hours.
+ * Handles overnight ranges (e.g., 22:00 → 07:00).
+ * Returns true if notifications should be suppressed.
+ */
+function isInQuietHours(
+  brazilTime: Date,
+  quietStart: string | null | undefined,
+  quietEnd: string | null | undefined
+): boolean {
+  if (!quietStart || !quietEnd) return false;
+
+  const [startH, startM] = quietStart.split(":").map(Number);
+  const [endH, endM] = quietEnd.split(":").map(Number);
+  const currentH = brazilTime.getHours();
+  const currentM = brazilTime.getMinutes();
+
+  const current = currentH * 60 + currentM;
+  const start = startH * 60 + startM;
+  const end = endH * 60 + endM;
+
+  if (start <= end) {
+    // Same-day range (e.g., 08:00 → 18:00)
+    return current >= start && current < end;
+  } else {
+    // Overnight range (e.g., 22:00 → 07:00)
+    return current >= start || current < end;
+  }
 }
 
 // ============================================================================
@@ -408,35 +444,63 @@ type NotificationContext =
   | "delayed"
   | "end_of_day"
   | "multiple_pending"
-  | "first_of_day";
+  | "first_of_day"
+  | "on_fire"
+  | "category_exercise"
+  | "category_reading"
+  | "category_meditation"
+  | "category_hydration";
 
 /**
  * Detects the context for notification selection.
- * Priority: end_of_day > multiple_pending > delayed > time_of_day
+ * Priority: end_of_day > multiple_pending > delayed > category > on_fire > first_of_day > time_of_day
  */
 function detectContext(
   currentHour: number,
   reminderTime: string | null,
   pendingCount: number,
-  brazilTime: Date
+  brazilTime: Date,
+  habit: Habit | null,
+  completedToday: number,
+  totalToday: number,
+  delayHours: number,
+  endOfDayEnabled: boolean
 ): NotificationContext {
-  const isEndOfDay = currentHour >= 22 || currentHour < 2; // Last 2 hours before midnight
-  const isDelayed = reminderTime ? isHabitDelayed(reminderTime, brazilTime, 2) : false;
+  const isEndOfDay = currentHour >= 22 || currentHour < 2;
+  const isDelayed = reminderTime ? isHabitDelayed(reminderTime, brazilTime, delayHours) : false;
 
-  // Priority logic
-  if (isEndOfDay && pendingCount > 0) {
+  // Priority logic (high -> low)
+  if (isEndOfDay && pendingCount > 0 && endOfDayEnabled) {
     return "end_of_day";
   } else if (pendingCount >= 3) {
     return "multiple_pending";
   } else if (isDelayed) {
     return "delayed";
-  } else if (currentHour >= 5 && currentHour < 12) {
-    return "morning";
-  } else if (currentHour >= 12 && currentHour < 18) {
-    return "afternoon";
-  } else {
-    return "evening";
   }
+
+  // Category-specific context (personalized copy for habit type)
+  if (habit) {
+    const cat = (habit.category || "").toLowerCase();
+    if (cat === "exercise" || cat === "exercicio" || cat === "treino") return "category_exercise";
+    if (cat === "reading" || cat === "leitura") return "category_reading";
+    if (cat === "meditation" || cat === "meditacao" || cat === "mindfulness") return "category_meditation";
+    if (cat === "hydration" || cat === "hidratacao" || cat === "agua") return "category_hydration";
+  }
+
+  // On fire: user completed 70%+ of today's habits
+  if (totalToday > 0 && completedToday / totalToday >= 0.7 && pendingCount <= 2) {
+    return "on_fire";
+  }
+
+  // First of day: no habits completed yet today and it's morning
+  if (completedToday === 0 && currentHour >= 5 && currentHour < 12) {
+    return "first_of_day";
+  }
+
+  // Time-of-day fallback
+  if (currentHour >= 5 && currentHour < 12) return "morning";
+  if (currentHour >= 12 && currentHour < 18) return "afternoon";
+  return "evening";
 }
 
 /**
@@ -637,7 +701,7 @@ serve(async (req) => {
     // Get all active habits with reminder_time set
     const { data: habits, error: habitsError } = await supabase
       .from("habits")
-      .select("id, name, emoji, period, user_id, reminder_time, days_of_week, notification_pref")
+      .select("id, name, emoji, period, user_id, reminder_time, days_of_week, notification_pref, category, streak")
       .eq("is_active", true)
       .not("reminder_time", "is", null);
 
@@ -785,8 +849,49 @@ serve(async (req) => {
       pendingByUser.set(habit.user_id, count);
     }
 
+    // Count total/completed habits per user today (for on_fire and first_of_day detection)
+    const totalHabitsByUser = new Map<string, number>();
+    const completedHabitsByUser = new Map<string, number>();
+    for (const habit of (habits as Habit[])) {
+      if (!isScheduledForToday(habit.days_of_week, brazilTime)) continue;
+      const uid = habit.user_id;
+      totalHabitsByUser.set(uid, (totalHabitsByUser.get(uid) || 0) + 1);
+      if (completedHabitIds.has(habit.id)) {
+        completedHabitsByUser.set(uid, (completedHabitsByUser.get(uid) || 0) + 1);
+      }
+    }
+
+    // Cache user notification preferences per user
+    const userPrefsCache = new Map<string, any>();
+
+    // Cache quiet hours check per user (avoid re-fetching for each habit)
+    const quietHoursCache = new Map<string, boolean>();
+
     for (const habit of habitsWithPush) {
       try {
+        // Check quiet hours + cache user prefs (cached per user)
+        if (!quietHoursCache.has(habit.user_id)) {
+          const { data: userPrefs } = await supabase
+            .from("user_progress")
+            .select("notification_preferences")
+            .eq("user_id", habit.user_id)
+            .maybeSingle();
+          const prefs = userPrefs?.notification_preferences || {};
+          quietHoursCache.set(habit.user_id, isInQuietHours(brazilTime, prefs.quiet_hours_start, prefs.quiet_hours_end));
+          userPrefsCache.set(habit.user_id, prefs);
+        }
+
+        if (quietHoursCache.get(habit.user_id)) {
+          console.log(`[Scheduler] Skipped: quiet hours for user ${habit.user_id}`);
+          results.push({
+            habitId: habit.id,
+            userId: habit.user_id,
+            success: false,
+            error: "Quiet hours",
+          });
+          continue;
+        }
+
         // Check daily limit before sending
         const withinLimit = await checkDailyLimit(supabase, habit.user_id, habit.id);
         if (!withinLimit) {
@@ -802,10 +907,43 @@ serve(async (req) => {
 
         // Detect notification context
         const pendingCount = pendingByUser.get(habit.user_id) || 1;
-        const context = detectContext(currentHour, habit.reminder_time, pendingCount, brazilTime);
+        const prefs = userPrefsCache.get(habit.user_id) || {};
+        const delayHours = prefs.delayed_reminder_hours ?? 2;
+        const endOfDayEnabled = prefs.end_of_day_enabled ?? true;
+        const context = detectContext(
+          currentHour,
+          habit.reminder_time,
+          pendingCount,
+          brazilTime,
+          habit,
+          completedHabitsByUser.get(habit.user_id) || 0,
+          totalHabitsByUser.get(habit.user_id) || 0,
+          delayHours,
+          endOfDayEnabled
+        );
 
         // Select copy message with rotation
         const copyMessage = await selectCopy(supabase, habit.user_id, context as NotificationContext, habit, pendingCount);
+
+        // Insert history FIRST to get the ID for click tracking
+        const { data: historyRow, error: historyInsertError } = await supabase
+          .from("notification_history")
+          .insert({
+            user_id: habit.user_id,
+            habit_id: habit.id,
+            context_type: context,
+            message_key: copyMessage.key,
+            title: copyMessage.title,
+            body: copyMessage.body,
+            sent_at: new Date().toISOString(),
+            notification_date: today,
+          })
+          .select("id")
+          .single();
+
+        if (historyInsertError) {
+          console.error(`[Scheduler] Failed to save notification history for habit ${habit.id}:`, historyInsertError);
+        }
 
         // Send push notification with selected copy
         const pushResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
@@ -826,6 +964,7 @@ serve(async (req) => {
               habitId: habit.id,
               habitName: habit.name,
               url: "/app/dashboard",
+              notificationHistoryId: historyRow?.id || undefined,
             },
             actions: [
               { action: "complete", title: "Completar" },
@@ -845,26 +984,6 @@ serve(async (req) => {
           context,
           messageKey: copyMessage.key,
         });
-
-        // Save to notification history if successful
-        if (isSuccess) {
-          const { error: historyError } = await supabase
-            .from("notification_history")
-            .insert({
-              user_id: habit.user_id,
-              habit_id: habit.id,
-              context_type: context,
-              message_key: copyMessage.key,
-              title: copyMessage.title,
-              body: copyMessage.body,
-              sent_at: new Date().toISOString(),
-              notification_date: today,
-            });
-
-          if (historyError) {
-            console.error(`[Scheduler] Failed to save notification history for habit ${habit.id}:`, historyError);
-          }
-        }
 
         results.push({
           habitId: habit.id,

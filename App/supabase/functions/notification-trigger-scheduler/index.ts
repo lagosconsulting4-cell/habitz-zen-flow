@@ -2,17 +2,20 @@
  * Edge Function: notification-trigger-scheduler
  *
  * Sends push notifications for behavioral triggers:
- * 1. DELAYED: Habit not completed 2+ hours after reminder time
- * 2. END_OF_DAY: Pending habits at 22:00-23:59 (last chance notification)
- * 3. MULTIPLE_PENDING: 3+ habits pending at 15:00-18:00 (afternoon catch-up)
- * 4. TRIAL_DAY_3: User on day 3 of trial with no habits created
- * 5. TRIAL_DAY_5: User on day 5 of trial with streak < 3
- * 6. TRIAL_ENDING: Trial ending in 3 days or 1 day
+ * 1. END_OF_DAY: Pending habits at 22:00-23:59 (last chance notification)
+ * 2. MULTIPLE_PENDING: 3+ habits pending at 15:00-18:00 (afternoon catch-up)
+ * 3. ONBOARDING: Day 0-7 sequence for new users (welcome, first habit, streaks)
+ * 4. VALUE/RECAP: Weekly (Sunday 10h) and monthly (1st 10h) progress summaries
+ * 5. INACTIVITY: Re-engagement at 3d, 7d, 14d of no activity (14h)
+ *
+ * NOTE: DELAYED notifications are handled by habit-reminder-scheduler (every 5 min)
+ * via detectContext("delayed"). Removed here to avoid double-notifications.
+ *
+ * Respects user quiet hours (notification_preferences.quiet_hours_start/end).
+ * Uses COPY_BANK with rotation to avoid message repetition.
  *
  * Runs hourly via pg_cron. Different from habit-reminder-scheduler which
  * runs every 5 minutes for time-based reminders.
- *
- * Uses shared copy engine from habit-reminder-scheduler.
  */
 
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
@@ -57,20 +60,6 @@ function getBrazilTime(): Date {
 }
 
 /**
- * Check if habit is delayed (X+ hours after reminder time)
- */
-function isHabitDelayed(reminderTime: string, currentTime: Date, delayHours: number): boolean {
-  const [hours, minutes] = reminderTime.split(":").map(Number);
-  const reminderDate = new Date(currentTime);
-  reminderDate.setHours(hours, minutes, 0, 0);
-
-  const diffMs = currentTime.getTime() - reminderDate.getTime();
-  const diffHours = diffMs / (1000 * 60 * 60);
-
-  return diffHours >= delayHours;
-}
-
-/**
  * Check if habit is scheduled for today based on days_of_week
  */
 function isScheduledForToday(daysOfWeek: number[] | null, currentTime: Date): boolean {
@@ -79,6 +68,213 @@ function isScheduledForToday(daysOfWeek: number[] | null, currentTime: Date): bo
   }
   const today = currentTime.getDay(); // 0 = Sunday, 1 = Monday, etc.
   return daysOfWeek.includes(today);
+}
+
+/**
+ * Check if current time falls within user's quiet hours.
+ * Handles overnight ranges (e.g., 22:00-07:00).
+ */
+function isInQuietHours(
+  brazilTime: Date,
+  quietStart: string | null | undefined,
+  quietEnd: string | null | undefined
+): boolean {
+  if (!quietStart || !quietEnd) return false;
+
+  const [startH, startM] = quietStart.split(":").map(Number);
+  const [endH, endM] = quietEnd.split(":").map(Number);
+  const currentH = brazilTime.getHours();
+  const currentM = brazilTime.getMinutes();
+
+  const current = currentH * 60 + currentM;
+  const start = startH * 60 + startM;
+  const end = endH * 60 + endM;
+
+  if (start <= end) {
+    return current >= start && current < end;
+  } else {
+    // Overnight range (e.g., 22:00 - 07:00)
+    return current >= start || current < end;
+  }
+}
+
+// ============================================================================
+// COPY BANK — Duolingo-style messages (tom carente, divertido, informal)
+// ============================================================================
+
+interface TriggerCopyMessage {
+  key: string;
+  title: string;
+  body: string;
+}
+
+interface TriggerCopyContext {
+  contextType: string;
+  messages: TriggerCopyMessage[];
+}
+
+const TRIGGER_COPY_BANK: Record<string, TriggerCopyContext> = {
+  // NOTE: "delayed" notifications removed — handled by habit-reminder-scheduler
+  // via detectContext("delayed") with 12 copy variations (6g+6p).
+  end_of_day: {
+    contextType: "end_of_day",
+    messages: [
+      { key: "end_of_day_g1", title: "Ultima chance!", body: "o dia ta acabando... bora terminar seus habitos? ⏰" },
+      { key: "end_of_day_g2", title: "Quase meia-noite!", body: "ainda da tempo! falta pouco pro dia acabar" },
+      { key: "end_of_day_g3", title: "Vai dormir sem completar?", body: "seus habitos tao te esperando... nao deixa pra amanha!" },
+    ],
+  },
+  multiple_pending: {
+    contextType: "multiple_pending",
+    messages: [
+      { key: "multiple_pending_g1", title: "Ops!", body: "voce tem {pendingCount} habitos pendentes... bora se organizar?" },
+      { key: "multiple_pending_g2", title: "Acumulou!", body: "{pendingCount} habitos esperando! que tal fazer 1 agora?" },
+      { key: "multiple_pending_g3", title: "To preocupado...", body: "{pendingCount} pendentes? bora pelo menos um!" },
+    ],
+  },
+  // --- Onboarding (Day 0-7) ---
+  onboard_welcome: {
+    contextType: "onboard_welcome",
+    messages: [
+      { key: "onboard_welcome_g1", title: "Bem-vindo ao Bora! 🚀", body: "sua jornada comeca agora. bora criar seu primeiro habito?" },
+      { key: "onboard_welcome_g2", title: "E ai, pronto(a)? 💪", body: "o primeiro passo e o mais importante. bora comecar!" },
+    ],
+  },
+  onboard_first_habit: {
+    contextType: "onboard_first_habit",
+    messages: [
+      { key: "onboard_first_g1", title: "Habito criado! ✨", body: "agora e so completar. vai la, leva 5 segundos!" },
+      { key: "onboard_first_g2", title: "Ja criou seu habito!", body: "falta so completar ele. bora?" },
+    ],
+  },
+  onboard_day_1: {
+    contextType: "onboard_day_1",
+    messages: [
+      { key: "onboard_d1_g1", title: "Dia 1! 🌟", body: "cria seu primeiro habito? leva 30 segundos!" },
+      { key: "onboard_d1_g2", title: "Oi! Ainda ta ai?", body: "vi que voce nao criou nenhum habito ainda. bora?" },
+    ],
+  },
+  onboard_day_2: {
+    contextType: "onboard_day_2",
+    messages: [
+      { key: "onboard_d2_g1", title: "Dia 2! 🔥", body: "consistencia e tudo. bora manter o ritmo?" },
+      { key: "onboard_d2_g2", title: "Segundo dia!", body: "quem completa 2 dias seguidos tem 3x mais chance de criar o habito!" },
+    ],
+  },
+  onboard_streak_3: {
+    contextType: "onboard_streak_3",
+    messages: [
+      { key: "onboard_s3_g1", title: "3 dias seguidos! 🔥🔥🔥", body: "voce ta formando um habito! nao para agora!" },
+      { key: "onboard_s3_g2", title: "Streak de 3! 💪", body: "3 dias sem parar! voce ta no caminho certo!" },
+    ],
+  },
+  onboard_day_5: {
+    contextType: "onboard_day_5",
+    messages: [
+      { key: "onboard_d5_g1", title: "5 dias! 🏅", body: "ja completou {totalCompletions} habitos. imagina em 1 mes!" },
+      { key: "onboard_d5_g2", title: "Quase 1 semana!", body: "5 dias e voce ja e mais consistente que a maioria!" },
+    ],
+  },
+  onboard_week: {
+    contextType: "onboard_week",
+    messages: [
+      { key: "onboard_w1_g1", title: "1 semana! 🎉", body: "7 dias completando habitos! voce e mais consistente que 80% dos usuarios!" },
+      { key: "onboard_w1_g2", title: "Uma semana inteira! 🏆", body: "parabens! {totalCompletions} habitos completados em 7 dias!" },
+    ],
+  },
+  // --- Value/Progress ---
+  weekly_recap: {
+    contextType: "weekly_recap",
+    messages: [
+      { key: "weekly_g1", title: "Sua semana em numeros 📊", body: "voce completou {weekCompletions} habitos! streak atual: {currentStreak} dias 🔥" },
+      { key: "weekly_g2", title: "Recap semanal! 🗓️", body: "{weekCompletions} habitos essa semana. bora superar semana que vem?" },
+    ],
+  },
+  monthly_recap: {
+    contextType: "monthly_recap",
+    messages: [
+      { key: "monthly_g1", title: "Recap de {monthName} 📊", body: "{monthCompletions} habitos, melhor streak: {longestStreak} dias! 🏆" },
+      { key: "monthly_g2", title: "Seu mes foi incrivel! 🎉", body: "em {monthName}: {monthCompletions} completados, {perfectDays} dias perfeitos!" },
+    ],
+  },
+  // --- Inactivity Re-engagement ---
+  inactive_3d: {
+    contextType: "inactive_3d",
+    messages: [
+      { key: "inactive_3d_g1", title: "Faz 3 dias... 😢", body: "que nao te vejo por aqui. ta tudo bem?" },
+      { key: "inactive_3d_g2", title: "Sinto sua falta!", body: "3 dias sem completar habitos. bora voltar devagar?" },
+    ],
+  },
+  inactive_7d: {
+    contextType: "inactive_7d",
+    messages: [
+      { key: "inactive_7d_g1", title: "Uma semana sem voce 💔", body: "seu streak zerou... mas da pra recomecar! que tal so 1 habito hoje?" },
+      { key: "inactive_7d_g2", title: "Oi sumido(a)!", body: "faz 7 dias! recomecar e mais facil do que voce pensa" },
+    ],
+  },
+  inactive_14d: {
+    contextType: "inactive_14d",
+    messages: [
+      { key: "inactive_14d_g1", title: "Ainda to aqui...", body: "te esperando. que tal voltar com calma? so 1 habito." },
+      { key: "inactive_14d_g2", title: "Ultima chamada 📢", body: "14 dias sem habitos. seus objetivos ainda importam?" },
+    ],
+  },
+};
+
+const MONTH_NAMES_PT = [
+  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
+];
+
+/**
+ * Select a copy message from the COPY_BANK with rotation.
+ * Avoids repeating the last 5 messages sent to this user for this context.
+ * Replaces template variables like {pendingCount}, {weekCompletions}, etc.
+ */
+async function selectTriggerCopy(
+  supabase: any,
+  userId: string,
+  contextType: string,
+  templateVars?: Record<string, string | number>
+): Promise<{ title: string; body: string; messageKey: string }> {
+  const bank = TRIGGER_COPY_BANK[contextType];
+  if (!bank || bank.messages.length === 0) {
+    return { title: "Bora!", body: "Voce tem habitos pendentes!", messageKey: `${contextType}_fallback` };
+  }
+
+  // Fetch last 5 message keys for this context to avoid repetition
+  const { data: recentHistory } = await supabase
+    .from("notification_history")
+    .select("message_key")
+    .eq("user_id", userId)
+    .eq("context_type", contextType)
+    .order("sent_at", { ascending: false })
+    .limit(5);
+
+  const recentKeys = new Set((recentHistory || []).map((h: any) => h.message_key));
+
+  // Filter out recently used messages
+  let available = bank.messages.filter(m => !recentKeys.has(m.key));
+
+  // If all messages were used, reset (pick from all)
+  if (available.length === 0) {
+    available = bank.messages;
+  }
+
+  // Random selection
+  const selected = available[Math.floor(Math.random() * available.length)];
+
+  // Replace template variables
+  let title = selected.title;
+  let body = selected.body;
+  if (templateVars) {
+    for (const [key, value] of Object.entries(templateVars)) {
+      title = title.replace(new RegExp(`\\{${key}\\}`, "g"), String(value));
+      body = body.replace(new RegExp(`\\{${key}\\}`, "g"), String(value));
+    }
+  }
+
+  return { title, body, messageKey: selected.key };
 }
 
 /**
@@ -180,75 +376,11 @@ async function checkAlreadySentToday(
   return !!data;
 }
 
-/**
- * TRIGGER 1: DELAYED HABIT
- * Checks if habit was not completed 2+ hours after reminder time
- */
-async function checkDelayedHabits(
-  supabase: any,
-  brazilTime: Date,
-  currentHour: number
-): Promise<{ habitId: string; userId: string; reminderTime: string }[]> {
-  // Only check during business hours (6-22h)
-  if (currentHour < 6 || currentHour >= 22) {
-    return [];
-  }
-
-  const today = brazilTime.toISOString().split("T")[0];
-
-  // Get habits with reminder_time 2+ hours ago
-  const { data: habits, error } = await supabase
-    .from("habits")
-    .select("id, name, emoji, user_id, reminder_time, days_of_week, notification_pref")
-    .eq("is_active", true)
-    .not("reminder_time", "is", null);
-
-  if (error) {
-    console.error("[Delayed] Error fetching habits:", error);
-    return [];
-  }
-
-  const delayedHabits: { habitId: string; userId: string; reminderTime: string }[] = [];
-
-  for (const habit of habits || []) {
-    // Check if habit is scheduled for today
-    if (!isScheduledForToday(habit.days_of_week, brazilTime)) {
-      continue;
-    }
-
-    // Check if habit is delayed (2+ hours after reminder)
-    if (!isHabitDelayed(habit.reminder_time, brazilTime, 2)) {
-      continue;
-    }
-
-    // Check if habit NOT completed today
-    const { data: completion, error: completionError } = await supabase
-      .from("habit_completions")
-      .select("id")
-      .eq("habit_id", habit.id)
-      .eq("completed_at", today)
-      .maybeSingle();
-
-    if (completionError) {
-      console.error(`[Delayed] Error checking completion for habit ${habit.id}:`, completionError);
-      continue;
-    }
-
-    if (!completion) {
-      // Habit not completed today
-      delayedHabits.push({
-        habitId: habit.id,
-        userId: habit.user_id,
-        reminderTime: habit.reminder_time,
-      });
-    }
-  }
-
-  return delayedHabits;
-}
+// NOTE: checkDelayedHabits removed — delayed detection handled by
+// habit-reminder-scheduler via detectContext("delayed") with 12 copy variations.
 
 /**
- * TRIGGER 2: END OF DAY
+ * TRIGGER 1: END OF DAY
  * Checks at 22:00-23:59 for pending habits (last chance)
  */
 async function checkEndOfDayHabits(
@@ -274,46 +406,30 @@ async function checkEndOfDayHabits(
     return [];
   }
 
-  const endOfDayHabits: { habitId: string; userId: string }[] = [];
+  // Filter to today's notifiable habits
+  const todayHabits = (habits || []).filter((h: any) => {
+    if (h.notification_pref?.reminder_enabled === false) return false;
+    return isScheduledForToday(h.days_of_week, brazilTime);
+  });
 
-  for (const habit of habits || []) {
-    // Check if notifications are enabled
-    if (habit.notification_pref?.reminder_enabled === false) {
-      continue;
-    }
+  if (todayHabits.length === 0) return [];
 
-    // Check if habit is scheduled for today
-    if (!isScheduledForToday(habit.days_of_week, brazilTime)) {
-      continue;
-    }
+  // Batch query: get all completed habit IDs for today in one query
+  const habitIds = todayHabits.map((h: any) => h.id);
+  const { data: completions } = await supabase
+    .from("habit_completions")
+    .select("habit_id")
+    .in("habit_id", habitIds)
+    .eq("completed_at", today);
+  const completedIds = new Set((completions || []).map((c: any) => c.habit_id));
 
-    // Check if habit NOT completed today
-    const { data: completion, error: completionError } = await supabase
-      .from("habit_completions")
-      .select("id")
-      .eq("habit_id", habit.id)
-      .eq("completed_at", today)
-      .maybeSingle();
-
-    if (completionError) {
-      console.error(`[EndOfDay] Error checking completion for habit ${habit.id}:`, completionError);
-      continue;
-    }
-
-    if (!completion) {
-      // Habit not completed today - last chance notification
-      endOfDayHabits.push({
-        habitId: habit.id,
-        userId: habit.user_id,
-      });
-    }
-  }
-
-  return endOfDayHabits;
+  return todayHabits
+    .filter((h: any) => !completedIds.has(h.id))
+    .map((h: any) => ({ habitId: h.id, userId: h.user_id }));
 }
 
 /**
- * TRIGGER 3: MULTIPLE PENDING
+ * TRIGGER 2: MULTIPLE PENDING
  * Checks at 15:00-18:00 for users with 3+ pending habits
  */
 async function checkMultiplePendingHabits(
@@ -339,38 +455,29 @@ async function checkMultiplePendingHabits(
     return [];
   }
 
+  // Filter to today's notifiable habits
+  const todayHabits = (habits || []).filter((h: any) => {
+    if (h.notification_pref?.reminder_enabled === false) return false;
+    return isScheduledForToday(h.days_of_week, brazilTime);
+  });
+
+  if (todayHabits.length === 0) return [];
+
+  // Batch query: get all completed habit IDs for today in one query
+  const habitIds = todayHabits.map((h: any) => h.id);
+  const { data: completions } = await supabase
+    .from("habit_completions")
+    .select("habit_id")
+    .in("habit_id", habitIds)
+    .eq("completed_at", today);
+  const completedIds = new Set((completions || []).map((c: any) => c.habit_id));
+
   // Count pending habits per user
   const pendingByUser = new Map<string, number>();
-
-  for (const habit of habits || []) {
-    // Check if notifications are enabled
-    if (habit.notification_pref?.reminder_enabled === false) {
-      continue;
-    }
-
-    // Check if habit is scheduled for today
-    if (!isScheduledForToday(habit.days_of_week, brazilTime)) {
-      continue;
-    }
-
-    // Check if habit NOT completed today
-    const { data: completion, error: completionError } = await supabase
-      .from("habit_completions")
-      .select("id")
-      .eq("habit_id", habit.id)
-      .eq("completed_at", today)
-      .maybeSingle();
-
-    if (completionError) {
-      console.error(`[MultiplePending] Error checking completion for habit ${habit.id}:`, completionError);
-      continue;
-    }
-
-    if (!completion) {
-      // Habit not completed
-      const userId = habit.user_id;
-      const count = (pendingByUser.get(userId) || 0) + 1;
-      pendingByUser.set(userId, count);
+  for (const habit of todayHabits) {
+    if (!completedIds.has(habit.id)) {
+      const count = (pendingByUser.get(habit.user_id) || 0) + 1;
+      pendingByUser.set(habit.user_id, count);
     }
   }
 
@@ -386,160 +493,298 @@ async function checkMultiplePendingHabits(
 }
 
 /**
- * TRIGGER 4: TRIAL DAY 3
- * Checks users on day 3 of trial who haven't created any habits
+ * TRIGGER 3: ONBOARDING SEQUENCE (Day 0-7)
+ * Sends targeted push notifications to new users during their first week.
+ * Each day has a specific trigger with conditions.
  */
-async function checkTrialDay3(
+async function checkOnboardingTriggers(
   supabase: any,
+  brazilTime: Date,
   currentHour: number
-): Promise<{ userId: string; email: string }[]> {
-  // Only trigger at 10:00 AM (morning engagement time)
-  if (currentHour !== 10) {
+): Promise<{ userId: string; triggerType: string; templateVars: Record<string, string | number> }[]> {
+  const triggers: { userId: string; triggerType: string; templateVars: Record<string, string | number> }[] = [];
+
+  // Define which triggers fire at which hour
+  const hourTriggerMap: Record<number, { day: number; type: string; condition?: string }[]> = {
+    10: [
+      { day: 1, type: "onboard_day_1", condition: "no_habits" },
+      { day: 3, type: "onboard_streak_3", condition: "streak_3" },
+      { day: 5, type: "onboard_day_5" },
+      { day: 7, type: "onboard_week" },
+    ],
+    14: [
+      { day: 1, type: "onboard_first_habit", condition: "has_habit_no_completion" },
+      { day: 2, type: "onboard_day_2" },
+    ],
+    20: [
+      { day: 0, type: "onboard_welcome" },
+    ],
+  };
+
+  const triggersForHour = hourTriggerMap[currentHour];
+  if (!triggersForHour || triggersForHour.length === 0) {
     return [];
   }
 
-  // Get users in trial for exactly 3 days
-  const threeDaysAgo = new Date();
-  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-  const startOfDay = threeDaysAgo.toISOString().split("T")[0];
-  const endOfDay = startOfDay + "T23:59:59Z";
+  // Fetch users who completed onboarding in last 8 days
+  const eightDaysAgo = new Date(brazilTime);
+  eightDaysAgo.setDate(eightDaysAgo.getDate() - 8);
 
-  const { data: purchases, error } = await supabase
-    .from("purchases")
-    .select("user_id, email")
-    .eq("status", "paid")
-    .not("trial_end_date", "is", null)
-    .gte("created_at", startOfDay)
-    .lte("created_at", endOfDay);
+  const { data: newUsers, error } = await supabase
+    .from("profiles")
+    .select("user_id, onboarding_completed_at")
+    .eq("has_completed_onboarding", true)
+    .not("onboarding_completed_at", "is", null)
+    .gte("onboarding_completed_at", eightDaysAgo.toISOString());
 
   if (error) {
-    console.error("[TrialDay3] Error fetching trial users:", error);
+    console.error("[Onboarding] Error fetching new users:", error);
     return [];
   }
 
-  const result: { userId: string; email: string }[] = [];
+  if (!newUsers || newUsers.length === 0) return [];
 
-  for (const purchase of purchases || []) {
-    // Check if user has any habits
-    const { data: habits, error: habitsError } = await supabase
-      .from("habits")
-      .select("id")
-      .eq("user_id", purchase.user_id)
-      .eq("is_active", true)
-      .limit(1);
+  const today = brazilTime.toISOString().split("T")[0];
 
-    if (habitsError) {
-      console.error(`[TrialDay3] Error checking habits for user ${purchase.user_id}:`, habitsError);
-      continue;
-    }
+  for (const user of newUsers) {
+    const onboardDate = new Date(user.onboarding_completed_at);
+    const diffMs = brazilTime.getTime() - onboardDate.getTime();
+    const daysSinceOnboarding = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (!habits || habits.length === 0) {
-      // User has no habits after 3 days
-      result.push({ userId: purchase.user_id, email: purchase.email });
+    for (const triggerDef of triggersForHour) {
+      if (daysSinceOnboarding !== triggerDef.day) continue;
+
+      // Check condition if needed
+      if (triggerDef.condition === "no_habits") {
+        const { data: habits } = await supabase
+          .from("habits")
+          .select("id")
+          .eq("user_id", user.user_id)
+          .eq("is_active", true)
+          .limit(1);
+        if (habits && habits.length > 0) continue; // Has habits, skip
+      }
+
+      if (triggerDef.condition === "has_habit_no_completion") {
+        const { data: habits } = await supabase
+          .from("habits")
+          .select("id")
+          .eq("user_id", user.user_id)
+          .eq("is_active", true)
+          .limit(1);
+        if (!habits || habits.length === 0) continue; // No habits, skip
+
+        const { data: completions } = await supabase
+          .from("habit_completions")
+          .select("id")
+          .eq("user_id", user.user_id)
+          .limit(1);
+        if (completions && completions.length > 0) continue; // Has completions, skip
+      }
+
+      if (triggerDef.condition === "streak_3") {
+        const { data: progress } = await supabase
+          .from("user_progress")
+          .select("current_streak")
+          .eq("user_id", user.user_id)
+          .maybeSingle();
+        if (!progress || progress.current_streak < 3) continue;
+      }
+
+      // Check already sent
+      const alreadySent = await checkAlreadySentToday(supabase, user.user_id, null, triggerDef.type);
+      if (alreadySent) continue;
+
+      // Get template vars
+      const templateVars: Record<string, string | number> = {};
+      if (triggerDef.type === "onboard_day_5" || triggerDef.type === "onboard_week") {
+        const { data: progress } = await supabase
+          .from("user_progress")
+          .select("total_habits_completed")
+          .eq("user_id", user.user_id)
+          .maybeSingle();
+        templateVars.totalCompletions = progress?.total_habits_completed || 0;
+      }
+
+      triggers.push({
+        userId: user.user_id,
+        triggerType: triggerDef.type,
+        templateVars,
+      });
     }
   }
 
-  return result;
+  return triggers;
 }
 
 /**
- * TRIGGER 5: TRIAL DAY 5
- * Checks users on day 5 of trial with streak < 3
+ * TRIGGER 4: VALUE/PROGRESS RECAP
+ * Weekly recap on Sunday 10h, Monthly recap on 1st of month 10h.
+ * Only sends to users who had activity in the period.
  */
-async function checkTrialDay5(
+async function checkValueTriggers(
   supabase: any,
-  currentHour: number
-): Promise<{ userId: string; email: string; streak: number }[]> {
-  // Only trigger at 10:00 AM
-  if (currentHour !== 10) {
+  brazilTime: Date,
+  currentHour: number,
+  usersWithPush: Set<string>
+): Promise<{ userId: string; triggerType: string; templateVars: Record<string, string | number> }[]> {
+  const triggers: { userId: string; triggerType: string; templateVars: Record<string, string | number> }[] = [];
+
+  if (currentHour !== 10) return [];
+
+  const dayOfWeek = brazilTime.getDay(); // 0 = Sunday
+  const dayOfMonth = brazilTime.getDate();
+  const today = brazilTime.toISOString().split("T")[0];
+
+  // WEEKLY RECAP — Sunday at 10h
+  if (dayOfWeek === 0) {
+    const sevenDaysAgo = new Date(brazilTime);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const weekStart = sevenDaysAgo.toISOString().split("T")[0];
+
+    // Get all users with push who have completions this week
+    for (const userId of usersWithPush) {
+      const alreadySent = await checkAlreadySentToday(supabase, userId, null, "weekly_recap");
+      if (alreadySent) continue;
+
+      const { data: completions, error: compError } = await supabase
+        .from("habit_completions")
+        .select("id")
+        .eq("user_id", userId)
+        .gte("completed_at", weekStart)
+        .lte("completed_at", today);
+
+      if (compError || !completions || completions.length === 0) continue;
+
+      const { data: progress } = await supabase
+        .from("user_progress")
+        .select("current_streak")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      triggers.push({
+        userId,
+        triggerType: "weekly_recap",
+        templateVars: {
+          weekCompletions: completions.length,
+          currentStreak: progress?.current_streak || 0,
+        },
+      });
+    }
+  }
+
+  // MONTHLY RECAP — 1st of month at 10h
+  if (dayOfMonth === 1) {
+    const lastMonth = new Date(brazilTime);
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+    const monthStart = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, "0")}-01`;
+    const monthEnd = `${brazilTime.getFullYear()}-${String(brazilTime.getMonth() + 1).padStart(2, "0")}-01`;
+    const monthName = MONTH_NAMES_PT[lastMonth.getMonth()];
+
+    for (const userId of usersWithPush) {
+      const alreadySent = await checkAlreadySentToday(supabase, userId, null, "monthly_recap");
+      if (alreadySent) continue;
+
+      const { data: completions, error: compError } = await supabase
+        .from("habit_completions")
+        .select("id")
+        .eq("user_id", userId)
+        .gte("completed_at", monthStart)
+        .lt("completed_at", monthEnd);
+
+      if (compError || !completions || completions.length === 0) continue;
+
+      const { data: progress } = await supabase
+        .from("user_progress")
+        .select("longest_streak, perfect_days")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      triggers.push({
+        userId,
+        triggerType: "monthly_recap",
+        templateVars: {
+          monthName,
+          monthCompletions: completions.length,
+          longestStreak: progress?.longest_streak || 0,
+          perfectDays: progress?.perfect_days || 0,
+        },
+      });
+    }
+  }
+
+  return triggers;
+}
+
+/**
+ * TRIGGER 5: INACTIVITY RE-ENGAGEMENT
+ * Sends push at 14h for users who haven't completed habits in 3, 7, or 14 days.
+ * Stops after 14 days (avoids spam/reports).
+ * Excludes users in first 8 days of onboarding (handled by onboarding triggers).
+ */
+async function checkInactivityTriggers(
+  supabase: any,
+  brazilTime: Date,
+  currentHour: number,
+  usersWithPush: Set<string>
+): Promise<{ userId: string; triggerType: string }[]> {
+  const triggers: { userId: string; triggerType: string }[] = [];
+
+  if (currentHour !== 14) return [];
+
+  const today = brazilTime.toISOString().split("T")[0];
+
+  // Get users with last_activity_date who completed onboarding > 8 days ago
+  const eightDaysAgo = new Date(brazilTime);
+  eightDaysAgo.setDate(eightDaysAgo.getDate() - 8);
+
+  // Fetch profiles that completed onboarding more than 8 days ago
+  const { data: eligibleProfiles, error: profileError } = await supabase
+    .from("profiles")
+    .select("user_id, onboarding_completed_at")
+    .eq("has_completed_onboarding", true)
+    .not("onboarding_completed_at", "is", null)
+    .lte("onboarding_completed_at", eightDaysAgo.toISOString());
+
+  if (profileError) {
+    console.error("[Inactivity] Error fetching profiles:", profileError);
     return [];
   }
 
-  // Get users in trial for exactly 5 days
-  const fiveDaysAgo = new Date();
-  fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
-  const startOfDay = fiveDaysAgo.toISOString().split("T")[0];
-  const endOfDay = startOfDay + "T23:59:59Z";
+  if (!eligibleProfiles || eligibleProfiles.length === 0) return [];
 
-  const { data: purchases, error } = await supabase
-    .from("purchases")
-    .select("user_id, email")
-    .eq("status", "paid")
-    .not("trial_end_date", "is", null)
-    .gte("created_at", startOfDay)
-    .lte("created_at", endOfDay);
+  const eligibleUserIds = new Set(eligibleProfiles.map((p: any) => p.user_id));
 
-  if (error) {
-    console.error("[TrialDay5] Error fetching trial users:", error);
-    return [];
-  }
+  // Get user_progress with last_activity_date for eligible users with push
+  for (const userId of usersWithPush) {
+    if (!eligibleUserIds.has(userId)) continue;
 
-  const result: { userId: string; email: string; streak: number }[] = [];
-
-  for (const purchase of purchases || []) {
-    // Check user's current streak
-    const { data: progress, error: progressError } = await supabase
+    const { data: progress } = await supabase
       .from("user_progress")
-      .select("current_streak")
-      .eq("user_id", purchase.user_id)
+      .select("last_activity_date")
+      .eq("user_id", userId)
       .maybeSingle();
 
-    if (progressError) {
-      console.error(`[TrialDay5] Error checking progress for user ${purchase.user_id}:`, progressError);
-      continue;
-    }
+    if (!progress?.last_activity_date) continue;
 
-    const streak = progress?.current_streak ?? 0;
-    if (streak < 3) {
-      // User has low streak after 5 days
-      result.push({ userId: purchase.user_id, email: purchase.email, streak });
-    }
+    const lastActivity = new Date(progress.last_activity_date);
+    const diffMs = brazilTime.getTime() - lastActivity.getTime();
+    const daysSinceActivity = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    let triggerType: string | null = null;
+    if (daysSinceActivity === 3) triggerType = "inactive_3d";
+    else if (daysSinceActivity === 7) triggerType = "inactive_7d";
+    else if (daysSinceActivity === 14) triggerType = "inactive_14d";
+
+    if (!triggerType) continue;
+
+    const alreadySent = await checkAlreadySentToday(supabase, userId, null, triggerType);
+    if (alreadySent) continue;
+
+    triggers.push({ userId, triggerType });
   }
 
-  return result;
-}
-
-/**
- * TRIGGER 6: TRIAL ENDING
- * Checks users whose trial ends in 3 days or 1 day
- */
-async function checkTrialEnding(
-  supabase: any,
-  currentHour: number
-): Promise<{ userId: string; email: string; daysLeft: number }[]> {
-  // Only trigger at 10:00 AM
-  if (currentHour !== 10) {
-    return [];
-  }
-
-  const now = new Date();
-  const result: { userId: string; email: string; daysLeft: number }[] = [];
-
-  // Check for 3 days and 1 day before trial ends
-  for (const daysLeft of [3, 1]) {
-    const targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + daysLeft);
-    const startOfDay = targetDate.toISOString().split("T")[0];
-    const endOfDay = startOfDay + "T23:59:59Z";
-
-    const { data: purchases, error } = await supabase
-      .from("purchases")
-      .select("user_id, email")
-      .eq("status", "paid")
-      .gte("trial_end_date", startOfDay)
-      .lte("trial_end_date", endOfDay);
-
-    if (error) {
-      console.error(`[TrialEnding] Error fetching trial users (${daysLeft}d):`, error);
-      continue;
-    }
-
-    for (const purchase of purchases || []) {
-      result.push({ userId: purchase.user_id, email: purchase.email, daysLeft });
-    }
-  }
-
-  return result;
+  return triggers;
 }
 
 /**
@@ -555,6 +800,28 @@ async function sendTriggerNotification(
   habitId?: string
 ): Promise<boolean> {
   try {
+    const today = new Date().toISOString().split("T")[0];
+
+    // Insert history FIRST to get the ID for click tracking
+    const { data: historyRow, error: historyError } = await supabase
+      .from("notification_history")
+      .insert({
+        user_id: userId,
+        habit_id: habitId || null,
+        context_type: context,
+        message_key: messageKey,
+        title,
+        body,
+        sent_at: new Date().toISOString(),
+        notification_date: today,
+      })
+      .select("id")
+      .single();
+
+    if (historyError) {
+      console.error(`[TriggerNotification] Failed to save history: ${historyError}`);
+    }
+
     const pushResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
       method: "POST",
       headers: {
@@ -572,6 +839,8 @@ async function sendTriggerNotification(
           type: "trigger-notification",
           context,
           url: "/app/dashboard",
+          habitId: habitId || undefined,
+          notificationHistoryId: historyRow?.id || undefined,
         },
         actions: [
           { action: "dismiss", title: "Depois" },
@@ -580,30 +849,7 @@ async function sendTriggerNotification(
     });
 
     const result = await pushResponse.json();
-    const isSuccess = pushResponse.ok && result.sent > 0;
-
-    // Save to notification history
-    if (isSuccess) {
-      const today = new Date().toISOString().split("T")[0];
-      const { error: historyError } = await supabase
-        .from("notification_history")
-        .insert({
-          user_id: userId,
-          habit_id: habitId || null,
-          context_type: context,
-          message_key: messageKey,
-          title,
-          body,
-          sent_at: new Date().toISOString(),
-          notification_date: today,
-        });
-
-      if (historyError) {
-        console.error(`[TriggerNotification] Failed to save history: ${historyError}`);
-      }
-    }
-
-    return isSuccess;
+    return pushResponse.ok && result.sent > 0;
   } catch (error) {
     console.error(`[TriggerNotification] Failed to send: ${error}`);
     return false;
@@ -664,29 +910,51 @@ serve(async (req) => {
 
     const usersWithPush = new Set(subscriptions?.map((s: any) => s.user_id) || []);
 
-    // TRIGGER 1: Check delayed habits
-    const delayedHabits = await checkDelayedHabits(supabase, brazilTime, currentHour);
-    const delayedWithPush = delayedHabits.filter(h => usersWithPush.has(h.userId));
+    // Cache quiet hours + user prefs per user to avoid repeated DB queries
+    const quietHoursCache = new Map<string, boolean>();
+    const userPrefsCache = new Map<string, any>();
 
-    // TRIGGER 2: Check end-of-day habits
+    async function getUserPrefs(userId: string): Promise<any> {
+      if (userPrefsCache.has(userId)) {
+        return userPrefsCache.get(userId)!;
+      }
+      const { data: userPrefs } = await supabase
+        .from("user_progress")
+        .select("notification_preferences")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const prefs = userPrefs?.notification_preferences || {};
+      userPrefsCache.set(userId, prefs);
+      return prefs;
+    }
+
+    async function isUserInQuietHours(userId: string): Promise<boolean> {
+      if (quietHoursCache.has(userId)) {
+        return quietHoursCache.get(userId)!;
+      }
+      const prefs = await getUserPrefs(userId);
+      const inQuiet = isInQuietHours(brazilTime, prefs.quiet_hours_start, prefs.quiet_hours_end);
+      quietHoursCache.set(userId, inQuiet);
+      return inQuiet;
+    }
+
+    // TRIGGER 1: Check end-of-day habits
     const endOfDayHabits = await checkEndOfDayHabits(supabase, brazilTime, currentHour);
     const endOfDayWithPush = endOfDayHabits.filter(h => usersWithPush.has(h.userId));
 
-    // TRIGGER 3: Check multiple pending
+    // TRIGGER 2: Check multiple pending
     const multiplePendingUsers = await checkMultiplePendingHabits(supabase, brazilTime, currentHour);
     const multiplePendingWithPush = multiplePendingUsers.filter(u => usersWithPush.has(u.userId));
 
-    // TRIGGER 4: Check trial day 3 (no habits)
-    const trialDay3Users = await checkTrialDay3(supabase, currentHour);
-    const trialDay3WithPush = trialDay3Users.filter(u => usersWithPush.has(u.userId));
+    // TRIGGER 3: Check onboarding sequence
+    const onboardingTriggers = await checkOnboardingTriggers(supabase, brazilTime, currentHour);
+    const onboardingWithPush = onboardingTriggers.filter(t => usersWithPush.has(t.userId));
 
-    // TRIGGER 5: Check trial day 5 (low streak)
-    const trialDay5Users = await checkTrialDay5(supabase, currentHour);
-    const trialDay5WithPush = trialDay5Users.filter(u => usersWithPush.has(u.userId));
+    // TRIGGER 4: Check value/progress recaps
+    const valueTriggers = await checkValueTriggers(supabase, brazilTime, currentHour, usersWithPush);
 
-    // TRIGGER 6: Check trial ending (3d and 1d)
-    const trialEndingUsers = await checkTrialEnding(supabase, currentHour);
-    const trialEndingWithPush = trialEndingUsers.filter(u => usersWithPush.has(u.userId));
+    // TRIGGER 5: Check inactivity re-engagement
+    const inactivityTriggers = await checkInactivityTriggers(supabase, brazilTime, currentHour, usersWithPush);
 
     if (dryRun) {
       return new Response(JSON.stringify({
@@ -694,12 +962,11 @@ serve(async (req) => {
         dryRun: true,
         currentTime: `${currentHour}:00`,
         triggers: {
-          delayed: delayedWithPush.length,
           endOfDay: endOfDayWithPush.length,
           multiplePending: multiplePendingWithPush.length,
-          trialDay3: trialDay3WithPush.length,
-          trialDay5: trialDay5WithPush.length,
-          trialEnding: trialEndingWithPush.length,
+          onboarding: onboardingWithPush.length,
+          value: valueTriggers.length,
+          inactivity: inactivityTriggers.length,
         },
       }), {
         status: 200,
@@ -708,49 +975,32 @@ serve(async (req) => {
     }
 
     const results = {
-      delayed: 0,
       endOfDay: 0,
       multiplePending: 0,
-      trialDay3: 0,
-      trialDay5: 0,
-      trialEnding: 0,
+      onboarding: 0,
+      value: 0,
+      inactivity: 0,
       skipped: 0,
       failed: 0,
     };
 
-    // Process TRIGGER 1: Delayed habits
-    for (const habit of delayedWithPush) {
-      // Check if we already sent a delayed notification for this habit today
-      const alreadySent = await checkAlreadySentToday(supabase, habit.userId, habit.habitId, "delayed");
-      if (alreadySent) {
-        console.log(`[Delayed] Skipping habit ${habit.habitId} - already sent today`);
-        results.skipped++;
-        continue;
-      }
-
-      // Check daily limit
-      const withinLimit = await checkDailyLimit(supabase, habit.userId, habit.habitId);
-      if (!withinLimit) {
-        console.log(`[Delayed] Skipping habit ${habit.habitId} - daily limit reached for user ${habit.userId}`);
-        results.skipped++;
-        continue;
-      }
-
-      const success = await sendTriggerNotification(
-        supabase,
-        habit.userId,
-        "Saudade...",
-        "ainda ta aqui esperando por voce... completa agora? 👀",
-        "delayed",
-        "delayed_g1",
-        habit.habitId
-      );
-      if (success) results.delayed++;
-      else results.failed++;
-    }
-
-    // Process TRIGGER 2: End of day
+    // Process TRIGGER 1: End of day
     for (const habit of endOfDayWithPush) {
+      // Check if user has end-of-day notifications enabled
+      const eodPrefs = await getUserPrefs(habit.userId);
+      if (eodPrefs.end_of_day_enabled === false) {
+        console.log(`[EndOfDay] Skipped: end_of_day_enabled=false for user ${habit.userId}`);
+        results.skipped++;
+        continue;
+      }
+
+      // Check quiet hours first
+      if (await isUserInQuietHours(habit.userId)) {
+        console.log(`[EndOfDay] Skipped: quiet hours for user ${habit.userId}`);
+        results.skipped++;
+        continue;
+      }
+
       // Check if we already sent an end_of_day notification for this habit today
       const alreadySent = await checkAlreadySentToday(supabase, habit.userId, habit.habitId, "end_of_day");
       if (alreadySent) {
@@ -767,21 +1017,29 @@ serve(async (req) => {
         continue;
       }
 
+      const eodCopy = await selectTriggerCopy(supabase, habit.userId, "end_of_day");
       const success = await sendTriggerNotification(
         supabase,
         habit.userId,
-        "Ultima chance!",
-        "o dia ta acabando... bora terminar seus habitos? ⏰",
+        eodCopy.title,
+        eodCopy.body,
         "end_of_day",
-        "end_of_day_g1",
+        eodCopy.messageKey,
         habit.habitId
       );
       if (success) results.endOfDay++;
       else results.failed++;
     }
 
-    // Process TRIGGER 3: Multiple pending
+    // Process TRIGGER 2: Multiple pending
     for (const user of multiplePendingWithPush) {
+      // Check quiet hours first
+      if (await isUserInQuietHours(user.userId)) {
+        console.log(`[MultiplePending] Skipped: quiet hours for user ${user.userId}`);
+        results.skipped++;
+        continue;
+      }
+
       // Check if we already sent a multiple_pending notification for this user today
       const alreadySent = await checkAlreadySentToday(supabase, user.userId, null, "multiple_pending");
       if (alreadySent) {
@@ -798,107 +1056,81 @@ serve(async (req) => {
         continue;
       }
 
+      const mpCopy = await selectTriggerCopy(supabase, user.userId, "multiple_pending", {
+        pendingCount: user.pendingCount,
+      });
       const success = await sendTriggerNotification(
         supabase,
         user.userId,
-        "Ops!",
-        `voce tem ${user.pendingCount} habitos pendentes... bora se organizar?`,
+        mpCopy.title,
+        mpCopy.body,
         "multiple_pending",
-        "multiple_pending_g1"
+        mpCopy.messageKey
       );
       if (success) results.multiplePending++;
       else results.failed++;
     }
 
-    // Process TRIGGER 4: Trial Day 3 (no habits)
-    for (const user of trialDay3WithPush) {
-      const alreadySent = await checkAlreadySentToday(supabase, user.userId, null, "trial_day_3");
-      if (alreadySent) {
-        console.log(`[TrialDay3] Skipping user ${user.userId} - already sent today`);
+    // Process TRIGGER 3: Onboarding sequence (bypasses daily limit)
+    for (const trigger of onboardingWithPush) {
+      if (await isUserInQuietHours(trigger.userId)) {
+        console.log(`[Onboarding] Skipped: quiet hours for user ${trigger.userId}`);
         results.skipped++;
         continue;
       }
 
-      const withinLimit = await checkDailyLimit(supabase, user.userId, null);
-      if (!withinLimit) {
-        console.log(`[TrialDay3] Skipping user ${user.userId} - daily limit reached`);
-        results.skipped++;
-        continue;
-      }
-
+      const obCopy = await selectTriggerCopy(supabase, trigger.userId, trigger.triggerType, trigger.templateVars);
       const success = await sendTriggerNotification(
         supabase,
-        user.userId,
-        "Voce criou seus habitos? 🌱",
-        "Seu trial ta rolando mas voce ainda nao criou nenhum habito... bora comecar?",
-        "trial_day_3",
-        "trial_day_3_no_habits"
+        trigger.userId,
+        obCopy.title,
+        obCopy.body,
+        trigger.triggerType,
+        obCopy.messageKey
       );
-      if (success) results.trialDay3++;
+      if (success) results.onboarding++;
       else results.failed++;
     }
 
-    // Process TRIGGER 5: Trial Day 5 (low streak)
-    for (const user of trialDay5WithPush) {
-      const alreadySent = await checkAlreadySentToday(supabase, user.userId, null, "trial_day_5");
-      if (alreadySent) {
-        console.log(`[TrialDay5] Skipping user ${user.userId} - already sent today`);
+    // Process TRIGGER 4: Value/progress recaps (bypasses daily limit)
+    for (const trigger of valueTriggers) {
+      if (await isUserInQuietHours(trigger.userId)) {
+        console.log(`[Value] Skipped: quiet hours for user ${trigger.userId}`);
         results.skipped++;
         continue;
       }
 
-      const withinLimit = await checkDailyLimit(supabase, user.userId, null);
-      if (!withinLimit) {
-        console.log(`[TrialDay5] Skipping user ${user.userId} - daily limit reached`);
-        results.skipped++;
-        continue;
-      }
-
+      const valCopy = await selectTriggerCopy(supabase, trigger.userId, trigger.triggerType, trigger.templateVars);
       const success = await sendTriggerNotification(
         supabase,
-        user.userId,
-        "Ja formou seu primeiro streak? 🔥",
-        "Faltam poucos dias de trial... bora construir uma sequencia hoje!",
-        "trial_day_5",
-        "trial_day_5_low_streak"
+        trigger.userId,
+        valCopy.title,
+        valCopy.body,
+        trigger.triggerType,
+        valCopy.messageKey
       );
-      if (success) results.trialDay5++;
+      if (success) results.value++;
       else results.failed++;
     }
 
-    // Process TRIGGER 6: Trial Ending
-    for (const user of trialEndingWithPush) {
-      const contextKey = user.daysLeft === 3 ? "trial_ending_3d" : "trial_ending_1d";
-      const alreadySent = await checkAlreadySentToday(supabase, user.userId, null, contextKey);
-      if (alreadySent) {
-        console.log(`[TrialEnding] Skipping user ${user.userId} - already sent today`);
+    // Process TRIGGER 5: Inactivity re-engagement (bypasses daily limit)
+    for (const trigger of inactivityTriggers) {
+      if (await isUserInQuietHours(trigger.userId)) {
+        console.log(`[Inactivity] Skipped: quiet hours for user ${trigger.userId}`);
         results.skipped++;
         continue;
       }
 
-      const withinLimit = await checkDailyLimit(supabase, user.userId, null);
-      if (!withinLimit) {
-        console.log(`[TrialEnding] Skipping user ${user.userId} - daily limit reached`);
-        results.skipped++;
-        continue;
-      }
-
-      const title = user.daysLeft === 3
-        ? "Seu trial termina em 3 dias ⏰"
-        : "Ultima chance! Trial acaba amanha 🚨";
-      const body = user.daysLeft === 3
-        ? "Aproveita pra explorar tudo o que o Habitz oferece!"
-        : "Garanta sua assinatura pra nao perder seu progresso!";
-
+      const inaCopy = await selectTriggerCopy(supabase, trigger.userId, trigger.triggerType);
       const success = await sendTriggerNotification(
         supabase,
-        user.userId,
-        title,
-        body,
-        contextKey,
-        contextKey
+        trigger.userId,
+        inaCopy.title,
+        inaCopy.body,
+        trigger.triggerType,
+        inaCopy.messageKey
       );
-      if (success) results.trialEnding++;
+      if (success) results.inactivity++;
       else results.failed++;
     }
 
