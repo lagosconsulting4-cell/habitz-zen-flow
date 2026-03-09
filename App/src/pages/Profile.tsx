@@ -717,6 +717,7 @@ const Profile = () => {
                       <p className="flex-1 text-sm font-medium text-foreground">{label}</p>
                       <input
                         type="time"
+                        aria-label={`Horario lembrete ${label}`}
                         value={notifPrefs.preferred_reminder_times?.[period] || defaultTime}
                         onChange={(e) => {
                           const updated = {
@@ -748,6 +749,7 @@ const Profile = () => {
                   <span className="text-xs text-muted-foreground font-medium">Das</span>
                   <input
                     type="time"
+                    aria-label="Horario inicio silencioso"
                     value={notifPrefs.quiet_hours_start || "22:00"}
                     onChange={(e) => updateNotifPref("quiet_hours_start", e.target.value)}
                     className="h-10 w-24 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground text-center"
@@ -755,6 +757,7 @@ const Profile = () => {
                   <span className="text-xs text-muted-foreground font-medium">ate</span>
                   <input
                     type="time"
+                    aria-label="Horario fim silencioso"
                     value={notifPrefs.quiet_hours_end || "07:00"}
                     onChange={(e) => updateNotifPref("quiet_hours_end", e.target.value)}
                     className="h-10 w-24 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground text-center"

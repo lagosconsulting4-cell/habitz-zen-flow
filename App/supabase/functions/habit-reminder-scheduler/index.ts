@@ -687,6 +687,10 @@ async function selectCopy(
       .replace("{journeyTitle}", journeyMeta.journeyTitle);
   }
 
+  // Safety net: strip any unreplaced template vars (e.g. journey copy without metadata)
+  title = title.replace(/\s*\{[a-zA-Z]+\}\s*/g, " ").replace(/  +/g, " ").trim();
+  body = body.replace(/\s*\{[a-zA-Z]+\}\s*/g, " ").replace(/  +/g, " ").trim();
+
   return {
     key: selected.key,
     title,
@@ -1047,6 +1051,13 @@ serve(async (req) => {
         // Override: journey cliff day (days 10-14 — highest dropout)
         if (habit.source === "journey" && jMeta && jMeta.currentDay >= 10 && jMeta.currentDay <= 14) {
           context = "journey_cliff_day";
+        }
+
+        // Fallback: journey context without metadata → use generic time-of-day context
+        if (context.startsWith("journey_") && !jMeta) {
+          if (currentHour >= 5 && currentHour < 12) context = "morning";
+          else if (currentHour >= 12 && currentHour < 18) context = "afternoon";
+          else context = "evening";
         }
 
         // Select copy message with rotation (pass journey metadata)

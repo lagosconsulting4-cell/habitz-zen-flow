@@ -715,31 +715,42 @@ async function checkInactivityTriggers(
 
   const eligibleUserIds = new Set(eligibleProfiles.map((p: any) => p.user_id));
 
-  // Get user_progress with last_activity_date for eligible users with push
-  for (const userId of usersWithPush) {
-    if (!eligibleUserIds.has(userId)) continue;
+  // Batch load: user_progress + dedup in 2 queries instead of 2N
+  const targetUserIds = [...usersWithPush].filter(uid => eligibleUserIds.has(uid));
+  if (targetUserIds.length === 0) return triggers;
 
-    const { data: progress } = await supabase
-      .from("user_progress")
-      .select("last_activity_date")
-      .eq("user_id", userId)
-      .maybeSingle();
+  const inactivityContextTypes = ["inactive_3d", "inactive_7d", "inactive_14d"];
+  const [progressRes, dedupRes] = await Promise.all([
+    supabase.from("user_progress").select("user_id, last_activity_date").in("user_id", targetUserIds),
+    supabase.from("notification_history").select("user_id, context_type").in("user_id", targetUserIds).in("context_type", inactivityContextTypes).eq("notification_date", today),
+  ]);
 
-    if (!progress?.last_activity_date) continue;
+  const progressMap = new Map<string, string>();
+  for (const p of (progressRes.data || [])) {
+    if (p.last_activity_date) progressMap.set(p.user_id, p.last_activity_date);
+  }
+  const sentSet = new Set<string>();
+  for (const d of (dedupRes.data || [])) {
+    sentSet.add(`${d.user_id}:${d.context_type}`);
+  }
 
-    const lastActivity = new Date(progress.last_activity_date);
-    const diffMs = brazilTime.getTime() - lastActivity.getTime();
-    const daysSinceActivity = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  for (const userId of targetUserIds) {
+    const lastActivityDate = progressMap.get(userId);
+    if (!lastActivityDate) continue;
+
+    // Date-only comparison (consistent with onboarding batch pattern)
+    const lastStr = new Date(lastActivityDate).toISOString().split("T")[0];
+    const daysSinceActivity = Math.round(
+      (new Date(today).getTime() - new Date(lastStr).getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     let triggerType: string | null = null;
     if (daysSinceActivity === 3) triggerType = "inactive_3d";
     else if (daysSinceActivity === 7) triggerType = "inactive_7d";
     else if (daysSinceActivity === 14) triggerType = "inactive_14d";
-
     if (!triggerType) continue;
 
-    const alreadySent = await checkAlreadySentToday(supabase, userId, null, triggerType);
-    if (alreadySent) continue;
+    if (sentSet.has(`${userId}:${triggerType}`)) continue;
 
     triggers.push({ userId, triggerType });
   }
@@ -805,6 +816,7 @@ async function sendTriggerNotification(
             notificationHistoryId: historyRow?.id || undefined,
           },
           actions: [
+            ...(habitId ? [{ action: "complete", title: "Completar" }] : []),
             { action: "dismiss", title: "Depois" },
           ],
         }),
@@ -873,7 +885,7 @@ serve(async (req) => {
       .select("user_id");
 
     if (subsError) {
-      console.error("Error fetching subscriptions:", subsError);
+      console.error("[TriggerScheduler] Error fetching subscriptions:", subsError);
     }
 
     const usersWithPush = new Set(subscriptions?.map((s: any) => s.user_id) || []);
@@ -954,160 +966,185 @@ serve(async (req) => {
 
     // Process TRIGGER 1: End of day
     for (const habit of endOfDayWithPush) {
-      // Check if user has end-of-day notifications enabled
-      const eodPrefs = await getUserPrefs(habit.userId);
-      if (eodPrefs.end_of_day_enabled === false) {
-        console.log(`[EndOfDay] Skipped: end_of_day_enabled=false for user ${habit.userId}`);
-        results.skipped++;
-        continue;
-      }
+      try {
+        // Check if user has end-of-day notifications enabled
+        const eodPrefs = await getUserPrefs(habit.userId);
+        if (eodPrefs.end_of_day_enabled === false) {
+          console.log(`[EndOfDay] Skipped: end_of_day_enabled=false for user ${habit.userId}`);
+          results.skipped++;
+          continue;
+        }
 
-      // Check quiet hours first
-      if (await isUserInQuietHours(habit.userId)) {
-        console.log(`[EndOfDay] Skipped: quiet hours for user ${habit.userId}`);
-        results.skipped++;
-        continue;
-      }
+        // Check quiet hours first
+        if (await isUserInQuietHours(habit.userId)) {
+          console.log(`[EndOfDay] Skipped: quiet hours for user ${habit.userId}`);
+          results.skipped++;
+          continue;
+        }
 
-      // Check if we already sent an end_of_day notification for this habit today
-      const alreadySent = await checkAlreadySentToday(supabase, habit.userId, habit.habitId, "end_of_day");
-      if (alreadySent) {
-        console.log(`[EndOfDay] Skipping habit ${habit.habitId} - already sent today`);
-        results.skipped++;
-        continue;
-      }
+        // Check if we already sent an end_of_day notification for this habit today
+        const alreadySent = await checkAlreadySentToday(supabase, habit.userId, habit.habitId, "end_of_day");
+        if (alreadySent) {
+          console.log(`[EndOfDay] Skipping habit ${habit.habitId} - already sent today`);
+          results.skipped++;
+          continue;
+        }
 
-      // Anti-burst: skip if push was sent < 5 min ago
-      const eodRecentlySent = await checkRecentlySent(supabase, habit.userId, 5);
-      if (eodRecentlySent) {
-        console.log(`[EndOfDay] Skipped: push sent < 5min ago for user ${habit.userId}`);
-        results.skipped++;
-        continue;
-      }
+        // Anti-burst: skip if push was sent < 5 min ago
+        const eodRecentlySent = await checkRecentlySent(supabase, habit.userId, 5);
+        if (eodRecentlySent) {
+          console.log(`[EndOfDay] Skipped: push sent < 5min ago for user ${habit.userId}`);
+          results.skipped++;
+          continue;
+        }
 
-      const eodCopy = await selectTriggerCopy(supabase, habit.userId, "end_of_day");
-      const success = await sendTriggerNotification(
-        supabase,
-        habit.userId,
-        eodCopy.title,
-        eodCopy.body,
-        "end_of_day",
-        eodCopy.messageKey,
-        habit.habitId
-      );
-      if (success) results.endOfDay++;
-      else results.failed++;
+        const eodCopy = await selectTriggerCopy(supabase, habit.userId, "end_of_day");
+        const success = await sendTriggerNotification(
+          supabase,
+          habit.userId,
+          eodCopy.title,
+          eodCopy.body,
+          "end_of_day",
+          eodCopy.messageKey,
+          habit.habitId
+        );
+        if (success) results.endOfDay++;
+        else results.failed++;
+      } catch (error) {
+        console.error(`[TriggerScheduler] Error processing EOD for user ${habit.userId}:`, error);
+        results.failed++;
+      }
     }
 
     // Process TRIGGER 2: Multiple pending
     for (const user of multiplePendingWithPush) {
-      // Check quiet hours first
-      if (await isUserInQuietHours(user.userId)) {
-        console.log(`[MultiplePending] Skipped: quiet hours for user ${user.userId}`);
-        results.skipped++;
-        continue;
-      }
+      try {
+        // Check quiet hours first
+        if (await isUserInQuietHours(user.userId)) {
+          console.log(`[MultiplePending] Skipped: quiet hours for user ${user.userId}`);
+          results.skipped++;
+          continue;
+        }
 
-      // Check if we already sent a multiple_pending notification for this user today
-      const alreadySent = await checkAlreadySentToday(supabase, user.userId, null, "multiple_pending");
-      if (alreadySent) {
-        console.log(`[MultiplePending] Skipping user ${user.userId} - already sent today`);
-        results.skipped++;
-        continue;
-      }
+        // Check if we already sent a multiple_pending notification for this user today
+        const alreadySent = await checkAlreadySentToday(supabase, user.userId, null, "multiple_pending");
+        if (alreadySent) {
+          console.log(`[MultiplePending] Skipping user ${user.userId} - already sent today`);
+          results.skipped++;
+          continue;
+        }
 
-      // Dedup: skip if EOD was already sent today (EOD has priority over multiple_pending)
-      const eodAlreadySent = await checkAlreadySentToday(supabase, user.userId, null, "end_of_day");
-      if (eodAlreadySent) {
-        console.log(`[MultiplePending] Skipped: EOD already sent today for user ${user.userId}`);
-        results.skipped++;
-        continue;
-      }
+        // Dedup: skip if EOD was already sent today (EOD has priority over multiple_pending)
+        const eodAlreadySent = await checkAlreadySentToday(supabase, user.userId, null, "end_of_day");
+        if (eodAlreadySent) {
+          console.log(`[MultiplePending] Skipped: EOD already sent today for user ${user.userId}`);
+          results.skipped++;
+          continue;
+        }
 
-      // Anti-burst: skip if push was sent < 5 min ago
-      const mpRecentlySent = await checkRecentlySent(supabase, user.userId, 5);
-      if (mpRecentlySent) {
-        console.log(`[MultiplePending] Skipped: push sent < 5min ago for user ${user.userId}`);
-        results.skipped++;
-        continue;
-      }
+        // Anti-burst: skip if push was sent < 5 min ago
+        const mpRecentlySent = await checkRecentlySent(supabase, user.userId, 5);
+        if (mpRecentlySent) {
+          console.log(`[MultiplePending] Skipped: push sent < 5min ago for user ${user.userId}`);
+          results.skipped++;
+          continue;
+        }
 
-      const mpCopy = await selectTriggerCopy(supabase, user.userId, "multiple_pending", {
-        pendingCount: user.pendingCount,
-      });
-      const success = await sendTriggerNotification(
-        supabase,
-        user.userId,
-        mpCopy.title,
-        mpCopy.body,
-        "multiple_pending",
-        mpCopy.messageKey
-      );
-      if (success) results.multiplePending++;
-      else results.failed++;
+        const mpCopy = await selectTriggerCopy(supabase, user.userId, "multiple_pending", {
+          pendingCount: user.pendingCount,
+        });
+        const success = await sendTriggerNotification(
+          supabase,
+          user.userId,
+          mpCopy.title,
+          mpCopy.body,
+          "multiple_pending",
+          mpCopy.messageKey
+        );
+        if (success) results.multiplePending++;
+        else results.failed++;
+      } catch (error) {
+        console.error(`[TriggerScheduler] Error processing multiple_pending for user ${user.userId}:`, error);
+        results.failed++;
+      }
     }
 
     // Process TRIGGER 3: Onboarding sequence (bypasses daily limit)
     for (const trigger of onboardingWithPush) {
-      if (await isUserInQuietHours(trigger.userId)) {
-        console.log(`[Onboarding] Skipped: quiet hours for user ${trigger.userId}`);
-        results.skipped++;
-        continue;
-      }
+      try {
+        if (await isUserInQuietHours(trigger.userId)) {
+          console.log(`[Onboarding] Skipped: quiet hours for user ${trigger.userId}`);
+          results.skipped++;
+          continue;
+        }
 
-      const obCopy = await selectTriggerCopy(supabase, trigger.userId, trigger.triggerType, trigger.templateVars);
-      const success = await sendTriggerNotification(
-        supabase,
-        trigger.userId,
-        obCopy.title,
-        obCopy.body,
-        trigger.triggerType,
-        obCopy.messageKey
-      );
-      if (success) results.onboarding++;
-      else results.failed++;
+        const obCopy = await selectTriggerCopy(supabase, trigger.userId, trigger.triggerType, trigger.templateVars);
+        const success = await sendTriggerNotification(
+          supabase,
+          trigger.userId,
+          obCopy.title,
+          obCopy.body,
+          trigger.triggerType,
+          obCopy.messageKey
+        );
+        if (success) results.onboarding++;
+        else results.failed++;
+      } catch (error) {
+        console.error(`[TriggerScheduler] Error processing onboarding for user ${trigger.userId}:`, error);
+        results.failed++;
+      }
     }
 
     // Process TRIGGER 4: Value/progress recaps (bypasses daily limit)
     for (const trigger of valueTriggers) {
-      if (await isUserInQuietHours(trigger.userId)) {
-        console.log(`[Value] Skipped: quiet hours for user ${trigger.userId}`);
-        results.skipped++;
-        continue;
-      }
+      try {
+        if (await isUserInQuietHours(trigger.userId)) {
+          console.log(`[Value] Skipped: quiet hours for user ${trigger.userId}`);
+          results.skipped++;
+          continue;
+        }
 
-      const valCopy = await selectTriggerCopy(supabase, trigger.userId, trigger.triggerType, trigger.templateVars);
-      const success = await sendTriggerNotification(
-        supabase,
-        trigger.userId,
-        valCopy.title,
-        valCopy.body,
-        trigger.triggerType,
-        valCopy.messageKey
-      );
-      if (success) results.value++;
-      else results.failed++;
+        const valCopy = await selectTriggerCopy(supabase, trigger.userId, trigger.triggerType, trigger.templateVars);
+        const success = await sendTriggerNotification(
+          supabase,
+          trigger.userId,
+          valCopy.title,
+          valCopy.body,
+          trigger.triggerType,
+          valCopy.messageKey
+        );
+        if (success) results.value++;
+        else results.failed++;
+      } catch (error) {
+        console.error(`[TriggerScheduler] Error processing value for user ${trigger.userId}:`, error);
+        results.failed++;
+      }
     }
 
     // Process TRIGGER 5: Inactivity re-engagement (bypasses daily limit)
     for (const trigger of inactivityTriggers) {
-      if (await isUserInQuietHours(trigger.userId)) {
-        console.log(`[Inactivity] Skipped: quiet hours for user ${trigger.userId}`);
-        results.skipped++;
-        continue;
-      }
+      try {
+        if (await isUserInQuietHours(trigger.userId)) {
+          console.log(`[Inactivity] Skipped: quiet hours for user ${trigger.userId}`);
+          results.skipped++;
+          continue;
+        }
 
-      const inaCopy = await selectTriggerCopy(supabase, trigger.userId, trigger.triggerType);
-      const success = await sendTriggerNotification(
-        supabase,
-        trigger.userId,
-        inaCopy.title,
-        inaCopy.body,
-        trigger.triggerType,
-        inaCopy.messageKey
-      );
-      if (success) results.inactivity++;
-      else results.failed++;
+        const inaCopy = await selectTriggerCopy(supabase, trigger.userId, trigger.triggerType);
+        const success = await sendTriggerNotification(
+          supabase,
+          trigger.userId,
+          inaCopy.title,
+          inaCopy.body,
+          trigger.triggerType,
+          inaCopy.messageKey
+        );
+        if (success) results.inactivity++;
+        else results.failed++;
+      } catch (error) {
+        console.error(`[TriggerScheduler] Error processing inactivity for user ${trigger.userId}:`, error);
+        results.failed++;
+      }
     }
 
     console.log(`[TriggerScheduler] Results:`, results);
@@ -1122,7 +1159,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error("Error in trigger scheduler:", error);
+    console.error("[TriggerScheduler] Error in trigger scheduler:", error);
     return new Response(JSON.stringify({ error: "Internal server error", details: String(error) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -475,7 +475,7 @@ serve(async (req) => {
       sent: pushSuccess,
       milestone,
       messageKey: copyMessage.key,
-      habitual: habit ? habit.name : null,
+      habitName: habit ? habit.name : null,
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

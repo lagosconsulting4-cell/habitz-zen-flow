@@ -288,7 +288,7 @@ serve(async (req) => {
       );
     }
 
-    // Soft validation: warn about missing template fields
+    // Fail-fast: reject if required template fields are missing
     const requiredFields: Partial<Record<NotificationType, string[]>> = {
       daily_reminder: ["currentDay"],
       new_habit: ["habitName"],
@@ -299,7 +299,11 @@ serve(async (req) => {
     const required = requiredFields[type] || [];
     const missing = required.filter((f) => payload[f as keyof JourneyNotificationPayload] == null);
     if (missing.length > 0) {
-      console.warn(`[JourneyNotif] Missing fields for ${type}: ${missing.join(", ")}`);
+      console.error(`[JourneyNotif] Missing required fields for ${type}: ${missing.join(", ")}`);
+      return new Response(
+        JSON.stringify({ error: `Missing required fields: ${missing.join(", ")}`, type }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Build template vars

@@ -83,9 +83,6 @@ registerRoute(
 
 interface NotificationData {
   type?: string;
-  period?: string;
-  habitCount?: number;
-  habitIds?: string[];
   url?: string;
   notificationHistoryId?: string;
   habitId?: string;

@@ -1,8 +1,9 @@
 import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { Sparkles, Plus, BookOpen } from "lucide-react";
+import { Sparkles, Plus, BookOpen, Bell, ChevronRight, Sun, Sunset, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { DashboardSkeleton } from "@/components/ui/skeleton";
 
 import { DashboardHabitCard } from "@/components/DashboardHabitCard";
@@ -22,6 +23,8 @@ import { useAuth } from "@/integrations/supabase/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useGamification, XP_VALUES } from "@/hooks/useGamification";
 import { celebrations } from "@/lib/celebrations";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Habit } from "@/components/DashboardHabitCard";
 import { hideGamification } from "@/config/featureFlags";
 import { useAllActiveJourneyHabits, useJourneyActions, useJourneyDay, CANONICAL_TO_ICON, type Journey } from "@/hooks/useJourney";
@@ -42,6 +45,7 @@ const Dashboard = () => {
   const { user } = useAuth();
   const { awardHabitXP, awardStreakBonus, awardPerfectDayBonus, awardJourneyDayGems, awardJourneyPhaseGems, awardJourneyCompleteGems, unlockAchievement, isAchievementUnlocked, getAchievementProgress, updateStreak, freezeUsedToday } = useGamification(user?.id);
   const isGamificationEnabled = !hideGamification;
+  const queryClient = useQueryClient();
 
   // Journey hooks — multi-journey support
   const { allJourneyHabits, activeStates } = useAllActiveJourneyHabits();
@@ -139,6 +143,14 @@ const Dashboard = () => {
   // Dynamic notification permission trigger (for streak-7 and journey-start re-asks)
   const [notifTrigger, setNotifTrigger] = useState<"after-streak-7" | "after-journey-start" | null>(null);
 
+  // Reminder time quick-setup drawer (Sprint 2)
+  const [showTimeSetup, setShowTimeSetup] = useState(false);
+  const [setupTimes, setSetupTimes] = useState({
+    morning: "08:00",
+    afternoon: "14:00",
+    evening: "20:00",
+  });
+
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
@@ -149,6 +161,23 @@ const Dashboard = () => {
     window.addEventListener("notification:request-permission", handler);
     return () => window.removeEventListener("notification:request-permission", handler);
   }, []);
+
+  // Listen for reminder time setup prompt (Sprint 2)
+  useEffect(() => {
+    const handler = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("user_progress")
+        .select("notification_preferences")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const prefs = (data?.notification_preferences as Record<string, unknown>) || {};
+      if (prefs.preferred_reminder_times) return; // already configured
+      setShowTimeSetup(true);
+    };
+    window.addEventListener("notification:setup-times", handler);
+    return () => window.removeEventListener("notification:setup-times", handler);
+  }, [user]);
 
   // Process XP toast queue
   useEffect(() => {
@@ -230,10 +259,18 @@ const Dashboard = () => {
           });
       }
 
-      console.log("[Dashboard] Completing habit from URL intent:", completeHabitId);
-      toggleHabit(completeHabitId).catch((error) => {
-        console.error("[Dashboard] Error completing habit from URL intent:", error);
-      });
+      // Check if already completed before toggling (avoids un-completing)
+      const alreadyCompleted = getHabitCompletionStatus(completeHabitId);
+      if (alreadyCompleted) {
+        console.log("[Dashboard] Habit already completed, skipping:", completeHabitId);
+      } else {
+        console.log("[Dashboard] Completing habit from URL intent:", completeHabitId);
+        toggleHabit(completeHabitId)
+          .then(() => toast.success("Habito completado!"))
+          .catch((error) => {
+            console.error("[Dashboard] Error completing habit from URL intent:", error);
+          });
+      }
 
       // Clean URL params
       searchParams.delete("complete");
@@ -397,6 +434,55 @@ const Dashboard = () => {
     if (todayHabits.length === 0) return false;
     return todayHabits.every((habit) => getHabitCompletionStatus(habit.id));
   }, [todayHabits, getHabitCompletionStatus]);
+
+  // Save preferred reminder times from quick-setup drawer (Sprint 2)
+  const handleSaveSetupTimes = useCallback(async () => {
+    if (!user) return;
+
+    // 1. Save to notification_preferences
+    const { data: current } = await supabase
+      .from("user_progress")
+      .select("notification_preferences")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const prefs = (current?.notification_preferences as Record<string, unknown>) || {};
+    await supabase
+      .from("user_progress")
+      .update({
+        notification_preferences: {
+          ...prefs,
+          preferred_reminder_times: setupTimes,
+        },
+      })
+      .eq("user_id", user.id);
+
+    // 2. Retroactively update existing journey habits
+    const journeyHabitIds = allJourneyHabits
+      .filter(jh => jh.is_active)
+      .map(jh => jh.habit_id);
+
+    if (journeyHabitIds.length > 0) {
+      for (const [period, time] of Object.entries(setupTimes)) {
+        const idsForPeriod = todayHabits
+          .filter(h => journeyHabitIds.includes(h.id) && h.period === period)
+          .map(h => h.id);
+        if (idsForPeriod.length > 0) {
+          await supabase
+            .from("habits")
+            .update({
+              reminder_time: time,
+              notification_pref: { reminder_enabled: true, reminder_time: time },
+            })
+            .in("id", idsForPeriod);
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: ["habits"] });
+    }
+
+    setShowTimeSetup(false);
+    toast.success("Horarios salvos! Seus lembretes foram atualizados.");
+  }, [user, setupTimes, allJourneyHabits, todayHabits, queryClient]);
 
   // Helper to add XP toast to queue
   const queueXpToast = useCallback((toast: {
@@ -990,6 +1076,55 @@ const Dashboard = () => {
 
       {/* NEW: Freeze Used Toast */}
       {isGamificationEnabled && <FreezeUsedToast />}
+
+      {/* Reminder Time Quick-Setup Drawer (Sprint 2) */}
+      <Drawer open={showTimeSetup} onOpenChange={setShowTimeSetup}>
+        <DrawerContent className="px-6 pb-8">
+          <div className="pt-4 pb-6 text-center">
+            <h3 className="text-lg font-bold text-foreground">
+              Quando voce quer ser lembrado?
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Configure seus horarios ideais
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {([
+              { period: "morning" as const, label: "Manha", icon: Sun },
+              { period: "afternoon" as const, label: "Tarde", icon: Sunset },
+              { period: "evening" as const, label: "Noite", icon: Moon },
+            ]).map(({ period, label, icon: Icon }) => (
+              <div key={period} className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 flex-shrink-0">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <p className="flex-1 text-sm font-medium text-foreground">{label}</p>
+                <input
+                  type="time"
+                  value={setupTimes[period]}
+                  onChange={(e) => setSetupTimes(prev => ({ ...prev, [period]: e.target.value }))}
+                  className="h-10 w-24 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground text-center"
+                />
+              </div>
+            ))}
+          </div>
+
+          <Button
+            onClick={handleSaveSetupTimes}
+            className="w-full mt-6 h-12 bg-primary text-primary-foreground font-semibold rounded-xl"
+          >
+            Salvar
+          </Button>
+
+          <button
+            onClick={() => setShowTimeSetup(false)}
+            className="w-full mt-2 py-3 text-sm text-muted-foreground font-medium"
+          >
+            Pular por enquanto
+          </button>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };
