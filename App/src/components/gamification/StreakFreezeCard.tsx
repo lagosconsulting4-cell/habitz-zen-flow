@@ -106,7 +106,7 @@ export const StreakFreezeCard = ({ userId: propUserId, compact = false, classNam
                 onClick={handlePurchase}
                 disabled={!canBuy || isPurchasingFreeze}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                  "inline-flex items-center gap-1.5 px-4 py-3 min-h-[44px] rounded-lg text-sm font-medium transition-all",
                   canBuy
                     ? "bg-purple-600 hover:bg-purple-500 text-white"
                     : "bg-muted text-muted-foreground cursor-not-allowed"
@@ -122,7 +122,7 @@ export const StreakFreezeCard = ({ userId: propUserId, compact = false, classNam
                 <button
                   onClick={handleUseFreeze}
                   disabled={isUsingFreeze}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition-all"
+                  className="inline-flex items-center gap-1.5 px-4 py-3 min-h-[44px] rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition-all"
                 >
                   <Shield className="w-3.5 h-3.5" />
                   <span>Proteger Hoje</span>

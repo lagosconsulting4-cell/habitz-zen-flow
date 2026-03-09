@@ -203,7 +203,7 @@ export const JourneyGraduationModal = ({
                           transition={{ delay: 0.5 + i * 0.05 }}
                           onClick={() => toggleHabit(habit.habitId)}
                           className={cn(
-                            "w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors text-left",
+                            "w-full flex items-center gap-3 p-3 min-h-[44px] rounded-lg transition-colors text-left",
                             !selected && "bg-white/5 border border-white/10 opacity-60"
                           )}
                           style={selected ? {

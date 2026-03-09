@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "@/layouts/ProtectedLayout";
 import ScrollToTop from "@/components/ScrollToTop";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useTheme } from "@/hooks/useTheme";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useNotificationNavigation } from "@/hooks/useNotificationNavigation";
@@ -152,6 +153,7 @@ const App = () => (
           <UpdatePrompt />
           <InstallPrompt />
         </Suspense>
+        <ErrorBoundary>
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -201,6 +203,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+        </ErrorBoundary>
       </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

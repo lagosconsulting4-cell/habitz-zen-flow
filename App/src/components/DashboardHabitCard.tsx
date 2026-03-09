@@ -252,9 +252,9 @@ const DashboardHabitCardComponent = ({
               onTimerClick?.();
             }}
             className={cn(
-              "absolute bottom-0 left-0 z-10",
+              "absolute -bottom-1.5 -left-1.5 z-10",
               "flex items-center justify-center",
-              "w-7 h-7 rounded-full",
+              "w-11 h-11 rounded-full",
               "bg-white dark:bg-black/80",
               "text-black dark:text-white",
               "shadow-sm border border-border/30",
@@ -263,7 +263,7 @@ const DashboardHabitCardComponent = ({
             aria-label="Iniciar timer"
             type="button"
           >
-            <Play size={12} fill="currentColor" />
+            <Play size={16} fill="currentColor" />
           </button>
         )}
 
