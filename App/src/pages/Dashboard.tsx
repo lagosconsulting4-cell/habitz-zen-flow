@@ -884,6 +884,8 @@ const Dashboard = () => {
             <AnimatePresence>
               {isPerfectDay && (
                 <motion.div
+                  role="status"
+                  aria-live="polite"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
@@ -1023,10 +1025,10 @@ const Dashboard = () => {
         {!progressLoading && weeklyInsight && todayHabits.length > 0 && (
           <button
             onClick={() => navigate("/progress")}
-            className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/60 hover:bg-accent/5 transition-colors text-left"
+            className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/60 hover:bg-accent/5 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
           >
             <div className="flex-shrink-0 relative w-12 h-12">
-              <svg width={48} height={48} className="transform -rotate-90">
+              <svg width={48} height={48} className="transform -rotate-90" role="img" aria-label="Progresso semanal">
                 <circle cx={24} cy={24} r={20} stroke="currentColor" strokeWidth={3}
                   fill="none" className="text-muted/20" />
                 <circle cx={24} cy={24} r={20} stroke="currentColor" strokeWidth={3}
@@ -1189,6 +1191,7 @@ const Dashboard = () => {
                   value={setupTimes[period]}
                   onChange={(e) => setSetupTimes(prev => ({ ...prev, [period]: e.target.value }))}
                   className="h-10 w-24 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground text-center"
+                  aria-label={`Horário ${label.toLowerCase()}`}
                 />
               </div>
             ))}

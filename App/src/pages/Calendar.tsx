@@ -305,7 +305,7 @@ const Calendar = () => {
                       {format(day, "EEE", { locale: ptBR }).slice(0, 3)}
                     </span>
                     <span className={`
-                      w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold
+                      w-11 h-11 flex items-center justify-center rounded-full text-sm font-bold
                       ${isTodayDate ? "bg-primary text-primary-foreground" : ""}
                       ${isSelected && !isTodayDate ? "bg-primary/30 text-primary" : ""}
                       ${!isTodayDate && !isSelected ? "text-foreground" : ""}
@@ -373,7 +373,8 @@ const Calendar = () => {
                   variant="ghost"
                   size="sm"
                   onClick={goToPreviousMonth}
-                  className="h-10 w-10 p-0 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                  className="h-11 w-11 p-0 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                  aria-label="Mês anterior"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </Button>
@@ -395,7 +396,8 @@ const Calendar = () => {
                   variant="ghost"
                   size="sm"
                   onClick={goToNextMonth}
-                  className="h-10 w-10 p-0 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                  className="h-11 w-11 p-0 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                  aria-label="Próximo mês"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </Button>
@@ -440,7 +442,7 @@ const Calendar = () => {
                           key={day.toISOString()}
                           onClick={() => handleSelectDate(day)}
                           className={`
-                            aspect-square p-1 rounded-xl text-sm font-medium relative
+                            aspect-square p-1.5 rounded-xl text-sm font-medium relative
                             transition-all duration-200 hover:scale-105 active:scale-95
                             ${isCurrentMonth ? "text-foreground" : "text-muted-foreground/30"}
                             ${isSelected ? "ring-2 ring-primary ring-offset-2 ring-offset-card" : ""}

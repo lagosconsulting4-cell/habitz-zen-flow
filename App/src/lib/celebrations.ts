@@ -9,6 +9,10 @@
 import { sounds } from "./sounds";
 import { isCelebrationsEnabled, isHapticEnabled } from "./preferences";
 
+/** Check if user prefers reduced motion */
+const prefersReducedMotion = (): boolean =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 // ============================================
 // TYPES
 // ============================================
@@ -68,6 +72,7 @@ export const createGlowPulse = (
   color: string = "rgba(163, 230, 53, 0.6)", // Default lime
   duration: number = 1000
 ): (() => void) => {
+  if (prefersReducedMotion()) return () => {};
   const element = document.getElementById(elementId);
   if (!element) return () => {};
 
@@ -119,6 +124,7 @@ export const createSubtleParticles = (
     duration?: number;
   } = {}
 ): (() => void) => {
+  if (prefersReducedMotion()) return () => {};
   const {
     count = 12,
     colors = ["#A3E635", "#84CC16", "#65A30D"],
@@ -220,6 +226,7 @@ export const createScalePulse = (
   scale: number = 1.05,
   duration: number = 300
 ): (() => void) => {
+  if (prefersReducedMotion()) return () => {};
   const element = document.getElementById(elementId);
   if (!element) return () => {};
 

@@ -159,7 +159,7 @@ const Progress = () => {
                 <div className="flex items-center gap-6">
                   {/* Progress Ring */}
                   <div className="relative flex-shrink-0">
-                    <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+                    <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100" role="img" aria-label="Anel de consistência">
                       <circle
                         cx="50" cy="50" r="42"
                         fill="none" stroke="currentColor" strokeWidth="8"
@@ -412,7 +412,7 @@ const Progress = () => {
                     {weeklySeries[0].date}  –  {weeklySeries[6].date}
                   </Badge>
                 </div>
-                <svg viewBox="0 0 350 160" className="w-full" preserveAspectRatio="xMidYMid meet">
+                <svg viewBox="0 0 350 160" className="w-full" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Gráfico de consistência semanal">
                   <defs>
                     <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="1" />
@@ -674,7 +674,7 @@ const Sparkline = memo(({ data }: { data: number[] }) => {
   const last = points[points.length - 1];
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-32 text-primary">
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-32 text-primary" role="img" aria-label="Gráfico de tendência de streaks">
       <defs>
         <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />

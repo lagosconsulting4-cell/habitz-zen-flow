@@ -557,18 +557,20 @@ const Profile = () => {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className={`h-8 w-8 p-0 ${theme === "light" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
+                    className={`h-11 w-11 p-0 ${theme === "light" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
                     onClick={() => setTheme("light")}
-                    title="Tema claro"
+                    aria-label="Tema claro"
+                    aria-pressed={theme === "light"}
                   >
                     <Sun className="w-4 h-4" />
                   </Button>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className={`h-8 w-8 p-0 ${theme === "dark" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
+                    className={`h-11 w-11 p-0 ${theme === "dark" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
                     onClick={() => setTheme("dark")}
-                    title="Tema escuro"
+                    aria-label="Tema escuro"
+                    aria-pressed={theme === "dark"}
                   >
                     <Moon className="w-4 h-4" />
                   </Button>

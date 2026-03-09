@@ -290,7 +290,7 @@ const MyHabits = () => {
               <button
                 key={category}
                 type="button"
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
                   selectedCategories.includes(category)
                     ? "bg-primary text-primary-foreground"
                     : "bg-secondary text-muted-foreground hover:bg-muted hover:text-foreground border border-border"
@@ -313,7 +313,7 @@ const MyHabits = () => {
               <button
                 key={period.id}
                 type="button"
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
                   selectedPeriods.includes(period.id)
                     ? "bg-primary text-primary-foreground"
                     : "bg-secondary text-muted-foreground hover:bg-muted hover:text-foreground border border-border"

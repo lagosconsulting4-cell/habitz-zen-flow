@@ -288,7 +288,7 @@ const DashboardHabitCardComponent = ({
       </div>
 
       {/* Habit Name */}
-      <h3 className="text-[10px] font-semibold text-center leading-tight line-clamp-2 px-1 tracking-wide text-foreground">
+      <h3 className="text-[10px] font-semibold text-center leading-tight line-clamp-2 px-1 tracking-wide text-foreground" title={habit.name}>
         {habit.name.toUpperCase()}
       </h3>
       {habit.frequency_type === "once" ? (

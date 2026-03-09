@@ -235,7 +235,7 @@ const JourneyDetail = () => {
                       expandedPhase === phase.phase_number ? null : phase.phase_number
                     )
                   }
-                  className="w-full flex items-center justify-between py-1"
+                  className="w-full flex items-center justify-between py-3 min-h-[44px]"
                 >
                   <div className="text-left flex items-center gap-2">
                     {/* Decorative phase number */}
@@ -293,7 +293,7 @@ const JourneyDetail = () => {
                               }}
                               disabled={isDayLocked}
                               className={cn(
-                                "w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-colors",
+                                "w-full flex items-center gap-3 p-3 min-h-[48px] rounded-xl text-left transition-colors",
                                 isCurrent && "border",
                                 isDone && "opacity-70",
                                 isDayLocked && "opacity-40 cursor-not-allowed",

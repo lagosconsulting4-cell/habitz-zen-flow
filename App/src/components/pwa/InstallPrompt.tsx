@@ -16,21 +16,10 @@ export function InstallPrompt() {
   const { isInstalled, isInstallable, isIOS, promptInstall } = usePWA();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Debug logs
-  console.log("[InstallPrompt] Valores:", { isInstalled, isInstallable, isIOS });
-
-  if (isInstalled) {
-    console.log("[InstallPrompt] Retornando null: app instalado");
-    return null;
-  }
+  if (isInstalled) return null;
 
   const shouldShow = isIOS || isInstallable;
-  if (!shouldShow) {
-    console.log("[InstallPrompt] Retornando null: shouldShow=false");
-    return null;
-  }
-
-  console.log("[InstallPrompt] ✅ RENDERIZANDO componente!");
+  if (!shouldShow) return null;
 
   const handleInstall = async () => {
     setIsLoading(true);
@@ -39,7 +28,7 @@ export function InstallPrompt() {
   };
 
   const buttonClasses = cn(
-    "fixed bottom-32 right-4 z-50",
+    "fixed right-4 z-50 toast-bottom",
     "w-16 h-16 rounded-full",
     "bg-primary",
     "text-primary-foreground",
