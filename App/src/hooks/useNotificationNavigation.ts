@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
-interface NotificationClickMessage {
-  type: "NOTIFICATION_CLICK" | "COMPLETE_HABIT_FROM_NOTIFICATION";
+interface NotificationMessage {
+  type: "NOTIFICATION_CLICK" | "COMPLETE_HABIT_FROM_NOTIFICATION" | "NOTIFICATION_TRACKED_CLICK" | "NOTIFICATION_TRACKED_DISMISS";
   url?: string;
   habitId?: string;
+  notificationHistoryId?: string;
   data?: {
     type?: string;
     period?: string;
@@ -14,43 +16,52 @@ interface NotificationClickMessage {
 }
 
 /**
+ * Track notification interaction in notification_history (fire-and-forget).
+ */
+function trackNotification(id: string, field: "opened_at" | "dismissed_at" | "completed_from_notification", value: string | boolean) {
+  supabase
+    .from("notification_history")
+    .update({ [field]: value })
+    .eq("id", id)
+    .then(({ error }) => {
+      if (error) console.warn("[Notification Tracking] Failed:", error.message);
+    });
+}
+
+/**
  * Hook that listens for notification click messages from the Service Worker
  * and navigates to the appropriate URL when a notification is clicked.
- * Also handles completing habits directly from notifications.
+ * Also handles completing habits and tracking click/dismiss events.
  */
 export function useNotificationNavigation() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleMessage = (event: MessageEvent<NotificationClickMessage>) => {
+    const handleMessage = (event: MessageEvent<NotificationMessage>) => {
+      // Track notification click (opened_at column in notification_history)
+      if (event.data?.type === "NOTIFICATION_TRACKED_CLICK" && event.data.notificationHistoryId) {
+        trackNotification(event.data.notificationHistoryId, "opened_at", new Date().toISOString());
+      }
+
+      // Track notification dismiss
+      if (event.data?.type === "NOTIFICATION_TRACKED_DISMISS" && event.data.notificationHistoryId) {
+        trackNotification(event.data.notificationHistoryId, "dismissed_at", new Date().toISOString());
+      }
+
       // Handle notification click navigation
       if (event.data?.type === "NOTIFICATION_CLICK") {
-        console.log("[App] Notification click received:", event.data);
-
         const url = event.data.url || "/dashboard";
-
-        // Remove /app prefix if present (since we're already in /app base)
         const cleanUrl = url.replace(/^\/app/, "");
-
-        // Navigate to the URL
         navigate(cleanUrl);
-
-        // If there's habit data, we could show a toast or highlight habits
-        if (event.data.data?.habitCount) {
-          console.log(
-            `[App] ${event.data.data.habitCount} pending habits from ${event.data.data.period}`
-          );
-        }
       }
 
       // Handle completing habit from notification
       if (event.data?.type === "COMPLETE_HABIT_FROM_NOTIFICATION") {
-        console.log(
-          "[App] Habit completion request received from notification:",
-          event.data.habitId
-        );
+        // Track completion from notification
+        if (event.data.notificationHistoryId) {
+          trackNotification(event.data.notificationHistoryId, "completed_from_notification", true);
+        }
 
-        // Dispatch a custom event that can be caught by components with useHabits
         window.dispatchEvent(
           new CustomEvent("habit:complete-from-notification", {
             detail: { habitId: event.data.habitId },
@@ -59,7 +70,6 @@ export function useNotificationNavigation() {
       }
     };
 
-    // Listen for messages from Service Worker
     navigator.serviceWorker?.addEventListener("message", handleMessage);
 
     return () => {

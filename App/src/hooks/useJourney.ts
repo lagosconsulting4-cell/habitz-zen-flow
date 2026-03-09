@@ -730,6 +730,13 @@ export const useJourneyActions = () => {
     },
     onSuccess: () => {
       invalidateAll();
+
+      // Re-ask notification permission when starting a journey (high investment moment)
+      window.dispatchEvent(
+        new CustomEvent("notification:request-permission", {
+          detail: { trigger: "after-journey-start" },
+        })
+      );
     },
   });
 

@@ -87,6 +87,9 @@ interface NotificationData {
   habitCount?: number;
   habitIds?: string[];
   url?: string;
+  notificationHistoryId?: string;
+  habitId?: string;
+  context?: string;
 }
 
 /**
@@ -125,17 +128,41 @@ self.addEventListener("push", (event) => {
 });
 
 /**
+ * Send tracking message to any open app window (fire-and-forget).
+ */
+function sendTrackingToApp(type: string, notificationHistoryId: string, extra?: Record<string, unknown>) {
+  self.clients
+    .matchAll({ type: "window", includeUncontrolled: true })
+    .then((windowClients) => {
+      for (const client of windowClients) {
+        if (client.url.includes(self.location.origin)) {
+          client.postMessage({
+            type,
+            notificationHistoryId,
+            ...extra,
+          });
+          return;
+        }
+      }
+    })
+    .catch(() => {});
+}
+
+/**
  * Handle notification click events
  */
 self.addEventListener("notificationclick", (event) => {
-  // Notification clicked
-
   event.notification.close();
 
   const action = event.action;
   const data = event.notification.data as NotificationData || {};
 
-  // If user clicked "dismiss", just close
+  // Track click in notification_history
+  if (data.notificationHistoryId) {
+    sendTrackingToApp("NOTIFICATION_TRACKED_CLICK", data.notificationHistoryId);
+  }
+
+  // If user clicked "dismiss", just close (tracking already sent above)
   if (action === "dismiss") {
     return;
   }
@@ -146,12 +173,12 @@ self.addEventListener("notificationclick", (event) => {
       self.clients
         .matchAll({ type: "window", includeUncontrolled: true })
         .then((windowClients) => {
-          // Send message to app to complete the habit
           for (const client of windowClients) {
             if (client.url.includes(self.location.origin)) {
               client.postMessage({
                 type: "COMPLETE_HABIT_FROM_NOTIFICATION",
                 habitId: data.habitId,
+                notificationHistoryId: data.notificationHistoryId,
               });
               return;
             }
@@ -173,12 +200,9 @@ self.addEventListener("notificationclick", (event) => {
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((windowClients) => {
-        // Look for an existing window to focus
         for (const client of windowClients) {
           if (client.url.includes(self.location.origin) && "focus" in client) {
-            // Found an existing window, focus it and navigate
             return client.focus().then(() => {
-              // Send message to app to navigate to the target URL
               client.postMessage({
                 type: "NOTIFICATION_CLICK",
                 url: targetUrl,
@@ -189,7 +213,6 @@ self.addEventListener("notificationclick", (event) => {
           }
         }
 
-        // No existing window found, open a new one
         if (self.clients.openWindow) {
           return self.clients.openWindow(fullUrl);
         }
@@ -201,10 +224,13 @@ self.addEventListener("notificationclick", (event) => {
 });
 
 /**
- * Handle notification close events
+ * Handle notification close/dismiss events
  */
 self.addEventListener("notificationclose", (event) => {
-  // Notification closed
+  const data = event.notification.data as NotificationData || {};
+  if (data.notificationHistoryId) {
+    sendTrackingToApp("NOTIFICATION_TRACKED_DISMISS", data.notificationHistoryId);
+  }
 });
 
 // ============================================

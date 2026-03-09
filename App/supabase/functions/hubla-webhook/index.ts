@@ -19,6 +19,7 @@ const n8nBaseUrl =
   "https://n8n-evo-n8n.harxon.easypanel.host/webhook";
 const n8nWebhookUrl = `${n8nBaseUrl}/bora-welcome`;
 const n8nPixPendingUrl = `${n8nBaseUrl}/pix-pending`;
+const n8nSubscriptionCanceledUrl = `${n8nBaseUrl}/subscription-canceled`;
 
 if (!supabaseUrl || !serviceRoleKey) {
   console.error("[hubla-webhook] Missing SUPABASE_URL or SERVICE_ROLE_KEY");
@@ -299,7 +300,7 @@ serve(async (req) => {
     isNewUser: boolean;
     productName?: string;
     amount?: number;
-  }) => {
+  }, targetUrl?: string) => {
     try {
       const n8nPayload = {
         event: data.event,
@@ -316,11 +317,12 @@ serve(async (req) => {
         timestamp: new Date().toISOString(),
       };
 
+      const url = targetUrl ?? n8nWebhookUrl;
       console.log(
-        `[hubla-webhook] 📤 Sending to N8N: ${JSON.stringify(n8nPayload)}`
+        `[hubla-webhook] 📤 Sending to N8N (${url}): ${JSON.stringify(n8nPayload)}`
       );
 
-      const response = await fetch(n8nWebhookUrl, {
+      const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(n8nPayload),
@@ -470,18 +472,9 @@ serve(async (req) => {
           .eq("user_id", userId)
           .is("first_purchase_date", null);
 
-        // Notify N8N for welcome email
-        if (userData.email && userId) {
-          await notifyN8N({
-            event: "SUBSCRIPTION_CREATED",
-            email: userData.email,
-            customerName: userData.displayName,
-            userId,
-            isNewUser,
-            productName: productNames,
-            amount: amountCents,
-          });
-        }
+        // NOTE: Do NOT notify N8N here. subscription.created fires when PIX
+        // is generated (before payment). The welcome email should only be sent
+        // from subscription.activated (payment confirmed).
 
         console.log(
           `[hubla-webhook] ✅ subscription.created processed for ${userData.email}`
@@ -505,7 +498,7 @@ serve(async (req) => {
         // Find purchase by subscription ID
         const { data: purchase } = await supabaseAdmin
           .from("purchases")
-          .select("user_id, status")
+          .select("user_id, status, product_names")
           .eq("provider", "hubla")
           .eq("provider_session_id", subscriptionId)
           .maybeSingle();
@@ -550,6 +543,7 @@ serve(async (req) => {
             customerName: profile.display_name ?? "Cliente Hubla",
             userId: purchase.user_id,
             isNewUser: false,
+            productName: purchase.product_names ?? undefined,
           });
         }
 
@@ -838,8 +832,26 @@ serve(async (req) => {
 
         await setUserPremium(purchase.user_id, false);
 
+        // Notify N8N for churn-winback flow (parity with Stripe)
+        const { data: deactivatedProfile } = await supabaseAdmin
+          .from("profiles")
+          .select("email, display_name")
+          .eq("user_id", purchase.user_id)
+          .maybeSingle();
+
+        if (deactivatedProfile?.email) {
+          await notifyN8N({
+            event: "SUBSCRIPTION_CANCELED",
+            email: deactivatedProfile.email,
+            customerName: deactivatedProfile.display_name ?? "Cliente Hubla",
+            userId: purchase.user_id,
+            isNewUser: false,
+            productName: "Bora (Hubla/Pix)",
+          }, n8nSubscriptionCanceledUrl);
+        }
+
         console.log(
-          `[hubla-webhook] ✅ subscription.deactivated processed — premium revoked`
+          `[hubla-webhook] ✅ subscription.deactivated processed — premium revoked + N8N notified`
         );
         break;
       }
@@ -882,8 +894,160 @@ serve(async (req) => {
 
         await setUserPremium(purchase.user_id, false);
 
+        // Notify N8N for churn-winback flow (parity with Stripe)
+        const { data: refundedProfile } = await supabaseAdmin
+          .from("profiles")
+          .select("email, display_name")
+          .eq("user_id", purchase.user_id)
+          .maybeSingle();
+
+        if (refundedProfile?.email) {
+          await notifyN8N({
+            event: "SUBSCRIPTION_CANCELED",
+            email: refundedProfile.email,
+            customerName: refundedProfile.display_name ?? "Cliente Hubla",
+            userId: purchase.user_id,
+            isNewUser: false,
+            productName: "Bora (Hubla/Pix)",
+          }, n8nSubscriptionCanceledUrl);
+        }
+
         console.log(
-          `[hubla-webhook] ✅ invoice.refunded processed — premium revoked`
+          `[hubla-webhook] ✅ invoice.refunded processed — premium revoked + N8N notified`
+        );
+        break;
+      }
+
+      // ════════════════════════════════════════════════════════════════
+      // NEW SALE — Hubla "Nova venda" event (different payload format)
+      // Fires after payment confirmed. Primary handler for credit card.
+      // ════════════════════════════════════════════════════════════════
+      case "NewSale": {
+        const evt = payload.event;
+        const email = normalizeEmail(evt?.userEmail);
+        const displayName = evt?.userName?.trim() || "Cliente Hubla";
+        const phone = normalizePhone(evt?.userPhone);
+        const groupName = evt?.groupName || "Habitz Premium (Hubla)";
+        const transactionId = evt?.transactionId;
+        const groupId = evt?.groupId;
+        const paymentMethod = evt?.paymentMethod ?? null;
+
+        if (!email) {
+          console.error("[hubla-webhook] No email in NewSale");
+          break;
+        }
+
+        console.log(
+          `[hubla-webhook] 🛒 NewSale: ${displayName} <${email}>`
+        );
+        console.log(
+          `[hubla-webhook] 📦 Product: ${groupName}`
+        );
+
+        // Find or create user
+        let isNewUser = false;
+        let userId = await findUserByEmail(email);
+
+        if (!userId) {
+          userId = await createUserFromHubla(
+            email,
+            displayName,
+            phone
+          );
+          isNewUser = true;
+
+          if (!userId) {
+            console.error(
+              `[hubla-webhook] Failed to create user for ${email}`
+            );
+            break;
+          }
+        } else if (phone) {
+          await supabaseAdmin
+            .from("profiles")
+            .update({ phone })
+            .eq("user_id", userId)
+            .is("phone", null);
+        }
+
+        // Upsert purchase — use transactionId:groupId for uniqueness
+        // (one transaction can have multiple products → multiple NewSale events)
+        const sessionId =
+          transactionId && groupId
+            ? `${transactionId}:${groupId}`
+            : transactionId;
+
+        if (sessionId) {
+          const { error: purchaseError } = await supabaseAdmin
+            .from("purchases")
+            .upsert(
+              {
+                user_id: userId,
+                email,
+                provider: "hubla",
+                provider_session_id: sessionId,
+                amount_cents: 0,
+                currency: "BRL",
+                status: "paid",
+                product_names: groupName,
+                payment_method: paymentMethod,
+              },
+              { onConflict: "provider_session_id" }
+            );
+
+          if (purchaseError) {
+            console.error(
+              `[hubla-webhook] Purchase upsert failed:`,
+              purchaseError
+            );
+          } else {
+            console.log(
+              `[hubla-webhook] ✅ Purchase recorded (paid)`
+            );
+          }
+        }
+
+        // Activate premium
+        await setUserPremium(userId, true);
+
+        // Update cohorts
+        await supabaseAdmin
+          .from("user_cohorts")
+          .update({
+            acquisition_source: "hubla",
+            first_purchase_date: new Date().toISOString().split("T")[0],
+          })
+          .eq("user_id", userId)
+          .is("first_purchase_date", null);
+
+        // Notify N8N with correct product name
+        await notifyN8N({
+          event: "SUBSCRIPTION_ACTIVATED",
+          email,
+          customerName: displayName,
+          userId,
+          isNewUser,
+          productName: groupName,
+        });
+
+        console.log(
+          `[hubla-webhook] ✅ NewSale processed for ${email}`
+        );
+        break;
+      }
+
+      // ════════════════════════════════════════════════════════════════
+      // NEW USER — Hubla "Novo usuário" event (logging only)
+      // NewSale already handles user creation + purchase + n8n
+      // ════════════════════════════════════════════════════════════════
+      case "NewUser": {
+        const evt = payload.event;
+        const email = normalizeEmail(evt?.userEmail);
+        const displayName = evt?.userName?.trim() || "Cliente Hubla";
+        const groupName = evt?.groupName || "unknown";
+
+        console.log(
+          `[hubla-webhook] 👤 NewUser: ${displayName} <${email}> — ${groupName}`
         );
         break;
       }

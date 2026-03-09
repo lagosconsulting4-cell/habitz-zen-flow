@@ -1008,6 +1008,15 @@ export const useGamification = (userId?: string) => {
       // Send streak milestone notification
       await sendStreakNotification(streakDays);
 
+      // Re-ask notification permission at streak 7 (high engagement moment)
+      if (streakDays === 7) {
+        window.dispatchEvent(
+          new CustomEvent("notification:request-permission", {
+            detail: { trigger: "after-streak-7" },
+          })
+        );
+      }
+
       return xpResult;
     }
   };

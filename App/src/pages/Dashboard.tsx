@@ -134,6 +134,20 @@ const Dashboard = () => {
     }>
   >([]);
 
+  // Dynamic notification permission trigger (for streak-7 and journey-start re-asks)
+  const [notifTrigger, setNotifTrigger] = useState<"after-streak-7" | "after-journey-start" | null>(null);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.trigger === "after-streak-7" || detail?.trigger === "after-journey-start") {
+        setNotifTrigger(detail.trigger);
+      }
+    };
+    window.addEventListener("notification:request-permission", handler);
+    return () => window.removeEventListener("notification:request-permission", handler);
+  }, []);
+
   // Process XP toast queue
   useEffect(() => {
     if (!isGamificationEnabled) return;
@@ -678,6 +692,14 @@ const Dashboard = () => {
       {/* Notification Permission Dialog - shows after first habit */}
       {todayHabits.length > 0 && (
         <NotificationPermissionDialog trigger="after-first-habit" />
+      )}
+
+      {/* Re-permission dialog for streak-7 / journey-start triggers */}
+      {notifTrigger && (
+        <NotificationPermissionDialog
+          trigger={notifTrigger}
+          onClose={() => setNotifTrigger(null)}
+        />
       )}
 
       {/* Streak Milestone Toast */}

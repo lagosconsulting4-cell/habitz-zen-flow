@@ -5,11 +5,61 @@ import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { usePWA } from "@/hooks/usePWA";
 import { cn } from "@/lib/utils";
 
+type NotificationTrigger =
+  | "after-onboarding"
+  | "after-first-habit"
+  | "after-streak-7"
+  | "after-journey-start"
+  | "manual";
+
 interface NotificationPermissionDialogProps {
   className?: string;
-  // Quando mostrar: "after-onboarding" | "after-first-habit" | "manual"
-  trigger?: "after-onboarding" | "after-first-habit" | "manual";
+  trigger?: NotificationTrigger;
   onClose?: () => void;
+}
+
+/**
+ * Expiration time for dismissed prompts (30 days in ms).
+ * After this period, the prompt can be shown again.
+ */
+const DISMISS_EXPIRATION_MS = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * Check if a trigger was dismissed and the dismissal hasn't expired.
+ * Returns true if the prompt should NOT be shown (still within cooldown).
+ */
+function isDismissedAndValid(trigger: string): boolean {
+  const key = `notification-prompt-${trigger}`;
+  const raw = localStorage.getItem(key);
+  if (!raw) return false;
+
+  // Legacy: old format was just "true" string
+  if (raw === "true") {
+    // Migrate to new format with current timestamp (starts 30-day clock)
+    localStorage.setItem(key, JSON.stringify({ dismissed: true, at: Date.now() }));
+    return true;
+  }
+
+  try {
+    const data = JSON.parse(raw);
+    if (!data.dismissed || !data.at) return false;
+    // Check if 30 days have passed
+    if (Date.now() - data.at > DISMISS_EXPIRATION_MS) {
+      localStorage.removeItem(key); // Expired, allow re-ask
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Mark a trigger as dismissed with timestamp for expiration.
+ */
+function markDismissed(trigger: string): void {
+  const key = `notification-prompt-${trigger}`;
+  localStorage.setItem(key, JSON.stringify({ dismissed: true, at: Date.now() }));
 }
 
 export function NotificationPermissionDialog({
@@ -24,17 +74,6 @@ export function NotificationPermissionDialog({
 
   // Verificar se deve mostrar
   useEffect(() => {
-    // Log de debug para diagnóstico
-    console.log("[NotificationDialog] Verificando exibição:", {
-      dismissed,
-      isSubscribed,
-      permission,
-      isIOS,
-      isStandalone,
-      isSupported,
-      trigger,
-    });
-
     if (dismissed || isSubscribed || permission === "denied") {
       setIsVisible(false);
       return;
@@ -51,15 +90,11 @@ export function NotificationPermissionDialog({
       return;
     }
 
-    // Verificar localStorage para triggers automáticos
-    const key = `notification-prompt-${trigger}`;
-    const alreadyShown = localStorage.getItem(key);
-
-    if (!alreadyShown && isSupported) {
+    // Check localStorage with 30-day expiration for automatic triggers
+    if (!isDismissedAndValid(trigger) && isSupported) {
       // Delay para não mostrar imediatamente
       const timeout = setTimeout(() => {
         setIsVisible(true);
-        localStorage.setItem(key, "true");
       }, 2000);
 
       return () => clearTimeout(timeout);
@@ -69,6 +104,9 @@ export function NotificationPermissionDialog({
   const handleClose = () => {
     setIsVisible(false);
     setDismissed(true);
+    if (trigger !== "manual") {
+      markDismissed(trigger);
+    }
     onClose?.();
   };
 
