@@ -29,6 +29,7 @@ const RecAqLanding = lazy(() => import("./pages/bora/RecAqLanding"));
 const MiniLanding = lazy(() => import("./pages/bora/MiniLanding"));
 const MetodoRendaSecreta = lazy(() => import("./pages/bora/MetodoRendaSecreta"));
 const MetodoRendaSecretaCombo = lazy(() => import("./pages/bora/MetodoRendaSecretaCombo"));
+const Reembolsos = lazy(() => import("./pages/bora/Reembolsos"));
 
 const queryClient = new QueryClient();
 
@@ -140,6 +141,16 @@ const App = () => (
               element={
                 <PathPrefixProvider prefix="/bora">
                   <BoraQuizPage />
+                </PathPrefixProvider>
+              }
+            />
+
+            {/* Auditoria de Reembolso e Retenção */}
+            <Route
+              path="/reembolsos"
+              element={
+                <PathPrefixProvider prefix="">
+                  <Reembolsos />
                 </PathPrefixProvider>
               }
             />
