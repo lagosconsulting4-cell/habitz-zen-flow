@@ -10,8 +10,9 @@ export default function Reembolsos() {
 
     // States do Formulário
     const [termoCiencia, setTermoCiencia] = useState(false);
-    const [identificacao, setIdentificacao] = useState({ email: '', produto: '', transacaoId: '' });
-    const [motivoPrincipal, setMotivoPrincipal] = useState('');
+    const [identificacao, setIdentificacao] = useState({ email: '', produto: '', transacaoId: 'Não exigido' });
+    const [motivosSelecionados, setMotivosSelecionados] = useState<string[]>([]);
+    const [outroMotivo, setOutroMotivo] = useState('');
     const [subResposta, setSubResposta] = useState('');
     const [justificativa, setJustificativa] = useState('');
 
@@ -24,9 +25,14 @@ export default function Reembolsos() {
     // Helpers
     const nextStep = () => setStep(step + 1);
 
-    const isStep2Valid = identificacao.email.includes('@') && identificacao.produto && identificacao.transacaoId;
-    const isJustificativaValid = justificativa.length >= 400;
+    const isStep2Valid = identificacao.email.includes('@') && identificacao.produto;
+    const isStep3Valid = motivosSelecionados.length > 0 && (!motivosSelecionados.includes('Outro') || outroMotivo.length >= 3);
+    const isJustificativaValid = justificativa.length >= 250;
     const isFinalValid = finalCheck1 && finalCheck2 && finalCheck3 && finalCheck4;
+
+    const toggleMotivo = (motivo: string) => {
+        setMotivosSelecionados(prev => prev.includes(motivo) ? prev.filter(m => m !== motivo) : [...prev, motivo]);
+    };
 
     const handlePaste = (e: React.ClipboardEvent) => {
         e.preventDefault();
@@ -37,12 +43,13 @@ export default function Reembolsos() {
 
     const submitAuditoria = async () => {
         setIsSubmitting(true);
+        const motivoFinal = motivosSelecionados.join(', ') + (motivosSelecionados.includes('Outro') ? ` - Específico: ${outroMotivo}` : '');
         try {
             const { error } = await supabase.from('auditoria_reembolsos').insert({
                 email: identificacao.email,
                 produto: identificacao.produto,
-                transacao_id: identificacao.transacaoId,
-                motivo_principal: motivoPrincipal,
+                transacao_id: 'Não exigida',
+                motivo_principal: motivoFinal,
                 sub_resposta: subResposta,
                 justificativa_detalhada: justificativa
             });
@@ -128,24 +135,13 @@ export default function Reembolsos() {
                             />
 
                             <label style={styles.label}>Produto que deseja cancelar:</label>
-                            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+                            <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '14px' }}>
                                     <input type="radio" checked={identificacao.produto === 'Bora'} onChange={() => setIdentificacao({ ...identificacao, produto: 'Bora' })} /> Bora
                                 </label>
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '14px' }}>
                                     <input type="radio" checked={identificacao.produto === 'Foquinha'} onChange={() => setIdentificacao({ ...identificacao, produto: 'Foquinha' })} /> Foquinha
                                 </label>
-                            </div>
-
-                            <label style={styles.label}>Código da Transação (ID do Pedido)</label>
-                            <input
-                                type="text"
-                                value={identificacao.transacaoId}
-                                onChange={(e) => setIdentificacao({ ...identificacao, transacaoId: e.target.value })}
-                                style={{ ...styles.input, marginBottom: '5px' }}
-                            />
-                            <div style={{ fontSize: '12px', color: '#666', marginBottom: '20px' }}>
-                                <a href="#" onClick={(e) => e.preventDefault()} style={{ color: '#666', textDecoration: 'underline' }}>Não sabe onde encontrar?</a> Procure no seu e-mail por 'Stripe' ou 'Hubla' ou verifique o extrato do seu cartão.
                             </div>
 
                             <button
@@ -163,34 +159,52 @@ export default function Reembolsos() {
                         <div>
                             <h2 style={styles.h2}>Motivo do Cancelamento</h2>
 
-                            <label style={styles.label}>Qual o principal motivo que o impede de utilizar o app?</label>
+                            <label style={{ ...styles.label, fontWeight: 'normal', color: '#444' }}>Você pode selecionar mais de uma opção para nos ajudar a entender exatamente o que houve.</label>
 
-                            <div style={{ marginTop: '15px' }}>
+                            <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 {[
                                     "Achei o processo muito complexo / Não consegui configurar.",
                                     "Não tenho tempo suficiente para aplicar o método.",
                                     "Achei que o resultado financeiro seria imediato.",
                                     "Bug Técnico / App travou.",
-                                    "Imprevistos Financeiros e Pessoais (Por mim, não pelo App).",
-                                    "Outro / Prefiro não responder especificamente."
+                                    "Imprevistos Financeiros e Pessoais.",
+                                    "Outro"
                                 ].map((motivo, idx) => (
-                                    <label key={idx} style={styles.radioLabel}>
-                                        <input
-                                            type="radio"
-                                            name="motivo"
-                                            checked={motivoPrincipal === motivo}
-                                            onChange={() => setMotivoPrincipal(motivo)}
-                                            style={{ marginTop: '3px' }}
-                                        />
-                                        <span>{motivo}</span>
-                                    </label>
+                                    <div
+                                        key={idx}
+                                        onClick={() => toggleMotivo(motivo)}
+                                        style={{
+                                            padding: '15px',
+                                            border: motivosSelecionados.includes(motivo) ? '2px solid #000' : '1px solid #e0e0e0',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            backgroundColor: motivosSelecionados.includes(motivo) ? '#f4f4f4' : '#fff',
+                                            transition: 'all 0.2s',
+                                            fontWeight: motivosSelecionados.includes(motivo) ? 'bold' : 'normal'
+                                        }}
+                                    >
+                                        {motivo}
+                                    </div>
                                 ))}
                             </div>
 
+                            {motivosSelecionados.includes('Outro') && (
+                                <div style={{ marginTop: '15px' }}>
+                                    <label style={styles.label}>Poderia nos detalhar brevemente o motivo?</label>
+                                    <input
+                                        type="text"
+                                        value={outroMotivo}
+                                        onChange={(e) => setOutroMotivo(e.target.value)}
+                                        placeholder="Ex: Minha conta do TikTok foi banida..."
+                                        style={styles.input}
+                                    />
+                                </div>
+                            )}
+
                             <button
-                                disabled={!motivoPrincipal}
+                                disabled={!isStep3Valid}
                                 onClick={nextStep}
-                                style={motivoPrincipal ? styles.button : styles.buttonDisabled}
+                                style={isStep3Valid ? styles.button : styles.buttonDisabled}
                             >
                                 Próximo
                             </button>
@@ -200,26 +214,29 @@ export default function Reembolsos() {
                     {/* --- ETAPA 4: ADAPTAÇÃO DO QUIZ --- */}
                     {step === 4 && (
                         <div>
-                            <h2 style={styles.h2}>Antes de continuarmos...</h2>
+                            <h2 style={styles.h2}>Antes de continuarmos, queremos te ouvir...</h2>
+                            <p style={{ ...styles.label, fontWeight: 'normal', color: '#444', marginBottom: '20px' }}>
+                                Percebemos que sua jornada não saiu como planejada. Para podermos te auxiliar ou concluir de vez sua rescisão, responda com sinceridade o principal ponto abaixo:
+                            </p>
 
-                            {motivoPrincipal.includes("complexo") && (
-                                <p style={styles.label}>Você já falou com o suporte para tentar resolver?</p>
+                            {motivosSelecionados.some(m => m.includes("complexo")) && (
+                                <p style={styles.label}>Você chegou a tentar contato com nosso suporte técnico para que pudéssemos te ajudar na configuração inicial?</p>
                             )}
 
-                            {motivoPrincipal.includes("tempo") && (
-                                <p style={styles.label}>Os Aplicativos da Lumen (Bora/Foquinha) foram projetados para automatizar seu trabalho e exigir apenas 15 minutos diários. Você diria que não conseguiu priorizar esses 15 minutos, ou focou esse tempo em outras atividades?</p>
+                            {motivosSelecionados.some(m => m.includes("tempo")) && (
+                                <p style={styles.label}>O aplicativo pode ser executado em 15 minutos. Você diria que não conseguiu encaixar esse tempo na rotina, ou acabou priorizando outras tarefas por falta de direcionamento nosso?</p>
                             )}
 
-                            {motivoPrincipal.includes("imediato") && (
-                                <p style={styles.label}>Você manteve a rotina de publicações diárias nos últimos 15 dias sem falhar para validar seu engajamento? (Sim/Não)</p>
+                            {motivosSelecionados.some(m => m.includes("imediato")) && (
+                                <p style={styles.label}>Na construção de um canal, consistência é tudo. Você conseguiu realizar as postagens de forma ininterrupta nos últimos 15 dias?</p>
                             )}
 
-                            {motivoPrincipal.includes("Bug") && (
-                                <p style={styles.label}>Qual funcionalidade travou sistematicamente com você? Descreva o erro para nossa engenharia investigar.</p>
+                            {motivosSelecionados.some(m => m.includes("Bug")) && (
+                                <p style={styles.label}>Sentimos muito pela frustração! Em qual funcionalidade a ferramenta travou para você? Isso limitou completamente sua conta?</p>
                             )}
 
-                            {(motivoPrincipal.includes("Financeiros") || motivoPrincipal.includes("Outro")) && (
-                                <p style={styles.label}>Nós compreendemos. Você acredita que em um prazo futuro voltaria a se interessar pela estrutura, ou prefere o banimento permanente?</p>
+                            {(motivosSelecionados.some(m => m.includes("Financeiros")) || motivosSelecionados.includes("Outro")) && (
+                                <p style={styles.label}>Entendemos perfeitamente o seu lado e sabemos que imprevistos fogem do nosso controle. Você precisou paralisar agora, mas cogita voltar a validar a estratégia no futuro?</p>
                             )}
 
                             <textarea
@@ -241,21 +258,22 @@ export default function Reembolsos() {
                     {/* --- ETAPA 5: A GRANDE BARREIRA (400 CHARS) --- */}
                     {step === 5 && (
                         <div>
-                            <h2 style={styles.h2}>Justificativa Detalhada para o Conselho Financeiro</h2>
+                            <h2 style={styles.h2}>Apenas para concluirmos</h2>
 
                             <label style={{ ...styles.label, fontWeight: 'normal', color: '#444' }}>
-                                Para que possamos validar sua solicitação e entender o motivo do insucesso com a ferramenta, descreva detalhadamente: O que exatamente não atendeu suas expectativas e quais funcionalidades você utilizou antes de decidir pelo cancelamento?
+                                Valorizamos muito os comentários dos nossos usuários. Poderia nos explicar detalhadamente qual foi o principal obstáculo? Sua resposta é analisada diretamente pela equipe para entender de fato a sua dor atual.
                             </label>
 
                             <textarea
                                 value={justificativa}
                                 onChange={(e) => setJustificativa(e.target.value)}
                                 onPaste={handlePaste}
+                                placeholder="Conte-nos o que houve em mais detalhes..."
                                 style={{ ...styles.input, height: '150px', resize: 'vertical' }}
                             ></textarea>
 
-                            <div style={{ textAlign: 'right', fontSize: '12px', color: justificativa.length >= 400 ? '#2e7d32' : '#d32f2f', marginTop: '-15px', marginBottom: '15px', fontWeight: 'bold' }}>
-                                Caracteres digitados: {justificativa.length} / 400
+                            <div style={{ textAlign: 'right', fontSize: '12px', color: justificativa.length >= 250 ? '#2e7d32' : '#d32f2f', marginTop: '-15px', marginBottom: '15px', fontWeight: 'bold' }}>
+                                Caracteres digitados: {justificativa.length} / 250
                             </div>
 
                             <button
