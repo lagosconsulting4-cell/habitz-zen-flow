@@ -481,6 +481,11 @@
   padding-bottom: calc(var(--navbar-height) + var(--navbar-padding));
 }
 
+/* Toast/FAB positioning - above navbar with safe area */
+.toast-bottom {
+  bottom: calc(var(--navbar-height) + var(--navbar-padding) + 0.5rem);
+}
+
 .touch-target-sm {
   min-width: 44px;
   min-height: 44px;

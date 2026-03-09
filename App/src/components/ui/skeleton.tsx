@@ -110,14 +110,36 @@ function DashboardSkeleton() {
       {/* XP Bar */}
       <XPBarSkeleton />
 
-      {/* Routine Card */}
+      {/* Routine Card (DailyMissionCard) */}
       <RoutineCardSkeleton />
 
-      {/* Habit Cards Grid */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Freeze Badge skeleton */}
+      <div className="rounded-2xl p-4 bg-card border border-border/60 dark:bg-muted/5 dark:border-border/20">
+        <div className="flex items-center gap-3">
+          <Skeleton className="w-10 h-10 rounded-xl" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-36 rounded-sm" />
+            <Skeleton className="h-3 w-48 rounded-sm" />
+          </div>
+          <Skeleton className="h-6 w-8 rounded-full" />
+        </div>
+      </div>
+
+      {/* Habit Cards Grid - responsive matching actual grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 justify-items-center">
         {[...Array(4)].map((_, i) => (
           <HabitCardSkeleton key={i} />
         ))}
+      </div>
+
+      {/* Weekly Insight skeleton */}
+      <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/60 dark:bg-muted/5 dark:border-border/20">
+        <Skeleton className="w-12 h-12 rounded-full shrink-0" />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-4 w-24 rounded-sm" />
+          <Skeleton className="h-3 w-40 rounded-sm" />
+        </div>
+        <Skeleton className="w-4 h-4 rounded-sm" />
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ export const GemToast = () => {
   }, [lastBalance]);
 
   return (
-    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+    <div className="fixed toast-bottom left-1/2 -translate-x-1/2 z-50 pointer-events-none">
       <AnimatePresence mode="popLayout">
         {notifications.map((notification) => (
           <motion.div

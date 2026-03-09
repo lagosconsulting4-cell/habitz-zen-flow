@@ -23,7 +23,7 @@ export const FloatingActionButton = ({ className }: FloatingActionButtonProps) =
       whileTap={{ scale: 0.9 }}
       onClick={() => navigate("/create")}
       className={cn(
-        "fixed bottom-24 right-4 z-40",
+        "fixed right-4 z-40 toast-bottom",
         "w-14 h-14 rounded-full",
         "bg-primary hover:bg-primary/90 text-primary-foreground",
         "flex items-center justify-center",

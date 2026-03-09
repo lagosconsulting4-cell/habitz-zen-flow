@@ -58,7 +58,7 @@ export const JourneyDayCompleteModal = ({
   // Auto-dismiss after 4 seconds
   useEffect(() => {
     if (isOpen && !journeyCompleted && !phaseCompleted) {
-      const timer = setTimeout(onClose, 4000);
+      const timer = setTimeout(onClose, 6000);
       return () => clearTimeout(timer);
     }
   }, [isOpen, journeyCompleted, phaseCompleted, onClose]);

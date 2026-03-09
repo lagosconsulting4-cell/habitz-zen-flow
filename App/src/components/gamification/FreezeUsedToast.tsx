@@ -55,7 +55,7 @@ export function FreezeUsedToast() {
             stiffness: 200,
             damping: 20,
           }}
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4"
+          className="fixed toast-bottom left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4"
         >
           {/* Toast card com gradiente azul/cyan */}
           <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl p-4 shadow-2xl text-white overflow-hidden relative">

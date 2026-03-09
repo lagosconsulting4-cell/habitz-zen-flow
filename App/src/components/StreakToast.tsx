@@ -53,7 +53,7 @@ export const StreakToast = ({ streakDays, show, onClose }: StreakToastProps) => 
   return (
     <AnimatePresence>
       {visible && (
-        <div className="fixed bottom-24 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+        <div className="fixed toast-bottom left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}

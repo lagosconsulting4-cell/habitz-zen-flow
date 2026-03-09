@@ -417,7 +417,7 @@ const DayHabitsSection = ({
                 <button
                   onClick={() => handleAdopt(habit.id, habit.name)}
                   disabled={adoptingId === habit.id}
-                  className="ml-12 flex items-center gap-1.5 text-xs py-1 px-2 rounded-lg transition-colors hover:bg-card/60 disabled:opacity-50"
+                  className="ml-12 flex items-center gap-1.5 text-xs py-2.5 px-3 min-h-[44px] rounded-lg transition-colors hover:bg-card/60 disabled:opacity-50"
                   style={{ color: themeColor }}
                 >
                   <Plus className="w-3.5 h-3.5" />

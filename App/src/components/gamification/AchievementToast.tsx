@@ -59,7 +59,7 @@ export const AchievementToast = ({ userId: propUserId }: AchievementToastProps) 
   };
 
   return (
-    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
+    <div className="fixed toast-bottom left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
       <AnimatePresence mode="popLayout">
         {notifications.map((notification) => {
           const achievement = getAchievement(notification.achievementId);
@@ -95,7 +95,7 @@ export const AchievementToast = ({ userId: propUserId }: AchievementToastProps) 
                   </div>
                   <button
                     onClick={() => handleShare(achievement)}
-                    className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors pointer-events-auto"
+                    className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors pointer-events-auto"
                   >
                     <Share2 className="w-4 h-4 text-yellow-900" />
                   </button>
