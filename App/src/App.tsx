@@ -1,4 +1,5 @@
 ﻿import { Suspense, lazy, useEffect } from "react";
+import { MotionConfig } from "motion/react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -54,6 +55,7 @@ const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
 const AdminContent = lazy(() => import("./pages/admin/Content"));
 const AdminAudit = lazy(() => import("./pages/admin/Audit"));
 const AdminLeads = lazy(() => import("./pages/admin/Leads"));
+const AdminPixRecovery = lazy(() => import("./pages/admin/PixRecovery"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -138,6 +140,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
+        <MotionConfig reducedMotion="user">
         <Toaster />
         <Sonner />
         <BrowserRouter basename="/app">
@@ -196,6 +199,7 @@ const App = () => (
               <Route path="/admin/leads" element={<AdminLeads />} />
               <Route path="/admin/analytics" element={<AdminAnalytics />} />
               <Route path="/admin/content" element={<AdminContent />} />
+              <Route path="/admin/pix-recovery" element={<AdminPixRecovery />} />
               <Route path="/admin/audit" element={<AdminAudit />} />
             </Route>
 
@@ -205,6 +209,7 @@ const App = () => (
         </Suspense>
         </ErrorBoundary>
       </BrowserRouter>
+        </MotionConfig>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>

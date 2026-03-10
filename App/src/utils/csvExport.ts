@@ -147,3 +147,49 @@ export const exportUnconvertedLeadsToCSV = (
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
+
+/**
+ * Export Pix recovery leads to CSV
+ */
+export const exportPixRecoveryToCSV = (
+  leads: Array<Record<string, unknown>>,
+  filename: string = "pix-recovery.csv"
+) => {
+  if (leads.length === 0) return;
+
+  const columns = [
+    { key: "email", label: "Email" },
+    { key: "name", label: "Nome" },
+    { key: "phone", label: "Telefone" },
+    { key: "product_label", label: "Produto" },
+    { key: "provider", label: "Provedor" },
+    { key: "amount_cents", label: "Valor (centavos)" },
+    { key: "urgency", label: "Urgência" },
+    { key: "source_table", label: "Origem" },
+    { key: "created_at", label: "Data Criação" },
+    { key: "exported_at", label: "Data Exportação" },
+  ];
+
+  const header = columns.map((col) => `"${col.label}"`).join(",");
+  const rows = leads.map((lead) =>
+    columns
+      .map((col) => {
+        const value = lead[col.key];
+        if (value === null || value === undefined) return '""';
+        return `"${String(value).replace(/"/g, '""')}"`;
+      })
+      .join(",")
+  );
+
+  const csvContent = [header, ...rows].join("\n");
+  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};

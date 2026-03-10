@@ -164,6 +164,18 @@ const AdminDashboard = () => {
           </Card>
         </Link>
 
+        <Link to="/admin/pix-recovery">
+          <Card className="p-6 hover:bg-accent transition-colors cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold">Pix Recovery</h3>
+                <p className="text-sm text-muted-foreground">Recuperar clientes com Pix pendente</p>
+              </div>
+              <DollarSign className="h-6 w-6 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+
         <Link to="/admin/audit">
           <Card className="p-6 hover:bg-accent transition-colors cursor-pointer">
             <div className="flex items-center justify-between">

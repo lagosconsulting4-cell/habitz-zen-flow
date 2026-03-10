@@ -14,6 +14,7 @@ import {
   Gift,
   ShieldCheck,
   Contact,
+  DollarSign,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,19 @@ const AppSidebar = ({ onOpenMore }: AppSidebarProps) => {
               >
                 <Contact className="h-4 w-4" />
                 <span>Leads</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/admin/pix-recovery")}
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                  location.pathname === "/admin/pix-recovery"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                }`}
+                aria-label="Pix Recovery"
+              >
+                <DollarSign className="h-4 w-4" />
+                <span>Pix Recovery</span>
               </button>
             </nav>
           </div>

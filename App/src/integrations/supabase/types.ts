@@ -483,6 +483,33 @@ export type Database = {
         }
         Relationships: []
       }
+      pix_recovery_exports: {
+        Row: {
+          id: string
+          source_table: string
+          source_id: string
+          exported_at: string
+          exported_by: string | null
+          campaign_name: string | null
+        }
+        Insert: {
+          id?: string
+          source_table: string
+          source_id: string
+          exported_at?: string
+          exported_by?: string | null
+          campaign_name?: string | null
+        }
+        Update: {
+          id?: string
+          source_table?: string
+          source_id?: string
+          exported_at?: string
+          exported_by?: string | null
+          campaign_name?: string | null
+        }
+        Relationships: []
+      }
       purchases: {
         Row: {
           id: string
@@ -1657,6 +1684,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      mark_pix_recovery_exported: {
+        Args: {
+          p_ids: string[]
+          p_source_tables: string[]
+          p_campaign_name?: string
+        }
+        Returns: number
+      }
       advance_journey_to_next_day: {
         Args: {
           p_user_id: string
