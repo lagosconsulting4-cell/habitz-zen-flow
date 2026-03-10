@@ -38,9 +38,9 @@ const PROPOSTAS: Record<string, string> = {
 
 const variants = {
     hidden: { opacity: 0, y: 16 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.38, ease: "easeOut" } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.38, ease: "easeOut" as const } },
     exit: { opacity: 0, y: -12, transition: { duration: 0.2 } }
-};
+} as const;
 
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 
@@ -213,7 +213,7 @@ export default function Reembolsos() {
                                                 placeholder="seu@email.com"
                                                 value={identificacao.email}
                                                 onChange={e => setIdentificacao({ ...identificacao, email: e.target.value })}
-                                                className="border-0 border-b-2 border-gray-200 pb-2 pt-1 text-[15px] placeholder:text-gray-300 focus:border-black focus:ring-0 outline-none transition-colors bg-transparent"
+                                                className="border-0 border-b-2 border-gray-200 pb-2 pt-1 text-[15px] text-gray-900 placeholder:text-gray-300 focus:border-black focus:ring-0 outline-none transition-colors bg-white"
                                             />
                                         </div>
 
@@ -273,7 +273,7 @@ export default function Reembolsos() {
                                                                 value={outroMotivo}
                                                                 onChange={e => setOutroMotivo(e.target.value)}
                                                                 placeholder="Descreva brevemente..."
-                                                                className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-[14px] placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all"
+                                                                className="w-full bg-white border border-gray-200 rounded-lg px-3.5 py-2.5 text-[14px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all"
                                                             />
                                                         </div>
                                                     )}
@@ -309,7 +309,7 @@ export default function Reembolsos() {
 
                                     {/* Box da proposta */}
                                     <div
-                                        className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-5 text-[15px] text-gray-800 leading-relaxed"
+                                        className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 text-[15px] text-gray-900 leading-relaxed"
                                         dangerouslySetInnerHTML={{ __html: PROPOSTAS[currentMotivoId] || PROPOSTAS['outro'] }}
                                     />
 
@@ -320,7 +320,7 @@ export default function Reembolsos() {
                                             value={subRespostas[currentMotivoId] || ''}
                                             onChange={e => setSubRespostas(prev => ({ ...prev, [currentMotivoId]: e.target.value }))}
                                             placeholder="Escreva aqui..."
-                                            className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-[14.5px] placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all min-h-[120px] resize-y"
+                                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-[14.5px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all min-h-[120px] resize-y"
                                         />
                                     </div>
 
@@ -350,7 +350,7 @@ export default function Reembolsos() {
                                             onChange={e => setJustificativa(e.target.value)}
                                             onPaste={handlePaste}
                                             placeholder="Escreva aqui..."
-                                            className="w-full border border-gray-200 rounded-xl px-4 py-4 text-[14.5px] placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[200px] resize-none leading-relaxed pb-8"
+                                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-4 text-[14.5px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[200px] resize-none leading-relaxed pb-8"
                                         />
                                         <span className={`absolute bottom-3 right-4 text-xs font-bold ${justificativa.length >= 250 ? 'text-green-600' : 'text-red-400'}`}>
                                             {justificativa.length} / 250
