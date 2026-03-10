@@ -4,22 +4,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldAlert, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 const MOTIVOS_APP = [
-    { id: "whatsapp", label: "Dificuldades para conectar meu WhatsApp ou gerar o QR Code." },
-    { id: "ia", label: "Não consegui configurar a Inteligência Artificial (Foquinha)." },
-    { id: "campanhas", label: "Criação de campanhas/atendimentos no Bora pareceu complexa." },
-    { id: "bugs", label: "O aplicativo apresentou instabilidades, lentidão ou travou." },
-    { id: "lead", label: "Achei que o app venderia sozinho (sem eu captar leads)." },
-    { id: "tempo", label: "Falta de tempo, imprevistos financeiros ou peso na rotina." }
+    { id: "foq_teste", label: "A Foquinha fica mandando mensagens estranhas de 'Modo Teste'." },
+    { id: "foq_lembrete", label: "A Foquinha não tem organizado bem meus compromissos/lembretes." },
+    { id: "bora_appstore", label: "O Bora não está na App Store/Play Store (Tive que usar no navegador)." },
+    { id: "bora_notificacao", label: "Não recebo notificações das minhas rotinas no Bora." },
+    { id: "bora_rotina", label: "O Bora gerou uma rotina que não condiz exatamente com a minha dor real." },
+    { id: "tempo", label: "Falta de tempo geral na rotina ou imprevistos financeiros." }
 ];
 
 const PERGUNTAS_FOLLOWUP: Record<string, string> = {
-    "whatsapp": "Entendemos que integrações podem ser complicadas no início. Você chegou a acionar o suporte técnico da Lumen para te auxiliar nessa conexão?",
-    "ia": "A IA requer um treinamento inicial para absorver a personalidade correta. O que exatamente você achou mais confuso ao configurar a inteligência?",
-    "campanhas": "Sabemos que fluxos de vendas podem assustar no começo. Qual detalhe da interface do Bora ou tutorial mais faltou para você desenrolar o uso?",
-    "bugs": "Poxa, sentimos muito pela frustração! Pode nos descrever detalhadamente (e qual modelo de celular usava) onde a ferramenta mais travou?",
-    "lead": "Nossos apps automatizam o atendimento como mágica, mas você ainda precisava escalar tráfego. Você sentiu falta de aulas nossas de tráfego básico?",
-    "tempo": "Entendemos a sobrecarga da rotina. Você precisou paralisar agora, mas sob quais circunstâncias cogitaria usar ferramentas da Lumen no futuro?",
-    "outro": "Poderia nos dar um pouco mais de contexto técnico ou estratégico sobre por que o app escolhido não atendeu às suas expectativas?"
+    "foq_teste": "Poxa, pedimos sinceras desculpas! O WhatsApp atualizou as políticas internas que afetou temporariamente o nosso construtor. A equipe de T.I já resolveu esse bug do modo teste. Sabendo que agora ela voltou a ser a assistente perfeita, você toparia reativá-la?",
+    "foq_lembrete": "Qual foi a maior confusão dela? Como nossa I.A aprende com o seu jeito de falar, é provável que precisássemos de apenas mais uns 3 dias para a Foquinha se adaptar perfeitamente a você. Saber disso muda sua decisão de partir?",
+    "bora_appstore": "Entendemos perfeitamente essa frustração de usar como 'App de Navegador' (PWA). A boa notícia: estamos em fase avançada de aprovação para lançar nas Lojas Nativas. Se pudesse testar a versão oficial da loja em breve, você reconsideraria cancelar?",
+    "bora_notificacao": "As notificações dependem um pouco das configurações do navegador Safari/Chrome em PWA. Uma vez lançado nas lojas em algumas semanas, os Pushs nativos vão saltar na sua tela. Isso ajudaria você a manter o foco?",
+    "bora_rotina": "O maior diferencial do Bora é o mapeamento hiperpersonalizado de dores. Se a nossa equipe te ajudasse a resetar o mapeamento e regerar uma trilha cirurgicamente focada no que você quer curar hoje, faria sentido dar uma segunda chance?",
+    "tempo": "Sabemos que a vida real atropela nossa organização. O Bora e a Foquinha existem justamente para 'arrumar a casa' e o tempo. Se você tentasse aplicar nem que seja 10% da rotina diária no Bora amanhã, você manteria sua assinatura?",
+    "outro": "Entendemos que algo grave quebrou sua expectativa. Sentimos muito, e a sua sinceridade agora é ouro. Pode nos dizer detalhadamente o que deveríamos ter feito de diferente para você ficar?"
 };
 
 export default function Reembolsos() {
