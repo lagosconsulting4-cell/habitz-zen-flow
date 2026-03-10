@@ -214,7 +214,7 @@ const Progress = () => {
                 </div>
 
                 {/* Stats Row */}
-                <div className="grid grid-cols-4 gap-4 mt-6 pt-4 border-t border-white/10">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 mt-6 pt-4 border-t border-white/10">
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <Zap className={cn("w-4 h-4", tierColor.text)} />

@@ -115,7 +115,7 @@ const DashboardHabitCardComponent = ({
         // Layout circular puro - sem fundo retangular (estilo Streaks)
         "bg-transparent",
         "text-foreground",
-        "focus-visible:outline-none focus-visible:ring-0",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
         "transition-all duration-200",
         className
       )}

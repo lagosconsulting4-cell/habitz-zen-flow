@@ -715,7 +715,9 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             <button
               key={cat.id}
               onClick={() => handleSelectCategory(cat)}
-              className="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 active:scale-95"
+              aria-label={cat.label}
+              aria-pressed={isActive}
+              className="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
               style={{
                 backgroundColor: isActive ? themeColors.categoryPill.activeBg : themeColors.categoryPill.inactiveBg,
                 border: isActive ? `2px solid ${themeColors.categoryPill.activeBg}` : "2px solid transparent",
@@ -1060,8 +1062,9 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
               <button
                 key={period.id}
                 type="button"
+                aria-pressed={selectedPeriod === period.id}
                 onClick={() => setSelectedPeriod(period.id)}
-                className={`flex flex-col items-center gap-1 rounded-xl py-3 text-center transition-all duration-200 ${
+                className={`flex flex-col items-center gap-1 rounded-xl py-3 text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
                   selectedPeriod === period.id
                     ? themeColors.periodIcon.selectedBg
                     : `bg-transparent ${themeColors.periodIcon.unselectedText}`
@@ -1132,11 +1135,17 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         <button
           onClick={() => setStep("confirm")}
           disabled={!habitName.trim()}
-          className="h-14 w-full rounded-xl text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="h-14 w-full rounded-xl text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100"
           style={{
-            backgroundColor: isDarkMode ? UNIFIED_COLOR : "#FFFFFF",
-            color: isDarkMode ? "#000000" : "#65A30D",
-            boxShadow: isDarkMode ? "0 4px 24px rgba(163, 230, 53, 0.3)" : "0 4px 24px rgba(255, 255, 255, 0.3)",
+            backgroundColor: !habitName.trim()
+              ? (isDarkMode ? 'rgba(163, 230, 53, 0.3)' : '#E2E8F0')
+              : (isDarkMode ? UNIFIED_COLOR : '#FFFFFF'),
+            color: !habitName.trim()
+              ? (isDarkMode ? 'rgba(0, 0, 0, 0.5)' : '#94A3B8')
+              : (isDarkMode ? '#000000' : '#65A30D'),
+            boxShadow: !habitName.trim()
+              ? 'none'
+              : (isDarkMode ? '0 4px 24px rgba(163, 230, 53, 0.3)' : '0 4px 24px rgba(255, 255, 255, 0.3)'),
           }}
         >
           CONTINUAR

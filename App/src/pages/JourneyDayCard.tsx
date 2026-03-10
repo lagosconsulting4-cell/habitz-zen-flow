@@ -544,7 +544,7 @@ const JourneyDayCard = () => {
   return (
     <div className="pb-navbar">
       {/* Top bar */}
-      <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+      <div className="px-4 pb-2 flex items-center justify-between" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}>
         <button
           onClick={() => navigate(`/journeys/${slug}`)}
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"

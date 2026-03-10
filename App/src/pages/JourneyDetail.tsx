@@ -51,8 +51,9 @@ const JourneyDetail = () => {
     <div className="pb-navbar">
       {/* Header with atmospheric gradient */}
       <div
-        className="px-4 pt-4 pb-6 space-y-4 relative overflow-hidden"
+        className="px-4 pb-6 space-y-4 relative overflow-hidden"
         style={{
+          paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))',
           background: `linear-gradient(180deg, ${theme.color}0D 0%, transparent 100%)`,
         }}
       >

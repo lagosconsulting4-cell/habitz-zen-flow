@@ -256,12 +256,13 @@ const Calendar = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 transition-colors duration-300">
+    <div className="min-h-screen bg-background pb-navbar transition-colors duration-300">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="container mx-auto px-4 py-6 max-w-4xl"
+        className="container mx-auto px-4 pb-6 max-w-4xl"
+        style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
         <div className="flex items-center justify-between mb-6">
           <div>

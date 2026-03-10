@@ -240,7 +240,7 @@ const JourneyHub = () => {
   }
 
   return (
-    <div className="px-4 pt-6 pb-navbar space-y-6">
+    <div className="px-4 pb-navbar space-y-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}>
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Jornadas</h1>

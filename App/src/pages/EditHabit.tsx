@@ -463,13 +463,15 @@ const EditHabit = () => {
         <Label className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
           CATEGORIA
         </Label>
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Categoria">
           {categories.map((cat) => (
             <button
               key={cat.id}
               type="button"
+              role="radio"
+              aria-checked={selectedCategory === cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 ${
+              className={`rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
                 selectedCategory === cat.id
                   ? themeColors.buttonActive
                   : themeColors.buttonInactive
@@ -486,13 +488,15 @@ const EditHabit = () => {
         <Label className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
           PERÍODO DO DIA
         </Label>
-        <div className="mt-2 grid grid-cols-3 gap-2">
+        <div className="mt-2 grid grid-cols-3 gap-2" role="radiogroup" aria-label="Período do dia">
           {periods.map((period) => (
             <button
               key={period.id}
               type="button"
+              role="radio"
+              aria-checked={selectedPeriod === period.id}
               onClick={() => setSelectedPeriod(period.id)}
-              className={`rounded-xl py-3 text-sm font-bold transition-all duration-200 ${
+              className={`rounded-xl py-3 text-sm font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
                 selectedPeriod === period.id
                   ? themeColors.buttonActive
                   : themeColors.buttonInactive
@@ -656,6 +660,7 @@ const EditHabit = () => {
                     type="time"
                     value={reminderTime}
                     onChange={(e) => setReminderTime(e.target.value)}
+                    aria-label="Horário do lembrete"
                     className={`mt-2 h-11 w-full rounded-lg px-3 ${themeColors.input}`}
                   />
                 </div>

@@ -567,8 +567,8 @@ serve(async (req) => {
           JSON.stringify(event, null, 2)
         );
 
-        // Only process Pix invoices
-        if (paymentMethod !== "pix") {
+        // Only process Pix invoices (case-insensitive)
+        if (paymentMethod?.toLowerCase() !== "pix") {
           console.log(
             `[hubla-webhook] ℹ️ invoice.created paymentMethod=${paymentMethod}, skipping (not pix)`
           );
