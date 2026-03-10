@@ -56,7 +56,7 @@ export default function Reembolsos() {
     const [motivosSelecionados, setMotivosSelecionados] = useState<string[]>([]);
     const [outroMotivo, setOutroMotivo] = useState('');
     const [followUpIndex, setFollowUpIndex] = useState(0);
-    const [subRespostas, setSubRespostas] = useState<Record<string, string>>({});
+    const [ficou, setFicou] = useState(false);
     const [justificativa, setJustificativa] = useState('');
     const [checks, setChecks] = useState({ c1: false, c2: false, c3: false });
 
@@ -67,7 +67,6 @@ export default function Reembolsos() {
     const step2Valid = identificacao.email.includes('@') && identificacao.produto !== '';
     const step3Valid = motivosSelecionados.length > 0 && (!motivosSelecionados.includes('outro') || outroMotivo.trim().length >= 3);
     const currentMotivoId = motivosSelecionados[followUpIndex];
-    const subRespostaAtualValid = currentMotivoId && (subRespostas[currentMotivoId]?.trim().length ?? 0) >= 5;
     const justificativaValid = justificativa.length >= 250;
     const checksValid = checks.c1 && checks.c2 && checks.c3;
 
@@ -81,6 +80,11 @@ export default function Reembolsos() {
         } else {
             goNext();
         }
+    };
+
+    const handleFicou = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setFicou(true);
     };
 
     const toggleMotivo = (id: string) => {
@@ -313,24 +317,35 @@ export default function Reembolsos() {
                                         dangerouslySetInnerHTML={{ __html: PROPOSTAS[currentMotivoId] || PROPOSTAS['outro'] }}
                                     />
 
-                                    {/* Resposta */}
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-sm font-semibold text-gray-700">O que você acha dessa proposta?</label>
-                                        <textarea
-                                            value={subRespostas[currentMotivoId] || ''}
-                                            onChange={e => setSubRespostas(prev => ({ ...prev, [currentMotivoId]: e.target.value }))}
-                                            placeholder="Escreva aqui..."
-                                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-[14.5px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all min-h-[120px] resize-y"
-                                        />
+                                    {/* Botões de decisão */}
+                                    <div className="flex flex-col gap-3">
+                                        <button
+                                            onClick={handleFicou}
+                                            className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all"
+                                        >
+                                            Quero ficar <CheckCircle2 size={17} />
+                                        </button>
+                                        <button
+                                            onClick={handleNextFollowUp}
+                                            className="w-full py-4 rounded-xl border-2 border-gray-100 text-gray-500 font-medium hover:border-gray-200 transition-all"
+                                        >
+                                            {followUpIndex < motivosSelecionados.length - 1 ? 'Ver próxima proposta' : 'Seguir com o cancelamento'}
+                                        </button>
                                     </div>
+                                </motion.div>
+                            )}
 
-                                    <button
-                                        disabled={!subRespostaAtualValid}
-                                        onClick={handleNextFollowUp}
-                                        className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                                    >
-                                        {followUpIndex < motivosSelecionados.length - 1 ? 'Ver próxima proposta' : 'Entendi, seguir com o cancelamento'} <ArrowRight size={17} />
-                                    </button>
+                            {/* ── STEP 4 FICOU: OBRIGADO POR CONFIAR ── */}
+                            {step === 4 && ficou && (
+                                <motion.div key="s4-ficou" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col items-center text-center gap-5 py-10">
+                                    <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center">
+                                        <CheckCircle2 size={34} className="text-indigo-500" />
+                                    </div>
+                                    <h2 className="text-2xl font-semibold tracking-tight">Obrigado por confiar na gente.</h2>
+                                    <p className="text-gray-500 text-[15px] leading-relaxed max-w-sm">
+                                        Estamos aqui para te ajudar. Qualquer dúvida, fale com o nosso suporte.
+                                    </p>
+                                    <p className="text-xs text-gray-400 font-medium tracking-widest uppercase mt-4">Lumen Apps · Até já.</p>
                                 </motion.div>
                             )}
 
