@@ -13,13 +13,13 @@ const MOTIVOS_APP = [
 ];
 
 const PERGUNTAS_FOLLOWUP: Record<string, string> = {
-    "foq_teste": "Poxa, pedimos sinceras desculpas! O WhatsApp atualizou as políticas internas que afetou temporariamente o nosso construtor. A equipe de T.I já resolveu esse bug do modo teste. Sabendo que agora ela voltou a ser a assistente perfeita, você toparia reativá-la?",
-    "foq_lembrete": "Qual foi a maior confusão dela? Como nossa I.A aprende com o seu jeito de falar, é provável que precisássemos de apenas mais uns 3 dias para a Foquinha se adaptar perfeitamente a você. Saber disso muda sua decisão de partir?",
-    "bora_appstore": "Entendemos perfeitamente essa frustração de usar como 'App de Navegador' (PWA). A boa notícia: estamos em fase avançada de aprovação para lançar nas Lojas Nativas. Se pudesse testar a versão oficial da loja em breve, você reconsideraria cancelar?",
-    "bora_notificacao": "As notificações dependem um pouco das configurações do navegador Safari/Chrome em PWA. Uma vez lançado nas lojas em algumas semanas, os Pushs nativos vão saltar na sua tela. Isso ajudaria você a manter o foco?",
-    "bora_rotina": "O maior diferencial do Bora é o mapeamento hiperpersonalizado de dores. Se a nossa equipe te ajudasse a resetar o mapeamento e regerar uma trilha cirurgicamente focada no que você quer curar hoje, faria sentido dar uma segunda chance?",
-    "tempo": "Sabemos que a vida real atropela nossa organização. O Bora e a Foquinha existem justamente para 'arrumar a casa' e o tempo. Se você tentasse aplicar nem que seja 10% da rotina diária no Bora amanhã, você manteria sua assinatura?",
-    "outro": "Entendemos que algo grave quebrou sua expectativa. Sentimos muito, e a sua sinceridade agora é ouro. Pode nos dizer detalhadamente o que deveríamos ter feito de diferente para você ficar?"
+    "foq_teste": "Poxa, pedimos sinceras desculpas! O WhatsApp atualizou as políticas internas que afetou temporariamente o nosso construtor. A equipe de T.I já resolveu esse bug do modo teste. Sabendo que agora ela voltou a ser a assistente perfeita, <span class=\"font-bold text-indigo-600\">você toparia reativá-la?</span>",
+    "foq_lembrete": "Qual foi a maior confusão dela? Como nossa I.A aprende com o seu jeito de falar, é provável que precisássemos de apenas mais uns 3 dias para a Foquinha se adaptar perfeitamente a você. <span class=\"font-bold text-indigo-600\">Saber disso muda sua decisão de partir?</span>",
+    "bora_appstore": "Entendemos perfeitamente essa frustração de usar como 'App de Navegador' (PWA). A boa notícia: estamos em fase avançada de aprovação para lançar nas Lojas Nativas. <span class=\"font-bold text-indigo-600\">Se pudesse testar a versão oficial da loja em breve, você reconsideraria cancelar?</span>",
+    "bora_notificacao": "As notificações dependem um pouco das configurações do navegador Safari/Chrome em PWA. Uma vez lançado nas lojas em algumas semanas, os Pushs nativos vão saltar na sua tela. <span class=\"font-bold text-indigo-600\">Isso ajudaria você a manter o foco?</span>",
+    "bora_rotina": "O maior diferencial do Bora é o mapeamento hiperpersonalizado de dores. <span class=\"font-bold text-indigo-600\">Se a nossa equipe te ajudasse a resetar o mapeamento e regerar uma trilha cirurgicamente focada no que você quer curar hoje, faria sentido dar uma segunda chance?</span>",
+    "tempo": "Sabemos que a vida real atropela nossa organização. O Bora e a Foquinha existem justamente para 'arrumar a casa' e o tempo. <span class=\"font-bold text-indigo-600\">Se você tentasse aplicar nem que seja 10% da rotina diária no Bora amanhã, você manteria sua assinatura?</span>",
+    "outro": "Entendemos que algo grave quebrou sua expectativa. Sentimos muito, e a sua sinceridade agora é ouro. <span class=\"font-bold text-indigo-600\">Pode nos dizer detalhadamente o que deveríamos ter feito de diferente para você ficar?</span>"
 };
 
 export default function Reembolsos() {
@@ -165,11 +165,11 @@ export default function Reembolsos() {
 
                                     <div className="space-y-4 text-gray-600 leading-relaxed text-[15px]">
                                         <p>
-                                            A Lumen investe pesado em tecnologia de automação inteligente (Bora/Foquinha). Entendemos que ferramentas robustas exigem alinhamento de expectativas. Ao prosseguir com a declaração de estorno, nós garantimos a devolução seguindo as diretrizes legais da plataforma de pagamento.
+                                            Valorizamos muito o seu progresso e a sua transparência, e processaremos seu reembolso sem burocracias seguindo as diretrizes legais da plataforma de pagamento.
                                         </p>
                                         <div className="p-4 bg-red-50 rounded-xl border border-red-100">
                                             <p>
-                                                Nosso sistema submete todos os relatórios abaixo à uma auditoria manual cruzada com os dados de uso do App no seu e-mail. Gostaríamos de pontuar que, em casos identificados de <strong>abuso das políticas, fraude ou má-fé pós-utilização intensiva</strong>, nos reservamos o direito contratual de suspender permanentemente esse CPF/E-mail do ecossistema de software da Lumen.
+                                                Gostaríamos apenas de lembrar que, para proteger nossa comunidade, <strong>somente em casos de má-fé comprovada</strong> (ex: usar intensivamente as ferramentas/integrações para gerar lucro e cancelar na sequência) o perfil perderá acesso futuro ao nosso ecossistema e suporte.
                                             </p>
                                         </div>
                                     </div>
@@ -179,7 +179,7 @@ export default function Reembolsos() {
                                             <input type="checkbox" className="w-5 h-5 accent-black cursor-pointer rounded" checked={termoCiencia} onChange={(e) => setTermoCiencia(e.target.checked)} />
                                         </div>
                                         <span className="text-gray-700 font-medium leading-snug">
-                                            Compreendo as políticas de má-fé e de estorno da plataforma, e desejo prosseguir com a justificativa técnica.
+                                            Compreendo as políticas de proteção da plataforma, e desejo prosseguir com meu pedido de estorno.
                                         </span>
                                     </label>
 
@@ -194,7 +194,7 @@ export default function Reembolsos() {
                                 <motion.div key="step2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-8">
                                     <div>
                                         <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Identificação</h2>
-                                        <p className="text-gray-500">Vamos localizar sua licença do aplicativo.</p>
+                                        <p className="text-gray-500">Vamos localizar o seu acesso nos nossos sistemas.</p>
                                     </div>
 
                                     <div className="flex flex-col gap-8">
@@ -222,7 +222,7 @@ export default function Reembolsos() {
                                         </div>
                                     </div>
 
-                                    <button disabled={!isStep2Valid} onClick={nextStep} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black">
+                                    <button disabled={!isStep2Valid} onClick={nextStep} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black disabled:bg-gray-200 disabled:text-gray-400">
                                         Continuar <ArrowRight size={18} />
                                     </button>
                                 </motion.div>
@@ -233,7 +233,7 @@ export default function Reembolsos() {
                                 <motion.div key="step3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
                                     <div>
                                         <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Por que a ferramenta falhou para você?</h2>
-                                        <p className="text-gray-500 leading-relaxed text-[15px]">Nós otimizamos o software semanalmente. Selecione a(s) maior(es) pedra(s) no sapato que impediram sua escala.</p>
+                                        <p className="text-gray-500 leading-relaxed text-[15px]">Entendemos que adotar novos hábitos ou ferramentas pode ser frustrante. Qual foi o maior obstáculo no seu caminho?</p>
                                     </div>
 
                                     <div className="flex flex-col gap-3 mt-2">
@@ -243,7 +243,7 @@ export default function Reembolsos() {
                                                 <div
                                                     key={m.id}
                                                     onClick={() => toggleMotivo(m.id)}
-                                                    className={`p-4 rounded-xl cursor-pointer border-2 transition-all flex items-center gap-4 ${isSelected ? 'border-black bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.04)]' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                                                    className={`p-4 rounded-xl cursor-pointer border-2 transition-all flex items-center gap-4 ${isSelected ? 'border-black bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-2 ring-black/5' : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 bg-white'}`}
                                                 >
                                                     <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-black border-black' : 'border-gray-300'}`}>
                                                         {isSelected && <CheckCircle2 size={14} className="text-white" />}
@@ -255,7 +255,7 @@ export default function Reembolsos() {
 
                                         {/* "Outro" Custom Option */}
                                         <div
-                                            className={`p-4 rounded-xl border-2 transition-all flex flex-col gap-4 ${motivosSelecionados.includes('outro') ? 'border-black bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.04)]' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                                            className={`p-4 rounded-xl border-2 transition-all flex flex-col gap-4 ${motivosSelecionados.includes('outro') ? 'border-black bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-2 ring-black/5' : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 bg-white'}`}
                                         >
                                             <div className="flex items-center gap-4 cursor-pointer" onClick={() => toggleMotivo('outro')}>
                                                 <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${motivosSelecionados.includes('outro') ? 'bg-black border-black' : 'border-gray-300'}`}>
@@ -270,7 +270,7 @@ export default function Reembolsos() {
                                                         type="text"
                                                         value={outroMotivo}
                                                         onChange={(e) => setOutroMotivo(e.target.value)}
-                                                        placeholder="Sintetize em 3 palavras no máximo..."
+                                                        placeholder="Sintetize em poucas palavras..."
                                                         className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-[14px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all shadow-sm"
                                                     />
                                                 </div>
@@ -278,7 +278,7 @@ export default function Reembolsos() {
                                         </div>
                                     </div>
 
-                                    <button disabled={!isStep3Valid} onClick={nextStep} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black">
+                                    <button disabled={!isStep3Valid} onClick={nextStep} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black disabled:bg-gray-200 disabled:text-gray-400">
                                         Continuar <ArrowRight size={18} />
                                     </button>
                                 </motion.div>
@@ -291,26 +291,27 @@ export default function Reembolsos() {
                                         <div className="flex justify-between items-center mb-2">
                                             <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Um passo atrás...</h2>
                                             {motivosSelecionados.length > 1 && (
-                                                <span className="text-xs font-bold text-gray-400">Pergunta {currentFollowUpIndex + 1} de {motivosSelecionados.length}</span>
+                                                <span className="text-xs font-bold text-indigo-400">Pergunta {currentFollowUpIndex + 1} de {motivosSelecionados.length}</span>
                                             )}
                                         </div>
                                         <p className="text-gray-500 leading-relaxed text-[15px]">
-                                            Precisamos isolar a fricção no seu caso para evoluirmos na Engenharia de Software e te ampararmos corretamente:
+                                            Antes de seguirmos, a sua opinião franca é ouro para nós! Sentimos muito que não tenha dado o "match" perfeito ainda:
                                         </p>
                                     </div>
 
-                                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 text-[15px] leading-relaxed font-medium text-gray-800 shadow-inner">
-                                        {PERGUNTAS_FOLLOWUP[currentMotivoId] || PERGUNTAS_FOLLOWUP['outro']}
-                                    </div>
+                                    <div
+                                        className="bg-indigo-50/60 p-6 rounded-xl border border-indigo-100/80 text-[15.5px] leading-relaxed text-gray-800 shadow-sm"
+                                        dangerouslySetInnerHTML={{ __html: PERGUNTAS_FOLLOWUP[currentMotivoId] || PERGUNTAS_FOLLOWUP['outro'] }}
+                                    />
 
                                     <textarea
                                         value={subRespostas[currentMotivoId] || ''}
                                         onChange={(e) => setSubRespostas(prev => ({ ...prev, [currentMotivoId]: e.target.value }))}
                                         placeholder="Sua resposta franca aqui. Detalhes são sempre bem-vindos..."
-                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-4 text-[15px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[140px] resize-y shadow-sm"
+                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-4 text-[15px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all min-h-[140px] resize-y shadow-sm"
                                     />
 
-                                    <button disabled={!isSubRespostaValid} onClick={nextFollowUp} className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black">
+                                    <button disabled={!isSubRespostaValid} onClick={nextFollowUp} className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black disabled:bg-gray-200 disabled:text-gray-400">
                                         {currentFollowUpIndex < motivosSelecionados.length - 1 ? 'Próxima Questão' : 'Continuar'} <ArrowRight size={18} />
                                     </button>
                                 </motion.div>
@@ -322,7 +323,7 @@ export default function Reembolsos() {
                                     <div>
                                         <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Ato Final</h2>
                                         <p className="text-gray-500 leading-relaxed text-[15px]">
-                                            Obrigado por nos situar. Por fim, explique detalhadamente a soma de fatores que gerou sua decisão de arquivar o software.
+                                            Obrigado por nos situar. Por fim, explique detalhadamente a soma de fatores que gerou sua decisão.
                                         </p>
                                     </div>
 
@@ -331,7 +332,7 @@ export default function Reembolsos() {
                                             value={justificativa}
                                             onChange={(e) => setJustificativa(e.target.value)}
                                             onPaste={handlePaste}
-                                            placeholder="Detalhe todo o seu processo, sua operação atual, os gargalos e o motivo real por trás dessa solicitação. A área de T.I revisará pessoalmente (Mínimo de 250 letras)..."
+                                            placeholder="Detalhe todo o seu processo, sua operação atual e o motivo real por trás dessa solicitação. Nossa equipe de qualidade vai ler cada linha com muita atenção (Mínimo 250 letras)..."
                                             className="w-full bg-white border border-gray-200 rounded-xl px-5 py-5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[220px] pb-10 resize-none leading-relaxed shadow-sm"
                                         />
                                         <div className={`absolute bottom-4 right-5 text-xs font-bold px-2 py-1 rounded bg-gray-50 ${justificativa.length >= 250 ? 'text-green-600' : 'text-red-500'}`}>
@@ -339,7 +340,7 @@ export default function Reembolsos() {
                                         </div>
                                     </div>
 
-                                    <button disabled={!isJustificativaValid} onClick={nextStep} className="mt-2 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black">
+                                    <button disabled={!isJustificativaValid} onClick={nextStep} className="mt-2 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black disabled:bg-gray-200 disabled:text-gray-400">
                                         Avançar <ArrowRight size={18} />
                                     </button>
                                 </motion.div>
@@ -351,18 +352,17 @@ export default function Reembolsos() {
                                     <div>
                                         <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Assinatura de Retirada</h2>
                                         <p className="text-gray-500 leading-relaxed text-[15px]">
-                                            A equipe receberá seu laudo na mesa de auditoria. Para consumar o pedido na gateway, marque seu aval nos protocolos finais:
+                                            A equipe receberá seu laudo de imediato. Para consumar o pedido na gateway, confirme seu aval nas opções abaixo:
                                         </p>
                                     </div>
 
                                     <div className="flex flex-col gap-3">
                                         {[
                                             { key: 'c1', text: "Declaro que interrompi os testes com a plataforma, e não reterei qualquer ativo gerado por automações nossas na má-fé." },
-                                            { key: 'c2', text: "O prazo base de conferência dos logs da base de dados e de resposta da equipe é de até 48 horas úteis." },
-                                            { key: 'c3', text: "O estorno é processado e liquidado pela operadora do cartão/banco, e pode cair entre 1 a 2 faturas subsequentes (Cartão)." },
-                                            { key: 'c4', text: "Compreendo e aceito a política rigorosa de suspensão do meu cadastro, caso constatados abusos nesta solicitação." }
+                                            { key: 'c2', text: "Nossa equipe vai avaliar o seu diagnóstico com o maior cuidado possível, confirmando os dados, e responderá tudo em até 48 horas úteis." },
+                                            { key: 'c3', text: "O estorno é processado e liquidado pela operadora do cartão/banco, e pode cair entre 1 a 2 faturas subsequentes (Cartão)." }
                                         ].map((check) => (
-                                            <label key={check.key} className={`flex items-start gap-4 p-4 rounded-xl cursor-pointer border transition-colors ${finalChecks[check.key as keyof typeof finalChecks] ? 'border-gray-300 bg-gray-50' : 'border-transparent hover:bg-gray-50'}`}>
+                                            <label key={check.key} className={`flex items-start gap-4 p-4 rounded-xl cursor-pointer border transition-colors ${finalChecks[check.key as keyof typeof finalChecks] ? 'border-gray-300 bg-gray-50 ring-2 ring-black/5' : 'border-transparent hover:bg-gray-50'}`}>
                                                 <div className="mt-0.5 flex-shrink-0">
                                                     <input type="checkbox" className="w-5 h-5 accent-black cursor-pointer rounded" checked={finalChecks[check.key as keyof typeof finalChecks]} onChange={(e) => setFinalChecks(prev => ({ ...prev, [check.key]: e.target.checked }))} />
                                                 </div>
@@ -371,7 +371,7 @@ export default function Reembolsos() {
                                         ))}
                                     </div>
 
-                                    <button disabled={!isFinalValid || isSubmitting} onClick={submitAuditoria} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black relative overflow-hidden">
+                                    <button disabled={(!finalChecks.c1 || !finalChecks.c2 || !finalChecks.c3) || isSubmitting} onClick={submitAuditoria} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black disabled:bg-gray-200 disabled:text-gray-400 relative overflow-hidden">
                                         {isSubmitting ? (
                                             <div className="flex items-center gap-2">
                                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -395,10 +395,10 @@ export default function Reembolsos() {
 
                                     <div className="flex flex-col gap-4 text-gray-500 max-w-md mx-auto text-[15px] leading-relaxed">
                                         <p>
-                                            O seu formulário extenso de rescisão e depoimento técnico foram fixados no painel interno.
+                                            O seu formulário extenso de rescisão e depoimento foram fixados com sucesso.
                                         </p>
                                         <p>
-                                            Nossa área de T.I cruza os dados nos logs do seu e-mail de acesso. Confirmando a aderência aos termos, retornaremos um protocolo oficial (ou Pix imediato) via <strong>E-mail/WhatsApp</strong> dentro de 48 horas úteis.
+                                            Nossa área de qualidade confirmará os dados de uso. Cumprindo as políticas da plataforma, retornaremos um protocolo oficial (ou Pix imediato) via <strong>E-mail/WhatsApp</strong> dentro de 48 horas úteis.
                                         </p>
                                     </div>
 
