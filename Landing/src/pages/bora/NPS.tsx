@@ -108,9 +108,6 @@ export default function NPS() {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
-            <header className="bg-black text-white py-5 flex justify-center sticky top-0 z-10">
-                <span className="text-lg tracking-[0.25em] font-light">LUMEN APPS</span>
-            </header>
 
             <main className="flex-1 w-full max-w-xl mx-auto px-4 py-12 flex flex-col">
                 {step < 7 && (

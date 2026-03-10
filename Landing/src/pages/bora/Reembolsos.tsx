@@ -47,11 +47,8 @@ const variants = {
 export default function Reembolsos() {
     useEffect(() => { document.title = "Cancelamento — Lumen Apps"; }, []);
 
-    // Links de retorno ao app por produto
-    const APP_LINKS: Record<string, string> = {
-        Bora: 'https://www.habitz.life/app',
-        Foquinha: 'https://wa.me/5511911559587',
-    };
+
+
 
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,7 +70,7 @@ export default function Reembolsos() {
     const step2Valid = identificacao.email.includes('@') && identificacao.produto !== '';
     const step3Valid = motivosSelecionados.length > 0 && (!motivosSelecionados.includes('outro') || outroMotivo.trim().length >= 3);
     const currentMotivoId = motivosSelecionados[followUpIndex];
-    const justificativaValid = justificativa.length >= 250;
+    const justificativaValid = justificativa.length >= 100;
     const checksValid = checks.c1 && checks.c2 && checks.c3;
 
     // Navegação
@@ -139,10 +136,6 @@ export default function Reembolsos() {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
-            {/* Header */}
-            <header className="bg-black text-white py-5 flex justify-center items-center sticky top-0 z-10">
-                <span className="text-lg tracking-[0.25em] font-light">LUMEN APPS</span>
-            </header>
 
             <main className="flex-1 w-full max-w-xl mx-auto px-4 py-12 flex flex-col">
 
@@ -357,8 +350,8 @@ export default function Reembolsos() {
                                             placeholder="Escreva aqui..."
                                             className="w-full bg-white border border-gray-200 rounded-xl px-4 py-4 text-[14.5px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[200px] resize-none leading-relaxed pb-8"
                                         />
-                                        <span className={`absolute bottom-3 right-4 text-xs font-bold ${justificativa.length >= 250 ? 'text-green-600' : 'text-red-400'}`}>
-                                            {justificativa.length} / 250
+                                        <span className={`absolute bottom-3 right-4 text-xs font-bold ${justificativa.length >= 100 ? 'text-green-600' : 'text-red-400'}`}>
+                                            {justificativa.length} / 100
                                         </span>
                                     </div>
 
@@ -474,12 +467,20 @@ export default function Reembolsos() {
                             </div>
                             <div className="flex flex-col gap-3 w-full">
                                 <a
-                                    href={APP_LINKS[identificacao.produto] || '#'}
+                                    href={(() => {
+                                        const getLabel = (id: string) =>
+                                            id === 'outro'
+                                                ? outroMotivo || 'Outro'
+                                                : motivosDoProduct().find(m => m.id === id)?.label || id;
+                                        const motivos = motivosSelecionados.map(getLabel).join('; ');
+                                        const msg = `Olá! Quero continuar com o ${identificacao.produto || 'app'} 👋\n\nMotivo que me fez querer cancelar: ${motivos}\n\nPreciso de ajuda para resolver isso.`;
+                                        return `https://wa.me/5511993371766?text=${encodeURIComponent(msg)}`;
+                                    })()}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all"
                                 >
-                                    Retornar ao {identificacao.produto || 'app'}
+                                    Falar com o suporte
                                 </a>
                                 <button
                                     onClick={() => window.close()}
