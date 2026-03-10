@@ -45,7 +45,7 @@ const variants = {
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 
 export default function Reembolsos() {
-    useEffect(() => { document.title = "Cancelamento — Lumen"; }, []);
+    useEffect(() => { document.title = "Cancelamento — Lumen Apps"; }, []);
 
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -134,7 +134,7 @@ export default function Reembolsos() {
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
             {/* Header */}
             <header className="bg-black text-white py-5 flex justify-center items-center sticky top-0 z-10">
-                <span className="text-lg tracking-[0.25em] font-light">LUMEN</span>
+                <span className="text-lg tracking-[0.25em] font-light">LUMEN APPS</span>
             </header>
 
             <main className="flex-1 w-full max-w-xl mx-auto px-4 py-12 flex flex-col">
@@ -427,7 +427,7 @@ export default function Reembolsos() {
                                         <p>Se mudar de ideia antes disso, é só responder o e-mail.</p>
                                     </div>
 
-                                    <p className="text-xs text-gray-400 font-medium tracking-widest uppercase mt-4">Lumen · Obrigado pelo seu tempo.</p>
+                                    <p className="text-xs text-gray-400 font-medium tracking-widest uppercase mt-4">Lumen Apps · Obrigado pelo seu tempo.</p>
                                 </motion.div>
                             )}
 
@@ -436,7 +436,7 @@ export default function Reembolsos() {
                 </div>
 
                 <footer className="mt-8 text-center text-xs text-gray-400">
-                    &copy; {new Date().getFullYear()} Lumen Systems. Todos os direitos reservados.
+                    &copy; {new Date().getFullYear()} Lumen Apps. Todos os direitos reservados.
                 </footer>
             </main>
         </div>
