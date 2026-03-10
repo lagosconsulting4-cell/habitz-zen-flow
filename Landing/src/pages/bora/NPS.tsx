@@ -1,186 +1,125 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, ArrowRight, MessageSquareHeart, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ChevronRight } from 'lucide-react';
 
-// ─── MOTIVOS POR FAIXA ────────────────────────────────────────────────────────
+// ─── DADOS ───────────────────────────────────────────────────────────────────
 
-const MOTIVOS: Record<string, string[]> = {
-    detrator: [
-        "A ferramenta não entregou o que eu esperava.",
-        "Tive problemas técnicos que nunca foram resolvidos.",
-        "Não consegui criar hábitos ou rotinas com ela.",
-        "A promessa da divulgação era diferente da realidade.",
-        "Outro."
-    ],
-    neutro: [
-        "Faltou algum recurso que eu precisava.",
-        "Não consegui criar o hábito de usar no dia a dia.",
-        "Tive problemas técnicos pontuais.",
-        "Outro."
-    ],
-    promotor: [
-        "Mudou minha rotina e produtividade.",
-        "Interface simples e fácil de usar.",
-        "A personalização me surpreendeu.",
-        "O suporte foi rápido e atencioso.",
-        "Outro."
-    ]
+const MOTIVOS_BORA = [
+    { id: "rotina", label: "A rotina gerada não se encaixou no meu dia." },
+    { id: "notificacao", label: "Não recebia notificações para seguir a rotina." },
+    { id: "appstore", label: "Esperava um app nas lojas (App Store / Play Store)." },
+    { id: "financeiro", label: "Questões financeiras na época." },
+    { id: "outro", label: "Outro motivo." },
+];
+
+const MOTIVOS_FOQUINHA = [
+    { id: "teste", label: "Ficava mandando mensagens de 'Modo Teste'." },
+    { id: "lembretes", label: "Não organizou meus lembretes como eu esperava." },
+    { id: "aprendizado", label: "Demorou para aprender meu jeito de escrever." },
+    { id: "financeiro", label: "Questões financeiras na época." },
+    { id: "outro", label: "Outro motivo." },
+];
+
+const SOLUCOES: Record<string, Record<string, string>> = {
+    Bora: {
+        rotina: "Refizemos o mapeamento de dores do zero. A nova versão gera rotinas mais simples e muito mais aderentes ao dia a dia real.",
+        notificacao: "O app nativo do Bora está em aprovação final na App Store e Google Play. Notificações nativas resolvidas de vez.",
+        appstore: "Bora nativo nas lojas: processo de aprovação na App Store e Google Play em fase final. Em breve você instala de verdade.",
+        financeiro: "Entendemos. Por isso criamos uma condição especial para quem já foi cliente — por muito menos do que você pagava antes.",
+        outro: "Fizemos mudanças profundas no produto. Queremos que você veja por você mesmo antes de decidir.",
+    },
+    Foquinha: {
+        teste: "O bug do 'Modo Teste' foi causado por uma atualização da API do WhatsApp e já foi corrigido. A Foquinha está estável.",
+        lembretes: "Atualizamos o sistema de aprendizado. Ela agora se calibra ao seu estilo em menos de 24h de uso.",
+        aprendizado: "O modelo de calibração foi refinado. Ela aprende mais rápido e com menos ajustes manuais da sua parte.",
+        financeiro: "Entendemos. Por isso criamos uma condição especial para quem já foi cliente — por muito menos do que você pagava antes.",
+        outro: "Fizemos mudanças profundas no produto. Queremos que você veja por você mesmo antes de decidir.",
+    },
 };
 
-function getFaixa(nota: number): 'detrator' | 'neutro' | 'promotor' {
-    if (nota <= 6) return 'detrator';
-    if (nota <= 8) return 'neutro';
-    return 'promotor';
-}
-
-// ─── VALIDAÇÃO DA DOR (Mapeamento empático) ───────────────────────────────────
-
-const VALIDACOES: Record<string, string> = {
-    "A ferramenta não entregou o que eu esperava.": "Quando uma ferramenta não entrega o que prometeu, a frustração é completamente legítima. Não é exagero — é uma decepção real.",
-    "Tive problemas técnicos que nunca foram resolvidos.": "Pagar por algo que não funciona é uma das piores experiências como consumidor. Você merecia uma solução, não uma desculpa.",
-    "Não consegui criar hábitos ou rotinas com ela.": "Mudar hábitos é genuinamente difícil. Uma ferramenta que não te ajuda nessa transição é uma ferramenta que falhou — e não você.",
-    "A promessa da divulgação era diferente da realidade.": "Expectativa errada criada pela comunicação da nossa empresa é um erro nosso, não seu. Sentimos muito por isso.",
-    "Faltou algum recurso que eu precisava.": "Faz sentido. Uma ferramenta que não resolve o que você precisava não é a ferramenta certa — ainda.",
-    "Não consegui criar o hábito de usar no dia a dia.": "Engajamento é o maior desafio de qualquer app de hábitos. Se a ferramenta não facilitou esse engajamento, ela falhou.",
-    "Tive problemas técnicos pontuais.": "Até problemas pontuais geram desconfiança na ferramenta. É uma experiência que não deveria acontecer.",
-    "Outro.": "Não importa qual tenha sido o motivo: se não funcionou para você, isso é suficiente para justificar sua decisão."
+const CHECKOUTS: Record<string, { parcelas: string; link: string; descricao: string }> = {
+    Bora: { parcelas: "11x de R$ 5,14", link: "https://pay.hub.la/znOSHkuvQIMxAEe4QGeD", descricao: "App de rotinas personalizadas com IA" },
+    Foquinha: { parcelas: "10x de R$ 5,08", link: "https://pay.hub.la/BB8emccD9QrTfcUZOGpt", descricao: "Agenda inteligente no WhatsApp" },
 };
 
-// ─── OFERTAS DE WIN-BACK (por motivo + produto) ───────────────────────────────
+// ─── ANIMAÇÃO ─────────────────────────────────────────────────────────────────
 
-const OFERTAS: Record<string, Record<string, string>> = {
-    "A ferramenta não entregou o que eu esperava.": {
-        Bora: "Refinamos completamente o mapeamento de dores do Bora. Se você voltar, nossa equipe gera uma nova trilha pessoalmente — sem repetir o erro anterior.",
-        Foquinha: "A Foquinha passou por uma atualização significativa. Ela agora se adapta ao seu estilo em 24h. Se voltar, podemos recomeçar do zero com ela."
-    },
-    "Tive problemas técnicos que nunca foram resolvidos.": {
-        Bora: "Os bugs relatados na época foram corrigidos. Se você voltar, garantimos uma sessão de onboarding 1:1 com suporte técnico para garantir que tudo rode perfeitamente no seu dispositivo.",
-        Foquinha: "O bug do 'Modo Teste' que prejudicou muitos usuários foi corrigido. Se você voltar, garantimos 1 semana gratuita para testar a versão estável."
-    },
-    "Não consegui criar hábitos ou rotinas com ela.": {
-        Bora: "A responsabilidade de criar o engajamento é nossa, não sua. Se você voltar, resertamos seu mapeamento e geramos uma rotina cirurgicamente simples — 10 minutos por dia, sem sobrecarga.",
-        Foquinha: "Nossa equipe pode configurar a Foquinha com você, em tempo real, para que os lembretes se encaixem exatamente no que você já faz. Sem esforço extra."
-    },
-    "A promessa da divulgação era diferente da realidade.": {
-        Bora: "Estamos revisando toda a comunicação do Bora para alinhar a expectativa à realidade. Se nos disser o que você esperava, podemos te mostrar se isso já é possível hoje.",
-        Foquinha: "Queremos entender exatamente o que foi prometido e não entregue. Esse feedback vai direto para quem define a comunicação do produto."
-    },
-    "Faltou algum recurso que eu precisava.": {
-        Bora: "Novos recursos são lançados a cada sprint. Qual funcionalidade você precisava que não existia? Pode ser que ela já exista hoje ou esteja no roadmap dos próximos 30 dias.",
-        Foquinha: "A Foquinha tem integrações que nem sempre são comunicadas bem. Me diga o que você precisava — pode ser que já seja possível."
-    },
-    "Não consegui criar o hábito de usar no dia a dia.": {
-        Bora: "Podemos simplificar radicalmente a sua rotina no Bora — uma única ação por dia, no horário que você definir. Se isso fosse suficiente para começar, você daria uma segunda chance?",
-        Foquinha: "Podemos configurar apenas um lembrete diário com a Foquinha, com uma tarefa simples que você já faz. O engajamento cresce naturalmente a partir daí."
-    },
-    "Tive problemas técnicos pontuais.": {
-        Bora: "Corrigimos as instabilidades e melhoramos a performance geral do app. Se você voltar, nossa equipe acompanha os primeiros 7 dias para garantir que não haja nenhum problema.",
-        Foquinha: "A estabilidade da Foquinha melhorou muito nas últimas semanas. Se você voltar, monitoramos sua conta de perto nos primeiros dias."
-    },
-    "Outro.": {
-        Bora: "Mesmo sem saber exatamente o que aconteceu, queremos fazer diferente. Se você nos contar o que precisaria para considerar voltar, ouviremos com muita atenção.",
-        Foquinha: "Queremos entender o que precisaria mudar para você considerar voltar. Sua opinião tem peso real aqui."
-    }
-};
-
-function getValidacao(motivo: string): string {
-    return VALIDACOES[motivo] || VALIDACOES["Outro."];
-}
-
-function getOferta(motivo: string, produto: string): string {
-    const key = OFERTAS[motivo] ? motivo : "Outro.";
-    return OFERTAS[key][produto] || OFERTAS[key]['Bora'];
-}
-
-// ─── ANIMAÇÕES ────────────────────────────────────────────────────────────────
-
-const variants = {
-    hidden: { opacity: 0, y: 16 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.38, ease: "easeOut" as const } },
-    exit: { opacity: 0, y: -12, transition: { duration: 0.2 } }
+const v = {
+    hidden: { opacity: 0, y: 14 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" as const } },
+    exit: { opacity: 0, y: -10, transition: { duration: 0.18 } },
 } as const;
 
 // ─── COMPONENTE ───────────────────────────────────────────────────────────────
 
 export default function NPS() {
-    useEffect(() => { document.title = "Avalie sua Experiência — Lumen Apps"; }, []);
+    useEffect(() => { document.title = "Sua experiência — Lumen Apps"; }, []);
 
     const [step, setStep] = useState(1);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [aceitouOferta, setAceitouOferta] = useState<boolean | null>(null);
-
-    const [email, setEmail] = useState('');
     const [produto, setProduto] = useState('');
-    const [nota, setNota] = useState<number | null>(null);
-    const [motivo, setMotivo] = useState('');
-    const [outroMotivo, setOutroMotivo] = useState('');
-    const [respostaOferta, setRespostaOferta] = useState('');
+    const [email, setEmail] = useState('');
+    const [motivoId, setMotivoId] = useState('');
+    const [outroText, setOutroText] = useState('');
     const [comentario, setComentario] = useState('');
+    const [enviando, setEnviando] = useState(false);
 
-    const goNext = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); setStep(s => s + 1); };
+    const motivos = produto === 'Foquinha' ? MOTIVOS_FOQUINHA : MOTIVOS_BORA;
+    const motivoLabel = motivos.find(m => m.id === motivoId)?.label ?? outroText;
+    const solucao = produto ? (SOLUCOES[produto]?.[motivoId] ?? SOLUCOES[produto]?.outro) : '';
+    const checkout = produto ? CHECKOUTS[produto] : null;
 
-    const faixa = nota !== null ? getFaixa(nota) : null;
-    const isDetrator = faixa === 'detrator' || faixa === 'neutro';
-    const motivoFinal = motivo === 'Outro.' ? `Outro: ${outroMotivo}` : motivo;
+    const go = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); setStep(s => s + 1); };
 
     const step1Valid = produto !== '';
-    const step2Valid = nota !== null;
-    const step3Valid = motivo !== '' && (motivo !== 'Outro.' || outroMotivo.trim().length >= 3);
+    const step2Valid = motivoId !== '' && (motivoId !== 'outro' || outroText.trim().length >= 3);
 
-    // Passos dinâmicos:
-    // Detratores: 1 Intro → 2 Nota → 3 Motivo → 4 Validação+Oferta → 5 Resposta Oferta (se aceite) → 6 Comentário → 7 Sucesso
-    // Promotores: 1 Intro → 2 Nota → 3 Motivo → 4 Comentário → 5 Sucesso
-
-    const submit = async (skipComment = false) => {
-        setIsSubmitting(true);
+    const salvar = async (voltou: boolean) => {
+        setEnviando(true);
         try {
-            const { error } = await supabase.from('nps_feedback').insert({
+            await supabase.from('nps_feedback').insert({
                 email: email || null,
                 produto,
-                nota: nota!,
-                motivo: motivoFinal,
-                comentario: [
-                    aceitouOferta === true ? `[Aceitou oferta] ${respostaOferta}` : aceitouOferta === false ? '[Recusou oferta]' : null,
-                    skipComment ? null : comentario
-                ].filter(Boolean).join('\n\n') || null
+                nota: null,
+                motivo: motivoId === 'outro' ? `Outro: ${outroText}` : motivoLabel,
+                comentario: comentario || null,
             });
-            if (error) { console.error(error); setIsSubmitting(false); return; }
-            // Vai para o step de sucesso
-            if (isDetrator) {
-                setStep(7);
-            } else {
-                setStep(5);
-            }
-        } catch (e) {
-            console.error(e);
-            setIsSubmitting(false);
-        }
+        } catch (e) { console.error(e); }
+        setEnviando(false);
+        if (!voltou) setStep(7); // obrigado
     };
 
-    const totalSteps = isDetrator ? 5 : 3;
-    const currentProgressStep = Math.min(step, totalSteps);
-    const progress = Math.round((currentProgressStep / totalSteps) * 100);
+    const irCheckout = () => {
+        // Salva no Supabase e abre o checkout
+        supabase.from('nps_feedback').insert({
+            email: email || null,
+            produto,
+            nota: null,
+            motivo: motivoId === 'outro' ? `Outro: ${outroText}` : motivoLabel,
+            comentario: 'ACEITOU OFERTA',
+        }).then(() => {
+            window.open(checkout!.link, '_blank');
+        });
+    };
 
-    const successStep = isDetrator ? 7 : 5;
+    // barra de progresso: steps 1-5 são os "principais"
+    const totalVis = 5;
+    const prog = Math.min(Math.round((step / totalVis) * 100), 100);
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
-            <header className="bg-black text-white py-5 flex justify-center items-center sticky top-0 z-10">
+            <header className="bg-black text-white py-5 flex justify-center sticky top-0 z-10">
                 <span className="text-lg tracking-[0.25em] font-light">LUMEN APPS</span>
             </header>
 
             <main className="flex-1 w-full max-w-xl mx-auto px-4 py-12 flex flex-col">
-
-                {step < successStep && (
+                {step < 7 && (
                     <div className="mb-8">
                         <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
-                            <motion.div
-                                className="h-full bg-black rounded-full"
-                                initial={{ width: `${Math.max(0, progress - 20)}%` }}
-                                animate={{ width: `${progress}%` }}
-                                transition={{ duration: 0.45, ease: "easeInOut" }}
-                            />
+                            <motion.div className="h-full bg-black rounded-full"
+                                initial={{ width: `${Math.max(0, prog - 20)}%` }}
+                                animate={{ width: `${prog}%` }}
+                                transition={{ duration: 0.4, ease: "easeInOut" }} />
                         </div>
                     </div>
                 )}
@@ -189,17 +128,12 @@ export default function NPS() {
                     <div className="p-8 md:p-10">
                         <AnimatePresence mode="wait">
 
-                            {/* ── 1: INTRO ── */}
+                            {/* ── 1: PRODUTO ── */}
                             {step === 1 && (
-                                <motion.div key="s1" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-7">
-                                    <div className="flex items-start gap-3">
-                                        <MessageSquareHeart size={26} className="text-gray-400 flex-shrink-0 mt-1" />
-                                        <div>
-                                            <h2 className="text-2xl font-semibold tracking-tight">Sua opinião importa de verdade.</h2>
-                                            <p className="text-gray-500 text-[15px] mt-1.5 leading-relaxed">
-                                                Queremos entender como foi a sua experiência com a Lumen Apps — e se há algo que podemos fazer por você.
-                                            </p>
-                                        </div>
+                                <motion.div key="s1" variants={v} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-7">
+                                    <div>
+                                        <h2 className="text-2xl font-semibold tracking-tight mb-1">Sua opinião importa.</h2>
+                                        <p className="text-gray-500 text-[15px] leading-relaxed">Queremos entender o que aconteceu com você. Leva menos de 2 minutos.</p>
                                     </div>
 
                                     <div className="flex flex-col gap-3">
@@ -216,84 +150,38 @@ export default function NPS() {
 
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-sm font-semibold text-gray-700">E-mail <span className="font-normal text-gray-400">(opcional)</span></label>
-                                        <input type="email" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)}
+                                        <input type="email" placeholder="seu@email.com" value={email}
+                                            onChange={e => setEmail(e.target.value)}
                                             className="border-0 border-b-2 border-gray-200 pb-2 pt-1 text-[15px] text-gray-900 bg-white placeholder:text-gray-300 focus:border-black focus:ring-0 outline-none transition-colors" />
                                     </div>
 
-                                    <button disabled={!step1Valid} onClick={goNext}
+                                    <button disabled={!step1Valid} onClick={go}
                                         className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                                         Continuar <ArrowRight size={17} />
                                     </button>
                                 </motion.div>
                             )}
 
-                            {/* ── 2: NOTA ── */}
+                            {/* ── 2: MOTIVO ── */}
                             {step === 2 && (
-                                <motion.div key="s2" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-7">
-                                    <div>
-                                        <h2 className="text-2xl font-semibold tracking-tight mb-1">
-                                            De 0 a 10, o quanto você indicaria o <span className="text-gray-500">{produto}</span> para alguém?
-                                        </h2>
-                                        <p className="text-gray-400 text-[13px]">0 = jamais · 10 = com certeza</p>
-                                    </div>
-
-                                    <div className="grid grid-cols-6 gap-2">
-                                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
-                                            <button key={n} onClick={() => setNota(n)}
-                                                className={`aspect-square rounded-xl text-[15px] font-semibold transition-all border-2 ${nota === n
-                                                        ? n <= 6 ? 'border-red-400 bg-red-50 text-red-600'
-                                                            : n <= 8 ? 'border-amber-400 bg-amber-50 text-amber-600'
-                                                                : 'border-green-400 bg-green-50 text-green-600'
-                                                        : 'border-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
-                                                    }`}>
-                                                {n}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {nota !== null && (
-                                        <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                                            className={`font-medium text-[15px] ${nota <= 6 ? 'text-red-500' : nota <= 8 ? 'text-amber-500' : 'text-green-600'}`}>
-                                            {nota <= 6 ? '😔 Sentimos muito. Vamos entender melhor.' : nota <= 8 ? '🙂 Obrigado. Queremos ouvir mais.' : '🌟 Que alegria ouvir isso!'}
-                                        </motion.p>
-                                    )}
-
-                                    <button disabled={!step2Valid} onClick={goNext}
-                                        className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
-                                        Continuar <ArrowRight size={17} />
-                                    </button>
-                                </motion.div>
-                            )}
-
-                            {/* ── 3: MOTIVO ── */}
-                            {step === 3 && nota !== null && faixa && (
-                                <motion.div key="s3" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
-                                    <div>
-                                        <h2 className="text-2xl font-semibold tracking-tight mb-1">
-                                            {faixa === 'promotor' ? 'O que mais te agradou?' : `Com nota ${nota}, o que pesou mais na sua experiência?`}
-                                        </h2>
-                                        {isDetrator && (
-                                            <p className="text-gray-500 text-[15px] leading-relaxed">
-                                                Seja honesto — cada resposta vai diretamente para quem pode mudar isso.
-                                            </p>
-                                        )}
-                                    </div>
+                                <motion.div key="s2" variants={v} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
+                                    <h2 className="text-2xl font-semibold tracking-tight">O que fez você cancelar o {produto}?</h2>
 
                                     <div className="flex flex-col gap-2.5">
-                                        {MOTIVOS[faixa].map(m => {
-                                            const sel = motivo === m;
+                                        {motivos.map(m => {
+                                            const sel = motivoId === m.id;
                                             return (
-                                                <div key={m} className="flex flex-col">
-                                                    <div onClick={() => setMotivo(m)}
+                                                <div key={m.id} className="flex flex-col">
+                                                    <div onClick={() => setMotivoId(m.id)}
                                                         className={`flex items-center gap-3.5 p-4 rounded-xl cursor-pointer border-2 transition-all ${sel ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/50'}`}>
                                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${sel ? 'bg-black border-black' : 'border-gray-300'}`}>
                                                             {sel && <div className="w-2 h-2 rounded-full bg-white" />}
                                                         </div>
-                                                        <span className={`text-[14.5px] leading-snug ${sel ? 'font-medium text-black' : 'text-gray-600'}`}>{m}</span>
+                                                        <span className={`text-[14.5px] leading-snug ${sel ? 'font-medium text-black' : 'text-gray-600'}`}>{m.label}</span>
                                                     </div>
-                                                    {m === 'Outro.' && sel && (
+                                                    {m.id === 'outro' && sel && (
                                                         <div className="pl-9 pt-2">
-                                                            <input type="text" value={outroMotivo} onChange={e => setOutroMotivo(e.target.value)}
+                                                            <input type="text" value={outroText} onChange={e => setOutroText(e.target.value)}
                                                                 placeholder="Descreva brevemente..."
                                                                 className="w-full bg-white border border-gray-200 rounded-lg px-3.5 py-2.5 text-[14px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black outline-none transition-all" />
                                                         </div>
@@ -303,131 +191,121 @@ export default function NPS() {
                                         })}
                                     </div>
 
-                                    <button disabled={!step3Valid} onClick={goNext}
+                                    <button disabled={!step2Valid} onClick={go}
                                         className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                                         Continuar <ArrowRight size={17} />
                                     </button>
                                 </motion.div>
                             )}
 
-                            {/* ── 4: MAPEAMENTO DA DOR + OFERTA (apenas detratores) ── */}
-                            {step === 4 && isDetrator && (
-                                <motion.div key="s4" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
-                                    {/* Validação da dor */}
-                                    <div className="p-5 bg-gray-50 rounded-xl border border-gray-100">
-                                        <p className="text-[13px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Entendemos o que aconteceu</p>
-                                        <p className="text-[15px] text-gray-800 leading-relaxed">
-                                            {getValidacao(motivoFinal)}
-                                        </p>
+                            {/* ── 3: SOLUÇÃO ── */}
+                            {step === 3 && (
+                                <motion.div key="s3" variants={v} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
+                                    <div>
+                                        <h2 className="text-2xl font-semibold tracking-tight mb-1">Entendemos o que aconteceu.</h2>
+                                        <p className="text-gray-500 text-[15px]">Aqui está o que mudamos desde então:</p>
                                     </div>
 
-                                    {/* Ponte para a oferta */}
-                                    <div className="flex items-center gap-2">
-                                        <Sparkles size={16} className="text-indigo-400 flex-shrink-0" />
-                                        <p className="text-[14px] text-gray-500">Mas algo mudou desde então. Seria justo te mostrar?</p>
-                                    </div>
-
-                                    {/* Oferta */}
                                     <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 text-[15px] text-gray-900 leading-relaxed">
-                                        {getOferta(motivoFinal, produto)}
+                                        {solucao}
                                     </div>
 
-                                    {/* Aceita ou não? */}
-                                    <p className="text-sm font-semibold text-gray-700">Isso muda algo para você?</p>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button onClick={() => { setAceitouOferta(true); goNext(); }}
-                                            className="py-3.5 rounded-xl border-2 border-black bg-black text-white font-medium text-[15px] hover:bg-gray-800 transition-all">
-                                            Sim, me interessa
-                                        </button>
-                                        <button onClick={() => { setAceitouOferta(false); goNext(); }}
-                                            className="py-3.5 rounded-xl border-2 border-gray-200 text-gray-500 font-medium text-[15px] hover:border-gray-300 transition-all">
-                                            Não, obrigado
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            )}
-
-                            {/* ── 5: RESPOSTA DA OFERTA (se aceitou) ── */}
-                            {step === 5 && isDetrator && aceitouOferta === true && (
-                                <motion.div key="s5-sim" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
-                                    <div>
-                                        <h2 className="text-2xl font-semibold tracking-tight mb-1">Ótimo! Nos conte mais.</h2>
-                                        <p className="text-gray-500 text-[15px] leading-relaxed">
-                                            Para que nossa equipe entre em contato da forma certa, nos diga o que você precisa para considerar voltar.
-                                        </p>
-                                    </div>
-                                    <textarea value={respostaOferta} onChange={e => setRespostaOferta(e.target.value)}
-                                        placeholder="Escreva aqui..."
-                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-4 text-[14.5px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all min-h-[130px] resize-y" />
-                                    <button disabled={respostaOferta.trim().length < 5} onClick={goNext}
-                                        className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                    <button onClick={go}
+                                        className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all">
                                         Continuar <ArrowRight size={17} />
                                     </button>
                                 </motion.div>
                             )}
 
-                            {/* ── 5: PULO (se recusou) ── */}
-                            {step === 5 && isDetrator && aceitouOferta === false && (
-                                <motion.div key="s5-nao" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
-                                    <div>
-                                        <h2 className="text-2xl font-semibold tracking-tight mb-1">Tudo bem. Respeitamos sua decisão.</h2>
-                                        <p className="text-gray-500 text-[15px]">Tem mais algo que você queira nos dizer?</p>
-                                    </div>
-                                    <textarea value={comentario} onChange={e => setComentario(e.target.value)}
-                                        placeholder="Escreva aqui..."
-                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-4 text-[14.5px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[130px] resize-none" />
-                                    <div className="flex flex-col gap-3">
-                                        <button onClick={() => submit(false)} disabled={isSubmitting}
-                                            className="w-full bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400">
-                                            {isSubmitting ? 'Enviando...' : 'Enviar Avaliação'}
-                                        </button>
-                                        <button onClick={() => submit(true)} disabled={isSubmitting}
-                                            className="text-gray-400 text-[14px] hover:text-gray-600 transition-colors py-2">
-                                            Pular e finalizar
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            )}
-
-                            {/* ── 6: COMENTÁRIO LIVRE (após aceitou oferta OU promotores) ── */}
-                            {((step === 6 && isDetrator && aceitouOferta === true) || (step === 4 && !isDetrator)) && (
-                                <motion.div key="s-comment" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
+                            {/* ── 4: PERGUNTA FECHADA ── */}
+                            {step === 4 && (
+                                <motion.div key="s4" variants={v} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-7">
                                     <div>
                                         <h2 className="text-2xl font-semibold tracking-tight mb-1">
-                                            {aceitouOferta ? 'Perfeito! Alguma coisa a mais?' : 'Quer adicionar mais alguma coisa?'}
+                                            Se esse problema foi resolvido, você consideraria usar o {produto} novamente?
                                         </h2>
-                                        <p className="text-gray-500 text-[15px]">Totalmente opcional.</p>
                                     </div>
+
+                                    <div className="flex flex-col gap-3">
+                                        <button onClick={go}
+                                            className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all">
+                                            Sim, consideraria <ChevronRight size={17} />
+                                        </button>
+                                        <button onClick={() => setStep(6)}
+                                            className="w-full py-4 rounded-xl border-2 border-gray-100 text-gray-500 font-medium hover:border-gray-200 transition-all">
+                                            Não por agora
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* ── 5: OFERTA ── */}
+                            {step === 5 && checkout && (
+                                <motion.div key="s5" variants={v} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-7">
+                                    <div>
+                                        <h2 className="text-2xl font-semibold tracking-tight mb-1">Que ótimo.</h2>
+                                        <p className="text-gray-500 text-[15px]">Criamos uma condição especial para quem já foi cliente:</p>
+                                    </div>
+
+                                    {/* Card de oferta */}
+                                    <div className="border-2 border-black rounded-2xl p-6 flex flex-col gap-3">
+                                        <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{produto}</p>
+                                        <div>
+                                            <p className="text-5xl font-bold text-black tracking-tight leading-none">{checkout.parcelas.split(' de ')[1]}</p>
+                                            <p className="text-gray-500 text-[14px] mt-1">{checkout.parcelas.split(' de ')[0]} · sem juros</p>
+                                        </div>
+                                        <p className="text-gray-600 text-[14px]">{checkout.descricao}</p>
+                                        <button onClick={irCheckout}
+                                            className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all mt-1">
+                                            Quero voltar <ArrowRight size={17} />
+                                        </button>
+                                    </div>
+
+                                    <button onClick={() => setStep(6)}
+                                        className="text-gray-400 text-[14px] hover:text-gray-600 transition-colors text-center py-1">
+                                        Não, obrigado
+                                    </button>
+                                </motion.div>
+                            )}
+
+                            {/* ── 6: PERGUNTA ABERTA (só quem recusou) ── */}
+                            {step === 6 && (
+                                <motion.div key="s6" variants={v} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
+                                    <div>
+                                        <h2 className="text-2xl font-semibold tracking-tight mb-1">Tudo bem.</h2>
+                                        <p className="text-gray-500 text-[15px]">O que precisaria mudar para você considerar no futuro?</p>
+                                    </div>
+
                                     <textarea value={comentario} onChange={e => setComentario(e.target.value)}
                                         placeholder="Escreva aqui..."
                                         className="w-full bg-white border border-gray-200 rounded-xl px-4 py-4 text-[14.5px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[140px] resize-none leading-relaxed" />
+
                                     <div className="flex flex-col gap-3">
-                                        <button onClick={() => submit(false)} disabled={isSubmitting}
+                                        <button onClick={() => salvar(false)} disabled={enviando}
                                             className="w-full bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400">
-                                            {isSubmitting ? 'Enviando...' : 'Enviar Avaliação'}
+                                            {enviando ? 'Enviando...' : 'Enviar feedback'}
                                         </button>
-                                        <button onClick={() => submit(true)} disabled={isSubmitting}
-                                            className="text-gray-400 text-[14px] hover:text-gray-600 transition-colors py-2">
-                                            Pular e finalizar
+                                        <button onClick={() => salvar(false)} disabled={enviando}
+                                            className="text-gray-400 text-[14px] hover:text-gray-600 transition-colors py-1">
+                                            Pular
                                         </button>
                                     </div>
                                 </motion.div>
                             )}
 
-                            {/* ── SUCESSO ── */}
-                            {step === successStep && (
-                                <motion.div key="s-success" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col items-center text-center gap-5 py-10">
+                            {/* ── 7: OBRIGADO ── */}
+                            {step === 7 && (
+                                <motion.div key="s7" variants={v} initial="hidden" animate="visible" exit="exit" className="flex flex-col items-center text-center gap-5 py-10">
                                     <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center">
                                         <CheckCircle2 size={34} className="text-green-500" />
                                     </div>
-                                    <h2 className="text-2xl font-semibold tracking-tight">Avaliação recebida.</h2>
-                                    <div className="text-gray-500 text-[15px] leading-relaxed max-w-sm space-y-2">
-                                        <p>Cada resposta alimenta o roadmap do produto diretamente.</p>
-                                        {aceitouOferta && (
-                                            <p className="text-gray-700 font-medium">Nossa equipe vai entrar em contato em breve com base no que você nos disse.</p>
-                                        )}
-                                    </div>
-                                    <p className="text-xs text-gray-400 font-medium tracking-widest uppercase mt-4">Lumen Apps · Obrigado pelo seu tempo.</p>
+                                    <h2 className="text-2xl font-semibold tracking-tight">Obrigado pelo feedback!</h2>
+                                    <p className="text-gray-500 text-[15px] max-w-sm leading-relaxed">
+                                        Sua resposta foi recebida. Cada opinião vai direto para o time de produto.
+                                    </p>
+                                    <p className="text-xs text-gray-400 font-medium tracking-widest uppercase mt-4">
+                                        Lumen Apps · Obrigado pelo seu tempo.
+                                    </p>
                                 </motion.div>
                             )}
 
