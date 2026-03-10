@@ -170,7 +170,7 @@ const Profile = () => {
               <AvatarDisplay
                 config={avatarConfig as any}
                 size={96}
-                className="rounded-full shadow-lg border-2 border-primary/30"
+                className="rounded-full shadow-lg overflow-hidden"
               />
               <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                 <Pencil className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />

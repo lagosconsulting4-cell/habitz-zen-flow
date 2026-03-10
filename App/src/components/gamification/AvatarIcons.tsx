@@ -86,7 +86,6 @@ export const DEFAULT_AVATAR_CONFIG: DiceBearAvatarConfig = {
   facialHair: [],
   facialHairProbability: 0,
   backgroundColor: ["65c9ff"],
-  style: ["circle"],
 };
 
 // ============================================

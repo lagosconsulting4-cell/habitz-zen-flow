@@ -246,7 +246,6 @@ export function AvatarCreator({ isOpen, onClose, userId }: AvatarCreatorProps) {
       accessories: maybePick(ACCESSORY_TYPES, 0.3),
       accessoriesProbability: 100,
       backgroundColor: [pick(BG_COLORS)],
-      style: ["circle"],
     });
   }, []);
 

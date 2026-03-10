@@ -365,9 +365,11 @@ export const useGamification = (userId?: string) => {
         p_config: config,
       });
       if (error) throw error;
+      return config;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["avatar-config", userId] });
+    onSuccess: (savedConfig) => {
+      // Immediately update cache so Profile shows new avatar without waiting for refetch
+      queryClient.setQueryData(["avatar-config", userId], savedConfig);
       queryClient.invalidateQueries({ queryKey: ["profiles", userId] });
     },
   });
