@@ -30,6 +30,7 @@ const MiniLanding = lazy(() => import("./pages/bora/MiniLanding"));
 const MetodoRendaSecreta = lazy(() => import("./pages/bora/MetodoRendaSecreta"));
 const MetodoRendaSecretaCombo = lazy(() => import("./pages/bora/MetodoRendaSecretaCombo"));
 const Reembolsos = lazy(() => import("./pages/bora/Reembolsos"));
+const NPS = lazy(() => import("./pages/bora/NPS"));
 
 const queryClient = new QueryClient();
 
@@ -151,6 +152,16 @@ const App = () => (
               element={
                 <PathPrefixProvider prefix="">
                   <Reembolsos />
+                </PathPrefixProvider>
+              }
+            />
+
+            {/* NPS - Avaliação de Experiência Pós-Reembolso */}
+            <Route
+              path="/nps"
+              element={
+                <PathPrefixProvider prefix="">
+                  <NPS />
                 </PathPrefixProvider>
               }
             />
