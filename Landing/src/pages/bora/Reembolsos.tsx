@@ -1,96 +1,109 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldAlert, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { HeartHandshake, ArrowRight, CheckCircle2, CheckCheck } from 'lucide-react';
 
-const MOTIVOS_APP = [
-    { id: "foq_teste", label: "A Foquinha fica mandando mensagens estranhas de 'Modo Teste'." },
-    { id: "foq_lembrete", label: "A Foquinha não tem organizado bem meus compromissos/lembretes." },
-    { id: "bora_appstore", label: "O Bora não está na App Store/Play Store (Tive que usar no navegador)." },
-    { id: "bora_notificacao", label: "Não recebo notificações das minhas rotinas no Bora." },
-    { id: "bora_rotina", label: "O Bora gerou uma rotina que não condiz exatamente com a minha dor real." },
-    { id: "tempo", label: "Falta de tempo geral na rotina ou imprevistos financeiros." }
+// ─── MOTIVOS FILTRADOS POR PRODUTO ────────────────────────────────────────────
+
+const MOTIVOS_BORA = [
+    { id: "bora_rotina", label: "O Bora gerou uma rotina que não se encaixou no meu dia a dia." },
+    { id: "bora_notificacao", label: "Não recebia notificações para seguir minha rotina." },
+    { id: "bora_appstore", label: "Esperava um app nativo (App Store/Play Store), não um app de navegador." },
+    { id: "tempo", label: "Falta de tempo ou questões financeiras no momento." },
+    { id: "outro", label: "Outro motivo." },
 ];
 
-const PERGUNTAS_FOLLOWUP: Record<string, string> = {
-    "foq_teste": "Poxa, pedimos sinceras desculpas! O WhatsApp atualizou as políticas internas que afetou temporariamente o nosso construtor. A equipe de T.I já resolveu esse bug do modo teste. Sabendo que agora ela voltou a ser a assistente perfeita, <span class=\"font-bold text-indigo-600\">você toparia reativá-la?</span>",
-    "foq_lembrete": "Qual foi a maior confusão dela? Como nossa I.A aprende com o seu jeito de falar, é provável que precisássemos de apenas mais uns 3 dias para a Foquinha se adaptar perfeitamente a você. <span class=\"font-bold text-indigo-600\">Saber disso muda sua decisão de partir?</span>",
-    "bora_appstore": "Entendemos perfeitamente essa frustração de usar como 'App de Navegador' (PWA). A boa notícia: estamos em fase avançada de aprovação para lançar nas Lojas Nativas. <span class=\"font-bold text-indigo-600\">Se pudesse testar a versão oficial da loja em breve, você reconsideraria cancelar?</span>",
-    "bora_notificacao": "As notificações dependem um pouco das configurações do navegador Safari/Chrome em PWA. Uma vez lançado nas lojas em algumas semanas, os Pushs nativos vão saltar na sua tela. <span class=\"font-bold text-indigo-600\">Isso ajudaria você a manter o foco?</span>",
-    "bora_rotina": "O maior diferencial do Bora é o mapeamento hiperpersonalizado de dores. <span class=\"font-bold text-indigo-600\">Se a nossa equipe te ajudasse a resetar o mapeamento e regerar uma trilha cirurgicamente focada no que você quer curar hoje, faria sentido dar uma segunda chance?</span>",
-    "tempo": "Sabemos que a vida real atropela nossa organização. O Bora e a Foquinha existem justamente para 'arrumar a casa' e o tempo. <span class=\"font-bold text-indigo-600\">Se você tentasse aplicar nem que seja 10% da rotina diária no Bora amanhã, você manteria sua assinatura?</span>",
-    "outro": "Entendemos que algo grave quebrou sua expectativa. Sentimos muito, e a sua sinceridade agora é ouro. <span class=\"font-bold text-indigo-600\">Pode nos dizer detalhadamente o que deveríamos ter feito de diferente para você ficar?</span>"
+const MOTIVOS_FOQUINHA = [
+    { id: "foq_teste", label: "A Foquinha ficou mandando mensagens estranhas de 'Modo Teste'." },
+    { id: "foq_lembrete", label: "Ela não organizou meus lembretes da forma que eu esperava." },
+    { id: "foq_aprendizado", label: "Demorou para aprender meu jeito de falar e me frustrei." },
+    { id: "tempo", label: "Falta de tempo ou questões financeiras no momento." },
+    { id: "outro", label: "Outro motivo." },
+];
+
+// ─── PROPOSTAS CONCRETAS DE RETENÇÃO ──────────────────────────────────────────
+
+const PROPOSTAS: Record<string, string> = {
+    "bora_rotina": "Sabia que você pode <strong>resetar o mapeamento do Bora</strong> e gerar uma nova rotina do zero? Nosso suporte faz isso para você em 5 minutos, sem nenhum custo adicional.",
+    "bora_notificacao": "As notificações no PWA dependem de uma configuração simples do navegador que 90% dos usuários não ativam. Nosso suporte resolve isso em menos de 10 minutos. <span class=\"font-semibold text-indigo-600\">Vale tentar antes de cancelar?</span>",
+    "bora_appstore": "A versão nativa do Bora para <strong>App Store e Google Play está em fase final de aprovação</strong>. Se você cancelar agora, perde o preço de cofundador. <span class=\"font-semibold text-indigo-600\">Vale esperar mais 30 dias?</span>",
+    "foq_teste": "O bug do 'Modo Teste' foi causado por uma atualização do WhatsApp que afetou temporariamente nossa API. <strong>Já foi corrigido.</strong> <span class=\"font-semibold text-indigo-600\">Quer que a gente reative sua Foquinha agora?</span>",
+    "foq_lembrete": "A Foquinha aprende com o seu jeito de escrever. Na primeira semana ela ainda está se calibrando. <span class=\"font-semibold text-indigo-600\">Com mais 3 dias de uso, a maioria dos usuários já sente a diferença. Quer tentar esse tempo?</span>",
+    "foq_aprendizado": "Cada pessoa tem um estilo. Nossa equipe pode <strong>recalibrar a IA da sua Foquinha pessoalmente</strong>, sem custo adicional. <span class=\"font-semibold text-indigo-600\">Quer agendar isso antes de decidir?</span>",
+    "tempo": "Você sabia que pode <strong>pausar sua assinatura</strong> em vez de cancelar? Assim você preserva o acesso, o preço de cofundador, e retoma quando quiser. <span class=\"font-semibold text-indigo-600\">Essa opção faz mais sentido para a sua situação?</span>",
+    "outro": "Sentimos muito que não detectamos isso antes. <span class=\"font-semibold text-indigo-600\">Pode nos contar o que aconteceu? Queremos resolver, não apenas protocolar.</span>",
 };
 
+// ─── ANIMAÇÕES ────────────────────────────────────────────────────────────────
+
+const variants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.38, ease: "easeOut" } },
+    exit: { opacity: 0, y: -12, transition: { duration: 0.2 } }
+};
+
+// ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
+
 export default function Reembolsos() {
-    useEffect(() => {
-        document.title = "Auditoria de Cancelamento - Lumen";
-    }, []);
+    useEffect(() => { document.title = "Cancelamento — Lumen"; }, []);
 
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Form States
+    // States
     const [termoCiencia, setTermoCiencia] = useState(false);
     const [identificacao, setIdentificacao] = useState({ email: '', produto: '' });
     const [motivosSelecionados, setMotivosSelecionados] = useState<string[]>([]);
     const [outroMotivo, setOutroMotivo] = useState('');
-
-    // Follow-up dynamics
-    const [currentFollowUpIndex, setCurrentFollowUpIndex] = useState(0);
+    const [followUpIndex, setFollowUpIndex] = useState(0);
     const [subRespostas, setSubRespostas] = useState<Record<string, string>>({});
-
-    // Final
     const [justificativa, setJustificativa] = useState('');
-    const [finalChecks, setFinalChecks] = useState({ c1: false, c2: false, c3: false, c4: false });
+    const [checks, setChecks] = useState({ c1: false, c2: false, c3: false });
 
-    // Validation
-    const isStep2Valid = identificacao.email.includes('@') && identificacao.produto;
-    const isStep3Valid = motivosSelecionados.length > 0 && (!motivosSelecionados.includes('outro') || outroMotivo.trim().length >= 3);
-    const isJustificativaValid = justificativa.length >= 250;
-    const isFinalValid = finalChecks.c1 && finalChecks.c2 && finalChecks.c3 && finalChecks.c4;
+    // Motivos filtrados pelo produto
+    const motivosDoproduto = identificacao.produto === 'Foquinha' ? MOTIVOS_FOQUINHA : MOTIVOS_BORA;
 
-    const currentMotivoId = motivosSelecionados[currentFollowUpIndex];
-    const isSubRespostaValid = currentMotivoId && (subRespostas[currentMotivoId]?.trim().length >= 5);
+    // Validações
+    const step2Valid = identificacao.email.includes('@') && identificacao.produto !== '';
+    const step3Valid = motivosSelecionados.length > 0 && (!motivosSelecionados.includes('outro') || outroMotivo.trim().length >= 3);
+    const currentMotivoId = motivosSelecionados[followUpIndex];
+    const subRespostaAtualValid = currentMotivoId && (subRespostas[currentMotivoId]?.trim().length ?? 0) >= 5;
+    const justificativaValid = justificativa.length >= 250;
+    const checksValid = checks.c1 && checks.c2 && checks.c3;
 
-    const nextStep = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setStep(step + 1);
-    }
+    // Navegação
+    const goNext = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); setStep(s => s + 1); };
 
-    const nextFollowUp = () => {
-        if (currentFollowUpIndex < motivosSelecionados.length - 1) {
-            setCurrentFollowUpIndex(currentFollowUpIndex + 1);
+    const handleNextFollowUp = () => {
+        if (followUpIndex < motivosSelecionados.length - 1) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setFollowUpIndex(i => i + 1);
         } else {
-            nextStep();
+            goNext();
         }
-    }
+    };
 
     const toggleMotivo = (id: string) => {
-        setMotivosSelecionados(prev => {
-            if (prev.includes(id)) {
-                const next = prev.filter(m => m !== id);
-                return next;
-            }
-            return [...prev, id];
-        });
+        setMotivosSelecionados(prev =>
+            prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]
+        );
     };
 
     const handlePaste = (e: React.ClipboardEvent) => {
         e.preventDefault();
-        alert("Para fins de auditoria, a justificativa deve ser digitada manualmente.");
     };
 
-    const submitAuditoria = async () => {
+    // Submissão
+    const submit = async () => {
         setIsSubmitting(true);
 
-        const formatMotivoLabel = (id: string) => {
-            if (id === 'outro') return `Outro: ${outroMotivo}`;
-            return MOTIVOS_APP.find(m => m.id === id)?.label || id;
-        };
+        const getLabel = (id: string) =>
+            id === 'outro' ? `Outro: ${outroMotivo}` : motivosDoProduct().find(m => m.id === id)?.label || id;
 
-        const motivoFinal = motivosSelecionados.map(formatMotivoLabel).join(' | ');
-        const subRespostasFinal = motivosSelecionados.map(id => `[${formatMotivoLabel(id)}]: ${subRespostas[id] || 'Sem resposta'}`).join('\n\n');
+        const motivoFinal = motivosSelecionados.map(getLabel).join(' | ');
+        const subFinal = motivosSelecionados
+            .map(id => `[${getLabel(id)}]: ${subRespostas[id] || '—'}`)
+            .join('\n\n');
 
         try {
             const { error } = await supabase.from('auditoria_reembolsos').insert({
@@ -98,313 +111,323 @@ export default function Reembolsos() {
                 produto: identificacao.produto,
                 transacao_id: 'Não exigida',
                 motivo_principal: motivoFinal,
-                sub_resposta: subRespostasFinal,
+                sub_resposta: subFinal,
                 justificativa_detalhada: justificativa
             });
-
-            if (error) {
-                console.error("Erro no Supabase:", error);
-                alert("Ocorreu um erro técnico na rede. Tente novamente mais tarde.");
-                setIsSubmitting(false);
-                return;
-            }
-
+            if (error) { console.error(error); setIsSubmitting(false); return; }
             setStep(7);
-        } catch (err) {
-            console.error(err);
+        } catch (e) {
+            console.error(e);
             setIsSubmitting(false);
         }
     };
 
-    const containerVariants = {
-        hidden: { opacity: 0, y: 15 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
-        exit: { opacity: 0, y: -15, transition: { duration: 0.2 } }
-    };
+    // Dupliquei pra não usar closure stale dentro de submit
+    function motivosDoProduct() {
+        return identificacao.produto === 'Foquinha' ? MOTIVOS_FOQUINHA : MOTIVOS_BORA;
+    }
+
+    const totalSteps = 6;
+    const progress = Math.round((step / totalSteps) * 100);
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900 selection:bg-gray-200">
+        <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
             {/* Header */}
-            <header className="bg-black text-white py-6 flex justify-center items-center shadow-lg z-10 sticky top-0">
-                <h1 className="text-xl tracking-[0.2em] font-light">LUMEN</h1>
+            <header className="bg-black text-white py-5 flex justify-center items-center sticky top-0 z-10">
+                <span className="text-lg tracking-[0.25em] font-light">LUMEN</span>
             </header>
 
-            {/* Main Content */}
-            <main className="flex-1 w-full max-w-2xl mx-auto px-4 py-12 md:py-16 flex flex-col">
+            <main className="flex-1 w-full max-w-xl mx-auto px-4 py-12 flex flex-col">
 
-                {/* Progress Bar */}
+                {/* Barra de Progresso */}
                 {step < 7 && (
-                    <div className="mb-10 animate-in fade-in duration-500">
-                        <div className="flex justify-between text-xs font-semibold text-gray-400 mb-2 px-1 tracking-wider uppercase">
-                            <span>Auditoria do Sistema</span>
-                            <span>{step} de 6</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                    <div className="mb-8">
+                        <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
                             <motion.div
                                 className="h-full bg-black rounded-full"
-                                initial={{ width: `${((step - 1) / 6) * 100}%` }}
-                                animate={{ width: `${(step / 6) * 100}%` }}
-                                transition={{ duration: 0.5, ease: "easeInOut" }}
+                                initial={{ width: `${Math.round(((step - 1) / totalSteps) * 100)}%` }}
+                                animate={{ width: `${progress}%` }}
+                                transition={{ duration: 0.45, ease: "easeInOut" }}
                             />
                         </div>
                     </div>
                 )}
 
-                {/* Form Card */}
-                <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+                {/* Card */}
+                <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100">
                     <div className="p-8 md:p-10">
                         <AnimatePresence mode="wait">
 
-                            {/* --- STEP 1 --- */}
+                            {/* ── STEP 1: ACOLHIMENTO ── */}
                             {step === 1 && (
-                                <motion.div key="step1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
-                                    <div className="flex items-center gap-3 text-red-600 mb-2">
-                                        <ShieldAlert size={28} />
-                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Análise de Qualidade</h2>
+                                <motion.div key="s1" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
+                                    <div className="flex items-center gap-3">
+                                        <HeartHandshake size={26} className="text-gray-400 flex-shrink-0" />
+                                        <h2 className="text-2xl font-semibold tracking-tight">Entendemos que nem sempre dá certo.</h2>
                                     </div>
 
-                                    <div className="space-y-4 text-gray-600 leading-relaxed text-[15px]">
+                                    <div className="space-y-4 text-[15px] text-gray-600 leading-relaxed">
                                         <p>
-                                            Valorizamos muito o seu progresso e a sua transparência, e processaremos seu reembolso sem burocracias seguindo as diretrizes legais da plataforma de pagamento.
+                                            Antes de prosseguir, queremos que você saiba: o seu pedido será analisado com atenção real, por uma pessoa real. Processamos reembolsos sem burocracia.
                                         </p>
-                                        <div className="p-4 bg-red-50 rounded-xl border border-red-100">
-                                            <p>
-                                                Gostaríamos apenas de lembrar que, para proteger nossa comunidade, <strong>somente em casos de má-fé comprovada</strong> (ex: usar intensivamente as ferramentas/integrações para gerar lucro e cancelar na sequência) o perfil perderá acesso futuro ao nosso ecossistema e suporte.
-                                            </p>
+                                        <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 text-amber-900 text-[14px]">
+                                            Apenas pedimos reciprocidade: em casos comprovados de uso predatório das ferramentas seguido de cancelamento imediato por má-fé, o acesso ao ecossistema Lumen é encerrado permanentemente.
                                         </div>
                                     </div>
 
-                                    <label className="flex items-start gap-4 p-4 mt-2 cursor-pointer group hover:bg-gray-50 rounded-xl transition-colors border border-transparent hover:border-gray-200">
-                                        <div className="mt-1 flex-shrink-0">
-                                            <input type="checkbox" className="w-5 h-5 accent-black cursor-pointer rounded" checked={termoCiencia} onChange={(e) => setTermoCiencia(e.target.checked)} />
-                                        </div>
-                                        <span className="text-gray-700 font-medium leading-snug">
-                                            Compreendo as políticas de proteção da plataforma, e desejo prosseguir com meu pedido de estorno.
+                                    <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
+                                        <input
+                                            type="checkbox"
+                                            className="mt-0.5 w-5 h-5 accent-black cursor-pointer flex-shrink-0"
+                                            checked={termoCiencia}
+                                            onChange={e => setTermoCiencia(e.target.checked)}
+                                        />
+                                        <span className="text-[14px] text-gray-700 leading-snug">
+                                            Entendo. Quero prosseguir com o pedido.
                                         </span>
                                     </label>
 
-                                    <button disabled={!termoCiencia} onClick={nextStep} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black focus:ring-4 focus:ring-gray-200">
-                                        Avançar <ArrowRight size={18} />
+                                    <button
+                                        disabled={!termoCiencia}
+                                        onClick={goNext}
+                                        className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                    >
+                                        Avançar <ArrowRight size={17} />
                                     </button>
                                 </motion.div>
                             )}
 
-                            {/* --- STEP 2 --- */}
+                            {/* ── STEP 2: IDENTIFICAÇÃO ── */}
                             {step === 2 && (
-                                <motion.div key="step2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-8">
+                                <motion.div key="s2" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-8">
                                     <div>
-                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Identificação</h2>
-                                        <p className="text-gray-500">Vamos localizar o seu acesso nos nossos sistemas.</p>
+                                        <h2 className="text-2xl font-semibold tracking-tight mb-1">Qual ferramenta não te atendeu?</h2>
+                                        <p className="text-gray-500 text-[15px]">Vamos localizar o seu acesso nos nossos sistemas.</p>
                                     </div>
 
-                                    <div className="flex flex-col gap-8">
-                                        <div className="group">
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2 transition-colors group-focus-within:text-black">E-mail utilizado na compra/acesso da ferramenta</label>
+                                    <div className="flex flex-col gap-6">
+                                        <div className="flex flex-col gap-1.5">
+                                            <label className="text-sm font-semibold text-gray-700">E-mail de acesso</label>
                                             <input
                                                 type="email"
                                                 placeholder="seu@email.com"
                                                 value={identificacao.email}
-                                                onChange={(e) => setIdentificacao({ ...identificacao, email: e.target.value })}
-                                                className="w-full bg-transparent border-0 border-b-2 border-gray-200 px-0 py-3 text-[15px] text-gray-900 placeholder:text-gray-300 focus:ring-0 focus:border-black transition-colors outline-none"
+                                                onChange={e => setIdentificacao({ ...identificacao, email: e.target.value })}
+                                                className="border-0 border-b-2 border-gray-200 pb-2 pt-1 text-[15px] placeholder:text-gray-300 focus:border-black focus:ring-0 outline-none transition-colors bg-transparent"
                                             />
                                         </div>
 
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-4">Qual ferramenta apresentou atrito?</label>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                {['Bora', 'Foquinha'].map(prod => (
-                                                    <label key={prod} className={`flex items-center justify-center py-4 rounded-xl border-2 cursor-pointer transition-all ${identificacao.produto === prod ? 'border-black bg-gray-50 text-black font-semibold shadow-[0_4px_12px_rgba(0,0,0,0.05)]' : 'border-gray-100 hover:border-gray-200 text-gray-500 bg-white'}`}>
-                                                        <input type="radio" className="sr-only" checked={identificacao.produto === prod} onChange={() => setIdentificacao({ ...identificacao, produto: prod })} />
-                                                        {prod}
-                                                    </label>
+                                        <div className="flex flex-col gap-3">
+                                            <label className="text-sm font-semibold text-gray-700">Produto</label>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {['Bora', 'Foquinha'].map(p => (
+                                                    <button
+                                                        key={p}
+                                                        onClick={() => setIdentificacao({ ...identificacao, produto: p })}
+                                                        className={`py-4 rounded-xl border-2 font-medium text-[15px] transition-all ${identificacao.produto === p ? 'border-black bg-gray-50 text-black' : 'border-gray-100 text-gray-400 hover:border-gray-200'}`}
+                                                    >
+                                                        {p}
+                                                    </button>
                                                 ))}
                                             </div>
                                         </div>
                                     </div>
 
-                                    <button disabled={!isStep2Valid} onClick={nextStep} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black disabled:bg-gray-200 disabled:text-gray-400">
-                                        Continuar <ArrowRight size={18} />
+                                    <button
+                                        disabled={!step2Valid}
+                                        onClick={goNext}
+                                        className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                    >
+                                        Continuar <ArrowRight size={17} />
                                     </button>
                                 </motion.div>
                             )}
 
-                            {/* --- STEP 3 --- */}
+                            {/* ── STEP 3: MOTIVOS (filtrado) ── */}
                             {step === 3 && (
-                                <motion.div key="step3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
-                                    <div>
-                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Por que a ferramenta falhou para você?</h2>
-                                        <p className="text-gray-500 leading-relaxed text-[15px]">Entendemos que adotar novos hábitos ou ferramentas pode ser frustrante. Qual foi o maior obstáculo no seu caminho?</p>
-                                    </div>
+                                <motion.div key="s3" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
+                                    <h2 className="text-2xl font-semibold tracking-tight">O que pesou mais na sua decisão?</h2>
 
-                                    <div className="flex flex-col gap-3 mt-2">
-                                        {MOTIVOS_APP.map((m) => {
-                                            const isSelected = motivosSelecionados.includes(m.id);
+                                    <div className="flex flex-col gap-2.5">
+                                        {motivosDoProduct().map(m => {
+                                            const sel = motivosSelecionados.includes(m.id);
                                             return (
-                                                <div
-                                                    key={m.id}
-                                                    onClick={() => toggleMotivo(m.id)}
-                                                    className={`p-4 rounded-xl cursor-pointer border-2 transition-all flex items-center gap-4 ${isSelected ? 'border-black bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-2 ring-black/5' : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 bg-white'}`}
-                                                >
-                                                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-black border-black' : 'border-gray-300'}`}>
-                                                        {isSelected && <CheckCircle2 size={14} className="text-white" />}
+                                                <div key={m.id} className="flex flex-col">
+                                                    <div
+                                                        onClick={() => toggleMotivo(m.id)}
+                                                        className={`flex items-center gap-3.5 p-4 rounded-xl border-2 cursor-pointer transition-all ${sel ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/50'}`}
+                                                    >
+                                                        <div className={`w-5 h-5 rounded flex items-center justify-center border-2 flex-shrink-0 transition-colors ${sel ? 'bg-black border-black' : 'border-gray-300'}`}>
+                                                            {sel && <CheckCircle2 size={13} className="text-white" />}
+                                                        </div>
+                                                        <span className={`text-[14.5px] leading-snug ${sel ? 'font-medium text-black' : 'text-gray-600'}`}>
+                                                            {m.label}
+                                                        </span>
                                                     </div>
-                                                    <span className={`text-[15px] leading-snug ${isSelected ? 'font-medium text-black' : 'text-gray-600'}`}>{m.label}</span>
+
+                                                    {/* Campo extra para "Outro" */}
+                                                    {m.id === 'outro' && sel && (
+                                                        <div className="pl-9 pt-2">
+                                                            <input
+                                                                type="text"
+                                                                value={outroMotivo}
+                                                                onChange={e => setOutroMotivo(e.target.value)}
+                                                                placeholder="Descreva brevemente..."
+                                                                className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-[14px] placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all"
+                                                            />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             );
                                         })}
-
-                                        {/* "Outro" Custom Option */}
-                                        <div
-                                            className={`p-4 rounded-xl border-2 transition-all flex flex-col gap-4 ${motivosSelecionados.includes('outro') ? 'border-black bg-gray-50 shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-2 ring-black/5' : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 bg-white'}`}
-                                        >
-                                            <div className="flex items-center gap-4 cursor-pointer" onClick={() => toggleMotivo('outro')}>
-                                                <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${motivosSelecionados.includes('outro') ? 'bg-black border-black' : 'border-gray-300'}`}>
-                                                    {motivosSelecionados.includes('outro') && <CheckCircle2 size={14} className="text-white" />}
-                                                </div>
-                                                <span className={`text-[15px] ${motivosSelecionados.includes('outro') ? 'font-medium text-black' : 'text-gray-600'}`}>Tive um problema completamente diferente.</span>
-                                            </div>
-
-                                            {motivosSelecionados.includes('outro') && (
-                                                <div className="pl-9 pb-1">
-                                                    <input
-                                                        type="text"
-                                                        value={outroMotivo}
-                                                        onChange={(e) => setOutroMotivo(e.target.value)}
-                                                        placeholder="Sintetize em poucas palavras..."
-                                                        className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-[14px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all shadow-sm"
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
                                     </div>
 
-                                    <button disabled={!isStep3Valid} onClick={nextStep} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black disabled:bg-gray-200 disabled:text-gray-400">
-                                        Continuar <ArrowRight size={18} />
+                                    <button
+                                        disabled={!step3Valid}
+                                        onClick={goNext}
+                                        className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                    >
+                                        Continuar <ArrowRight size={17} />
                                     </button>
                                 </motion.div>
                             )}
 
-                            {/* --- STEP 4 (DYNAMIC FOLLOW-UPS) --- */}
+                            {/* ── STEP 4: PROPOSTAS DE RETENÇÃO ── */}
                             {step === 4 && currentMotivoId && (
-                                <motion.div key={`step4-${currentMotivoId}`} variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-8">
+                                <motion.div key={`s4-${currentMotivoId}`} variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-7">
                                     <div>
-                                        <div className="flex justify-between items-center mb-2">
-                                            <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Um passo atrás...</h2>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <h2 className="text-2xl font-semibold tracking-tight">Antes de ir...</h2>
                                             {motivosSelecionados.length > 1 && (
-                                                <span className="text-xs font-bold text-indigo-400">Pergunta {currentFollowUpIndex + 1} de {motivosSelecionados.length}</span>
+                                                <span className="text-xs font-semibold text-indigo-400 bg-indigo-50 px-2.5 py-1 rounded-full">
+                                                    {followUpIndex + 1} de {motivosSelecionados.length}
+                                                </span>
                                             )}
                                         </div>
-                                        <p className="text-gray-500 leading-relaxed text-[15px]">
-                                            Antes de seguirmos, a sua opinião franca é ouro para nós! Sentimos muito que não tenha dado o "match" perfeito ainda:
-                                        </p>
+                                        <p className="text-gray-500 text-[15px]">Temos uma proposta para o que você relatou:</p>
                                     </div>
 
+                                    {/* Box da proposta */}
                                     <div
-                                        className="bg-indigo-50/60 p-6 rounded-xl border border-indigo-100/80 text-[15.5px] leading-relaxed text-gray-800 shadow-sm"
-                                        dangerouslySetInnerHTML={{ __html: PERGUNTAS_FOLLOWUP[currentMotivoId] || PERGUNTAS_FOLLOWUP['outro'] }}
+                                        className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-5 text-[15px] text-gray-800 leading-relaxed"
+                                        dangerouslySetInnerHTML={{ __html: PROPOSTAS[currentMotivoId] || PROPOSTAS['outro'] }}
                                     />
 
-                                    <textarea
-                                        value={subRespostas[currentMotivoId] || ''}
-                                        onChange={(e) => setSubRespostas(prev => ({ ...prev, [currentMotivoId]: e.target.value }))}
-                                        placeholder="Sua resposta franca aqui. Detalhes são sempre bem-vindos..."
-                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-4 text-[15px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all min-h-[140px] resize-y shadow-sm"
-                                    />
+                                    {/* Resposta */}
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-sm font-semibold text-gray-700">O que você acha dessa proposta?</label>
+                                        <textarea
+                                            value={subRespostas[currentMotivoId] || ''}
+                                            onChange={e => setSubRespostas(prev => ({ ...prev, [currentMotivoId]: e.target.value }))}
+                                            placeholder="Escreva aqui..."
+                                            className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-[14.5px] placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all min-h-[120px] resize-y"
+                                        />
+                                    </div>
 
-                                    <button disabled={!isSubRespostaValid} onClick={nextFollowUp} className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black disabled:bg-gray-200 disabled:text-gray-400">
-                                        {currentFollowUpIndex < motivosSelecionados.length - 1 ? 'Próxima Questão' : 'Continuar'} <ArrowRight size={18} />
+                                    <button
+                                        disabled={!subRespostaAtualValid}
+                                        onClick={handleNextFollowUp}
+                                        className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                    >
+                                        {followUpIndex < motivosSelecionados.length - 1 ? 'Ver próxima proposta' : 'Entendi, seguir com o cancelamento'} <ArrowRight size={17} />
                                     </button>
                                 </motion.div>
                             )}
 
-                            {/* --- STEP 5 --- */}
+                            {/* ── STEP 5: JUSTIFICATIVA LIVRE ── */}
                             {step === 5 && (
-                                <motion.div key="step5" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
+                                <motion.div key="s5" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-6">
                                     <div>
-                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Ato Final</h2>
-                                        <p className="text-gray-500 leading-relaxed text-[15px]">
-                                            Obrigado por nos situar. Por fim, explique detalhadamente a soma de fatores que gerou sua decisão.
+                                        <h2 className="text-2xl font-semibold tracking-tight mb-1">Por último, nos conte com suas palavras.</h2>
+                                        <p className="text-gray-500 text-[15px] leading-relaxed">
+                                            Não tem resposta certa ou errada. O que você escrever vai ser lido pela nossa equipe e vai ajudar a melhorar o produto.
                                         </p>
                                     </div>
 
-                                    <div className="relative mt-2">
+                                    <div className="relative">
                                         <textarea
                                             value={justificativa}
-                                            onChange={(e) => setJustificativa(e.target.value)}
+                                            onChange={e => setJustificativa(e.target.value)}
                                             onPaste={handlePaste}
-                                            placeholder="Detalhe todo o seu processo, sua operação atual e o motivo real por trás dessa solicitação. Nossa equipe de qualidade vai ler cada linha com muita atenção (Mínimo 250 letras)..."
-                                            className="w-full bg-white border border-gray-200 rounded-xl px-5 py-5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[220px] pb-10 resize-none leading-relaxed shadow-sm"
+                                            placeholder="Escreva aqui..."
+                                            className="w-full border border-gray-200 rounded-xl px-4 py-4 text-[14.5px] placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all min-h-[200px] resize-none leading-relaxed pb-8"
                                         />
-                                        <div className={`absolute bottom-4 right-5 text-xs font-bold px-2 py-1 rounded bg-gray-50 ${justificativa.length >= 250 ? 'text-green-600' : 'text-red-500'}`}>
+                                        <span className={`absolute bottom-3 right-4 text-xs font-bold ${justificativa.length >= 250 ? 'text-green-600' : 'text-red-400'}`}>
                                             {justificativa.length} / 250
-                                        </div>
+                                        </span>
                                     </div>
 
-                                    <button disabled={!isJustificativaValid} onClick={nextStep} className="mt-2 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black disabled:bg-gray-200 disabled:text-gray-400">
-                                        Avançar <ArrowRight size={18} />
+                                    <button
+                                        disabled={!justificativaValid}
+                                        onClick={goNext}
+                                        className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                    >
+                                        Finalizar <ArrowRight size={17} />
                                     </button>
                                 </motion.div>
                             )}
 
-                            {/* --- STEP 6 --- */}
+                            {/* ── STEP 6: CONFIRMAÇÕES ── */}
                             {step === 6 && (
-                                <motion.div key="step6" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-8">
+                                <motion.div key="s6" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-7">
                                     <div>
-                                        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Assinatura de Retirada</h2>
-                                        <p className="text-gray-500 leading-relaxed text-[15px]">
-                                            A equipe receberá seu laudo de imediato. Para consumar o pedido na gateway, confirme seu aval nas opções abaixo:
-                                        </p>
+                                        <h2 className="text-2xl font-semibold tracking-tight mb-1">Só mais duas confirmações:</h2>
                                     </div>
 
                                     <div className="flex flex-col gap-3">
                                         {[
-                                            { key: 'c1', text: "Declaro que interrompi os testes com a plataforma, e não reterei qualquer ativo gerado por automações nossas na má-fé." },
-                                            { key: 'c2', text: "Nossa equipe vai avaliar o seu diagnóstico com o maior cuidado possível, confirmando os dados, e responderá tudo em até 48 horas úteis." },
-                                            { key: 'c3', text: "O estorno é processado e liquidado pela operadora do cartão/banco, e pode cair entre 1 a 2 faturas subsequentes (Cartão)." }
-                                        ].map((check) => (
-                                            <label key={check.key} className={`flex items-start gap-4 p-4 rounded-xl cursor-pointer border transition-colors ${finalChecks[check.key as keyof typeof finalChecks] ? 'border-gray-300 bg-gray-50 ring-2 ring-black/5' : 'border-transparent hover:bg-gray-50'}`}>
-                                                <div className="mt-0.5 flex-shrink-0">
-                                                    <input type="checkbox" className="w-5 h-5 accent-black cursor-pointer rounded" checked={finalChecks[check.key as keyof typeof finalChecks]} onChange={(e) => setFinalChecks(prev => ({ ...prev, [check.key]: e.target.checked }))} />
-                                                </div>
-                                                <span className={`text-[14px] leading-snug ${finalChecks[check.key as keyof typeof finalChecks] ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>{check.text}</span>
-                                            </label>
-                                        ))}
+                                            { key: 'c1', text: "Estou ciente de que não reterei acesso nem usarei dados da plataforma após o cancelamento." },
+                                            { key: 'c2', text: "Entendo que o processamento do estorno no cartão pode levar de 1 a 2 faturas." },
+                                            { key: 'c3', text: "Concordo que a equipe da Lumen poderá entrar em contato comigo em até 48h para confirmar os dados." }
+                                        ].map(({ key, text }) => {
+                                            const checked = checks[key as keyof typeof checks];
+                                            return (
+                                                <label key={key} className={`flex items-start gap-3.5 p-4 rounded-xl border cursor-pointer transition-colors ${checked ? 'border-gray-300 bg-gray-50' : 'border-gray-100 hover:bg-gray-50/50'}`}>
+                                                    <input
+                                                        type="checkbox"
+                                                        className="mt-0.5 w-5 h-5 accent-black cursor-pointer flex-shrink-0"
+                                                        checked={checked}
+                                                        onChange={e => setChecks(prev => ({ ...prev, [key]: e.target.checked }))}
+                                                    />
+                                                    <span className={`text-[14px] leading-snug ${checked ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>{text}</span>
+                                                </label>
+                                            );
+                                        })}
                                     </div>
 
-                                    <button disabled={(!finalChecks.c1 || !finalChecks.c2 || !finalChecks.c3) || isSubmitting} onClick={submitAuditoria} className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-30 disabled:hover:bg-black disabled:bg-gray-200 disabled:text-gray-400 relative overflow-hidden">
+                                    <button
+                                        disabled={!checksValid || isSubmitting}
+                                        onClick={submit}
+                                        className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                    >
                                         {isSubmitting ? (
-                                            <div className="flex items-center gap-2">
+                                            <>
                                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                Emitindo Laudo...
-                                            </div>
+                                                Enviando...
+                                            </>
                                         ) : (
-                                            "Finalizar Solicitação e Auditar"
+                                            <>Confirmar Pedido de Reembolso <CheckCheck size={17} /></>
                                         )}
                                     </button>
                                 </motion.div>
                             )}
 
-                            {/* --- STEP 7: SUCCESS --- */}
+                            {/* ── STEP 7: SUCESSO ── */}
                             {step === 7 && (
-                                <motion.div key="step7" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col items-center gap-6 py-10 md:py-16 text-center">
-                                    <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center mb-4">
-                                        <CheckCircle2 size={40} className="text-green-600" />
+                                <motion.div key="s7" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col items-center text-center gap-5 py-10">
+                                    <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center">
+                                        <CheckCircle2 size={34} className="text-green-500" />
                                     </div>
 
-                                    <h2 className="text-3xl font-semibold text-gray-900 tracking-tight">Ocorrência Protocolada</h2>
+                                    <h2 className="text-2xl font-semibold tracking-tight">Pedido recebido com carinho.</h2>
 
-                                    <div className="flex flex-col gap-4 text-gray-500 max-w-md mx-auto text-[15px] leading-relaxed">
-                                        <p>
-                                            O seu formulário extenso de rescisão e depoimento foram fixados com sucesso.
-                                        </p>
-                                        <p>
-                                            Nossa área de qualidade confirmará os dados de uso. Cumprindo as políticas da plataforma, retornaremos um protocolo oficial (ou Pix imediato) via <strong>E-mail/WhatsApp</strong> dentro de 48 horas úteis.
-                                        </p>
+                                    <div className="text-gray-500 text-[15px] leading-relaxed max-w-sm space-y-3">
+                                        <p>Sua mensagem chegou. Prometemos que alguém da nossa equipe vai ler tudo que você escreveu.</p>
+                                        <p>Você receberá uma confirmação por <strong className="text-gray-700">e-mail em até 48 horas úteis</strong> com as próximas etapas do seu estorno.</p>
+                                        <p>Se mudar de ideia antes disso, é só responder o e-mail.</p>
                                     </div>
 
-                                    <div className="mt-4 text-xs font-semibold text-gray-400 uppercase tracking-widest">
-                                        Lumen Audit System
-                                    </div>
+                                    <p className="text-xs text-gray-400 font-medium tracking-widest uppercase mt-4">Lumen · Obrigado pelo seu tempo.</p>
                                 </motion.div>
                             )}
 
@@ -412,8 +435,7 @@ export default function Reembolsos() {
                     </div>
                 </div>
 
-                {/* Footer */}
-                <footer className="mt-10 mb-4 text-center text-xs text-gray-400">
+                <footer className="mt-8 text-center text-xs text-gray-400">
                     &copy; {new Date().getFullYear()} Lumen Systems. Todos os direitos reservados.
                 </footer>
             </main>
