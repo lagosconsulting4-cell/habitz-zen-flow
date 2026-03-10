@@ -49,8 +49,8 @@ export default function Reembolsos() {
 
     // Links de retorno ao app por produto
     const APP_LINKS: Record<string, string> = {
-        Bora: 'https://app.borahabitos.com',
-        Foquinha: 'https://wa.me/5511999999999', // atualizar com o número da Foquinha
+        Bora: 'https://www.habitz.life/app',
+        Foquinha: 'https://wa.me/5511911559587',
     };
 
     const [step, setStep] = useState(1);
@@ -111,9 +111,6 @@ export default function Reembolsos() {
             id === 'outro' ? `Outro: ${outroMotivo}` : motivosDoProduct().find(m => m.id === id)?.label || id;
 
         const motivoFinal = motivosSelecionados.map(getLabel).join(' | ');
-        const subFinal = motivosSelecionados
-            .map(id => `[${getLabel(id)}]: ${subRespostas[id] || '—'}`)
-            .join('\n\n');
 
         try {
             const { error } = await supabase.from('auditoria_reembolsos').insert({
@@ -121,7 +118,7 @@ export default function Reembolsos() {
                 produto: identificacao.produto,
                 transacao_id: 'Não exigida',
                 motivo_principal: motivoFinal,
-                sub_resposta: subFinal,
+                sub_resposta: null,
                 justificativa_detalhada: justificativa
             });
             if (error) { console.error(error); setIsSubmitting(false); return; }
