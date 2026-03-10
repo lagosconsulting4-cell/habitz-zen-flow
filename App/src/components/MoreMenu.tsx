@@ -29,6 +29,7 @@ import {
   type NavItem,
 } from "@/config/nav";
 import { cn } from "@/lib/utils";
+import { haptic } from "@/lib/haptics";
 
 const iconMap: Record<string, LucideIcon> = {
   home: Home,
@@ -61,6 +62,7 @@ const MoreMenu = ({ open, onOpenChange }: MoreMenuProps) => {
   }, []);
 
   const handleSelect = (item: NavItem) => {
+    haptic.light();
     onOpenChange(false);
     if (location.pathname !== item.path) {
       navigate(item.path);

@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useHabits, Habit } from "@/hooks/useHabits";
 import { useAppPreferences } from "@/hooks/useAppPreferences";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { haptic } from "@/lib/haptics";
 import { HabitIconKey, getHabitIcon, getHabitIconWithFallback } from "@/components/icons/HabitIcons";
 import { HeroCircle } from "@/components/HeroCircle";
 import { Switch } from "@/components/ui/switch";
@@ -257,10 +258,17 @@ const EditHabit = () => {
         due_date: frequencyType === "once" ? dueDate : null,
       });
 
+      haptic.success();
       toast({ title: "Hábito atualizado com sucesso!" });
       navigate("/habits");
     } catch (error) {
       console.error("Failed to update habit", error);
+      haptic.error();
+      toast({
+        title: "Erro ao atualizar hábito",
+        description: "Tente novamente em alguns instantes.",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -392,6 +400,7 @@ const EditHabit = () => {
         <button
           onClick={() => setStep("details")}
           className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
+          aria-label="Voltar"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -399,6 +408,7 @@ const EditHabit = () => {
         <button
           onClick={() => navigate("/habits")}
           className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
+          aria-label="Voltar"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -411,6 +421,7 @@ const EditHabit = () => {
       <button
         onClick={() => navigate("/habits")}
         className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
+        aria-label="Fechar"
       >
         <X className="h-5 w-5" />
       </button>
@@ -516,6 +527,7 @@ const EditHabit = () => {
         <div className="mt-2 grid grid-cols-2 gap-3">
           <Input
             type="number"
+            inputMode="numeric"
             min={0}
             value={goalValue ?? ""}
             onChange={(e) => setGoalValue(e.target.value ? Number(e.target.value) : undefined)}

@@ -1,98 +1,133 @@
-import { SVGProps } from "react";
-import {
-  Smile,
-  Star,
-  Glasses,
-  Heart,
-  Brain,
-  Flame,
-  Rocket,
-  Trophy,
-  Gem,
-  Zap,
-  Target,
-  Crown,
-  Sparkles,
-  Wand2,
-  Shield,
-  Lightbulb,
-  type LucideIcon,
-} from "lucide-react";
-
-export type AvatarIconKey =
-  | "smile_basic"
-  | "star_eyes"
-  | "cool_shades"
-  | "heart_eyes"
-  | "thinking"
-  | "fire_warrior"
-  | "rocket_boost"
-  | "trophy_winner"
-  | "brain_power"
-  | "diamond_flex"
-  | "lightning_fast"
-  | "target_locked"
-  | "crown_royalty"
-  | "unicorn_magic"
-  | "dragon_master"
-  | "ninja_stealth"
-  | "wizard_sage"
-  | "phoenix_rebirth"
-  | "galaxy_brain"
-  | "zen_master";
-
-type IconProps = SVGProps<SVGSVGElement>;
+import { useMemo } from "react";
+import { createAvatar } from "@dicebear/core";
+import { avataaars } from "@dicebear/collection";
 
 // ============================================
-// LUCIDE WRAPPER (for consistency)
+// DiceBear Avataaars Config Types
 // ============================================
 
-const wrapLucideIcon = (LucideComponent: LucideIcon) => (props: IconProps) => (
-  <LucideComponent
-    strokeWidth={2}
-    fill="none"
-    stroke="currentColor"
-    {...props}
-  />
-);
+export interface DiceBearAvatarConfig {
+  skinColor?: string[];
+  top?: string[];
+  topProbability?: number;
+  hairColor?: string[];
+  hatColor?: string[];
+  eyes?: string[];
+  eyebrows?: string[];
+  mouth?: string[];
+  nose?: string[];
+  facialHair?: string[];
+  facialHairProbability?: number;
+  facialHairColor?: string[];
+  clothing?: string[];
+  clothesColor?: string[];
+  clothingGraphic?: string[];
+  accessories?: string[];
+  accessoriesProbability?: number;
+  accessoriesColor?: string[];
+  backgroundColor?: string[];
+  style?: string[];
+}
 
 // ============================================
-// EXPORTED ICONS MAP
+// Option Enums (from DiceBear avataaars schema)
 // ============================================
 
-export const AvatarIcons: Record<AvatarIconKey, (props: IconProps) => JSX.Element> = {
-  // ========== COMMON (5) ==========
-  smile_basic: wrapLucideIcon(Smile),
-  star_eyes: wrapLucideIcon(Star),
-  cool_shades: wrapLucideIcon(Glasses),
-  heart_eyes: wrapLucideIcon(Heart),
-  thinking: wrapLucideIcon(Brain),
+export const SKIN_COLORS = ["614335", "d08b5b", "ae5d29", "edb98a", "ffdbb4", "fd9841", "f8d25c"];
 
-  // ========== RARE (7) ==========
-  fire_warrior: wrapLucideIcon(Flame),
-  rocket_boost: wrapLucideIcon(Rocket),
-  trophy_winner: wrapLucideIcon(Trophy),
-  brain_power: wrapLucideIcon(Brain),
-  diamond_flex: wrapLucideIcon(Gem),
-  lightning_fast: wrapLucideIcon(Zap),
-  target_locked: wrapLucideIcon(Target),
+export const HAIR_STYLES = [
+  "bob", "bun", "curly", "curvy", "dreads", "dreads01", "dreads02",
+  "frida", "fro", "froBand", "frizzle", "longButNotTooLong", "miaWallace",
+  "shavedSides", "shaggy", "shaggyMullet", "shortCurly", "shortFlat",
+  "shortRound", "shortWaved", "sides", "straight01", "straight02",
+  "straightAndStrand", "theCaesar", "theCaesarAndSidePart", "bigHair",
+];
 
-  // ========== EPIC (5) ==========
-  crown_royalty: wrapLucideIcon(Crown),
-  unicorn_magic: wrapLucideIcon(Sparkles),
-  dragon_master: wrapLucideIcon(Sparkles),
-  ninja_stealth: wrapLucideIcon(Shield),
-  wizard_sage: wrapLucideIcon(Wand2),
+export const HAT_STYLES = ["hat", "hijab", "turban", "winterHat1", "winterHat02", "winterHat03", "winterHat04"];
 
-  // ========== LEGENDARY (3) ==========
-  phoenix_rebirth: wrapLucideIcon(Flame),
-  galaxy_brain: wrapLucideIcon(Sparkles),
-  zen_master: wrapLucideIcon(Lightbulb),
+export const HAIR_COLORS = ["a55728", "2c1b18", "b58143", "d6b370", "724133", "4a312c", "f59797", "ecdcbf", "c93305", "e8e1e1"];
+
+export const EYE_TYPES = ["default", "happy", "closed", "cry", "eyeRoll", "hearts", "side", "squint", "surprised", "wink", "winkWacky", "xDizzy"];
+
+export const EYEBROW_TYPES = [
+  "defaultNatural", "angryNatural", "flatNatural", "frownNatural",
+  "raisedExcitedNatural", "sadConcernedNatural", "unibrowNatural", "upDownNatural",
+  "default", "angry", "raisedExcited", "sadConcerned", "upDown",
+];
+
+export const MOUTH_TYPES = ["default", "smile", "twinkle", "tongue", "concerned", "disbelief", "eating", "grimace", "sad", "screamOpen", "serious", "vomit"];
+
+export const FACIAL_HAIR_TYPES = ["beardLight", "beardMedium", "beardMajestic", "moustacheFancy", "moustacheMagnum"];
+
+export const CLOTHING_TYPES = ["blazerAndShirt", "blazerAndSweater", "collarAndSweater", "graphicShirt", "hoodie", "overall", "shirtCrewNeck", "shirtScoopNeck", "shirtVNeck"];
+
+export const CLOTHES_COLORS = ["262e33", "65c9ff", "5199e4", "25557c", "e6e6e6", "929598", "3c4f5c", "b1e2ff", "a7ffc4", "ffafb9", "ffffb1", "ff488e", "ff5c5c", "ffffff"];
+
+export const ACCESSORY_TYPES = ["kurt", "prescription01", "prescription02", "round", "sunglasses", "wayfarers", "eyepatch"];
+
+export const BG_COLORS = ["65c9ff", "b6e3f4", "c0aede", "d1d4f9", "ffd5dc", "ffdfbf", "ffffff", "f0f0f0"];
+
+// ============================================
+// Default Config
+// ============================================
+
+export const DEFAULT_AVATAR_CONFIG: DiceBearAvatarConfig = {
+  skinColor: ["ffdbb4"],
+  top: ["shortFlat"],
+  topProbability: 100,
+  hairColor: ["2c1b18"],
+  eyes: ["default"],
+  eyebrows: ["defaultNatural"],
+  mouth: ["smile"],
+  clothing: ["hoodie"],
+  clothesColor: ["65c9ff"],
+  accessories: [],
+  accessoriesProbability: 0,
+  facialHair: [],
+  facialHairProbability: 0,
+  backgroundColor: ["65c9ff"],
+  style: ["circle"],
 };
 
-export const DEFAULT_AVATAR_ICON: AvatarIconKey = "smile_basic";
+// ============================================
+// SVG Generation (safe: config values come from predefined enums, not user HTML)
+// ============================================
 
-export const getAvatarIcon = (key?: AvatarIconKey | null) => {
-  if (!key) return null;
-  return AvatarIcons[key] ?? null;
-};
+export function generateAvatarSvg(config?: DiceBearAvatarConfig | null): string {
+  return createAvatar(avataaars, {
+    ...(config || DEFAULT_AVATAR_CONFIG),
+  }).toString();
+}
+
+// ============================================
+// React Component
+// ============================================
+
+export function AvatarDisplay({
+  config,
+  size = 40,
+  className,
+}: {
+  config?: DiceBearAvatarConfig | null;
+  size?: number;
+  className?: string;
+}) {
+  // SVG is generated from DiceBear library with predefined enum values — safe to render
+  const svg = useMemo(() => generateAvatarSvg(config), [config]);
+
+  return (
+    <div
+      className={className}
+      style={{ width: size, height: size }}
+      dangerouslySetInnerHTML={{ __html: svg.replace(/<svg /, '<svg style="width:100%;height:100%;display:block" ') }}
+    />
+  );
+}
+
+// ============================================
+// Legacy Backward Compat (remove in cleanup PR)
+// ============================================
+
+export type AvatarIconKey = string;
+export const DEFAULT_AVATAR_ICON = "smile_basic";
+export const getAvatarIcon = (_key?: string | null) => null;

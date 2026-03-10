@@ -263,21 +263,25 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     );
   }, []);
 
+  const MAX_ONBOARDING_JOURNEYS = 2;
+
   const toggleJourney = useCallback((journeyId: string) => {
     setSelectedJourneyIds((prev) => {
       const next = new Set(prev);
       if (next.has(journeyId)) next.delete(journeyId);
-      else next.add(journeyId);
+      else if (next.size < MAX_ONBOARDING_JOURNEYS) next.add(journeyId);
       return next;
     });
   }, []);
+
+  const MAX_ONBOARDING_HABITS = 5;
 
   const toggleHabit = useCallback((habitId: string) => {
     setSelectedHabitIds((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(habitId)) {
         newSet.delete(habitId);
-      } else {
+      } else if (newSet.size < MAX_ONBOARDING_HABITS) {
         newSet.add(habitId);
       }
       return newSet;
@@ -330,9 +334,9 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         weekDays,
       });
 
-      // Set recommended habits and select all by default
+      // Set recommended habits — none selected by default, user chooses explicitly
       setRecommendedHabits(recommendations);
-      setSelectedHabitIds(new Set(recommendations.map((h) => h.id)));
+      setSelectedHabitIds(new Set());
     } catch (error) {
       console.error("Failed to generate routine:", error);
     } finally {
@@ -382,8 +386,19 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         return categoryMap[category] || "outro";
       };
 
-      // Create habits in database with all available data
+      // Fetch existing active habits to avoid duplicates
+      const { data: existingHabits } = await supabase
+        .from("habits")
+        .select("name")
+        .eq("user_id", user.id)
+        .eq("is_active", true);
+      const existingNames = new Set(
+        (existingHabits || []).map((h) => h.name.toLowerCase().trim())
+      );
+
+      // Create habits in database — skip duplicates
       for (const habit of selectedHabits) {
+        if (existingNames.has(habit.name.toLowerCase().trim())) continue;
         const { error: habitError } = await supabase.from("habits").insert({
           // Required fields
           user_id: user.id,

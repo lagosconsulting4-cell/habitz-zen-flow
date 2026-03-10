@@ -24,6 +24,7 @@ import { useHabits } from "@/hooks/useHabits";
 import useHabitCatalog, { HabitTemplate } from "@/hooks/useHabitCatalog";
 import { useAppPreferences } from "@/hooks/useAppPreferences";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { haptic } from "@/lib/haptics";
 import { HABIT_EMOJIS } from "@/data/habit-emojis";
 import type { HabitEmoji } from "@/data/habit-emojis";
 import { HabitIconKey, getHabitIcon } from "@/components/icons/HabitIcons";
@@ -414,9 +415,16 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         auto_complete_source: "manual",
         due_date: frequencyType === "once" ? dueDate : null,
       });
+      haptic.success();
       navigate("/dashboard");
     } catch (error) {
       console.error("Failed to create habit", error);
+      haptic.error();
+      toast({
+        title: "Erro ao criar hábito",
+        description: "Tente novamente em alguns instantes.",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -427,6 +435,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       return (
         <Input
           type="number"
+          inputMode="numeric"
           min={1}
           max={7}
           value={timesPerWeek ?? ""}
@@ -440,6 +449,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       return (
         <Input
           type="number"
+          inputMode="numeric"
           min={1}
           max={31}
           value={timesPerMonth ?? ""}
@@ -453,6 +463,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       return (
         <Input
           type="number"
+          inputMode="numeric"
           min={1}
           value={everyNDays ?? ""}
           onChange={(e) => setEveryNDays(e.target.value ? Number(e.target.value) : undefined)}
@@ -670,6 +681,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         <button
           onClick={() => setStep("select")}
           className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
+          aria-label="Voltar"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -677,6 +689,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         <button
           onClick={() => setStep("details")}
           className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
+          aria-label="Voltar"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -691,6 +704,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       <button
         onClick={() => navigate("/dashboard")}
         className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
+        aria-label="Fechar"
       >
         <X className="h-5 w-5" />
       </button>
@@ -841,6 +855,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
           onChange={(e) => setHabitName(e.target.value)}
           placeholder="Digite o nome da tarefa"
           maxLength={18}
+          autoComplete="off"
           className={`mt-2 rounded-xl ${themeColors.input}`}
         />
         <p className={`mt-1.5 text-right text-xs ${themeColors.sectionTitle}`}>

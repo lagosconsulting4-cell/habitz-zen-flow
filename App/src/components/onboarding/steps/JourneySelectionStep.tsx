@@ -26,9 +26,12 @@ interface JourneyOption {
   recommended: boolean;
 }
 
+const MAX_JOURNEYS = 2;
+
 export const JourneySelectionStep = () => {
   const { challenges, selectedJourneyIds, toggleJourney } = useOnboarding();
   const reducedMotion = useReducedMotion();
+  const atLimit = selectedJourneyIds.size >= MAX_JOURNEYS;
 
   // Fetch L1 journeys from DB
   const { data: journeys = [], isLoading } = useQuery({
@@ -76,7 +79,7 @@ export const JourneySelectionStep = () => {
       >
         <h2 className="text-2xl font-bold mb-1">Escolha sua jornada</h2>
         <p className="text-sm text-muted-foreground font-serif italic">
-          Transformações guiadas de 30 dias
+          Transformações guiadas de 30 dias — escolha até {MAX_JOURNEYS}
         </p>
       </motion.div>
 
@@ -112,7 +115,7 @@ export const JourneySelectionStep = () => {
                 key={j.id}
                 initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 16, scale: 0.98 }}
                 animate={{
-                  opacity: 1,
+                  opacity: atLimit && !selected ? 0.45 : 1,
                   y: 0,
                   scale: 1,
                   borderColor: selected ? `${theme.color}66` : `${theme.color}26`,
@@ -225,11 +228,15 @@ export const JourneySelectionStep = () => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="text-center text-xs text-muted-foreground mt-3"
+        className="text-center text-xs mt-3"
       >
-        {selectedJourneyIds.size > 0
-          ? `${selectedJourneyIds.size} ${selectedJourneyIds.size === 1 ? "jornada selecionada" : "jornadas selecionadas"}`
-          : "Selecione uma ou mais, ou pule esta etapa"}
+        {atLimit ? (
+          <span className="text-amber-500 font-medium">⚠ Limite atingido — comece com {MAX_JOURNEYS} jornadas</span>
+        ) : selectedJourneyIds.size > 0 ? (
+          <span className="text-muted-foreground">{selectedJourneyIds.size} {selectedJourneyIds.size === 1 ? "jornada selecionada" : "jornadas selecionadas"}</span>
+        ) : (
+          <span className="text-muted-foreground">Selecione uma ou mais, ou pule esta etapa</span>
+        )}
       </motion.p>
     </div>
   );

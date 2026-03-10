@@ -64,8 +64,8 @@ const AdherenceCard = () => {
         return {
           icon: CheckCircle,
           iconColor: "text-green-500",
-          bgColor: "from-green-50 to-emerald-50",
-          borderColor: "border-green-200",
+          bgColor: "from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30",
+          borderColor: "border-green-200 dark:border-green-800/40",
           title: "Você está no ritmo!",
           subtitle: "Continue assim, seu progresso está ótimo",
           badgeText: "No ritmo",
@@ -75,8 +75,8 @@ const AdherenceCard = () => {
         return {
           icon: Clock,
           iconColor: "text-yellow-500",
-          bgColor: "from-yellow-50 to-orange-50",
-          borderColor: "border-yellow-200",
+          bgColor: "from-yellow-50 to-orange-50 dark:from-yellow-950/30 dark:to-orange-950/30",
+          borderColor: "border-yellow-200 dark:border-yellow-800/40",
           title: "Quase lá!",
           subtitle: "Você está um pouco atrasado, mas pode recuperar",
           badgeText: "Levemente atrasado",
@@ -86,8 +86,8 @@ const AdherenceCard = () => {
         return {
           icon: AlertCircle,
           iconColor: "text-orange-500",
-          bgColor: "from-orange-50 to-red-50",
-          borderColor: "border-orange-200",
+          bgColor: "from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30",
+          borderColor: "border-orange-200 dark:border-orange-800/40",
           title: "Não desista!",
           subtitle: "Vamos retomar o ritmo juntos",
           badgeText: "Retome o ritmo",
@@ -97,8 +97,8 @@ const AdherenceCard = () => {
         return {
           icon: TrendingUp,
           iconColor: "text-purple-500",
-          bgColor: "from-purple-50 to-pink-50",
-          borderColor: "border-purple-200",
+          bgColor: "from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30",
+          borderColor: "border-purple-200 dark:border-purple-800/40",
           title: "Comece seu programa!",
           subtitle: "O plano de 30 dias está te esperando",
           badgeText: "Iniciar",
@@ -118,22 +118,22 @@ const AdherenceCard = () => {
     >
       <div className="p-6">
         <div className="flex items-start gap-4">
-          <div className="p-3 bg-white rounded-xl shadow-sm">
+          <div className="p-3 bg-white dark:bg-white/10 rounded-xl shadow-sm">
             <Icon className={`w-6 h-6 ${config.iconColor}`} />
           </div>
 
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-xl font-bold text-gray-900">{config.title}</h3>
+              <h3 className="text-xl font-bold text-foreground">{config.title}</h3>
               <Badge className={config.badgeColor}>{config.badgeText}</Badge>
             </div>
 
-            <p className="text-sm text-gray-700 mb-4">{config.subtitle}</p>
+            <p className="text-sm text-muted-foreground mb-4">{config.subtitle}</p>
 
             <div className="space-y-3">
               {/* Indicador de semana */}
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">
+                <span className="text-muted-foreground">
                   Você está na <strong>semana {adherence.week} de 4</strong> do programa
                 </span>
               </div>
@@ -141,13 +141,13 @@ const AdherenceCard = () => {
               {/* Progresso geral */}
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-600">Progresso Geral</span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="text-muted-foreground">Progresso Geral</span>
+                  <span className="font-semibold text-foreground">
                     {programProgress.completedLessons} de {programProgress.totalLessons} aulas
                   </span>
                 </div>
                 <Progress value={programProgress.percentage} className="h-2" />
-                <div className="text-xs text-gray-500 mt-1 text-right">
+                <div className="text-xs text-muted-foreground mt-1 text-right">
                   {programProgress.percentage}% concluído
                 </div>
               </div>

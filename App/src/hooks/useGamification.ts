@@ -339,6 +339,39 @@ export const useGamification = (userId?: string) => {
     staleTime: 30_000,
   });
 
+  // Query: Avatar Config (DiceBear)
+  const { data: avatarConfig } = useQuery({
+    queryKey: ["avatar-config", userId],
+    queryFn: async () => {
+      if (!userId) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("avatar_config")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (error) throw error;
+      return (data?.avatar_config as Record<string, unknown>) ?? null;
+    },
+    enabled: Boolean(userId),
+    staleTime: 300_000,
+  });
+
+  // Mutation: Save Avatar Config (DiceBear)
+  const saveAvatarConfigMutation = useMutation({
+    mutationFn: async ({ config }: { config: Record<string, unknown> }) => {
+      if (!userId) throw new Error("User not authenticated");
+      const { error } = await supabase.rpc("save_avatar_config", {
+        p_user_id: userId,
+        p_config: config,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["avatar-config", userId] });
+      queryClient.invalidateQueries({ queryKey: ["profiles", userId] });
+    },
+  });
+
   // Query: Avatars Catalog (público, cacheable por mais tempo)
   const { data: avatarsCatalog } = useQuery({
     queryKey: ["avatars-catalog"],
@@ -1268,7 +1301,12 @@ export const useGamification = (userId?: string) => {
     lifetimeGemsSpent: gems?.lifetime_gems_spent || 0,
     gemTransactions: gemTransactions || [],
 
-    // ========== NEW: AVATARS DATA ==========
+    // ========== NEW: DICEBEAR AVATAR ==========
+    avatarConfig: (avatarConfig as Record<string, unknown>) ?? null,
+    saveAvatarConfig: saveAvatarConfigMutation.mutateAsync,
+    isSavingAvatarConfig: saveAvatarConfigMutation.isPending,
+
+    // ========== LEGACY AVATARS DATA ==========
     avatarsCatalog: avatarsCatalog || [],
     userAvatars: userAvatars || [],
     equippedAvatar,
@@ -1365,6 +1403,7 @@ export const useGamification = (userId?: string) => {
       queryClient.invalidateQueries({ queryKey: ["user-progress", userId] });
       queryClient.invalidateQueries({ queryKey: ["user-unlocks", userId] });
       queryClient.invalidateQueries({ queryKey: ["user-gems", userId] });
+      queryClient.invalidateQueries({ queryKey: ["avatar-config", userId] });
       queryClient.invalidateQueries({ queryKey: ["user-avatars", userId] });
       queryClient.invalidateQueries({ queryKey: ["user-achievements", userId] });
       queryClient.invalidateQueries({ queryKey: ["streak-freezes", userId] });

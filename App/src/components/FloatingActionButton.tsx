@@ -23,12 +23,13 @@ export const FloatingActionButton = ({ className }: FloatingActionButtonProps) =
       whileTap={{ scale: 0.9 }}
       onClick={() => navigate("/create")}
       className={cn(
-        "fixed right-4 z-40 toast-bottom",
+        "fixed right-4 z-[45] toast-bottom",
         "w-14 h-14 rounded-full",
         "bg-primary hover:bg-primary/90 text-primary-foreground",
         "flex items-center justify-center",
         "shadow-lg shadow-primary/25",
         "transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/70 focus-visible:ring-offset-2",
         className
       )}
       aria-label="Criar novo hábito"

@@ -542,7 +542,12 @@ const JourneyDayCard = () => {
   }
 
   return (
-    <div className="pb-navbar">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="pb-navbar"
+    >
       {/* Top bar */}
       <div className="px-4 pb-2 flex items-center justify-between" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}>
         <button
@@ -726,7 +731,7 @@ const JourneyDayCard = () => {
           <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
 

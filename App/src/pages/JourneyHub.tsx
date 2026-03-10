@@ -37,7 +37,8 @@ const ActiveJourneyCard = ({ journey }: { journey: JourneyWithState }) => {
       onClick={() => navigate(`/journeys/${journey.slug}`)}
       className={cn(
         "w-full journey-card p-4 text-left relative",
-        "border transition-all"
+        "border transition-all",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
       )}
       style={{
         background: 'var(--card)',
@@ -53,7 +54,7 @@ const ActiveJourneyCard = ({ journey }: { journey: JourneyWithState }) => {
             className="absolute inset-0 rounded-full blur-md"
             style={{ backgroundColor: `${theme.color}1A` }}
           />
-          <svg width={ringSize} height={ringSize} className="transform -rotate-90 relative">
+          <svg width={ringSize} height={ringSize} className="transform -rotate-90 relative" role="img" aria-label={`Progresso da jornada: ${percent}%`}>
             <circle
               cx={ringSize / 2}
               cy={ringSize / 2}
@@ -134,7 +135,8 @@ const JourneyCatalogCard = ({
         "border",
         isLocked
           ? "opacity-50 cursor-not-allowed"
-          : "transition-all"
+          : "transition-all",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
       )}
       style={{
         background: 'var(--card)',
@@ -240,7 +242,13 @@ const JourneyHub = () => {
   }
 
   return (
-    <div className="px-4 pb-navbar space-y-6" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="px-4 pb-navbar space-y-6 max-w-xl mx-auto w-full"
+      style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
+    >
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Jornadas</h1>
@@ -294,7 +302,7 @@ const JourneyHub = () => {
           <p className="text-muted-foreground">Nenhuma jornada disponivel no momento</p>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

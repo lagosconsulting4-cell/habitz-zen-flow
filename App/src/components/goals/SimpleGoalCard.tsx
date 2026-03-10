@@ -48,24 +48,18 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
     onChange(suggestedValue);
   };
 
-  // Cores adaptativas baseadas no tema com bom contraste
-  const cardClass = isDarkMode
-    ? "border-white/10 bg-white/5"
-    : "border-slate-200 bg-slate-50"; // Fundo claro visível
-  const iconBgClass = isDarkMode ? "bg-lime-400/10" : "bg-lime-100"; // Lime suave no light
-  const iconClass = isDarkMode ? "text-lime-400" : "text-lime-600"; // Lime visível
-  const labelClass = isDarkMode ? "text-white/40" : "text-slate-500"; // Texto legível
-  const valueClass = isDarkMode ? "text-white" : "text-slate-900"; // Texto escuro legível
-  const borderClass = isDarkMode ? "border-white/10" : "border-slate-200";
-  const inputClass = isDarkMode
-    ? "bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-lime-400/50"
-    : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-lime-500";
-  const unitLabelClass = isDarkMode ? "text-white/50" : "text-slate-500";
-  const buttonActiveClass = isDarkMode ? "bg-lime-400 text-black" : "bg-lime-500 text-white"; // Lime consistente
-  const buttonInactiveClass = isDarkMode
-    ? "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
-    : "bg-slate-200 text-slate-600 hover:bg-slate-300 hover:text-slate-800"; // Cinza neutro
-  const helpTextClass = isDarkMode ? "text-white/50" : "text-slate-500";
+  // Cores adaptativas usando tokens do tema (automatico light/dark)
+  const cardClass = "border-border bg-card/50";
+  const iconBgClass = "bg-primary/10";
+  const iconClass = "text-primary";
+  const labelClass = "text-muted-foreground";
+  const valueClass = "text-foreground";
+  const borderClass = "border-border";
+  const inputClass = "bg-background border-border text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50";
+  const unitLabelClass = "text-muted-foreground";
+  const buttonActiveClass = "bg-primary text-primary-foreground";
+  const buttonInactiveClass = "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground";
+  const helpTextClass = "text-muted-foreground";
 
   return (
     <div className={`mx-4 overflow-hidden rounded-2xl border ${cardClass}`}>
@@ -93,6 +87,7 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
         <div className="relative">
           <Input
             type="number"
+            inputMode="numeric"
             min={config.validation?.min || 0}
             max={config.validation?.max}
             value={value ?? ""}
@@ -143,7 +138,7 @@ export const SimpleGoalCard: React.FC<SimpleGoalCardProps> = ({
         {validation.warning && (
           <div className="flex items-start gap-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20 px-3 py-2">
             <AlertCircle className="h-4 w-4 text-yellow-500 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-yellow-200/90 leading-relaxed">
+            <p className="text-xs text-yellow-700 dark:text-yellow-200/90 leading-relaxed">
               {validation.warning}
             </p>
           </div>

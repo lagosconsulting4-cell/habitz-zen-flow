@@ -690,7 +690,7 @@ export const useJourneyActions = () => {
           unit: template.unit === "none" ? null : template.unit === "minutes" ? "minutes" : "custom",
           goal_value: template.initial_goal_value,
           reminder_time: periodToReminder[template.period] || "08:00",
-          notification_pref: { reminder_enabled: true, reminder_time: periodToReminder[template.period] || "08:00" },
+          notification_pref: { reminder_enabled: false, reminder_time: periodToReminder[template.period] || "08:00" },
         };
         if (isOneTime) {
           habitInsert.due_date = new Date().toISOString().split("T")[0];
@@ -889,7 +889,7 @@ export const useJourneyActions = () => {
             unit: template.unit === "none" ? null : template.unit === "minutes" ? "minutes" : "custom",
             goal_value: template.initial_goal_value,
             reminder_time: cdPeriodToReminder[template.period] || "08:00",
-            notification_pref: { reminder_enabled: true, reminder_time: cdPeriodToReminder[template.period] || "08:00" },
+            notification_pref: { reminder_enabled: false, reminder_time: cdPeriodToReminder[template.period] || "08:00" },
           };
           if (isOneTimeHabit) {
             newHabitInsert.due_date = new Date().toISOString().split("T")[0];

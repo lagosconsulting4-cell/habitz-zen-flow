@@ -74,6 +74,7 @@ const Tips = () => {
         <div className="flex overflow-x-auto gap-2 mb-6 pb-2">
           <button
             onClick={() => setActiveTab("rotina")}
+            aria-pressed={activeTab === "rotina"}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
               activeTab === "rotina"
                 ? "bg-primary text-primary-foreground"
@@ -85,6 +86,7 @@ const Tips = () => {
           </button>
           <button
             onClick={() => setActiveTab("nutricao")}
+            aria-pressed={activeTab === "nutricao"}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
               activeTab === "nutricao"
                 ? "bg-primary text-primary-foreground"

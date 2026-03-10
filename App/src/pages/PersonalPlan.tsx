@@ -230,7 +230,15 @@ const PersonalPlan = () => {
                           return (
                             <div
                               key={lesson.id}
+                              role="button"
+                              tabIndex={0}
                               onClick={() => handleLessonClick(lesson, module)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  handleLessonClick(lesson, module);
+                                }
+                              }}
                               className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all cursor-pointer ${
                                 isCompleted
                                   ? "bg-primary/10 border-primary/30"

@@ -133,6 +133,7 @@ const Meditation = () => {
             <button
               key={category.value}
               onClick={() => setSelectedCategory(category.value)}
+              aria-pressed={selectedCategory === category.value}
               className={`whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                 selectedCategory === category.value
                   ? "bg-primary text-primary-foreground"
@@ -168,7 +169,16 @@ const Meditation = () => {
                   className={`rounded-2xl bg-card border border-border p-6 hover:border-primary/50 transition-all duration-300 cursor-pointer ${
                     selectedSessionId === session.id ? "ring-2 ring-primary" : ""
                   }`}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={selectedSessionId === session.id}
                   onClick={() => toggleSessionDetails(session.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      toggleSessionDetails(session.id);
+                    }
+                  }}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -204,6 +214,7 @@ const Meditation = () => {
                         event.stopPropagation();
                         void handlePlay(session);
                       }}
+                      aria-label={activeSessionId === session.id && isPlaying ? "Pausar meditação" : "Reproduzir meditação"}
                     >
                       {loadingAudioId === session.id ? (
                         <Loader2 className="w-4 h-4 animate-spin" />

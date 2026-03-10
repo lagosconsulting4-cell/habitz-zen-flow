@@ -119,9 +119,11 @@ export const RoutinePreviewStep = () => {
           <span className="text-muted-foreground">
             {selectedCount} de {totalHabits} selecionados
           </span>
-          {selectedCount >= 3 && (
+          {selectedCount >= 5 ? (
+            <span className="text-amber-500 font-medium">⚠ Limite atingido (máx. 5)</span>
+          ) : selectedCount >= 3 ? (
             <span className="text-green-500 font-medium">✓ Mínimo atingido</span>
-          )}
+          ) : null}
         </div>
       </motion.div>
 
@@ -289,7 +291,7 @@ export const RoutinePreviewStep = () => {
         transition={{ delay: 0.8, duration: 0.4 }}
         className="text-center text-xs text-muted-foreground mt-4"
       >
-        Selecione pelo menos 3 hábitos para começar sua jornada
+        Selecione de 3 a 5 hábitos — cada um gerará lembretes no WhatsApp
       </motion.p>
 
       {/* Custom Habit Dialog */}

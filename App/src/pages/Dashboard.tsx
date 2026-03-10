@@ -231,6 +231,7 @@ const Dashboard = () => {
         // Complete the habit (today's date)
         toggleHabit(habitId).catch((error) => {
           console.error("[Dashboard] Error completing habit from notification:", error);
+          toast.error("Erro ao completar hábito");
         });
       }
     };
@@ -272,6 +273,7 @@ const Dashboard = () => {
           .then(() => toast.success("Hábito completado!"))
           .catch((error) => {
             console.error("[Dashboard] Error completing habit from URL intent:", error);
+            toast.error("Erro ao completar hábito");
           });
       }
 
@@ -674,7 +676,7 @@ const Dashboard = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 px-4 pb-navbar space-y-5"
+        className="flex-1 px-4 pb-navbar space-y-5 max-w-xl mx-auto w-full"
         style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
         {/* DailyMissionCard - Journey progress + daily habit progress */}
@@ -722,7 +724,7 @@ const Dashboard = () => {
                   Proximo lembrete: {timeStr}
                 </p>
                 <p className="text-[11px] text-muted-foreground truncate">
-                  {nextHabit.emoji} {nextHabit.name}
+                  {nextHabit.name}
                 </p>
               </div>
               <ChevronRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />

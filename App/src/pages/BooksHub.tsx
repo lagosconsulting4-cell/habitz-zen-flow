@@ -53,6 +53,7 @@ const BooksHub = () => {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
+              aria-pressed={selectedCategory === category}
               className={`whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                 selectedCategory === category
                   ? "bg-primary text-primary-foreground"

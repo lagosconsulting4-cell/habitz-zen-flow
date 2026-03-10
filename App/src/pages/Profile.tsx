@@ -1,84 +1,58 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import {
-  Bell,
   Clock,
   LogOut,
-  User,
   Mail,
   Diamond,
   Snowflake,
   Shield,
-  Sparkles,
   Pencil,
   Check,
   X,
   Loader2,
   Sun,
   Moon,
-  Volume2,
-  VolumeX,
-  Vibrate,
   Gift,
   ChevronRight,
   XCircle,
-  Trophy,
-  Sunset,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
-import { sounds } from "@/lib/sounds";
 import { usePremium } from "@/hooks/usePremium";
-import { useProfileInsights } from "@/hooks/useProfileInsights";
-import { useAppPreferences } from "@/hooks/useAppPreferences";
 import { useTheme } from "@/hooks/useTheme";
 import { useGamification } from "@/hooks/useGamification";
 import { toast } from "sonner";
 import { bonusSections } from "@/pages/Bonus";
 import { bonusFlags } from "@/config/bonusFlags";
 import { NotificationToggle } from "@/components/pwa/NotificationPermissionDialog";
-import { AvatarShopModal } from "@/components/gamification/AvatarShopModal";
 import { FreezeShopModal } from "@/components/gamification/FreezeShopModal";
-import { GemCounter } from "@/components/gamification/GemCounter";
-import { StreakFreezeCard } from "@/components/gamification/StreakFreezeCard";
-import { getAvatarIcon } from "@/components/gamification/AvatarIcons";
+import { AvatarDisplay } from "@/components/gamification/AvatarIcons";
+import { AvatarCreator } from "@/components/gamification/AvatarCreator";
 
 const Profile = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState("Habitz");
   const [email, setEmail] = useState("usuario@habitz.app");
-  const [accountCreatedAt, setAccountCreatedAt] = useState<string | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
-  const [avatarShopOpen, setAvatarShopOpen] = useState(false);
   const [freezeShopOpen, setFreezeShopOpen] = useState(false);
+  const [avatarCreatorOpen, setAvatarCreatorOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [notifPrefs, setNotifPrefs] = useState<{
-    quiet_hours_start?: string;
-    quiet_hours_end?: string;
     end_of_day_enabled?: boolean;
-    preferred_reminder_times?: {
-      morning?: string;
-      afternoon?: string;
-      evening?: string;
-    };
   }>({});
 
-  const { isPremium, premiumSince } = usePremium(userId ?? undefined);
-  const { insights, loading: insightsLoading } = useProfileInsights(userId ?? undefined);
-  const { prefs, setPreferences } = useAppPreferences();
+  const { isPremium } = usePremium(userId ?? undefined);
   const { theme, setTheme } = useTheme();
-  const { equippedAvatar, userAchievements, achievementsCatalog, gemsBalance, availableFreezes } = useGamification(userId ?? undefined);
-
-  const numberFormatter = useMemo(() => new Intl.NumberFormat("pt-BR"), []);
+  const { equippedAvatar, gemsBalance, availableFreezes, avatarConfig } = useGamification(userId ?? undefined);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -90,7 +64,6 @@ const Profile = () => {
 
       setUserId(user.id);
       setEmail((prev) => user.email ?? prev);
-      setAccountCreatedAt(user.created_at ?? null);
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -177,17 +150,6 @@ const Profile = () => {
     }
   };
 
-  const stats = [
-    { label: "Hábitos ativos", value: insights.activeHabits, highlight: true },
-    { label: "Dias usando", value: insights.daysUsing },
-    { label: "Consistência", value: insights.consistency, suffix: "%" },
-  ];
-
-  const accessStart = insights.sinceDate ?? premiumSince ?? accountCreatedAt;
-  const accessSinceLabel = accessStart
-    ? new Date(accessStart).toLocaleDateString("pt-BR")
-    : "agora";
-
   return (
     <div className="min-h-screen bg-background pb-navbar transition-colors duration-300">
       <motion.div
@@ -197,14 +159,23 @@ const Profile = () => {
         className="container mx-auto px-4 pb-6 max-w-2xl"
         style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
+        {/* ====== 1. Identity Header ====== */}
         <div className="text-center mb-8">
           <div className="relative">
-            <div className="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-2 border-primary/30">
-              <User className="w-10 h-10 text-primary" />
-            </div>
-            <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground border-0 font-semibold">
-              {isPremium ? "Premium vitalício" : "Conta aguardando ativação"}
-            </Badge>
+            <button
+              onClick={() => setAvatarCreatorOpen(true)}
+              className="relative group mx-auto mb-4 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50"
+              aria-label="Personalizar avatar"
+            >
+              <AvatarDisplay
+                config={avatarConfig as any}
+                size={96}
+                className="rounded-full shadow-lg border-2 border-primary/30"
+              />
+              <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                <Pencil className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </button>
           </div>
           {isAdmin && (
             <Button
@@ -234,6 +205,7 @@ const Profile = () => {
                 className="h-8 w-8 text-primary hover:bg-primary/10"
                 onClick={handleSaveName}
                 disabled={isSavingName}
+                aria-label="Confirmar alteracao"
               >
                 {isSavingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               </Button>
@@ -243,6 +215,7 @@ const Profile = () => {
                 className="h-8 w-8 text-muted-foreground hover:bg-muted"
                 onClick={handleCancelEdit}
                 disabled={isSavingName}
+                aria-label="Cancelar edicao"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -255,6 +228,7 @@ const Profile = () => {
                 variant="ghost"
                 className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
                 onClick={handleStartEdit}
+                aria-label="Editar nome"
               >
                 <Pencil className="w-4 h-4" />
               </Button>
@@ -264,80 +238,13 @@ const Profile = () => {
             <Mail className="w-4 h-4" />
             {email}
           </p>
-          <p className="text-xs text-muted-foreground/60 mt-2">
-            Acesso liberado desde {accessSinceLabel}
-          </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-          {stats.map((stat, index) => {
-            const value = insightsLoading
-              ? "--"
-              : `${numberFormatter.format(stat.value)}${stat.suffix ?? ""}`;
-
-            return (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-              >
-                <Card className="rounded-2xl bg-card border border-border p-4 text-center">
-                  <p className={`text-2xl font-bold ${stat.highlight ? "text-primary" : "text-foreground"}`}>
-                    {value}
-                  </p>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mt-1">{stat.label}</p>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Avatar Section */}
+        {/* ====== 2. Recursos ====== */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.09 }}
-          className="mb-8"
-        >
-          <Card className="rounded-2xl bg-card border border-border p-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-primary/30 shadow-md">
-                  {(() => {
-                    const IconComponent = equippedAvatar ? getAvatarIcon(equippedAvatar.id as any) : null;
-                    if (!IconComponent) {
-                      return <span className="text-2xl">👤</span>;
-                    }
-                    return <IconComponent width={40} height={40} />;
-                  })()}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg text-foreground">{equippedAvatar?.name || "Sorriso Básico"}</h3>
-                  {equippedAvatar && (
-                    <Badge variant="secondary" className="mt-2">
-                      {equippedAvatar.tier}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              {/* SPRINT 0: Botão "Mudar Avatar" temporariamente oculto - avatares não estão gerando engajamento
-              <Button
-                onClick={() => setAvatarShopOpen(true)}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold whitespace-nowrap"
-              >
-                Mudar Avatar
-              </Button>
-              */}
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Gems and Freezes Recursos Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
+          transition={{ duration: 0.3, delay: 0.05 }}
           className="mb-8"
         >
           <Card className="rounded-2xl bg-card border border-border p-6">
@@ -396,11 +303,11 @@ const Profile = () => {
           </Card>
         </motion.div>
 
-        {/* Bonus Content Section */}
+        {/* ====== 3. Conteudo Bonus ====== */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.12 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
           className="mb-8"
         >
           <Card className="rounded-2xl bg-card border border-border p-6">
@@ -408,11 +315,15 @@ const Profile = () => {
               <div className="p-2 bg-primary/10 rounded-lg">
                 <Gift className="w-5 h-5 text-primary" />
               </div>
-              <h2 className="text-lg font-bold uppercase tracking-wide text-foreground">Conteúdo Bônus</h2>
+              <h2 className="text-lg font-bold uppercase tracking-wide text-foreground">Conteudo Bonus</h2>
             </div>
             <div className="space-y-2">
               {bonusSections
-                .filter((section) => bonusFlags[section.id as keyof typeof bonusFlags] !== false)
+                .filter(
+                  (section) =>
+                    bonusFlags[section.id as keyof typeof bonusFlags] !== false &&
+                    !["plano", "guided"].includes(section.id)
+                )
                 .map((section) => (
                   <Link
                     key={section.id}
@@ -430,268 +341,59 @@ const Profile = () => {
           </Card>
         </motion.div>
 
-        {false && <motion.div
+        {/* ====== 4. Aparencia ====== */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.15 }}
         >
-          <Card className="rounded-2xl bg-card border-2 border-primary/30 p-6 mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Shield className="w-5 h-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-foreground flex items-center gap-2">
-                  Conta vitalícia ativa
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Todos os módulos liberados e atualizações garantidas.
-                </p>
-              </div>
-              <Badge className={isPremium ? "bg-primary text-primary-foreground font-semibold" : "bg-muted text-muted-foreground font-semibold"}>
-                {isPremium ? "Premium" : "Pendente"}
-              </Badge>
-            </div>
-            {isPremium && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full border-destructive/30 text-destructive hover:bg-destructive/10"
-                onClick={() => navigate("/cancel-subscription")}
-              >
-                <XCircle className="w-4 h-4 mr-2" />
-                Gerenciar Assinatura
-              </Button>
-            )}
-          </Card>
-        </motion.div>}
-
-        {/* Affiliate Program Section */}
-        {false && <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.18 }}
-          className="mb-8"
-        >
           <Card className="rounded-2xl bg-card border border-border p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Sparkles className="w-5 h-5 text-primary" />
-              </div>
-              <h2 className="text-lg font-bold uppercase tracking-wide text-foreground">
-                Programa de Afiliados
-              </h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Indique amigos e ganhe recompensas. Compartilhe o Habitz e construa juntos.
-            </p>
-            <a
-              href="https://app.kirvano.com/affiliate/c891e35f-e7f1-4e3a-a719-5346f0af8710"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block w-full"
-            >
-              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
-                Acessar Programa de Afiliados
-              </Button>
-            </a>
-          </Card>
-        </motion.div>}
-
-        {/* Achievements Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.21 }}
-          className="mb-8"
-        >
-          <Card className="rounded-2xl bg-card border border-border p-6">
+            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Aparencia</h2>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Trophy className="w-5 h-5 text-primary" />
-                </div>
+                {theme === "dark" ? (
+                  <Moon className="w-5 h-5 text-primary" />
+                ) : (
+                  <Sun className="w-5 h-5 text-primary" />
+                )}
                 <div>
-                  <h2 className="text-lg font-bold uppercase tracking-wide text-foreground">Conquistas</h2>
+                  <p className="font-semibold text-foreground">Tema</p>
                   <p className="text-sm text-muted-foreground">
-                    {userAchievements.length} / {achievementsCatalog.length} desbloqueadas
+                    Escolha o tema do aplicativo
                   </p>
                 </div>
               </div>
-              <Button
-                onClick={() => navigate("/achievements")}
-                variant="ghost"
-                className="text-foreground"
-              >
-                Ver Todas <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.24 }}
-        >
-          <Card className="rounded-2xl bg-card border border-border p-6">
-            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Aparencia</h2>
-
-            <div className="space-y-4">
-              {/* Theme Switcher */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {theme === "dark" ? (
-                    <Moon className="w-5 h-5 text-primary" />
-                  ) : (
-                    <Sun className="w-5 h-5 text-primary" />
-                  )}
-                  <div>
-                    <p className="font-semibold text-foreground">Tema</p>
-                    <p className="text-sm text-muted-foreground">
-                      Escolha o tema do aplicativo
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-1 bg-muted rounded-lg p-1">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className={`h-11 w-11 p-0 ${theme === "light" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
-                    onClick={() => setTheme("light")}
-                    aria-label="Tema claro"
-                    aria-pressed={theme === "light"}
-                  >
-                    <Sun className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className={`h-11 w-11 p-0 ${theme === "dark" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
-                    onClick={() => setTheme("dark")}
-                    aria-label="Tema escuro"
-                    aria-pressed={theme === "dark"}
-                  >
-                    <Moon className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Grid Order */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Badge className="bg-primary/10 text-primary font-semibold">Grid</Badge>
-                  <div>
-                    <p className="font-semibold text-foreground">Ordenacao</p>
-                    <p className="text-sm text-muted-foreground">
-                      Pendentes primeiro ou por streak
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant={prefs.gridOrder === "pending_first" ? "default" : "outline"}
-                    className={prefs.gridOrder === "pending_first" ? "bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" : "bg-secondary border-border hover:bg-muted"}
-                    onClick={() => setPreferences({ gridOrder: "pending_first" })}
-                  >
-                    Pendentes
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={prefs.gridOrder === "streak" ? "default" : "outline"}
-                    className={prefs.gridOrder === "streak" ? "bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" : "bg-secondary border-border hover:bg-muted"}
-                    onClick={() => setPreferences({ gridOrder: "streak" })}
-                  >
-                    Streak
-                  </Button>
-                </div>
+              <div className="flex gap-1 bg-muted rounded-lg p-1">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className={`h-11 w-11 p-0 ${theme === "light" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
+                  onClick={() => setTheme("light")}
+                  aria-label="Tema claro"
+                  aria-pressed={theme === "light"}
+                >
+                  <Sun className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className={`h-11 w-11 p-0 ${theme === "dark" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
+                  onClick={() => setTheme("dark")}
+                  aria-label="Tema escuro"
+                  aria-pressed={theme === "dark"}
+                >
+                  <Moon className="w-4 h-4" />
+                </Button>
               </div>
             </div>
           </Card>
         </motion.div>
 
-        {/* Sound & Feedback Settings */}
+        {/* ====== 5. Notificacoes ====== */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.27 }}
-          className="mt-4"
-        >
-          <Card className="rounded-2xl bg-card border border-border p-6">
-            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Sons e Feedback</h2>
-
-            <div className="space-y-5">
-              {/* Sound Toggle + Volume */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {prefs.soundEnabled ? (
-                      <Volume2 className="w-5 h-5 text-primary" />
-                    ) : (
-                      <VolumeX className="w-5 h-5 text-muted-foreground" />
-                    )}
-                    <div>
-                      <p className="font-semibold text-foreground">Sons</p>
-                      <p className="text-sm text-muted-foreground">
-                        Efeitos sonoros ao completar habitos
-                      </p>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={prefs.soundEnabled}
-                    onCheckedChange={(checked) => setPreferences({ soundEnabled: checked })}
-                  />
-                </div>
-              </div>
-
-              {/* Haptic Feedback */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Vibrate className={`w-5 h-5 ${prefs.hapticEnabled ? "text-primary" : "text-muted-foreground"}`} />
-                  <div>
-                    <p className="font-semibold text-foreground">Vibracao</p>
-                    <p className="text-sm text-muted-foreground">
-                      Feedback tatil ao interagir
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={prefs.hapticEnabled}
-                  onCheckedChange={(checked) => {
-                    setPreferences({ hapticEnabled: checked });
-                    if (checked && "vibrate" in navigator) {
-                      navigator.vibrate(15);
-                    }
-                  }}
-                />
-              </div>
-
-              {/* Celebrations */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Sparkles className={`w-5 h-5 ${prefs.celebrationsEnabled ? "text-primary" : "text-muted-foreground"}`} />
-                  <div>
-                    <p className="font-semibold text-foreground">Celebracoes</p>
-                    <p className="text-sm text-muted-foreground">
-                      Efeitos visuais ao completar
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={prefs.celebrationsEnabled}
-                  onCheckedChange={(checked) => setPreferences({ celebrationsEnabled: checked })}
-                />
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Notifications Settings */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.32 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
           className="mt-4"
         >
           <Card className="rounded-2xl bg-card border border-border p-6">
@@ -701,74 +403,8 @@ const Profile = () => {
               {/* Push Notifications Toggle */}
               <NotificationToggle />
 
-              {/* Preferred Reminder Times */}
-              <div className="border-t border-border pt-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                  Horarios dos Lembretes
-                </p>
-                <div className="space-y-3">
-                  {([
-                    { period: "morning" as const, label: "Manha", icon: Sun, defaultTime: "08:00" },
-                    { period: "afternoon" as const, label: "Tarde", icon: Sunset, defaultTime: "14:00" },
-                    { period: "evening" as const, label: "Noite", icon: Moon, defaultTime: "20:00" },
-                  ] as const).map(({ period, label, icon: Icon, defaultTime }) => (
-                    <div key={period} className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 flex-shrink-0">
-                        <Icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <p className="flex-1 text-sm font-medium text-foreground">{label}</p>
-                      <input
-                        type="time"
-                        aria-label={`Horario lembrete ${label}`}
-                        value={notifPrefs.preferred_reminder_times?.[period] || defaultTime}
-                        onChange={(e) => {
-                          const updated = {
-                            ...notifPrefs.preferred_reminder_times,
-                            [period]: e.target.value,
-                          };
-                          updateNotifPref("preferred_reminder_times", updated);
-                        }}
-                        className="h-10 w-24 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground text-center"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <p className="text-[11px] text-muted-foreground/60 mt-2 italic">
-                  Novos habitos de jornada usarao estes horarios.
-                </p>
-              </div>
-
-              {/* Quiet Hours */}
-              <div className="border-t border-border pt-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <Moon className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Nao Perturbe</p>
-                    <p className="text-xs text-muted-foreground">Sem notificacoes nesse horario</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground font-medium">Das</span>
-                  <input
-                    type="time"
-                    aria-label="Horario inicio silencioso"
-                    value={notifPrefs.quiet_hours_start || "22:00"}
-                    onChange={(e) => updateNotifPref("quiet_hours_start", e.target.value)}
-                    className="h-10 w-24 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground text-center"
-                  />
-                  <span className="text-xs text-muted-foreground font-medium">ate</span>
-                  <input
-                    type="time"
-                    aria-label="Horario fim silencioso"
-                    value={notifPrefs.quiet_hours_end || "07:00"}
-                    onChange={(e) => updateNotifPref("quiet_hours_end", e.target.value)}
-                    className="h-10 w-24 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground text-center"
-                  />
-                </div>
-              </div>
-
               {/* End of Day Reminder */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between border-t border-border pt-4">
                 <div className="flex items-center gap-3">
                   <Clock className="w-5 h-5 text-muted-foreground" />
                   <div>
@@ -785,11 +421,12 @@ const Profile = () => {
           </Card>
         </motion.div>
 
+        {/* ====== 6. Acoes da Conta ====== */}
         {isPremium && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.37 }}
+            transition={{ duration: 0.3, delay: 0.25 }}
             className="mt-6"
           >
             <Button
@@ -806,7 +443,7 @@ const Profile = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: isPremium ? 0.42 : 0.37 }}
+          transition={{ duration: 0.3, delay: isPremium ? 0.3 : 0.25 }}
           className="mt-4"
         >
           <Button
@@ -819,17 +456,17 @@ const Profile = () => {
           </Button>
         </motion.div>
 
-        {/* Avatar Shop Modal */}
-        <AvatarShopModal
-          isOpen={avatarShopOpen}
-          onClose={() => setAvatarShopOpen(false)}
-          userId={userId ?? undefined}
-        />
-
-        {/* SPRINT 0: Nova Freeze Shop Modal - Loja focada em utility (freezes) ao invés de cosméticos (avatares) */}
+        {/* Freeze Shop Modal */}
         <FreezeShopModal
           isOpen={freezeShopOpen}
           onClose={() => setFreezeShopOpen(false)}
+          userId={userId ?? undefined}
+        />
+
+        {/* Avatar Creator */}
+        <AvatarCreator
+          isOpen={avatarCreatorOpen}
+          onClose={() => setAvatarCreatorOpen(false)}
           userId={userId ?? undefined}
         />
       </motion.div>

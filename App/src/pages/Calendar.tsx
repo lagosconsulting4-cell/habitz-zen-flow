@@ -34,6 +34,7 @@ import {
   subDays,
   isToday as dateFnsIsToday,
 } from "date-fns";
+import { toast } from "sonner";
 import { ptBR } from "date-fns/locale";
 import { useHabits } from "@/hooks/useHabits";
 import { supabase } from "@/integrations/supabase/client";
@@ -111,6 +112,7 @@ const Calendar = () => {
         setMonthCompletions(map);
       } catch (err) {
         console.error("Failed to load month completions", err);
+        toast.error("Erro ao carregar dados do mês");
       } finally {
         setLoadingMonthStats(false);
       }
@@ -131,6 +133,7 @@ const Calendar = () => {
       await fetchCompletionsForDate(dateKey);
     } catch (error) {
       console.error("Failed to load completions for date", error);
+      toast.error("Erro ao carregar dados do dia");
     }
   };
 
@@ -513,9 +516,12 @@ const Calendar = () => {
           </DialogHeader>
 
           {selectedDayHabits.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nenhum habito foi programado para este dia.
-            </p>
+            <div className="flex flex-col items-center gap-3 py-4 text-center">
+              <CalendarIcon className="w-10 h-10 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">
+                Nenhum hábito programado para este dia.
+              </p>
+            </div>
           ) : (
             <div className="space-y-3">
               {selectedDayHabits.map((habit) => {
@@ -525,10 +531,10 @@ const Calendar = () => {
                     key={habit.id}
                     className="flex items-center justify-between rounded-2xl border border-border bg-card p-4"
                   >
-                    <div>
+                    <div className="min-w-0">
                       <p className="font-semibold text-foreground flex items-center gap-2">
-                        <span className="text-xl">{habit.emoji}</span>
-                        {habit.name}
+                        <span className="text-xl flex-shrink-0">{habit.emoji}</span>
+                        <span className="truncate">{habit.name}</span>
                       </p>
                       <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mt-1">
                         {habit.category} • {habit.period === "morning" ? "Manha" : habit.period === "afternoon" ? "Tarde" : "Noite"}

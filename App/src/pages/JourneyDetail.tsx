@@ -6,6 +6,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, CheckCircle2, Lock, Circle, Play, Pause, RotateCcw, ChevronDown } from "lucide-react";
+import { haptic } from "@/lib/haptics";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useJourneyDetail, useJourneyActions } from "@/hooks/useJourney";
@@ -37,6 +38,7 @@ const JourneyDetail = () => {
   const completionSet = new Set(dayCompletions);
 
   const handleStart = async () => {
+    haptic.medium();
     await startJourney(journey.id);
     if (!isAchievementUnlocked("journey_explorer")) {
       unlockAchievement({ achievementId: "journey_explorer", progressSnapshot: { journey_id: journey.id } }).catch(() => {});
@@ -44,11 +46,16 @@ const JourneyDetail = () => {
     navigate(`/journeys/${slug}/day/1`);
   };
 
-  const handlePause = () => pauseJourney(journey.id);
-  const handleResume = () => resumeJourney(journey.id);
+  const handlePause = () => { haptic.light(); pauseJourney(journey.id); };
+  const handleResume = () => { haptic.medium(); resumeJourney(journey.id); };
 
   return (
-    <div className="pb-navbar">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="pb-navbar"
+    >
       {/* Header with atmospheric gradient */}
       <div
         className="px-4 pb-6 space-y-4 relative overflow-hidden"
@@ -376,7 +383,7 @@ const JourneyDetail = () => {
           );
         })}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

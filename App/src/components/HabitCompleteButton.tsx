@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Check } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { haptic } from "@/lib/haptics";
 
 interface HabitCompleteButtonProps {
   completed: boolean;
@@ -29,6 +30,7 @@ const HabitCompleteButton = ({ completed, onToggle }: HabitCompleteButtonProps) 
   );
 
   const handleClick = () => {
+    haptic.medium();
     setIsPressing(true);
     onToggle();
     setTimeout(() => setIsPressing(false), 120);

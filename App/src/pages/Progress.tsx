@@ -159,7 +159,7 @@ const Progress = () => {
                 <div className="flex items-center gap-6">
                   {/* Progress Ring */}
                   <div className="relative flex-shrink-0">
-                    <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100" role="img" aria-label="Anel de consistência">
+                    <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100" role="img" aria-label={`Progresso do nível: ${currentLevelProgress}%`}>
                       <circle
                         cx="50" cy="50" r="42"
                         fill="none" stroke="currentColor" strokeWidth="8"

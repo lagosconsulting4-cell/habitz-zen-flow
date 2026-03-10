@@ -115,7 +115,7 @@ const JourneyProgressItem = ({
           <div className="mt-1 w-full h-1.5 bg-muted/20 dark:bg-zinc-700/30 rounded-full overflow-hidden">
             <motion.div
               initial={{ scaleX: 0 }}
-              animate={{ scaleX: dailyPercent / 100 }}
+              animate={{ scaleX: (state.completion_percent ?? 0) / 100 }}
               transition={{ duration: 0.5 }}
               className="h-full rounded-full relative overflow-hidden origin-left"
               style={{ backgroundColor: theme.color }}
@@ -129,7 +129,7 @@ const JourneyProgressItem = ({
             <CheckCircle2 className="w-4 h-4" style={{ color: theme.color }} />
           ) : (
             <span className="text-[10px] font-bold" style={{ color: theme.color }}>
-              {dailyPercent}%
+              {state.completion_percent ?? 0}%
             </span>
           )}
           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />

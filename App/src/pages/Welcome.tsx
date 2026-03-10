@@ -61,8 +61,8 @@ export default function Welcome() {
   }, [searchParams, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-lime-50 to-green-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+    <div className="min-h-screen bg-gradient-to-br from-lime-50 to-green-50 dark:from-background dark:to-background flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-card rounded-2xl shadow-xl p-8 border border-border">
         <div className="flex flex-col items-center text-center space-y-6">
           {/* Icon */}
           <div className="relative">
@@ -70,12 +70,12 @@ export default function Welcome() {
               <Loader2 className="w-16 h-16 text-lime-500 animate-spin" />
             )}
             {status === "success" && (
-              <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-lime-100 dark:bg-lime-900/30 rounded-full flex items-center justify-center">
                 <CheckCircle2 className="w-10 h-10 text-lime-600" />
               </div>
             )}
             {status === "error" && (
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
                 <XCircle className="w-10 h-10 text-red-600" />
               </div>
             )}
@@ -83,18 +83,18 @@ export default function Welcome() {
 
           {/* Title */}
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
               {status === "loading" && "Processando..."}
               {status === "success" && "Sucesso!"}
               {status === "error" && "Ops!"}
             </h1>
-            <p className="text-slate-600">{message}</p>
+            <p className="text-muted-foreground">{message}</p>
           </div>
 
           {/* Additional info for success */}
           {status === "success" && (
-            <div className="w-full bg-lime-50 rounded-lg p-4 border border-lime-200">
-              <p className="text-sm text-lime-800">
+            <div className="w-full bg-lime-50 dark:bg-lime-950/30 rounded-lg p-4 border border-lime-200 dark:border-lime-800/40">
+              <p className="text-sm text-lime-800 dark:text-lime-200">
                 🎉 Pagamento confirmado! Você será redirecionado para criar sua senha.
               </p>
             </div>
@@ -102,7 +102,7 @@ export default function Welcome() {
 
           {/* Loading progress */}
           {status === "loading" && (
-            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
               <div className="h-full bg-lime-500 rounded-full animate-pulse" style={{ width: "60%" }} />
             </div>
           )}
