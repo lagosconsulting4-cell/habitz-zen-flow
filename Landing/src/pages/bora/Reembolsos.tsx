@@ -47,6 +47,12 @@ const variants = {
 export default function Reembolsos() {
     useEffect(() => { document.title = "Cancelamento — Lumen Apps"; }, []);
 
+    // Links de retorno ao app por produto
+    const APP_LINKS: Record<string, string> = {
+        Bora: 'https://app.borahabitos.com',
+        Foquinha: 'https://wa.me/5511999999999', // atualizar com o número da Foquinha
+    };
+
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -335,19 +341,6 @@ export default function Reembolsos() {
                                 </motion.div>
                             )}
 
-                            {/* ── STEP 4 FICOU: OBRIGADO POR CONFIAR ── */}
-                            {step === 4 && ficou && (
-                                <motion.div key="s4-ficou" variants={variants} initial="hidden" animate="visible" exit="exit" className="flex flex-col items-center text-center gap-5 py-10">
-                                    <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center">
-                                        <CheckCircle2 size={34} className="text-indigo-500" />
-                                    </div>
-                                    <h2 className="text-2xl font-semibold tracking-tight">Obrigado por confiar na gente.</h2>
-                                    <p className="text-gray-500 text-[15px] leading-relaxed max-w-sm">
-                                        Estamos aqui para te ajudar. Qualquer dúvida, fale com o nosso suporte.
-                                    </p>
-                                    <p className="text-xs text-gray-400 font-medium tracking-widest uppercase mt-4">Lumen Apps · Até já.</p>
-                                </motion.div>
-                            )}
 
                             {/* ── STEP 5: JUSTIFICATIVA LIVRE ── */}
                             {step === 5 && (
@@ -454,6 +447,54 @@ export default function Reembolsos() {
                     &copy; {new Date().getFullYear()} Lumen Apps. Todos os direitos reservados.
                 </footer>
             </main>
+
+            {/* ── MODAL DE RETENÇÃO ── */}
+            <AnimatePresence>
+                {ficou && (
+                    <motion.div
+                        key="modal-ficou"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center px-4"
+                        style={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(0,0,0,0.45)' }}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.94, y: 16 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                            transition={{ duration: 0.3, ease: 'easeOut' }}
+                            className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm flex flex-col items-center text-center gap-5"
+                        >
+                            <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center">
+                                <CheckCircle2 size={34} className="text-indigo-500" />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-semibold tracking-tight mb-1">Obrigado por confiar na gente.</h2>
+                                <p className="text-gray-500 text-[15px] leading-relaxed">
+                                    Estamos aqui para continuar te ajudando.
+                                </p>
+                            </div>
+                            <div className="flex flex-col gap-3 w-full">
+                                <a
+                                    href={APP_LINKS[identificacao.produto] || '#'}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full flex items-center justify-center gap-2 bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all"
+                                >
+                                    Retornar ao {identificacao.produto || 'app'}
+                                </a>
+                                <button
+                                    onClick={() => window.close()}
+                                    className="w-full py-4 rounded-xl border-2 border-gray-100 text-gray-500 font-medium hover:border-gray-200 transition-all"
+                                >
+                                    Fechar esta aba
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
