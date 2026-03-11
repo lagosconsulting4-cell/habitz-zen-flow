@@ -1,5 +1,5 @@
 -- ============================================
--- SEED: Digital Detox L1 — "Detox de Dopamina"
+-- SEED: Digital Detox L1 — "Eu Controlo a Tela"
 -- ============================================
 
 -- 1. Journey
@@ -7,8 +7,8 @@ INSERT INTO public.journeys (slug, theme_slug, title, subtitle, promise, descrip
 VALUES (
   'digital-detox-l1',
   'digital-detox',
-  'Detox de Dopamina',
-  'Resetar Minha Vida Digital',
+  'Eu Controlo a Tela',
+  'Reset de Dopamina em 30 Dias',
   'Reduza seu tempo de tela pela metade, durma 1 hora a mais por noite e recupere sua capacidade de foco — sem virar monge nem jogar seu celular fora.',
   'Jornada de 30 dias para retomar o controle da sua relação com tecnologia. Baseada em pesquisa científica sobre dopamina, sono e foco.',
   1,
@@ -26,7 +26,7 @@ INSERT INTO public.journeys (slug, theme_slug, title, subtitle, promise, descrip
 VALUES (
   'digital-detox-l2',
   'digital-detox',
-  'Digital Minimalism',
+  'Produtividade Intencional',
   'Produtividade Intencional',
   'Construa um sistema de produtividade que usa tecnologia a seu favor, não contra você. Deep work blocks, second brain, e uma vida offline tão rica que o celular perde a graça.',
   'Nível 2 do Detox de Dopamina. Foco em produtividade intencional e minimalismo digital.',
@@ -42,13 +42,13 @@ VALUES (
 
 -- Also insert placeholder journeys for the other 4 themes (L1 + L2)
 INSERT INTO public.journeys (slug, theme_slug, title, subtitle, promise, level, duration_days, illustration_key, tags, is_active, sort_order) VALUES
-  ('own-mornings-l1', 'own-mornings', 'Domine Suas Manhãs', 'Rotina Matinal de Elite', 'Construa uma rotina matinal que transforma suas manhãs em seu superpoder.', 1, 30, 'own-mornings', ARRAY['manhã','sono','rotina'], true, 1),
-  ('own-mornings-l2', 'own-mornings', 'Own Your Mornings L2', 'Manhã Avançada', 'Otimize sua rotina matinal com técnicas avançadas de performance.', 2, 30, 'own-mornings', ARRAY['manhã','performance'], true, 2),
-  ('gym-l1', 'gym', 'Do Sofá ao Shape', 'Primeiros 30 Dias na Academia', 'Saia da inércia e construa o hábito de treinar. Sem vergonha, sem julgamento.', 1, 30, 'gym', ARRAY['academia','corpo','saúde'], true, 5),
+  ('own-mornings-l1', 'own-mornings', 'Manhã de Elite', 'Sua Rotina Matinal Imbatível', 'Construa uma rotina matinal que transforma suas manhãs em seu superpoder.', 1, 30, 'own-mornings', ARRAY['manhã','sono','rotina'], true, 1),
+  ('own-mornings-l2', 'own-mornings', 'Manhã Avançada: Protocolo 5h', 'Rotina Matinal Nível 2', 'Otimize sua rotina matinal com técnicas avançadas de performance.', 2, 30, 'own-mornings', ARRAY['manhã','performance'], true, 2),
+  ('gym-l1', 'gym', 'Do Zero ao Treino', 'Primeiros 30 Dias na Academia', 'Saia da inércia e construa o hábito de treinar. Sem vergonha, sem julgamento.', 1, 30, 'gym', ARRAY['academia','corpo','saúde'], true, 5),
   ('gym-l2', 'gym', 'Protocolo de Hipertrofia', 'Shape Avançado', 'Maximize seus resultados com protocolos avançados de treino e nutrição.', 2, 30, 'gym', ARRAY['academia','hipertrofia'], true, 6),
-  ('focus-protocol-l1', 'focus-protocol', 'Domine Sua Atenção', 'Protocolo de Foco', 'Recupere sua capacidade de concentração profunda em 30 dias.', 1, 30, 'focus-protocol', ARRAY['foco','estudo','produtividade'], true, 7),
+  ('focus-protocol-l1', 'focus-protocol', 'Foco Inabalável', 'Protocolo de Atenção Profunda', 'Recupere sua capacidade de concentração profunda em 30 dias.', 1, 30, 'focus-protocol', ARRAY['foco','estudo','produtividade'], true, 7),
   ('focus-protocol-l2', 'focus-protocol', 'Aprendizado Acelerado', 'Foco Avançado', 'Técnicas avançadas de aprendizado e deep work para máxima performance.', 2, 30, 'focus-protocol', ARRAY['foco','aprendizado'], true, 8),
-  ('finances-l1', 'finances', 'Controle Total', 'Finanças Pessoais', 'Tome controle das suas finanças em 30 dias. Sem planilha complicada.', 1, 30, 'finances', ARRAY['dinheiro','finanças','controle'], true, 9),
+  ('finances-l1', 'finances', 'Nunca Mais Quebrado', 'Finanças Pessoais em 30 Dias', 'Tome controle das suas finanças em 30 dias. Sem planilha complicada.', 1, 30, 'finances', ARRAY['dinheiro','finanças','controle'], true, 9),
   ('finances-l2', 'finances', 'Faça Seu Dinheiro Trabalhar', 'Finanças Avançadas', 'Investimentos, renda passiva e construção de patrimônio.', 2, 30, 'finances', ARRAY['investimento','patrimônio'], true, 10)
 ON CONFLICT (slug) DO NOTHING;
 

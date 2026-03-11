@@ -1,15 +1,51 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useOnboarding } from "../OnboardingProvider";
-import { Check, TrendingUp, Calendar } from "lucide-react";
+import { Check, Calendar } from "lucide-react";
+import { JourneyIllustration, getJourneyTheme } from "@/components/JourneyIllustration";
+import { sounds } from "@/lib/sounds";
+import { haptic } from "@/lib/haptics";
+
+interface JourneyOption {
+  id: string;
+  slug: string;
+  theme_slug: string;
+  title: string;
+}
 
 export const CelebrationStep = () => {
-  const { recommendedHabits, selectedHabitIds, submitOnboarding, isSubmitting } = useOnboarding();
+  const { recommendedHabits, selectedHabitIds, submitOnboarding, isSubmitting, selectedJourneyIds } = useOnboarding();
   const [progress, setProgress] = useState(0);
   const [submitted, setSubmitted] = useState(false);
 
   const selectedHabits = recommendedHabits.filter((h) => selectedHabitIds.has(h.id));
   const habitCount = selectedHabits.length;
+
+  // Fetch journeys from cache (same queryKey as JourneySelectionStep)
+  const { data: allJourneys = [] } = useQuery<JourneyOption[]>({
+    queryKey: ["journeys-l1-onboarding"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("journeys")
+        .select("id, slug, theme_slug, title, promise")
+        .eq("level", 1)
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return (data || []) as JourneyOption[];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const selectedJourneys = allJourneys.filter((j) => selectedJourneyIds.has(j.id));
+
+  // Sound + haptic on mount
+  useEffect(() => {
+    sounds.unlock();
+    haptic.success();
+  }, []);
 
   // Auto-submit on mount
   useEffect(() => {
@@ -52,9 +88,9 @@ export const CelebrationStep = () => {
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: "spring", duration: 0.6, delay: 0.1 }}
-          className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 mb-4 shadow-lg shadow-green-500/30"
+          className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 border border-primary/20 mb-4"
         >
-          <Check className="h-8 w-8 text-white" strokeWidth={3} />
+          <Check className="h-7 w-7 text-primary" strokeWidth={2.5} />
         </motion.div>
 
         {/* Title */}
@@ -62,9 +98,9 @@ export const CelebrationStep = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
-          className="text-3xl font-bold mb-2 bg-gradient-to-r from-primary via-green-500 to-blue-500 bg-clip-text text-transparent"
+          className="text-2xl font-bold mb-1"
         >
-          Parabéns!
+          Tudo pronto.
         </motion.h1>
 
         <motion.p
@@ -73,10 +109,10 @@ export const CelebrationStep = () => {
           transition={{ delay: 0.3, duration: 0.4 }}
           className="text-sm text-muted-foreground mb-4"
         >
-          Sua rotina personalizada está pronta
+          Sua rotina foi configurada
         </motion.p>
 
-        {/* Stats Row - Horizontal */}
+        {/* Stats Row */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -92,29 +128,52 @@ export const CelebrationStep = () => {
           {/* Days per Week */}
           <div className="bg-card border border-border rounded-xl px-4 py-3 min-w-[80px]">
             <div className="flex items-center justify-center gap-1">
-              <Calendar className="h-4 w-4 text-green-500" />
-              <span className="text-2xl font-bold text-green-500">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className="text-2xl font-bold">
                 {selectedHabits[0]?.frequency_days?.length || 7}
               </span>
             </div>
             <div className="text-xs text-muted-foreground">Dias/sem</div>
           </div>
-
-          {/* Trend */}
-          <div className="bg-card border border-border rounded-xl px-4 py-3 min-w-[80px]">
-            <div className="flex items-center justify-center gap-1">
-              <TrendingUp className="h-4 w-4 text-blue-500" />
-              <span className="text-2xl font-bold text-blue-500">+</span>
-            </div>
-            <div className="text-xs text-muted-foreground">Progresso</div>
-          </div>
         </motion.div>
+
+        {/* Selected journeys — visual commitment */}
+        {selectedJourneys.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.4 }}
+            className="space-y-2 mb-4"
+          >
+            <p className="text-xs text-muted-foreground">Suas jornadas</p>
+            <div className="flex justify-center gap-3">
+              {selectedJourneys.map((journey) => {
+                const theme = getJourneyTheme(journey.theme_slug);
+                return (
+                  <div
+                    key={journey.id}
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl border min-w-[100px] max-w-[140px]"
+                    style={{
+                      borderColor: `${theme.color}33`,
+                      backgroundColor: `${theme.color}0A`,
+                    }}
+                  >
+                    <JourneyIllustration illustrationKey={journey.theme_slug} size="sm" />
+                    <span className="text-xs font-medium text-foreground/80 text-center line-clamp-2">
+                      {journey.title}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
 
         {/* Loading message + Progress */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.4 }}
+          transition={{ delay: 0.6, duration: 0.4 }}
           className="text-center"
         >
           <p className="text-xs text-muted-foreground mb-2">
@@ -126,7 +185,7 @@ export const CelebrationStep = () => {
             <motion.div
               initial={{ width: "0%" }}
               animate={{ width: `${progress}%` }}
-              className="h-full bg-gradient-to-r from-primary via-green-500 to-blue-500"
+              className="h-full bg-primary"
             />
           </div>
         </motion.div>

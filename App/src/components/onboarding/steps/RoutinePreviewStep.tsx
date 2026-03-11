@@ -120,7 +120,7 @@ export const RoutinePreviewStep = () => {
             {selectedCount} de {totalHabits} selecionados
           </span>
           {selectedCount >= 5 ? (
-            <span className="text-amber-500 font-medium">⚠ Limite atingido (máx. 5)</span>
+            <span className="text-amber-500 font-medium">Limite atingido (máx. 5)</span>
           ) : selectedCount >= 3 ? (
             <span className="text-green-500 font-medium">✓ Mínimo atingido</span>
           ) : null}

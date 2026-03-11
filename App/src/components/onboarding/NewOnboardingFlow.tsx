@@ -17,6 +17,7 @@ import { ChallengesStep } from "./steps/ChallengesStep";
 import { JourneySelectionStep } from "./steps/JourneySelectionStep";
 import { WeekDaysStep } from "./steps/WeekDaysStep";
 import { RoutinePreviewStep } from "./steps/RoutinePreviewStep";
+import { QuietHoursStep } from "./steps/QuietHoursStep";
 import { NotificationStep } from "./steps/NotificationStep";
 import { CelebrationStep } from "./steps/CelebrationStep";
 
@@ -34,7 +35,7 @@ const OnboardingFlowContent = () => {
     }
   }, [currentStep, generateRoutine]);
 
-  // All 14 steps (including Theme, JourneySelection, and Notification)
+  // All 15 steps (including Theme, JourneySelection, QuietHours, and Notification)
   const steps = [
     <WelcomeStep key="welcome" />,              // 0
     <ThemeStep key="theme" />,                  // 1
@@ -48,8 +49,9 @@ const OnboardingFlowContent = () => {
     <JourneySelectionStep key="journeys" />,    // 9
     <WeekDaysStep key="weekdays" />,            // 10
     <RoutinePreviewStep key="preview" />,       // 11
-    <NotificationStep key="notification" />,    // 12
-    <CelebrationStep key="celebration" />,      // 13
+    <QuietHoursStep key="quiet-hours" />,       // 12
+    <NotificationStep key="notification" />,    // 13
+    <CelebrationStep key="celebration" />,      // 14
   ];
 
   return (

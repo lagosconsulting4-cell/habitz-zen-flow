@@ -9,6 +9,8 @@
 import { motion, AnimatePresence } from "motion/react";
 import { Flame } from "lucide-react";
 import { useEffect, useState } from "react";
+import { sounds } from "@/lib/sounds";
+import { haptic } from "@/lib/haptics";
 
 export interface StreakToastProps {
   streakDays: number;
@@ -32,6 +34,14 @@ const MILESTONE_COLORS: Record<number, string> = {
 
 export const StreakToast = ({ streakDays, show, onClose }: StreakToastProps) => {
   const [visible, setVisible] = useState(show);
+
+  // Sound + haptic on streak milestone
+  useEffect(() => {
+    if (show) {
+      sounds.streak();
+      haptic.double();
+    }
+  }, [show]);
 
   useEffect(() => {
     if (show) {

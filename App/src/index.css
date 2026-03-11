@@ -327,6 +327,13 @@
 .animate-breathe {
   animation: breathe 3s ease-in-out infinite;
 }
+@keyframes glow-breathe {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.15); }
+}
+.animate-glow-breathe {
+  animation: glow-breathe 3s ease-in-out infinite;
+}
 
 .glass {
   backdrop-filter: saturate(180%) blur(20px);

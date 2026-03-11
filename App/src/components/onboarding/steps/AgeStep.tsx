@@ -1,17 +1,19 @@
+import type { ReactNode } from "react";
 import { motion } from "motion/react";
+import { GraduationCap, Briefcase, Home, Star, Sparkles } from "lucide-react";
 import { useOnboarding, type AgeRange } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 
 const AGE_OPTIONS: Array<{
   value: AgeRange;
   label: string;
-  emoji: string;
+  icon: ReactNode;
 }> = [
-  { value: "18-24", label: "18-24", emoji: "🎓" },
-  { value: "25-34", label: "25-34", emoji: "💼" },
-  { value: "35-44", label: "35-44", emoji: "🏠" },
-  { value: "45-54", label: "45-54", emoji: "⭐" },
-  { value: "55+", label: "55+", emoji: "🌟" },
+  { value: "18-24", label: "18-24", icon: <GraduationCap className="w-5 h-5" /> },
+  { value: "25-34", label: "25-34", icon: <Briefcase className="w-5 h-5" /> },
+  { value: "35-44", label: "35-44", icon: <Home className="w-5 h-5" /> },
+  { value: "45-54", label: "45-54", icon: <Star className="w-5 h-5" /> },
+  { value: "55+", label: "55+", icon: <Sparkles className="w-5 h-5" /> },
 ];
 
 export const AgeStep = () => {
@@ -50,7 +52,7 @@ export const AgeStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                icon={option.icon}
                 selected={ageRange === option.value}
                 onClick={() => setAgeRange(option.value)}
                 variant="mini"

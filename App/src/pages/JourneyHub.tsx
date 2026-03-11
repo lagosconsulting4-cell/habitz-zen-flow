@@ -141,7 +141,7 @@ const JourneyCatalogCard = ({
       style={{
         background: 'var(--card)',
         borderColor: isLocked ? 'var(--border)' : `${theme.color}26`,
-        boxShadow: isLocked ? undefined : `0 2px 16px ${theme.color}0D`,
+        boxShadow: isLocked ? undefined : `0 4px 20px ${theme.color}15, 0 0 0 1px ${theme.color}0A`,
       }}
     >
       {/* Top accent stripe */}
@@ -150,15 +150,23 @@ const JourneyCatalogCard = ({
         style={{ backgroundColor: isLocked ? 'var(--muted-foreground)' : theme.color }}
       />
       <div className="flex items-center gap-3 relative z-10">
-        <JourneyIllustration
-          illustrationKey={journey.illustration_key}
-          size="sm"
-          className={isLocked ? "opacity-50" : ""}
-        />
+        <div className="relative flex-shrink-0">
+          {!isLocked && (
+            <div
+              className="absolute inset-0 blur-xl opacity-20 rounded-full"
+              style={{ backgroundColor: theme.color }}
+            />
+          )}
+          <JourneyIllustration
+            illustrationKey={journey.illustration_key}
+            size="sm"
+            className={cn("relative", isLocked ? "opacity-50" : "")}
+          />
+        </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-bold text-foreground line-clamp-2">{journey.title}</h3>
           {journey.promise && (
-            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{journey.promise}</p>
+            <p className="text-sm text-foreground/70 font-medium mt-0.5 line-clamp-2 leading-snug">{journey.promise}</p>
           )}
 
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
@@ -249,10 +257,19 @@ const JourneyHub = () => {
       className="px-4 pb-navbar space-y-6 max-w-xl mx-auto w-full"
       style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
     >
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Jornadas</h1>
-        <p className="text-sm text-muted-foreground mt-1 font-serif italic">
+      {/* Header with atmospheric gradient */}
+      <div className="relative -mx-4 px-4 pb-4">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `
+              radial-gradient(ellipse at 50% 0%, rgba(163,230,53,0.06) 0%, transparent 70%),
+              radial-gradient(circle at 80% 30%, rgba(163,230,53,0.03) 0%, transparent 50%)
+            `,
+          }}
+        />
+        <h1 className="text-2xl font-bold text-foreground relative">Jornadas</h1>
+        <p className="text-sm text-muted-foreground mt-1 font-serif italic relative">
           Transformações guiadas de 30 dias
         </p>
       </div>
@@ -260,7 +277,7 @@ const JourneyHub = () => {
       {/* Active Journeys */}
       {activeJourneys.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-muted-foreground">
+          <h2 className="text-base font-semibold text-foreground/80">
             Em andamento
           </h2>
           {activeJourneys.map((j) => (
@@ -271,7 +288,7 @@ const JourneyHub = () => {
 
       {/* Journey Catalog */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground">
+        <h2 className="text-base font-semibold text-foreground/80">
           {activeJourneys.length > 0 ? "Explorar" : "Escolha sua jornada"}
         </h2>
         <div className="space-y-3">

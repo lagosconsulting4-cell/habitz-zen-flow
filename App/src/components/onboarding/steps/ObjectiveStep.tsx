@@ -1,17 +1,19 @@
+import type { ReactNode } from "react";
 import { motion } from "motion/react";
+import { BarChart3, Dumbbell, Heart, CalendarDays, ShieldX } from "lucide-react";
 import { useOnboarding, type Objective } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 
 const OBJECTIVE_OPTIONS: Array<{
   value: Objective;
   label: string;
-  emoji: string;
+  icon: ReactNode;
 }> = [
-  { value: "productivity", label: "Produtividade", emoji: "📊" },
-  { value: "health", label: "Saúde Física", emoji: "💪" },
-  { value: "mental", label: "Bem-estar", emoji: "🧘" },
-  { value: "routine", label: "Organização", emoji: "📅" },
-  { value: "avoid", label: "Eliminar Vícios", emoji: "🚫" },
+  { value: "productivity", label: "Produtividade", icon: <BarChart3 className="w-5 h-5" /> },
+  { value: "health", label: "Saúde Física", icon: <Dumbbell className="w-5 h-5" /> },
+  { value: "mental", label: "Bem-estar", icon: <Heart className="w-5 h-5" /> },
+  { value: "routine", label: "Organização", icon: <CalendarDays className="w-5 h-5" /> },
+  { value: "avoid", label: "Eliminar Vícios", icon: <ShieldX className="w-5 h-5" /> },
 ];
 
 export const ObjectiveStep = () => {
@@ -50,7 +52,7 @@ export const ObjectiveStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                icon={option.icon}
                 selected={objective === option.value}
                 onClick={() => setObjective(option.value)}
                 variant="mini"

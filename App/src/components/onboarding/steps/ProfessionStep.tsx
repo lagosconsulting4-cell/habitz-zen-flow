@@ -1,17 +1,19 @@
+import type { ReactNode } from "react";
 import { motion } from "motion/react";
+import { BadgeCheck, Laptop, Building2, BookOpen, Sunset } from "lucide-react";
 import { useOnboarding, type Profession } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 
 const PROFESSION_OPTIONS: Array<{
   value: Profession;
   label: string;
-  emoji: string;
+  icon: ReactNode;
 }> = [
-  { value: "clt", label: "CLT", emoji: "👔" },
-  { value: "freelancer", label: "Autônomo", emoji: "💻" },
-  { value: "entrepreneur", label: "Empresário", emoji: "🏢" },
-  { value: "student", label: "Estudante", emoji: "📚" },
-  { value: "retired", label: "Aposentado", emoji: "🌴" },
+  { value: "clt", label: "CLT", icon: <BadgeCheck className="w-5 h-5" /> },
+  { value: "freelancer", label: "Autônomo", icon: <Laptop className="w-5 h-5" /> },
+  { value: "entrepreneur", label: "Empresário", icon: <Building2 className="w-5 h-5" /> },
+  { value: "student", label: "Estudante", icon: <BookOpen className="w-5 h-5" /> },
+  { value: "retired", label: "Aposentado", icon: <Sunset className="w-5 h-5" /> },
 ];
 
 export const ProfessionStep = () => {
@@ -50,7 +52,7 @@ export const ProfessionStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                icon={option.icon}
                 selected={profession === option.value}
                 onClick={() => setProfession(option.value)}
                 variant="mini"

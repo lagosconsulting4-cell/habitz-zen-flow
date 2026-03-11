@@ -1,14 +1,16 @@
+import type { ReactNode } from "react";
 import { motion } from "motion/react";
+import { Clock, Target, Brain, Moon, HeartPulse, Flame } from "lucide-react";
 import { useOnboarding } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 
-const CHALLENGE_OPTIONS = [
-  { id: "procrastination", label: "Procrastinação", emoji: "⏰" },
-  { id: "focus", label: "Foco", emoji: "🎯" },
-  { id: "forgetfulness", label: "Esquecimento", emoji: "💭" },
-  { id: "tiredness", label: "Cansaço", emoji: "😴" },
-  { id: "anxiety", label: "Ansiedade", emoji: "😰" },
-  { id: "motivation", label: "Motivação", emoji: "🔥" },
+const CHALLENGE_OPTIONS: Array<{ id: string; label: string; icon: ReactNode }> = [
+  { id: "procrastination", label: "Procrastinação", icon: <Clock className="w-5 h-5" /> },
+  { id: "focus", label: "Foco", icon: <Target className="w-5 h-5" /> },
+  { id: "forgetfulness", label: "Esquecimento", icon: <Brain className="w-5 h-5" /> },
+  { id: "tiredness", label: "Cansaço", icon: <Moon className="w-5 h-5" /> },
+  { id: "anxiety", label: "Ansiedade", icon: <HeartPulse className="w-5 h-5" /> },
+  { id: "motivation", label: "Motivação", icon: <Flame className="w-5 h-5" /> },
 ];
 
 export const ChallengesStep = () => {
@@ -47,7 +49,7 @@ export const ChallengesStep = () => {
               <SelectionCard
                 id={option.id}
                 title={option.label}
-                emoji={option.emoji}
+                icon={option.icon}
                 selected={challenges.includes(option.id)}
                 onClick={() => toggleChallenge(option.id)}
                 variant="mini"

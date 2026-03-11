@@ -39,7 +39,7 @@ const THEMES: Record<string, JourneyTheme> = {
     bgClass: "bg-violet-500/10",
     borderClass: "border-violet-500/30",
     gradientClass: "from-violet-500/20 to-purple-600/20 text-violet-400",
-    label: "Detox",
+    label: "Tela",
   },
   "own-mornings": {
     icon: Sunrise,
@@ -48,7 +48,7 @@ const THEMES: Record<string, JourneyTheme> = {
     bgClass: "bg-amber-500/10",
     borderClass: "border-amber-500/30",
     gradientClass: "from-amber-500/20 to-orange-600/20 text-amber-400",
-    label: "Manhãs",
+    label: "Elite",
   },
   "gym": {
     icon: Dumbbell,
@@ -57,7 +57,7 @@ const THEMES: Record<string, JourneyTheme> = {
     bgClass: "bg-red-500/10",
     borderClass: "border-red-500/30",
     gradientClass: "from-red-500/20 to-rose-600/20 text-red-400",
-    label: "Gym",
+    label: "Treino",
   },
   "focus-protocol": {
     icon: Brain,

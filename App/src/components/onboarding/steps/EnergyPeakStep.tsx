@@ -1,15 +1,17 @@
+import type { ReactNode } from "react";
 import { motion } from "motion/react";
+import { Sun, CloudSun, Moon } from "lucide-react";
 import { useOnboarding, type EnergyPeak } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 
 const ENERGY_PEAK_OPTIONS: Array<{
   value: EnergyPeak;
   label: string;
-  emoji: string;
+  icon: ReactNode;
 }> = [
-  { value: "morning", label: "Manhã", emoji: "☀️" },
-  { value: "afternoon", label: "Tarde", emoji: "🌤️" },
-  { value: "evening", label: "Noite", emoji: "🌙" },
+  { value: "morning", label: "Manhã", icon: <Sun className="w-5 h-5" /> },
+  { value: "afternoon", label: "Tarde", icon: <CloudSun className="w-5 h-5" /> },
+  { value: "evening", label: "Noite", icon: <Moon className="w-5 h-5" /> },
 ];
 
 export const EnergyPeakStep = () => {
@@ -48,7 +50,7 @@ export const EnergyPeakStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                icon={option.icon}
                 selected={energyPeak === option.value}
                 onClick={() => setEnergyPeak(option.value)}
                 variant="mini"

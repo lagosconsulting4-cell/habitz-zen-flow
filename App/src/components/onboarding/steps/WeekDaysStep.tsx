@@ -1,4 +1,6 @@
+import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { Briefcase, RefreshCw, SlidersHorizontal } from "lucide-react";
 import { useOnboarding, type WeekDaysPreset } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 import { cn } from "@/lib/utils";
@@ -6,12 +8,12 @@ import { cn } from "@/lib/utils";
 const PRESET_OPTIONS: Array<{
   value: WeekDaysPreset;
   label: string;
-  emoji: string;
+  icon: ReactNode;
   days: number[];
 }> = [
-  { value: "weekdays", label: "Seg-Sex", emoji: "💼", days: [1, 2, 3, 4, 5] },
-  { value: "everyday", label: "Todo dia", emoji: "🔄", days: [0, 1, 2, 3, 4, 5, 6] },
-  { value: "custom", label: "Custom", emoji: "✨", days: [] },
+  { value: "weekdays", label: "Seg-Sex", icon: <Briefcase className="w-5 h-5" />, days: [1, 2, 3, 4, 5] },
+  { value: "everyday", label: "Todo dia", icon: <RefreshCw className="w-5 h-5" />, days: [0, 1, 2, 3, 4, 5, 6] },
+  { value: "custom", label: "Custom", icon: <SlidersHorizontal className="w-5 h-5" />, days: [] },
 ];
 
 const WEEK_DAYS = [
@@ -77,7 +79,7 @@ export const WeekDaysStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                icon={option.icon}
                 selected={weekDaysPreset === option.value}
                 onClick={() => handlePresetChange(option.value)}
                 variant="mini"

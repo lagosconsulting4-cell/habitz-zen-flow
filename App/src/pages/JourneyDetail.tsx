@@ -5,8 +5,9 @@
 
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowLeft, CheckCircle2, Lock, Circle, Play, Pause, RotateCcw, ChevronDown } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Lock, Circle, Play, Pause, RotateCcw, ChevronDown, Check } from "lucide-react";
 import { haptic } from "@/lib/haptics";
+import { sounds } from "@/lib/sounds";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useJourneyDetail, useJourneyActions } from "@/hooks/useJourney";
@@ -38,7 +39,8 @@ const JourneyDetail = () => {
   const completionSet = new Set(dayCompletions);
 
   const handleStart = async () => {
-    haptic.medium();
+    sounds.unlock();
+    haptic.success();
     await startJourney(journey.id);
     if (!isAchievementUnlocked("journey_explorer")) {
       unlockAchievement({ achievementId: "journey_explorer", progressSnapshot: { journey_id: journey.id } }).catch(() => {});
@@ -61,9 +63,22 @@ const JourneyDetail = () => {
         className="px-4 pb-6 space-y-4 relative overflow-hidden"
         style={{
           paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))',
-          background: `linear-gradient(180deg, ${theme.color}0D 0%, transparent 100%)`,
+          background: `
+            radial-gradient(ellipse at 50% 0%, ${theme.color}1A 0%, transparent 60%),
+            radial-gradient(circle at 80% 20%, ${theme.color}0F 0%, transparent 40%),
+            linear-gradient(180deg, ${theme.color}08 0%, transparent 40%)
+          `,
         }}
       >
+        {/* Dot pattern texture */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          style={{
+            backgroundImage: `radial-gradient(${theme.color} 1px, transparent 1px)`,
+            backgroundSize: '20px 20px',
+          }}
+        />
+
         <button
           onClick={() => navigate("/journeys")}
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -93,6 +108,48 @@ const JourneyDetail = () => {
           >
             "{journey.promise}"
           </p>
+        )}
+
+        {/* Transformation: Before → After (only for non-enrolled users) */}
+        {journey.target_audience && journey.expected_result && !isEnrolled && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="grid grid-cols-2 gap-3"
+          >
+            {/* ANTES — quem é essa jornada */}
+            <div className="p-3 rounded-xl bg-foreground/[0.03] border border-foreground/[0.06]">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+                Pra quem
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {journey.target_audience}
+              </p>
+            </div>
+
+            {/* DEPOIS — o resultado esperado */}
+            <div
+              className="p-3 rounded-xl"
+              style={{
+                backgroundColor: `${theme.color}08`,
+                border: `1px solid ${theme.color}15`,
+              }}
+            >
+              <div className="flex items-center gap-1 mb-1.5">
+                <Check className="w-3 h-3" style={{ color: theme.color }} />
+                <p
+                  className="text-[10px] font-bold uppercase tracking-wider"
+                  style={{ color: theme.color }}
+                >
+                  O resultado
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {journey.expected_result}
+              </p>
+            </div>
+          </motion.div>
         )}
 
         {/* Progress bar (if enrolled) */}
@@ -190,13 +247,14 @@ const JourneyDetail = () => {
           const isLast = phaseIdx === phases.length - 1;
 
           return (
-            <div key={phase.id} className="flex gap-3">
+            <div key={phase.id} className={cn("flex gap-3", phaseFuture && "opacity-50")}>
               {/* Timeline column */}
               <div className="flex flex-col items-center w-8 flex-shrink-0">
                 {/* Node — rounded square for more designed feel */}
                 <div
                   className={cn(
                     "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border-2 z-10 transition-all",
+                    phaseActive && "animate-glow-breathe",
                     phaseComplete
                       ? "border-transparent text-white"
                       : phaseActive
@@ -258,6 +316,11 @@ const JourneyDetail = () => {
                       <h3 className="text-sm font-bold text-foreground">{phase.title}</h3>
                       {phase.subtitle && (
                         <p className="text-xs text-muted-foreground">{phase.subtitle}</p>
+                      )}
+                      {phase.description && !isExpanded && (
+                        <p className="text-[11px] text-muted-foreground/60 mt-0.5 line-clamp-1">
+                          {phase.description}
+                        </p>
                       )}
                     </div>
                   </div>

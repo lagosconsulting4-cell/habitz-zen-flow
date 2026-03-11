@@ -1,17 +1,19 @@
+import type { ReactNode } from "react";
 import { motion } from "motion/react";
+import { Zap, Timer, Clock, CalendarClock } from "lucide-react";
 import { useOnboarding, type TimeAvailable } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 
 const TIME_AVAILABLE_OPTIONS: Array<{
   value: TimeAvailable;
   label: string;
-  emoji: string;
+  icon: ReactNode;
   habits: string;
 }> = [
-  { value: "15min", label: "15 min", emoji: "⚡", habits: "~3 hábitos" },
-  { value: "30min", label: "30 min", emoji: "⏱️", habits: "~5 hábitos" },
-  { value: "1h", label: "1 hora", emoji: "🕐", habits: "~7 hábitos" },
-  { value: "2h+", label: "2+ horas", emoji: "📅", habits: "~10 hábitos" },
+  { value: "15min", label: "15 min", icon: <Zap className="w-5 h-5" />, habits: "~3 hábitos" },
+  { value: "30min", label: "30 min", icon: <Timer className="w-5 h-5" />, habits: "~5 hábitos" },
+  { value: "1h", label: "1 hora", icon: <Clock className="w-5 h-5" />, habits: "~7 hábitos" },
+  { value: "2h+", label: "2+ horas", icon: <CalendarClock className="w-5 h-5" />, habits: "~10 hábitos" },
 ];
 
 export const TimeAvailableStep = () => {
@@ -53,7 +55,7 @@ export const TimeAvailableStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                icon={option.icon}
                 selected={timeAvailable === option.value}
                 onClick={() => setTimeAvailable(option.value)}
                 variant="mini"

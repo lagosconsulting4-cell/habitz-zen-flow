@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { useGamification, type Achievement } from "@/hooks/useGamification";
 import { useAuth } from "@/integrations/supabase/auth";
 import { getAchievementIcon } from "./AchievementIcons";
+import { sounds } from "@/lib/sounds";
+import { haptic } from "@/lib/haptics";
 
 interface AchievementNotification {
   id: number;
@@ -27,6 +29,9 @@ export const AchievementToast = ({ userId: propUserId }: AchievementToastProps) 
     const handler = (e: CustomEvent) => {
       const { achievementId, gemsEarned } = e.detail;
       const id = Date.now();
+
+      sounds.unlock();
+      haptic.success();
 
       setNotifications((prev) => [...prev, { id, achievementId, gemsEarned }]);
 

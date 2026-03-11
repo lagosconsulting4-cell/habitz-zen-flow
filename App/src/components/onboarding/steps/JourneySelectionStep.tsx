@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOnboarding } from "../OnboardingProvider";
 import { cn } from "@/lib/utils";
-import { Check, Star, Calendar } from "lucide-react";
+import { Check, Calendar } from "lucide-react";
+import { haptic } from "@/lib/haptics";
 import { JourneyIllustration, getJourneyTheme } from "@/components/JourneyIllustration";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -132,7 +133,7 @@ export const JourneySelectionStep = () => {
                   boxShadow: { duration: 0.3 },
                 }}
                 whileTap={reducedMotion ? undefined : { scale: 0.97 }}
-                onClick={() => toggleJourney(j.id)}
+                onClick={() => { haptic.light(); toggleJourney(j.id); }}
                 role="checkbox"
                 aria-checked={selected}
                 aria-label={`${j.title}${j.recommended ? " - Recomendada para você" : ""}`}
@@ -174,21 +175,20 @@ export const JourneySelectionStep = () => {
                       {j.title}
                     </h3>
                     {j.promise && (
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                      <p className="text-sm text-foreground/70 mt-0.5 line-clamp-2">
                         {j.promise}
                       </p>
                     )}
                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       {j.recommended && (
                         <span
-                          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold"
+                          className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold"
                           style={{
                             backgroundColor: `${theme.color}1A`,
                             color: theme.color,
                             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.1)",
                           }}
                         >
-                          <Star className="w-2.5 h-2.5" />
                           Pra você
                         </span>
                       )}
@@ -231,7 +231,7 @@ export const JourneySelectionStep = () => {
         className="text-center text-xs mt-3"
       >
         {atLimit ? (
-          <span className="text-amber-500 font-medium">⚠ Limite atingido — comece com {MAX_JOURNEYS} jornadas</span>
+          <span className="text-amber-500 font-medium">Limite atingido — comece com {MAX_JOURNEYS} jornadas</span>
         ) : selectedJourneyIds.size > 0 ? (
           <span className="text-muted-foreground">{selectedJourneyIds.size} {selectedJourneyIds.size === 1 ? "jornada selecionada" : "jornadas selecionadas"}</span>
         ) : (

@@ -526,6 +526,9 @@ const Dashboard = () => {
 
       // Celebrations only when transitioning to fully completed
       if (isNowFullyCompleted && !wasFullyCompleted) {
+        // Sensory celebration — sound + haptic
+        celebrations.habitComplete();
+
         if (isGamificationEnabled) {
           queueXpToast({
             amount: XP_VALUES.HABIT_COMPLETE,
@@ -604,6 +607,9 @@ const Dashboard = () => {
 
       // OPTIMISTIC: Add completion immediately
       addCompletionOptimistic(optimisticCompletion);
+
+      // Sensory celebration — sound + haptic
+      celebrations.habitComplete();
 
       if (isGamificationEnabled) {
         // IMMEDIATE: Queue XP toast
@@ -784,16 +790,6 @@ const Dashboard = () => {
                     {firstActiveJourney.title} · {firstActiveJourney.duration_days} dias
                   </p>
                 </div>
-              </div>
-
-              {/* Motivational quote */}
-              <div
-                className="pl-3 border-l-2 py-1"
-                style={{ borderColor: firstJourneyTheme.color }}
-              >
-                <p className="text-sm font-serif italic" style={{ color: `${firstJourneyTheme.color}CC` }}>
-                  Você já deu o passo mais difícil: começar. Seu primeiro dia está pronto.
-                </p>
               </div>
 
               {/* CTA — navigate to day content */}

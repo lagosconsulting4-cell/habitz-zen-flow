@@ -1,17 +1,19 @@
+import type { ReactNode } from "react";
 import { motion } from "motion/react";
+import { Sunrise, Building2, Moon, RefreshCw } from "lucide-react";
 import { useOnboarding, type WorkSchedule } from "../OnboardingProvider";
 import { SelectionCard, SelectionCardGrid } from "../SelectionCard";
 
 const WORK_SCHEDULE_OPTIONS: Array<{
   value: WorkSchedule;
   label: string;
-  emoji: string;
+  icon: ReactNode;
   hours: string;
 }> = [
-  { value: "morning", label: "Manhã", emoji: "🌅", hours: "6h-14h" },
-  { value: "commercial", label: "Comercial", emoji: "🏢", hours: "8h-18h" },
-  { value: "evening", label: "Tarde/Noite", emoji: "🌙", hours: "14h-22h" },
-  { value: "flexible", label: "Flexível", emoji: "🔄", hours: "Varia" },
+  { value: "morning", label: "Manhã", icon: <Sunrise className="w-5 h-5" />, hours: "6h-14h" },
+  { value: "commercial", label: "Comercial", icon: <Building2 className="w-5 h-5" />, hours: "8h-18h" },
+  { value: "evening", label: "Tarde/Noite", icon: <Moon className="w-5 h-5" />, hours: "14h-22h" },
+  { value: "flexible", label: "Flexível", icon: <RefreshCw className="w-5 h-5" />, hours: "Varia" },
 ];
 
 export const WorkScheduleStep = () => {
@@ -53,7 +55,7 @@ export const WorkScheduleStep = () => {
               <SelectionCard
                 id={option.value}
                 title={option.label}
-                emoji={option.emoji}
+                icon={option.icon}
                 selected={workSchedule === option.value}
                 onClick={() => setWorkSchedule(option.value)}
                 variant="mini"

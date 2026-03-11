@@ -80,6 +80,11 @@ export interface OnboardingState {
   recommendedHabits: RecommendedHabit[];
   selectedHabitIds: Set<string>;
 
+  // Quiet Hours (opt-in)
+  quietHoursEnabled: boolean;
+  quietHoursStart: string;
+  quietHoursEnd: string;
+
   // Status
   isGeneratingRoutine: boolean;
   isSubmitting: boolean;
@@ -103,6 +108,9 @@ export interface OnboardingContextType extends OnboardingState {
   toggleJourney: (journeyId: string) => void;
   setWeekDaysPreset: (preset: WeekDaysPreset) => void;
   setWeekDays: (days: number[]) => void;
+  setQuietHoursEnabled: (enabled: boolean) => void;
+  setQuietHoursStart: (time: string) => void;
+  setQuietHoursEnd: (time: string) => void;
 
   // Habit Management
   generateRoutine: () => Promise<void>;
@@ -150,10 +158,13 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [recommendedHabits, setRecommendedHabits] = useState<RecommendedHabit[]>([]);
   const [selectedHabitIds, setSelectedHabitIds] = useState<Set<string>>(new Set());
   const [selectedJourneyIds, setSelectedJourneyIds] = useState<Set<string>>(new Set());
+  const [quietHoursEnabled, setQuietHoursEnabled] = useState(false);
+  const [quietHoursStart, setQuietHoursStart] = useState("22:00");
+  const [quietHoursEnd, setQuietHoursEnd] = useState("07:00");
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const totalSteps = 14; // Welcome, Theme, Age, Profession, WorkSchedule, EnergyPeak, TimeAvailable, Objective, Challenges, JourneySelection, WeekDays, Preview, Notification, Celebration
+  const totalSteps = 15; // Welcome, Theme, Age, Profession, WorkSchedule, EnergyPeak, TimeAvailable, Objective, Challenges, JourneySelection, WeekDays, Preview, QuietHours, Notification, Celebration
 
   // ============================================================================
   // NAVIGATION
@@ -210,9 +221,11 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         return weekDays.length > 0;
       case 11: // Preview
         return selectedHabitIds.size >= 3;
-      case 12: // Notification
+      case 12: // Quiet Hours
+        return true; // Optional — user can skip or configure
+      case 13: // Notification
         return true; // Notification step always valid (user can skip)
-      case 13: // Celebration (auto-submits)
+      case 14: // Celebration (auto-submits)
         return true;
       default:
         return false;
@@ -449,6 +462,38 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         console.error("Failed to update profile:", profileError);
       }
 
+      // Save quiet hours preference if enabled
+      if (quietHoursEnabled && user) {
+        // Fetch current notification_preferences, merge quiet hours, update
+        const { data: upData } = await supabase
+          .from("user_progress")
+          .select("notification_preferences")
+          .eq("user_id", user.id)
+          .single();
+
+        const currentPrefs = (upData?.notification_preferences as Record<string, unknown>) || {
+          daily_limit: 3,
+          extra_for_streaks: 2,
+          delayed_reminder_hours: 2,
+          end_of_day_enabled: true,
+        };
+
+        const { error: qhError } = await supabase
+          .from("user_progress")
+          .update({
+            notification_preferences: {
+              ...currentPrefs,
+              quiet_hours_start: quietHoursStart,
+              quiet_hours_end: quietHoursEnd,
+            },
+          } as never)
+          .eq("user_id", user.id);
+
+        if (qhError) {
+          console.error("Failed to save quiet hours:", qhError);
+        }
+      }
+
       // Start selected journeys
       for (const journeyId of selectedJourneyIds) {
         try {
@@ -493,7 +538,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     } finally {
       setIsSubmitting(false);
     }
-  }, [user, recommendedHabits, selectedHabitIds, selectedJourneyIds, weekDays, objective, timeAvailable, addXP, navigate]);
+  }, [user, recommendedHabits, selectedHabitIds, selectedJourneyIds, weekDays, objective, timeAvailable, quietHoursEnabled, quietHoursStart, quietHoursEnd, addXP, navigate]);
 
   // ============================================================================
   // CONTEXT VALUE
@@ -518,6 +563,9 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     weekDays,
     recommendedHabits,
     selectedHabitIds,
+    quietHoursEnabled,
+    quietHoursStart,
+    quietHoursEnd,
     isGeneratingRoutine,
     isSubmitting,
 
@@ -538,6 +586,9 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     toggleJourney,
     setWeekDaysPreset,
     setWeekDays,
+    setQuietHoursEnabled,
+    setQuietHoursStart,
+    setQuietHoursEnd,
 
     // Habit Management
     generateRoutine,
@@ -570,6 +621,9 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     weekDays,
     recommendedHabits,
     selectedHabitIds,
+    quietHoursEnabled,
+    quietHoursStart,
+    quietHoursEnd,
     isGeneratingRoutine,
     isSubmitting,
     goToStep,
@@ -586,6 +640,9 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     toggleJourney,
     setWeekDaysPreset,
     setWeekDays,
+    setQuietHoursEnabled,
+    setQuietHoursStart,
+    setQuietHoursEnd,
     generateRoutine,
     toggleHabit,
     updateHabitTime,

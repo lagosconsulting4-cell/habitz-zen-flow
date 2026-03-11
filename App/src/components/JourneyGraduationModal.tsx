@@ -6,6 +6,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { GraduationCap, Check, Archive, Sparkles } from "lucide-react";
+import { sounds } from "@/lib/sounds";
+import { haptic } from "@/lib/haptics";
 import {
   Dialog,
   DialogContent,
@@ -90,6 +92,15 @@ export const JourneyGraduationModal = ({
       return () => clearTimeout(timer);
     }
     setShowContent(false);
+  }, [isOpen]);
+
+  // Maximum celebration — day 30 graduation
+  useEffect(() => {
+    if (isOpen) {
+      sounds.levelUp();
+      haptic.heavy();
+      setTimeout(() => haptic.double(), 200);
+    }
   }, [isOpen]);
 
   const toggleHabit = (habitId: string) => {

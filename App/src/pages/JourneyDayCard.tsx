@@ -590,6 +590,14 @@ const JourneyDayCard = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent" />
           </div>
 
+          {/* Atmospheric gradient */}
+          <div
+            className="absolute top-0 left-0 right-0 h-32 pointer-events-none"
+            style={{
+              background: `linear-gradient(180deg, ${theme.color}08 0%, transparent 100%)`,
+            }}
+          />
+
           <div className="p-5 space-y-4">
             {/* Day header */}
             <div className="flex items-center gap-3">
