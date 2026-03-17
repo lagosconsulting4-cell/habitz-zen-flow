@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, TrendingUp, DollarSign, FileText, ShieldCheck, Contact } from "lucide-react";
+import { Users, TrendingUp, DollarSign, FileText, ShieldCheck, Contact, Bell } from "lucide-react";
 
 interface DashboardStats {
   userStats: {
@@ -136,6 +136,18 @@ const AdminDashboard = () => {
                 <p className="text-sm text-muted-foreground">Manage quiz leads and follow-ups</p>
               </div>
               <Contact className="h-6 w-6 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+
+        <Link to="/admin/push">
+          <Card className="p-6 hover:bg-accent transition-colors cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold">Enviar Push</h3>
+                <p className="text-sm text-muted-foreground">Notificação manual para um usuário</p>
+              </div>
+              <Bell className="h-6 w-6 text-muted-foreground" />
             </div>
           </Card>
         </Link>

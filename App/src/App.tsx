@@ -21,8 +21,9 @@ const UpdatePrompt = lazy(() => import("@/components/pwa/InstallPrompt").then(m 
 const OfflineIndicator = lazy(() => import("@/components/pwa/OfflineIndicator").then(m => ({ default: m.OfflineIndicator })));
 
 // Lazy load pages for better initial bundle size
-const OnboardingFlow = lazy(() => import("./pages/OnboardingFlow"));
-const NewOnboardingFlow = lazy(() => import("./components/onboarding/NewOnboardingFlow"));
+const OnboardingFlowLegacy = lazy(() => import("./pages/OnboardingFlow"));
+const NewOnboardingFlowLegacy = lazy(() => import("./components/onboarding/NewOnboardingFlow"));
+const OnboardingFlowV2 = lazy(() => import("./components/onboarding-v2/OnboardingFlowV2"));
 const PersonalPlan = lazy(() => import("./pages/PersonalPlan"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const CreateHabit = lazy(() => import("./pages/CreateHabit"));
@@ -56,6 +57,7 @@ const AdminContent = lazy(() => import("./pages/admin/Content"));
 const AdminAudit = lazy(() => import("./pages/admin/Audit"));
 const AdminLeads = lazy(() => import("./pages/admin/Leads"));
 const AdminPixRecovery = lazy(() => import("./pages/admin/PixRecovery"));
+const AdminPushNotification = lazy(() => import("./pages/admin/PushNotification"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -171,8 +173,12 @@ const App = () => (
             <Route path="/criar-senha" element={<Navigate to="/definir-senha" replace />} />
 
             <Route element={<ProtectedRoute><ProtectedLayout /></ProtectedRoute>}>
-              <Route path="/onboarding" element={<OnboardingFlow />} />
-              <Route path="/onboarding-new" element={<NewOnboardingFlow />} />
+              <Route path="/onboarding" element={<OnboardingFlowV2 />} />
+              {/* Backward compat: old v2 URL still works */}
+              <Route path="/onboarding-v2" element={<Navigate to="/onboarding" replace />} />
+              {/* Legacy onboarding preserved for rollback */}
+              <Route path="/onboarding-legacy" element={<OnboardingFlowLegacy />} />
+              <Route path="/onboarding-legacy-new" element={<NewOnboardingFlowLegacy />} />
               <Route path="/plano" element={<PersonalPlan />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/create" element={<CreateHabit />} />
@@ -200,6 +206,7 @@ const App = () => (
               <Route path="/admin/analytics" element={<AdminAnalytics />} />
               <Route path="/admin/content" element={<AdminContent />} />
               <Route path="/admin/pix-recovery" element={<AdminPixRecovery />} />
+              <Route path="/admin/push" element={<AdminPushNotification />} />
               <Route path="/admin/audit" element={<AdminAudit />} />
             </Route>
 
