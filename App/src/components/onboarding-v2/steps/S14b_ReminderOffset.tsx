@@ -69,8 +69,8 @@ export const S14bReminderOffset = () => {
   };
 
   return (
-    <div className="h-full flex flex-col px-6 py-8">
-      <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
+    <div className="h-full flex flex-col px-6 py-4">
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col justify-center max-w-md mx-auto w-full">
         {/* Animated bell illustration */}
         <IllustrationBell />
 
