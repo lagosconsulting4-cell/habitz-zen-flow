@@ -42,7 +42,7 @@ const THEMES: Record<string, JourneyTheme> = {
     borderClass: "border-violet-500/30",
     gradientClass: "from-violet-500/20 to-purple-600/20 text-violet-400",
     label: "Tela",
-    backgroundImage: "/backgrounds/arte9.webp",
+    backgroundImage: `${import.meta.env.BASE_URL}backgrounds/arte9.webp`,
   },
   "own-mornings": {
     icon: Sunrise,
@@ -52,7 +52,7 @@ const THEMES: Record<string, JourneyTheme> = {
     borderClass: "border-amber-500/30",
     gradientClass: "from-amber-500/20 to-orange-600/20 text-amber-400",
     label: "Elite",
-    backgroundImage: "/backgrounds/arte8.webp",
+    backgroundImage: `${import.meta.env.BASE_URL}backgrounds/arte8.webp`,
   },
   "gym": {
     icon: Dumbbell,
@@ -62,7 +62,7 @@ const THEMES: Record<string, JourneyTheme> = {
     borderClass: "border-red-500/30",
     gradientClass: "from-red-500/20 to-rose-600/20 text-red-400",
     label: "Treino",
-    backgroundImage: "/backgrounds/arte11.webp",
+    backgroundImage: `${import.meta.env.BASE_URL}backgrounds/arte11.webp`,
   },
   "focus-protocol": {
     icon: Brain,
@@ -72,7 +72,7 @@ const THEMES: Record<string, JourneyTheme> = {
     borderClass: "border-blue-500/30",
     gradientClass: "from-blue-500/20 to-cyan-600/20 text-blue-400",
     label: "Foco",
-    backgroundImage: "/backgrounds/arte5.webp",
+    backgroundImage: `${import.meta.env.BASE_URL}backgrounds/arte5.webp`,
   },
   "finances": {
     icon: Wallet,
@@ -82,7 +82,7 @@ const THEMES: Record<string, JourneyTheme> = {
     borderClass: "border-emerald-500/30",
     gradientClass: "from-emerald-500/20 to-green-600/20 text-emerald-400",
     label: "Finanças",
-    backgroundImage: "/backgrounds/arte2.webp",
+    backgroundImage: `${import.meta.env.BASE_URL}backgrounds/arte2.webp`,
   },
 };
 

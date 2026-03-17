@@ -3,7 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { useOnboardingV2 } from "../OnboardingProviderV2";
 import { Button } from "@/components/ui/button";
 
-const BG = "/backgrounds/arte3.webp";
+const BG = `${import.meta.env.BASE_URL}backgrounds/arte3.webp`;
 
 // intro = step 2 of 4 in phase 0 → show phase 0 at ~50%
 const PROGRESS_TOTAL_PHASES = 5;

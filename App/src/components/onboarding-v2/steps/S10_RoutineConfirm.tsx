@@ -18,7 +18,7 @@ const PERIOD_LABEL: Record<string, string> = {
 
 const PERIOD_ORDER = ["morning", "afternoon", "evening"] as const;
 
-const BG = "/backgrounds/arte1.webp";
+const BG = `${import.meta.env.BASE_URL}backgrounds/arte1.webp`;
 
 // confirm = end of phase 2 (phases 0-indexed: 0,1,2 = full; 3,4 = empty)
 const PROGRESS_FILLED_PHASES = 3;

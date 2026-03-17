@@ -179,9 +179,9 @@ function OnboardingProgressDots({ currentStep }: { currentStep: number }) {
 
 // Preload hero images on mount so they're cached before the step renders
 const PRELOAD_IMAGES = [
-  '/assets/onboarding/welcome-bg.webp',
-  '/assets/onboarding/journeys-intro-bg.webp',
-  '/assets/onboarding/celebration-bg.webp',
+  `${import.meta.env.BASE_URL}assets/onboarding/welcome-bg.webp`,
+  `${import.meta.env.BASE_URL}assets/onboarding/journeys-intro-bg.webp`,
+  `${import.meta.env.BASE_URL}assets/onboarding/celebration-bg.webp`,
 ];
 
 const OnboardingFlowV2Content = () => {

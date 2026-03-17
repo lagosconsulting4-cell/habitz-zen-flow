@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { Input } from "@/components/ui/input";
 import { useOnboardingV2 } from "../OnboardingProviderV2";
 
-const BG = "/assets/onboarding/welcome-bg.webp";
+const BG = `${import.meta.env.BASE_URL}assets/onboarding/welcome-bg.webp`;
 
 export const S0Welcome = () => {
   const { quizData, collectedName, setCollectedName, nextStep, isStepValid } = useOnboardingV2();
@@ -51,7 +51,7 @@ export const S0Welcome = () => {
 
         {/* Logo — acima do título, fundo branco 15% */}
         <motion.img
-          src="/assets/logo-icon.png"
+          src={`${import.meta.env.BASE_URL}assets/logo-icon.png`}
           alt="Bora"
           initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}

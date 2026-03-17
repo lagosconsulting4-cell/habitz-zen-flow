@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useOnboardingV2 } from "../OnboardingProviderV2";
 import { Button } from "@/components/ui/button";
 
-const BG = "/assets/onboarding/journeys-intro-bg.webp";
+const BG = `${import.meta.env.BASE_URL}assets/onboarding/journeys-intro-bg.webp`;
 const PRIMARY = "#A3E635";
 
 // phases 0-2 full, phase 3 at 50%, phase 4 empty

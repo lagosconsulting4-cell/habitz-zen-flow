@@ -259,7 +259,7 @@ const JourneyHub = () => {
       {/* Hero com arte12 */}
       <div className="relative -mx-4 overflow-hidden" style={{ height: '42vh' }}>
         <img
-          src="/backgrounds/arte13.webp"
+          src={`${import.meta.env.BASE_URL}backgrounds/arte13.webp`}
           alt=""
           aria-hidden="true"
           loading="eager"

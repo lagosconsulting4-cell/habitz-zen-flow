@@ -156,7 +156,7 @@ const Auth = () => {
         className="w-full max-w-md"
       >
         <motion.img
-          src="/assets/logo-bora.png"
+          src={`${import.meta.env.BASE_URL}assets/logo-bora.png`}
           alt="Bora"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}

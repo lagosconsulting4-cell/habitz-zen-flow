@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOnboardingV2 } from "../OnboardingProviderV2";
 
-const BG = "/assets/onboarding/celebration-bg.webp";
+const BG = `${import.meta.env.BASE_URL}assets/onboarding/celebration-bg.webp`;
 
 // ============================================================================
 // COMPONENT
