@@ -74,8 +74,6 @@ const JourneyDetail = () => {
           />
           {/* Top scrim: keeps back button readable against bright sky */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent" />
-          {/* Bottom fade: blends into the content card below */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" />
           {/* Back button — glassmorphic pill */}
           <button
             onClick={() => navigate("/journeys")}

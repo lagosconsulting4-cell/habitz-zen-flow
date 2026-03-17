@@ -4,7 +4,7 @@
  */
 
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "motion/react";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,9 @@ interface FloatingActionButtonProps {
 
 export const FloatingActionButton = ({ className }: FloatingActionButtonProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  if (location.pathname !== "/dashboard") return null;
 
   return createPortal(
     <motion.button
