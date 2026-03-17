@@ -314,8 +314,8 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
         return lifeAreas.length >= 1;
       case 7: // habit experience
         return habitExperience !== null;
-      case 9: // preview — at least 3 habits selected
-        return selectedHabitIds.size >= 3;
+      case 9: // preview — at least 1 habit selected
+        return selectedHabitIds.size >= 1;
       default:
         return true;
     }
