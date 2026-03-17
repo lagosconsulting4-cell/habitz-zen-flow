@@ -182,6 +182,27 @@ export function usePWA(): UsePWAReturn {
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [checkIsStandalone]);
 
+  // Verificar atualização do SW quando usuário volta ao app
+  useEffect(() => {
+    if (!swRegistration) return;
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        swRegistration.update().catch(() => {});
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [swRegistration]);
+
+  // Verificar atualização do SW a cada 60 minutos (para apps que ficam abertos)
+  useEffect(() => {
+    if (!swRegistration) return;
+    const interval = setInterval(() => {
+      swRegistration.update().catch(() => {});
+    }, 60 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [swRegistration]);
+
   // Verificar periodicamente se o app foi desinstalado
   useEffect(() => {
     const interval = setInterval(() => {
