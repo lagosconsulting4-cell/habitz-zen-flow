@@ -1,6 +1,7 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { motion } from "motion/react";
-import { ChevronLeft } from "lucide-react";
+import { Bell, Timer, Star, Clock, AlarmClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOnboardingV2 } from "../OnboardingProviderV2";
 import { useEventTracker } from "@/hooks/useEventTracker";
@@ -15,17 +16,17 @@ import { SelectionCard } from "@/components/onboarding/SelectionCard";
 interface OffsetOption {
   value: number;
   label: string;
-  emoji: string;
+  icon: ReactNode;
   description: string;
   recommended?: boolean;
 }
 
 const OFFSET_OPTIONS: OffsetOption[] = [
-  { value: 0,  label: 'Na hora certa', emoji: '🔔', description: 'Exatamente no horário do hábito' },
-  { value: 5,  label: '5 min antes',   emoji: '⏱️', description: 'Um aviso rápido' },
-  { value: 10, label: '10 min antes',  emoji: '⭐', description: 'Recomendado', recommended: true },
-  { value: 15, label: '15 min antes',  emoji: '🕐', description: 'Tempo para se preparar' },
-  { value: 30, label: '30 min antes',  emoji: '🗓️', description: 'Bastante antecedência' },
+  { value: 0,  label: 'Na hora certa', icon: <Bell       size={20} className="text-amber-500"  />, description: 'Exatamente no horário do hábito' },
+  { value: 5,  label: '5 min antes',   icon: <Timer      size={20} className="text-orange-400" />, description: 'Um aviso rápido' },
+  { value: 10, label: '10 min antes',  icon: <Star       size={20} className="text-primary"    />, description: 'Recomendado', recommended: true },
+  { value: 15, label: '15 min antes',  icon: <Clock      size={20} className="text-amber-400"  />, description: 'Tempo para se preparar' },
+  { value: 30, label: '30 min antes',  icon: <AlarmClock size={20} className="text-amber-500"  />, description: 'Bastante antecedência' },
 ];
 
 // ============================================================================
@@ -33,9 +34,9 @@ const OFFSET_OPTIONS: OffsetOption[] = [
 // ============================================================================
 
 export const S14bReminderOffset = () => {
-  const { nextStep, prevStep } = useOnboardingV2();
+  const { nextStep } = useOnboardingV2();
   const { trackEvent } = useEventTracker();
-  const [selected, setSelected] = useState(10);
+  const [selected, setSelected] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleConfirm = async () => {
@@ -88,7 +89,7 @@ export const S14bReminderOffset = () => {
           transition={{ delay: 0.1, duration: 0.4 }}
           className="text-base text-muted-foreground leading-relaxed mb-6"
         >
-          Quando você quer receber o lembrete de cada hábito?
+          Com quanto tempo antes você quer ser avisado?
         </motion.p>
 
         {/* Selection cards */}
@@ -109,7 +110,7 @@ export const S14bReminderOffset = () => {
                   id={`offset-${opt.value}`}
                   title={opt.label}
                   description={opt.description}
-                  emoji={opt.emoji}
+                  icon={opt.icon}
                   selected={selected === opt.value}
                   onClick={() => setSelected(opt.value)}
                   variant="compact"
@@ -132,15 +133,12 @@ export const S14bReminderOffset = () => {
         transition={{ delay: 0.5, duration: 0.4 }}
         className="max-w-md mx-auto w-full mt-6"
       >
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => prevStep()} className="h-10 w-10 shrink-0">
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+        <div>
           <Button
             onClick={handleConfirm}
-            disabled={isSaving}
+            disabled={isSaving || selected === null}
             size="lg"
-            className="flex-1 rounded-xl"
+            className="w-full rounded-xl"
           >
             {isSaving ? (
               <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />

@@ -3,6 +3,7 @@
  * Replaces the "Adicionar" tab that was removed from nav
  */
 
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { Plus } from "lucide-react";
@@ -15,7 +16,7 @@ interface FloatingActionButtonProps {
 export const FloatingActionButton = ({ className }: FloatingActionButtonProps) => {
   const navigate = useNavigate();
 
-  return (
+  return createPortal(
     <motion.button
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
@@ -35,7 +36,8 @@ export const FloatingActionButton = ({ className }: FloatingActionButtonProps) =
       aria-label="Criar novo hábito"
     >
       <Plus className="w-6 h-6" />
-    </motion.button>
+    </motion.button>,
+    document.body
   );
 };
 

@@ -164,6 +164,7 @@
   }
 
   .gradient-text {
+    color: hsl(var(--primary)); /* Fallback for unsupported browsers */
     @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
   }
 

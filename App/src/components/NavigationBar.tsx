@@ -14,13 +14,13 @@ interface NavItem {
   index?: number; // Optional - Journeys doesn't have an index (not swipeable)
 }
 
-// Navigation items - Journeys navigates normally, others are swipeable
+// Navigation items - all are swipeable
 const navItems: NavItem[] = [
-  { id: "home", label: "Home", icon: Home, path: "/dashboard", index: 0 },
-  { id: "habits", label: "Hábitos", icon: ListChecks, path: "/habits", index: 1 },
-  { id: "journeys", label: "Jornadas", icon: Compass, path: "/journeys" },
-  { id: "progress", label: "Streaks", icon: TrendingUp, path: "/progress", index: 2 },
-  { id: "profile", label: "Perfil", icon: User, path: "/profile", index: 3 },
+  { id: "home",     label: "Home",     icon: Home,       path: "/dashboard", index: 0 },
+  { id: "habits",   label: "Hábitos",  icon: ListChecks, path: "/habits",    index: 1 },
+  { id: "journeys", label: "Jornadas", icon: Compass,    path: "/journeys",  index: 2 },
+  { id: "progress", label: "Streaks",  icon: TrendingUp, path: "/progress",  index: 3 },
+  { id: "profile",  label: "Perfil",   icon: User,       path: "/profile",   index: 4 },
 ];
 
 const transition = { type: "spring", bounce: 0.2, duration: 0.35 } as const;
@@ -88,6 +88,7 @@ const NavigationBar = memo(() => {
           return (
             <motion.button
               key={item.id}
+              data-tour={item.id === "home" ? "today" : item.id}
               type="button"
               onClick={() => handleNavigate(item)}
               transition={transition}

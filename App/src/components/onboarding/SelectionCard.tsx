@@ -48,7 +48,7 @@ export const SelectionCard = ({
           "relative cursor-pointer transition-all duration-300",
           "border-2",
           selected
-            ? "border-primary bg-primary/5 dark:bg-primary/10 shadow-md shadow-primary/20"
+            ? "border-primary bg-gradient-to-br from-primary/[0.08] to-transparent dark:from-primary/[0.12] dark:to-transparent shadow-lg shadow-primary/25 ring-1 ring-primary/40"
             : "border-border hover:border-primary/50 hover:shadow-sm",
           disabled && "opacity-50 cursor-not-allowed",
           isIconOnly ? "p-4" : isMini ? "py-2 px-2" : isCompact ? "p-4" : "p-6",
@@ -72,9 +72,8 @@ export const SelectionCard = ({
           }}
           transition={{
             type: "spring",
-            stiffness: 200,
-            damping: 15,
-            duration: 0.4
+            stiffness: 350,
+            damping: 18,
           }}
         >
           <div
@@ -114,8 +113,8 @@ export const SelectionCard = ({
                       : "w-14 h-14 text-3xl",
                 !emoji && (isMini ? "bg-muted p-1.5" : "bg-muted p-3")
               )}
-              animate={{ rotate: selected ? [0, -10, 10, 0] : 0 }}
-              transition={{ duration: 0.3 }}
+              animate={{ scale: selected ? 1.12 : 1, rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 22 }}
             >
               {emoji ? emoji : icon}
             </motion.div>

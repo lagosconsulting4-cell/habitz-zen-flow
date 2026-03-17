@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import NavigationBar from "@/components/NavigationBar";
 import AppSidebar from "@/components/AppSidebar";
 import { SwipeableCarousel, SWIPEABLE_PATHS, SwipeContextProvider } from "@/layouts/SwipeableLayout";
+import { TourOverlay } from "@/components/TourOverlay";
 
 const ProtectedLayout = () => {
   const location = useLocation();
@@ -11,7 +12,7 @@ const ProtectedLayout = () => {
   const isSwipeableRoute = SWIPEABLE_PATHS.has(location.pathname);
 
   const shouldHideNav = useMemo(() => {
-    const hiddenRoutes = new Set(["/onboarding", "/onboarding-new", "/create"]);
+    const hiddenRoutes = new Set(["/onboarding", "/onboarding-new", "/create", "/onboarding-v2"]);
     // Also hide for /habits/edit/:id routes
     const isEditHabitRoute = location.pathname.startsWith("/habits/edit/");
     return hiddenRoutes.has(location.pathname) || isEditHabitRoute;
@@ -23,12 +24,17 @@ const ProtectedLayout = () => {
 
   return (
     <SwipeContextProvider>
-      <div className="relative min-h-screen bg-background">
-        {isSwipeableRoute ? (
-          // Swipeable routes use the carousel
+      <TourOverlay />
+      {shouldHideNav ? (
+        // Onboarding / fullscreen routes — no wrapper, no padding, no scroll
+        <Outlet />
+      ) : isSwipeableRoute ? (
+        <div className="relative min-h-screen bg-background">
           <SwipeableCarousel />
-        ) : (
-          // Non-swipeable routes use traditional layout with Outlet
+          <NavigationBar />
+        </div>
+      ) : (
+        <div className="relative min-h-screen bg-background">
           <div
             className={`mx-auto flex w-full ${containerWidth} flex-col gap-6 px-4 md:flex-row md:px-8 ${bottomPadding}`}
             style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}
@@ -38,10 +44,9 @@ const ProtectedLayout = () => {
               <Outlet />
             </main>
           </div>
-        )}
-
-        {!shouldHideNav && <NavigationBar />}
-      </div>
+          <NavigationBar />
+        </div>
+      )}
     </SwipeContextProvider>
   );
 };

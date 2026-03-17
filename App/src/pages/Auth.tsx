@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Mail, Lock, Loader2, KeyRound } from "lucide-react";
+import { Mail, Lock, Loader2, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -45,13 +45,13 @@ const Auth = () => {
 
       // Se nao completou onboarding, redirecionar para la primeiro
       if (!data?.has_completed_onboarding) {
-        navigate("/onboarding-new", { replace: true });
+        navigate("/onboarding", { replace: true });
         return;
       }
 
       if (data?.is_premium) {
         const safePath =
-          preferredPath && !["/auth", "/pricing", "/onboarding", "/onboarding-new"].includes(preferredPath)
+          preferredPath && !["/auth", "/pricing", "/onboarding", "/onboarding-v2", "/onboarding-legacy", "/onboarding-legacy-new"].includes(preferredPath)
             ? preferredPath
             : "/dashboard";
         navigate(safePath, { replace: true });
@@ -63,7 +63,7 @@ const Auth = () => {
       console.error("Failed to resolve premium status", err);
       toast.error("Nao conseguimos validar sua assinatura agora. Entrando no app mesmo assim.");
       const safePath =
-        preferredPath && !["/auth", "/pricing", "/onboarding", "/onboarding-new"].includes(preferredPath)
+        preferredPath && !["/auth", "/pricing", "/onboarding", "/onboarding-v2", "/onboarding-legacy", "/onboarding-legacy-new"].includes(preferredPath)
           ? preferredPath
           : "/dashboard";
       navigate(safePath, { replace: true });
@@ -148,21 +148,21 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 via-background to-background flex items-center justify-center p-4 transition-colors duration-300">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
         className="w-full max-w-md"
       >
-        <Button
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground hover:bg-muted mb-6 flex items-center gap-2"
-          onClick={() => navigate("/")}
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Voltar para inicio
-        </Button>
+        <motion.img
+          src="/assets/logo-bora.png"
+          alt="Bora"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="h-20 w-auto mx-auto mb-8"
+        />
 
         <Card className="rounded-2xl bg-card border border-border text-foreground">
           <CardHeader className="space-y-4 text-center">

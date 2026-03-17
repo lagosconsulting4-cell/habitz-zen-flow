@@ -9,13 +9,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useLocation } from "react-router-dom";
 import { usePWA } from "@/hooks/usePWA";
 import { cn } from "@/lib/utils";
+
+const ONBOARDING_ROUTES = new Set(["/onboarding", "/onboarding-new", "/onboarding-v2"]);
 
 export function InstallPrompt() {
   const { isInstalled, isInstallable, isIOS, promptInstall } = usePWA();
   const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
 
+  if (ONBOARDING_ROUTES.has(location.pathname)) return null;
   if (isInstalled) return null;
 
   const shouldShow = isIOS || isInstallable;
@@ -28,7 +33,7 @@ export function InstallPrompt() {
   };
 
   const buttonClasses = cn(
-    "fixed right-4 z-50 toast-bottom",
+    "fixed left-4 z-50 toast-bottom",
     "w-16 h-16 rounded-full",
     "bg-primary",
     "text-primary-foreground",

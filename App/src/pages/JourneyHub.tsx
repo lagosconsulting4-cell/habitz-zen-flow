@@ -255,23 +255,24 @@ const JourneyHub = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
       className="px-4 pb-navbar space-y-6 max-w-xl mx-auto w-full"
-      style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
     >
-      {/* Header with atmospheric gradient */}
-      <div className="relative -mx-4 px-4 pb-4">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `
-              radial-gradient(ellipse at 50% 0%, rgba(163,230,53,0.06) 0%, transparent 70%),
-              radial-gradient(circle at 80% 30%, rgba(163,230,53,0.03) 0%, transparent 50%)
-            `,
-          }}
+      {/* Hero com arte12 */}
+      <div className="relative -mx-4 overflow-hidden" style={{ height: '42vh' }}>
+        <img
+          src="/backgrounds/arte13.webp"
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          className="w-full h-full object-cover object-bottom"
         />
-        <h1 className="text-2xl font-bold text-foreground relative">Jornadas</h1>
-        <p className="text-sm text-muted-foreground mt-1 font-serif italic relative">
-          Transformações guiadas de 30 dias
-        </p>
+        {/* Scrim top — safe-area + legibilidade status bar */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-transparent" />
+        {/* Fade bottom → background */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
+        {/* Título sobreposto no bottom */}
+        <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
+          <h1 className="text-2xl font-bold text-gray-900">Jornadas feitas pra você</h1>
+        </div>
       </div>
 
       {/* Active Journeys */}

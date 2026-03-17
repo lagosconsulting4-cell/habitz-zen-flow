@@ -16,7 +16,7 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
   const location = useLocation();
 
   // Allow onboarding-new route to work without auth during development
-  const isOnboardingNewRoute = location.pathname === "/onboarding-new";
+  const isOnboardingNewRoute = location.pathname === "/onboarding" || location.pathname === "/onboarding-v2";
 
   useEffect(() => {
     // Check current auth state

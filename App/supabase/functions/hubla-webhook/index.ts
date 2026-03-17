@@ -20,6 +20,7 @@ const n8nBaseUrl =
 const n8nWebhookUrl = `${n8nBaseUrl}/bora-welcome`;
 const n8nPixPendingUrl = `${n8nBaseUrl}/pix-pending`;
 const n8nSubscriptionCanceledUrl = `${n8nBaseUrl}/subscription-canceled`;
+const n8nTelegramNotifyUrl = `${n8nBaseUrl}/telegram-notify`;
 
 if (!supabaseUrl || !serviceRoleKey) {
   console.error("[hubla-webhook] Missing SUPABASE_URL or SERVICE_ROLE_KEY");
@@ -340,6 +341,42 @@ serve(async (req) => {
     }
   };
 
+  // ─── Telegram notification helper (fire-and-forget) ──────────────
+  const notifyTelegram = (data: {
+    eventType: string;
+    eventLabel: string;
+    customerName?: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    productName?: string;
+    amountCents?: number;
+    paymentMethod?: string;
+    invoiceId?: string;
+    subscriptionId?: string;
+    reason?: string;
+  }) => {
+    const payload = {
+      ...data,
+      amountFormatted: data.amountCents
+        ? `R$ ${(data.amountCents / 100).toFixed(2).replace(".", ",")}`
+        : undefined,
+      provider: "hubla",
+      timestamp: new Date().toISOString(),
+    };
+    fetch(n8nTelegramNotifyUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then((r) => {
+        if (!r.ok)
+          console.warn(`[hubla-webhook] ⚠️ Telegram notify: ${r.status}`);
+      })
+      .catch((e) =>
+        console.warn(`[hubla-webhook] ⚠️ Telegram notify failed:`, e)
+      );
+  };
+
   // ─── Extract helpers ──────────────────────────────────────────────
 
   const extractUserData = (event: any) => {
@@ -475,6 +512,7 @@ serve(async (req) => {
         // NOTE: Do NOT notify N8N here. subscription.created fires when PIX
         // is generated (before payment). The welcome email should only be sent
         // from subscription.activated (payment confirmed).
+        // NOTE: Telegram PIX_PENDENTE is sent from invoice.created (richer data).
 
         console.log(
           `[hubla-webhook] ✅ subscription.created processed for ${userData.email}`
@@ -546,6 +584,15 @@ serve(async (req) => {
             productName: purchase.product_names ?? undefined,
           });
         }
+
+        notifyTelegram({
+          eventType: "VENDA_CONFIRMADA",
+          eventLabel: "Venda Confirmada (Pix)",
+          customerName: profile?.display_name ?? "Cliente Hubla",
+          customerEmail: profile?.email,
+          productName: purchase.product_names ?? undefined,
+          subscriptionId,
+        });
 
         console.log(
           `[hubla-webhook] ✅ subscription.activated processed`
@@ -634,6 +681,17 @@ serve(async (req) => {
             error
           );
         }
+
+        notifyTelegram({
+          eventType: "PIX_PENDENTE",
+          eventLabel: "Pix Pendente",
+          customerName: userData.displayName,
+          customerEmail: userData.email,
+          customerPhone: userData.phone,
+          productName: productNames,
+          paymentMethod: "pix",
+          invoiceId,
+        });
         break;
       }
 
@@ -676,6 +734,12 @@ serve(async (req) => {
             .eq("provider_payment_intent", invoiceId);
 
           await setUserPremium(purchase.user_id, true);
+
+          notifyTelegram({
+            eventType: "VENDA_CONFIRMADA",
+            eventLabel: "Venda Confirmada (Invoice)",
+            invoiceId,
+          });
 
           console.log(
             `[hubla-webhook] ✅ invoice.payment_succeeded processed`
@@ -788,6 +852,16 @@ serve(async (req) => {
           productName: productNames,
         });
 
+        notifyTelegram({
+          eventType: "VENDA_CONFIRMADA",
+          eventLabel: "Venda Confirmada (Member)",
+          customerName: userData.displayName,
+          customerEmail: userData.email,
+          customerPhone: userData.phone,
+          productName: productNames,
+          subscriptionId,
+        });
+
         console.log(
           `[hubla-webhook] ✅ customer.member_added processed`
         );
@@ -850,6 +924,15 @@ serve(async (req) => {
           }, n8nSubscriptionCanceledUrl);
         }
 
+        notifyTelegram({
+          eventType: "CANCELAMENTO",
+          eventLabel: "Cancelamento",
+          customerName: deactivatedProfile?.display_name ?? "Cliente Hubla",
+          customerEmail: deactivatedProfile?.email,
+          productName: "Bora (Hubla/Pix)",
+          subscriptionId,
+        });
+
         console.log(
           `[hubla-webhook] ✅ subscription.deactivated processed — premium revoked + N8N notified`
         );
@@ -911,6 +994,15 @@ serve(async (req) => {
             productName: "Bora (Hubla/Pix)",
           }, n8nSubscriptionCanceledUrl);
         }
+
+        notifyTelegram({
+          eventType: "REEMBOLSO",
+          eventLabel: "Reembolso",
+          customerName: refundedProfile?.display_name ?? "Cliente Hubla",
+          customerEmail: refundedProfile?.email,
+          productName: "Bora (Hubla/Pix)",
+          invoiceId,
+        });
 
         console.log(
           `[hubla-webhook] ✅ invoice.refunded processed — premium revoked + N8N notified`
@@ -1030,9 +1122,127 @@ serve(async (req) => {
           productName: groupName,
         });
 
+        notifyTelegram({
+          eventType: "VENDA_CONFIRMADA",
+          eventLabel: "Venda Confirmada (Legacy)",
+          customerName: displayName,
+          customerEmail: email,
+          customerPhone: phone,
+          productName: groupName,
+          paymentMethod: paymentMethod ?? undefined,
+        });
+
         console.log(
           `[hubla-webhook] ✅ NewSale processed for ${email}`
         );
+        break;
+      }
+
+      // ════════════════════════════════════════════════════════════════
+      // INVOICE EXPIRED — Pix expired without payment
+      // ════════════════════════════════════════════════════════════════
+      case "invoice.expired": {
+        const event = payload.event;
+        const invoice = event?.invoice;
+        const invoiceId = invoice?.id;
+        const userData = extractUserData(event);
+        const productNames = extractProductNames(event);
+        const amountCents = invoice?.amount?.totalCents ?? 0;
+
+        console.log(
+          `[hubla-webhook] ⏰ Invoice expired: ${invoiceId} — ${userData?.email ?? "unknown"}`
+        );
+
+        // Mark purchase as expired if still open
+        if (invoiceId) {
+          await supabaseAdmin
+            .from("purchases")
+            .update({ status: "expired", updated_at: new Date().toISOString() })
+            .eq("provider", "hubla")
+            .eq("provider_payment_intent", invoiceId)
+            .eq("status", "open");
+        }
+
+        notifyTelegram({
+          eventType: "PIX_EXPIRADO",
+          eventLabel: "Pix Expirado",
+          customerName: userData?.displayName,
+          customerEmail: userData?.email,
+          customerPhone: userData?.phone,
+          productName: productNames,
+          amountCents,
+          invoiceId,
+        });
+        break;
+      }
+
+      // ════════════════════════════════════════════════════════════════
+      // INVOICE PAYMENT FAILED — Payment attempt failed
+      // ════════════════════════════════════════════════════════════════
+      case "invoice.payment_failed": {
+        const event = payload.event;
+        const invoice = event?.invoice;
+        const invoiceId = invoice?.id;
+        const userData = extractUserData(event);
+        const productNames = extractProductNames(event);
+        const amountCents = invoice?.amount?.totalCents ?? 0;
+        const failureReason =
+          invoice?.failureReason ?? invoice?.failure_reason ?? "Desconhecido";
+
+        console.log(
+          `[hubla-webhook] ❌ Payment failed: ${invoiceId} — ${userData?.email ?? "unknown"} — ${failureReason}`
+        );
+
+        notifyTelegram({
+          eventType: "PAGAMENTO_FALHOU",
+          eventLabel: "Pagamento Falhou",
+          customerName: userData?.displayName,
+          customerEmail: userData?.email,
+          customerPhone: userData?.phone,
+          productName: productNames,
+          amountCents,
+          invoiceId,
+          reason: failureReason,
+        });
+        break;
+      }
+
+      // ════════════════════════════════════════════════════════════════
+      // INVOICE STATUS UPDATED — Log only, no Telegram (redundant)
+      // ════════════════════════════════════════════════════════════════
+      case "invoice.status_updated": {
+        const invoiceId = payload.event?.invoice?.id;
+        const newStatus = payload.event?.invoice?.status;
+        console.log(
+          `[hubla-webhook] 🔄 invoice.status_updated: ${invoiceId} → ${newStatus}`
+        );
+        break;
+      }
+
+      // ════════════════════════════════════════════════════════════════
+      // LEAD ABANDONED CHECKOUT — Lead left without completing
+      // ════════════════════════════════════════════════════════════════
+      case "lead.abandoned_checkout": {
+        const event = payload.event;
+        const lead = event?.lead ?? event;
+        const email = normalizeEmail(lead?.email ?? lead?.user?.email);
+        const name =
+          lead?.name ?? lead?.user?.firstName ?? "Lead";
+        const phone = normalizePhone(lead?.phone ?? lead?.user?.phone);
+        const productNames = extractProductNames(event);
+
+        console.log(
+          `[hubla-webhook] 🛒❌ Abandoned checkout: ${name} <${email ?? "no-email"}>`
+        );
+
+        notifyTelegram({
+          eventType: "CARRINHO_ABANDONADO",
+          eventLabel: "Carrinho Abandonado",
+          customerName: name,
+          customerEmail: email ?? undefined,
+          customerPhone: phone,
+          productName: productNames,
+        });
         break;
       }
 

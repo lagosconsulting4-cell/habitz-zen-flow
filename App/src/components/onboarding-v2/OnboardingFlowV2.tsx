@@ -1,26 +1,29 @@
-import { useRef, useState, useEffect, type ComponentType } from "react";
+import { useRef, useState, useEffect, lazy, Suspense, type ComponentType } from "react";
 import { motion, AnimatePresence, MotionConfig } from "motion/react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { OnboardingProviderV2, useOnboardingV2 } from "./OnboardingProviderV2";
-import { S0Welcome } from "./steps/S0_Welcome";
-import { S1AppIntro } from "./steps/S1_AppIntro";
-import { S2ObjectiveConfirm } from "./steps/S2_ObjectiveConfirm";
-import { S3InstallPWASoft } from "./steps/S3_InstallPWA_Soft";
-import { S4WakeSleepTime } from "./steps/S4_WakeSleepTime";
-import { S5WeekendDiff } from "./steps/S5_WeekendDiff";
-import { S6LifeAreas } from "./steps/S6_LifeAreas";
-import { S7HabitExperience } from "./steps/S7_HabitExperience";
-import { S8LoadingRoutine } from "./steps/S8_LoadingRoutine";
-import { S9RoutinePreview } from "./steps/S9_RoutinePreview";
-import { S10RoutineConfirm } from "./steps/S10_RoutineConfirm";
-import { S11JourneysIntro } from "./steps/S11_JourneysIntro";
-import { S12JourneySelection } from "./steps/S12_JourneySelection";
-import { S13InstallPWAHard } from "./steps/S13_InstallPWA_Hard";
-import { S14Notifications } from "./steps/S14_Notifications";
-import { S14bReminderOffset } from "./steps/S14b_ReminderOffset";
-import { S20Celebration } from "./steps/S20_Celebration";
 import { OnboardingBlobBackground } from "./OnboardingBlobBackground";
+
+// Lazy-loaded steps — each chunk loads only when the step is reached
+const S0Welcome = lazy(() => import("./steps/S0_Welcome").then(m => ({ default: m.S0Welcome })));
+const S1AppIntro = lazy(() => import("./steps/S1_AppIntro").then(m => ({ default: m.S1AppIntro })));
+const S2ObjectiveConfirm = lazy(() => import("./steps/S2_ObjectiveConfirm").then(m => ({ default: m.S2ObjectiveConfirm })));
+const S3InstallPWASoft = lazy(() => import("./steps/S3_InstallPWA_Soft").then(m => ({ default: m.S3InstallPWASoft })));
+const S4WakeSleepTime = lazy(() => import("./steps/S4_WakeSleepTime").then(m => ({ default: m.S4WakeSleepTime })));
+const S5WeekendDiff = lazy(() => import("./steps/S5_WeekendDiff").then(m => ({ default: m.S5WeekendDiff })));
+const S6LifeAreas = lazy(() => import("./steps/S6_LifeAreas").then(m => ({ default: m.S6LifeAreas })));
+const S7HabitExperience = lazy(() => import("./steps/S7_HabitExperience").then(m => ({ default: m.S7HabitExperience })));
+const S8LoadingRoutine = lazy(() => import("./steps/S8_LoadingRoutine").then(m => ({ default: m.S8LoadingRoutine })));
+const S9RoutinePreview = lazy(() => import("./steps/S9_RoutinePreview").then(m => ({ default: m.S9RoutinePreview })));
+const S10RoutineConfirm = lazy(() => import("./steps/S10_RoutineConfirm").then(m => ({ default: m.S10RoutineConfirm })));
+const S11JourneysIntro = lazy(() => import("./steps/S11_JourneysIntro").then(m => ({ default: m.S11JourneysIntro })));
+const S12JourneySelection = lazy(() => import("./steps/S12_JourneySelection").then(m => ({ default: m.S12JourneySelection })));
+const S13InstallPWAHard = lazy(() => import("./steps/S13_InstallPWA_Hard").then(m => ({ default: m.S13InstallPWAHard })));
+const S14Notifications = lazy(() => import("./steps/S14_Notifications").then(m => ({ default: m.S14Notifications })));
+const S14bReminderOffset = lazy(() => import("./steps/S14b_ReminderOffset").then(m => ({ default: m.S14bReminderOffset })));
+const S20Celebration = lazy(() => import("./steps/S20_Celebration").then(m => ({ default: m.S20Celebration })));
 
 // ============================================================================
 // STEPS CONFIGURATION
@@ -55,22 +58,29 @@ const STEPS: StepConfig[] = [
 // Steps where progress bar is hidden
 const HIDE_PROGRESS_ON = new Set([
   'welcome', 'loading',
-  'celebration',
+  'confirm', 'celebration',
+  'intro', 'journeys-intro',
 ]);
 
 // Steps where back button is hidden
 const HIDE_BACK_ON = new Set([
   'welcome', 'loading',
+  'confirm',
+  'pwa-soft',
   'pwa-hard', 'notifications', 'reminder-offset',
   'celebration',
+  'intro', 'journeys-intro',
 ]);
 
 // Steps where bottom nav bar is hidden (step has its own CTA)
 const HIDE_NAV_ON = new Set([
+  'welcome',
+  'confirm',
   'pwa-soft',
   'loading',
   'pwa-hard', 'notifications', 'reminder-offset',
   'celebration',
+  'intro', 'journeys-intro',
 ]);
 
 // Step component mapping — implemented steps render their component, others show placeholder
@@ -103,7 +113,7 @@ const NUM_PROGRESS_PHASES = 5;
 
 const variants = {
   enter: (direction: 'forward' | 'backward') => ({
-    x: direction === 'forward' ? '60%' : '-60%',
+    x: direction === 'forward' ? '30%' : '-30%',
     opacity: 0,
   }),
   center: {
@@ -111,7 +121,7 @@ const variants = {
     opacity: 1,
   },
   exit: (direction: 'forward' | 'backward') => ({
-    x: direction === 'forward' ? '-60%' : '60%',
+    x: direction === 'forward' ? '-30%' : '30%',
     opacity: 0,
   }),
 };
@@ -167,9 +177,21 @@ function OnboardingProgressDots({ currentStep }: { currentStep: number }) {
 // FLOW CONTENT (inside Provider)
 // ============================================================================
 
+// Preload hero images on mount so they're cached before the step renders
+const PRELOAD_IMAGES = [
+  '/assets/onboarding/welcome-bg.webp',
+  '/assets/onboarding/journeys-intro-bg.webp',
+  '/assets/onboarding/celebration-bg.webp',
+];
+
 const OnboardingFlowV2Content = () => {
   const { currentStep, nextStep, prevStep, isStepValid } = useOnboardingV2();
   const directionRef = useRef<'forward' | 'backward'>('forward');
+
+  // Preload hero images once on mount
+  useEffect(() => {
+    PRELOAD_IMAGES.forEach(src => { const img = new Image(); img.src = src; });
+  }, []);
 
   const currentStepConfig = STEPS[currentStep];
   const showBack = currentStepConfig && !HIDE_BACK_ON.has(currentStepConfig.id) && currentStep > 0;
@@ -196,14 +218,16 @@ const OnboardingFlowV2Content = () => {
   };
 
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden relative">
+      {/* Blob background — covers full viewport including progress bar area */}
+      <OnboardingBlobBackground phase={currentStepConfig?.phase ?? 0} />
+
       {/* Progress Dots */}
       <OnboardingProgressDots currentStep={currentStep} />
 
       {/* Step Content */}
       <div className="flex-1 min-h-0 relative overflow-hidden">
-        <OnboardingBlobBackground phase={currentStepConfig?.phase ?? 0} />
-        <AnimatePresence mode="wait" custom={directionRef.current}>
+        <AnimatePresence mode="wait" initial={false} custom={directionRef.current}>
           <motion.div
             key={currentStep}
             custom={directionRef.current}
@@ -211,40 +235,44 @@ const OnboardingFlowV2Content = () => {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+            transition={{ type: 'tween', duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
             className="w-full h-full relative z-10"
+            style={{ willChange: 'transform, opacity' }}
           >
-            {(() => {
-              const StepComponent = currentStepConfig ? STEP_COMPONENTS[currentStepConfig.id] : null;
-              if (StepComponent) {
-                return <StepComponent />;
-              }
-              return (
-                <div className="min-h-[60vh] flex items-center justify-center px-6">
-                  <div className="text-center space-y-3">
-                    <p className="text-muted-foreground text-lg">
-                      Step <span className="font-semibold text-foreground">{currentStepConfig?.id || currentStep}</span> em construção
-                    </p>
-                    <p className="text-xs text-muted-foreground/60">
-                      Fase {currentStepConfig?.phase ?? '?'} · Step {currentStep + 1} de {STEPS.length}
-                    </p>
+            <Suspense fallback={<div className="w-full h-full" />}>
+              {(() => {
+                const StepComponent = currentStepConfig ? STEP_COMPONENTS[currentStepConfig.id] : null;
+                if (StepComponent) {
+                  return <StepComponent />;
+                }
+                return (
+                  <div className="min-h-[60vh] flex items-center justify-center px-6">
+                    <div className="text-center space-y-3">
+                      <p className="text-muted-foreground text-lg">
+                        Step <span className="font-semibold text-foreground">{currentStepConfig?.id || currentStep}</span> em construção
+                      </p>
+                      <p className="text-xs text-muted-foreground/60">
+                        Fase {currentStepConfig?.phase ?? '?'} · Step {currentStep + 1} de {STEPS.length}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })()}
+                );
+              })()}
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Navigation Bar */}
       {(showNav || showBack) && (
-        <div className="z-40 bg-background/95 backdrop-blur-sm border-t border-border pb-safe">
+        <div className="z-40 pb-safe">
           <div className="px-4 py-3 flex items-center gap-3">
             {showBack && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleBack}
+                onMouseDown={(e) => e.preventDefault()}
                 className="h-10 w-10 shrink-0"
               >
                 <ChevronLeft className="h-5 w-5" />

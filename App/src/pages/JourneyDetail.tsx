@@ -56,36 +56,76 @@ const JourneyDetail = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="pb-navbar"
+      className=""
     >
-      {/* Header with atmospheric gradient */}
+      {/* HERO — background image (when available) */}
+      {/* Negative margins bleed out of ProtectedLayout's px-4 / paddingTop container */}
+      {theme.backgroundImage ? (
+        <div
+          className="relative overflow-hidden -mx-4 md:-mx-8 w-[calc(100%+2rem)] md:w-[calc(100%+4rem)] h-[50vh]"
+          style={{ marginTop: 'calc(-1rem - env(safe-area-inset-top, 0px))' }}
+        >
+          <img
+            src={theme.backgroundImage}
+            alt=""
+            aria-hidden="true"
+            loading="eager"
+            className="h-full w-full object-cover object-center"
+          />
+          {/* Top scrim: keeps back button readable against bright sky */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-transparent" />
+          {/* Bottom fade: blends into the content card below */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+          {/* Back button — glassmorphic pill */}
+          <button
+            onClick={() => navigate("/journeys")}
+            style={{ top: 'calc(2rem + env(safe-area-inset-top, 0px))' }}
+            className="absolute left-4 flex items-center gap-1.5 text-sm text-white bg-black/25 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar
+          </button>
+        </div>
+      ) : null}
+
+      {/* CONTENT CARD — floats over hero (or sits below atmospheric gradient fallback) */}
       <div
-        className="px-4 pb-6 space-y-4 relative overflow-hidden"
-        style={{
+        className={cn(
+          "px-4 pb-6 space-y-4",
+          theme.backgroundImage
+            ? "-mt-16 relative rounded-t-3xl bg-background pt-6"
+            : "relative overflow-hidden",
+        )}
+        style={!theme.backgroundImage ? {
           paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))',
           background: `
             radial-gradient(ellipse at 50% 0%, ${theme.color}1A 0%, transparent 60%),
             radial-gradient(circle at 80% 20%, ${theme.color}0F 0%, transparent 40%),
             linear-gradient(180deg, ${theme.color}08 0%, transparent 40%)
           `,
-        }}
+        } : undefined}
       >
-        {/* Dot pattern texture */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage: `radial-gradient(${theme.color} 1px, transparent 1px)`,
-            backgroundSize: '20px 20px',
-          }}
-        />
+        {/* Dot pattern texture — fallback only */}
+        {!theme.backgroundImage && (
+          <div
+            className="absolute inset-0 pointer-events-none opacity-[0.03]"
+            style={{
+              backgroundImage: `radial-gradient(${theme.color} 1px, transparent 1px)`,
+              backgroundSize: '20px 20px',
+            }}
+          />
+        )}
 
-        <button
-          onClick={() => navigate("/journeys")}
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Voltar
-        </button>
+        {/* Back button — fallback only (no image) */}
+        {!theme.backgroundImage && (
+          <button
+            onClick={() => navigate("/journeys")}
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar
+          </button>
+        )}
 
         <div className="flex items-start gap-4">
           <JourneyIllustration illustrationKey={journey.illustration_key} size="lg" />
@@ -99,16 +139,6 @@ const JourneyDetail = () => {
             </p>
           </div>
         </div>
-
-        {/* Promise */}
-        {journey.promise && (
-          <p
-            className="text-sm text-muted-foreground italic font-serif leading-relaxed border-l-3 pl-3"
-            style={{ borderLeftWidth: 3, borderLeftColor: `${theme.color}66` }}
-          >
-            "{journey.promise}"
-          </p>
-        )}
 
         {/* Transformation: Before → After (only for non-enrolled users) */}
         {journey.target_audience && journey.expected_result && !isEnrolled && (
@@ -249,7 +279,7 @@ const JourneyDetail = () => {
           return (
             <div key={phase.id} className={cn("flex gap-3", phaseFuture && "opacity-50")}>
               {/* Timeline column */}
-              <div className="flex flex-col items-center w-8 flex-shrink-0">
+              <div className="flex flex-col items-center w-8 flex-shrink-0 pt-3">
                 {/* Node — rounded square for more designed feel */}
                 <div
                   className={cn(
@@ -303,15 +333,7 @@ const JourneyDetail = () => {
                   }
                   className="w-full flex items-center justify-between py-3 min-h-[44px]"
                 >
-                  <div className="text-left flex items-center gap-2">
-                    {/* Decorative phase number */}
-                    <span
-                      className="text-2xl font-mono font-bold opacity-10 select-none leading-none"
-                      style={{ color: theme.color }}
-                      aria-hidden="true"
-                    >
-                      {String(phase.phase_number).padStart(2, "0")}
-                    </span>
+                  <div className="text-left">
                     <div>
                       <h3 className="text-sm font-bold text-foreground">{phase.title}</h3>
                       {phase.subtitle && (

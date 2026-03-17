@@ -6,15 +6,17 @@ import { cn } from "@/lib/utils";
 // Lazy load pages for better performance
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const MyHabits = lazy(() => import("@/pages/MyHabits"));
+const JourneyHub = lazy(() => import("@/pages/JourneyHub"));
 const Progress = lazy(() => import("@/pages/Progress"));
 const Profile = lazy(() => import("@/pages/Profile"));
 
 // Route to index mapping (Create is excluded - it's a modal overlay)
 export const SWIPEABLE_ROUTES = [
   { path: "/dashboard", index: 0 },
-  { path: "/habits", index: 1 },
-  { path: "/progress", index: 2 },
-  { path: "/profile", index: 3 },
+  { path: "/habits",    index: 1 },
+  { path: "/journeys",  index: 2 },
+  { path: "/progress",  index: 3 },
+  { path: "/profile",   index: 4 },
 ] as const;
 
 export const SWIPEABLE_PATHS = new Set(SWIPEABLE_ROUTES.map(r => r.path));
@@ -84,10 +86,14 @@ export const SwipeContextProvider = ({ children }: SwipeContextProviderProps) =>
   useEffect(() => {
     if (!emblaApi) return;
 
+    const onSettle = () => { isNavigatingRef.current = false; };
+
     emblaApi.on("select", onSelect);
+    emblaApi.on("settle", onSettle);
 
     return () => {
       emblaApi.off("select", onSelect);
+      emblaApi.off("settle", onSettle);
     };
   }, [emblaApi, onSelect]);
 
@@ -102,10 +108,7 @@ export const SwipeContextProvider = ({ children }: SwipeContextProviderProps) =>
       isNavigatingRef.current = true;
       emblaApi.scrollTo(targetIndex);
       setCurrentIndex(targetIndex);
-
-      setTimeout(() => {
-        isNavigatingRef.current = false;
-      }, 300);
+      // isNavigatingRef is reset by the 'settle' event listener
     }
   }, [emblaApi, currentRouteConfig]);
 
@@ -116,11 +119,15 @@ export const SwipeContextProvider = ({ children }: SwipeContextProviderProps) =>
     }
 
     const route = SWIPEABLE_ROUTES.find(r => r.index === index);
-    if (route) {
-      setCurrentIndex(index); // Update state immediately to sync bottom nav
-      navigate(route.path);
+    if (!route) return;
+
+    setCurrentIndex(index); // Update state immediately to sync bottom nav
+    if (emblaApi) {
+      isNavigatingRef.current = true;
+      emblaApi.scrollTo(index); // Animate immediately, same frame as the tap
     }
-  }, [navigate]);
+    navigate(route.path, { replace: true });
+  }, [emblaApi, navigate]);
 
   return (
     <SwipeContext.Provider value={{ currentIndex, navigateTo, isSwipeable, emblaRef }}>
@@ -135,30 +142,37 @@ export const SwipeableCarousel = () => {
 
   return (
     <div className="overflow-hidden w-full h-dvh" ref={emblaRef}>
-      <div className="flex touch-pan-y h-full pb-0">
+      <div className="flex h-full">
         {/* Slide 0: Dashboard */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full")}>
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full will-change-transform")}>
           <Suspense fallback={<PageLoader />}>
             <Dashboard />
           </Suspense>
         </div>
 
         {/* Slide 1: Hábitos */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full")}>
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full will-change-transform")}>
           <Suspense fallback={<PageLoader />}>
             <MyHabits />
           </Suspense>
         </div>
 
-        {/* Slide 2: Progress/Streaks */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full")}>
+        {/* Slide 2: Jornadas */}
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full will-change-transform")}>
+          <Suspense fallback={<PageLoader />}>
+            <JourneyHub />
+          </Suspense>
+        </div>
+
+        {/* Slide 3: Progress/Streaks */}
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full will-change-transform")}>
           <Suspense fallback={<PageLoader />}>
             <Progress />
           </Suspense>
         </div>
 
-        {/* Slide 3: Profile */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full")}>
+        {/* Slide 4: Profile */}
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full will-change-transform")}>
           <Suspense fallback={<PageLoader />}>
             <Profile />
           </Suspense>

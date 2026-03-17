@@ -48,6 +48,9 @@ const Profile = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [notifPrefs, setNotifPrefs] = useState<{
     end_of_day_enabled?: boolean;
+    reminder_offset_minutes?: number;
+    quiet_hours_start?: string | null;
+    quiet_hours_end?: string | null;
   }>({});
 
   const { isPremium } = usePremium(userId ?? undefined);
@@ -92,9 +95,23 @@ const Profile = () => {
     loadProfile();
   }, []);
 
-  const updateNotifPref = async (key: string, value: boolean | string | Record<string, string | undefined>) => {
+  const updateNotifPref = async (key: string, value: boolean | string | number | null | Record<string, string | undefined>) => {
     if (!userId) return;
     const updated = { ...notifPrefs, [key]: value };
+    setNotifPrefs(updated);
+    const { error } = await supabase
+      .from("user_progress")
+      .update({ notification_preferences: updated })
+      .eq("user_id", userId);
+    if (error) {
+      toast.error("Erro ao salvar preferencia");
+      setNotifPrefs(notifPrefs); // revert
+    }
+  };
+
+  const updateQuietHours = async (start: string | null, end: string | null) => {
+    if (!userId) return;
+    const updated = { ...notifPrefs, quiet_hours_start: start, quiet_hours_end: end };
     setNotifPrefs(updated);
     const { error } = await supabase
       .from("user_progress")
@@ -164,6 +181,7 @@ const Profile = () => {
           <div className="relative">
             <button
               onClick={() => setAvatarCreatorOpen(true)}
+              data-tour="avatar"
               className="relative group mx-auto mb-4 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50"
               aria-label="Personalizar avatar"
             >
@@ -247,7 +265,7 @@ const Profile = () => {
           transition={{ duration: 0.3, delay: 0.05 }}
           className="mb-8"
         >
-          <Card className="rounded-2xl bg-card border border-border p-6">
+          <Card data-tour="resources" className="rounded-2xl bg-card border border-border p-6">
             <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Recursos</h2>
             <div className="space-y-3">
               {/* Gems Display */}
@@ -310,7 +328,7 @@ const Profile = () => {
           transition={{ duration: 0.3, delay: 0.1 }}
           className="mb-8"
         >
-          <Card className="rounded-2xl bg-card border border-border p-6">
+          <Card data-tour="bonus" className="rounded-2xl bg-card border border-border p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-primary/10 rounded-lg">
                 <Gift className="w-5 h-5 text-primary" />
@@ -416,6 +434,81 @@ const Profile = () => {
                   checked={notifPrefs.end_of_day_enabled !== false}
                   onCheckedChange={(checked) => updateNotifPref("end_of_day_enabled", checked)}
                 />
+              </div>
+
+              {/* Reminder Offset */}
+              <div className="border-t border-border pt-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <Clock className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Aviso de habito</p>
+                    <p className="text-xs text-muted-foreground">Quanto tempo antes receber o lembrete</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {([0, 5, 10, 15, 30] as const).map((min) => {
+                    const currentOffset = notifPrefs.reminder_offset_minutes ?? 10;
+                    const isSelected = currentOffset === min;
+                    return (
+                      <button
+                        key={min}
+                        onClick={() => updateNotifPref("reminder_offset_minutes", min)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+                          isSelected
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-muted text-muted-foreground border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {min === 0 ? "Na hora" : `${min} min`}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Quiet Hours */}
+              <div className="border-t border-border pt-4">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-3">
+                    <Moon className="w-5 h-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Horário de silêncio</p>
+                      <p className="text-xs text-muted-foreground">
+                        {notifPrefs.quiet_hours_start && notifPrefs.quiet_hours_end
+                          ? `Sem notificações das ${notifPrefs.quiet_hours_start} às ${notifPrefs.quiet_hours_end}`
+                          : "Desativado"}
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={!!(notifPrefs.quiet_hours_start && notifPrefs.quiet_hours_end)}
+                    onCheckedChange={(checked) =>
+                      updateQuietHours(checked ? "22:00" : null, checked ? "07:00" : null)
+                    }
+                  />
+                </div>
+                {notifPrefs.quiet_hours_start && notifPrefs.quiet_hours_end && (
+                  <div className="flex items-center gap-3 mt-3 pl-8">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Das</span>
+                      <input
+                        type="time"
+                        value={notifPrefs.quiet_hours_start}
+                        onChange={(e) => updateQuietHours(e.target.value, notifPrefs.quiet_hours_end!)}
+                        className="bg-muted border border-border rounded-lg px-2 py-1 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">às</span>
+                      <input
+                        type="time"
+                        value={notifPrefs.quiet_hours_end}
+                        onChange={(e) => updateQuietHours(notifPrefs.quiet_hours_start!, e.target.value)}
+                        className="bg-muted border border-border rounded-lg px-2 py-1 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </Card>

@@ -14,6 +14,7 @@ import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useNotificationNavigation } from "@/hooks/useNotificationNavigation";
 import { useSessionTracker } from "@/hooks/useSessionTracker";
 import { AuthProvider } from "@/integrations/supabase/auth";
+import { TourProvider } from "@/contexts/TourContext";
 
 // Lazy load PWA components for better initial bundle
 const InstallPrompt = lazy(() => import("@/components/pwa/InstallPrompt").then(m => ({ default: m.InstallPrompt })));
@@ -118,10 +119,12 @@ const SessionTracker = () => {
 const RoutePrefetcher = () => {
   useEffect(() => {
     const prefetchRoutes = () => {
-      // Top 5 rotas mais acessadas - prefetch para cache do browser
+      // Rotas do carrossel + mais acessadas - prefetch para cache do browser
       import("./pages/Dashboard");
       import("./pages/MyHabits");
+      import("./pages/JourneyHub");
       import("./pages/Progress");
+      import("./pages/Profile");
       import("./pages/Calendar");
       import("./pages/CreateHabit");
     };
@@ -146,6 +149,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter basename="/app">
+        <TourProvider>
         <ThemeInitializer />
         <ScrollToTop />
         {/* PWA Components */}
@@ -215,6 +219,7 @@ const App = () => (
           </Routes>
         </Suspense>
         </ErrorBoundary>
+        </TourProvider>
       </BrowserRouter>
         </MotionConfig>
       </TooltipProvider>

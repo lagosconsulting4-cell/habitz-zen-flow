@@ -146,7 +146,7 @@ export function IllustrationOrbit() {
             {/* Orbiting dot 1 — inner orbit, fast (radius=20, starting at right) */}
             <motion.g
               animate={{ rotate: 360 }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 3, repeat: 3, ease: "linear" }}
               style={{ transformOrigin: "60px 60px" }}
             >
               <circle cx={80} cy={60} r={4} fill="#A3E635" />
@@ -155,7 +155,7 @@ export function IllustrationOrbit() {
             {/* Orbiting dot 2 — middle orbit, counter-clockwise (radius=34) */}
             <motion.g
               animate={{ rotate: -360 }}
-              transition={{ duration: 5.5, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 5.5, repeat: 3, ease: "linear" }}
               style={{ transformOrigin: "60px 60px" }}
             >
               <circle cx={94} cy={60} r={3} fill="#A3E635" fillOpacity={0.75} />
@@ -164,7 +164,7 @@ export function IllustrationOrbit() {
             {/* Orbiting dot 3 — outer orbit, slow (radius=50) */}
             <motion.g
               animate={{ rotate: 360 }}
-              transition={{ duration: 9, repeat: Infinity, ease: "linear", delay: 1 }}
+              transition={{ duration: 9, repeat: 3, ease: "linear", delay: 1 }}
               style={{ transformOrigin: "60px 60px" }}
             >
               <circle cx={110} cy={60} r={2.5} fill="#A3E635" fillOpacity={0.55} />
@@ -173,7 +173,7 @@ export function IllustrationOrbit() {
             {/* Orbiting dot 4 — outer orbit, offset counter-clockwise */}
             <motion.g
               animate={{ rotate: -360 }}
-              transition={{ duration: 11, repeat: Infinity, ease: "linear", delay: 3 }}
+              transition={{ duration: 11, repeat: 3, ease: "linear", delay: 3 }}
               style={{ transformOrigin: "60px 60px" }}
             >
               <circle cx={110} cy={60} r={2} fill="#84cc16" fillOpacity={0.4} />
@@ -343,7 +343,7 @@ export function IllustrationBell() {
         <motion.g
           style={{ transformOrigin: "60px 80px" }}
           animate={shouldReduceMotion ? {} : { rotate: [0, 7, 0, -7, 0] }}
-          transition={{ duration: 2.5, ease: "easeInOut", repeat: Infinity, repeatDelay: 1.5, delay: 2 }}
+          transition={{ duration: 2.5, ease: "easeInOut", repeat: 3, repeatDelay: 1.5, delay: 2 }}
         >
           {/* Bell crown/hanger */}
           <motion.path
@@ -372,23 +372,24 @@ export function IllustrationBell() {
           />
         </motion.g>
 
-        {/* Notification dot — Phase 4 blue */}
-        <motion.circle
-          cx={84} cy={34} r={7}
-          fill="#3B82F6"
+        {/* Notification badge — blue circle with "1" */}
+        <motion.g
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           style={{ transformOrigin: "84px 34px" }}
           transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.9 }}
-        />
-        {/* White dot inside notification */}
-        <motion.circle
-          cx={84} cy={34} r={2.5}
-          fill="white"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.1, duration: 0.2 }}
-        />
+        >
+          <circle cx={84} cy={34} r={9} fill="#3B82F6" />
+          <text
+            x={84} y={34}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="white"
+            fontSize="11"
+            fontWeight="700"
+            fontFamily="system-ui, sans-serif"
+          >1</text>
+        </motion.g>
       </svg>
     </motion.div>
   );

@@ -22,7 +22,19 @@ export type EventName =
   | "timer_cancelled"
   | "level_up"
   | "streak_milestone"
-  | "perfect_day";
+  | "perfect_day"
+  | "onboarding_v2_started"
+  | "onboarding_v2_step_completed"
+  | "onboarding_v2_objective_confirmed"
+  | "onboarding_v2_pwa_soft_action"
+  | "onboarding_v2_routine_generated"
+  | "onboarding_v2_habits_selected"
+  | "onboarding_v2_journey_selected"
+  | "onboarding_v2_pwa_hard_action"
+  | "onboarding_v2_notifications_action"
+  | "onboarding_v2_tour_completed"
+  | "onboarding_v2_completed"
+  | "onboarding_v2_abandoned";
 
 interface EventProperties {
   [key: string]: string | number | boolean | null | undefined;

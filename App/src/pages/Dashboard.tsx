@@ -1,7 +1,7 @@
-import { useMemo, useState, useEffect, useCallback, useRef } from "react";
+import React, { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { Sparkles, Plus, BookOpen, Bell, ChevronRight, Sun, Sunset, Moon, Shield } from "lucide-react";
+import { Sparkles, Plus, Bell, ChevronRight, Sun, Sunset, Moon, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { DashboardSkeleton } from "@/components/ui/skeleton";
@@ -28,7 +28,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { Habit } from "@/components/DashboardHabitCard";
 import { hideGamification } from "@/config/featureFlags";
 import useProgress from "@/hooks/useProgress";
-import { useAllActiveJourneyHabits, useJourneyActions, useJourneyDay, CANONICAL_TO_ICON, type Journey } from "@/hooks/useJourney";
+import { useAllActiveJourneyHabits, useJourneyActions, CANONICAL_TO_ICON, type Journey } from "@/hooks/useJourney";
 import { JourneyIllustration, getJourneyTheme } from "@/components/JourneyIllustration";
 import { JourneyDayCompleteModal } from "@/components/JourneyDayCompleteModal";
 import { JourneyGraduationModal } from "@/components/JourneyGraduationModal";
@@ -399,25 +399,19 @@ const Dashboard = () => {
     });
   }, [todayHabitsRaw, habitIconMap]);
 
-  // ── First Day Banner data ──
-  const firstActiveJourney = activeStates[0]?.journeys as Journey | undefined;
-  const firstActiveState = activeStates[0];
-  const firstJourneyTheme = useMemo(
-    () => firstActiveJourney ? getJourneyTheme(firstActiveJourney.theme_slug || firstActiveJourney.illustration_key) : null,
-    [firstActiveJourney]
-  );
-
-  const isFirstDay = useMemo(() => {
-    if (!firstActiveState) return false;
-    return firstActiveState.current_day === 1 && firstActiveState.days_completed === 0;
-  }, [firstActiveState]);
-
-  // Fetch day content for first day banner (only queries when there's an active journey)
-  const { day: todayDayContent } = useJourneyDay(
-    firstActiveJourney?.slug || "",
-    firstActiveState?.current_day || 1,
-    firstActiveJourney?.id
-  );
+  // ── Group habits by journey ──
+  const habitsByJourney = useMemo(() => {
+    const map = new Map<string, Habit[]>();
+    for (const habit of todayHabits) {
+      if (habit.source !== 'journey') continue;
+      const jh = allJourneyHabits.find(j => j.habit_id === habit.id && j.is_active);
+      if (!jh) continue;
+      const arr = map.get(jh.journey_id) || [];
+      arr.push(habit as Habit);
+      map.set(jh.journey_id, arr);
+    }
+    return map;
+  }, [todayHabits, allJourneyHabits]);
 
   // ── Section headers ──
   const hasJourneyHabits = useMemo(() => todayHabits.some((h) => h.source === "journey"), [todayHabits]);
@@ -758,64 +752,6 @@ const Dashboard = () => {
           </motion.div>
         )}
 
-        {/* First Day Banner — only on Day 1 of first active journey */}
-        {isFirstDay && firstActiveJourney && firstJourneyTheme && todayDayContent && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="w-full rounded-2xl overflow-hidden bg-card border"
-            style={{
-              borderColor: `${firstJourneyTheme.color}26`,
-              boxShadow: `0 4px 24px ${firstJourneyTheme.color}0D`,
-            }}
-          >
-            {/* Theme gradient stripe */}
-            <div className="h-1.5 relative overflow-hidden">
-              <div className="absolute inset-0" style={{ background: firstJourneyTheme.color }} />
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent" />
-            </div>
-
-            <div className="p-4 space-y-3">
-              {/* Header with illustration */}
-              <div className="flex items-center gap-3">
-                <JourneyIllustration
-                  illustrationKey={firstActiveJourney.illustration_key}
-                  size="sm"
-                />
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-bold text-foreground">
-                    Dia 1: {todayDayContent.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    {firstActiveJourney.title} · {firstActiveJourney.duration_days} dias
-                  </p>
-                </div>
-              </div>
-
-              {/* CTA — navigate to day content */}
-              <Button
-                onClick={() => navigate(`/journeys/${firstActiveJourney.slug}/day/1`)}
-                className="w-full h-11 rounded-xl font-semibold text-white"
-                style={{
-                  backgroundColor: firstJourneyTheme.color,
-                  boxShadow: `0 4px 12px ${firstJourneyTheme.color}40`,
-                }}
-              >
-                <BookOpen className="w-4 h-4 mr-2" />
-                Ler conteúdo do Dia 1
-              </Button>
-
-              {/* Time estimate */}
-              {todayDayContent.estimated_minutes && (
-                <p className="text-center text-[11px] text-muted-foreground">
-                  ~{todayDayContent.estimated_minutes} min de leitura
-                </p>
-              )}
-            </div>
-          </motion.div>
-        )}
-
         {todayHabits.length === 0 ? (
           /* Empty State Premium */
           <motion.div
@@ -902,77 +838,91 @@ const Dashboard = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-            {/* Journey section header */}
-            {hasJourneyHabits && firstActiveJourney && firstJourneyTheme && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-2"
-              >
-                <div
-                  className="w-1 h-4 rounded-full"
-                  style={{ backgroundColor: firstJourneyTheme.color }}
-                />
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Hábitos da Jornada
-                </span>
-              </motion.div>
+            {/* Per-journey habit sections */}
+            {activeStates.map((state) => {
+              const journey = state.journeys as Journey;
+              if (!journey) return null;
+              const theme = getJourneyTheme(journey.theme_slug || journey.illustration_key);
+              const journeyHabits = habitsByJourney.get(state.journey_id) || [];
+              if (journeyHabits.length === 0) return null;
+
+              return (
+                <React.Fragment key={state.journey_id}>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex items-center gap-2"
+                  >
+                    <div
+                      className="w-1 h-4 rounded-full"
+                      style={{ backgroundColor: theme.color }}
+                    />
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {journey.title}
+                    </span>
+                  </motion.div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 justify-items-center">
+                    {journeyHabits.map((habit, index) => (
+                      <motion.div
+                        key={habit.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          duration: 0.15,
+                          delay: Math.min(index * 0.03, 0.15)
+                        }}
+                      >
+                        <DashboardHabitCard
+                          habit={habit}
+                          progress={calculateProgress(habit)}
+                          completed={isCompletedToday(habit.id)}
+                          onToggle={() => handleToggle(habit)}
+                          streakDays={habit.streak}
+                          completionCount={getHabitCompletionCount(habit.id).current}
+                          timesPerDay={habit.times_per_day ?? 1}
+                          isTimedHabit={isTimedHabit(habit.unit)}
+                          onTimerClick={() => setTimerHabit(habit)}
+                          journeyThemeSlug={habitThemeMap.get(habit.id) || defaultThemeSlug}
+                          isFrozen={freezeUsedToday && (habit.streak ?? 0) > 0}
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                </React.Fragment>
+              );
+            })}
+
+            {/* Non-journey habits (only if no journey sections exist) */}
+            {!hasJourneyHabits && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 justify-items-center">
+                {todayHabits.map((habit, index) => (
+                  <motion.div
+                    key={habit.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.15,
+                      delay: Math.min(index * 0.03, 0.15)
+                    }}
+                  >
+                    <DashboardHabitCard
+                      habit={habit as Habit}
+                      progress={calculateProgress(habit as Habit)}
+                      completed={isCompletedToday(habit.id)}
+                      onToggle={() => handleToggle(habit as Habit)}
+                      streakDays={habit.streak}
+                      completionCount={getHabitCompletionCount(habit.id).current}
+                      timesPerDay={(habit as Habit).times_per_day ?? 1}
+                      isTimedHabit={isTimedHabit(habit.unit)}
+                      onTimerClick={() => setTimerHabit(habit as Habit)}
+                      journeyThemeSlug={null}
+                      isFrozen={freezeUsedToday && (habit.streak ?? 0) > 0}
+                    />
+                  </motion.div>
+                ))}
+              </div>
             )}
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 justify-items-center">
-              {todayHabits.filter((h) => h.source === "journey").map((habit, index) => (
-                <motion.div
-                  key={habit.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.15,
-                    delay: Math.min(index * 0.03, 0.15)
-                  }}
-                >
-                  <DashboardHabitCard
-                    habit={habit as Habit}
-                    progress={calculateProgress(habit as Habit)}
-                    completed={isCompletedToday(habit.id)}
-                    onToggle={() => handleToggle(habit as Habit)}
-                    streakDays={habit.streak}
-                    completionCount={getHabitCompletionCount(habit.id).current}
-                    timesPerDay={(habit as Habit).times_per_day ?? 1}
-                    isTimedHabit={isTimedHabit(habit.unit)}
-                    onTimerClick={() => setTimerHabit(habit as Habit)}
-                    journeyThemeSlug={habitThemeMap.get(habit.id) || (habit.source === 'journey' ? defaultThemeSlug : null)}
-                    isFrozen={freezeUsedToday && (habit.streak ?? 0) > 0}
-                  />
-                </motion.div>
-              ))}
-
-              {/* Non-journey habits (only if no section headers needed) */}
-              {!hasJourneyHabits && todayHabits.filter((h) => h.source !== "journey").map((habit, index) => (
-                <motion.div
-                  key={habit.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.15,
-                    delay: Math.min(index * 0.03, 0.15)
-                  }}
-                >
-                  <DashboardHabitCard
-                    habit={habit as Habit}
-                    progress={calculateProgress(habit as Habit)}
-                    completed={isCompletedToday(habit.id)}
-                    onToggle={() => handleToggle(habit as Habit)}
-                    streakDays={habit.streak}
-                    completionCount={getHabitCompletionCount(habit.id).current}
-                    timesPerDay={(habit as Habit).times_per_day ?? 1}
-                    isTimedHabit={isTimedHabit(habit.unit)}
-                    onTimerClick={() => setTimerHabit(habit as Habit)}
-                    journeyThemeSlug={habitThemeMap.get(habit.id) || (habit.source === 'journey' ? defaultThemeSlug : null)}
-                    isFrozen={freezeUsedToday && (habit.streak ?? 0) > 0}
-                  />
-                </motion.div>
-              ))}
-            </div>
 
             {/* Personal habits section (only shown when both types exist) */}
             {hasPersonalHabits && hasJourneyHabits && (
