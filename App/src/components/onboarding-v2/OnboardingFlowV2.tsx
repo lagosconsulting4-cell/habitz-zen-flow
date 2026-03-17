@@ -138,12 +138,13 @@ function OnboardingProgressDots({ currentStep }: { currentStep: number }) {
 
   return (
     <motion.div
-      className="z-40 pt-safe"
+      className="z-40"
+      style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 14px)" }}
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
     >
-      <div className="px-4 py-3 flex items-center gap-2">
+      <div className="px-4 pb-3 flex items-center gap-2">
         {Array.from({ length: NUM_PROGRESS_PHASES }, (_, i) => {
           const isPast = i < currentPhase;
           const isCurrent = i === currentPhase;
@@ -265,8 +266,8 @@ const OnboardingFlowV2Content = () => {
 
       {/* Navigation Bar */}
       {(showNav || showBack) && (
-        <div className="z-40 pb-safe">
-          <div className="px-4 py-3 flex items-center gap-3">
+        <div className="z-40" style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 16px)" }}>
+          <div className="px-4 pt-3 flex items-center gap-3">
             {showBack && (
               <Button
                 variant="ghost"

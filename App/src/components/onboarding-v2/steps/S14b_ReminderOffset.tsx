@@ -132,6 +132,7 @@ export const S14bReminderOffset = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.4 }}
         className="max-w-md mx-auto w-full mt-6"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)" }}
       >
         <div>
           <Button

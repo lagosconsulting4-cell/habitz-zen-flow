@@ -151,6 +151,7 @@ export const S3InstallPWASoft = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.4 }}
         className="space-y-3 max-w-md mx-auto w-full pt-4"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)" }}
       >
         {isInstallable && (
           <Button

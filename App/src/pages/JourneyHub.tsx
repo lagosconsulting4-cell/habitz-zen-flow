@@ -266,9 +266,9 @@ const JourneyHub = () => {
           className="w-full h-full object-cover object-bottom"
         />
         {/* Scrim top — safe-area + legibilidade status bar */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
         {/* Fade bottom → background */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/15 to-transparent" />
         {/* Título sobreposto no bottom */}
         <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
           <h1 className="text-2xl font-bold text-gray-900">Jornadas feitas pra você</h1>

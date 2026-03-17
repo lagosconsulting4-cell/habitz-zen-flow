@@ -69,7 +69,7 @@ export const S14Notifications = () => {
         </div>
 
         {/* Footer */}
-        <div className="space-y-3 max-w-md mx-auto w-full">
+        <div className="space-y-3 max-w-md mx-auto w-full" style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)" }}>
           <Button
             onClick={() => prevStep()}
             size="lg"
@@ -164,6 +164,7 @@ export const S14Notifications = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.4 }}
         className="space-y-3 max-w-md mx-auto w-full"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)" }}
       >
         <Button
           onClick={handleActivate}

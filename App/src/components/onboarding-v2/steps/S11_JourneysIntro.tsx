@@ -117,7 +117,7 @@ export const S11JourneysIntro = () => {
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to bottom, transparent 0%, transparent 55%, var(--background) 100%)",
+                "linear-gradient(to bottom, transparent 0%, transparent 65%, var(--background) 100%)",
             }}
           />
 
