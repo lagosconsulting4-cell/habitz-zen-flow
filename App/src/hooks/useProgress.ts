@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { getBRTDateString } from "@/utils/date";
 
 interface HabitRow {
   id: string;
@@ -69,7 +70,7 @@ interface ProgressData {
   habitsNeedingAttention: HabitAttention[];
 }
 
-const formatDate = (date: Date) => date.toISOString().split("T")[0];
+const formatDate = (date: Date) => getBRTDateString(date);
 
 const addDays = (date: Date, days: number) => {
   const result = new Date(date);

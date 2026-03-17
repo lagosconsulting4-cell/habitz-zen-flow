@@ -11,6 +11,7 @@ import { useMemo, useCallback, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
+import { getBRTDateString } from "@/utils/date";
 
 // ============================================
 // TYPES
@@ -693,7 +694,7 @@ export const useJourneyActions = () => {
           notification_pref: { reminder_enabled: false, reminder_time: periodToReminder[template.period] || "08:00" },
         };
         if (isOneTime) {
-          habitInsert.due_date = new Date().toISOString().split("T")[0];
+          habitInsert.due_date = getBRTDateString();
         }
         newHabitTemplateMap.push({ template, insertIndex: newHabitInserts.length });
         newHabitInserts.push(habitInsert);
@@ -892,7 +893,7 @@ export const useJourneyActions = () => {
             notification_pref: { reminder_enabled: false, reminder_time: cdPeriodToReminder[template.period] || "08:00" },
           };
           if (isOneTimeHabit) {
-            newHabitInsert.due_date = new Date().toISOString().split("T")[0];
+            newHabitInsert.due_date = getBRTDateString();
           }
           cdTemplateMap.push(template);
           cdNewInserts.push(newHabitInsert);

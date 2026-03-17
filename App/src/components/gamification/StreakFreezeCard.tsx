@@ -3,6 +3,7 @@ import { Shield, Sparkles, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGamification, GEM_VALUES } from "@/hooks/useGamification";
 import { useAuth } from "@/integrations/supabase/auth";
+import { getBRTDateString } from "@/utils/date";
 
 interface StreakFreezeCardProps {
   userId?: string;
@@ -40,7 +41,7 @@ export const StreakFreezeCard = ({ userId: propUserId, compact = false, classNam
 
   const handleUseFreeze = async () => {
     try {
-      await useStreakFreeze({ protectedDate: new Date().toISOString().split("T")[0] });
+      await useStreakFreeze({ protectedDate: getBRTDateString() });
     } catch (error: any) {
       console.error("Failed to use streak freeze:", error);
     }

@@ -15,11 +15,12 @@ import {
   deleteCachedHabit,
   CachedHabit,
 } from "@/lib/offline-db";
+import { getBRTDateString, msUntilBRTMidnight } from "@/utils/date";
 
 const emitProgressChange = (date?: string) => {
   window.dispatchEvent(
     new CustomEvent("habit:completion-changed", {
-      detail: { date: date ?? new Date().toISOString().split("T")[0] },
+      detail: { date: date ?? getBRTDateString() },
     })
   );
 };
@@ -250,15 +251,12 @@ export const useHabits = () => {
     }
   }, []);
 
-  // Track current completions date — reactive to midnight rollover
-  const [today, setToday] = useState(() => new Date().toISOString().split("T")[0]);
+  // Track current completions date — reactive to BRT midnight rollover
+  const [today, setToday] = useState(() => getBRTDateString());
   useEffect(() => {
-    const now = new Date();
-    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    const msUntilMidnight = tomorrow.getTime() - now.getTime();
     const timer = setTimeout(() => {
-      setToday(new Date().toISOString().split("T")[0]);
-    }, msUntilMidnight + 100); // small buffer past midnight
+      setToday(getBRTDateString());
+    }, msUntilBRTMidnight() + 100); // small buffer past BRT midnight
     return () => clearTimeout(timer);
   }, [today]); // re-schedule whenever `today` changes
 
@@ -269,9 +267,7 @@ export const useHabits = () => {
     setCompletionsDateState((prev) => {
       // Only auto-advance if the user was viewing the previous "today"
       // (not if they navigated to a specific past/future date via Calendar)
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split("T")[0];
+      const yesterdayStr = getBRTDateString(new Date(Date.now() - 24 * 60 * 60 * 1000));
       if (prev === yesterdayStr) {
         return today;
       }
@@ -588,7 +584,7 @@ export const useHabits = () => {
   );
 
   const toggleHabit = async (habitId: string, date?: string) => {
-    const targetDate = date ?? new Date().toISOString().split("T")[0];
+    const targetDate = date ?? getBRTDateString();
     const toggleKey = `${habitId}-${targetDate}`;
 
     // Debounce: prevent double-clicks causing race conditions
@@ -753,9 +749,7 @@ export const useHabits = () => {
       emitProgressChange(targetDate);
 
       const habit = habits.find((h) => h.id === habitId);
-      const today = new Date().toISOString().split("T")[0];
-
-      if (habit && targetDate === today && !isOnline) {
+      if (habit && targetDate === getBRTDateString() && !isOnline) {
         // For offline: Calculate and update streak locally
         // For online: RPC already updated streak
         const increment = !existingCompletion;

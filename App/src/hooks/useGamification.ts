@@ -2,7 +2,7 @@ import { useEffect, useCallback, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getRewardsForLevel } from "@/data/levelRewards";
-import { getLocalDateString } from "@/utils/date";
+import { getBRTDateString } from "@/utils/date";
 import { getUnlockable } from "@/data/unlockables";
 import { toast } from "sonner";
 
@@ -544,7 +544,7 @@ export const useGamification = (userId?: string) => {
     queryKey: ["freeze-used-today", userId],
     queryFn: async (): Promise<boolean> => {
       if (!userId) return false;
-      const today = new Date().toISOString().split("T")[0];
+      const today = getBRTDateString();
       const { data, error } = await supabase
         .from("streak_freeze_events")
         .select("created_at")
@@ -944,7 +944,7 @@ export const useGamification = (userId?: string) => {
 
       const { data, error } = await supabase.rpc("use_streak_freeze", {
         p_user_id: userId,
-        p_protected_date: protectedDate || getLocalDateString(),
+        p_protected_date: protectedDate || getBRTDateString(),
       });
 
       if (error) throw error;

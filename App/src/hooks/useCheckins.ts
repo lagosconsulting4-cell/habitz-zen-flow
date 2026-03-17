@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { trackEventGlobal } from "@/hooks/useEventTracker";
+import { getBRTDateString } from "@/utils/date";
 
 export interface DailyCheckin {
   id: string;
@@ -28,7 +29,7 @@ export const useCheckins = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+      const today = getBRTDateString();
 
       const { data, error } = await supabase
         .from("daily_checkins")
@@ -77,7 +78,7 @@ export const useCheckins = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
-      const today = new Date().toISOString().split("T")[0];
+      const today = getBRTDateString();
 
       const { data, error } = await supabase
         .from("daily_checkins")

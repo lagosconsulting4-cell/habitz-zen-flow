@@ -15,6 +15,7 @@ import { getHabitIconWithFallback } from "@/components/icons/HabitIcons";
 import { JourneyIllustration, getJourneyTheme } from "@/components/JourneyIllustration";
 import { useActiveJourneys, useAllActiveJourneyHabits, useJourneyDay } from "@/hooks/useJourney";
 import type { Habit } from "@/components/DashboardHabitCard";
+import { getBRTDateString } from "@/utils/date";
 
 interface DailyMissionCardProps {
   habits: Habit[];
@@ -48,7 +49,7 @@ const JourneyProgressItem = ({
   if (!journey) return null;
 
   // Detect if day was already advanced today
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = getBRTDateString();
   const wasAdvancedToday =
     state.current_day > 1 &&
     state.days_completed > 0 &&

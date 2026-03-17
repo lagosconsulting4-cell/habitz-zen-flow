@@ -32,6 +32,7 @@ import { useAllActiveJourneyHabits, useJourneyActions, useJourneyDay, CANONICAL_
 import { JourneyIllustration, getJourneyTheme } from "@/components/JourneyIllustration";
 import { JourneyDayCompleteModal } from "@/components/JourneyDayCompleteModal";
 import { JourneyGraduationModal } from "@/components/JourneyGraduationModal";
+import { getBRTDateString } from "@/utils/date";
 
 // Helper to check if habit has time-based goal
 const isTimedHabit = (unit?: string | null): boolean => {
@@ -289,7 +290,7 @@ const Dashboard = () => {
     if (activeStates.length === 0 || allJourneyHabits.length === 0 || isCompleting) return;
 
     for (const activeJourney of activeStates) {
-      const todayStr = new Date().toISOString().split("T")[0];
+      const todayStr = getBRTDateString();
       const completionKey = `${activeJourney.journey_id}:${todayStr}`;
       if (journeyDayCompletedRef.current.has(completionKey)) continue;
 
@@ -593,7 +594,7 @@ const Dashboard = () => {
   // Handle timer completion
   const handleTimerComplete = useCallback(async () => {
     if (timerHabit) {
-      const targetDate = new Date().toISOString().split("T")[0];
+      const targetDate = getBRTDateString();
       const habitId = timerHabit.id;
 
       // OPTIMISTIC: Create completion object immediately

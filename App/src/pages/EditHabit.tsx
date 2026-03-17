@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useHabits, Habit } from "@/hooks/useHabits";
+import { getBRTDateString } from "@/utils/date";
 import { useAppPreferences } from "@/hooks/useAppPreferences";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { haptic } from "@/lib/haptics";
@@ -282,7 +283,7 @@ const EditHabit = () => {
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            min={new Date().toISOString().split("T")[0]}
+            min={getBRTDateString()}
             className={`h-11 w-full rounded-xl px-3 ${themeColors.input}`}
           />
           {dueDate && (

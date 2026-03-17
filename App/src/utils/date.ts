@@ -1,13 +1,35 @@
 
+/** Brazil is permanently UTC-3 (no DST since 2019) */
+const BRT_OFFSET_MS = 3 * 60 * 60 * 1000;
+
+/**
+ * Returns a date string in YYYY-MM-DD format for Brasília time (UTC-3).
+ * Use this everywhere a "today" date is needed — avoids the day flipping
+ * at 21:00 BRT (= 00:00 UTC) that happens with toISOString().
+ */
+export const getBRTDateString = (date = new Date()): string => {
+    const brt = new Date(date.getTime() - BRT_OFFSET_MS);
+    return brt.toISOString().split('T')[0];
+};
+
+/**
+ * Returns milliseconds until the next midnight in Brasília time.
+ * Use this to schedule the daily reset timer.
+ */
+export const msUntilBRTMidnight = (): number => {
+    const brtNow = new Date(Date.now() - BRT_OFFSET_MS);
+    const nextMidnightUTC =
+        Date.UTC(brtNow.getUTCFullYear(), brtNow.getUTCMonth(), brtNow.getUTCDate() + 1)
+        + BRT_OFFSET_MS;
+    return nextMidnightUTC - Date.now();
+};
+
 /**
  * Returns a date string in YYYY-MM-DD format for the local timezone
- * This is useful for consistent querying of daily records regardless of UTC time
+ * @deprecated Use getBRTDateString() instead for consistent BRT dates
  */
 export const getLocalDateString = (date = new Date()): string => {
-    const d = new Date(date);
-    const offset = d.getTimezoneOffset();
-    const localDate = new Date(d.getTime() - offset * 60 * 1000);
-    return localDate.toISOString().split('T')[0];
+    return getBRTDateString(date);
 };
 
 /**
