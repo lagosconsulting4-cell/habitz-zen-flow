@@ -227,7 +227,10 @@ const OnboardingFlowV2Content = () => {
       <OnboardingProgressDots currentStep={currentStep} />
 
       {/* Step Content */}
-      <div className="flex-1 min-h-0 relative overflow-hidden">
+      <div
+        className="flex-1 min-h-0 relative overflow-hidden"
+        style={(showNav || showBack) ? { paddingBottom: "calc(76px + env(safe-area-inset-bottom, 0px))" } : undefined}
+      >
         <AnimatePresence mode="wait" initial={false} custom={directionRef.current}>
           <motion.div
             key={currentStep}
@@ -266,7 +269,7 @@ const OnboardingFlowV2Content = () => {
 
       {/* Navigation Bar */}
       {(showNav || showBack) && (
-        <div className="z-40" style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 16px)" }}>
+        <div className="fixed bottom-0 inset-x-0 z-40 bg-background" style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 16px)" }}>
           <div className="px-4 pt-3 flex items-center gap-3">
             {showBack && (
               <Button
