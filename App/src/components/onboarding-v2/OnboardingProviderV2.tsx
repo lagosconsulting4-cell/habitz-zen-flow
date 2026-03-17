@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/integrations/supabase/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useGamification } from "@/hooks/useGamification";
@@ -134,6 +135,7 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
   // External hooks
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { startTour } = useTour();
   const { addXP } = useGamification(user?.id);
   const { startJourney } = useJourneyActions();
@@ -468,7 +470,12 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
         notifications: notificationsGranted,
       }, "onboarding_v2");
 
-      // --- (h) Navigate + start tour ---
+      // --- (h) Invalidate profile cache so ProtectedRoute reads updated has_completed_onboarding ---
+      if (user?.id) {
+        queryClient.invalidateQueries({ queryKey: ["premium-profile", user.id] });
+      }
+
+      // --- (i) Navigate + start tour ---
       startTour();
       navigate("/dashboard", { replace: true });
     } catch (error) {
@@ -476,7 +483,7 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
     } finally {
       setIsSubmitting(false);
     }
-  }, [user, generatedHabits, selectedHabitIds, selectedJourneyIds, quizResponseId, notificationsGranted, addXP, navigate, startTour, startJourney, trackEvent, journeyScores, journeyDominantSignals, wakeSleepTime, weekendDiff, lifeAreas, habitExperience]);
+  }, [user, generatedHabits, selectedHabitIds, selectedJourneyIds, quizResponseId, notificationsGranted, addXP, navigate, queryClient, startTour, startJourney, trackEvent, journeyScores, journeyDominantSignals, wakeSleepTime, weekendDiff, lifeAreas, habitExperience]);
 
   // ============================================================================
   // CONTEXT VALUE

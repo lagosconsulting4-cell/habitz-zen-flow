@@ -5,6 +5,7 @@ interface PremiumProfile {
   is_premium: boolean;
   premium_since: string | null;
   phone: string | null;
+  has_completed_onboarding: boolean | null;
 }
 
 export const usePremium = (userId?: string) => {
@@ -17,7 +18,7 @@ export const usePremium = (userId?: string) => {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("is_premium, premium_since, phone")
+        .select("is_premium, premium_since, phone, has_completed_onboarding")
         .eq("user_id", userId)
         .single();
 
@@ -70,6 +71,7 @@ export const usePremium = (userId?: string) => {
   return {
     isPremium: profileQuery.data?.is_premium ?? null,
     premiumSince: profileQuery.data?.premium_since ?? null,
+    hasCompletedOnboarding: profileQuery.data?.has_completed_onboarding ?? null,
     loading: profileQuery.isLoading,
     error: profileQuery.error,
     refresh: () => {

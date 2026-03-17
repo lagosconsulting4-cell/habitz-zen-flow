@@ -45,7 +45,7 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
     return () => subscription.unsubscribe();
   }, [isOnboardingNewRoute]);
 
-  const { isPremium, loading: premiumLoading, error: premiumError } = usePremium(user?.id);
+  const { isPremium, hasCompletedOnboarding, loading: premiumLoading, error: premiumError } = usePremium(user?.id);
   const { isAdmin, loading: adminLoading } = useAdmin(user?.id);
 
   if (loading || premiumLoading || (adminOnly && adminLoading)) {
@@ -80,6 +80,10 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
     // Redirect to external /bora page (outside /app basename)
     window.location.href = "/bora";
     return null;
+  }
+
+  if (hasCompletedOnboarding === false && !isOnboardingNewRoute) {
+    return <Navigate to="/onboarding" replace />;
   }
 
   return <>{children}</>;
