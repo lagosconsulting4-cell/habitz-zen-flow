@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { motion } from "motion/react";
 import { Briefcase, Dumbbell, Brain, Heart } from "lucide-react";
 import { useOnboardingV2, type LifeArea } from "../OnboardingProviderV2";
@@ -9,7 +10,7 @@ const LIFE_AREA_OPTIONS = [
   { value: "relationships" as LifeArea, label: "Relações",      Icon: Heart },
 ] as const;
 
-export const S6LifeAreas = () => {
+export const S6LifeAreas = memo(function S6LifeAreas() {
   const { lifeAreas, toggleLifeArea } = useOnboardingV2();
 
   return (
@@ -86,4 +87,4 @@ export const S6LifeAreas = () => {
       </div>
     </div>
   );
-};
+});

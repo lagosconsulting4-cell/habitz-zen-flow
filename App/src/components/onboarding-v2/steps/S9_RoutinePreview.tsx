@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, memo } from "react";
 import { motion } from "motion/react";
 import {
   DndContext,
@@ -105,13 +105,12 @@ function SortableHabitCard({ habit, selected, disabled, onToggle, showWeekendTim
         {...attributes}
         {...listeners}
         className={cn(
-          "touch-none pl-3 text-transparent group-hover:text-muted-foreground/40 focus-visible:text-muted-foreground/40 cursor-grab active:cursor-grabbing shrink-0 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm transition-colors self-stretch flex items-center",
-          ds.handlePy,
+          "touch-none pl-3 text-transparent group-hover:text-muted-foreground/40 focus-visible:text-muted-foreground/40 cursor-grab active:cursor-grabbing shrink-0 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm transition-colors self-stretch flex items-center min-h-[44px]",
         )}
         tabIndex={0}
         aria-label={`Reordenar ${habit.name}`}
       >
-        <GripVertical size={16} />
+        <GripVertical size={20} />
       </button>
 
       {/* Clickable content area — full row toggle */}
@@ -216,7 +215,7 @@ function PeriodGroup({ period, habits, selectedIds, isAtLimit, onToggle, showWee
 // MAIN COMPONENT
 // ============================================================================
 
-export const S9RoutinePreview = () => {
+export const S9RoutinePreview = memo(function S9RoutinePreview() {
   const {
     generatedHabits,
     setGeneratedHabits,
@@ -434,4 +433,4 @@ export const S9RoutinePreview = () => {
 
     </div>
   );
-};
+});

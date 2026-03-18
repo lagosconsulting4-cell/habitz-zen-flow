@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, memo } from "react";
 import { motion } from "motion/react";
 import { BarChart3, Dumbbell, Heart, CalendarDays, ShieldX } from "lucide-react";
 import { useOnboardingV2 } from "../OnboardingProviderV2";
@@ -53,7 +53,7 @@ const OBJECTIVE_OPTIONS: ObjectiveOption[] = [
   },
 ];
 
-export const S2ObjectiveConfirm = () => {
+export const S2ObjectiveConfirm = memo(function S2ObjectiveConfirm() {
   const {
     quizData,
     confirmedObjective,
@@ -150,4 +150,4 @@ export const S2ObjectiveConfirm = () => {
 
     </div>
   );
-};
+});

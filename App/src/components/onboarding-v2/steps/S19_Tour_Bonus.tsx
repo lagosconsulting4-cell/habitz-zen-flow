@@ -1,10 +1,11 @@
-import { useOnboardingV2 } from "../OnboardingProviderV2";
+import { memo } from "react";
+import { useOnboardingNav } from "../OnboardingProviderV2";
 import { useEventTracker } from "@/hooks/useEventTracker";
 import { MockProfileSection } from "../TourMockElements";
 import { SpotlightOverlay } from "../SpotlightOverlay";
 
-export const S19TourBonus = () => {
-  const { nextStep } = useOnboardingV2();
+export const S19TourBonus = memo(function S19TourBonus() {
+  const { nextStep } = useOnboardingNav();
   const { trackEvent } = useEventTracker();
 
   const handleNext = () => {
@@ -26,4 +27,4 @@ export const S19TourBonus = () => {
       />
     </div>
   );
-};
+});

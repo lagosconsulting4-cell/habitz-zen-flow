@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { motion } from "motion/react";
 import { Input } from "@/components/ui/input";
 import { useOnboardingV2 } from "../OnboardingProviderV2";
 
 const BG = `${import.meta.env.BASE_URL}assets/onboarding/welcome-bg.webp`;
 
-export const S0Welcome = () => {
+export const S0Welcome = memo(function S0Welcome() {
   const { quizData, collectedName, setCollectedName, nextStep, isStepValid } = useOnboardingV2();
   const [localName, setLocalName] = useState(collectedName || "");
   const hasName = !!quizData?.name;
@@ -162,4 +162,4 @@ export const S0Welcome = () => {
       </motion.div>
     </div>
   );
-};
+});

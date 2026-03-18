@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, memo } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ const BG = `${import.meta.env.BASE_URL}assets/onboarding/celebration-bg.webp`;
 // COMPONENT
 // ============================================================================
 
-export const S20Celebration = () => {
+export const S20Celebration = memo(function S20Celebration() {
   const {
     collectedName,
     quizData,
@@ -109,4 +109,4 @@ export const S20Celebration = () => {
       </motion.div>
     </div>
   );
-};
+});

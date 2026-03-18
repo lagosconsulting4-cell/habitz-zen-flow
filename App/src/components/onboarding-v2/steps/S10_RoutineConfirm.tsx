@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { motion } from "motion/react";
 import { ChevronLeft } from "lucide-react";
 import { useOnboardingV2 } from "../OnboardingProviderV2";
@@ -28,7 +28,7 @@ const PROGRESS_TOTAL_PHASES = 5;
 // COMPONENT
 // ============================================================================
 
-export const S10RoutineConfirm = () => {
+export const S10RoutineConfirm = memo(function S10RoutineConfirm() {
   const {
     generatedHabits,
     selectedHabitIds,
@@ -188,7 +188,7 @@ export const S10RoutineConfirm = () => {
       </div>
     </div>
   );
-};
+});
 
 // ============================================================================
 // STAT BLOCK

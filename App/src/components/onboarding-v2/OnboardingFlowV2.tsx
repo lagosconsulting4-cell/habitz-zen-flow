@@ -3,7 +3,7 @@ import { motion, AnimatePresence, MotionConfig } from "motion/react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { OnboardingProviderV2, useOnboardingV2 } from "./OnboardingProviderV2";
+import { OnboardingProviderV2, useOnboardingNav, useOnboardingActions } from "./OnboardingProviderV2";
 import { OnboardingBlobBackground } from "./OnboardingBlobBackground";
 
 // Lazy-loaded steps — each chunk loads only when the step is reached
@@ -164,7 +164,7 @@ function OnboardingProgressDots({ currentStep }: { currentStep: number }) {
                 className="absolute inset-y-0 left-0 w-full rounded-full bg-primary"
                 animate={{ scaleX: fillRatio }}
                 style={{ transformOrigin: 'left' }}
-                transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+                transition={{ type: 'tween', duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               />
             </div>
           );
@@ -186,7 +186,8 @@ const PRELOAD_IMAGES = [
 ];
 
 const OnboardingFlowV2Content = () => {
-  const { currentStep, nextStep, prevStep, isStepValid } = useOnboardingV2();
+  const { currentStep, nextStep, prevStep } = useOnboardingNav();
+  const { isStepValid } = useOnboardingActions();
   const directionRef = useRef<'forward' | 'backward'>('forward');
 
   // Preload hero images once on mount
@@ -197,7 +198,6 @@ const OnboardingFlowV2Content = () => {
   const currentStepConfig = STEPS[currentStep];
   const showBack = currentStepConfig && !HIDE_BACK_ON.has(currentStepConfig.id) && currentStep > 0;
   const showNav = currentStepConfig && !HIDE_NAV_ON.has(currentStepConfig.id);
-
   // Idle pulse — CTA pulses subtly after 4s of being valid & idle
   const [idlePulse, setIdlePulse] = useState(false);
   const stepIsValid = isStepValid();

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { motion } from "motion/react";
 import { Check, Share, MoreVertical, Smartphone, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { useOnboardingV2 } from "../OnboardingProviderV2";
 import { useEventTracker } from "@/hooks/useEventTracker";
 import { usePWA } from "@/hooks/usePWA";
 
-export const S3InstallPWASoft = () => {
+export const S3InstallPWASoft = memo(function S3InstallPWASoft() {
   const { nextStep, prevStep, setIsPWAInstalled } = useOnboardingV2();
   const { trackEvent } = useEventTracker();
   const { isInstalled, isIOS, isAndroid, isInstallable, promptInstall } = usePWA();
@@ -191,4 +191,4 @@ export const S3InstallPWASoft = () => {
       </motion.div>
     </div>
   );
-};
+});

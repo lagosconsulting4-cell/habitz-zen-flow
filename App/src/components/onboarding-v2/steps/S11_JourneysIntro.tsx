@@ -1,6 +1,7 @@
+import { memo } from "react";
 import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useOnboardingV2 } from "../OnboardingProviderV2";
+import { useOnboardingNav } from "../OnboardingProviderV2";
 import { Button } from "@/components/ui/button";
 
 const BG = `${import.meta.env.BASE_URL}assets/onboarding/journeys-intro-bg.webp`;
@@ -91,8 +92,8 @@ function MockJourneyCard() {
 // COMPONENT
 // ============================================================================
 
-export const S11JourneysIntro = () => {
-  const { nextStep, prevStep } = useOnboardingV2();
+export const S11JourneysIntro = memo(function S11JourneysIntro() {
+  const { nextStep, prevStep } = useOnboardingNav();
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
@@ -226,4 +227,4 @@ export const S11JourneysIntro = () => {
       </div>
     </div>
   );
-};
+});

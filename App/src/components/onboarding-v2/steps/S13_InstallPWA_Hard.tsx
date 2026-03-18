@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { motion } from "motion/react";
 import { Check, Share, MoreVertical, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { usePWA } from "@/hooks/usePWA";
 // COMPONENT
 // ============================================================================
 
-export const S13InstallPWAHard = () => {
+export const S13InstallPWAHard = memo(function S13InstallPWAHard() {
   const { nextStep, setIsPWAInstalled } = useOnboardingV2();
   const { trackEvent } = useEventTracker();
   const { isInstalled, isIOS, isAndroid, isInstallable, promptInstall } = usePWA();
@@ -201,4 +201,4 @@ export const S13InstallPWAHard = () => {
       </motion.div>
     </div>
   );
-};
+});

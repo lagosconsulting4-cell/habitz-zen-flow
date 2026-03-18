@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useOnboardingV2, type HabitExperience } from "../OnboardingProviderV2";
 import { SelectionCard } from "@/components/onboarding/SelectionCard";
@@ -32,7 +33,7 @@ const CONDITIONAL_COPY: Record<HabitExperience, string> = {
   already_have: "Construímos em cima do que funciona e adicionamos o que faltava.",
 };
 
-export const S7HabitExperience = () => {
+export const S7HabitExperience = memo(function S7HabitExperience() {
   const { habitExperience, setHabitExperience } = useOnboardingV2();
 
   return (
@@ -99,4 +100,4 @@ export const S7HabitExperience = () => {
       </div>
     </div>
   );
-};
+});

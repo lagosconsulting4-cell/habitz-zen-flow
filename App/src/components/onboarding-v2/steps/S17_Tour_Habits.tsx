@@ -1,9 +1,10 @@
-import { useOnboardingV2 } from "../OnboardingProviderV2";
+import { memo } from "react";
+import { useOnboardingNav } from "../OnboardingProviderV2";
 import { MockNavigationBar } from "../TourMockElements";
 import { SpotlightOverlay } from "../SpotlightOverlay";
 
-export const S17TourHabits = () => {
-  const { nextStep } = useOnboardingV2();
+export const S17TourHabits = memo(function S17TourHabits() {
+  const { nextStep } = useOnboardingNav();
 
   return (
     <div className="h-full relative">
@@ -19,4 +20,4 @@ export const S17TourHabits = () => {
       />
     </div>
   );
-};
+});

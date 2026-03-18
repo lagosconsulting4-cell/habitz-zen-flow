@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useOnboardingV2, type WeekendDiff } from "../OnboardingProviderV2";
 import { SelectionCard } from "@/components/onboarding/SelectionCard";
@@ -32,7 +33,7 @@ const CONDITIONAL_COPY: Record<WeekendDiff, string> = {
   varies: "Ótimo. Vamos montar uma rotina diferente para cada período. Mais leve no fim de semana, mais focada durante a semana.",
 };
 
-export const S5WeekendDiff = () => {
+export const S5WeekendDiff = memo(function S5WeekendDiff() {
   const { weekendDiff, setWeekendDiff } = useOnboardingV2();
 
   return (
@@ -89,4 +90,4 @@ export const S5WeekendDiff = () => {
       </div>
     </div>
   );
-};
+});

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useLayoutEffect } from "react";
+import { useMemo, useRef, useLayoutEffect, memo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -68,7 +68,7 @@ function DrumPicker({ label, value, onChange }: DrumPickerProps) {
       if (TIME_OPTIONS[clamped] !== value) {
         onChange(TIME_OPTIONS[clamped]);
       }
-    }, 80);
+    }, 50);
   };
 
   return (
@@ -252,7 +252,7 @@ function SleepStatsCard({ wake, sleep }: { wake: string; sleep: string }) {
 // S4 — Wake/Sleep Time
 // ============================================================================
 
-export const S4WakeSleepTime = () => {
+export const S4WakeSleepTime = memo(function S4WakeSleepTime() {
   const { wakeSleepTime, setWakeSleepTime } = useOnboardingV2();
 
   return (
@@ -314,4 +314,4 @@ export const S4WakeSleepTime = () => {
       </div>
     </div>
   );
-};
+});

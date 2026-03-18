@@ -35,61 +35,42 @@ export interface WakeSleeTime {
   sleep: string;  // "HH:mm"
 }
 
-export interface OnboardingV2State {
-  // Step atual
+// --- Split context types ---
+
+export interface OnboardingNavContextType {
   currentStep: number;
   totalSteps: number;
+  goToStep: (step: number) => void;
+  nextStep: () => void;
+  prevStep: () => void;
+}
 
-  // Dados do quiz (vindos do Supabase via useQuizData)
+export interface OnboardingDataContextType {
+  // Quiz data
   quizData: QuizData | null;
   isLoadingQuizData: boolean;
   quizResponseId: string | null;
-
-  // Dados coletados no onboarding (S4-S7)
+  // Collected inputs
   wakeSleepTime: WakeSleeTime;
   weekendDiff: WeekendDiff | null;
   lifeAreas: LifeArea[];
   habitExperience: HabitExperience | null;
-
-  // Objetivo (pode ser confirmado/alterado no S2)
   confirmedObjective: string | null;
-
-  // Nome coletado no S0 (fallback quando quiz não tem nome)
   collectedName: string | null;
-
   // PWA
   isPWAInstalled: boolean;
-
-  // Rotina gerada
+  // Generated routine
   generatedHabits: RecommendedHabitV2[];
   selectedHabitIds: Set<string>;
   isGeneratingRoutine: boolean;
-
-  // Jornadas
+  // Journeys
   journeyScores: Record<string, number>;
   journeyDominantSignals: Record<string, string>;
   selectedJourneyIds: Set<string>;
   journeyBadges: string[];
-
-  // Notificacoes
+  // Notifications + tour
   notificationsGranted: boolean;
-
-  // Tour
   tourStep: number;
-
-  // Submissao
-  isSubmitting: boolean;
-}
-
-export interface OnboardingV2ContextType extends OnboardingV2State {
-  // Navigation
-  goToStep: (step: number) => void;
-  nextStep: () => void;
-  prevStep: () => void;
-
-  // Validation
-  isStepValid: () => boolean;
-
   // Setters
   setWakeSleepTime: (v: WakeSleeTime) => void;
   setWeekendDiff: (v: WeekendDiff) => void;
@@ -108,17 +89,28 @@ export interface OnboardingV2ContextType extends OnboardingV2State {
   toggleJourney: (id: string) => void;
   setNotificationsGranted: (v: boolean) => void;
   setTourStep: (v: number) => void;
-  setIsSubmitting: (v: boolean) => void;
-
-  // Submission
-  submitOnboardingV2: () => Promise<void>;
 }
 
+export interface OnboardingActionsContextType {
+  isStepValid: () => boolean;
+  submitOnboardingV2: () => Promise<void>;
+  isSubmitting: boolean;
+  setIsSubmitting: (v: boolean) => void;
+}
+
+// Backward-compatible composed type (used by useOnboardingV2)
+export interface OnboardingV2ContextType extends OnboardingNavContextType, OnboardingDataContextType, OnboardingActionsContextType {}
+
+// Legacy alias kept for external consumers
+export interface OnboardingV2State extends OnboardingNavContextType, Omit<OnboardingDataContextType, keyof OnboardingActionsContextType>, OnboardingActionsContextType {}
+
 // ============================================================================
-// CONTEXT
+// CONTEXTS
 // ============================================================================
 
-const OnboardingV2Context = createContext<OnboardingV2ContextType | null>(null);
+const OnboardingNavContext = createContext<OnboardingNavContextType | null>(null);
+const OnboardingDataContext = createContext<OnboardingDataContextType | null>(null);
+const OnboardingActionsContext = createContext<OnboardingActionsContextType | null>(null);
 
 // ============================================================================
 // PROVIDER
@@ -486,13 +478,20 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
   }, [user, generatedHabits, selectedHabitIds, selectedJourneyIds, quizResponseId, notificationsGranted, addXP, navigate, queryClient, startTour, startJourney, trackEvent, journeyScores, journeyDominantSignals, wakeSleepTime, weekendDiff, lifeAreas, habitExperience]);
 
   // ============================================================================
-  // CONTEXT VALUE
+  // SPLIT CONTEXT VALUES — each useMemo only re-runs when its own deps change
   // ============================================================================
 
-  const value = useMemo<OnboardingV2ContextType>(() => ({
-    // State
+  // Nav context: only changes when currentStep changes
+  const navValue = useMemo<OnboardingNavContextType>(() => ({
     currentStep,
     totalSteps: TOTAL_STEPS,
+    goToStep,
+    nextStep,
+    prevStep,
+  }), [currentStep, goToStep, nextStep, prevStep]);
+
+  // Data context: changes when any quiz/input/habit/journey state changes
+  const dataValue = useMemo<OnboardingDataContextType>(() => ({
     quizData,
     isLoadingQuizData,
     quizResponseId,
@@ -512,17 +511,6 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
     journeyBadges,
     notificationsGranted,
     tourStep,
-    isSubmitting,
-
-    // Navigation
-    goToStep,
-    nextStep,
-    prevStep,
-
-    // Validation
-    isStepValid,
-
-    // Setters
     setWakeSleepTime,
     setWeekendDiff,
     setLifeAreas,
@@ -540,55 +528,62 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
     toggleJourney,
     setNotificationsGranted,
     setTourStep,
-    setIsSubmitting,
-
-    // Submission
-    submitOnboardingV2,
   }), [
-    currentStep,
-    quizData,
-    isLoadingQuizData,
-    quizResponseId,
-    wakeSleepTime,
-    weekendDiff,
-    lifeAreas,
-    habitExperience,
-    confirmedObjective,
-    collectedName,
-    isPWAInstalled,
-    generatedHabits,
-    selectedHabitIds,
-    isGeneratingRoutine,
-    journeyScores,
-    journeyDominantSignals,
-    selectedJourneyIds,
-    journeyBadges,
-    notificationsGranted,
-    tourStep,
-    isSubmitting,
-    goToStep,
-    nextStep,
-    prevStep,
-    isStepValid,
-    toggleLifeArea,
-    toggleHabit,
-    toggleJourney,
-    submitOnboardingV2,
+    quizData, isLoadingQuizData, quizResponseId,
+    wakeSleepTime, weekendDiff, lifeAreas, habitExperience,
+    confirmedObjective, collectedName, isPWAInstalled,
+    generatedHabits, selectedHabitIds, isGeneratingRoutine,
+    journeyScores, journeyDominantSignals, selectedJourneyIds, journeyBadges,
+    notificationsGranted, tourStep,
+    toggleLifeArea, toggleHabit, toggleJourney,
   ]);
 
-  return <OnboardingV2Context.Provider value={value}>{children}</OnboardingV2Context.Provider>;
+  // Actions context: changes when validation deps or submission state changes
+  const actionsValue = useMemo<OnboardingActionsContextType>(() => ({
+    isStepValid,
+    submitOnboardingV2,
+    isSubmitting,
+    setIsSubmitting,
+  }), [isStepValid, submitOnboardingV2, isSubmitting]);
+
+  return (
+    <OnboardingNavContext.Provider value={navValue}>
+      <OnboardingDataContext.Provider value={dataValue}>
+        <OnboardingActionsContext.Provider value={actionsValue}>
+          {children}
+        </OnboardingActionsContext.Provider>
+      </OnboardingDataContext.Provider>
+    </OnboardingNavContext.Provider>
+  );
 };
 
 // ============================================================================
-// HOOK
+// HOOKS — use the focused sub-contexts for optimal re-render isolation
 // ============================================================================
 
+export const useOnboardingNav = (): OnboardingNavContextType => {
+  const ctx = useContext(OnboardingNavContext);
+  if (!ctx) throw new Error("useOnboardingNav must be used within OnboardingProviderV2");
+  return ctx;
+};
+
+export const useOnboardingData = (): OnboardingDataContextType => {
+  const ctx = useContext(OnboardingDataContext);
+  if (!ctx) throw new Error("useOnboardingData must be used within OnboardingProviderV2");
+  return ctx;
+};
+
+export const useOnboardingActions = (): OnboardingActionsContextType => {
+  const ctx = useContext(OnboardingActionsContext);
+  if (!ctx) throw new Error("useOnboardingActions must be used within OnboardingProviderV2");
+  return ctx;
+};
+
+// Backward-compatible composed hook — subscribes to all 3 contexts.
+// For optimal performance in heavy steps, use the focused hooks above directly.
 export const useOnboardingV2 = (): OnboardingV2ContextType => {
-  const context = useContext(OnboardingV2Context);
-
-  if (!context) {
-    throw new Error("useOnboardingV2 must be used within OnboardingProviderV2");
-  }
-
-  return context;
+  const nav = useOnboardingNav();
+  const data = useOnboardingData();
+  const actions = useOnboardingActions();
+  return { ...nav, ...data, ...actions };
 };

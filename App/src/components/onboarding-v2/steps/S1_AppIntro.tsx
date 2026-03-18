@@ -1,6 +1,7 @@
+import { memo } from "react";
 import { motion } from "motion/react";
 import { ChevronLeft } from "lucide-react";
-import { useOnboardingV2 } from "../OnboardingProviderV2";
+import { useOnboardingNav } from "../OnboardingProviderV2";
 import { Button } from "@/components/ui/button";
 
 const BG = `${import.meta.env.BASE_URL}backgrounds/arte3.webp`;
@@ -15,8 +16,8 @@ const PARAGRAPHS = [
   "Não é motivação. É estrutura.",
 ];
 
-export const S1AppIntro = () => {
-  const { nextStep, prevStep } = useOnboardingV2();
+export const S1AppIntro = memo(function S1AppIntro() {
+  const { nextStep, prevStep } = useOnboardingNav();
 
   return (
     <div className="h-[100dvh] relative bg-black overflow-hidden flex flex-col">
@@ -137,4 +138,4 @@ export const S1AppIntro = () => {
       </div>
     </div>
   );
-};
+});

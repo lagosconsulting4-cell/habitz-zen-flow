@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import type { ReactNode } from "react";
 import { motion } from "motion/react";
 import { Bell, Timer, Star, Clock, AlarmClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useOnboardingV2 } from "../OnboardingProviderV2";
+import { useOnboardingNav } from "../OnboardingProviderV2";
 import { useEventTracker } from "@/hooks/useEventTracker";
 import { supabase } from "@/integrations/supabase/client";
 import { IllustrationBell } from "../OnboardingIllustrations";
@@ -33,8 +33,8 @@ const OFFSET_OPTIONS: OffsetOption[] = [
 // COMPONENT
 // ============================================================================
 
-export const S14bReminderOffset = () => {
-  const { nextStep } = useOnboardingV2();
+export const S14bReminderOffset = memo(function S14bReminderOffset() {
+  const { nextStep } = useOnboardingNav();
   const { trackEvent } = useEventTracker();
   const [selected, setSelected] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -150,4 +150,4 @@ export const S14bReminderOffset = () => {
       </motion.div>
     </div>
   );
-};
+});

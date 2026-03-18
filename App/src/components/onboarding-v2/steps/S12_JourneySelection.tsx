@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,7 +53,7 @@ function SkeletonCards() {
 // COMPONENT
 // ============================================================================
 
-export const S12JourneySelection = () => {
+export const S12JourneySelection = memo(function S12JourneySelection() {
   const {
     journeyScores,
     journeyDominantSignals,
@@ -306,4 +306,4 @@ export const S12JourneySelection = () => {
       </div>{/* end centered wrapper */}
     </div>
   );
-};
+});

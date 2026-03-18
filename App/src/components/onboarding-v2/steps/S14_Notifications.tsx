@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { motion } from "motion/react";
 import { Bell, Smartphone } from "lucide-react";
 import { IllustrationCheckmark } from "../OnboardingIllustrations";
@@ -12,7 +12,7 @@ import { usePushNotifications } from "@/hooks/usePushNotifications";
 // COMPONENT
 // ============================================================================
 
-export const S14Notifications = () => {
+export const S14Notifications = memo(function S14Notifications() {
   const { nextStep, prevStep, setNotificationsGranted, isPWAInstalled } = useOnboardingV2();
   const { trackEvent } = useEventTracker();
   const { isInstalled } = usePWA();
@@ -203,4 +203,4 @@ export const S14Notifications = () => {
       </motion.div>
     </div>
   );
-};
+});

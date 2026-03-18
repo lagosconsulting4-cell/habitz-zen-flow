@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, memo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Brain } from "lucide-react";
 import { useOnboardingV2 } from "../OnboardingProviderV2";
@@ -79,7 +79,7 @@ const deriveBadges = (
 // COMPONENT
 // ============================================================================
 
-export const S8LoadingRoutine = () => {
+export const S8LoadingRoutine = memo(function S8LoadingRoutine() {
   const {
     quizData,
     wakeSleepTime,
@@ -300,4 +300,4 @@ export const S8LoadingRoutine = () => {
       </AnimatePresence>
     </div>
   );
-};
+});
