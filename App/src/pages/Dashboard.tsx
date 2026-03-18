@@ -815,29 +815,6 @@ const Dashboard = () => {
         ) : (
           /* Grid de hábitos - 2 colunas com section headers */
           <div className="space-y-4">
-            {/* Perfect Day Banner */}
-            <AnimatePresence>
-              {isPerfectDay && (
-                <motion.div
-                  role="status"
-                  aria-live="polite"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="flex flex-col items-center gap-3 py-6 px-4 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 text-center"
-                >
-                  <div className="w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <Sparkles className="w-7 h-7 text-green-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-foreground">Dia Perfeito!</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Todos os {todayHabits.length} habitos concluidos. Voce arrasou!
-                    </p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
             {/* Per-journey habit sections */}
             {activeStates.map((state) => {
               const journey = state.journeys as Journey;
@@ -967,6 +944,33 @@ const Dashboard = () => {
                 </div>
               </>
             )}
+
+            {/* Perfect Day Banner — at bottom to avoid layout shift when it appears */}
+            <AnimatePresence>
+              {isPerfectDay && (
+                <motion.div
+                  role="status"
+                  aria-live="polite"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.35, ease: "easeInOut" }}
+                  style={{ overflow: "hidden" }}
+                >
+                  <div className="flex flex-col items-center gap-3 py-6 px-4 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 text-center">
+                    <div className="w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <Sparkles className="w-7 h-7 text-green-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-foreground">Dia Perfeito!</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Todos os {todayHabits.length} habitos concluidos. Voce arrasou!
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
 
