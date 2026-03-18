@@ -223,6 +223,7 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
     toggleHabit,
     habitExperience,
     weekendDiff,
+    hasFoquinhaData,
   } = useOnboardingV2();
 
   const showTabs = weekendDiff !== "same";
@@ -351,10 +352,12 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
           className="text-center mb-3"
         >
           <h2 className="text-2xl font-bold text-foreground">
-            Essa é a sua rotina.
+            {hasFoquinhaData ? "Sua rotina personalizada" : "Essa é a sua rotina."}
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            {generatedHabits.length} hábitos selecionados para você
+            {hasFoquinhaData
+              ? `${generatedHabits.filter((h: any) => h._isExisting).length} da Foquinha + ${generatedHabits.filter((h: any) => !h._isExisting).length} sugestões novas`
+              : `${generatedHabits.length} hábitos selecionados para você`}
           </p>
         </motion.div>
       </div>
@@ -413,20 +416,93 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
           >
-            <div className={cn("w-full pb-2", ds.groupGap)}>
-              {(["morning", "afternoon", "evening"] as Period[]).map((period) => (
-                <PeriodGroup
-                  key={`${activeTab}-${period}`}
-                  period={period}
-                  habits={groupedHabits[period]}
-                  selectedIds={selectedHabitIds}
-                  isAtLimit={isAtLimit}
-                  onToggle={toggleHabit}
-                  showWeekendTime={activeTab === "weekend"}
-                  ds={ds}
-                />
-              ))}
-            </div>
+            {hasFoquinhaData ? (
+              <div className="w-full pb-2 space-y-4">
+                {/* Section: Foquinha habits */}
+                {(() => {
+                  const foquinhaList = filteredHabits.filter((h: any) => h._isExisting);
+                  if (foquinhaList.length === 0) return null;
+                  const fGroups: Record<Period, RecommendedHabitV2[]> = { morning: [], afternoon: [], evening: [] };
+                  for (const h of foquinhaList) {
+                    const p = (h.period as Period) || "morning";
+                    if (fGroups[p]) fGroups[p].push(h);
+                  }
+                  return (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2 px-1">
+                        <span className="text-sm font-semibold text-primary">Da Foquinha</span>
+                        <span className="text-xs text-muted-foreground">(já ativos)</span>
+                      </div>
+                      <div className={cn("w-full", ds.groupGap)}>
+                        {(["morning", "afternoon", "evening"] as Period[]).map((period) =>
+                          fGroups[period].length > 0 ? (
+                            <PeriodGroup
+                              key={`foquinha-${activeTab}-${period}`}
+                              period={period}
+                              habits={fGroups[period]}
+                              selectedIds={selectedHabitIds}
+                              isAtLimit={isAtLimit}
+                              onToggle={toggleHabit}
+                              showWeekendTime={activeTab === "weekend"}
+                              ds={ds}
+                            />
+                          ) : null
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+                {/* Section: New suggestions */}
+                {(() => {
+                  const newList = filteredHabits.filter((h: any) => !h._isExisting);
+                  if (newList.length === 0) return null;
+                  const nGroups: Record<Period, RecommendedHabitV2[]> = { morning: [], afternoon: [], evening: [] };
+                  for (const h of newList) {
+                    const p = (h.period as Period) || "morning";
+                    if (nGroups[p]) nGroups[p].push(h);
+                  }
+                  return (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2 px-1 mt-3">
+                        <span className="text-sm font-semibold text-foreground">Sugestões novas</span>
+                        <span className="text-xs text-muted-foreground">(toque para adicionar)</span>
+                      </div>
+                      <div className={cn("w-full", ds.groupGap)}>
+                        {(["morning", "afternoon", "evening"] as Period[]).map((period) =>
+                          nGroups[period].length > 0 ? (
+                            <PeriodGroup
+                              key={`new-${activeTab}-${period}`}
+                              period={period}
+                              habits={nGroups[period]}
+                              selectedIds={selectedHabitIds}
+                              isAtLimit={isAtLimit}
+                              onToggle={toggleHabit}
+                              showWeekendTime={activeTab === "weekend"}
+                              ds={ds}
+                            />
+                          ) : null
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            ) : (
+              <div className={cn("w-full pb-2", ds.groupGap)}>
+                {(["morning", "afternoon", "evening"] as Period[]).map((period) => (
+                  <PeriodGroup
+                    key={`${activeTab}-${period}`}
+                    period={period}
+                    habits={groupedHabits[period]}
+                    selectedIds={selectedHabitIds}
+                    isAtLimit={isAtLimit}
+                    onToggle={toggleHabit}
+                    showWeekendTime={activeTab === "weekend"}
+                    ds={ds}
+                  />
+                ))}
+              </div>
+            )}
           </DndContext>
         </motion.div>
       </div>

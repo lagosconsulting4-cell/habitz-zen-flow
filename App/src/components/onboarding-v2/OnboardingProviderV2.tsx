@@ -68,6 +68,10 @@ export interface OnboardingDataContextType {
   journeyDominantSignals: Record<string, string>;
   selectedJourneyIds: Set<string>;
   journeyBadges: string[];
+  // Foquinha bridge (existing data from WhatsApp onboarding)
+  existingHabits: Array<{ id: string; name: string; emoji: string | null; category: string | null; period: string | null; reminder_time: string | null; frequency_type: string | null; days_of_week: number[] | null; source: string | null }>;
+  hasFoquinhaData: boolean;
+  existingNotifPrefs: Record<string, unknown> | null;
   // Notifications + tour
   notificationsGranted: boolean;
   tourStep: number;
@@ -169,6 +173,11 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
   // Tour
   const [tourStep, setTourStep] = useState(0);
 
+  // Foquinha bridge — existing data from prior onboarding
+  const [existingHabits, setExistingHabits] = useState<OnboardingDataContextType["existingHabits"]>([]);
+  const [hasFoquinhaData, setHasFoquinhaData] = useState(false);
+  const [existingNotifPrefs, setExistingNotifPrefs] = useState<Record<string, unknown> | null>(null);
+
   // Submission
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -181,6 +190,28 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
       setConfirmedObjective(quizData.objective);
     }
   }, [quizData?.objective, confirmedObjective]);
+
+  // Fetch existing habits & notification prefs (Foquinha bridge)
+  useEffect(() => {
+    if (!user?.id) return;
+    (async () => {
+      try {
+        const [habitsRes, progressRes] = await Promise.all([
+          supabase.from("habits").select("id, name, emoji, category, period, reminder_time, frequency_type, days_of_week, source").eq("user_id", user.id).eq("is_active", true),
+          supabase.from("user_progress").select("notification_preferences").eq("user_id", user.id).maybeSingle(),
+        ]);
+        if (habitsRes.data && habitsRes.data.length > 0) {
+          setExistingHabits(habitsRes.data);
+          setHasFoquinhaData(true);
+        }
+        if (progressRes.data?.notification_preferences) {
+          setExistingNotifPrefs(progressRes.data.notification_preferences as Record<string, unknown>);
+        }
+      } catch (err) {
+        console.warn("Foquinha bridge fetch failed:", err);
+      }
+    })();
+  }, [user?.id]);
 
   // Calculate journey scores when all Phase 1 data is collected
   useEffect(() => {
@@ -346,8 +377,8 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
     };
 
     try {
-      // --- (a) Create habits ---
-      const selectedHabits = generatedHabits.filter(h => selectedHabitIds.has(h.id));
+      // --- (a) Create habits (skip existing Foquinha habits) ---
+      const selectedHabits = generatedHabits.filter(h => selectedHabitIds.has(h.id) && !(h as any)._isExisting);
 
       // Dedup check — same as v1:402-410
       const { data: existingHabits } = await supabase
@@ -527,6 +558,9 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
     journeyDominantSignals,
     selectedJourneyIds,
     journeyBadges,
+    existingHabits,
+    hasFoquinhaData,
+    existingNotifPrefs,
     notificationsGranted,
     tourStep,
     setWakeSleepTime,
@@ -552,6 +586,7 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
     confirmedObjective, collectedName, isPWAInstalled,
     generatedHabits, selectedHabitIds, isGeneratingRoutine,
     journeyScores, journeyDominantSignals, selectedJourneyIds, journeyBadges,
+    existingHabits, hasFoquinhaData, existingNotifPrefs,
     notificationsGranted, tourStep,
     toggleLifeArea, toggleHabit, toggleJourney,
   ]);

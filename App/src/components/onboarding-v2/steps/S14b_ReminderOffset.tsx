@@ -1,9 +1,9 @@
-import { useState, memo } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import type { ReactNode } from "react";
 import { motion } from "motion/react";
 import { Bell, Timer, Star, Clock, AlarmClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useOnboardingNav } from "../OnboardingProviderV2";
+import { useOnboardingNav, useOnboardingData } from "../OnboardingProviderV2";
 import { useEventTracker } from "@/hooks/useEventTracker";
 import { supabase } from "@/integrations/supabase/client";
 import { IllustrationBell } from "../OnboardingIllustrations";
@@ -35,9 +35,21 @@ const OFFSET_OPTIONS: OffsetOption[] = [
 
 export const S14bReminderOffset = memo(function S14bReminderOffset() {
   const { nextStep } = useOnboardingNav();
+  const { existingNotifPrefs } = useOnboardingData();
   const { trackEvent } = useEventTracker();
   const [selected, setSelected] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const hasAutoSkipped = useRef(false);
+
+  // Auto-skip if reminder offset was already configured (e.g. via Foquinha)
+  useEffect(() => {
+    if (hasAutoSkipped.current) return;
+    if (existingNotifPrefs?.reminder_offset_minutes !== undefined) {
+      hasAutoSkipped.current = true;
+      trackEvent("onboarding_v2_reminder_offset_skipped", { reason: "already_set", offset: existingNotifPrefs.reminder_offset_minutes }, "onboarding_v2");
+      nextStep();
+    }
+  }, [existingNotifPrefs, nextStep, trackEvent]);
 
   const handleConfirm = async () => {
     setIsSaving(true);

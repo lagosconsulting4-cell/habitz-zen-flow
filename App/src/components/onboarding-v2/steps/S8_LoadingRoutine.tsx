@@ -28,7 +28,7 @@ const BASE_MESSAGES = [
   "Encontrando os melhores momentos do dia...",
   "Separando semana do fim de semana...",
   null, // Dynamic — filled at render time
-  "Sua rotina está pronta.",
+  null, // Dynamic — final message (Foquinha-aware)
 ];
 
 const MESSAGE_DURATION = 800;
@@ -93,6 +93,8 @@ export const S8LoadingRoutine = memo(function S8LoadingRoutine() {
     setSelectedHabitIds,
     setIsGeneratingRoutine,
     nextStep,
+    existingHabits,
+    hasFoquinhaData,
   } = useOnboardingV2();
   const { trackEvent } = useEventTracker();
 
@@ -104,9 +106,14 @@ export const S8LoadingRoutine = memo(function S8LoadingRoutine() {
 
   // Build messages with dynamic 4th entry
   const objectiveLabel = OBJECTIVE_LABELS[confirmedObjective || ""] || "seu objetivo";
-  const messages = BASE_MESSAGES.map((m) =>
-    m === null ? `Ajustando para o que você quer...` : m
-  );
+  const messages = BASE_MESSAGES.map((m, i) => {
+    if (m !== null) return m;
+    if (i === 3) return "Ajustando para o que você quer...";
+    // i === 4 — final message
+    return hasFoquinhaData
+      ? "Encontramos seus hábitos! Gerando sugestões complementares..."
+      : "Sua rotina está pronta.";
+  });
 
   const badges = deriveBadges(wakeSleepTime, lifeAreas, habitExperience);
 
@@ -172,11 +179,48 @@ export const S8LoadingRoutine = memo(function S8LoadingRoutine() {
 
       if (cancelled) return;
 
-      setGeneratedHabits(habits);
+      // Merge Foquinha existing habits with newly generated recommendations
+      if (hasFoquinhaData && existingHabits.length > 0) {
+        const foquinhaHabits = existingHabits.map(h => ({
+          id: `existing-${h.id}`,
+          name: h.name,
+          category: h.category || "productivity",
+          period: (h.period || "morning") as "morning" | "afternoon" | "evening",
+          icon: h.emoji || "",
+          icon_key: "",
+          color: "#6366f1",
+          suggested_time: h.reminder_time?.slice(0, 5) || null,
+          weekend_time: null as string | null,
+          weekend_duration: null as number | null,
+          duration: null as number | null,
+          goal_value: 1,
+          goal_unit: "times",
+          frequency_type: (h.frequency_type || "daily") as string,
+          frequency_days: h.days_of_week || [0, 1, 2, 3, 4, 5, 6],
+          recommendation_score: 100,
+          template_id: null as string | null,
+          priority: 1,
+          _isExisting: true,
+          _existingId: h.id,
+        }));
 
-      const limit = SELECTION_LIMITS[habitExperience ?? "tried"] || 6;
-      const autoSelected = new Set(habits.slice(0, limit).map((h) => h.id));
-      setSelectedHabitIds(autoSelected);
+        // Dedup: remove suggestions that match existing habit names
+        const existingNames = new Set(existingHabits.map(h => h.name.toLowerCase().trim()));
+        const filteredNew = habits.filter(h => !existingNames.has(h.name.toLowerCase().trim()));
+
+        const merged = [...foquinhaHabits, ...filteredNew];
+        setGeneratedHabits(merged as typeof habits);
+
+        // Auto-select: all Foquinha habits only (new suggestions start deselected)
+        const autoSelected = new Set(foquinhaHabits.map(h => h.id));
+        setSelectedHabitIds(autoSelected);
+      } else {
+        setGeneratedHabits(habits);
+
+        const limit = SELECTION_LIMITS[habitExperience ?? "tried"] || 6;
+        const autoSelected = new Set(habits.slice(0, limit).map((h) => h.id));
+        setSelectedHabitIds(autoSelected);
+      }
 
       trackEvent("onboarding_v2_routine_generated", {
         habits_count: habits.length,
