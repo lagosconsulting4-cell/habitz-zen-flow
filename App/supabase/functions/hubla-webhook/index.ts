@@ -301,6 +301,7 @@ serve(async (req) => {
     isNewUser: boolean;
     productName?: string;
     amount?: number;
+    customerPhone?: string;
   }, targetUrl?: string) => {
     try {
       const n8nPayload = {
@@ -310,6 +311,7 @@ serve(async (req) => {
           email: data.email,
           full_name: data.customerName,
           first_name: data.customerName.split(" ")[0],
+          phone: data.customerPhone ?? null,
         },
         user_id: data.userId,
         is_new_user: data.isNewUser,
@@ -570,7 +572,7 @@ serve(async (req) => {
         // Notify N8N — we need email for this, fetch from profile
         const { data: profile } = await supabaseAdmin
           .from("profiles")
-          .select("email, display_name")
+          .select("email, display_name, phone")
           .eq("user_id", purchase.user_id)
           .maybeSingle();
 
@@ -582,6 +584,7 @@ serve(async (req) => {
             userId: purchase.user_id,
             isNewUser: false,
             productName: purchase.product_names ?? undefined,
+            customerPhone: profile.phone ?? undefined,
           });
         }
 
@@ -850,6 +853,7 @@ serve(async (req) => {
           userId,
           isNewUser,
           productName: productNames,
+          customerPhone: userData.phone ?? undefined,
         });
 
         notifyTelegram({
@@ -909,7 +913,7 @@ serve(async (req) => {
         // Notify N8N for churn-winback flow (parity with Stripe)
         const { data: deactivatedProfile } = await supabaseAdmin
           .from("profiles")
-          .select("email, display_name")
+          .select("email, display_name, phone")
           .eq("user_id", purchase.user_id)
           .maybeSingle();
 
@@ -921,6 +925,7 @@ serve(async (req) => {
             userId: purchase.user_id,
             isNewUser: false,
             productName: "Bora (Hubla/Pix)",
+            customerPhone: deactivatedProfile.phone ?? undefined,
           }, n8nSubscriptionCanceledUrl);
         }
 
@@ -980,7 +985,7 @@ serve(async (req) => {
         // Notify N8N for churn-winback flow (parity with Stripe)
         const { data: refundedProfile } = await supabaseAdmin
           .from("profiles")
-          .select("email, display_name")
+          .select("email, display_name, phone")
           .eq("user_id", purchase.user_id)
           .maybeSingle();
 
@@ -992,6 +997,7 @@ serve(async (req) => {
             userId: purchase.user_id,
             isNewUser: false,
             productName: "Bora (Hubla/Pix)",
+            customerPhone: refundedProfile.phone ?? undefined,
           }, n8nSubscriptionCanceledUrl);
         }
 
@@ -1120,6 +1126,7 @@ serve(async (req) => {
           userId,
           isNewUser,
           productName: groupName,
+          customerPhone: phone ?? undefined,
         });
 
         notifyTelegram({

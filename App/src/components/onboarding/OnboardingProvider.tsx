@@ -472,7 +472,6 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
           .single();
 
         const currentPrefs = (upData?.notification_preferences as Record<string, unknown>) || {
-          daily_limit: 3,
           extra_for_streaks: 2,
           delayed_reminder_hours: 2,
           end_of_day_enabled: true,

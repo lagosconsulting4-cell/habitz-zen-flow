@@ -434,6 +434,24 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
         console.error("Failed to update profile:", profileError);
       }
 
+      // --- (d2) Ensure whatsapp_conversations exists (bridge for Foquinha scheduler) ---
+      try {
+        const { data: profileForPhone } = await supabase
+          .from("profiles")
+          .select("phone")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (profileForPhone?.phone) {
+          await supabase.from("whatsapp_conversations").upsert(
+            { phone: profileForPhone.phone, user_id: user.id, messages: [] },
+            { onConflict: "phone" }
+          );
+        }
+      } catch (wcErr) {
+        // Non-fatal — Foquinha will create conversation on first WhatsApp message
+        console.warn("whatsapp_conversations upsert skipped:", wcErr);
+      }
+
       // --- (e) Update quiz_responses ---
       if (quizResponseId) {
         await supabase
