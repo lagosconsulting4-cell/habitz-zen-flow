@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Play, Pause, RotateCcw, Check, SkipForward } from "lucide-react";
 import confetti from "canvas-confetti";
@@ -101,7 +102,7 @@ export const TimerModal = ({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
@@ -315,7 +316,8 @@ export const TimerModal = ({
           )}
         </AnimatePresence>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 
