@@ -52,6 +52,7 @@ export interface Habit {
   times_per_day?: number | null;
   source?: string | null;
   due_date?: string | null;
+  type?: "habit" | "reminder" | null;
 }
 
 export interface HabitCompletion {
@@ -114,7 +115,7 @@ export const useHabits = () => {
         // Select only necessary columns to reduce payload
         const { data, error } = await supabase
           .from("habits")
-          .select("id, name, emoji, category, period, days_of_week, streak, is_active, user_id, created_at, updated_at, reminder_time, times_per_day, source, icon_key, goal_value, unit, frequency_type, due_date")
+          .select("id, name, emoji, category, period, days_of_week, streak, is_active, user_id, created_at, updated_at, reminder_time, times_per_day, source, icon_key, goal_value, unit, frequency_type, due_date, type")
           .eq("user_id", user.id)
           .order("created_at", { ascending: true });
 

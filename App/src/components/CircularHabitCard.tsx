@@ -21,6 +21,7 @@ export interface Habit {
   category?: string;
   goal_value?: number | null;
   unit?: string | null;
+  type?: "habit" | "reminder" | null;
 }
 
 interface CircularHabitCardProps {

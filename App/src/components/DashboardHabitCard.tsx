@@ -20,6 +20,7 @@ export interface Habit {
   source?: string | null;
   frequency_type?: string | null;
   reminder_time?: string | null;
+  type?: "habit" | "reminder" | null;
 }
 
 interface DashboardHabitCardProps {

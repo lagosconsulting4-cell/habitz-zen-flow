@@ -715,6 +715,7 @@ export type Database = {
           times_per_day: number
           times_per_month: number | null
           times_per_week: number | null
+          type: string | null
           unit: Database["public"]["Enums"]["habit_unit"] | null
           updated_at: string
           user_id: string
@@ -753,6 +754,7 @@ export type Database = {
           times_per_day?: number
           times_per_month?: number | null
           times_per_week?: number | null
+          type?: string | null
           unit?: Database["public"]["Enums"]["habit_unit"] | null
           updated_at?: string
           user_id: string
@@ -791,6 +793,7 @@ export type Database = {
           times_per_day?: number
           times_per_month?: number | null
           times_per_week?: number | null
+          type?: string | null
           unit?: Database["public"]["Enums"]["habit_unit"] | null
           updated_at?: string
           user_id?: string
