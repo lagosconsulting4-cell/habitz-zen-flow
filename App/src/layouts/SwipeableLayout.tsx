@@ -54,6 +54,11 @@ export const SwipeContextProvider = ({ children }: SwipeContextProviderProps) =>
   const location = useLocation();
   const navigate = useNavigate();
   const isNavigatingRef = useRef(false);
+  const pathnameRef = useRef(location.pathname);
+
+  useEffect(() => {
+    pathnameRef.current = location.pathname;
+  }, [location.pathname]);
 
   // Check if current route is swipeable
   const currentRouteConfig = SWIPEABLE_ROUTES.find(r => r.path === location.pathname);
@@ -69,6 +74,8 @@ export const SwipeContextProvider = ({ children }: SwipeContextProviderProps) =>
   const [currentIndex, setCurrentIndex] = useState(currentRouteConfig?.index ?? 0);
 
   // Handle carousel select event - update URL when user swipes
+  // Uses pathnameRef instead of location.pathname to keep the callback stable
+  // and prevent event handler re-registration during multi-page swipes
   const onSelect = useCallback(() => {
     if (!emblaApi || isNavigatingRef.current) return;
 
@@ -77,10 +84,10 @@ export const SwipeContextProvider = ({ children }: SwipeContextProviderProps) =>
 
     // Update URL to match carousel position
     const route = SWIPEABLE_ROUTES.find(r => r.index === index);
-    if (route && route.path !== location.pathname) {
+    if (route && route.path !== pathnameRef.current) {
       navigate(route.path, { replace: true });
     }
-  }, [emblaApi, navigate, location.pathname]);
+  }, [emblaApi, navigate]);
 
   // Subscribe to embla events
   useEffect(() => {

@@ -163,7 +163,7 @@ const MyHabits = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="container mx-auto px-4 pb-6 max-w-4xl"
+        className="px-4 pb-navbar max-w-xl mx-auto w-full"
         style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
         {/* Header */}

@@ -11,7 +11,7 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   path: string;
-  index?: number; // Optional - Journeys doesn't have an index (not swipeable)
+  index?: number; // Swipe index for carousel-based navigation
 }
 
 // Navigation items - all are swipeable
