@@ -23,7 +23,7 @@ const navItems: NavItem[] = [
   { id: "profile",  label: "Perfil",   icon: User,       path: "/profile",   index: 4 },
 ];
 
-const transition = { type: "spring", bounce: 0.2, duration: 0.35 } as const;
+const transition = { type: "spring", stiffness: 400, damping: 30 } as const;
 
 const NavigationBar = memo(() => {
   const location = useLocation();

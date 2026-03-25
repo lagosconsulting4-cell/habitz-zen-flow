@@ -69,6 +69,9 @@ export const SwipeContextProvider = ({ children }: SwipeContextProviderProps) =>
     skipSnaps: false,
     startIndex: currentRouteConfig?.index ?? 0,
     watchDrag: isSwipeable,
+    containScroll: 'keepSnaps',
+    duration: 25,
+    dragThreshold: 10,
   });
 
   const [currentIndex, setCurrentIndex] = useState(currentRouteConfig?.index ?? 0);
