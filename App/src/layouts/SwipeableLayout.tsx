@@ -70,7 +70,7 @@ export const SwipeContextProvider = ({ children }: SwipeContextProviderProps) =>
     startIndex: currentRouteConfig?.index ?? 0,
     watchDrag: isSwipeable,
     containScroll: 'keepSnaps',
-    duration: 25,
+    duration: 30,
     dragThreshold: 10,
   });
 
@@ -154,35 +154,35 @@ export const SwipeableCarousel = () => {
     <div className="overflow-hidden w-full h-dvh" ref={emblaRef}>
       <div className="flex h-full">
         {/* Slide 0: Dashboard */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full will-change-transform")}>
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto overflow-x-hidden h-full will-change-transform")}>
           <Suspense fallback={<PageLoader />}>
             <Dashboard />
           </Suspense>
         </div>
 
         {/* Slide 1: Hábitos */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full will-change-transform")}>
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto overflow-x-hidden h-full will-change-transform")}>
           <Suspense fallback={<PageLoader />}>
             <MyHabits />
           </Suspense>
         </div>
 
         {/* Slide 2: Jornadas */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full will-change-transform")}>
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto overflow-x-hidden h-full will-change-transform")}>
           <Suspense fallback={<PageLoader />}>
             <JourneyHub />
           </Suspense>
         </div>
 
         {/* Slide 3: Progress/Streaks */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full will-change-transform")}>
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto overflow-x-hidden h-full will-change-transform")}>
           <Suspense fallback={<PageLoader />}>
             <Progress />
           </Suspense>
         </div>
 
         {/* Slide 4: Profile */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto h-full will-change-transform")}>
+        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto overflow-x-hidden h-full will-change-transform")}>
           <Suspense fallback={<PageLoader />}>
             <Profile />
           </Suspense>

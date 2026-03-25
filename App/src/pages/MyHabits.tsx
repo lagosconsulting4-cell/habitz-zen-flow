@@ -158,7 +158,7 @@ const MyHabits = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-navbar transition-colors duration-300">
+    <div className="bg-background">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -460,7 +460,7 @@ const MyHabits = () => {
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, transition: { duration: 0.15 } }}
-                    transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.16) }}
+                    transition={{ duration: 0.2 }}
                   >
                     <Card
                       className={cn(
