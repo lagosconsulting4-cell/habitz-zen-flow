@@ -70,7 +70,7 @@ export const SwipeContextProvider = ({ children }: SwipeContextProviderProps) =>
     startIndex: currentRouteConfig?.index ?? 0,
     watchDrag: isSwipeable,
     containScroll: 'keepSnaps',
-    duration: 30,
+    duration: 40,
     dragThreshold: 10,
   });
 
