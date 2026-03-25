@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -209,6 +209,13 @@ export const FreezeShopModal = ({ isOpen, onClose, userId }: FreezeShopModalProp
             </div>
           </div>
         </div>
+
+        {/* Close Button */}
+        <DialogClose asChild>
+          <Button variant="ghost" className="w-full text-muted-foreground">
+            Fechar
+          </Button>
+        </DialogClose>
       </DialogContent>
     </Dialog>
   );
