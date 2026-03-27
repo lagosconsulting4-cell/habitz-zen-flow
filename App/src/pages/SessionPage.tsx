@@ -3,7 +3,7 @@
  * Routes: /session (standalone daily session) or /journeys/:slug/session (journey context)
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import {
@@ -262,36 +262,56 @@ function parseSessionContent(content: string): {
 function getPeriodInfo() {
   const now = new Date();
   const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+  // Morning starts at 06:00, not midnight
   const period: "morning" | "afternoon" | "evening" =
-    h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
-  const endH = { morning: 12, afternoon: 18, evening: 24 }[period];
+    h < 6 ? "evening" : h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
+  const startH = h < 6 ? 0 : h < 12 ? 6 : h < 18 ? 12 : 18;
+  const endH = h < 6 ? 6 : h < 12 ? 12 : h < 18 ? 18 : 24;
   return {
     period,
     remainingSeconds: Math.max(0, endH * 3600 - (h * 3600 + m * 60 + s)),
+    startH,
+    endH,
   };
+}
+
+function getPeriodElapsedPct(startH: number, endH: number): number {
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+  const total = (endH - startH) * 3600;
+  const elapsed = Math.max(0, h * 3600 + m * 60 + s - startH * 3600);
+  return Math.min(100, (elapsed / total) * 100);
 }
 
 function SessionTimerRing({
   progress,
-  size = 260,
+  size = 240,
+  isDark,
   children,
 }: {
   progress: number;
   size?: number;
+  isDark: boolean;
   children: React.ReactNode;
 }) {
   const strokeWidth = 2;
   const radius = (size - strokeWidth * 2) / 2;
   const circumference = 2 * Math.PI * radius;
-  // progress 0→100 means elapsed, offset grows → ring shrinks (showing remaining)
-  const offset = (progress / 100) * circumference;
+  // progress = % of period elapsed → ring fills clockwise as time passes
+  // offset = circumference - (progress/100 * circumference) means ring shrinks as progress grows
+  // We want: progress=0 → ring empty, progress=100 → ring full
+  // But visually we want: at start of period ring is almost empty (little elapsed)
+  // and grows as period progresses, gap = remaining
+  const offset = circumference - (progress / 100) * circumference;
+  const ringColor = isDark ? "#a3e635" : "#65a30d";
+  const trackColor = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)";
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="absolute inset-0 -rotate-90">
         <defs>
-          <filter id="session-ring-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+          <filter id="session-ring-glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation={isDark ? 6 : 3} result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -299,26 +319,16 @@ function SessionTimerRing({
           </filter>
         </defs>
         {/* Track */}
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" strokeWidth={strokeWidth} stroke={trackColor} />
+        {/* Progress arc */}
         <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          strokeWidth={strokeWidth}
-          stroke="rgba(255,255,255,0.07)"
-        />
-        {/* Progress ring */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          strokeWidth={strokeWidth}
-          stroke="#a3e635"
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none" strokeWidth={strokeWidth}
+          stroke={ringColor}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          filter="url(#session-ring-glow)"
+          filter={isDark ? "url(#session-ring-glow)" : undefined}
           style={{ transition: "stroke-dashoffset 1s linear" }}
         />
       </svg>
@@ -331,12 +341,20 @@ function SessionTimerRing({
 
 const DailySessionView = () => {
   const navigate = useNavigate();
-  const { period, remainingSeconds } = useMemo(() => getPeriodInfo(), []);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
-  const { formattedRemaining, progress } = useTimer({
-    targetSeconds: remainingSeconds,
-    autoStart: true,
-  });
+  const { period, remainingSeconds, startH, endH } = useMemo(() => getPeriodInfo(), []);
+
+  // Ring progress: reflects how much of the PERIOD has elapsed (updates every second)
+  const [ringProgress, setRingProgress] = useState(() => getPeriodElapsedPct(startH, endH));
+  useEffect(() => {
+    const id = setInterval(() => setRingProgress(getPeriodElapsedPct(startH, endH)), 1000);
+    return () => clearInterval(id);
+  }, [startH, endH]);
+
+  // Timer: used only for the countdown text display
+  const { formattedRemaining } = useTimer({ targetSeconds: remainingSeconds, autoStart: true });
 
   const { habits, toggleHabit, completions } = useHabits();
 
@@ -355,7 +373,7 @@ const DailySessionView = () => {
     );
   }, [habits, period]);
 
-  // Completed first, then pending (preserving original order within each group)
+  // Completed first, then pending in original order
   const sortedHabits = useMemo(() => {
     const done = periodHabits.filter((h) => completedIds.has(h.id));
     const pending = periodHabits.filter((h) => !completedIds.has(h.id));
@@ -373,44 +391,50 @@ const DailySessionView = () => {
     return "later" as const;
   };
 
-  const formatTime = (t: string | null | undefined) => {
-    if (!t) return null;
-    return t.slice(0, 5); // "06:30:00" → "06:30"
-  };
+  const formatTime = (t: string | null | undefined) => t ? t.slice(0, 5) : null;
 
   const statusLabel = (status: ReturnType<typeof getStatus>, habit: Habit) => {
-    if (status === "done") {
-      if (habit.goal_value) return `${habit.goal_value} ${habit.unit ?? ""}`.trim();
-      return "Concluído";
-    }
+    if (status === "done") return habit.goal_value ? `${habit.goal_value} ${habit.unit ?? ""}`.trim() : "Concluído";
     if (status === "ongoing") return "Ongoing";
     if (status === "upnext") return "Up Next";
     return "Final Step";
   };
 
+  // Theme colors
+  const bg = isDark ? "#000" : "#F5F5F5";
+  const cardBg = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)";
+  const cardBorder = isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.08)";
+  const textPrimary = isDark ? "#ffffff" : "#111111";
+  const textDimmed = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)";
+  const textMuted = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)";
+  const ringAccent = isDark ? "#a3e635" : "#65a30d";
+  const closeButtonBg = isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.07)";
+  const closeIconColor = isDark ? "#ffffff" : "#111111";
+
   return (
     <div
-      className="min-h-screen flex flex-col bg-black relative"
-      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+      className="min-h-screen flex flex-col relative"
+      style={{ backgroundColor: bg, paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
       {/* Back button */}
       <button
         onClick={() => navigate(-1)}
-        className="absolute left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 active:bg-white/20 transition-colors"
-        style={{ top: "calc(1rem + env(safe-area-inset-top, 0px))" }}
+        className="absolute left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full transition-colors active:scale-95"
+        style={{ top: "calc(1rem + env(safe-area-inset-top, 0px))", backgroundColor: closeButtonBg }}
       >
-        <X className="h-5 w-5 text-white" />
+        <X className="h-5 w-5" style={{ color: closeIconColor }} />
       </button>
 
-      {/* Timer */}
-      <div className="flex items-center justify-center pt-16 pb-6">
-        <SessionTimerRing progress={progress} size={260}>
+      {/* Timer ring */}
+      <div className="flex items-center justify-center pt-16 pb-8">
+        <SessionTimerRing progress={ringProgress} size={240} isDark={isDark}>
           <div className="text-center select-none">
-            <p className="text-6xl font-bold text-white tracking-tight tabular-nums">
+            <p className="text-6xl font-bold tracking-tight tabular-nums" style={{ color: textPrimary }}>
               {formattedRemaining}
             </p>
-            <p className="text-[11px] tracking-[0.22em] uppercase mt-1" style={{ color: "rgba(163,230,53,0.65)" }}>
-              • Remaining
+            <p className="text-[11px] tracking-[0.22em] uppercase mt-1.5 flex items-center justify-center gap-1">
+              <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ backgroundColor: ringAccent }} />
+              <span style={{ color: isDark ? "rgba(163,230,53,0.6)" : "#65a30d" }}>Remaining</span>
             </p>
           </div>
         </SessionTimerRing>
@@ -419,7 +443,7 @@ const DailySessionView = () => {
       {/* Habits list */}
       <div className="flex-1 px-4 space-y-2 overflow-y-auto pb-4">
         {sortedHabits.length === 0 && (
-          <p className="text-center text-white/30 text-sm pt-8">
+          <p className="text-center text-sm pt-8" style={{ color: textMuted }}>
             Nenhum hábito para este período.
           </p>
         )}
@@ -444,53 +468,35 @@ const DailySessionView = () => {
                 "flex items-center gap-4 rounded-2xl px-4 py-3.5 transition-all duration-150",
                 !isDone && "cursor-pointer active:scale-[0.98]",
                 isDone && "cursor-default",
-                isOngoing && "bg-white/[0.08] border border-white/[0.09]"
               )}
+              style={isOngoing ? { backgroundColor: cardBg, border: `1px solid ${cardBorder}` } : {}}
             >
               {/* Status circle */}
               <div className="flex-shrink-0">
                 {isDone ? (
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-lime-400">
-                    <Check className="h-4 w-4 text-black stroke-[2.5]" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full" style={{ backgroundColor: ringAccent }}>
+                    <Check className="h-4 w-4 stroke-[2.5]" style={{ color: isDark ? "#000" : "#000" }} />
                   </div>
                 ) : (
                   <div
-                    className={cn(
-                      "flex h-7 w-7 items-center justify-center rounded-full border-2",
-                      isOngoing ? "border-lime-400" : "border-white/20"
-                    )}
+                    className="flex h-7 w-7 items-center justify-center rounded-full border-2"
+                    style={{ borderColor: isOngoing ? ringAccent : isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)" }}
                   >
-                    {isOngoing && (
-                      <div className="h-2.5 w-2.5 rounded-full bg-lime-400" />
-                    )}
+                    {isOngoing && <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ringAccent }} />}
                   </div>
                 )}
               </div>
 
               {/* Text */}
               <div className="flex-1 min-w-0">
-                <p
-                  className={cn(
-                    "text-sm font-semibold leading-tight",
-                    isDone
-                      ? "text-white/35"
-                      : isOngoing
-                      ? "text-white"
-                      : "text-white/55"
-                  )}
-                >
+                <p className="text-sm font-semibold leading-tight" style={{
+                  color: isDone ? textMuted : isOngoing ? textPrimary : isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)",
+                }}>
                   {habit.name}
                 </p>
-                <p
-                  className="text-xs mt-0.5"
-                  style={{
-                    color: isOngoing
-                      ? "#a3e635"
-                      : isDone
-                      ? "rgba(255,255,255,0.25)"
-                      : "rgba(255,255,255,0.3)",
-                  }}
-                >
+                <p className="text-xs mt-0.5" style={{
+                  color: isOngoing ? ringAccent : isDone ? textMuted : isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
+                }}>
                   {statusLabel(status, habit)}
                 </p>
               </div>
@@ -498,13 +504,11 @@ const DailySessionView = () => {
               {/* Time + chevron */}
               <div className="flex items-center gap-1.5 flex-shrink-0">
                 {timeLabel && (
-                  <span className="text-xs text-white/20 tabular-nums">
+                  <span className="text-xs tabular-nums" style={{ color: textMuted }}>
                     {timeLabel}
                   </span>
                 )}
-                {isOngoing && (
-                  <ChevronRight className="h-4 w-4 text-white/25" />
-                )}
+                {isOngoing && <ChevronRight className="h-4 w-4" style={{ color: textMuted }} />}
               </div>
             </motion.div>
           );
@@ -514,47 +518,32 @@ const DailySessionView = () => {
       {/* CTA */}
       <div
         className="px-5 pt-4"
-        style={{
-          paddingBottom: "max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)))",
-        }}
+        style={{ paddingBottom: "max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)))" }}
       >
         <button
           disabled={allDone || pendingHabits.length === 0}
           onClick={() => {
-            if (pendingHabits[0]) {
-              haptic.success();
-              toggleHabit(pendingHabits[0].id);
-            }
+            if (pendingHabits[0]) { haptic.success(); toggleHabit(pendingHabits[0].id); }
           }}
           className="flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-bold tracking-wide transition-all duration-200 active:scale-[0.98]"
-          style={
-            allDone
-              ? {
-                  background: "rgba(163,230,53,0.15)",
-                  color: "rgba(163,230,53,0.5)",
-                }
-              : {
-                  background: "linear-gradient(135deg, #a3e635 0%, #84cc16 100%)",
-                  color: "#000",
-                  boxShadow:
-                    "0 0 28px rgba(163,230,53,0.4), 0 4px 20px rgba(163,230,53,0.25), inset 0 1px 0 rgba(255,255,255,0.25)",
-                }
-          }
+          style={allDone ? {
+            background: isDark ? "rgba(163,230,53,0.12)" : "rgba(101,163,13,0.12)",
+            color: isDark ? "rgba(163,230,53,0.4)" : "rgba(101,163,13,0.5)",
+          } : {
+            background: "linear-gradient(135deg, #a3e635 0%, #84cc16 100%)",
+            color: "#000",
+            boxShadow: "0 0 28px rgba(163,230,53,0.45), 0 4px 20px rgba(163,230,53,0.3), inset 0 1px 0 rgba(255,255,255,0.3)",
+          }}
         >
-          {allDone ? (
-            "Sessão Completa! 🎉"
-          ) : (
-            <>
-              <Zap className="h-5 w-5 fill-current" />
-              Complete Task
-            </>
+          {allDone ? "Sessão Completa! 🎉" : (
+            <><Zap className="h-5 w-5 fill-current" /> Complete Task</>
           )}
         </button>
 
         <button
           onClick={() => navigate(-1)}
-          className="mt-3 w-full text-center text-[11px] tracking-[0.18em] uppercase transition-colors"
-          style={{ color: "rgba(255,255,255,0.2)" }}
+          className="mt-5 w-full text-center text-[11px] tracking-[0.2em] uppercase transition-colors"
+          style={{ color: textMuted }}
         >
           Finish Session Early
         </button>

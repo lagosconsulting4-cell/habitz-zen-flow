@@ -15,7 +15,11 @@ const ProtectedLayout = () => {
     const hiddenRoutes = new Set(["/onboarding", "/onboarding-new", "/create", "/onboarding-v2"]);
     // Also hide for /habits/edit/:id routes
     const isEditHabitRoute = location.pathname.startsWith("/habits/edit/");
-    return hiddenRoutes.has(location.pathname) || isEditHabitRoute;
+    // Session routes are fullscreen — no nav, no padding, no FAB
+    const isSessionRoute =
+      location.pathname === "/session" ||
+      (location.pathname.includes("/journeys/") && location.pathname.endsWith("/session"));
+    return hiddenRoutes.has(location.pathname) || isEditHabitRoute || isSessionRoute;
   }, [location.pathname]);
 
   const showSidebar = !shouldHideNav && !isSwipeableRoute;
