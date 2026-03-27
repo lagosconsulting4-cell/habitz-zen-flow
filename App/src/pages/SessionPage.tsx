@@ -1,8 +1,9 @@
 /**
  * SessionPage — Premium fullscreen daily session view
- * Routes: /session (standalone) or /journeys/:slug/session (journey context)
+ * Routes: /session (standalone daily session) or /journeys/:slug/session (journey context)
  */
 
+import React, { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import {
@@ -15,12 +16,16 @@ import {
   Lightbulb,
   Utensils,
   CalendarDays,
+  X,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useJourneyDetail, useJourneyDay } from "@/hooks/useJourney";
 import { getJourneyTheme } from "@/components/JourneyIllustration";
 import { useTheme } from "@/hooks/useTheme";
 import { haptic } from "@/lib/haptics";
+import { useHabits, type Habit } from "@/hooks/useHabits";
+import { useTimer } from "@/hooks/useTimer";
 
 function hexToRgba(hex: string, alpha: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -252,7 +257,313 @@ function parseSessionContent(content: string): {
   return { title, exercises, blocks };
 }
 
-// ── Component ──
+// ── Daily Session Components ──
+
+function getPeriodInfo() {
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+  const period: "morning" | "afternoon" | "evening" =
+    h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
+  const endH = { morning: 12, afternoon: 18, evening: 24 }[period];
+  return {
+    period,
+    remainingSeconds: Math.max(0, endH * 3600 - (h * 3600 + m * 60 + s)),
+  };
+}
+
+function SessionTimerRing({
+  progress,
+  size = 260,
+  children,
+}: {
+  progress: number;
+  size?: number;
+  children: React.ReactNode;
+}) {
+  const strokeWidth = 2;
+  const radius = (size - strokeWidth * 2) / 2;
+  const circumference = 2 * Math.PI * radius;
+  // progress 0→100 means elapsed, offset grows → ring shrinks (showing remaining)
+  const offset = (progress / 100) * circumference;
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="absolute inset-0 -rotate-90">
+        <defs>
+          <filter id="session-ring-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        {/* Track */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          strokeWidth={strokeWidth}
+          stroke="rgba(255,255,255,0.07)"
+        />
+        {/* Progress ring */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          strokeWidth={strokeWidth}
+          stroke="#a3e635"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          filter="url(#session-ring-glow)"
+          style={{ transition: "stroke-dashoffset 1s linear" }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+const DailySessionView = () => {
+  const navigate = useNavigate();
+  const { period, remainingSeconds } = useMemo(() => getPeriodInfo(), []);
+
+  const { formattedRemaining, progress } = useTimer({
+    targetSeconds: remainingSeconds,
+    autoStart: true,
+  });
+
+  const { habits, toggleHabit, completions } = useHabits();
+
+  const completedIds = useMemo(
+    () => new Set(completions.map((c) => c.habit_id)),
+    [completions]
+  );
+
+  const periodHabits = useMemo(() => {
+    const todayDow = new Date().getDay();
+    return habits.filter(
+      (h) =>
+        h.is_active &&
+        h.period === period &&
+        (h.days_of_week.length === 0 || h.days_of_week.includes(todayDow))
+    );
+  }, [habits, period]);
+
+  // Completed first, then pending (preserving original order within each group)
+  const sortedHabits = useMemo(() => {
+    const done = periodHabits.filter((h) => completedIds.has(h.id));
+    const pending = periodHabits.filter((h) => !completedIds.has(h.id));
+    return [...done, ...pending];
+  }, [periodHabits, completedIds]);
+
+  const pendingHabits = sortedHabits.filter((h) => !completedIds.has(h.id));
+  const allDone = pendingHabits.length === 0 && sortedHabits.length > 0;
+
+  const getStatus = (habit: Habit) => {
+    if (completedIds.has(habit.id)) return "done" as const;
+    const idx = pendingHabits.findIndex((h) => h.id === habit.id);
+    if (idx === 0) return "ongoing" as const;
+    if (idx === 1) return "upnext" as const;
+    return "later" as const;
+  };
+
+  const formatTime = (t: string | null | undefined) => {
+    if (!t) return null;
+    return t.slice(0, 5); // "06:30:00" → "06:30"
+  };
+
+  const statusLabel = (status: ReturnType<typeof getStatus>, habit: Habit) => {
+    if (status === "done") {
+      if (habit.goal_value) return `${habit.goal_value} ${habit.unit ?? ""}`.trim();
+      return "Concluído";
+    }
+    if (status === "ongoing") return "Ongoing";
+    if (status === "upnext") return "Up Next";
+    return "Final Step";
+  };
+
+  return (
+    <div
+      className="min-h-screen flex flex-col bg-black relative"
+      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+    >
+      {/* Back button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="absolute left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 active:bg-white/20 transition-colors"
+        style={{ top: "calc(1rem + env(safe-area-inset-top, 0px))" }}
+      >
+        <X className="h-5 w-5 text-white" />
+      </button>
+
+      {/* Timer */}
+      <div className="flex items-center justify-center pt-16 pb-6">
+        <SessionTimerRing progress={progress} size={260}>
+          <div className="text-center select-none">
+            <p className="text-6xl font-bold text-white tracking-tight tabular-nums">
+              {formattedRemaining}
+            </p>
+            <p className="text-[11px] tracking-[0.22em] uppercase mt-1" style={{ color: "rgba(163,230,53,0.65)" }}>
+              • Remaining
+            </p>
+          </div>
+        </SessionTimerRing>
+      </div>
+
+      {/* Habits list */}
+      <div className="flex-1 px-4 space-y-2 overflow-y-auto pb-4">
+        {sortedHabits.length === 0 && (
+          <p className="text-center text-white/30 text-sm pt-8">
+            Nenhum hábito para este período.
+          </p>
+        )}
+        {sortedHabits.map((habit, i) => {
+          const status = getStatus(habit);
+          const isDone = status === "done";
+          const isOngoing = status === "ongoing";
+          const timeLabel = formatTime(habit.reminder_time);
+
+          return (
+            <motion.div
+              key={habit.id}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              onClick={() => {
+                if (isDone) return;
+                haptic.light();
+                toggleHabit(habit.id);
+              }}
+              className={cn(
+                "flex items-center gap-4 rounded-2xl px-4 py-3.5 transition-all duration-150",
+                !isDone && "cursor-pointer active:scale-[0.98]",
+                isDone && "cursor-default",
+                isOngoing && "bg-white/[0.08] border border-white/[0.09]"
+              )}
+            >
+              {/* Status circle */}
+              <div className="flex-shrink-0">
+                {isDone ? (
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-lime-400">
+                    <Check className="h-4 w-4 text-black stroke-[2.5]" />
+                  </div>
+                ) : (
+                  <div
+                    className={cn(
+                      "flex h-7 w-7 items-center justify-center rounded-full border-2",
+                      isOngoing ? "border-lime-400" : "border-white/20"
+                    )}
+                  >
+                    {isOngoing && (
+                      <div className="h-2.5 w-2.5 rounded-full bg-lime-400" />
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Text */}
+              <div className="flex-1 min-w-0">
+                <p
+                  className={cn(
+                    "text-sm font-semibold leading-tight",
+                    isDone
+                      ? "text-white/35"
+                      : isOngoing
+                      ? "text-white"
+                      : "text-white/55"
+                  )}
+                >
+                  {habit.name}
+                </p>
+                <p
+                  className="text-xs mt-0.5"
+                  style={{
+                    color: isOngoing
+                      ? "#a3e635"
+                      : isDone
+                      ? "rgba(255,255,255,0.25)"
+                      : "rgba(255,255,255,0.3)",
+                  }}
+                >
+                  {statusLabel(status, habit)}
+                </p>
+              </div>
+
+              {/* Time + chevron */}
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                {timeLabel && (
+                  <span className="text-xs text-white/20 tabular-nums">
+                    {timeLabel}
+                  </span>
+                )}
+                {isOngoing && (
+                  <ChevronRight className="h-4 w-4 text-white/25" />
+                )}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* CTA */}
+      <div
+        className="px-5 pt-4"
+        style={{
+          paddingBottom: "max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)))",
+        }}
+      >
+        <button
+          disabled={allDone || pendingHabits.length === 0}
+          onClick={() => {
+            if (pendingHabits[0]) {
+              haptic.success();
+              toggleHabit(pendingHabits[0].id);
+            }
+          }}
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-bold tracking-wide transition-all duration-200 active:scale-[0.98]"
+          style={
+            allDone
+              ? {
+                  background: "rgba(163,230,53,0.15)",
+                  color: "rgba(163,230,53,0.5)",
+                }
+              : {
+                  background: "linear-gradient(135deg, #a3e635 0%, #84cc16 100%)",
+                  color: "#000",
+                  boxShadow:
+                    "0 0 28px rgba(163,230,53,0.4), 0 4px 20px rgba(163,230,53,0.25), inset 0 1px 0 rgba(255,255,255,0.25)",
+                }
+          }
+        >
+          {allDone ? (
+            "Sessão Completa! 🎉"
+          ) : (
+            <>
+              <Zap className="h-5 w-5 fill-current" />
+              Complete Task
+            </>
+          )}
+        </button>
+
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-3 w-full text-center text-[11px] tracking-[0.18em] uppercase transition-colors"
+          style={{ color: "rgba(255,255,255,0.2)" }}
+        >
+          Finish Session Early
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ── Main Component ──
 
 const SessionPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -264,12 +575,9 @@ const SessionPage = () => {
   const currentDay = userState?.current_day || 1;
   const { day } = useJourneyDay(slug || "", currentDay);
 
+  // ── Standalone daily session (no journey context) ──
   if (!slug) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: isDarkMode ? "#000" : "#FAFAFA" }}>
-        <p className={isDarkMode ? "text-white/50" : "text-gray-500"}>Selecione uma jornada para ver a sessão.</p>
-      </div>
-    );
+    return <DailySessionView />;
   }
 
   if (loading || !journey || !day) {
