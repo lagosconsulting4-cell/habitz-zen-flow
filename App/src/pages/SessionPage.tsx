@@ -363,25 +363,34 @@ const DailySessionView = () => {
     [completions]
   );
 
-  const periodHabits = useMemo(() => {
+  // Todos os hábitos ativos do dia (todos os períodos)
+  const allDayHabits = useMemo(() => {
     const todayDow = new Date().getDay();
     return habits.filter(
       (h) =>
         h.is_active &&
-        h.period === period &&
         (h.days_of_week.length === 0 || h.days_of_week.includes(todayDow))
     );
-  }, [habits, period]);
+  }, [habits]);
 
-  // Completed first, then pending in original order
-  const sortedHabits = useMemo(() => {
-    const done = periodHabits.filter((h) => completedIds.has(h.id));
-    const pending = periodHabits.filter((h) => !completedIds.has(h.id));
-    return [...done, ...pending];
-  }, [periodHabits, completedIds]);
+  const PERIOD_ORDER = ["morning", "afternoon", "evening"] as const;
+  const PERIOD_LABELS: Record<string, string> = { morning: "Manhã", afternoon: "Tarde", evening: "Noite" };
 
-  const pendingHabits = sortedHabits.filter((h) => !completedIds.has(h.id));
-  const allDone = pendingHabits.length === 0 && sortedHabits.length > 0;
+  // Agrupado por período; concluídos primeiro dentro de cada grupo
+  const groupedHabits = useMemo(() => {
+    return PERIOD_ORDER
+      .map((p) => ({
+        period: p,
+        label: PERIOD_LABELS[p],
+        habits: allDayHabits
+          .filter((h) => h.period === p)
+          .sort((a, b) => (completedIds.has(a.id) ? 0 : 1) - (completedIds.has(b.id) ? 0 : 1)),
+      }))
+      .filter((g) => g.habits.length > 0);
+  }, [allDayHabits, completedIds]);
+
+  const pendingHabits = allDayHabits.filter((h) => !completedIds.has(h.id));
+  const allDone = pendingHabits.length === 0 && allDayHabits.length > 0;
 
   const getStatus = (habit: Habit) => {
     if (completedIds.has(habit.id)) return "done" as const;
@@ -395,9 +404,9 @@ const DailySessionView = () => {
 
   const statusLabel = (status: ReturnType<typeof getStatus>, habit: Habit) => {
     if (status === "done") return habit.goal_value ? `${habit.goal_value} ${habit.unit ?? ""}`.trim() : "Concluído";
-    if (status === "ongoing") return "Ongoing";
-    if (status === "upnext") return "Up Next";
-    return "Final Step";
+    if (status === "ongoing") return "Em Andamento";
+    if (status === "upnext") return "Próximo";
+    return "Pendente";
   };
 
   // Theme colors
@@ -434,85 +443,95 @@ const DailySessionView = () => {
             </p>
             <p className="text-[11px] tracking-[0.22em] uppercase mt-1.5 flex items-center justify-center gap-1">
               <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ backgroundColor: ringAccent }} />
-              <span style={{ color: isDark ? "rgba(163,230,53,0.6)" : "#65a30d" }}>Remaining</span>
+              <span style={{ color: isDark ? "rgba(163,230,53,0.6)" : "#65a30d" }}>Restante</span>
             </p>
           </div>
         </SessionTimerRing>
       </div>
 
-      {/* Habits list */}
-      <div className="flex-1 px-4 space-y-2 overflow-y-auto pb-4">
-        {sortedHabits.length === 0 && (
+      {/* Lista de hábitos agrupada por período */}
+      <div className="flex-1 px-4 overflow-y-auto pb-4">
+        {allDayHabits.length === 0 && (
           <p className="text-center text-sm pt-8" style={{ color: textMuted }}>
-            Nenhum hábito para este período.
+            Nenhum hábito para hoje.
           </p>
         )}
-        {sortedHabits.map((habit, i) => {
-          const status = getStatus(habit);
-          const isDone = status === "done";
-          const isOngoing = status === "ongoing";
-          const timeLabel = formatTime(habit.reminder_time);
+        {groupedHabits.map((group) => (
+          <div key={group.period} className="mb-4">
+            {/* Cabeçalho do período */}
+            <p className="text-[11px] font-semibold tracking-[0.18em] uppercase mb-2 px-1" style={{ color: textMuted }}>
+              {group.label}
+            </p>
+            <div className="space-y-2">
+              {group.habits.map((habit, i) => {
+                const status = getStatus(habit);
+                const isDone = status === "done";
+                const isOngoing = status === "ongoing";
+                const timeLabel = formatTime(habit.reminder_time);
 
-          return (
-            <motion.div
-              key={habit.id}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04 }}
-              onClick={() => {
-                if (isDone) return;
-                haptic.light();
-                toggleHabit(habit.id);
-              }}
-              className={cn(
-                "flex items-center gap-4 rounded-2xl px-4 py-3.5 transition-all duration-150",
-                !isDone && "cursor-pointer active:scale-[0.98]",
-                isDone && "cursor-default",
-              )}
-              style={isOngoing ? { backgroundColor: cardBg, border: `1px solid ${cardBorder}` } : {}}
-            >
-              {/* Status circle */}
-              <div className="flex-shrink-0">
-                {isDone ? (
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full" style={{ backgroundColor: ringAccent }}>
-                    <Check className="h-4 w-4 stroke-[2.5]" style={{ color: isDark ? "#000" : "#000" }} />
-                  </div>
-                ) : (
-                  <div
-                    className="flex h-7 w-7 items-center justify-center rounded-full border-2"
-                    style={{ borderColor: isOngoing ? ringAccent : isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)" }}
+                return (
+                  <motion.div
+                    key={habit.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    onClick={() => {
+                      if (isDone) return;
+                      haptic.light();
+                      toggleHabit(habit.id);
+                    }}
+                    className={cn(
+                      "flex items-center gap-4 rounded-2xl px-4 py-3.5 transition-all duration-150",
+                      !isDone && "cursor-pointer active:scale-[0.98]",
+                      isDone && "cursor-default",
+                    )}
+                    style={isOngoing ? { backgroundColor: cardBg, border: `1px solid ${cardBorder}` } : {}}
                   >
-                    {isOngoing && <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ringAccent }} />}
-                  </div>
-                )}
-              </div>
+                    {/* Círculo de status */}
+                    <div className="flex-shrink-0">
+                      {isDone ? (
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full" style={{ backgroundColor: ringAccent }}>
+                          <Check className="h-4 w-4 stroke-[2.5]" style={{ color: "#000" }} />
+                        </div>
+                      ) : (
+                        <div
+                          className="flex h-7 w-7 items-center justify-center rounded-full border-2"
+                          style={{ borderColor: isOngoing ? ringAccent : isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)" }}
+                        >
+                          {isOngoing && <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ringAccent }} />}
+                        </div>
+                      )}
+                    </div>
 
-              {/* Text */}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold leading-tight" style={{
-                  color: isDone ? textMuted : isOngoing ? textPrimary : isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)",
-                }}>
-                  {habit.name}
-                </p>
-                <p className="text-xs mt-0.5" style={{
-                  color: isOngoing ? ringAccent : isDone ? textMuted : isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
-                }}>
-                  {statusLabel(status, habit)}
-                </p>
-              </div>
+                    {/* Texto */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold leading-tight" style={{
+                        color: isDone ? textMuted : isOngoing ? textPrimary : isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)",
+                      }}>
+                        {habit.name}
+                      </p>
+                      <p className="text-xs mt-0.5" style={{
+                        color: isOngoing ? ringAccent : isDone ? textMuted : isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
+                      }}>
+                        {statusLabel(status, habit)}
+                      </p>
+                    </div>
 
-              {/* Time + chevron */}
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                {timeLabel && (
-                  <span className="text-xs tabular-nums" style={{ color: textMuted }}>
-                    {timeLabel}
-                  </span>
-                )}
-                {isOngoing && <ChevronRight className="h-4 w-4" style={{ color: textMuted }} />}
-              </div>
-            </motion.div>
-          );
-        })}
+                    {/* Horário + chevron */}
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {timeLabel && (
+                        <span className="text-xs tabular-nums" style={{ color: textMuted }}>
+                          {timeLabel}
+                        </span>
+                      )}
+                      {isOngoing && <ChevronRight className="h-4 w-4" style={{ color: textMuted }} />}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* CTA */}
@@ -536,7 +555,7 @@ const DailySessionView = () => {
           }}
         >
           {allDone ? "Sessão Completa! 🎉" : (
-            <><Zap className="h-5 w-5 fill-current" /> Complete Task</>
+            <><Zap className="h-5 w-5 fill-current" /> Concluir Tarefa</>
           )}
         </button>
 
@@ -545,7 +564,7 @@ const DailySessionView = () => {
           className="mt-5 w-full text-center text-[11px] tracking-[0.2em] uppercase transition-colors"
           style={{ color: textMuted }}
         >
-          Finish Session Early
+          Encerrar Sessão
         </button>
       </div>
     </div>
