@@ -363,14 +363,20 @@ const DailySessionView = () => {
     [completions]
   );
 
-  // Todos os hábitos ativos do dia (todos os períodos)
+  // Todos os hábitos ativos do dia (todos os períodos), ordenados por horário
   const allDayHabits = useMemo(() => {
     const todayDow = new Date().getDay();
-    return habits.filter(
-      (h) =>
-        h.is_active &&
-        (h.days_of_week.length === 0 || h.days_of_week.includes(todayDow))
-    );
+    return habits
+      .filter(
+        (h) =>
+          h.is_active &&
+          (h.days_of_week.length === 0 || h.days_of_week.includes(todayDow))
+      )
+      .sort((a, b) => {
+        const ta = a.reminder_time ?? "99:99";
+        const tb = b.reminder_time ?? "99:99";
+        return ta.localeCompare(tb);
+      });
   }, [habits]);
 
   const PERIOD_ORDER = ["morning", "afternoon", "evening"] as const;
@@ -411,8 +417,12 @@ const DailySessionView = () => {
 
   // Theme colors
   const bg = isDark ? "#000" : "#F5F5F5";
-  const cardBg = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)";
-  const cardBorder = isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.08)";
+  // Card neutro (concluído, próximo, pendente)
+  const cardNeutralBg     = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)";
+  const cardNeutralBorder = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)";
+  // Card em andamento (destaque)
+  const cardOngoingBg     = isDark ? "rgba(255,255,255,0.10)" : "rgba(101,163,13,0.08)";
+  const cardOngoingBorder = isDark ? "rgba(163,230,53,0.25)"  : "rgba(101,163,13,0.22)";
   const textPrimary = isDark ? "#ffffff" : "#111111";
   const textDimmed = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)";
   const textMuted = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)";
@@ -485,20 +495,23 @@ const DailySessionView = () => {
                       !isDone && "cursor-pointer active:scale-[0.98]",
                       isDone && "cursor-default",
                     )}
-                    style={isOngoing ? { backgroundColor: cardBg, border: `1px solid ${cardBorder}` } : {}}
+                    style={{
+                      backgroundColor: isOngoing ? cardOngoingBg : cardNeutralBg,
+                      border: `1px solid ${isOngoing ? cardOngoingBorder : cardNeutralBorder}`,
+                    }}
                   >
                     {/* Círculo de status */}
                     <div className="flex-shrink-0">
                       {isDone ? (
-                        <div className="flex h-7 w-7 items-center justify-center rounded-full" style={{ backgroundColor: ringAccent }}>
-                          <Check className="h-4 w-4 stroke-[2.5]" style={{ color: "#000" }} />
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full" style={{ backgroundColor: ringAccent }}>
+                          <Check className="h-3.5 w-3.5 stroke-[2.5]" style={{ color: "#000" }} />
                         </div>
                       ) : (
                         <div
-                          className="flex h-7 w-7 items-center justify-center rounded-full border-2"
+                          className="flex h-6 w-6 items-center justify-center rounded-full border-2"
                           style={{ borderColor: isOngoing ? ringAccent : isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)" }}
                         >
-                          {isOngoing && <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ringAccent }} />}
+                          {isOngoing && <div className="h-2 w-2 rounded-full" style={{ backgroundColor: ringAccent }} />}
                         </div>
                       )}
                     </div>
@@ -507,6 +520,7 @@ const DailySessionView = () => {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold leading-tight" style={{
                         color: isDone ? textMuted : isOngoing ? textPrimary : isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)",
+                        textDecoration: isDone ? "line-through" : "none",
                       }}>
                         {habit.name}
                       </p>
