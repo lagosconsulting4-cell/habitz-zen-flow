@@ -356,28 +356,23 @@ const DailySessionView = () => {
   // Timer: used only for the countdown text display
   const { formattedRemaining } = useTimer({ targetSeconds: remainingSeconds, autoStart: true });
 
-  const { habits, toggleHabit, completions } = useHabits();
+  const { toggleHabit, completions, getHabitsForDate } = useHabits();
 
   const completedIds = useMemo(
     () => new Set(completions.map((c) => c.habit_id)),
     [completions]
   );
 
-  // Todos os hábitos ativos do dia (todos os períodos), ordenados por horário
+  // Todos os hábitos do dia — usa getHabitsForDate que trata frequency_type corretamente
+  // (daily, fixed_days, once, every_n_days) igual ao Dashboard
   const allDayHabits = useMemo(() => {
-    const todayDow = new Date().getDay();
-    return habits
-      .filter(
-        (h) =>
-          h.is_active &&
-          (h.days_of_week.length === 0 || h.days_of_week.includes(todayDow))
-      )
+    return getHabitsForDate(new Date())
       .sort((a, b) => {
         const ta = a.reminder_time ?? "99:99";
         const tb = b.reminder_time ?? "99:99";
         return ta.localeCompare(tb);
       });
-  }, [habits]);
+  }, [getHabitsForDate]);
 
   const PERIOD_ORDER = ["morning", "afternoon", "evening"] as const;
   const PERIOD_LABELS: Record<string, string> = { morning: "Manhã", afternoon: "Tarde", evening: "Noite" };
@@ -553,25 +548,34 @@ const DailySessionView = () => {
         className="px-5 pt-4"
         style={{ paddingBottom: "max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)))" }}
       >
-        <button
-          disabled={allDone || pendingHabits.length === 0}
-          onClick={() => {
-            if (pendingHabits[0]) { haptic.success(); toggleHabit(pendingHabits[0].id); }
-          }}
-          className="flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-bold tracking-wide transition-all duration-200 active:scale-[0.98]"
-          style={allDone ? {
-            background: isDark ? "rgba(163,230,53,0.12)" : "rgba(101,163,13,0.12)",
-            color: isDark ? "rgba(163,230,53,0.4)" : "rgba(101,163,13,0.5)",
-          } : {
-            background: "linear-gradient(135deg, #a3e635 0%, #84cc16 100%)",
-            color: "#000",
-            boxShadow: "0 0 28px rgba(163,230,53,0.45), 0 4px 20px rgba(163,230,53,0.3), inset 0 1px 0 rgba(255,255,255,0.3)",
-          }}
-        >
-          {allDone ? "Sessão Completa! 🎉" : (
-            <><Zap className="h-5 w-5 fill-current" /> Concluir Tarefa</>
-          )}
-        </button>
+        {allDone ? (
+          <button
+            onClick={() => { haptic.success(); navigate("/"); }}
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-bold tracking-wide transition-all duration-200 active:scale-[0.98]"
+            style={{
+              background: "linear-gradient(135deg, #a3e635 0%, #84cc16 100%)",
+              color: "#000",
+              boxShadow: "0 0 28px rgba(163,230,53,0.45), 0 4px 20px rgba(163,230,53,0.3), inset 0 1px 0 rgba(255,255,255,0.3)",
+            }}
+          >
+            Sessão Completa
+          </button>
+        ) : (
+          <button
+            disabled={pendingHabits.length === 0}
+            onClick={() => {
+              if (pendingHabits[0]) { haptic.success(); toggleHabit(pendingHabits[0].id); }
+            }}
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-bold tracking-wide transition-all duration-200 active:scale-[0.98]"
+            style={{
+              background: "linear-gradient(135deg, #a3e635 0%, #84cc16 100%)",
+              color: "#000",
+              boxShadow: "0 0 28px rgba(163,230,53,0.45), 0 4px 20px rgba(163,230,53,0.3), inset 0 1px 0 rgba(255,255,255,0.3)",
+            }}
+          >
+            <Zap className="h-5 w-5 fill-current" /> Concluir Tarefa
+          </button>
+        )}
 
         <button
           onClick={() => navigate(-1)}
