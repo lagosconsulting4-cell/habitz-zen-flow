@@ -128,7 +128,7 @@ const Dashboard = () => {
 
   // Day Complete modal state
   const [showDayComplete, setShowDayComplete] = useState(false);
-  const dayCompleteShownRef = useRef(false);
+  const dayCompleteShownRef = useRef<string | null>(null); // stores BRT date when last shown
 
   // DEV: expose for testing — remove before production
   // DEV: expose for testing — remove before production
@@ -314,7 +314,7 @@ const Dashboard = () => {
 
   // Journey day auto-completion detection — iterates ALL active journeys
   useEffect(() => {
-    if (activeStates.length === 0 || allJourneyHabits.length === 0 || isCompleting) return;
+    if (activeStates.length === 0 || allJourneyHabits.length === 0) return;
 
     for (const activeJourney of activeStates) {
       const todayStr = getBRTDateString();
@@ -325,7 +325,7 @@ const Dashboard = () => {
       // On day 1 (never advanced), always allow; on day 2+, only advance if
       // updated_at is from a previous day (meaning habits are freshly completed today).
       if (activeJourney.current_day > 1 && activeJourney.updated_at) {
-        const updatedDate = activeJourney.updated_at.split("T")[0];
+        const updatedDate = getBRTDateString(new Date(activeJourney.updated_at));
         if (updatedDate === todayStr) {
           journeyDayCompletedRef.current.add(completionKey);
           continue;
@@ -402,7 +402,7 @@ const Dashboard = () => {
       // Only process one journey completion at a time
       break;
     }
-  }, [activeStates, allJourneyHabits, getHabitCompletionStatus, isCompleting, completeDay]);
+  }, [activeStates, allJourneyHabits, getHabitCompletionStatus, completeDay]);
 
   // Filter habits for today using comprehensive filtering logic
   const todayHabitsRaw = useMemo(() => {
@@ -635,8 +635,9 @@ const Dashboard = () => {
 
           if (allCompleted && awardPerfectDayBonus) {
             celebrations.perfectDay();
-            if (!dayCompleteShownRef.current) {
-              dayCompleteShownRef.current = true;
+            const todayBRT = getBRTDateString();
+            if (dayCompleteShownRef.current !== todayBRT) {
+              dayCompleteShownRef.current = todayBRT;
               setShowDayComplete(true);
             }
             if (isGamificationEnabled) {
@@ -721,8 +722,9 @@ const Dashboard = () => {
 
         if (allCompleted && awardPerfectDayBonus) {
           celebrations.perfectDay();
-          if (!dayCompleteShownRef.current) {
-            dayCompleteShownRef.current = true;
+          const todayBRT = getBRTDateString();
+          if (dayCompleteShownRef.current !== todayBRT) {
+            dayCompleteShownRef.current = todayBRT;
             setShowDayComplete(true);
           }
           if (isGamificationEnabled) {
