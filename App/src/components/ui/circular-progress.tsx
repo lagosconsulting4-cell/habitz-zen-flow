@@ -35,6 +35,7 @@ export const CircularProgress = ({
         width={size}
         height={size}
         className="transform -rotate-90"
+        style={{ overflow: "visible" }}
       >
         {/* Glow filter definition */}
         {glow && (
