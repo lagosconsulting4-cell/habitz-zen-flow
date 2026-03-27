@@ -1,39 +1,39 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import {
-  Clock,
   LogOut,
-  Mail,
-  Diamond,
+  Gem,
   Snowflake,
-  Shield,
   Pencil,
   Check,
   X,
   Loader2,
   Sun,
   Moon,
-  Gift,
   ChevronRight,
-  XCircle,
+  User,
+  Bell,
+  Shield,
+  Globe,
+  HelpCircle,
+  BookOpen,
+  BarChart3,
+  Headphones,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
-import { usePremium } from "@/hooks/usePremium";
 import { useTheme } from "@/hooks/useTheme";
 import { useGamification } from "@/hooks/useGamification";
 import { toast } from "sonner";
-import { bonusSections } from "@/pages/Bonus";
-import { bonusFlags } from "@/config/bonusFlags";
-import { NotificationToggle } from "@/components/pwa/NotificationPermissionDialog";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { FreezeShopModal } from "@/components/gamification/FreezeShopModal";
 import { AvatarDisplay } from "@/components/gamification/AvatarIcons";
 import { AvatarCreator } from "@/components/gamification/AvatarCreator";
+import { cn } from "@/lib/utils";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -53,17 +53,27 @@ const Profile = () => {
     quiet_hours_end?: string | null;
   }>({});
 
-  const { isPremium } = usePremium(userId ?? undefined);
+  const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
-  const { equippedAvatar, gemsBalance, availableFreezes, avatarConfig } = useGamification(userId ?? undefined);
+  const isDark = theme === "dark";
+  const { gemsBalance, availableFreezes, avatarConfig, refetchAvatarConfig } = useGamification(userId ?? undefined);
+
+  const handleShopClose = useCallback(() => {
+    setFreezeShopOpen(false);
+    // Force refetch gems & freezes so Profile shows updated values immediately
+    if (userId) {
+      queryClient.invalidateQueries({ queryKey: ["user-gems", userId] });
+      queryClient.invalidateQueries({ queryKey: ["streak-freezes", userId] });
+    }
+  }, [userId, queryClient]);
+  const { isSubscribed, subscribe, unsubscribe, isLoading: notifLoading } = usePushNotifications();
+
 
   useEffect(() => {
     const loadProfile = async () => {
       const { data } = await supabase.auth.getUser();
       const user = data.user;
-      if (!user) {
-        return;
-      }
+      if (!user) return;
 
       setUserId(user.id);
       setEmail((prev) => user.email ?? prev);
@@ -74,28 +84,22 @@ const Profile = () => {
         .eq("user_id", user.id)
         .single();
 
-      if (profile?.display_name) {
-        setDisplayName(profile.display_name);
-      }
-      if (profile?.is_admin) {
-        setIsAdmin(profile.is_admin);
-      }
+      if (profile?.display_name) setDisplayName(profile.display_name);
+      if (profile?.is_admin) setIsAdmin(profile.is_admin);
 
-      // Load notification preferences
       const { data: progress } = await supabase
         .from("user_progress")
         .select("notification_preferences")
         .eq("user_id", user.id)
         .maybeSingle();
       if (progress?.notification_preferences) {
-        setNotifPrefs(progress.notification_preferences);
+        setNotifPrefs(progress.notification_preferences as typeof notifPrefs);
       }
     };
-
     loadProfile();
   }, []);
 
-  const updateNotifPref = async (key: string, value: boolean | string | number | null | Record<string, string | undefined>) => {
+  const updateNotifPref = async (key: string, value: boolean | string | number | null) => {
     if (!userId) return;
     const updated = { ...notifPrefs, [key]: value };
     setNotifPrefs(updated);
@@ -104,22 +108,8 @@ const Profile = () => {
       .update({ notification_preferences: updated })
       .eq("user_id", userId);
     if (error) {
-      toast.error("Erro ao salvar preferencia");
-      setNotifPrefs(notifPrefs); // revert
-    }
-  };
-
-  const updateQuietHours = async (start: string | null, end: string | null) => {
-    if (!userId) return;
-    const updated = { ...notifPrefs, quiet_hours_start: start, quiet_hours_end: end };
-    setNotifPrefs(updated);
-    const { error } = await supabase
-      .from("user_progress")
-      .update({ notification_preferences: updated })
-      .eq("user_id", userId);
-    if (error) {
-      toast.error("Erro ao salvar preferencia");
-      setNotifPrefs(notifPrefs); // revert
+      toast.error("Erro ao salvar preferência");
+      setNotifPrefs(notifPrefs);
     }
   };
 
@@ -140,429 +130,341 @@ const Profile = () => {
 
   const handleSaveName = async () => {
     if (!userId || !editedName.trim()) return;
-
     const trimmedName = editedName.trim();
     if (trimmedName.length < 2) {
       toast.error("Nome deve ter ao menos 2 caracteres");
       return;
     }
-
     setIsSavingName(true);
     try {
       const { error } = await supabase
         .from("profiles")
         .update({ display_name: trimmedName })
         .eq("user_id", userId);
-
       if (error) throw error;
-
       setDisplayName(trimmedName);
       setIsEditingName(false);
-      toast.success("Nome atualizado com sucesso!");
-    } catch (error) {
-      console.error("Erro ao salvar nome:", error);
-      toast.error("Erro ao salvar nome. Tente novamente.");
+      toast.success("Nome atualizado!");
+    } catch {
+      toast.error("Erro ao salvar nome.");
     } finally {
       setIsSavingName(false);
     }
   };
 
+  // Shared card styles
+  const cardStyle = isDark ? {
+    background: "linear-gradient(145deg, #1c1c1c 0%, #141414 100%)",
+    boxShadow: "0 0 40px rgba(163,230,53,0.03), 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+  } : undefined;
+  const cardClass = isDark
+    ? "border border-white/[0.08]"
+    : "bg-white border border-gray-100 shadow-sm";
+
   return (
-    <div className="min-h-screen bg-background pb-navbar transition-colors duration-300">
+    <div className="min-h-screen bg-background pb-navbar">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="px-4 pb-navbar max-w-xl mx-auto w-full"
-        style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
+        className="px-4 max-w-xl mx-auto w-full"
+        style={{ paddingTop: "calc(1.5rem + env(safe-area-inset-top, 0px))" }}
       >
-        {/* ====== 1. Identity Header ====== */}
-        <div className="text-center mb-8">
-          <div className="relative">
+        {/* ====== Avatar Header ====== */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="flex flex-col items-center mb-8 pt-4"
+        >
+          {/* Avatar with green ring */}
+          <div className="relative mb-4">
+            {/* Outer glow ring */}
+            <div
+              className="w-32 h-32 rounded-full p-[2px]"
+              style={{
+                background: "linear-gradient(135deg, #A3E635, #65A30D)",
+                boxShadow: isDark
+                  ? "0 0 50px rgba(163,230,53,0.35), 0 0 100px rgba(163,230,53,0.15), 0 0 150px rgba(163,230,53,0.06)"
+                  : "0 0 40px rgba(163,230,53,0.2), 0 0 80px rgba(163,230,53,0.08)",
+              }}
+            >
+              {/* Dark gap between ring and avatar */}
+              <div className={cn("w-full h-full rounded-full p-[6px]", isDark ? "bg-[#0A0A0A]" : "bg-background")}>
+                <div className="w-full h-full rounded-full overflow-hidden">
+                  <AvatarDisplay config={avatarConfig as Record<string, unknown> | null} size={112} />
+                </div>
+              </div>
+            </div>
+            {/* Edit button */}
             <button
               onClick={() => setAvatarCreatorOpen(true)}
-              data-tour="avatar"
-              className="relative group mx-auto mb-4 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50"
-              aria-label="Personalizar avatar"
+              className="absolute bottom-1 right-0 w-11 h-11 rounded-full bg-lime-400 flex items-center justify-center"
+              style={{ boxShadow: "0 4px 12px rgba(163,230,53,0.4), 0 0 20px rgba(163,230,53,0.15)" }}
             >
-              <AvatarDisplay
-                config={avatarConfig as any}
-                size={96}
-                className="rounded-full shadow-lg overflow-hidden"
-              />
-              <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                <Pencil className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
+              <Pencil className="w-4 h-4 text-black" />
             </button>
           </div>
-          {isAdmin && (
-            <Button
-              onClick={() => navigate("/admin")}
-              className="mb-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 shadow-lg font-semibold"
-            >
-              <Shield className="w-4 h-4 mr-2" />
-              Painel de Admin
-            </Button>
-          )}
+
+          {/* Name */}
           {isEditingName ? (
-            <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="flex items-center gap-2">
               <Input
                 value={editedName}
                 onChange={(e) => setEditedName(e.target.value)}
-                className="max-w-[200px] bg-secondary border-border text-foreground text-center"
-                placeholder="Seu nome"
+                className="w-48 text-center"
                 autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSaveName();
-                  if (e.key === "Escape") handleCancelEdit();
-                }}
+                onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
               />
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 text-primary hover:bg-primary/10"
-                onClick={handleSaveName}
-                disabled={isSavingName}
-                aria-label="Confirmar alteracao"
-              >
+              <button onClick={handleSaveName} disabled={isSavingName} className="p-1.5 rounded-full bg-lime-400 text-black">
                 {isSavingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 text-muted-foreground hover:bg-muted"
-                onClick={handleCancelEdit}
-                disabled={isSavingName}
-                aria-label="Cancelar edicao"
-              >
+              </button>
+              <button onClick={handleCancelEdit} className="p-1.5 rounded-full bg-white/10 text-white">
                 <X className="w-4 h-4" />
-              </Button>
+              </button>
             </div>
           ) : (
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground">{displayName}</h1>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                onClick={handleStartEdit}
-                aria-label="Editar nome"
-              >
-                <Pencil className="w-4 h-4" />
-              </Button>
-            </div>
+            <button onClick={handleStartEdit} className="group">
+              <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-foreground")}>
+                {displayName}
+              </h1>
+            </button>
           )}
-          <p className="text-muted-foreground flex items-center gap-2 justify-center">
-            <Mail className="w-4 h-4" />
+          <p className={cn("text-sm mt-1", isDark ? "text-white/40" : "text-muted-foreground")}>
             {email}
           </p>
-        </div>
-
-        {/* ====== 2. Recursos ====== */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.05 }}
-          className="mb-8"
-        >
-          <Card data-tour="resources" className="rounded-2xl bg-card border border-border p-6">
-            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Recursos</h2>
-            <div className="space-y-3">
-              {/* Gems Display */}
-              <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/20">
-                    <Diamond className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase">Gems</p>
-                    <p className="text-2xl font-bold text-foreground">{gemsBalance.toLocaleString()}</p>
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setFreezeShopOpen(true);
-                  }}
-                  className="text-primary hover:bg-primary/20"
-                >
-                  Loja <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-
-              {/* Freezes Display */}
-              <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-foreground/5 to-foreground/10 border border-border">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-foreground/10">
-                    <Snowflake className="w-5 h-5 text-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase">Streak Freezes</p>
-                    <p className="text-2xl font-bold text-foreground">{availableFreezes}</p>
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setFreezeShopOpen(true);
-                  }}
-                  className="text-foreground hover:bg-foreground/10"
-                >
-                  Comprar <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-            </div>
-          </Card>
+          {isAdmin && (
+            <Link to="/admin" className="mt-2 text-[10px] uppercase tracking-widest text-lime-400 font-bold">
+              Admin
+            </Link>
+          )}
         </motion.div>
 
-        {/* ====== 3. Conteudo Bonus ====== */}
+        {/* ====== Resources ====== */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-          className="mb-8"
+          transition={{ delay: 0.1 }}
+          className="mb-6"
         >
-          <Card data-tour="bonus" className="rounded-2xl bg-card border border-border p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Gift className="w-5 h-5 text-primary" />
-              </div>
-              <h2 className="text-lg font-bold uppercase tracking-wide text-foreground">Conteudo Bonus</h2>
-            </div>
-            <div className="space-y-2">
-              {bonusSections
-                .filter(
-                  (section) =>
-                    bonusFlags[section.id as keyof typeof bonusFlags] !== false &&
-                    !["plano", "guided"].includes(section.id)
-                )
-                .map((section) => (
-                  <Link
-                    key={section.id}
-                    to={section.path}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors"
-                  >
-                    <div className="flex-1">
-                      <p className="font-semibold text-foreground text-sm">{section.title}</p>
-                      <p className="text-xs text-muted-foreground">{section.description}</p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  </Link>
-                ))}
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* ====== 4. Aparencia ====== */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.15 }}
-        >
-          <Card className="rounded-2xl bg-card border border-border p-6">
-            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Aparencia</h2>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {theme === "dark" ? (
-                  <Moon className="w-5 h-5 text-primary" />
-                ) : (
-                  <Sun className="w-5 h-5 text-primary" />
-                )}
-                <div>
-                  <p className="font-semibold text-foreground">Tema</p>
-                  <p className="text-sm text-muted-foreground">
-                    Escolha o tema do aplicativo
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-1 bg-muted rounded-lg p-1">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className={`h-11 w-11 p-0 ${theme === "light" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
-                  onClick={() => setTheme("light")}
-                  aria-label="Tema claro"
-                  aria-pressed={theme === "light"}
-                >
-                  <Sun className="w-4 h-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className={`h-11 w-11 p-0 ${theme === "dark" ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
-                  onClick={() => setTheme("dark")}
-                  aria-label="Tema escuro"
-                  aria-pressed={theme === "dark"}
-                >
-                  <Moon className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* ====== 5. Notificacoes ====== */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-          className="mt-4"
-        >
-          <Card className="rounded-2xl bg-card border border-border p-6">
-            <h2 className="text-lg font-bold uppercase tracking-wide text-foreground mb-4">Notificacoes</h2>
-
-            <div className="space-y-4">
-              {/* Push Notifications Toggle */}
-              <NotificationToggle />
-
-              {/* End of Day Reminder */}
-              <div className="flex items-center justify-between border-t border-border pt-4">
-                <div className="flex items-center gap-3">
-                  <Clock className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">Lembrete Fim do Dia</p>
-                    <p className="text-xs text-muted-foreground">Notificar habitos pendentes as 22h</p>
-                  </div>
-                </div>
-                <Switch
-                  checked={notifPrefs.end_of_day_enabled !== false}
-                  onCheckedChange={(checked) => updateNotifPref("end_of_day_enabled", checked)}
-                />
-              </div>
-
-              {/* Reminder Offset */}
-              <div className="border-t border-border pt-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <Clock className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">Aviso de habito</p>
-                    <p className="text-xs text-muted-foreground">Quanto tempo antes receber o lembrete</p>
-                  </div>
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  {([0, 5, 10, 15, 30] as const).map((min) => {
-                    const currentOffset = notifPrefs.reminder_offset_minutes ?? 10;
-                    const isSelected = currentOffset === min;
-                    return (
-                      <button
-                        key={min}
-                        onClick={() => updateNotifPref("reminder_offset_minutes", min)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-                          isSelected
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-muted text-muted-foreground border-border hover:border-primary/50"
-                        }`}
-                      >
-                        {min === 0 ? "Na hora" : `${min} min`}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Quiet Hours */}
-              <div className="border-t border-border pt-4">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-3">
-                    <Moon className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Horário de silêncio</p>
-                      <p className="text-xs text-muted-foreground">
-                        {notifPrefs.quiet_hours_start && notifPrefs.quiet_hours_end
-                          ? `Sem notificações das ${notifPrefs.quiet_hours_start} às ${notifPrefs.quiet_hours_end}`
-                          : "Desativado"}
-                      </p>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={!!(notifPrefs.quiet_hours_start && notifPrefs.quiet_hours_end)}
-                    onCheckedChange={(checked) =>
-                      updateQuietHours(checked ? "22:00" : null, checked ? "07:00" : null)
-                    }
-                  />
-                </div>
-                {notifPrefs.quiet_hours_start && notifPrefs.quiet_hours_end && (
-                  <div className="flex items-center gap-3 mt-3 pl-8">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">Das</span>
-                      <input
-                        type="time"
-                        value={notifPrefs.quiet_hours_start}
-                        onChange={(e) => updateQuietHours(e.target.value, notifPrefs.quiet_hours_end!)}
-                        className="bg-muted border border-border rounded-lg px-2 py-1 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">às</span>
-                      <input
-                        type="time"
-                        value={notifPrefs.quiet_hours_end}
-                        onChange={(e) => updateQuietHours(notifPrefs.quiet_hours_start!, e.target.value)}
-                        className="bg-muted border border-border rounded-lg px-2 py-1 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* ====== 6. Acoes da Conta ====== */}
-        {isPremium && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.25 }}
-            className="mt-6"
-          >
-            <Button
-              variant="outline"
-              className="w-full flex items-center justify-center gap-3 p-4 border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors rounded-2xl"
-              onClick={() => navigate("/cancel-subscription")}
+          <div className="flex items-center justify-between mb-3">
+            <h2 className={cn("text-base font-bold", isDark ? "text-white" : "text-foreground")}>
+              Recursos
+            </h2>
+            <button
+              onClick={() => setFreezeShopOpen(true)}
+              className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-lime-400" : "text-lime-600")}
             >
-              <XCircle className="w-5 h-5" />
-              <span className="font-semibold">Cancelar Assinatura</span>
-            </Button>
-          </motion.div>
-        )}
+              Ver Loja
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Gems */}
+            <button
+              onClick={() => setFreezeShopOpen(true)}
+              className={cn("rounded-2xl p-5 flex flex-col items-center text-center", cardClass)}
+              style={cardStyle}
+            >
+              <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center mb-4", isDark ? "bg-lime-400/15" : "bg-lime-100")}>
+                <Gem className={cn("w-6 h-6", isDark ? "text-lime-300" : "text-lime-600")} />
+              </div>
+              <p className={cn("text-2xl font-bold tabular-nums", isDark ? "text-white" : "text-foreground")}>
+                {(gemsBalance || 0).toLocaleString()}
+              </p>
+              <p className={cn("text-[9px] uppercase tracking-widest mt-1", isDark ? "text-white/30" : "text-muted-foreground")}>
+                Gemas Coletadas
+              </p>
+            </button>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: isPremium ? 0.3 : 0.25 }}
-          className="mt-4"
-        >
-          <Button
-            variant="ghost"
-            className="w-full flex items-center justify-center gap-3 p-4 hover:bg-muted transition-colors rounded-2xl text-muted-foreground"
-            onClick={handleSignOut}
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="font-semibold">Sair da conta</span>
-          </Button>
+            {/* Freezes */}
+            <button
+              onClick={() => setFreezeShopOpen(true)}
+              className={cn("rounded-2xl p-5 flex flex-col items-center text-center", cardClass)}
+              style={cardStyle}
+            >
+              <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center mb-4", isDark ? "bg-sky-400/15" : "bg-sky-100")}>
+                <Snowflake className={cn("w-6 h-6", isDark ? "text-sky-300" : "text-sky-600")} />
+              </div>
+              <p className={cn("text-2xl font-bold tabular-nums", isDark ? "text-white" : "text-foreground")}>
+                {String(availableFreezes || 0).padStart(2, "0")}
+              </p>
+              <p className={cn("text-[9px] uppercase tracking-widest mt-1", isDark ? "text-white/30" : "text-muted-foreground")}>
+                Freezes Disponíveis
+              </p>
+            </button>
+          </div>
         </motion.div>
 
-        {/* Freeze Shop Modal */}
-        <FreezeShopModal
-          isOpen={freezeShopOpen}
-          onClose={() => setFreezeShopOpen(false)}
-          userId={userId ?? undefined}
-        />
+        {/* ====== Bonus Content ====== */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mb-6"
+        >
+          <h2 className={cn("text-base font-bold mb-3", isDark ? "text-white" : "text-foreground")}>
+            Conteúdo Bônus
+          </h2>
+          <div className={cn("rounded-2xl overflow-hidden divide-y", cardClass, isDark ? "divide-white/[0.04]" : "divide-gray-100")} style={cardStyle}>
+            {[
+              { icon: Headphones, label: "Meditações", subtitle: "Sessões de relaxamento", path: "/meditation" },
+              { icon: BookOpen, label: "Biblioteca", subtitle: "Guias e artigos diários", path: "/books" },
+              { icon: BarChart3, label: "Insights", subtitle: "Dados de correlação", path: "/tips" },
+            ].map((item) => (
+              <Link
+                key={item.label}
+                to={item.path}
+                className={cn("flex items-center gap-4 px-5 py-4 transition-colors", isDark ? "hover:bg-white/[0.02]" : "hover:bg-gray-50")}
+              >
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0", isDark ? "bg-white/5" : "bg-gray-100")}>
+                  <item.icon className={cn("w-5 h-5", isDark ? "text-white/50" : "text-gray-500")} />
+                </div>
+                <div className="flex-1">
+                  <p className={cn("text-sm font-semibold", isDark ? "text-white" : "text-foreground")}>{item.label}</p>
+                  <p className={cn("text-[11px]", isDark ? "text-white/40" : "text-muted-foreground")}>{item.subtitle}</p>
+                </div>
+                <ChevronRight className={cn("w-4 h-4", isDark ? "text-white/20" : "text-gray-300")} />
+              </Link>
+            ))}
+          </div>
+        </motion.div>
 
-        {/* Avatar Creator */}
-        <AvatarCreator
-          isOpen={avatarCreatorOpen}
-          onClose={() => setAvatarCreatorOpen(false)}
-          userId={userId ?? undefined}
-        />
+        {/* ====== Account Settings ====== */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-6"
+        >
+          <p className={cn("text-[10px] font-semibold uppercase tracking-[0.2em] mb-3 px-1", isDark ? "text-white/30" : "text-muted-foreground")}>
+            Configurações da Conta
+          </p>
+          <div className={cn("rounded-2xl overflow-hidden divide-y", cardClass, isDark ? "divide-white/[0.04]" : "divide-gray-100")} style={cardStyle}>
+            {/* Edit Profile */}
+            <button
+              onClick={handleStartEdit}
+              className={cn("flex items-center gap-4 px-5 py-4 w-full text-left transition-colors", isDark ? "hover:bg-white/[0.02]" : "hover:bg-gray-50")}
+            >
+              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", isDark ? "bg-white/5" : "bg-gray-100")}>
+                <User className={cn("w-5 h-5", isDark ? "text-white/50" : "text-gray-500")} />
+              </div>
+              <span className={cn("text-sm font-semibold flex-1", isDark ? "text-white" : "text-foreground")}>Editar Perfil</span>
+              <ChevronRight className={cn("w-4 h-4", isDark ? "text-white/20" : "text-gray-300")} />
+            </button>
+
+            {/* Notifications */}
+            <div className={cn("flex items-center gap-4 px-5 py-4")}>
+              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", isDark ? "bg-white/5" : "bg-gray-100")}>
+                <Bell className={cn("w-5 h-5", isDark ? "text-white/50" : "text-gray-500")} />
+              </div>
+              <span className={cn("text-sm font-semibold flex-1", isDark ? "text-white" : "text-foreground")}>Notificações</span>
+              <Switch
+                checked={isSubscribed}
+                disabled={notifLoading}
+                onCheckedChange={async (checked) => {
+                  if (checked) await subscribe();
+                  else await unsubscribe();
+                }}
+                className="data-[state=checked]:bg-lime-400"
+              />
+            </div>
+
+            {/* Security */}
+            <button
+              className={cn("flex items-center gap-4 px-5 py-4 w-full text-left transition-colors opacity-50", isDark ? "" : "")}
+              disabled
+            >
+              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", isDark ? "bg-white/5" : "bg-gray-100")}>
+                <Shield className={cn("w-5 h-5", isDark ? "text-white/50" : "text-gray-500")} />
+              </div>
+              <span className={cn("text-sm font-semibold flex-1", isDark ? "text-white" : "text-foreground")}>Segurança</span>
+              <ChevronRight className={cn("w-4 h-4", isDark ? "text-white/20" : "text-gray-300")} />
+            </button>
+          </div>
+        </motion.div>
+
+        {/* ====== Preferences ====== */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="mb-8"
+        >
+          <p className={cn("text-[10px] font-semibold uppercase tracking-[0.2em] mb-3 px-1", isDark ? "text-white/30" : "text-muted-foreground")}>
+            Preferências
+          </p>
+          <div className={cn("rounded-2xl overflow-hidden divide-y", cardClass, isDark ? "divide-white/[0.04]" : "divide-gray-100")} style={cardStyle}>
+            {/* Theme */}
+            <button
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              className={cn("flex items-center gap-4 px-5 py-4 w-full text-left transition-colors", isDark ? "hover:bg-white/[0.02]" : "hover:bg-gray-50")}
+            >
+              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", isDark ? "bg-white/5" : "bg-gray-100")}>
+                {isDark ? <Moon className="w-5 h-5 text-white/50" /> : <Sun className="w-5 h-5 text-gray-500" />}
+              </div>
+              <span className={cn("text-sm font-semibold flex-1", isDark ? "text-white" : "text-foreground")}>Tema</span>
+              <span className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-lime-400" : "text-lime-600")}>
+                {isDark ? "Dark Mode" : "Light Mode"}
+              </span>
+            </button>
+
+            {/* Language */}
+            <div className={cn("flex items-center gap-4 px-5 py-4")}>
+              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", isDark ? "bg-white/5" : "bg-gray-100")}>
+                <Globe className={cn("w-5 h-5", isDark ? "text-white/50" : "text-gray-500")} />
+              </div>
+              <span className={cn("text-sm font-semibold flex-1", isDark ? "text-white" : "text-foreground")}>Idioma</span>
+              <span className={cn("text-[10px] font-medium uppercase tracking-wider", isDark ? "text-white/40" : "text-muted-foreground")}>
+                Português
+              </span>
+            </div>
+
+            {/* Help */}
+            <a
+              href="https://wa.me/5511993371766?text=Ol%C3%A1%2C%20preciso%20de%20ajuda%20com%20o%20app%20Bora"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn("flex items-center gap-4 px-5 py-4 w-full text-left transition-colors", isDark ? "hover:bg-white/[0.02]" : "hover:bg-gray-50")}
+            >
+              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", isDark ? "bg-white/5" : "bg-gray-100")}>
+                <HelpCircle className={cn("w-5 h-5", isDark ? "text-white/50" : "text-gray-500")} />
+              </div>
+              <span className={cn("text-sm font-semibold flex-1", isDark ? "text-white" : "text-foreground")}>Ajuda/Suporte</span>
+              <ChevronRight className={cn("w-4 h-4", isDark ? "text-white/20" : "text-gray-300")} />
+            </a>
+          </div>
+        </motion.div>
+
+        {/* ====== Sign Out ====== */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="flex justify-center mb-8"
+        >
+          <button
+            onClick={handleSignOut}
+            className={cn("flex items-center gap-2 text-sm font-medium transition-colors", isDark ? "text-red-400/70 hover:text-red-400" : "text-red-500/70 hover:text-red-500")}
+          >
+            <LogOut className="w-4 h-4" />
+            Sair da Conta
+          </button>
+        </motion.div>
       </motion.div>
+
+      {/* Modals */}
+      {userId && (
+        <>
+          <FreezeShopModal isOpen={freezeShopOpen} onClose={handleShopClose} userId={userId} />
+          <AvatarCreator isOpen={avatarCreatorOpen} onClose={() => {
+            setAvatarCreatorOpen(false);
+            // Force refetch avatar from DB after save
+            setTimeout(() => {
+              refetchAvatarConfig();
+            }, 300);
+          }} userId={userId} />
+        </>
+      )}
     </div>
   );
 };

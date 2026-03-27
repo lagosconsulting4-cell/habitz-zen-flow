@@ -2,56 +2,53 @@ import { useMemo } from "react";
 import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle, Flame } from "lucide-react";
+import { Check, Zap, Flame } from "lucide-react";
+import { CheckCircle2, Circle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface WeeklyOverviewProps {
-  /** Function to check if a specific date has completed habits */
   getCompletionForDate: (date: Date) => { completed: number; total: number };
-  /** Dark mode flag */
   isDarkMode?: boolean;
-  /** Optional class name */
   className?: string;
+  variant?: "progress-page" | "dashboard";
+  consistencyPercent?: number;
 }
 
 const WEEKDAY_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const WEEKDAY_SHORT = ["S", "M", "T", "W", "T", "F", "S"];
 
 export const WeeklyOverview = ({
   getCompletionForDate,
   isDarkMode = true,
   className,
+  variant = "progress-page",
+  consistencyPercent,
 }: WeeklyOverviewProps) => {
-  // Get current week dates (Sunday to Saturday)
+  const isDashboard = variant === "dashboard";
+
   const weekDates = useMemo(() => {
     const today = new Date();
     const currentDay = today.getDay();
     const dates: Date[] = [];
-
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() - currentDay + i);
       date.setHours(0, 0, 0, 0);
       dates.push(date);
     }
-
     return dates;
   }, []);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Calculate streak (consecutive days with 100% completion ending today or yesterday)
   const currentStreak = useMemo(() => {
     let streak = 0;
     const checkDate = new Date(today);
-
-    // Check if today is complete, if not start from yesterday
     const todayCompletion = getCompletionForDate(today);
     if (todayCompletion.total === 0 || todayCompletion.completed < todayCompletion.total) {
       checkDate.setDate(checkDate.getDate() - 1);
     }
-
-    // Count backwards
     for (let i = 0; i < 30; i++) {
       const completion = getCompletionForDate(checkDate);
       if (completion.total > 0 && completion.completed === completion.total) {
@@ -61,10 +58,85 @@ export const WeeklyOverview = ({
         break;
       }
     }
-
     return streak;
   }, [getCompletionForDate, today]);
 
+  // ── Dashboard variant ──
+  if (isDashboard) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+        className={className}
+      >
+        <Card className="rounded-2xl p-4 border border-border/60 bg-card card-premium">
+          {/* Header: label + streak badge */}
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+              Panorama Semanal
+            </p>
+            {currentStreak > 0 && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-orange-500/20 text-orange-400"
+              >
+                <Flame className="w-3.5 h-3.5" />
+                {currentStreak}d
+              </motion.div>
+            )}
+          </div>
+
+          {/* Day dots */}
+          <div className="flex items-center gap-2">
+            {weekDates.map((date, index) => {
+              const isToday = date.getTime() === today.getTime();
+              const completion = getCompletionForDate(date);
+              const hasHabits = completion.total > 0;
+              const isComplete = hasHabits && completion.completed === completion.total;
+
+              return (
+                <div key={index} className="flex flex-col items-center gap-1.5 flex-1">
+                  {/* Day circle */}
+                  <div
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center transition-all",
+                      isToday && "ring-2 ring-primary ring-offset-1 ring-offset-background",
+                      isComplete
+                        ? "bg-primary/25"
+                        : isToday
+                          ? "bg-primary/15"
+                          : "bg-black/[0.06] dark:bg-white/[0.08] border border-black/10 dark:border-white/10"
+                    )}
+                  >
+                    {isComplete ? (
+                      <Check className="w-4 h-4 text-primary" strokeWidth={3} />
+                    ) : isToday ? (
+                      <Zap className="w-4 h-4 text-primary" />
+                    ) : (
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground/20" />
+                    )}
+                  </div>
+
+                  {/* Day label */}
+                  <span className={cn(
+                    "text-[10px] font-semibold",
+                    isToday ? "text-primary" : "text-muted-foreground"
+                  )}>
+                    {WEEKDAY_SHORT[index]}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      </motion.div>
+    );
+  }
+
+  // ── Progress-page variant (unchanged from original) ──
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

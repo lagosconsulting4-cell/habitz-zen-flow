@@ -340,7 +340,7 @@ export const useGamification = (userId?: string) => {
   });
 
   // Query: Avatar Config (DiceBear)
-  const { data: avatarConfig } = useQuery({
+  const { data: avatarConfig, refetch: refetchAvatarConfig } = useQuery({
     queryKey: ["avatar-config", userId],
     queryFn: async () => {
       if (!userId) return null;
@@ -353,24 +353,29 @@ export const useGamification = (userId?: string) => {
       return (data?.avatar_config as Record<string, unknown>) ?? null;
     },
     enabled: Boolean(userId),
-    staleTime: 300_000,
+    staleTime: 30_000, // 30s — avatar changes should reflect quickly
   });
 
   // Mutation: Save Avatar Config (DiceBear)
   const saveAvatarConfigMutation = useMutation({
     mutationFn: async ({ config }: { config: Record<string, unknown> }) => {
       if (!userId) throw new Error("User not authenticated");
-      const { error } = await supabase.rpc("save_avatar_config", {
-        p_user_id: userId,
-        p_config: config,
-      });
+      // Use direct UPDATE with select to verify save
+      const { data, error } = await supabase
+        .from("profiles")
+        .update({ avatar_config: config, updated_at: new Date().toISOString() })
+        .eq("user_id", userId)
+        .select("avatar_config")
+        .single();
       if (error) throw error;
-      return config;
+      if (!data?.avatar_config) throw new Error("Avatar config not saved");
+      return data.avatar_config as Record<string, unknown>;
     },
     onSuccess: (savedConfig) => {
-      // Immediately update cache so Profile shows new avatar without waiting for refetch
+      // Immediately update cache so Profile shows new avatar
       queryClient.setQueryData(["avatar-config", userId], savedConfig);
-      queryClient.invalidateQueries({ queryKey: ["profiles", userId] });
+      queryClient.invalidateQueries({ queryKey: ["avatar-config", userId] });
+      queryClient.invalidateQueries({ queryKey: ["profile", userId] });
     },
   });
 
@@ -910,10 +915,7 @@ export const useGamification = (userId?: string) => {
         queryClient.invalidateQueries({ queryKey: ["gem-transactions", userId] });
         queryClient.invalidateQueries({ queryKey: ["weekly-freeze-purchases", userId] });
 
-        toast.success("Freeze comprado!", {
-          description: `Você tem ${result.available_freezes} freezes disponíveis`,
-          icon: "❄️",
-        });
+        // Toast suppressed — FreezeShopModal shows its own success popup
 
         window.dispatchEvent(
           new CustomEvent("gamification:freeze-purchased", { detail: { userId } })
@@ -1305,6 +1307,7 @@ export const useGamification = (userId?: string) => {
 
     // ========== NEW: DICEBEAR AVATAR ==========
     avatarConfig: (avatarConfig as Record<string, unknown>) ?? null,
+    refetchAvatarConfig,
     saveAvatarConfig: saveAvatarConfigMutation.mutateAsync,
     isSavingAvatarConfig: saveAvatarConfigMutation.isPending,
 

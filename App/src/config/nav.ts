@@ -25,8 +25,7 @@ export const navItems: NavItem[] = [
     showInMobileNav: true,
     includeInMoreMenu: true,
   },
-  { id: "profile", label: "Perfil", path: "/profile", icon: "user", variant: "secondary", requiresAuth: true, showInMobileNav: false, includeInMoreMenu: true },
-  { id: "bonus", label: "Bônus", path: "/bonus", icon: "gift", variant: "secondary", requiresAuth: true, showInMobileNav: false, includeInMoreMenu: true }
+  { id: "profile", label: "Perfil", path: "/profile", icon: "user", variant: "secondary", requiresAuth: true, showInMobileNav: false, includeInMoreMenu: true }
 ];
 
 export const primaryNavItems = navItems.filter((item) => item.variant === "primary");

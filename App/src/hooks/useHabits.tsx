@@ -186,7 +186,7 @@ export const useHabits = () => {
   } = useQuery({
     queryKey: ['habits', user?.id],
     queryFn: fetchHabitsQuery,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 30 seconds — fast updates on navigation
     enabled: !!user,
   });
 
@@ -283,7 +283,7 @@ export const useHabits = () => {
   } = useQuery({
     queryKey: ['completions', user?.id, completionsDate],
     queryFn: () => fetchCompletionsQuery(completionsDate),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 30 seconds — fast updates on navigation
     enabled: !!user,
   });
 
@@ -395,6 +395,7 @@ export const useHabits = () => {
         "notification_pref" |
         "auto_complete_source" |
         "reminder_time" |
+        "times_per_day" |
         "due_date"
       >>;
     }) => {
@@ -413,11 +414,13 @@ export const useHabits = () => {
       if (error) throw error;
       return data as Habit;
     },
-    onSuccess: (data, variables) => {
-      // Optimistically update cache
+    onSuccess: async (data) => {
+      // Update cache with server-returned data (instant UI update)
       queryClient.setQueryData(['habits', user?.id], (old: Habit[] = []) =>
-        old.map((habit) => (habit.id === variables.habitId ? { ...habit, ...variables.updates } : habit))
+        old.map((habit) => (habit.id === data.id ? data : habit))
       );
+      // Await refetch so fresh data is in cache before mutateAsync resolves and navigate() fires
+      await queryClient.refetchQueries({ queryKey: ['habits', user?.id] });
     },
     onError: (error) => {
       console.error("Error updating habit:", error);

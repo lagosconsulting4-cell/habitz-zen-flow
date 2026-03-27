@@ -33,7 +33,7 @@ export interface DiceBearAvatarConfig {
 // Option Enums (from DiceBear avataaars schema)
 // ============================================
 
-export const SKIN_COLORS = ["614335", "d08b5b", "ae5d29", "edb98a", "ffdbb4", "fd9841", "f8d25c"];
+export const SKIN_COLORS = ["614335", "d08b5b", "ae5d29", "edb98a", "ffdbb4", "fd9841", "f8d25c", "c68642", "8d5524", "e0ac69", "f1c27d", "ffdbac"];
 
 export const HAIR_STYLES = [
   "bob", "bun", "curly", "curvy", "dreads", "dreads01", "dreads02",
@@ -62,6 +62,8 @@ export const FACIAL_HAIR_TYPES = ["beardLight", "beardMedium", "beardMajestic", 
 export const CLOTHING_TYPES = ["blazerAndShirt", "blazerAndSweater", "collarAndSweater", "graphicShirt", "hoodie", "overall", "shirtCrewNeck", "shirtScoopNeck", "shirtVNeck"];
 
 export const CLOTHES_COLORS = ["262e33", "65c9ff", "5199e4", "25557c", "e6e6e6", "929598", "3c4f5c", "b1e2ff", "a7ffc4", "ffafb9", "ffffb1", "ff488e", "ff5c5c", "ffffff"];
+
+export const CLOTHING_GRAPHIC_TYPES = ["bat", "bear", "cumbia", "deer", "diamond", "hola", "pizza", "resist", "skull", "skullOutline"];
 
 export const ACCESSORY_TYPES = ["kurt", "prescription01", "prescription02", "round", "sunglasses", "wayfarers", "eyepatch"];
 
@@ -112,7 +114,9 @@ export function AvatarDisplay({
   className?: string;
 }) {
   // SVG is generated from DiceBear library with predefined enum values — safe to render
-  const svg = useMemo(() => generateAvatarSvg(config), [config]);
+  // Use JSON.stringify for value-based comparison (not reference-based)
+  const configKey = JSON.stringify(config);
+  const svg = useMemo(() => generateAvatarSvg(config), [configKey]);
 
   return (
     <div

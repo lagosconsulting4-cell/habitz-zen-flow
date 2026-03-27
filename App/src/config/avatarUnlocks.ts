@@ -94,6 +94,11 @@ export const AVATAR_UNLOCKS: Record<string, Record<string, UnlockTier>> = {
     // 30 days
     eyepatch: 30,
   },
+  clothingGraphic: {
+    bat: 0, bear: 0, diamond: 0, hola: 0,
+    cumbia: 7, deer: 7, pizza: 7,
+    resist: 14, skull: 14, skullOutline: 30,
+  },
 };
 
 /** Returns the streak threshold for unlocking a given trait option (0 = free). */

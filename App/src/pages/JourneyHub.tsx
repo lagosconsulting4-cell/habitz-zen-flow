@@ -1,113 +1,139 @@
 /**
- * JourneyHub — Catalog of all journeys + active journey progress
+ * JourneyHub — Premium catalog of all journeys + active journey progress
  * Route: /journeys
  */
 
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Lock, ChevronRight, Compass, Calendar } from "lucide-react";
+import { Lock, ChevronRight, Compass, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useJourneys, type JourneyWithState } from "@/hooks/useJourney";
-import { JourneyIllustration, getJourneyTheme } from "@/components/JourneyIllustration";
+import { getJourneyTheme } from "@/components/JourneyIllustration";
 import { JourneyHubSkeleton } from "@/components/ui/skeleton";
+import { useTheme } from "@/hooks/useTheme";
+
+// Mock engagement numbers per theme
+const MOCK_USERS: Record<string, string> = {
+  "digital-detox": "+12k",
+  "own-mornings": "+8.5k",
+  gym: "+15k",
+  "focus-protocol": "+6.2k",
+  finances: "+4.8k",
+};
+
+// Avatar photos per theme (2 unique faces each)
+const BASE = import.meta.env.BASE_URL;
+const MOCK_AVATARS: Record<string, [string, string]> = {
+  "digital-detox": [`${BASE}images/avatars/a1.webp`, `${BASE}images/avatars/a2.webp`],
+  "own-mornings": [`${BASE}images/avatars/a3.webp`, `${BASE}images/avatars/a4.webp`],
+  gym: [`${BASE}images/avatars/a5.webp`, `${BASE}images/avatars/a6.webp`],
+  "focus-protocol": [`${BASE}images/avatars/a2.webp`, `${BASE}images/avatars/a5.webp`],
+  finances: [`${BASE}images/avatars/a4.webp`, `${BASE}images/avatars/a1.webp`],
+};
+
+// Level labels
+const LEVEL_LABELS: Record<number, string> = {
+  1: "INICIANTE",
+  2: "AVANÇADO",
+};
+
+// Unique cover image per journey slug — NO repeats
+const JOURNEY_COVERS: Record<string, string> = {
+  // L1 journeys
+  "digital-detox-l1": `${import.meta.env.BASE_URL}backgrounds/arte9.webp`,
+  "own-mornings-l1": `${import.meta.env.BASE_URL}backgrounds/arte8.webp`,
+  "gym-l1": `${import.meta.env.BASE_URL}backgrounds/arte11.webp`,
+  "focus-protocol-l1": `${import.meta.env.BASE_URL}backgrounds/arte5.webp`,
+  "finances-l1": `${import.meta.env.BASE_URL}backgrounds/arte2.webp`,
+  // L2 journeys — each gets a different image
+  "digital-detox-l2": `${import.meta.env.BASE_URL}backgrounds/arte1.webp`,
+  "own-mornings-l2": `${import.meta.env.BASE_URL}backgrounds/arte3.webp`,
+  "gym-l2": `${import.meta.env.BASE_URL}backgrounds/arte12.webp`,
+  "focus-protocol-l2": `${import.meta.env.BASE_URL}backgrounds/arte7.webp`,
+  "finances-l2": `${import.meta.env.BASE_URL}backgrounds/arte10.webp`,
+};
+
+function getJourneyCover(journey: JourneyWithState): string | undefined {
+  return JOURNEY_COVERS[journey.slug] || getJourneyTheme(journey.theme_slug).backgroundImage || undefined;
+}
 
 // ============================================
-// Active Journey Card (featured top section)
+// Active Journey Card — Image hero style
 // ============================================
 const ActiveJourneyCard = ({ journey }: { journey: JourneyWithState }) => {
   const navigate = useNavigate();
   const state = journey.userState!;
-  const percent = state.completion_percent;
-  const theme = getJourneyTheme(journey.theme_slug);
-
-  // Progress ring
-  const ringSize = 56;
-  const strokeWidth = 4;
-  const radius = (ringSize - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percent / 100) * circumference;
+  const bgImage = getJourneyCover(journey);
 
   return (
-    <motion.button
-      initial={{ opacity: 0, y: 10 }}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      onClick={() => navigate(`/journeys/${journey.slug}`)}
-      className={cn(
-        "w-full journey-card p-4 text-left relative",
-        "border transition-all",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-      )}
+      transition={{ delay: 0.15, duration: 0.4 }}
+      className="rounded-2xl overflow-hidden"
       style={{
-        background: 'var(--card)',
-        borderColor: `${theme.color}33`,
-        boxShadow: `0 4px 24px ${theme.color}1A`,
+        backgroundColor: "rgb(20, 20, 20)",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(163,230,53,0.04)",
       }}
     >
-      <div className="flex items-center gap-4 relative z-10">
-        {/* Progress ring */}
-        <div className="relative flex-shrink-0">
-          {/* Glow behind ring */}
-          <div
-            className="absolute inset-0 rounded-full blur-md"
-            style={{ backgroundColor: `${theme.color}1A` }}
+      {/* Image area (top) */}
+      <div className="relative" style={{ height: 180 }}>
+        {bgImage && (
+          <img
+            src={bgImage}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
           />
-          <svg width={ringSize} height={ringSize} className="transform -rotate-90 relative" role="img" aria-label={`Progresso da jornada: ${percent}%`}>
-            <circle
-              cx={ringSize / 2}
-              cy={ringSize / 2}
-              r={radius}
-              strokeWidth={strokeWidth}
-              fill="transparent"
-              style={{ stroke: `${theme.color}26` }}
-            />
-            <motion.circle
-              cx={ringSize / 2}
-              cy={ringSize / 2}
-              r={radius}
-              strokeWidth={strokeWidth}
-              fill="transparent"
-              strokeDasharray={circumference}
-              initial={{ strokeDashoffset: circumference }}
-              animate={{ strokeDashoffset: offset }}
-              transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-              strokeLinecap="round"
-              style={{ stroke: theme.color }}
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-xs font-bold text-foreground">{percent}%</span>
-          </div>
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-bold text-foreground truncate">{journey.title}</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Dia {state.current_day} de {journey.duration_days} · Fase {state.current_phase}
-          </p>
-          <Button
-            size="sm"
-            className="mt-2 h-8 px-4 rounded-lg text-xs font-semibold"
-            style={{ backgroundColor: theme.color, color: '#fff' }}
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/journeys/${journey.slug}/day/${state.current_day}`);
-            }}
-          >
-            Continuar
-          </Button>
-        </div>
-
-        <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+        )}
+        {/* Bottom fade into card bg */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(to top, rgb(20,20,20) 0%, rgba(20,20,20,0) 30%)",
+          }}
+        />
       </div>
-    </motion.button>
+
+      {/* Content area (bottom) */}
+      <div className="px-5 pb-5 pt-4">
+        {/* Progress indicator */}
+        <p className="text-xs font-bold uppercase tracking-wider text-white/50 mb-2">
+          DIA {state.current_day} DE {journey.duration_days}{" "}
+          <span className="inline-block w-6 h-px bg-white/20 align-middle ml-2" />
+        </p>
+        {/* Title */}
+        <h3 className="text-xl font-bold text-white leading-tight">
+          {journey.title}
+        </h3>
+        {/* Description */}
+        {journey.promise && (
+          <p className="text-sm text-white/50 mt-1.5 line-clamp-2 leading-relaxed">
+            {journey.promise}
+          </p>
+        )}
+        {/* Continue button */}
+        <button
+          onClick={() =>
+            navigate(`/journeys/${journey.slug}`)
+          }
+          className="mt-5 flex h-12 w-full items-center justify-center rounded-full text-sm font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          style={{
+            background: "linear-gradient(135deg, #A3E635 0%, #84CC16 100%)",
+            color: "#000000",
+            boxShadow:
+              "0 0 24px rgba(163, 230, 53, 0.3), 0 4px 12px rgba(163, 230, 53, 0.2)",
+          }}
+        >
+          CONTINUAR
+        </button>
+      </div>
+    </motion.div>
   );
 };
 
 // ============================================
-// Journey Catalog Card
+// Journey Catalog Card — Image + tags style
 // ============================================
 const JourneyCatalogCard = ({
   journey,
@@ -119,99 +145,187 @@ const JourneyCatalogCard = ({
   index: number;
 }) => {
   const navigate = useNavigate();
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
   const theme = getJourneyTheme(journey.theme_slug);
+  const bgImage = getJourneyCover(journey);
+  const mockUsers = MOCK_USERS[journey.theme_slug] || "+1k";
+  const isCompleted = journey.userState?.status === "completed";
 
   return (
     <motion.button
-      initial={{ opacity: 0, y: 16, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: 0.1 + index * 0.08, type: "spring", stiffness: 300, damping: 30 }}
-      whileHover={!isLocked ? { y: -2, scale: 1.01 } : undefined}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        delay: 0.1 + index * 0.08,
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      }}
+      whileHover={!isLocked ? { y: -2 } : undefined}
       whileTap={!isLocked ? { scale: 0.98 } : undefined}
       onClick={() => !isLocked && navigate(`/journeys/${journey.slug}`)}
       disabled={isLocked}
       className={cn(
-        "w-full journey-card p-4 text-left relative",
-        "border",
-        isLocked
-          ? "opacity-50 cursor-not-allowed"
-          : "transition-all",
+        "w-full text-left",
+        isLocked ? "opacity-70 cursor-not-allowed" : "transition-all",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
       )}
-      style={{
-        background: 'var(--card)',
-        borderColor: isLocked ? 'var(--border)' : `${theme.color}26`,
-        boxShadow: isLocked ? undefined : `0 4px 20px ${theme.color}15, 0 0 0 1px ${theme.color}0A`,
-      }}
     >
-      {/* Top accent stripe */}
+      {/* Cover Image */}
       <div
-        className="absolute top-0 inset-x-0 h-0.5"
-        style={{ backgroundColor: isLocked ? 'var(--muted-foreground)' : theme.color }}
-      />
-      <div className="flex items-center gap-3 relative z-10">
-        <div className="relative flex-shrink-0">
-          {!isLocked && (
-            <div
-              className="absolute inset-0 blur-xl opacity-20 rounded-full"
-              style={{ backgroundColor: theme.color }}
-            />
-          )}
-          <JourneyIllustration
-            illustrationKey={journey.illustration_key}
-            size="sm"
-            className={cn("relative", isLocked ? "opacity-50" : "")}
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-bold text-foreground line-clamp-2">{journey.title}</h3>
-          {journey.promise && (
-            <p className="text-sm text-foreground/70 font-medium mt-0.5 line-clamp-2 leading-snug">{journey.promise}</p>
-          )}
-
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Calendar className="w-3 h-3" />
-              {journey.duration_days} dias
-            </div>
-            {journey.level === 2 && (
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">L2</Badge>
+        className="relative rounded-xl overflow-hidden mb-3"
+        style={{ height: 160 }}
+      >
+        {bgImage && (
+          <img
+            src={bgImage}
+            alt=""
+            className={cn(
+              "absolute inset-0 h-full w-full object-cover",
+              isLocked && "blur-[2px]"
             )}
-            {journey.tags.slice(0, 2).map((tag) => (
-              <Badge
-                key={tag}
-                variant="secondary"
-                className="text-[10px] px-1.5 py-0 h-4"
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
+          />
+        )}
+        {/* Subtle gradient for badge readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
 
-          {/* Completed state */}
-          {journey.userState?.status === "completed" && (
-            <Badge
-              className="mt-2 text-[10px] border-0"
-              style={{ backgroundColor: `${theme.color}1A`, color: theme.color }}
-            >
-              Completada
-            </Badge>
-          )}
+        {/* Duration badge */}
+        <div
+          className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full px-3 py-1"
+          style={{
+            backgroundColor: "rgba(163, 230, 53, 0.9)",
+            boxShadow: "0 2px 8px rgba(163, 230, 53, 0.3)",
+          }}
+        >
+          <div className="h-1.5 w-1.5 rounded-full bg-black/40" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-black">
+            {journey.duration_days} DIAS
+          </span>
         </div>
 
-        {isLocked ? (
-          <Lock className="w-5 h-5 text-muted-foreground/50 flex-shrink-0" />
-        ) : (
-          <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+        {/* Lock overlay */}
+        {isLocked && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm">
+              <Lock className="h-5 w-5 text-white/70" />
+            </div>
+          </div>
+        )}
+
+        {/* Completed badge */}
+        {isCompleted && (
+          <div
+            className="absolute top-3 left-3 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
+            style={{
+              backgroundColor: `${theme.color}E6`,
+              color: "#FFFFFF",
+            }}
+          >
+            Completa
+          </div>
         )}
       </div>
 
-      {/* Locked overlay text */}
+      {/* Tags row */}
+      <div className="flex items-center gap-2 mb-2">
+        <span
+          className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+          style={{
+            backgroundColor: isDarkMode
+              ? "rgba(255,255,255,0.1)"
+              : "rgba(0,0,0,0.06)",
+            color: isDarkMode
+              ? "rgba(255,255,255,0.7)"
+              : "rgba(0,0,0,0.6)",
+          }}
+        >
+          {LEVEL_LABELS[journey.level] || `NÍVEL ${journey.level}`}
+        </span>
+        {journey.tags.slice(0, 2).map((tag) => (
+          <span
+            key={tag}
+            className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+            style={{
+              backgroundColor: isDarkMode
+                ? "rgba(255,255,255,0.06)"
+                : "rgba(0,0,0,0.04)",
+              color: isDarkMode
+                ? "rgba(255,255,255,0.5)"
+                : "rgba(0,0,0,0.4)",
+            }}
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      {/* Title */}
+      <h3
+        className={cn(
+          "text-lg font-bold leading-tight",
+          isDarkMode ? "text-white" : "text-gray-900"
+        )}
+      >
+        {journey.title}
+      </h3>
+
+      {/* Locked subtitle */}
       {isLocked && (
-        <p className="text-[10px] text-muted-foreground mt-1 ml-[52px]">
-          Complete o Nivel 1 para desbloquear
+        <p
+          className="text-xs mt-1"
+          style={{
+            color: isDarkMode
+              ? "rgba(255,255,255,0.4)"
+              : "rgba(0,0,0,0.4)",
+          }}
+        >
+          Desbloqueie no Nível 2
         </p>
       )}
+
+      {/* User row */}
+      <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center gap-1.5">
+          {/* Mock avatar photos */}
+          <div className="flex -space-x-1.5">
+            {(MOCK_AVATARS[journey.theme_slug] || [`${BASE}images/avatars/a1.webp`, `${BASE}images/avatars/a2.webp`]).map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt=""
+                className="h-6 w-6 rounded-full border-2 object-cover"
+                style={{ borderColor: isDarkMode ? "#000" : "#FFF" }}
+              />
+            ))}
+          </div>
+          <span
+            className="text-xs font-medium"
+            style={{
+              color: isDarkMode
+                ? "rgba(255,255,255,0.4)"
+                : "rgba(0,0,0,0.4)",
+            }}
+          >
+            {mockUsers}
+          </span>
+        </div>
+        {isLocked ? (
+          <Lock
+            className="h-4 w-4"
+            style={{
+              color: isDarkMode
+                ? "rgba(255,255,255,0.3)"
+                : "rgba(0,0,0,0.3)",
+            }}
+          />
+        ) : (
+          <ChevronRight
+            className="h-5 w-5"
+            style={{ color: theme.color }}
+          />
+        )}
+      </div>
     </motion.button>
   );
 };
@@ -221,6 +335,8 @@ const JourneyCatalogCard = ({
 // ============================================
 const JourneyHub = () => {
   const { journeys, loading, isL2Unlocked } = useJourneys();
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
 
   const activeJourneys = useMemo(
     () => journeys.filter((j) => j.userState?.status === "active"),
@@ -229,20 +345,6 @@ const JourneyHub = () => {
   const catalogJourneys = useMemo(
     () => journeys.filter((j) => j.userState?.status !== "active"),
     [journeys]
-  );
-
-  // Group catalog by theme
-  const themes = useMemo(
-    () =>
-      catalogJourneys.reduce<Record<string, JourneyWithState[]>>(
-        (acc, j) => {
-          if (!acc[j.theme_slug]) acc[j.theme_slug] = [];
-          acc[j.theme_slug].push(j);
-          return acc;
-        },
-        {}
-      ),
-    [catalogJourneys]
   );
 
   if (loading) {
@@ -254,70 +356,145 @@ const JourneyHub = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="px-4 pb-navbar space-y-6 max-w-xl mx-auto w-full"
+      className="px-4 pb-navbar space-y-8 max-w-xl mx-auto w-full"
     >
-      {/* Hero com arte12 */}
-      <div className="relative -mx-4 overflow-hidden" style={{ height: '42vh' }}>
+      {/* Hero Section — image with text overlaid at bottom */}
+      <div className="relative -mx-4 overflow-hidden flex flex-col justify-end" style={{ height: "52vh" }}>
+        {/* Background image */}
         <img
           src={`${import.meta.env.BASE_URL}backgrounds/arte13.webp`}
           alt=""
           aria-hidden="true"
           loading="eager"
-          className="w-full h-full object-cover object-bottom"
+          className="absolute inset-0 w-full h-full object-cover object-center"
         />
-        {/* Scrim top — safe-area + legibilidade status bar */}
+        {/* Top scrim for status bar */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
-        {/* Fade bottom → background */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/15 to-transparent" />
-        {/* Título sobreposto no bottom */}
-        <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
-          <h1 className="text-2xl font-bold text-gray-900">Jornadas feitas pra você</h1>
+        {/* Bottom gradient for text readability */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: isDarkMode
+              ? "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 35%, rgba(0,0,0,0) 65%)"
+              : "linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.7) 35%, rgba(255,255,255,0) 65%)",
+          }}
+        />
+        {/* Content overlaid at bottom */}
+        <div className="relative z-10 px-4 pb-4">
+          {/* Curated badge */}
+          <span
+            className="inline-block rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] mb-4"
+            style={{
+              backgroundColor: isDarkMode
+                ? "rgba(163, 230, 53, 0.15)"
+                : "rgba(132, 204, 22, 0.12)",
+              color: isDarkMode ? "#A3E635" : "#65A30D",
+            }}
+          >
+            CURATED
+          </span>
+          {/* Heading */}
+          <h1
+            className={cn(
+              "text-3xl font-bold leading-tight",
+              isDarkMode ? "text-white" : "text-gray-900"
+            )}
+          >
+            Jornadas{" "}
+            <em className="font-bold italic">para você</em>
+          </h1>
+          {/* Subtitle */}
+          <p
+            className="mt-3 text-sm leading-relaxed"
+            style={{
+              color: isDarkMode
+                ? "rgba(255,255,255,0.5)"
+                : "rgba(0,0,0,0.5)",
+            }}
+          >
+            Experiências imersivas de vários dias, feitas para transformar
+            seus hábitos.
+          </p>
         </div>
       </div>
 
       {/* Active Journeys */}
       {activeJourneys.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-base font-semibold text-foreground/80">
-            Em andamento
-          </h2>
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2
+              className={cn(
+                "text-lg font-bold",
+                isDarkMode ? "text-white" : "text-gray-900"
+              )}
+            >
+              Em Andamento
+            </h2>
+            <span
+              className="text-xs font-semibold"
+              style={{ color: isDarkMode ? "#A3E635" : "#65A30D" }}
+            >
+              {activeJourneys.length} ativa
+              {activeJourneys.length > 1 ? "s" : ""}
+            </span>
+          </div>
           {activeJourneys.map((j) => (
             <ActiveJourneyCard key={j.id} journey={j} />
           ))}
         </section>
       )}
 
-      {/* Journey Catalog */}
-      <section className="space-y-3">
-        <h2 className="text-base font-semibold text-foreground/80">
-          {activeJourneys.length > 0 ? "Explorar" : "Escolha sua jornada"}
-        </h2>
-        <div className="space-y-3">
+      {/* Explore Catalog */}
+      <section className="space-y-5">
+        <div className="flex items-center justify-between">
+          <h2
+            className={cn(
+              "text-lg font-bold",
+              isDarkMode ? "text-white" : "text-gray-900"
+            )}
+          >
+            Explorar
+          </h2>
+          <SlidersHorizontal
+            className="h-5 w-5"
+            style={{
+              color: isDarkMode
+                ? "rgba(255,255,255,0.4)"
+                : "rgba(0,0,0,0.4)",
+            }}
+          />
+        </div>
+        <div className="space-y-8">
           {(() => {
             let globalIndex = 0;
-            return Object.entries(themes).map(([, themeJourneys]) => {
-              const sorted = [...themeJourneys].sort((a, b) => a.level - b.level);
-              return sorted.map((j) => {
-                const idx = globalIndex++;
-                return (
-                  <JourneyCatalogCard
-                    key={j.id}
-                    journey={j}
-                    isLocked={!isL2Unlocked(j)}
-                    index={idx}
-                  />
-                );
-              });
+            // Flatten all catalog journeys sorted by theme then level
+            const sorted = [...catalogJourneys].sort((a, b) => {
+              if (a.theme_slug !== b.theme_slug)
+                return a.theme_slug.localeCompare(b.theme_slug);
+              return a.level - b.level;
+            });
+            return sorted.map((j) => {
+              const idx = globalIndex++;
+              return (
+                <JourneyCatalogCard
+                  key={j.id}
+                  journey={j}
+                  isLocked={!isL2Unlocked(j)}
+                  index={idx}
+                />
+              );
             });
           })()}
         </div>
       </section>
 
-      {/* Empty catalog state */}
+      {/* Empty state */}
       {journeys.length === 0 && (
         <div className="text-center py-12">
           <Compass className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <p className="text-muted-foreground">Nenhuma jornada disponivel no momento</p>
+          <p className="text-muted-foreground">
+            Nenhuma jornada disponível no momento
+          </p>
         </div>
       )}
     </motion.div>

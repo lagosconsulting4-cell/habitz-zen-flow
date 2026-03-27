@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 /**
  * Mobile-friendly table renderer — turns markdown table rows into styled exercise cards.
  */
-const ExerciseTable = ({
+export const ExerciseTable = ({
   headers,
   rows,
   themeColor,
@@ -82,7 +82,7 @@ const ExerciseTable = ({
   );
 };
 
-const renderContent = (content: string, themeColor: string) => {
+export const renderContent = (content: string, themeColor: string) => {
   const lines = content.split("\n");
   const elements: React.ReactNode[] = [];
   let i = 0;

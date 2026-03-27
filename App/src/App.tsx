@@ -27,6 +27,7 @@ const NewOnboardingFlowLegacy = lazy(() => import("./components/onboarding/NewOn
 const OnboardingFlowV2 = lazy(() => import("./components/onboarding-v2/OnboardingFlowV2"));
 const PersonalPlan = lazy(() => import("./pages/PersonalPlan"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const SessionPage = lazy(() => import("./pages/SessionPage"));
 const CreateHabit = lazy(() => import("./pages/CreateHabit"));
 const EditHabit = lazy(() => import("./pages/EditHabit"));
 const Progress = lazy(() => import("./pages/Progress"));
@@ -45,7 +46,6 @@ const Pricing = lazy(() => import("./pages/Pricing"));
 const Thanks = lazy(() => import("./pages/Thanks"));
 const Cancel = lazy(() => import("./pages/Cancel"));
 const MyHabits = lazy(() => import("./pages/MyHabits"));
-const Bonus = lazy(() => import("./pages/Bonus"));
 const Preview = lazy(() => import("./pages/Preview"));
 const DefinirSenha = lazy(() => import("./pages/DefinirSenha"));
 const Welcome = lazy(() => import("./pages/Welcome"));
@@ -70,8 +70,9 @@ const PageLoader = () => (
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutos - dados frescos
+      staleTime: 30 * 1000, // 30 segundos - dados frescos (navegação rápida atualiza)
       gcTime: 30 * 60 * 1000, // 30 minutos - manter no cache
+      refetchOnMount: "always" as const, // Refetch ao navegar entre páginas
       retry: (failureCount, error) => {
         // Don't retry if offline
         if (!navigator.onLine) return false;
@@ -185,6 +186,8 @@ const App = () => (
               <Route path="/onboarding-legacy-new" element={<NewOnboardingFlowLegacy />} />
               <Route path="/plano" element={<PersonalPlan />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/session" element={<SessionPage />} />
+              <Route path="/journeys/:slug/session" element={<SessionPage />} />
               <Route path="/create" element={<CreateHabit />} />
               <Route path="/habits" element={<MyHabits />} />
               <Route path="/habits/edit/:id" element={<EditHabit />} />
@@ -199,7 +202,7 @@ const App = () => (
               <Route path="/journeys/:slug/day/:day" element={<JourneyDayCard />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/cancel-subscription" element={<CancelSubscription />} />
-              <Route path="/bonus" element={<Bonus />} />
+              <Route path="/bonus" element={<Navigate to="/dashboard" replace />} />
             </Route>
 
             {/* Admin routes - protected with adminOnly */}

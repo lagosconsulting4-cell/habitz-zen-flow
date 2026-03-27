@@ -2,11 +2,8 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useTheme } from "@/hooks/useTheme";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,37 +21,43 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
 import { useHabits, Habit } from "@/hooks/useHabits";
-import { Loader2, MoreVertical, Copy, Edit, Trash2, Target, Flame, TrendingUp, ArrowUpDown, ChevronRight, Sparkles, Plus } from "lucide-react";
+import { Loader2, MoreVertical, Copy, Trash2, Target, Flame, Search, Clock, Sparkles, ChevronRight } from "lucide-react";
 import { HabitIconKey } from "@/components/icons/HabitIcons";
 import { HabitGlyph } from "@/components/icons/HabitGlyph";
 
-const categories = [
-  { id: "mente", label: "Mente" },
-  { id: "corpo", label: "Corpo" },
-  { id: "estudo", label: "Estudo" },
-  { id: "carreira", label: "Carreira" },
-  { id: "relacionamento", label: "Relacionamento" },
-  { id: "financeiro", label: "Financeiro" },
-  { id: "outro", label: "Outro" },
-];
-const periods = [
-  { id: "morning", label: "Manhã" },
-  { id: "afternoon", label: "Tarde" },
-  { id: "evening", label: "Noite" },
-];
+const CATEGORY_LABELS: Record<string, string> = {
+  mente: "Mente",
+  corpo: "Corpo",
+  estudo: "Estudo",
+  carreira: "Carreira",
+  relacionamento: "Relação",
+  financeiro: "Finanças",
+  productivity: "Produtividade",
+  fitness: "Fitness",
+  nutrition: "Alimentação",
+  time_routine: "Rotina",
+  avoid: "Evitar",
+  outro: "Outro",
+};
+
+const PERIOD_LABELS: Record<string, string> = {
+  morning: "Manhã",
+  afternoon: "Tarde",
+  evening: "Noite",
+};
+
+const PERIOD_ORDER: Record<string, number> = { morning: 0, afternoon: 1, evening: 2 };
+
+function formatTime(time?: string | null): string | null {
+  if (!time) return null;
+  const parts = time.split(":");
+  if (parts.length < 2) return null;
+  return `${parts[0]}:${parts[1]}`;
+}
 
 const MyHabits = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const {
@@ -67,84 +70,53 @@ const MyHabits = () => {
   } = useHabits();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
-  const [status, setStatus] = useState<"active" | "archived">("active");
+  const [status, setStatus] = useState<"active" | "archived" | "completed">("active");
   const [deleteTarget, setDeleteTarget] = useState<Habit | null>(null);
-  const [sortBy, setSortBy] = useState<"name" | "streak" | "category" | "period">("name");
-
-  // Calculate stats
-  const stats = useMemo(() => {
-    const activeHabits = habits.filter((h) => h.is_active);
-    const longestStreak = Math.max(0, ...activeHabits.map((h) => h.streak));
-    const avgStreak = activeHabits.length > 0
-      ? Math.round(activeHabits.reduce((sum, h) => sum + h.streak, 0) / activeHabits.length)
-      : 0;
-
-    return {
-      total: activeHabits.length,
-      longestStreak,
-      avgStreak,
-    };
-  }, [habits]);
 
   const filteredHabits = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
+    return habits
+      .filter((h) => {
+        if (status === "active") return h.is_active;
+        if (status === "archived") return !h.is_active;
+        if (status === "completed") return h.is_active && h.streak > 0;
+        return true;
+      })
+      .filter((h) => (term ? h.name.toLowerCase().includes(term) : true))
+      .sort((a, b) => {
+        if (status === "completed") return b.streak - a.streak;
+        const po = (PERIOD_ORDER[a.period] ?? 0) - (PERIOD_ORDER[b.period] ?? 0);
+        return po !== 0 ? po : a.name.localeCompare(b.name);
+      });
+  }, [habits, status, searchTerm]);
 
-    const filtered = habits
-      .filter((habit) => status === "active" ? habit.is_active : !habit.is_active)
-      .filter((habit) => (term ? habit.name.toLowerCase().includes(term) : true))
-      .filter((habit) =>
-        selectedCategories.length > 0 ? selectedCategories.includes(habit.category) : true,
-      )
-      .filter((habit) =>
-        selectedPeriods.length > 0 ? selectedPeriods.includes(habit.period) : true,
-      );
+  // Group by period
+  const habitsByPeriod = useMemo(() => {
+    const groups: { period: string; label: string; habits: Habit[] }[] = [];
+    const map = new Map<string, Habit[]>();
+    for (const h of filteredHabits) {
+      const arr = map.get(h.period) || [];
+      arr.push(h);
+      map.set(h.period, arr);
+    }
+    for (const [period, list] of map) {
+      groups.push({ period, label: PERIOD_LABELS[period] || period, habits: list });
+    }
+    groups.sort((a, b) => (PERIOD_ORDER[a.period] ?? 0) - (PERIOD_ORDER[b.period] ?? 0));
+    return groups;
+  }, [filteredHabits]);
 
-    // Sort habits
-    return filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "streak":
-          return b.streak - a.streak;
-        case "category":
-          return a.category.localeCompare(b.category);
-        case "period":
-          const periodOrder = { morning: 0, afternoon: 1, evening: 2 };
-          return periodOrder[a.period] - periodOrder[b.period];
-        case "name":
-        default:
-          return a.name.localeCompare(b.name);
-      }
-    });
-  }, [habits, status, searchTerm, selectedCategories, selectedPeriods, sortBy]);
-
-  const uniqueCategories = useMemo(
-    () => Array.from(new Set(habits.map((habit) => habit.category))),
-    [habits],
-  );
-
-  const handleEdit = (habit: Habit) => {
-    navigate(`/habits/edit/${habit.id}`);
-  };
+  const handleEdit = (habit: Habit) => navigate(`/habits/edit/${habit.id}`);
 
   const handleDuplicate = async (habit: Habit) => {
-    try {
-      await duplicateHabit(habit.id);
-    } catch (error) {
-      /* handled */
-    }
+    try { await duplicateHabit(habit.id); } catch { /* handled */ }
   };
 
   const handleArchiveToggle = async (habit: Habit) => {
     try {
-      if (habit.is_active) {
-        await archiveHabit(habit.id);
-      } else {
-        await restoreHabit(habit.id);
-      }
-    } catch (error) {
-      /* handled */
-    }
+      if (habit.is_active) await archiveHabit(habit.id);
+      else await restoreHabit(habit.id);
+    } catch { /* handled */ }
   };
 
   const handleDelete = async () => {
@@ -152,419 +124,240 @@ const MyHabits = () => {
     try {
       await deleteHabit(deleteTarget.id);
       setDeleteTarget(null);
-    } catch (error) {
-      /* handled */
-    }
+    } catch { /* handled */ }
   };
 
   return (
-    <div className="bg-background">
+    <div className="bg-background min-h-screen">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
         className="px-4 pb-navbar max-w-xl mx-auto w-full"
-        style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
+        style={{ paddingTop: "calc(1.5rem + env(safe-area-inset-top, 0px))" }}
       >
-        {/* Header */}
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground flex items-center gap-3 mb-2">
-              <Target className="w-8 h-8 text-primary" />
-              Meus Hábitos
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Gerencie e edite seus hábitos.
-            </p>
-          </div>
-          <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
-            <Link to="/create">
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Hábito
-            </Link>
-          </Button>
-        </div>
+        {/* Search bar */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className={cn(
+            "flex items-center gap-3 rounded-2xl px-4 py-3 mb-4",
+            isDarkMode
+              ? "bg-white/5 border border-white/5"
+              : "bg-gray-100 border border-gray-200/50"
+          )}
+        >
+          <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          <input
+            type="text"
+            placeholder="Buscar hábito..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+          />
+        </motion.div>
 
-        {/* Stats Summary Cards */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {/* Streak Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-          >
-            <Card className={cn(
-              "rounded-2xl p-4 border h-full transition-all duration-300",
-              isDarkMode
-                ? "bg-gradient-to-br from-orange-500/20 to-orange-600/10 border-orange-500/30"
-                : "bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200"
-            )}>
-              <div className="flex items-center gap-2 mb-2">
-                <div className={cn(
-                  "p-1.5 rounded-lg",
-                  isDarkMode ? "bg-orange-500/20" : "bg-orange-500/10"
-                )}>
-                  <Flame className={cn("w-4 h-4", isDarkMode ? "text-orange-400" : "text-orange-600")} />
-                </div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Maior Streak</p>
-              </div>
-              <p className={cn("text-2xl font-bold", isDarkMode ? "text-orange-400" : "text-orange-600")}>
-                {stats.longestStreak}
-                <span className="text-sm font-normal text-muted-foreground ml-1">dias</span>
-              </p>
-            </Card>
-          </motion.div>
-
-          {/* Total Habits Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
-          >
-            <Card className={cn(
-              "rounded-2xl p-4 border h-full transition-all duration-300",
-              isDarkMode
-                ? "bg-gradient-to-br from-blue-500/20 to-blue-600/10 border-blue-500/30"
-                : "bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200"
-            )}>
-              <div className="flex items-center gap-2 mb-2">
-                <div className={cn(
-                  "p-1.5 rounded-lg",
-                  isDarkMode ? "bg-blue-500/20" : "bg-blue-500/10"
-                )}>
-                  <Target className={cn("w-4 h-4", isDarkMode ? "text-blue-400" : "text-blue-600")} />
-                </div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Ativos</p>
-              </div>
-              <p className={cn("text-2xl font-bold", isDarkMode ? "text-blue-400" : "text-blue-600")}>
-                {stats.total}
-                <span className="text-sm font-normal text-muted-foreground ml-1">hábitos</span>
-              </p>
-            </Card>
-          </motion.div>
-        </div>
-
-        <Card className="rounded-2xl bg-card border border-border p-4 mb-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 flex-1">
-              <Input
-                placeholder="Buscar hábito"
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                className="md:max-w-sm bg-secondary border-border text-foreground placeholder:text-muted-foreground"
-              />
-              {/* Sorting Dropdown */}
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-                <SelectTrigger className="w-full sm:w-[160px] bg-secondary border-border">
-                  <ArrowUpDown className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <SelectValue placeholder="Ordenar por" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Nome (A-Z)</SelectItem>
-                  <SelectItem value="streak">Maior Streak</SelectItem>
-                  <SelectItem value="category">Categoria</SelectItem>
-                  <SelectItem value="period">Período</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Tabs value={status} onValueChange={(value) => setStatus(value as typeof status)}>
-              <TabsList className="grid grid-cols-2 rounded-full bg-muted p-1">
-                <TabsTrigger
-                  value="active"
-                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-semibold"
-                >
-                  Ativos
-                </TabsTrigger>
-                <TabsTrigger
-                  value="archived"
-                  className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground data-[state=active]:font-semibold"
-                >
-                  Arquivados
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {uniqueCategories.map((category) => (
-              <button
-                key={category}
-                type="button"
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
-                  selectedCategories.includes(category)
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-muted-foreground hover:bg-muted hover:text-foreground border border-border"
-                }`}
-                onClick={() =>
-                  setSelectedCategories((prev) =>
-                    prev.includes(category)
-                      ? prev.filter((item) => item !== category)
-                      : [...prev, category],
-                  )
-                }
-              >
-                {categories.find((item) => item.id === category)?.label ?? category}
-              </button>
-             ))}
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            {periods.map((period) => (
-              <button
-                key={period.id}
-                type="button"
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
-                  selectedPeriods.includes(period.id)
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-muted-foreground hover:bg-muted hover:text-foreground border border-border"
-                }`}
-                onClick={() =>
-                  setSelectedPeriods((prev) =>
-                    prev.includes(period.id)
-                      ? prev.filter((item) => item !== period.id)
-                      : [...prev, period.id],
-                  )
-                }
-              >
-                {period.label}
-               </button>
-             ))}
-          </div>
-        </Card>
-
-        {loading ? (
-          <Card className="rounded-2xl bg-card border border-border p-12 text-center">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col items-center gap-4"
+        {/* Status tabs */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex gap-2 mb-6"
+        >
+          {([
+            { id: "active", label: "Ativos" },
+            { id: "archived", label: "Arquivados" },
+            { id: "completed", label: "Completados" },
+          ] as const).map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setStatus(tab.id)}
+              className={cn(
+                "px-4 py-2 rounded-full text-sm font-medium transition-all",
+                status === tab.id
+                  ? isDarkMode
+                    ? "bg-lime-400/15 text-lime-300 border border-lime-400/30"
+                    : "bg-foreground text-background"
+                  : isDarkMode
+                    ? "text-white/40 hover:text-white/60 border border-white/10"
+                    : "text-muted-foreground hover:text-foreground border border-gray-200"
+              )}
             >
-              <div className="relative">
-                <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                <div className="absolute inset-0 animate-ping opacity-20">
-                  <Loader2 className="h-10 w-10 text-primary" />
-                </div>
-              </div>
-              <p className="text-muted-foreground">Carregando seus hábitos...</p>
-            </motion.div>
-          </Card>
+              {tab.label}
+            </button>
+          ))}
+        </motion.div>
+
+        {/* Content */}
+        {loading ? (
+          <div className="flex flex-col items-center gap-4 py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Carregando...</p>
+          </div>
         ) : filteredHabits.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
+            className="flex flex-col items-center py-16 text-center"
           >
-            <Card className={cn(
-              "rounded-2xl border p-8 text-center relative overflow-hidden",
-              isDarkMode
-                ? "bg-gradient-to-br from-card to-muted/30 border-border"
-                : "bg-gradient-to-br from-white to-slate-50 border-slate-200"
-            )}>
-              {/* Background decoration */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className={cn(
-                  "absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-10",
-                  isDarkMode ? "bg-primary" : "bg-lime-400"
-                )} />
-                <div className={cn(
-                  "absolute -bottom-16 -left-16 w-32 h-32 rounded-full opacity-10",
-                  isDarkMode ? "bg-blue-500" : "bg-blue-400"
-                )} />
-              </div>
-
-              <div className="relative z-10">
-                {status === "archived" ? (
-                  <>
-                    <motion.div
-                      initial={{ scale: 0.8 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                      className="mb-4"
-                    >
-                      <div className={cn(
-                        "w-20 h-20 mx-auto rounded-full flex items-center justify-center",
-                        isDarkMode ? "bg-muted" : "bg-slate-100"
-                      )}>
-                        <Trash2 className="w-10 h-10 text-muted-foreground" />
-                      </div>
-                    </motion.div>
-                    <h2 className="text-xl font-bold text-foreground mb-2">
-                      Nenhum hábito arquivado
-                    </h2>
-                    <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-                      Você não arquivou nenhum hábito ainda. Isso é bom! Continue mantendo seus hábitos ativos.
-                    </p>
-                    <Button variant="outline" onClick={() => setStatus("active")}>
-                      <TrendingUp className="w-4 h-4 mr-2" />
-                      Ver hábitos ativos
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <motion.div
-                      initial={{ scale: 0.8 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                      className="mb-4"
-                    >
-                      <div className={cn(
-                        "w-20 h-20 mx-auto rounded-full flex items-center justify-center",
-                        isDarkMode ? "bg-primary/20" : "bg-lime-100"
-                      )}>
-                        <Target className={cn("w-10 h-10", isDarkMode ? "text-primary" : "text-lime-600")} />
-                      </div>
-                    </motion.div>
-                    <h2 className="text-xl font-bold text-foreground mb-2">
-                      {searchTerm || selectedCategories.length > 0 || selectedPeriods.length > 0
-                        ? "Nenhum resultado encontrado"
-                        : "Comece sua jornada!"}
-                    </h2>
-                    <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-                      {searchTerm || selectedCategories.length > 0 || selectedPeriods.length > 0
-                        ? "Tente ajustar os filtros ou buscar por outro termo."
-                        : "Crie seu primeiro hábito e comece a construir uma rotina que transforma sua vida."}
-                    </p>
-                    {searchTerm || selectedCategories.length > 0 || selectedPeriods.length > 0 ? (
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setSearchTerm("");
-                          setSelectedCategories([]);
-                          setSelectedPeriods([]);
-                        }}
-                      >
-                        Limpar filtros
-                      </Button>
-                    ) : (
-                      <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
-                        <Link to="/create">
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Criar primeiro hábito
-                        </Link>
-                      </Button>
-                    )}
-                  </>
-                )}
-              </div>
-            </Card>
+            <div
+              className={cn(
+                "w-20 h-20 rounded-full flex items-center justify-center mb-5",
+                isDarkMode ? "bg-white/5" : "bg-gray-100"
+              )}
+            >
+              {status === "archived" ? (
+                <Trash2 className="w-9 h-9 text-muted-foreground" />
+              ) : (
+                <Target className="w-9 h-9 text-muted-foreground" />
+              )}
+            </div>
+            <h2 className="text-lg font-bold text-foreground mb-2">
+              {status === "archived"
+                ? "Nenhum hábito arquivado"
+                : searchTerm
+                  ? "Nenhum resultado"
+                  : "Comece sua jornada!"}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6 max-w-xs">
+              {status === "archived"
+                ? "Seus hábitos arquivados aparecerão aqui."
+                : searchTerm
+                  ? "Tente buscar por outro termo."
+                  : "Crie seu primeiro hábito e transforme sua rotina."}
+            </p>
+            {status === "archived" ? (
+              <Button variant="outline" size="sm" onClick={() => setStatus("active")}>
+                Ver ativos
+              </Button>
+            ) : !searchTerm ? (
+              <Button asChild size="sm" className="bg-primary text-primary-foreground">
+                <Link to="/create">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Criar hábito
+                </Link>
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => setSearchTerm("")}>
+                Limpar busca
+              </Button>
+            )}
           </motion.div>
         ) : (
-          <AnimatePresence mode="popLayout">
-            <div className="space-y-3">
-              {filteredHabits.map((habit, index) => {
-                const archived = !habit.is_active;
-                return (
-                  <motion.div
-                    key={habit.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, transition: { duration: 0.15 } }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Card
-                      className={cn(
-                        "rounded-2xl bg-card border p-4 transition-all duration-200 group cursor-pointer",
-                        "hover:shadow-lg hover:border-primary/30",
-                        archived ? "border-destructive/30 opacity-60 hover:opacity-70" : "border-border"
-                      )}
-                      onClick={() => handleEdit(habit)}
-                    >
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          {/* Icon */}
+          <div className="space-y-8">
+            {habitsByPeriod.map(({ period, label, habits: periodHabits }, gi) => (
+              <motion.div
+                key={period}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + gi * 0.05 }}
+              >
+                {/* Section header */}
+                <p
+                  className={cn(
+                    "text-[11px] font-semibold uppercase tracking-[0.2em] mb-3 px-1",
+                    isDarkMode ? "text-white/65" : "text-muted-foreground"
+                  )}
+                >
+                  {label}
+                </p>
+
+                {/* Habit cards */}
+                <div className="space-y-2.5">
+                  <AnimatePresence mode="popLayout">
+                    {periodHabits.map((habit, i) => {
+                      const archived = !habit.is_active;
+                      const streakStr = String(habit.streak).padStart(2, "0");
+                      const time = formatTime(habit.reminder_time);
+                      const categoryLabel =
+                        CATEGORY_LABELS[habit.category] || habit.category;
+
+                      return (
+                        <motion.div
+                          key={habit.id}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                          transition={{ delay: i * 0.03 }}
+                          onClick={() => handleEdit(habit)}
+                          className={cn(
+                            "group cursor-pointer rounded-2xl p-4 flex items-center gap-4 transition-all duration-200",
+                            isDarkMode
+                              ? "bg-[#1a1a1a] border border-white/[0.06] hover:border-lime-400/15 hover:bg-[#1f1f1f]"
+                              : "bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200",
+                            archived && "opacity-50"
+                          )}
+                          style={
+                            isDarkMode
+                              ? { boxShadow: "0 2px 16px rgba(0,0,0,0.4), 0 0 1px rgba(163,230,53,0.05), inset 0 1px 0 rgba(255,255,255,0.03)" }
+                              : undefined
+                          }
+                        >
+                          {/* Icon circle */}
                           <div
                             className={cn(
-                              "flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-200 group-hover:scale-105",
-                              isDarkMode ? "bg-primary/10" : "bg-lime-100"
+                              "flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center",
+                              isDarkMode ? "bg-lime-400/15" : "bg-gray-100"
                             )}
                           >
                             <HabitGlyph
                               iconKey={habit.icon_key as HabitIconKey | null}
                               category={habit.category}
                               size="md"
-                              tone="inherit"
+                              tone="gray"
                               fallbackLabel={habit.emoji}
-                              className={isDarkMode ? "text-primary" : "text-lime-600"}
+                              className={isDarkMode ? "text-lime-300" : "text-gray-600"}
                             />
                           </div>
 
-                          {/* Info */}
+                          {/* Name + meta */}
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-bold text-foreground truncate">
+                            <h3 className="text-sm font-semibold text-foreground truncate">
                               {habit.name}
                             </h3>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                              <span>{categories.find((item) => item.id === habit.category)?.label ?? habit.category}</span>
-                              <span>•</span>
-                              <span>{periods.find((period) => period.id === habit.period)?.label ?? habit.period}</span>
-                              {habit.streak > 0 && (
+                            <div className="flex items-center gap-1.5 mt-1 text-[11px] text-muted-foreground">
+                              <span>{categoryLabel}</span>
+                              {time && (
                                 <>
-                                  <span>•</span>
-                                  <div className="flex items-center gap-1">
-                                    <Flame className="h-3 w-3 text-orange-500" />
-                                    <span className="font-semibold">{habit.streak}</span>
-                                  </div>
+                                  <Clock className="w-3 h-3" />
+                                  <span>{time}</span>
                                 </>
                               )}
                             </div>
                           </div>
-                        </div>
 
-                        {/* Actions */}
-                        <div className="flex items-center gap-2">
-                          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-9 w-9 text-foreground hover:bg-muted"
-                                onClick={(e) => e.stopPropagation()}
-                                onPointerDown={(e) => e.stopPropagation()}
-                              >
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="w-48"
-                              onClick={(e) => e.stopPropagation()}
+                          {/* Streak — pinned to right edge */}
+                          <div className="flex-shrink-0 text-right ml-auto pr-1">
+                            <p
+                              className={cn(
+                                "text-2xl font-bold tabular-nums leading-none",
+                                isDarkMode ? "text-lime-300" : "text-lime-600"
+                              )}
+                              style={
+                                isDarkMode && habit.streak > 0
+                                  ? { textShadow: "0 0 14px rgba(163, 230, 53, 0.6)" }
+                                  : undefined
+                              }
                             >
-                              <DropdownMenuItem
-                                onClick={(e) => e.stopPropagation()}
-                                onSelect={() => handleDuplicate(habit)}
-                              >
-                                <Copy className="mr-2 h-4 w-4" /> Duplicar
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={(e) => e.stopPropagation()}
-                                onSelect={() => handleArchiveToggle(habit)}
-                              >
-                                {habit.is_active ? "Arquivar" : "Reativar"}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={(e) => e.stopPropagation()}
-                                onSelect={() => setDeleteTarget(habit)}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" /> Excluir
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </div>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </AnimatePresence>
+                              {streakStr}
+                            </p>
+                            <p className="text-[8px] uppercase tracking-widest text-muted-foreground mt-1">
+                              Daystreak
+                            </p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         )}
       </motion.div>
 
+      {/* Delete confirmation */}
       <AlertDialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

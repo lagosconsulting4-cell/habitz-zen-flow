@@ -1,30 +1,83 @@
 /**
- * JourneyDetail — Individual journey page with visual timeline, phases, and progress
+ * JourneyDetail — Premium daily journey view with habits and progress
  * Route: /journeys/:slug
  */
 
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "motion/react";
-import { ArrowLeft, CheckCircle2, Lock, Circle, Play, Pause, RotateCcw, ChevronDown, Check } from "lucide-react";
+import { motion } from "motion/react";
+import {
+  ArrowLeft,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  Circle,
+  Clock,
+  Pencil,
+  Play,
+  Trophy,
+} from "lucide-react";
 import { haptic } from "@/lib/haptics";
 import { sounds } from "@/lib/sounds";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useJourneyDetail, useJourneyActions } from "@/hooks/useJourney";
-import { JourneyIllustration, getJourneyTheme } from "@/components/JourneyIllustration";
+import {
+  useJourneyDetail,
+  useJourneyActions,
+  useJourneyHabits,
+  useJourneyDay,
+  CANONICAL_TO_ICON,
+} from "@/hooks/useJourney";
+import { renderContent } from "@/pages/JourneyDayCard";
+import { getJourneyTheme } from "@/components/JourneyIllustration";
 import { JourneyDetailSkeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/integrations/supabase/auth";
 import { useGamification } from "@/hooks/useGamification";
-import { useState } from "react";
+import { useHabits } from "@/hooks/useHabits";
+import { useTheme } from "@/hooks/useTheme";
+import { useToast } from "@/hooks/use-toast";
+import { getHabitIcon, type HabitIconKey } from "@/components/icons/HabitIcons";
+import { getBRTDateString } from "@/utils/date";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { DrumColumn, HOURS, MINUTES } from "@/components/ui/time-drum-picker";
+
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// Journey cover images (same as JourneyHub)
+const BASE = import.meta.env.BASE_URL;
+const JOURNEY_COVERS: Record<string, string> = {
+  "digital-detox-l1": `${BASE}backgrounds/arte9.webp`,
+  "own-mornings-l1": `${BASE}backgrounds/arte8.webp`,
+  "gym-l1": `${BASE}backgrounds/arte11.webp`,
+  "focus-protocol-l1": `${BASE}backgrounds/arte5.webp`,
+  "finances-l1": `${BASE}backgrounds/arte2.webp`,
+  "digital-detox-l2": `${BASE}backgrounds/arte1.webp`,
+  "own-mornings-l2": `${BASE}backgrounds/arte3.webp`,
+  "gym-l2": `${BASE}backgrounds/arte12.webp`,
+  "focus-protocol-l2": `${BASE}backgrounds/arte7.webp`,
+  "finances-l2": `${BASE}backgrounds/arte10.webp`,
+};
 
 const JourneyDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { journey, phases, days, userState, dayCompletions, loading } = useJourneyDetail(slug || "");
+  const { journey, phases, userState, loading } = useJourneyDetail(slug || "");
   const { startJourney, pauseJourney, resumeJourney, isStarting } = useJourneyActions();
   const { user } = useAuth();
   const { unlockAchievement, isAchievementUnlocked } = useGamification(user?.id);
-  const [expandedPhase, setExpandedPhase] = useState<number | null>(null);
+  const { journeyHabits } = useJourneyHabits(journey?.id);
+  const { day: currentDayData } = useJourneyDay(slug || "", userState?.current_day || 1);
+  const { habits, toggleHabit, getHabitCompletionStatus, updateHabit } = useHabits();
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
+  const { toast } = useToast();
+  const [pendingEdits, setPendingEdits] = useState<Map<string, string>>(new Map());
+  const [isSaving, setIsSaving] = useState(false);
 
   if (loading || !journey) {
     return <JourneyDetailSkeleton />;
@@ -36,7 +89,72 @@ const JourneyDetail = () => {
   const isCompleted = userState?.status === "completed";
   const isEnrolled = !!userState;
   const currentDay = userState?.current_day || 0;
-  const completionSet = new Set(dayCompletions);
+  const coverImage = JOURNEY_COVERS[journey.slug] || theme.backgroundImage;
+
+  // Get today's habit data
+  const journeyHabitIds = new Set(journeyHabits.map((jh) => jh.habit_id));
+  const todayHabits = habits.filter((h) => journeyHabitIds.has(h.id) && h.is_active);
+  const completedCount = todayHabits.filter((h) => getHabitCompletionStatus(h.id)).length;
+  const totalCount = todayHabits.length;
+  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  // Get display time for a habit (pending edit overrides DB value)
+  const getDisplayTime = (habitId: string, dbTime: string | null): string => {
+    return pendingEdits.get(habitId) || dbTime?.slice(0, 5) || "08:00";
+  };
+
+  // Set pending time edit
+  const setPendingTime = (habitId: string, newTime: string) => {
+    setPendingEdits((prev) => new Map(prev).set(habitId, newTime));
+  };
+
+  // Save all pending time edits
+  const handleSaveEdits = async () => {
+    setIsSaving(true);
+    try {
+      for (const [habitId, newTime] of pendingEdits) {
+        await updateHabit({
+          id: habitId,
+          reminder_time: newTime,
+          notification_pref: {
+            reminder_enabled: true,
+            reminder_time: newTime,
+            sound: "default",
+            time_sensitive: false,
+          },
+        });
+      }
+      setPendingEdits(new Map());
+      haptic.success();
+      toast({ title: "Horários atualizados", description: "Os lembretes foram salvos com sucesso." });
+    } catch {
+      haptic.error();
+      toast({ title: "Erro ao salvar", description: "Tente novamente.", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Handle habit toggle
+  const handleToggle = async (habitId: string) => {
+    haptic.light();
+    await toggleHabit(habitId);
+  };
+
+  // Next milestone
+  const currentPhase = phases.find((p) => p.phase_number === (userState?.current_phase || 1));
+  const nextPhase = phases.find((p) => p.phase_number === (userState?.current_phase || 1) + 1);
+  const milestoneDay = currentPhase?.day_end || 7;
+  const milestoneProgress = currentPhase
+    ? Math.min(100, ((currentDay - currentPhase.day_start) / (currentPhase.day_end - currentPhase.day_start + 1)) * 100)
+    : 0;
+
+  // Progress ring calculations
+  const ringSize = 56;
+  const strokeWidth = 4;
+  const radius = (ringSize - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const ringOffset = circumference - (progressPercent / 100) * circumference;
 
   const handleStart = async () => {
     sounds.unlock();
@@ -48,424 +166,419 @@ const JourneyDetail = () => {
     navigate(`/journeys/${slug}/day/1`);
   };
 
-  const handlePause = () => { haptic.light(); pauseJourney(journey.id); };
-  const handleResume = () => { haptic.medium(); resumeJourney(journey.id); };
+  // ── NOT ENROLLED STATE ──
+  if (!isEnrolled) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen"
+        style={{ backgroundColor: isDarkMode ? "#000" : "#FAFAFA" }}
+      >
+        {/* Hero */}
+        <div className="relative" style={{ height: "calc(45vh + 1rem + env(safe-area-inset-top, 0px))", marginLeft: "-1rem", marginRight: "-1rem", marginTop: "calc(-1rem - env(safe-area-inset-top, 0px))" }}>
+          {coverImage && <img src={coverImage} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)" }} />
+          <button onClick={() => navigate("/journeys")} className="absolute z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm" style={{ top: "calc(1rem + env(safe-area-inset-top, 0px))", left: "1rem" }}>
+            <ArrowLeft className="h-5 w-5 text-white" />
+          </button>
+          <div className="absolute bottom-0 left-0 right-0 p-5">
+            <h1 className="text-3xl font-bold text-white italic leading-tight">{journey.title}</h1>
+            {journey.subtitle && <p className="text-sm text-white/60 mt-2">{journey.subtitle}</p>}
+          </div>
+        </div>
 
+        {/* Info */}
+        <div className="px-4 py-6 space-y-6">
+          {journey.promise && (
+            <p className={`text-sm leading-relaxed ${isDarkMode ? "text-white/60" : "text-gray-600"}`}>{journey.promise}</p>
+          )}
+
+          {/* Before/After */}
+          {journey.target_audience && (
+            <div className="rounded-xl p-4" style={{ backgroundColor: isDarkMode ? "rgb(28,28,28)" : "rgb(249,250,251)", border: `1px solid ${isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }}>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2" style={{ color: theme.color }}>PRA QUEM</p>
+              <p className={`text-sm ${isDarkMode ? "text-white/70" : "text-gray-700"}`}>{journey.target_audience}</p>
+            </div>
+          )}
+          {journey.expected_result && (
+            <div className="rounded-xl p-4" style={{ backgroundColor: isDarkMode ? "rgb(28,28,28)" : "rgb(249,250,251)", border: `1px solid ${isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }}>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2" style={{ color: theme.color }}>O RESULTADO</p>
+              <p className={`text-sm ${isDarkMode ? "text-white/70" : "text-gray-700"}`}>{journey.expected_result}</p>
+            </div>
+          )}
+
+          {/* Start Button */}
+          <button
+            onClick={handleStart}
+            disabled={isStarting}
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+            style={{
+              background: "linear-gradient(135deg, #A3E635 0%, #84CC16 100%)",
+              color: "#000",
+              boxShadow: "0 0 30px rgba(163,230,53,0.3), 0 4px 16px rgba(163,230,53,0.2)",
+            }}
+          >
+            {isStarting ? "INICIANDO..." : "INICIAR JORNADA"}
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // ── PAUSED STATE ──
+  if (isPaused) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen" style={{ backgroundColor: isDarkMode ? "#000" : "#FAFAFA" }}>
+        <div className="relative" style={{ height: "calc(45vh + 1rem + env(safe-area-inset-top, 0px))", marginLeft: "-1rem", marginRight: "-1rem", marginTop: "calc(-1rem - env(safe-area-inset-top, 0px))" }}>
+          {coverImage && <img src={coverImage} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+          <button onClick={() => navigate("/journeys")} className="absolute z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm" style={{ top: "calc(1rem + env(safe-area-inset-top, 0px))", left: "1rem" }}>
+            <ArrowLeft className="h-5 w-5 text-white" />
+          </button>
+          <div className="absolute bottom-0 left-0 right-0 p-5">
+            <p className="text-xs font-bold uppercase tracking-wider text-white/50 mb-2">PAUSADA · DIA {currentDay} DE {journey.duration_days}</p>
+            <h1 className="text-3xl font-bold text-white italic leading-tight">{journey.title}</h1>
+          </div>
+        </div>
+        <div className="px-4 py-6">
+          <button
+            onClick={() => { haptic.medium(); resumeJourney(journey.id); }}
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-bold uppercase tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
+            style={{ background: "linear-gradient(135deg, #A3E635 0%, #84CC16 100%)", color: "#000", boxShadow: "0 0 30px rgba(163,230,53,0.3), 0 4px 16px rgba(163,230,53,0.2)" }}
+          >
+            RETOMAR JORNADA
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // ── ACTIVE STATE — Main daily view ──
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-      className=""
+      className="min-h-screen pb-navbar"
+      style={{ backgroundColor: isDarkMode ? "#000" : "#FAFAFA" }}
     >
-      {/* HERO — background image (when available) */}
-      {/* Negative margins bleed out of ProtectedLayout's px-4 / paddingTop container */}
-      {theme.backgroundImage ? (
+      {/* Hero with cover image */}
+      <div className="relative" style={{ height: "calc(42vh + 1rem + env(safe-area-inset-top, 0px))", marginLeft: "-1rem", marginRight: "-1rem", marginTop: "calc(-1rem - env(safe-area-inset-top, 0px))" }}>
+        {coverImage && (
+          <img src={coverImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        )}
         <div
-          className="relative overflow-hidden -mx-4 md:-mx-8 w-[calc(100%+2rem)] md:w-[calc(100%+4rem)] h-[50vh]"
-          style={{ marginTop: 'calc(-1rem - env(safe-area-inset-top, 0px))' }}
+          className="absolute inset-0"
+          style={{
+            background: isDarkMode
+              ? "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%)"
+              : "linear-gradient(to top, rgba(250,250,250,1) 0%, rgba(250,250,250,0.4) 50%, rgba(250,250,250,0) 100%)",
+          }}
+        />
+        {/* Back button */}
+        <button
+          onClick={() => navigate("/journeys")}
+          className="absolute z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm"
+          style={{ top: "calc(1rem + env(safe-area-inset-top, 0px))", left: "1rem" }}
         >
-          <img
-            src={theme.backgroundImage}
-            alt=""
-            aria-hidden="true"
-            loading="eager"
-            className="h-full w-full object-cover object-center"
-          />
-          {/* Top scrim: keeps back button readable against bright sky */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent" />
-          {/* Back button — glassmorphic pill */}
-          <button
-            onClick={() => navigate("/journeys")}
-            style={{ top: 'calc(2rem + env(safe-area-inset-top, 0px))' }}
-            className="absolute left-4 flex items-center gap-1.5 text-sm text-white bg-black/25 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar
-          </button>
+          <ArrowLeft className="h-5 w-5 text-white" />
+        </button>
+        {/* Content at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
+          <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: theme.color }}>
+            DIA {currentDay} DE {journey.duration_days}
+          </p>
+          <h1 className={cn("text-3xl font-bold italic leading-tight", isDarkMode ? "text-white" : "text-gray-900")}>
+            {journey.title}
+          </h1>
         </div>
-      ) : null}
+      </div>
 
-      {/* CONTENT CARD — floats over hero (or sits below atmospheric gradient fallback) */}
-      <div
-        className={cn(
-          "px-4 pb-6 space-y-4",
-          theme.backgroundImage
-            ? "-mt-16 relative rounded-t-3xl bg-background pt-6"
-            : "relative overflow-hidden",
-        )}
-        style={!theme.backgroundImage ? {
-          paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))',
-          background: `
-            radial-gradient(ellipse at 50% 0%, ${theme.color}1A 0%, transparent 60%),
-            radial-gradient(circle at 80% 20%, ${theme.color}0F 0%, transparent 40%),
-            linear-gradient(180deg, ${theme.color}08 0%, transparent 40%)
-          `,
-        } : undefined}
-      >
-        {/* Dot pattern texture — fallback only */}
-        {!theme.backgroundImage && (
-          <div
-            className="absolute inset-0 pointer-events-none opacity-[0.03]"
-            style={{
-              backgroundImage: `radial-gradient(${theme.color} 1px, transparent 1px)`,
-              backgroundSize: '20px 20px',
-            }}
-          />
-        )}
-
-        {/* Back button — fallback only (no image) */}
-        {!theme.backgroundImage && (
-          <button
-            onClick={() => navigate("/journeys")}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar
-          </button>
-        )}
-
-        <div className="flex items-start gap-4">
-          <JourneyIllustration illustrationKey={journey.illustration_key} size="lg" />
-          <div className="flex-1">
-            <h1 className="text-xl font-bold text-foreground">{journey.title}</h1>
-            {journey.subtitle && (
-              <p className="text-sm text-muted-foreground mt-1">{journey.subtitle}</p>
-            )}
-            <p className="text-xs text-muted-foreground/70 mt-1">
-              {journey.duration_days} dias · Nivel {journey.level}
+      <div className="px-4 space-y-7 pt-4">
+        {/* Today's Progress */}
+        <div
+          className="flex items-center justify-between rounded-xl px-5 py-4"
+          style={{
+            backgroundColor: isDarkMode ? "rgb(28,28,28)" : "rgb(249,250,251)",
+            border: `1px solid ${isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+          }}
+        >
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}>
+              PROGRESSO DE HOJE
             </p>
+            <p className={cn("text-xl font-bold mt-1", isDarkMode ? "text-white" : "text-gray-900")}>
+              {completedCount}/{totalCount} Tarefas
+            </p>
+          </div>
+          {/* Progress Ring */}
+          <div className="relative">
+            <svg width={ringSize} height={ringSize} className="transform -rotate-90">
+              <circle cx={ringSize / 2} cy={ringSize / 2} r={radius} strokeWidth={strokeWidth} fill="transparent" style={{ stroke: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }} />
+              <circle
+                cx={ringSize / 2} cy={ringSize / 2} r={radius} strokeWidth={strokeWidth} fill="transparent"
+                strokeDasharray={circumference} strokeDashoffset={ringOffset} strokeLinecap="round"
+                style={{ stroke: theme.color, transition: "stroke-dashoffset 0.6s ease-out" }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className={cn("text-xs font-bold", isDarkMode ? "text-white" : "text-gray-900")}>{progressPercent}%</span>
+            </div>
           </div>
         </div>
 
-        {/* Transformation: Before → After (only for non-enrolled users) */}
-        {journey.target_audience && journey.expected_result && !isEnrolled && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-2 gap-3"
+        {/* ── Premium Session Card ── */}
+        {currentDayData?.card_content && (
+          <motion.button
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 25 }}
+            onClick={() => navigate(`/journeys/${slug}/session`)}
+            className="w-full rounded-2xl p-[1.5px] transition-transform duration-200 hover:scale-[1.02] active:scale-[0.97]"
+            style={{
+              background: isDarkMode
+                ? `linear-gradient(135deg, ${hexToRgba(theme.color, 0.5)} 0%, ${hexToRgba(theme.color, 0.15)} 40%, ${hexToRgba(theme.color, 0.4)} 100%)`
+                : `linear-gradient(135deg, ${hexToRgba(theme.color, 0.4)} 0%, ${hexToRgba(theme.color, 0.1)} 40%, ${hexToRgba(theme.color, 0.3)} 100%)`,
+              boxShadow: isDarkMode
+                ? `0 0 32px ${hexToRgba(theme.color, 0.12)}, 0 0 64px ${hexToRgba(theme.color, 0.06)}, 0 4px 20px rgba(0,0,0,0.3)`
+                : `0 0 24px ${hexToRgba(theme.color, 0.08)}, 0 4px 16px rgba(0,0,0,0.06)`,
+            }}
           >
-            {/* ANTES — quem é essa jornada */}
-            <div className="p-3 rounded-xl bg-foreground/[0.03] border border-foreground/[0.06]">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-                Pra quem
-              </p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {journey.target_audience}
-              </p>
-            </div>
-
-            {/* DEPOIS — o resultado esperado */}
             <div
-              className="p-3 rounded-xl"
+              className="flex items-center gap-4 rounded-[14px] px-5 py-5"
               style={{
-                backgroundColor: `${theme.color}08`,
-                border: `1px solid ${theme.color}15`,
+                backgroundColor: isDarkMode ? "rgb(16, 16, 16)" : "#FFFFFF",
+                boxShadow: isDarkMode ? "inset 0 1px 0 rgba(255,255,255,0.04)" : "none",
               }}
             >
-              <div className="flex items-center gap-1 mb-1.5">
-                <Check className="w-3 h-3" style={{ color: theme.color }} />
-                <p
-                  className="text-[10px] font-bold uppercase tracking-wider"
-                  style={{ color: theme.color }}
+              {/* Icon with glow */}
+              <div className="relative flex-shrink-0">
+                {/* Glow behind icon */}
+                <div
+                  className="absolute inset-0 rounded-xl blur-lg"
+                  style={{ backgroundColor: hexToRgba(theme.color, isDarkMode ? 0.2 : 0.15) }}
+                />
+                <div
+                  className="relative flex h-12 w-12 items-center justify-center rounded-xl"
+                  style={{
+                    backgroundColor: hexToRgba(theme.color, isDarkMode ? 0.15 : 0.12),
+                    boxShadow: isDarkMode ? `0 0 16px ${hexToRgba(theme.color, 0.2)}` : `0 0 12px ${hexToRgba(theme.color, 0.12)}`,
+                  }}
                 >
-                  O resultado
+                  <Play className="h-5 w-5 ml-0.5" style={{ color: theme.color }} />
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 text-left min-w-0">
+                <p className={cn("text-base font-bold", isDarkMode ? "text-white" : "text-gray-900")}>
+                  Sessão do Dia
+                </p>
+                <p className="text-xs mt-0.5 truncate" style={{ color: isDarkMode ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.45)" }}>
+                  {currentDayData.title}
+                  {currentDayData.estimated_minutes ? ` · ~${currentDayData.estimated_minutes} min` : ""}
                 </p>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {journey.expected_result}
+
+              {/* Arrow */}
+              <div
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
+                style={{
+                  backgroundColor: hexToRgba(theme.color, isDarkMode ? 0.12 : 0.1),
+                }}
+              >
+                <ChevronRight className="h-4 w-4" style={{ color: theme.color }} />
+              </div>
+            </div>
+          </motion.button>
+        )}
+
+        {/* Essential Rituals */}
+        <div className="space-y-4">
+          <p className={cn("text-base font-bold", isDarkMode ? "text-white" : "text-gray-900")}>
+            Rituais Essenciais
+          </p>
+          <div className="space-y-3">
+            {todayHabits.map((habit) => {
+              const isDone = getHabitCompletionStatus(habit.id);
+              const jh = journeyHabits.find((j) => j.habit_id === habit.id);
+              const iconKey = habit.icon_key || (jh?.canonical_key ? CANONICAL_TO_ICON[jh.canonical_key] : null) || "plan";
+              const HabitIcon = getHabitIcon(iconKey as HabitIconKey);
+              const displayTime = getDisplayTime(habit.id, habit.reminder_time);
+              const [displayHour, displayMinute] = displayTime.split(":");
+
+              return (
+                <motion.div
+                  key={habit.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  onClick={() => handleToggle(habit.id)}
+                  className="rounded-xl px-4 py-4 cursor-pointer active:scale-[0.98] transition-transform"
+                  style={{
+                    backgroundColor: isDarkMode ? "rgb(28,28,28)" : "rgb(249,250,251)",
+                    border: isDone
+                      ? `1px solid ${hexToRgba(theme.color, 0.3)}`
+                      : `1px solid ${isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+                    boxShadow: isDone ? (isDarkMode ? `0 0 12px ${hexToRgba(theme.color, 0.08)}` : `0 0 8px ${hexToRgba(theme.color, 0.06)}`) : "none",
+                  }}
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Icon */}
+                    <div
+                      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl"
+                      style={{
+                        backgroundColor: hexToRgba(theme.color, isDarkMode ? 0.12 : 0.1),
+                        boxShadow: isDone ? (isDarkMode ? `0 0 10px ${hexToRgba(theme.color, 0.15)}` : "none") : "none",
+                      }}
+                    >
+                      {HabitIcon && <HabitIcon className="h-5 w-5" style={{ color: theme.color }} />}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-sm font-bold", isDarkMode ? "text-white" : "text-gray-900")}>{habit.name}</p>
+                      {habit.goal_value && habit.unit && habit.unit !== "none" && (
+                        <p className="text-xs mt-0.5" style={{ color: isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}>
+                          {habit.goal_value} {habit.unit === "minutes" ? "minutos" : habit.unit === "liters" ? "litros" : habit.unit}
+                        </p>
+                      )}
+                      {/* Time row — Popover with DrumPicker */}
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 mt-2 touch-target-sm">
+                            <Clock className="h-3 w-3" style={{ color: isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }} />
+                            <span className="text-xs" style={{ color: pendingEdits.has(habit.id) ? theme.color : (isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)") }}>
+                              {displayTime}
+                            </span>
+                            <Pencil className="h-3 w-3 ml-1" style={{ color: isDarkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }} />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-auto rounded-xl border-0 p-4"
+                          style={{
+                            backgroundColor: isDarkMode ? "rgb(20, 20, 20)" : "#FFFFFF",
+                            boxShadow: isDarkMode ? `0 8px 32px rgba(0,0,0,0.6), 0 0 16px ${hexToRgba(theme.color, 0.05)}` : "0 8px 32px rgba(0,0,0,0.12)",
+                            border: isDarkMode ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(0,0,0,0.08)",
+                            "--drum-bg": isDarkMode ? "rgb(20, 20, 20)" : "#FFFFFF",
+                          } as React.CSSProperties}
+                        >
+                          <div className="flex items-center gap-2">
+                            <DrumColumn
+                              options={HOURS}
+                              value={displayHour}
+                              onChange={(h) => setPendingTime(habit.id, `${h}:${displayMinute}`)}
+                            />
+                            <span className={cn("text-2xl font-bold", isDarkMode ? "text-white" : "text-gray-900")}>:</span>
+                            <DrumColumn
+                              options={MINUTES}
+                              value={(() => {
+                                const m = parseInt(displayMinute, 10);
+                                const rounded = Math.round(m / 5) * 5;
+                                return String(rounded >= 60 ? 0 : rounded).padStart(2, "0");
+                              })()}
+                              onChange={(m) => setPendingTime(habit.id, `${displayHour}:${m}`)}
+                            />
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    {/* Completion indicator */}
+                    <div className="flex-shrink-0 mt-1">
+                      {isDone ? (
+                        <CheckCircle2 className="h-6 w-6" style={{ color: theme.color }} />
+                      ) : (
+                        <Circle
+                          className="h-6 w-6"
+                          style={{ color: isDarkMode ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)" }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+
+            {todayHabits.length === 0 && (
+              <p className="text-sm text-center py-6" style={{ color: isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}>
+                Nenhum hábito ativo para hoje
               </p>
+            )}
+          </div>
+        </div>
+
+
+        {/* Next Milestone */}
+        {currentPhase && !isCompleted && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl px-5 py-4"
+            style={{
+              backgroundColor: isDarkMode ? "rgb(28,28,28)" : "rgb(249,250,251)",
+              border: `1px solid ${isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-1" style={{ color: theme.color }}>
+                  PRÓXIMO MARCO
+                </p>
+                <p className={cn("text-base font-bold", isDarkMode ? "text-white" : "text-gray-900")}>
+                  Dia {milestoneDay}: {currentPhase.badge_name || currentPhase.title}
+                </p>
+              </div>
+              <Trophy className="h-8 w-8 flex-shrink-0 ml-4" style={{ color: isDarkMode ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)" }} />
+            </div>
+            {/* Progress bar */}
+            <div className="mt-3 h-1.5 w-full rounded-full overflow-hidden" style={{ backgroundColor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }}>
+              <motion.div
+                className="h-full rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.max(5, milestoneProgress)}%` }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                style={{ backgroundColor: theme.color }}
+              />
             </div>
           </motion.div>
         )}
 
-        {/* Progress bar (if enrolled) */}
-        {isEnrolled && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Dia {currentDay} de {journey.duration_days}</span>
-              <span>{userState!.completion_percent}%</span>
-            </div>
-            <div className="w-full h-3 bg-muted/20 dark:bg-zinc-700/30 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: userState!.completion_percent / 100 }}
-                transition={{ duration: 0.5 }}
-                className="h-full rounded-full origin-left"
-                style={{ backgroundColor: theme.color }}
-              />
-            </div>
-          </div>
+        {/* Pause button */}
+        {isActive && (
+          <button
+            onClick={() => { haptic.light(); pauseJourney(journey.id); }}
+            className={cn(
+              "w-full rounded-xl py-3 text-sm font-semibold transition-all",
+              isDarkMode ? "bg-neutral-800 text-neutral-400 hover:bg-neutral-700" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+            )}
+          >
+            Pausar Jornada
+          </button>
         )}
-
-        {/* Action buttons */}
-        <div className="flex gap-2">
-          {!isEnrolled && (
-            <Button
-              onClick={handleStart}
-              disabled={isStarting}
-              className="flex-1 h-12 rounded-xl font-bold text-white"
-              style={{ backgroundColor: theme.color }}
-            >
-              {isStarting ? (
-                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-              ) : (
-                <Play className="w-4 h-4 mr-2" />
-              )}
-              Iniciar Jornada
-            </Button>
-          )}
-
-          {isActive && (
-            <>
-              <Button
-                onClick={() => navigate(`/journeys/${slug}/day/${currentDay}`)}
-                className="flex-1 h-12 rounded-xl font-bold text-white"
-                style={{ backgroundColor: theme.color }}
-              >
-                Ver Dia {currentDay}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handlePause}
-                className="h-12 w-12 rounded-xl p-0"
-              >
-                <Pause className="w-4 h-4" />
-              </Button>
-            </>
-          )}
-
-          {isPaused && (
-            <Button
-              onClick={handleResume}
-              className="flex-1 h-12 rounded-xl font-bold text-white"
-              style={{ backgroundColor: theme.color }}
-            >
-              <RotateCcw className="w-4 h-4 mr-2" />
-              Retomar Jornada
-            </Button>
-          )}
-
-          {isCompleted && (
-            <Button
-              variant="outline"
-              className="flex-1 h-12 rounded-xl font-bold"
-              disabled
-            >
-              <CheckCircle2 className="w-4 h-4 mr-2" style={{ color: theme.color }} />
-              Jornada Completa
-            </Button>
-          )}
-        </div>
       </div>
 
-      {/* Timeline: Phases and Days */}
-      <div className="px-4 space-y-0">
-        {phases.map((phase, phaseIdx) => {
-          const phaseDays = days.filter(
-            (d) => d.day_number >= phase.day_start && d.day_number <= phase.day_end
-          );
-          const phaseCompletedDays = phaseDays.filter((d) => completionSet.has(d.day_number)).length;
-          const phaseComplete = phaseCompletedDays === phaseDays.length && phaseDays.length > 0;
-          const phaseActive =
-            isActive && currentDay >= phase.day_start && currentDay <= phase.day_end;
-          const phaseFuture = isActive && currentDay < phase.day_start;
-          const isExpanded = expandedPhase === phase.phase_number || phaseActive;
-          const isLast = phaseIdx === phases.length - 1;
-
-          return (
-            <div key={phase.id} className={cn("flex gap-3", phaseFuture && "opacity-50")}>
-              {/* Timeline column */}
-              <div className="flex flex-col items-center w-8 flex-shrink-0 pt-3">
-                {/* Node — rounded square for more designed feel */}
-                <div
-                  className={cn(
-                    "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border-2 z-10 transition-all",
-                    phaseActive && "animate-glow-breathe",
-                    phaseComplete
-                      ? "border-transparent text-white"
-                      : phaseActive
-                        ? "border-2"
-                        : "border-border bg-background text-muted-foreground"
-                  )}
-                  style={{
-                    backgroundColor: phaseComplete ? theme.color : phaseActive ? `${theme.color}1A` : undefined,
-                    borderColor: phaseActive ? theme.color : phaseComplete ? theme.color : undefined,
-                    boxShadow: phaseComplete
-                      ? `0 4px 16px ${theme.color}4D`
-                      : phaseActive
-                        ? `0 0 12px ${theme.color}33`
-                        : undefined,
-                  }}
-                >
-                  {phaseComplete ? (
-                    <CheckCircle2 className="w-4 h-4" />
-                  ) : (
-                    <span className="text-xs font-bold" style={phaseActive ? { color: theme.color } : undefined}>
-                      {phase.phase_number}
-                    </span>
-                  )}
-                </div>
-                {/* Connecting gradient line */}
-                {!isLast && (
-                  <div
-                    className="w-0.5 flex-1 min-h-[16px]"
-                    style={{
-                      background: phaseComplete
-                        ? `linear-gradient(180deg, ${theme.color}, ${theme.color}80)`
-                        : `linear-gradient(180deg, var(--border), transparent)`,
-                    }}
-                  />
-                )}
-              </div>
-
-              {/* Phase content */}
-              <div className={cn("flex-1 pb-4", !isLast && "mb-0")}>
-                {/* Phase header */}
-                <button
-                  onClick={() =>
-                    setExpandedPhase(
-                      expandedPhase === phase.phase_number ? null : phase.phase_number
-                    )
-                  }
-                  className="w-full flex items-center justify-between py-3 min-h-[44px]"
-                >
-                  <div className="text-left">
-                    <div>
-                      <h3 className="text-sm font-bold text-foreground">{phase.title}</h3>
-                      {phase.subtitle && (
-                        <p className="text-xs text-muted-foreground">{phase.subtitle}</p>
-                      )}
-                      {phase.description && !isExpanded && (
-                        <p className="text-[11px] text-muted-foreground/60 mt-0.5 line-clamp-1">
-                          {phase.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-muted-foreground">
-                      {phaseCompletedDays}/{phaseDays.length}
-                    </span>
-                    <motion.div
-                      animate={{ rotate: isExpanded ? 180 : 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                    </motion.div>
-                  </div>
-                </button>
-
-                {/* Expanded day list */}
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="mt-2 space-y-1">
-                        {phaseDays.map((day) => {
-                          const isDone = completionSet.has(day.day_number);
-                          const isCurrent = isActive && day.day_number === currentDay;
-                          const isDayLocked = isActive && day.day_number > currentDay;
-                          const isAccessible = !isActive || day.day_number <= currentDay;
-
-                          return (
-                            <button
-                              key={day.id}
-                              onClick={() => {
-                                if (isAccessible) {
-                                  navigate(`/journeys/${slug}/day/${day.day_number}`);
-                                }
-                              }}
-                              disabled={isDayLocked}
-                              className={cn(
-                                "w-full flex items-center gap-3 p-3 min-h-[48px] rounded-xl text-left transition-colors",
-                                isCurrent && "border",
-                                isDone && "opacity-70",
-                                isDayLocked && "opacity-40 cursor-not-allowed",
-                                !isCurrent && !isDayLocked && "hover:bg-accent/5"
-                              )}
-                              style={isCurrent ? {
-                                backgroundColor: `${theme.color}0D`,
-                                borderColor: `${theme.color}33`,
-                              } : undefined}
-                            >
-                              {/* Status icon */}
-                              {isDone ? (
-                                <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: theme.color }} />
-                              ) : isCurrent ? (
-                                <Circle className="w-4 h-4 flex-shrink-0" style={{ color: theme.color }} />
-                              ) : isDayLocked ? (
-                                <Lock className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
-                              ) : (
-                                <Circle className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
-                              )}
-
-                              {/* Day info */}
-                              <div className="flex-1 min-w-0">
-                                <p
-                                  className={cn(
-                                    "text-xs font-semibold",
-                                    isCurrent ? "" : "text-foreground"
-                                  )}
-                                  style={isCurrent ? { color: theme.color } : undefined}
-                                >
-                                  Dia {day.day_number}: {day.title}
-                                  {isCurrent && (
-                                    <span className="ml-1.5 inline-flex items-center gap-1">
-                                      <span
-                                        className="w-1.5 h-1.5 rounded-full animate-pulse"
-                                        style={{ backgroundColor: theme.color }}
-                                      />
-                                      <span
-                                        className="text-[9px] font-bold uppercase tracking-wider"
-                                        style={{ color: theme.color }}
-                                      >
-                                        hoje
-                                      </span>
-                                    </span>
-                                  )}
-                                </p>
-                                {day.estimated_minutes && (
-                                  <p className="text-[10px] text-muted-foreground">
-                                    ~{day.estimated_minutes} min
-                                  </p>
-                                )}
-                              </div>
-
-                              {/* Badges */}
-                              <div className="flex gap-1">
-                                {day.is_rest_day && (
-                                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-muted/20 text-muted-foreground">
-                                    descanso
-                                  </span>
-                                )}
-                                {day.is_review_day && (
-                                  <span
-                                    className="text-[9px] px-1.5 py-0.5 rounded-full"
-                                    style={{ backgroundColor: `${theme.color}1A`, color: theme.color }}
-                                  >
-                                    review
-                                  </span>
-                                )}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* Sticky Save Button — appears when user has pending time edits */}
+      {pendingEdits.size > 0 && (
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="fixed bottom-0 left-0 right-0 z-30 px-4"
+          style={{ paddingBottom: "max(1rem, calc(1rem + env(safe-area-inset-bottom)))" }}
+        >
+          <button
+            onClick={handleSaveEdits}
+            disabled={isSaving}
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+            style={{
+              background: "linear-gradient(135deg, #A3E635 0%, #84CC16 100%)",
+              color: "#000",
+              boxShadow: "0 0 30px rgba(163,230,53,0.3), 0 4px 16px rgba(163,230,53,0.2), 0 -8px 24px rgba(0,0,0,0.4)",
+            }}
+          >
+            {isSaving ? "SALVANDO..." : "SALVAR ALTERAÇÕES"}
+          </button>
+        </motion.div>
+      )}
     </motion.div>
   );
 };

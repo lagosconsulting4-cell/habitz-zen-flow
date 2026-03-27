@@ -58,7 +58,7 @@ const NavigationBar = memo(() => {
 
   return (
     <nav
-      className={cn("fixed inset-x-0 bottom-0 z-40 md:hidden", "pt-1")}
+      className={cn("fixed inset-x-0 bottom-0 z-40 md:hidden")}
       role="navigation"
       aria-label="Navegação principal"
     >
@@ -67,14 +67,11 @@ const NavigationBar = memo(() => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
         className={cn(
-          "flex items-center justify-around gap-1.5 px-4 py-2 rounded-t-2xl",
-          // Light mode: white bg with top border
+          "flex items-center justify-around px-5 py-3",
           "bg-card/95 border-t border-border",
-          // Dark mode: dark bg with subtle border
-          "dark:bg-[#0f0f0f]/95 dark:border dark:border-white/[0.08]",
-          // Shadows
+          "dark:bg-[#0f0f0f]/95 dark:border-t dark:border-white/[0.06]",
           "shadow-[0_-2px_10px_rgba(0,0,0,0.06)]",
-          "dark:shadow-[0_-4px_24px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.03)]",
+          "dark:shadow-[0_-4px_32px_rgba(0,0,0,0.6)]",
           "backdrop-blur-xl"
         )}
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
@@ -86,35 +83,49 @@ const NavigationBar = memo(() => {
           const Icon = item.icon;
 
           return (
-            <motion.button
-              key={item.id}
-              data-tour={item.id === "home" ? "today" : item.id}
-              type="button"
-              onClick={() => handleNavigate(item)}
-              transition={transition}
-              aria-label={item.label}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "relative flex items-center justify-center rounded-full w-12 h-12",
-                "transition-colors duration-200",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                  : cn(
-                      // Light mode: gray icons
-                      "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                      // Dark mode: lighter gray icons
-                      "dark:text-white/40 dark:hover:text-white/80 dark:hover:bg-white/5"
-                    )
+            <div key={item.id} className="relative flex items-center justify-center">
+              {/* Breathing glow ring — only for active item */}
+              {isActive && (
+                <motion.div
+                  className="absolute rounded-full bg-primary pointer-events-none"
+                  style={{ width: 56, height: 56 }}
+                  animate={{
+                    boxShadow: [
+                      "0 0 18px rgba(163,230,53,0.45), 0 0 36px rgba(163,230,53,0.25)",
+                      "0 0 26px rgba(163,230,53,0.65), 0 0 52px rgba(163,230,53,0.35)",
+                      "0 0 18px rgba(163,230,53,0.45), 0 0 36px rgba(163,230,53,0.25)",
+                    ],
+                  }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                />
               )}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Icon
-                size={22}
-                strokeWidth={isActive ? 2.6 : 2.2}
-                className="flex-shrink-0"
-              />
-            </motion.button>
+              <motion.button
+                data-tour={item.id === "home" ? "today" : item.id}
+                type="button"
+                onClick={() => handleNavigate(item)}
+                transition={transition}
+                aria-label={item.label}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "relative flex items-center justify-center rounded-full",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+                  isActive
+                    ? "w-14 h-14 bg-primary text-black"
+                    : cn(
+                        "w-10 h-10",
+                        "text-muted-foreground hover:text-foreground",
+                        "dark:text-white/40 dark:hover:text-white/70 dark:hover:bg-white/5"
+                      )
+                )}
+                whileTap={{ scale: 0.92 }}
+              >
+                <Icon
+                  size={isActive ? 22 : 20}
+                  strokeWidth={isActive ? 2.5 : 2}
+                  className="flex-shrink-0"
+                />
+              </motion.button>
+            </div>
           );
         })}
       </motion.div>

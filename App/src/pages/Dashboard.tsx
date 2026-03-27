@@ -1,13 +1,14 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { Sparkles, Plus, Bell, ChevronRight, Sun, Sunset, Moon, Shield } from "lucide-react";
+import { Sparkles, Plus, Bell, ChevronRight, Sun, Sunrise, Sunset, Moon, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { DashboardSkeleton } from "@/components/ui/skeleton";
 
-import { DashboardHabitCard } from "@/components/DashboardHabitCard";
-import { DailyMissionCard } from "@/components/DailyMissionCard";
+import { DashboardHeroSection } from "@/components/DashboardHeroSection";
+import { HabitListItem } from "@/components/HabitListItem";
+import { WeeklyOverview } from "@/components/WeeklyOverview";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { LevelUpModal } from "@/components/LevelUpModal";
 import { TimerModal } from "@/components/timer";
@@ -21,7 +22,7 @@ import { useHabits } from "@/hooks/useHabits";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/integrations/supabase/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { useGamification, XP_VALUES } from "@/hooks/useGamification";
+import { useGamification, XP_VALUES, GEM_VALUES } from "@/hooks/useGamification";
 import { celebrations } from "@/lib/celebrations";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,6 +33,7 @@ import { useAllActiveJourneyHabits, useJourneyActions, CANONICAL_TO_ICON, type J
 import { JourneyIllustration, getJourneyTheme } from "@/components/JourneyIllustration";
 import { JourneyDayCompleteModal } from "@/components/JourneyDayCompleteModal";
 import { JourneyGraduationModal } from "@/components/JourneyGraduationModal";
+import { DayCompleteModal } from "@/components/DayCompleteModal";
 import { getBRTDateString } from "@/utils/date";
 
 // Helper to check if habit has time-based goal
@@ -45,7 +47,7 @@ const Dashboard = () => {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const { user } = useAuth();
-  const { awardHabitXP, awardStreakBonus, awardPerfectDayBonus, awardJourneyDayGems, awardJourneyPhaseGems, awardJourneyCompleteGems, unlockAchievement, isAchievementUnlocked, getAchievementProgress, updateStreak, freezeUsedToday } = useGamification(user?.id);
+  const { awardHabitXP, awardStreakBonus, awardPerfectDayBonus, awardJourneyDayGems, awardJourneyPhaseGems, awardJourneyCompleteGems, unlockAchievement, isAchievementUnlocked, getAchievementProgress, updateStreak, freezeUsedToday, progress: userProgress } = useGamification(user?.id);
   const isGamificationEnabled = !hideGamification;
   const queryClient = useQueryClient();
   const { weeklyInsight, loading: progressLoading } = useProgress();
@@ -123,6 +125,31 @@ const Dashboard = () => {
       icon?: string;
     }>;
   } | null>(null);
+
+  // Day Complete modal state
+  const [showDayComplete, setShowDayComplete] = useState(false);
+  const dayCompleteShownRef = useRef(false);
+
+  // DEV: expose for testing — remove before production
+  // DEV: expose for testing — remove before production
+  useEffect(() => {
+    (window as any).__showDayComplete = () => setShowDayComplete(true);
+    (window as any).__showJourneyComplete = (slug?: string, day?: number) => {
+      setCompletingJourney({ journeyId: "test", themeSlug: slug || "own-mornings" });
+      setJourneyDayComplete({
+        dayNumber: day || 7,
+        totalDays: 30,
+        journeyTitle: "Elite Morning",
+        phaseCompleted: false,
+        journeyCompleted: false,
+        newHabitPreview: null,
+      });
+    };
+    return () => {
+      delete (window as any).__showDayComplete;
+      delete (window as any).__showJourneyComplete;
+    };
+  }, []);
 
   // Streak toast state
   const [streakMilestone, setStreakMilestone] = useState<number | null>(null);
@@ -441,6 +468,56 @@ const Dashboard = () => {
     return todayHabits.every((habit) => getHabitCompletionStatus(habit.id));
   }, [todayHabits, getHabitCompletionStatus]);
 
+  // ── Period-based grouping for redesigned dashboard ──
+  const PERIOD_CONFIG = useMemo(() => ({
+    morning: { label: "Manha", timeRange: "06:00 - 12:00", icon: Sunrise },
+    afternoon: { label: "Tarde", timeRange: "12:00 - 18:00", icon: Sun },
+    evening: { label: "Noite", timeRange: "18:00 - 00:00", icon: Moon },
+  }), []);
+
+  const habitsByPeriod = useMemo(() => {
+    const map: Record<string, typeof todayHabits> = { morning: [], afternoon: [], evening: [] };
+    todayHabits.forEach((h) => {
+      const period = (h as any).period || "morning";
+      if (map[period]) map[period].push(h);
+      else map.morning.push(h);
+    });
+    return map;
+  }, [todayHabits]);
+
+  const completedCount = useMemo(
+    () => todayHabits.filter((h) => getHabitCompletionStatus(h.id)).length,
+    [todayHabits, getHabitCompletionStatus]
+  );
+
+  const getJourneyTitleForHabit = useCallback((habitId: string): string | undefined => {
+    const jh = allJourneyHabits.find((j) => j.habit_id === habitId && j.is_active);
+    if (!jh) return undefined;
+    return (journeyLookup.get(jh.journey_id) as Journey | undefined)?.title;
+  }, [allJourneyHabits, journeyLookup]);
+
+  const getThemeColorForHabit = useCallback((habitId: string): string | undefined => {
+    const slug = habitThemeMap.get(habitId);
+    if (!slug) return undefined;
+    const theme = getJourneyTheme(slug);
+    return theme.color;
+  }, [habitThemeMap]);
+
+  // Primary journey title for hero section
+  const primaryJourneyTitle = useMemo(() => {
+    if (activeStates.length === 0) return undefined;
+    const first = activeStates[0]?.journeys as Journey | undefined;
+    return first?.title;
+  }, [activeStates]);
+
+  // Weekly completion data for WeeklyOverview
+  const getCompletionForDate = useCallback((date: Date): { completed: number; total: number } => {
+    const habits = getHabitsForDate(date);
+    if (habits.length === 0) return { completed: 0, total: 0 };
+    const completed = habits.filter((h) => getHabitCompletionStatus(h.id)).length;
+    return { completed, total: habits.length };
+  }, [getHabitsForDate, getHabitCompletionStatus]);
+
   // Save preferred reminder times from quick-setup drawer (Sprint 2)
   const handleSaveSetupTimes = useCallback(async () => {
     if (!user) return;
@@ -558,6 +635,10 @@ const Dashboard = () => {
 
           if (allCompleted && awardPerfectDayBonus) {
             celebrations.perfectDay();
+            if (!dayCompleteShownRef.current) {
+              dayCompleteShownRef.current = true;
+              setShowDayComplete(true);
+            }
             if (isGamificationEnabled) {
               queueXpToast({
                 amount: XP_VALUES.PERFECT_DAY,
@@ -640,6 +721,10 @@ const Dashboard = () => {
 
         if (allCompleted && awardPerfectDayBonus) {
           celebrations.perfectDay();
+          if (!dayCompleteShownRef.current) {
+            dayCompleteShownRef.current = true;
+            setShowDayComplete(true);
+          }
           if (isGamificationEnabled) {
             queueXpToast({
               amount: XP_VALUES.PERFECT_DAY,
@@ -680,78 +765,6 @@ const Dashboard = () => {
         className="flex-1 px-4 pb-navbar space-y-5 max-w-xl mx-auto w-full"
         style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
-        {/* DailyMissionCard - Journey progress + daily habit progress */}
-        {todayHabits.length > 0 && (
-          <DailyMissionCard
-            habits={todayHabits as Habit[]}
-            getHabitCompletionStatus={getHabitCompletionStatus}
-          />
-        )}
-
-        {/* Next Reminder Preview — links to Profile for time adjustment */}
-        {(() => {
-          const now = new Date();
-          const currentMinutes = now.getHours() * 60 + now.getMinutes();
-          const journeyHabitIds = new Set(
-            allJourneyHabits.filter(jh => jh.is_active).map(jh => jh.habit_id)
-          );
-
-          const upcomingReminder = todayHabits
-            .filter(h =>
-              journeyHabitIds.has(h.id) &&
-              h.reminder_time &&
-              !getHabitCompletionStatus(h.id)
-            )
-            .map(h => {
-              const [hh, mm] = (h.reminder_time || "08:00").split(":").map(Number);
-              return { habit: h, minutes: hh * 60 + mm };
-            })
-            .filter(r => r.minutes > currentMinutes)
-            .sort((a, b) => a.minutes - b.minutes)[0];
-
-          if (!upcomingReminder) return null;
-
-          const { habit: nextHabit, minutes } = upcomingReminder;
-          const timeStr = `${Math.floor(minutes / 60).toString().padStart(2, "0")}:${(minutes % 60).toString().padStart(2, "0")}`;
-
-          return (
-            <button
-              onClick={() => navigate("/profile")}
-              className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border/60 hover:bg-accent/5 transition-colors text-left"
-            >
-              <Bell className="w-4 h-4 text-primary flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-foreground">
-                  Proximo lembrete: {timeStr}
-                </p>
-                <p className="text-[11px] text-muted-foreground truncate">
-                  {nextHabit.name}
-                </p>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-            </button>
-          );
-        })()}
-
-        {/* Streak Protection Status */}
-        {isGamificationEnabled && (
-          <FreezeBadge userId={user?.id} variant="full" />
-        )}
-
-        {/* Freeze auto-used today banner */}
-        {isGamificationEnabled && freezeUsedToday && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-3 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20"
-          >
-            <Shield className="w-5 h-5 text-blue-400 flex-shrink-0" />
-            <p className="text-xs text-blue-600 dark:text-blue-300">
-              <strong>Streak salvo!</strong> Um freeze foi usado automaticamente hoje para proteger seu progresso.
-            </p>
-          </motion.div>
-        )}
-
         {todayHabits.length === 0 ? (
           /* Empty State Premium */
           <motion.div
@@ -760,7 +773,6 @@ const Dashboard = () => {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="flex flex-col items-center justify-center py-12 md:py-16"
           >
-            {/* Ilustração minimalista */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -768,15 +780,10 @@ const Dashboard = () => {
               className="mb-6"
             >
               <div className="relative w-20 h-20 rounded-full flex items-center justify-center bg-primary/10 dark:bg-primary/15">
-                <Sparkles
-                  size={32}
-                  strokeWidth={1.5}
-                  className="text-primary"
-                />
+                <Sparkles size={32} strokeWidth={1.5} className="text-primary" />
               </div>
             </motion.div>
 
-            {/* Texto motivacional */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -791,7 +798,6 @@ const Dashboard = () => {
               </p>
             </motion.div>
 
-            {/* CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -813,197 +819,118 @@ const Dashboard = () => {
             </motion.div>
           </motion.div>
         ) : (
-          /* Grid de hábitos - 2 colunas com section headers */
-          <div className="space-y-4">
-            {/* Per-journey habit sections */}
-            {activeStates.map((state) => {
-              const journey = state.journeys as Journey;
-              if (!journey) return null;
-              const theme = getJourneyTheme(journey.theme_slug || journey.illustration_key);
-              const journeyHabits = habitsByJourney.get(state.journey_id) || [];
-              if (journeyHabits.length === 0) return null;
+          <>
+            {/* 1. Hero Section — progress ring + greeting + CTAs */}
+            <DashboardHeroSection
+              totalHabits={todayHabits.length}
+              completedHabits={completedCount}
+              journeyTitle={primaryJourneyTitle}
+            />
 
-              return (
-                <React.Fragment key={state.journey_id}>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex items-center gap-2"
-                  >
-                    <div
-                      className="w-1 h-4 rounded-full"
-                      style={{ backgroundColor: theme.color }}
-                    />
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      {journey.title}
-                    </span>
-                  </motion.div>
+            {/* 2. Weekly Outlook */}
+            <WeeklyOverview
+              getCompletionForDate={getCompletionForDate}
+              isDarkMode={isDarkMode}
+              variant="dashboard"
+              consistencyPercent={weeklyInsight?.thisWeekConsistency || 0}
+            />
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 justify-items-center">
-                    {journeyHabits.map((habit, index) => (
-                      <motion.div
-                        key={habit.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <DashboardHabitCard
-                          habit={habit}
-                          progress={calculateProgress(habit)}
-                          completed={isCompletedToday(habit.id)}
-                          onToggle={() => handleToggle(habit)}
-                          streakDays={habit.streak}
-                          completionCount={getHabitCompletionCount(habit.id).current}
-                          timesPerDay={habit.times_per_day ?? 1}
-                          isTimedHabit={isTimedHabit(habit.unit)}
-                          onTimerClick={() => setTimerHabit(habit)}
-                          journeyThemeSlug={habitThemeMap.get(habit.id) || defaultThemeSlug}
-                          isFrozen={freezeUsedToday && (habit.streak ?? 0) > 0}
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
-                </React.Fragment>
-              );
-            })}
-
-            {/* Non-journey habits (only if no journey sections exist) */}
-            {!hasJourneyHabits && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 justify-items-center">
-                {todayHabits.map((habit, index) => (
-                  <motion.div
-                    key={habit.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      duration: 0.15,
-                      delay: Math.min(index * 0.03, 0.15)
-                    }}
-                  >
-                    <DashboardHabitCard
-                      habit={habit as Habit}
-                      progress={calculateProgress(habit as Habit)}
-                      completed={isCompletedToday(habit.id)}
-                      onToggle={() => handleToggle(habit as Habit)}
-                      streakDays={habit.streak}
-                      completionCount={getHabitCompletionCount(habit.id).current}
-                      timesPerDay={(habit as Habit).times_per_day ?? 1}
-                      isTimedHabit={isTimedHabit(habit.unit)}
-                      onTimerClick={() => setTimerHabit(habit as Habit)}
-                      journeyThemeSlug={null}
-                      isFrozen={freezeUsedToday && (habit.streak ?? 0) > 0}
-                    />
-                  </motion.div>
-                ))}
-              </div>
+            {/* Streak Protection Status */}
+            {isGamificationEnabled && (
+              <FreezeBadge userId={user?.id} variant="full" />
             )}
 
-            {/* Personal habits section (only shown when both types exist) */}
-            {hasPersonalHabits && hasJourneyHabits && (
-              <>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex items-center gap-2 mt-2"
-                >
-                  <div className="w-1 h-4 rounded-full bg-muted-foreground/30" />
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Meus hábitos
-                  </span>
-                </motion.div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 justify-items-center">
-                  {todayHabits.filter((h) => h.source !== "journey").map((habit, index) => (
-                    <motion.div
-                      key={habit.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.15,
-                        delay: Math.min(index * 0.03, 0.15)
-                      }}
-                    >
-                      <DashboardHabitCard
-                        habit={habit as Habit}
-                        progress={calculateProgress(habit as Habit)}
-                        completed={isCompletedToday(habit.id)}
-                        onToggle={() => handleToggle(habit as Habit)}
-                        streakDays={habit.streak}
-                        completionCount={getHabitCompletionCount(habit.id).current}
-                        timesPerDay={(habit as Habit).times_per_day ?? 1}
-                        isTimedHabit={isTimedHabit(habit.unit)}
-                        onTimerClick={() => setTimerHabit(habit as Habit)}
-                        journeyThemeSlug={habitThemeMap.get(habit.id) || (habit.source === 'journey' ? defaultThemeSlug : null)}
-                        isFrozen={freezeUsedToday && (habit.streak ?? 0) > 0}
-                      />
-                    </motion.div>
-                  ))}
-                </div>
-              </>
+            {/* Freeze auto-used today banner */}
+            {isGamificationEnabled && freezeUsedToday && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-3 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20"
+              >
+                <Shield className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                <p className="text-xs text-blue-600 dark:text-blue-300">
+                  <strong>Streak salvo!</strong> Um freeze foi usado automaticamente hoje para proteger seu progresso.
+                </p>
+              </motion.div>
             )}
 
-            {/* Perfect Day Banner — at bottom to avoid layout shift when it appears */}
-            <AnimatePresence>
-              {isPerfectDay && (
-                <motion.div
-                  role="status"
-                  aria-live="polite"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.35, ease: "easeInOut" }}
-                  style={{ overflow: "hidden" }}
-                >
-                  <div className="flex flex-col items-center gap-3 py-6 px-4 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 text-center">
-                    <div className="w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <Sparkles className="w-7 h-7 text-green-500" />
+            {/* 3. Habits by Period */}
+            <div className="space-y-5">
+              {(["morning", "afternoon", "evening"] as const).map((periodKey) => {
+                const config = PERIOD_CONFIG[periodKey];
+                const habits = habitsByPeriod[periodKey];
+                if (!habits || habits.length === 0) return null;
+
+                const PeriodIcon = config.icon;
+
+                return (
+                  <div key={periodKey}>
+                    {/* Period header */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-black dark:text-white">
+                          {config.label}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground/60 tabular-nums">
+                        {config.timeRange}
+                      </span>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-foreground">Dia Perfeito!</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Todos os {todayHabits.length} habitos concluidos. Voce arrasou!
-                      </p>
+
+                    {/* Habit list */}
+                    <div className="space-y-2">
+                      {habits.map((habit, index) => (
+                        <motion.div
+                          key={habit.id}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.15, delay: Math.min(index * 0.04, 0.2) }}
+                        >
+                          <HabitListItem
+                            habit={habit as Habit}
+                            completed={isCompletedToday(habit.id)}
+                            onToggle={() => handleToggle(habit as Habit)}
+                            streakDays={habit.streak}
+                            journeyTitle={getJourneyTitleForHabit(habit.id)}
+                            isTimedHabit={isTimedHabit(habit.unit)}
+                            onTimerClick={() => setTimerHabit(habit as Habit)}
+                            themeColor={getThemeColorForHabit(habit.id)}
+                          />
+                        </motion.div>
+                      ))}
                     </div>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
+                );
+              })}
 
-        {/* Weekly Insight Mini-Card */}
-        {!progressLoading && weeklyInsight && todayHabits.length > 0 && (
-          <button
-            onClick={() => navigate("/progress")}
-            className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/60 hover:bg-accent/5 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
-          >
-            <div className="flex-shrink-0 relative w-12 h-12">
-              <svg width={48} height={48} className="transform -rotate-90" role="img" aria-label="Progresso semanal">
-                <circle cx={24} cy={24} r={20} stroke="currentColor" strokeWidth={3}
-                  fill="none" className="text-muted/20" />
-                <circle cx={24} cy={24} r={20} stroke="currentColor" strokeWidth={3}
-                  fill="none" strokeLinecap="round" className="text-primary"
-                  strokeDasharray={2 * Math.PI * 20}
-                  strokeDashoffset={2 * Math.PI * 20 * (1 - (weeklyInsight.thisWeekConsistency || 0) / 100)}
-                />
-              </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-foreground">
-                {weeklyInsight.thisWeekConsistency || 0}%
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">Esta semana</p>
-              <p className="text-xs text-muted-foreground">
-                {weeklyInsight.perfectDaysThisWeek || 0} {(weeklyInsight.perfectDaysThisWeek || 0) === 1 ? "dia perfeito" : "dias perfeitos"}
-                {weeklyInsight.delta !== 0 && (
-                  <span className={weeklyInsight.delta > 0 ? "text-green-500 ml-1" : "text-red-400 ml-1"}>
-                    {weeklyInsight.delta > 0 ? "+" : ""}{weeklyInsight.delta}%
-                  </span>
+              {/* Perfect Day Banner */}
+              <AnimatePresence>
+                {isPerfectDay && (
+                  <motion.div
+                    role="status"
+                    aria-live="polite"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                    style={{ overflow: "hidden" }}
+                  >
+                    <div className="flex flex-col items-center gap-3 py-6 px-4 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 text-center">
+                      <div className="w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center">
+                        <Sparkles className="w-7 h-7 text-green-500" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-foreground">Dia Perfeito!</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Todos os {todayHabits.length} habitos concluidos. Voce arrasou!
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
                 )}
-              </p>
+              </AnimatePresence>
             </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-          </button>
+          </>
         )}
       </motion.div>
 
@@ -1070,6 +997,14 @@ const Dashboard = () => {
           unlockedItems={levelUpData.unlockedItems}
         />
       )}
+
+      {/* Day Complete Modal */}
+      <DayCompleteModal
+        isOpen={showDayComplete}
+        onClose={() => setShowDayComplete(false)}
+        streakDays={userProgress?.current_streak || 0}
+        gemsAwarded={GEM_VALUES.PERFECT_DAY}
+      />
 
       {/* Notification Permission Dialog - shows after first habit */}
       {todayHabits.length > 0 && (

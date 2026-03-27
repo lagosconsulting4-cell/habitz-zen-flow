@@ -199,7 +199,7 @@ export const useJourneys = () => {
       if (error) throw error;
       return (data || []) as Journey[];
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000, // 30s — journey progress needs to be current
   });
 
   const { data: userStates = [], isLoading: statesLoading } = useQuery({
@@ -328,7 +328,7 @@ export const useJourneyDetail = (slug: string) => {
       };
     },
     enabled: !!slug,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   });
 
   const journey = journeyBundle ? {
@@ -439,7 +439,7 @@ export const useJourneyDay = (slug: string, dayNumber: number, journeyId?: strin
       return data as JourneyDay;
     },
     enabled: !!slug && dayNumber > 0,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   });
 
   return { day, loading: isLoading };

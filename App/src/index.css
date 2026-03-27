@@ -182,6 +182,20 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.05);
   }
 
+  /* Premium glow effects */
+  .glow-primary {
+    box-shadow: 0 0 40px rgba(163, 230, 53, 0.10);
+  }
+  .dark .glow-primary {
+    box-shadow: 0 0 60px rgba(163, 230, 53, 0.15);
+  }
+  .card-premium {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+  .dark .card-premium {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 20px rgba(163, 230, 53, 0.03);
+  }
+
   /* Grid para hábitos circulares - alinhamento perfeito */
   .habits-grid {
     display: grid;
@@ -240,6 +254,25 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
+  }
+
+  /* Hide scrollbar globally — PWA should feel native, no scrollbars anywhere */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Prevent layout shift from hidden scrollbar */
+  html {
+    overflow-y: scroll; /* reserve space even though bar is hidden */
+    width: 100%;
+  }
+  body {
+    width: 100%;
+    overflow-x: hidden;
   }
 }
 /* Landing page animation utilities */

@@ -1,26 +1,117 @@
-import { useEffect, useState } from "react";
+import { useId, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Play, Pause, RotateCcw, Check, SkipForward } from "lucide-react";
+import { X, Play, Pause, RotateCcw, Check, SkipForward, Settings } from "lucide-react";
 import confetti from "canvas-confetti";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { TreeVisualization } from "./TreeVisualization";
-import { useTimer, getTargetSeconds, getRandomQuote, formatTime } from "@/hooks/useTimer";
+import { useTimer, getTargetSeconds, formatTime } from "@/hooks/useTimer";
 import type { Habit } from "@/components/CircularHabitCard";
 
+// Import image as Vite asset — guarantees correct path regardless of base URL
+import timerNatureImg from "/images/timer-nature.jpg?url";
+
 interface TimerModalProps {
-  /** The habit to track */
   habit: Habit;
-  /** Whether the modal is open */
   isOpen: boolean;
-  /** Callback to close the modal */
   onClose: () => void;
-  /** Callback when timer completes */
   onComplete: () => void;
-  /** Dark mode */
   isDarkMode?: boolean;
+}
+
+const STATE_LABELS: Record<string, string> = {
+  idle: "Foco profundo",
+  running: "Foco profundo",
+  paused: "Pausado",
+  completed: "Completo!",
+};
+
+// Custom ring component built specifically for this modal
+function TimerRing({
+  progress,
+  size,
+  children,
+}: {
+  progress: number;
+  size: number;
+  children: React.ReactNode;
+}) {
+  const id = useId();
+  const strokeWidth = 4;
+  const trackStrokeWidth = 4;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (progress / 100) * circumference;
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg
+        width={size}
+        height={size}
+        className="absolute inset-0 -rotate-90"
+      >
+        <defs>
+          <filter id={`glow-${id}`} x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {/* Track */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="rgba(163, 230, 53, 0.08)"
+          strokeWidth={trackStrokeWidth}
+          fill="transparent"
+        />
+
+        {/* Glow layer */}
+        {progress > 0 && (
+          <motion.circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="#A3E635"
+            strokeWidth={strokeWidth + 4}
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeLinecap="round"
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: offset }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            filter={`url(#glow-${id})`}
+            opacity={0.4}
+          />
+        )}
+
+        {/* Progress arc */}
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="#A3E635"
+          strokeWidth={strokeWidth}
+          fill="transparent"
+          strokeDasharray={circumference}
+          strokeLinecap="round"
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        />
+      </svg>
+
+      {/* Center content */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        {children}
+      </div>
+    </div>
+  );
 }
 
 export const TimerModal = ({
@@ -28,20 +119,15 @@ export const TimerModal = ({
   isOpen,
   onClose,
   onComplete,
-  isDarkMode = true,
 }: TimerModalProps) => {
-  const [quote] = useState(getRandomQuote);
   const [showCelebration, setShowCelebration] = useState(false);
 
-  // Calculate target time from habit
   const targetSeconds = getTargetSeconds(
     habit.goal_value || 10,
     habit.unit || "minutes"
   );
 
   const {
-    elapsedSeconds,
-    remainingSeconds,
     progress,
     state,
     start,
@@ -53,11 +139,9 @@ export const TimerModal = ({
     targetSeconds,
     onComplete: () => {
       setShowCelebration(true);
-      // Haptic feedback for completion
       if ("vibrate" in navigator) {
         navigator.vibrate([50, 50, 100]);
       }
-      // Elegant confetti - reduced particles for better performance
       confetti({
         particleCount: 40,
         spread: 60,
@@ -69,18 +153,11 @@ export const TimerModal = ({
     },
   });
 
-  // Handle completion
   const handleComplete = () => {
     onComplete();
     onClose();
   };
 
-  // Handle skip
-  const handleSkip = () => {
-    skip();
-  };
-
-  // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
       reset();
@@ -88,19 +165,15 @@ export const TimerModal = ({
     }
   }, [isOpen, reset]);
 
-  // Colors based on theme
-  const bgColor = isDarkMode ? "bg-background" : "bg-primary";
-  const textColor = isDarkMode ? "text-white" : "text-white";
-  const textMuted = isDarkMode ? "text-white/60" : "text-white/70";
-  const accentColor = isDarkMode ? "text-lime-400" : "text-white";
-  const buttonPrimary = isDarkMode
-    ? "bg-lime-400 text-black hover:bg-lime-500"
-    : "bg-white text-primary hover:bg-white/90";
-  const buttonSecondary = isDarkMode
-    ? "bg-white/10 text-white hover:bg-white/20"
-    : "bg-black/10 text-white hover:bg-black/20";
+  const goalDisplay = habit.unit === "hours"
+    ? `${habit.goal_value || 1}h`
+    : `${habit.goal_value || 10}min`;
 
   if (!isOpen) return null;
+
+  const glossyStyle = {
+    boxShadow: "0 4px 24px rgba(163, 230, 53, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.25)",
+  };
 
   return createPortal(
     <AnimatePresence>
@@ -115,121 +188,89 @@ export const TimerModal = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/90 backdrop-blur-md"
           onClick={state === "idle" ? onClose : undefined}
         />
 
-        {/* Modal content */}
+        {/* Modal */}
         <motion.div
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className={cn(
-            "relative w-full max-w-sm mx-4 rounded-3xl p-6 shadow-2xl",
-            bgColor
-          )}
+          className="relative w-full max-w-sm mx-4 rounded-3xl px-6 pt-5 pb-6 shadow-2xl overflow-hidden"
+          style={{ backgroundColor: "#0A0A0A" }}
         >
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className={cn(
-              "absolute top-4 right-4 p-2 rounded-full transition-colors",
-              buttonSecondary
-            )}
-            aria-label="Fechar"
-          >
-            <X size={20} />
-          </button>
+          {/* Ambient green glow behind ring */}
+          <div
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] rounded-full pointer-events-none"
+            style={{
+              background: "radial-gradient(circle, rgba(163, 230, 53, 0.08) 0%, rgba(163, 230, 53, 0.03) 40%, transparent 70%)",
+            }}
+          />
 
-          {/* Header */}
-          <div className="text-center mb-6">
-            <h2 className={cn("text-xl font-bold mb-1", textColor)}>
+          {/* Header bar */}
+          <div className="relative flex items-center justify-between mb-4">
+            <button
+              onClick={onClose}
+              className="p-2 -ml-1 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+              aria-label="Fechar"
+            >
+              <X size={20} />
+            </button>
+            <h2 className="text-sm font-bold text-white tracking-wide">
               {habit.name}
             </h2>
-            <p className={cn("text-sm", textMuted)}>
-              Meta: {formatTime(targetSeconds)}
-            </p>
+            <div className="w-9" />
           </div>
 
-          {/* Tree Visualization */}
-          <div className="flex justify-center mb-8">
-            <TreeVisualization
-              progress={progress}
-              size={180}
-              isDarkMode={isDarkMode}
-            />
+          {/* Ring area */}
+          <div className="relative flex justify-center mb-8">
+            <TimerRing progress={progress} size={240}>
+              {/* Photo circle with dark border — uses background-image for reliability */}
+              <div
+                className="rounded-full flex items-center justify-center"
+                style={{
+                  width: 200,
+                  height: 200,
+                  border: "3px solid #1a1a1a",
+                  boxShadow: "inset 0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
+                  backgroundImage: `url(${timerNatureImg})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                {/* Gradient overlay + timer text */}
+                <div
+                  className="w-full h-full rounded-full flex flex-col items-center justify-center"
+                  style={{
+                    background: "radial-gradient(circle, rgba(0,0,0,0.1) 20%, rgba(0,0,0,0.4) 100%)",
+                  }}
+                >
+                  <span
+                    className="text-[44px] font-bold text-white tabular-nums leading-none"
+                    style={{ textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}
+                  >
+                    {formattedRemaining}
+                  </span>
+                  <span
+                    className="text-[10px] uppercase tracking-[0.2em] text-white/60 mt-2"
+                    style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+                  >
+                    {STATE_LABELS[state] || ""}
+                  </span>
+                </div>
+              </div>
+            </TimerRing>
           </div>
 
-          {/* Timer display */}
-          <div className="text-center mb-6">
-            <motion.div
-              key={formattedRemaining}
-              initial={{ scale: 1.05 }}
-              animate={{ scale: 1 }}
-              className={cn("text-5xl font-bold tracking-tight", accentColor)}
-            >
-              {formattedRemaining}
-            </motion.div>
-            <p className={cn("text-sm mt-2", textMuted)}>
-              {state === "completed"
-                ? "Tempo completo!"
-                : state === "running"
-                ? "Em andamento..."
-                : state === "paused"
-                ? "Pausado"
-                : "Pronto para começar"}
-            </p>
-          </div>
-
-          {/* Progress bar */}
-          <div className="mb-6">
-            <div
-              className={cn(
-                "h-2 rounded-full overflow-hidden",
-                isDarkMode ? "bg-white/10" : "bg-black/10"
-              )}
-            >
-              <motion.div
-                className={cn(
-                  "h-full rounded-full",
-                  isDarkMode ? "bg-lime-400" : "bg-white"
-                )}
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.3 }}
-              />
-            </div>
-            <p className={cn("text-xs text-center mt-2", textMuted)}>
-              {Math.round(progress)}% concluído
-            </p>
-          </div>
-
-          {/* Quote */}
-          {state !== "completed" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className={cn(
-                "text-center mb-6 px-4 py-3 rounded-xl",
-                isDarkMode ? "bg-white/5" : "bg-black/5"
-              )}
-            >
-              <p className={cn("text-sm italic", textMuted)}>
-                "{quote.text}"
-              </p>
-              <p className={cn("text-xs mt-1", textMuted)}>
-                — {quote.author}
-              </p>
-            </motion.div>
-          )}
-
-          {/* Action buttons */}
-          <div className="flex gap-3">
+          {/* Action button */}
+          <div className="relative flex gap-3 mb-5">
             {state === "completed" ? (
               <Button
                 onClick={handleComplete}
-                className={cn("flex-1 h-14 text-base font-semibold rounded-xl", buttonPrimary)}
+                className="flex-1 h-14 rounded-full bg-gradient-to-b from-lime-300 to-lime-500 hover:from-lime-200 hover:to-lime-400 text-black font-bold text-base border-0"
+                style={glossyStyle}
               >
                 <Check size={20} className="mr-2" />
                 Concluir
@@ -238,15 +279,15 @@ export const TimerModal = ({
               <>
                 <Button
                   onClick={pause}
-                  className={cn("flex-1 h-14 text-base font-semibold rounded-xl", buttonSecondary)}
+                  className="flex-1 h-14 rounded-full bg-white/10 text-white hover:bg-white/15 font-semibold text-base border-0"
                 >
                   <Pause size={20} className="mr-2" />
                   Pausar
                 </Button>
                 <Button
-                  onClick={handleSkip}
-                  className={cn("h-14 px-4 rounded-xl", buttonSecondary)}
-                  title="Pular para conclusão"
+                  onClick={skip}
+                  className="h-14 px-5 rounded-full bg-white/10 text-white hover:bg-white/15 border-0"
+                  title="Pular"
                 >
                   <SkipForward size={20} />
                 </Button>
@@ -255,14 +296,15 @@ export const TimerModal = ({
               <>
                 <Button
                   onClick={start}
-                  className={cn("flex-1 h-14 text-base font-semibold rounded-xl", buttonPrimary)}
+                  className="flex-1 h-14 rounded-full bg-gradient-to-b from-lime-300 to-lime-500 hover:from-lime-200 hover:to-lime-400 text-black font-bold text-base border-0"
+                  style={glossyStyle}
                 >
                   <Play size={20} className="mr-2" />
                   Continuar
                 </Button>
                 <Button
                   onClick={reset}
-                  className={cn("h-14 px-4 rounded-xl", buttonSecondary)}
+                  className="h-14 px-5 rounded-full bg-white/10 text-white hover:bg-white/15 border-0"
                   title="Reiniciar"
                 >
                   <RotateCcw size={20} />
@@ -271,23 +313,37 @@ export const TimerModal = ({
             ) : (
               <Button
                 onClick={start}
-                className={cn("flex-1 h-14 text-base font-semibold rounded-xl", buttonPrimary)}
+                className="flex-1 h-14 rounded-full bg-gradient-to-b from-lime-300 to-lime-500 hover:from-lime-200 hover:to-lime-400 text-black font-bold text-base border-0"
+                style={glossyStyle}
               >
-                <Play size={20} className="mr-2" />
-                Iniciar
+                <Play size={18} className="mr-2" />
+                Iniciar Sessao
               </Button>
             )}
           </div>
 
-          {/* Skip hint for long timers */}
-          {state !== "completed" && targetSeconds > 300 && (
-            <p className={cn("text-xs text-center mt-4", textMuted)}>
-              Dica: Você pode pular o timer se já completou a atividade
-            </p>
-          )}
+          {/* Info chips — dark gray pills */}
+          <div className="relative flex gap-3">
+            <div className="flex-1 rounded-2xl p-3.5" style={{ backgroundColor: "#1a1a1a" }}>
+              <p className="text-[9px] uppercase tracking-widest text-white/40 mb-1">
+                Habito
+              </p>
+              <p className="text-sm font-semibold text-white truncate">
+                {habit.name}
+              </p>
+            </div>
+            <div className="flex-1 rounded-2xl p-3.5" style={{ backgroundColor: "#1a1a1a" }}>
+              <p className="text-[9px] uppercase tracking-widest text-white/40 mb-1">
+                Meta hoje
+              </p>
+              <p className="text-sm font-semibold text-white">
+                {goalDisplay}
+              </p>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Celebration overlay - elegant glow effect instead of emoji */}
+        {/* Celebration overlay */}
         <AnimatePresence>
           {showCelebration && (
             <motion.div
@@ -296,14 +352,12 @@ export const TimerModal = ({
               exit={{ opacity: 0 }}
               className="absolute inset-0 pointer-events-none flex items-center justify-center"
             >
-              {/* Radial glow effect */}
               <motion.div
                 initial={{ scale: 0.5, opacity: 0 }}
                 animate={{ scale: [0.5, 1.5, 1.2], opacity: [0, 0.4, 0] }}
                 transition={{ duration: 1.2, ease: "easeOut" }}
                 className="absolute w-64 h-64 rounded-full bg-lime-400/30 blur-3xl"
               />
-              {/* Check icon */}
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: [0, 1.15, 1] }}

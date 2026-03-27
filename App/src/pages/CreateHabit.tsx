@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   X,
   ChevronRight,
+  Plus,
+  Pencil,
+  ArrowRight,
+  Check,
   Target,
   Calendar,
   Bell,
@@ -41,6 +45,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getHabitFormTheme } from "@/theme/habitFormTheme";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { ptBR } from "date-fns/locale";
 
 const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; icon: React.ReactNode }> = [
   { id: "morning", name: "Manhã", icon: <Sun className="h-5 w-5" /> },
@@ -64,11 +71,70 @@ const soundOptions: Array<{ value: "default" | "soft" | "bright"; label: string;
   { value: "bright", label: "Vibrante", description: "Som mais chamativo" },
 ];
 
+import { DrumColumn, HOURS, MINUTES } from "@/components/ui/time-drum-picker";
+
 type Step = "select" | "details" | "confirm";
 type FrequencyType = "daily" | "fixed_days" | "once";
 
 // Cor unificada para todas as categorias - verde lime premium
 const UNIFIED_COLOR = "#A3E635";
+
+// Hero card images mapped by habit iconKey and category
+const HABIT_HERO_IMAGES: Record<string, string> = {
+  meditate: "/images/habits/meditation.webp",
+  mindful_minutes: "/images/habits/meditation.webp",
+  sunrise: "/images/habits/morning.webp",
+  wake_early: "/images/habits/morning.webp",
+  wake_on_time: "/images/habits/morning.webp",
+  make_bed: "/images/habits/morning.webp",
+  alarm: "/images/habits/morning.webp",
+  run: "/images/habits/exercise.webp",
+  walk_run: "/images/habits/exercise.webp",
+  strength: "/images/habits/exercise.webp",
+  exercise_minutes: "/images/habits/exercise.webp",
+  burn_energy: "/images/habits/exercise.webp",
+  cycle: "/images/habits/exercise.webp",
+  swim: "/images/habits/exercise.webp",
+  book: "/images/habits/reading.webp",
+  read_books: "/images/habits/reading.webp",
+  study: "/images/habits/reading.webp",
+  journal: "/images/habits/reading.webp",
+  water: "/images/habits/water.webp",
+  drink_water: "/images/habits/water.webp",
+  sleep: "/images/habits/sleep.webp",
+  sleep_8h: "/images/habits/sleep.webp",
+  bed: "/images/habits/sleep.webp",
+  no_late_sleep: "/images/habits/sleep.webp",
+  meal: "/images/habits/food.webp",
+  breakfast: "/images/habits/food.webp",
+  fruits: "/images/habits/food.webp",
+  vegetables: "/images/habits/food.webp",
+  protein: "/images/habits/food.webp",
+  vitamins: "/images/habits/food.webp",
+  no_sugar: "/images/habits/food.webp",
+  focus: "/images/habits/focus.webp",
+  deep_work: "/images/habits/focus.webp",
+  plan: "/images/habits/focus.webp",
+  review: "/images/habits/focus.webp",
+  checklist: "/images/habits/focus.webp",
+  organize: "/images/habits/focus.webp",
+  yoga: "/images/habits/yoga.webp",
+  stretch: "/images/habits/yoga.webp",
+};
+
+const CATEGORY_HERO_IMAGES: Record<string, string> = {
+  productivity: "/images/habits/focus.webp",
+  fitness: "/images/habits/exercise.webp",
+  nutrition: "/images/habits/food.webp",
+  time_routine: "/images/habits/focus.webp",
+  avoid: "/images/habits/meditation.webp",
+};
+
+function getHeroImage(iconKey: string | null | undefined, categoryId: string | undefined): string {
+  if (iconKey && HABIT_HERO_IMAGES[iconKey]) return HABIT_HERO_IMAGES[iconKey];
+  if (categoryId && CATEGORY_HERO_IMAGES[categoryId]) return CATEGORY_HERO_IMAGES[categoryId];
+  return "/images/habits/default.webp";
+}
 
 export const CATEGORY_DATA: Array<{
   id: string;
@@ -79,8 +145,9 @@ export const CATEGORY_DATA: Array<{
   tasks: Array<{
     id: string;
     name: string;
-    iconKey?: HabitIconKey;
     description?: string;
+    iconKey?: HabitIconKey;
+    categoryOverride?: string;
     default_goal_value?: number;
     default_unit?: "none" | "steps" | "minutes" | "km" | "hours" | "pages" | "liters" | "custom";
     default_frequency_type?: "fixed_days" | "times_per_week" | "times_per_month" | "every_n_days" | "daily";
@@ -93,90 +160,70 @@ export const CATEGORY_DATA: Array<{
 }> = [
   {
     id: "productivity",
-    name: "Produtividade",
-    description: "Organização pessoal e desenvolvimento",
-    iconKey: "plan",
+    name: "Mente",
+    description: "Desenvolvimento pessoal e mental",
+    iconKey: "meditate",
     colorToken: UNIFIED_COLOR,
     tasks: [
-      { id: "wake_early", name: "Acordar Cedo", iconKey: "sunrise", default_unit: "none", default_frequency_type: "daily" },
-      { id: "make_bed", name: "Fazer a Cama", iconKey: "make_bed", default_unit: "none", default_frequency_type: "daily" },
-      { id: "plan_day", name: "Planejar o Dia", iconKey: "plan", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
-      { id: "review_goals", name: "Revisar Objetivos", iconKey: "review", default_unit: "none", default_frequency_type: "times_per_week", default_times_per_week: 1 },
-      { id: "journaling", name: "Journaling", iconKey: "journal", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
-      { id: "read_books", name: "Ler Livros", iconKey: "book", default_unit: "pages", default_goal_value: 30, default_frequency_type: "daily" },
-      { id: "meditate", name: "Meditar", iconKey: "meditate", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
-      { id: "study", name: "Estudar", iconKey: "study", default_unit: "hours", default_goal_value: 1, default_frequency_type: "daily" },
-      { id: "organize_space", name: "Organizar Ambiente", iconKey: "organize", default_unit: "minutes", default_goal_value: 15, default_frequency_type: "daily" },
-      { id: "task_list", name: "Fazer Lista de Tarefas", iconKey: "checklist", default_unit: "none", default_frequency_type: "daily" },
+      { id: "wake_early", name: "Acordar Cedo", description: "Comece o dia com vantagem", iconKey: "sunrise", default_unit: "none", default_frequency_type: "daily" },
+      { id: "make_bed", name: "Fazer a Cama", description: "Primeira vitória do dia", iconKey: "make_bed", default_unit: "none", default_frequency_type: "daily" },
+      { id: "plan_day", name: "Planejar o Dia", description: "Organize suas prioridades", iconKey: "plan", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
+      { id: "review_goals", name: "Revisar Objetivos", description: "Mantenha o foco no que importa", iconKey: "review", default_unit: "none", default_frequency_type: "times_per_week", default_times_per_week: 1 },
+      { id: "journaling", name: "Journaling", description: "Reflita e organize pensamentos", iconKey: "journal", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
+      { id: "read_books", name: "Ler Livros", description: "Expanda seu conhecimento", iconKey: "book", default_unit: "pages", default_goal_value: 30, default_frequency_type: "daily" },
+      { id: "meditate", name: "Meditar", description: "Treine sua mente diariamente", iconKey: "meditate", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
+      { id: "study", name: "Estudar", description: "Invista no seu crescimento", iconKey: "study", default_unit: "hours", default_goal_value: 1, default_frequency_type: "daily" },
+      { id: "organize_space", name: "Organizar Ambiente", description: "Espaço limpo, mente clara", iconKey: "organize", default_unit: "minutes", default_goal_value: 15, default_frequency_type: "daily" },
+      { id: "task_list", name: "Fazer Lista de Tarefas", description: "Planeje e execute com clareza", iconKey: "checklist", default_unit: "none", default_frequency_type: "daily" },
     ],
   },
   {
     id: "fitness",
-    name: "Saúde/Fitness",
-    description: "Saúde física e bem-estar corporal",
+    name: "Corpo",
+    description: "Saúde física, nutrição e bem-estar",
     iconKey: "run",
     colorToken: UNIFIED_COLOR,
     tasks: [
-      { id: "walk_run", name: "Caminhar ou Correr", default_unit: "steps", default_goal_value: 10000, default_frequency_type: "daily", auto_complete_source: "health" },
-      { id: "cycle", name: "Pedalar", iconKey: "cycle", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "times_per_week", default_times_per_week: 3 },
-      { id: "swim", name: "Nadar", iconKey: "swim", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "times_per_week", default_times_per_week: 2 },
-      { id: "mindful_minutes", name: "Minutos de Atenção Plena", iconKey: "meditate", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily", auto_complete_source: "health" },
-      { id: "climb_stairs", name: "Subir Escadas", iconKey: "stairs", default_unit: "custom", default_goal_value: 10, default_frequency_type: "daily", auto_complete_source: "health" },
-      { id: "activity_rings", name: "Completar Anéis de Atividade", iconKey: "activity_rings", default_unit: "none", default_frequency_type: "daily", auto_complete_source: "health" },
-      { id: "stand_hours", name: "Horas em Pé", iconKey: "stand_hours", default_unit: "custom", default_goal_value: 12, default_frequency_type: "daily", auto_complete_source: "health" },
-      { id: "exercise_minutes", name: "Minutos de Exercício", iconKey: "exercise_minutes", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "daily", auto_complete_source: "health" },
-      { id: "burn_calories", name: "Queimar Calorias", iconKey: "burn_energy", default_unit: "custom", default_goal_value: 500, default_frequency_type: "daily", auto_complete_source: "health" },
-      { id: "stretching", name: "Alongamento", iconKey: "stretch", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
-      { id: "yoga", name: "Yoga", iconKey: "yoga", default_unit: "minutes", default_goal_value: 20, default_frequency_type: "times_per_week", default_times_per_week: 3 },
-      { id: "strength_training", name: "Treino de Força", iconKey: "strength", default_unit: "minutes", default_goal_value: 45, default_frequency_type: "times_per_week", default_times_per_week: 3 },
-      { id: "drink_water", name: "Beber Água", iconKey: "water", default_unit: "liters", default_goal_value: 2, default_frequency_type: "daily" },
-      { id: "sleep_8h", name: "Dormir 8 Horas", iconKey: "sleep", default_unit: "hours", default_goal_value: 8, default_frequency_type: "daily", auto_complete_source: "health" },
-    ],
-  },
-  {
-    id: "nutrition",
-    name: "Alimentação",
-    description: "Nutrição e alimentação saudável",
-    iconKey: "meal",
-    colorToken: UNIFIED_COLOR,
-    tasks: [
-      { id: "healthy_breakfast", name: "Café da Manhã Saudável", iconKey: "breakfast", default_unit: "none", default_frequency_type: "daily" },
-      { id: "eat_fruits", name: "Comer Frutas", iconKey: "fruits", default_unit: "custom", default_goal_value: 2, default_frequency_type: "daily" },
-      { id: "eat_vegetables", name: "Comer Vegetais", iconKey: "vegetables", default_unit: "custom", default_goal_value: 3, default_frequency_type: "daily" },
-      { id: "drink_water_2l", name: "Beber 2L de Água", iconKey: "water", default_unit: "liters", default_goal_value: 2, default_frequency_type: "daily" },
-      { id: "avoid_sugar", name: "Evitar Açúcar", iconKey: "no_sugar", default_unit: "none", default_frequency_type: "daily" },
-      { id: "meal_prep", name: "Preparar Refeições", iconKey: "meal", default_unit: "custom", default_goal_value: 3, default_frequency_type: "times_per_week", default_times_per_week: 1 },
-      { id: "eat_protein", name: "Comer Proteína", iconKey: "protein", default_unit: "custom", default_goal_value: 3, default_frequency_type: "daily" },
-      { id: "take_vitamins", name: "Tomar Vitaminas", iconKey: "vitamins", default_unit: "none", default_frequency_type: "daily" },
+      { id: "walk_run", name: "Caminhar ou Correr", description: "Movimente-se todos os dias", default_unit: "steps", default_goal_value: 10000, default_frequency_type: "daily", auto_complete_source: "health" },
+      { id: "cycle", name: "Pedalar", description: "Pedale para mais energia", iconKey: "cycle", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "times_per_week", default_times_per_week: 3 },
+      { id: "swim", name: "Nadar", description: "Exercício completo e refrescante", iconKey: "swim", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "times_per_week", default_times_per_week: 2 },
+      { id: "stretching", name: "Alongamento", description: "Flexibilidade e bem-estar", iconKey: "stretch", default_unit: "minutes", default_goal_value: 10, default_frequency_type: "daily" },
+      { id: "yoga", name: "Yoga", description: "Equilíbrio entre corpo e mente", iconKey: "yoga", default_unit: "minutes", default_goal_value: 20, default_frequency_type: "times_per_week", default_times_per_week: 3 },
+      { id: "strength_training", name: "Treino de Força", description: "Fortaleça seu corpo", iconKey: "strength", default_unit: "minutes", default_goal_value: 45, default_frequency_type: "times_per_week", default_times_per_week: 3 },
+      { id: "drink_water", name: "Beber Água", description: "Mantenha seu corpo hidratado", iconKey: "water", default_unit: "liters", default_goal_value: 2, default_frequency_type: "daily" },
+      { id: "sleep_8h", name: "Dormir 8 Horas", description: "Descanse para render mais", iconKey: "sleep", default_unit: "hours", default_goal_value: 8, default_frequency_type: "daily", auto_complete_source: "health" },
+      { id: "exercise_minutes", name: "Minutos de Exercício", description: "Mova-se por pelo menos 30 min", iconKey: "exercise_minutes", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "daily", auto_complete_source: "health" },
+      { id: "burn_calories", name: "Queimar Calorias", description: "Atinja sua meta diária", iconKey: "burn_energy", default_unit: "custom", default_goal_value: 500, default_frequency_type: "daily", auto_complete_source: "health" },
+      // Nutrition tasks (categoryOverride preserves DB value)
+      { id: "healthy_breakfast", name: "Café da Manhã Saudável", description: "Comece o dia bem alimentado", iconKey: "breakfast", categoryOverride: "nutrition", default_unit: "none", default_frequency_type: "daily" },
+      { id: "eat_fruits", name: "Comer Frutas", description: "Vitaminas naturais diárias", iconKey: "fruits", categoryOverride: "nutrition", default_unit: "custom", default_goal_value: 2, default_frequency_type: "daily" },
+      { id: "eat_vegetables", name: "Comer Vegetais", description: "Nutrição verde no prato", iconKey: "vegetables", categoryOverride: "nutrition", default_unit: "custom", default_goal_value: 3, default_frequency_type: "daily" },
+      { id: "drink_water_2l", name: "Beber 2L de Água", description: "Hidratação é essencial", iconKey: "water", categoryOverride: "nutrition", default_unit: "liters", default_goal_value: 2, default_frequency_type: "daily" },
+      { id: "avoid_sugar", name: "Evitar Açúcar", description: "Reduza o açúcar no dia a dia", iconKey: "no_sugar", categoryOverride: "nutrition", default_unit: "none", default_frequency_type: "daily" },
+      { id: "meal_prep", name: "Preparar Refeições", description: "Planeje suas refeições", iconKey: "meal", categoryOverride: "nutrition", default_unit: "custom", default_goal_value: 3, default_frequency_type: "times_per_week", default_times_per_week: 1 },
+      { id: "eat_protein", name: "Comer Proteína", description: "Fortaleça seus músculos", iconKey: "protein", categoryOverride: "nutrition", default_unit: "custom", default_goal_value: 3, default_frequency_type: "daily" },
+      { id: "take_vitamins", name: "Tomar Vitaminas", description: "Suplementação diária", iconKey: "vitamins", categoryOverride: "nutrition", default_unit: "none", default_frequency_type: "daily" },
     ],
   },
   {
     id: "time_routine",
-    name: "Tempo/Rotina",
-    description: "Gestão de tempo e rotinas",
-    iconKey: "clock",
+    name: "Foco",
+    description: "Produtividade, foco e rotinas saudáveis",
+    iconKey: "focus",
     colorToken: UNIFIED_COLOR,
     tasks: [
-      { id: "pomodoro", name: "Pomodoro de Trabalho", iconKey: "focus", default_unit: "custom", default_goal_value: 4, default_frequency_type: "times_per_week", default_times_per_week: 5 },
-      { id: "deep_focus", name: "Tempo de Foco Profundo", iconKey: "deep_work", default_unit: "hours", default_goal_value: 2, default_frequency_type: "daily" },
-      { id: "sleep_on_time", name: "Dormir no Horário", iconKey: "bed", default_unit: "none", default_frequency_type: "daily" },
-      { id: "wake_on_time", name: "Acordar no Horário", iconKey: "alarm", default_unit: "none", default_frequency_type: "daily" },
-      { id: "screen_free_time", name: "Tempo Sem Telas", iconKey: "no_screens", default_unit: "hours", default_goal_value: 1, default_frequency_type: "daily" },
-    ],
-  },
-  {
-    id: "avoid",
-    name: "Evitar",
-    description: "Hábitos a serem eliminados",
-    iconKey: "ban",
-    colorToken: UNIFIED_COLOR,
-    tasks: [
-      { id: "no_smoking", name: "Não Fumar", iconKey: "no_smoke", default_unit: "none", default_frequency_type: "daily" },
-      { id: "no_sweets", name: "Não Comer Doces", iconKey: "no_sugar", default_unit: "none", default_frequency_type: "daily" },
-      { id: "limit_social_media", name: "Limitar Redes Sociais", iconKey: "social_media", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "daily" },
-      { id: "no_skip_meals", name: "Não Pular Refeições", iconKey: "no_skip_meals", default_unit: "custom", default_goal_value: 3, default_frequency_type: "daily" },
-      { id: "no_late_sleep", name: "Não Dormir Tarde", iconKey: "no_late_sleep", default_unit: "none", default_frequency_type: "daily" },
-      { id: "no_sedentary", name: "Não Ficar Sedentário", iconKey: "active", default_unit: "custom", default_goal_value: 8, default_frequency_type: "daily" },
+      { id: "pomodoro", name: "Pomodoro de Trabalho", description: "Blocos de foco intenso", iconKey: "focus", default_unit: "custom", default_goal_value: 4, default_frequency_type: "times_per_week", default_times_per_week: 5 },
+      { id: "deep_focus", name: "Tempo de Foco Profundo", description: "Concentração sem distrações", iconKey: "deep_work", default_unit: "hours", default_goal_value: 2, default_frequency_type: "daily" },
+      { id: "sleep_on_time", name: "Dormir no Horário", description: "Rotina de sono consistente", iconKey: "bed", default_unit: "none", default_frequency_type: "daily" },
+      { id: "wake_on_time", name: "Acordar no Horário", description: "Disciplina desde o despertar", iconKey: "alarm", default_unit: "none", default_frequency_type: "daily" },
+      { id: "screen_free_time", name: "Tempo Sem Telas", description: "Descanse seus olhos e mente", iconKey: "no_screens", default_unit: "hours", default_goal_value: 1, default_frequency_type: "daily" },
+      // Avoid tasks (categoryOverride preserves DB value)
+      { id: "no_smoking", name: "Não Fumar", description: "Liberte-se do cigarro", iconKey: "no_smoke", categoryOverride: "avoid", default_unit: "none", default_frequency_type: "daily" },
+      { id: "no_sweets", name: "Não Comer Doces", description: "Controle a tentação", iconKey: "no_sugar", categoryOverride: "avoid", default_unit: "none", default_frequency_type: "daily" },
+      { id: "limit_social_media", name: "Limitar Redes Sociais", description: "Menos scroll, mais vida", iconKey: "social_media", categoryOverride: "avoid", default_unit: "minutes", default_goal_value: 30, default_frequency_type: "daily" },
+      { id: "no_skip_meals", name: "Não Pular Refeições", description: "Alimente-se regularmente", iconKey: "no_skip_meals", categoryOverride: "avoid", default_unit: "custom", default_goal_value: 3, default_frequency_type: "daily" },
+      { id: "no_late_sleep", name: "Não Dormir Tarde", description: "Respeite seu horário de sono", iconKey: "no_late_sleep", categoryOverride: "avoid", default_unit: "none", default_frequency_type: "daily" },
+      { id: "no_sedentary", name: "Não Ficar Sedentário", description: "Levante-se e movimente-se", iconKey: "active", categoryOverride: "avoid", default_unit: "custom", default_goal_value: 8, default_frequency_type: "daily" },
     ],
   },
 ];
@@ -184,7 +231,9 @@ export const CATEGORY_DATA: Array<{
 const fallbackCategories = CATEGORY_DATA.map((c) => ({ id: c.id, name: c.name, color: c.colorToken, icon_key: null }));
 
 const CreateHabit = () => {
-  const [habitName, setHabitName] = useState("");
+  const location = useLocation();
+  const prefilled = location.state as { prefilledName?: string; prefilledCategory?: string; prefilledPeriod?: string } | undefined;
+  const [habitName, setHabitName] = useState(prefilled?.prefilledName || "");
   const [selectedEmoji, setSelectedEmoji] = useState<HabitEmoji>(HABIT_EMOJIS[0]);
   const [selectedCategory, setSelectedCategory] = useState(fallbackCategories[0].id);
   const [selectedColor, setSelectedColor] = useState<string | null>(fallbackCategories[0].color ?? null);
@@ -196,7 +245,7 @@ const CreateHabit = () => {
   const [timesPerMonth, setTimesPerMonth] = useState<number | undefined>(undefined);
   const [everyNDays, setEveryNDays] = useState<number | undefined>(undefined);
   const [timesPerDay, setTimesPerDay] = useState<number>(1);
-  const [selectedPeriod, setSelectedPeriod] = useState<typeof periods[number]["id"]>(periods[0].id);
+  const [selectedPeriod, setSelectedPeriod] = useState<typeof periods[number]["id"]>((prefilled?.prefilledPeriod as typeof periods[number]["id"]) || periods[0].id);
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [reminderTime, setReminderTime] = useState<string>("08:00");
@@ -207,7 +256,7 @@ const CreateHabit = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string; iconKey?: HabitIconKey } | null>(null);
   const [selectedTemplateAuto, setSelectedTemplateAuto] = useState<boolean>(false);
-  const [step, setStep] = useState<Step>("select");
+  const [step, setStep] = useState<Step>(prefilled?.prefilledName ? "details" : "select");
   const [selectedCategoryData, setSelectedCategoryData] = useState<(typeof CATEGORY_DATA)[number] | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const contentScrollRef = useRef<HTMLDivElement>(null);
@@ -268,10 +317,19 @@ const CreateHabit = () => {
 
   // Scroll to top when step changes
   useEffect(() => {
+    // Immediate scroll
     if (contentScrollRef.current) {
       contentScrollRef.current.scrollTop = 0;
     }
+    window.scrollTo(0, 0);
     setIsScrolled(false);
+    // Delayed scroll to catch AnimatePresence timing
+    const timer = setTimeout(() => {
+      if (contentScrollRef.current) {
+        contentScrollRef.current.scrollTop = 0;
+      }
+    }, 50);
+    return () => clearTimeout(timer);
   }, [step]);
 
   // Handle scroll for header opacity
@@ -564,6 +622,13 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     return null;
   };
 
+  const handleCustomCreate = () => {
+    clearTemplateSelection();
+    setSelectedCategory("productivity");
+    setHabitName("");
+    setStep("details");
+  };
+
   const handleSelectCategory = (cat: (typeof CATEGORY_DATA)[number]) => {
     setSelectedCategory(cat.id);
     setSelectedCategoryData(cat);
@@ -584,6 +649,10 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     setHabitName(tpl.name);
     // IMPORTANTE: Atualizar o icon_key com o ícone do template selecionado
     setSelectedIconKey(tpl.iconKey || null);
+    // Use categoryOverride for DB category if task was redistributed
+    if (tpl.categoryOverride) {
+      setSelectedCategory(tpl.categoryOverride);
+    }
     setUnit((tpl.default_unit as typeof unit) ?? "none");
     setGoalValue(tpl.default_goal_value ?? undefined);
     const tplFreq = tpl.default_frequency_type === "fixed_days" ? "fixed_days" : "daily";
@@ -602,10 +671,10 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
   };
 
   // Stepper configuration
-  const steps: Array<{ id: Step; label: string; icon: typeof Target }> = [
-    { id: "select", label: "Escolher", icon: Target },
-    { id: "details", label: "Configurar", icon: Calendar },
-    { id: "confirm", label: "Confirmar", icon: Bell },
+  const steps: Array<{ id: Step; label: string }> = [
+    { id: "select", label: "ESCOLHER" },
+    { id: "details", label: "CONFIGURAR" },
+    { id: "confirm", label: "CONFIRMAR" },
   ];
 
   const currentStepIndex = steps.findIndex(s => s.id === step);
@@ -614,7 +683,6 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     <div className="px-4 py-3 flex justify-center">
       <div className="flex items-center justify-center w-full max-w-xs">
         {steps.map((s, index) => {
-          const StepIcon = s.icon;
           const isActive = index === currentStepIndex;
           const isCompleted = index < currentStepIndex;
           const isLast = index === steps.length - 1;
@@ -627,20 +695,27 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                   animate={{
                     scale: isActive ? 1.1 : 1,
                     backgroundColor: isActive || isCompleted
-                      ? "#A3E635"  // Verde lime para ativo/concluído (ambos os modos)
-                      : (isDarkMode ? "rgba(255,255,255,0.1)" : "#E2E8F0"), // Cinza visível no light
+                      ? themeColors.stepperNumber.activeBg
+                      : themeColors.stepperNumber.inactiveBg,
+                    boxShadow: isActive
+                      ? (isDarkMode ? "0 0 20px rgba(163, 230, 53, 0.4), 0 0 40px rgba(163, 230, 53, 0.15)" : "0 0 16px rgba(132, 204, 22, 0.3)")
+                      : isCompleted
+                        ? (isDarkMode ? "0 0 12px rgba(163, 230, 53, 0.2)" : "0 0 8px rgba(132, 204, 22, 0.15)")
+                        : "none",
                   }}
                   transition={{ duration: 0.2 }}
                   className="flex h-10 w-10 items-center justify-center rounded-full"
                 >
-                  <StepIcon
-                    className="h-5 w-5 transition-colors duration-200"
+                  <span
+                    className="text-sm font-bold transition-colors duration-200"
                     style={{
                       color: isActive || isCompleted
-                        ? "#FFFFFF"  // Branco no verde (ambos os modos)
-                        : (isDarkMode ? "rgba(255,255,255,0.4)" : "#64748B") // Slate-500 no light
+                        ? themeColors.stepperNumber.activeText
+                        : themeColors.stepperNumber.inactiveText,
                     }}
-                  />
+                  >
+                    {index + 1}
+                  </span>
                 </motion.div>
                 <span
                   className={`text-[10px] font-semibold uppercase tracking-wide transition-colors duration-200 ${
@@ -662,8 +737,8 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                     className="h-0.5 rounded-full"
                     animate={{
                       backgroundColor: isCompleted
-                        ? "#A3E635"  // Verde para concluído (ambos os modos)
-                        : (isDarkMode ? "rgba(255,255,255,0.15)" : "#CBD5E1"), // Cinza visível no light
+                        ? themeColors.stepperNumber.activeBg
+                        : (isDarkMode ? "rgba(255,255,255,0.15)" : "#CBD5E1"),
                     }}
                     transition={{ duration: 0.3 }}
                   />
@@ -678,7 +753,15 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
 
   const HeaderBar = (
     <div className={`flex items-center justify-between px-4 py-4 border-b ${themeColors.headerBorder}`}>
-      {step === "details" ? (
+      {step === "select" ? (
+        <button
+          onClick={() => navigate("/dashboard")}
+          className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
+          aria-label="Fechar"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      ) : step === "details" ? (
         <button
           onClick={() => setStep("select")}
           className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
@@ -686,7 +769,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-      ) : step === "confirm" ? (
+      ) : (
         <button
           onClick={() => setStep("details")}
           className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
@@ -694,21 +777,13 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-      ) : (
-        <div className="w-10" />
       )}
       <div className="text-center">
         <p className={`text-base font-semibold tracking-wide ${themeColors.headerText}`}>
           {step === "select" ? "Nova Tarefa" : step === "details" ? "Configurar Tarefa" : "Confirmar"}
         </p>
       </div>
-      <button
-        onClick={() => navigate("/dashboard")}
-        className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
-        aria-label="Fechar"
-      >
-        <X className="h-5 w-5" />
-      </button>
+      <div className="w-10" />
     </div>
   );
 
@@ -721,8 +796,16 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       transition={{ duration: 0.25, ease: "easeOut" }}
       className="space-y-6 pb-6 pt-4"
     >
-      {/* Category Pills - Apenas ícones circulares minimalistas */}
-      <div className="flex items-center justify-center gap-2 px-4">
+      {/* Category Filter Label */}
+      <p
+        className="text-[10px] font-bold uppercase tracking-[0.2em] px-6"
+        style={{ color: themeColors.categoryLabel }}
+      >
+        FILTRO POR CATEGORIA
+      </p>
+
+      {/* Category Pills with Labels */}
+      <div className="flex items-center justify-center gap-6 px-4">
         {CATEGORY_DATA.map((cat) => {
           const Icon = getHabitIcon(cat.iconKey);
           const isActive = selectedCategoryData?.id === cat.id;
@@ -730,38 +813,84 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
             <button
               key={cat.id}
               onClick={() => handleSelectCategory(cat)}
-              aria-label={cat.label}
+              aria-label={cat.name}
               aria-pressed={isActive}
-              className="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-              style={{
-                backgroundColor: isActive ? themeColors.categoryPill.activeBg : themeColors.categoryPill.inactiveBg,
-                border: isActive ? `2px solid ${themeColors.categoryPill.activeBg}` : "2px solid transparent",
-              }}
+              className="flex flex-col items-center gap-1.5 transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
             >
-              {Icon && <Icon className="h-5 w-5" style={{ color: isActive ? themeColors.categoryPill.activeIcon : themeColors.categoryPill.inactiveIcon }} />}
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200"
+                style={{
+                  backgroundColor: isActive ? themeColors.categoryPill.activeBg : themeColors.categoryPill.inactiveBg,
+                  border: isActive ? `2px solid ${themeColors.categoryPill.activeBg}` : "2px solid transparent",
+                  boxShadow: isActive
+                    ? (isDarkMode ? "0 0 20px rgba(163, 230, 53, 0.35), 0 0 40px rgba(163, 230, 53, 0.1)" : "0 0 16px rgba(132, 204, 22, 0.25)")
+                    : "none",
+                }}
+              >
+                {Icon && <Icon className="h-5 w-5" style={{ color: isActive ? themeColors.categoryPill.activeIcon : themeColors.categoryPill.inactiveIcon }} />}
+              </div>
+              <span
+                className={`text-[10px] font-semibold transition-colors duration-200 ${
+                  isActive ? themeColors.bodyText : themeColors.bodyTextMuted
+                }`}
+              >
+                {cat.name}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Descrição da categoria selecionada */}
-      {selectedCategoryData && (
-        <div className="px-6 pt-0">
-          <p className={`text-sm text-center leading-relaxed ${themeColors.bodyTextSecondary}`}>
-            {selectedCategoryData.description}
-          </p>
-        </div>
-      )}
+      {/* Custom Habit Card */}
+      <div className="px-4">
+        <button
+          onClick={handleCustomCreate}
+          className="flex w-full items-center gap-4 rounded-2xl px-5 py-5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          style={{
+            backgroundColor: themeColors.customHabitCard.bg,
+            border: `1.5px dashed ${themeColors.customHabitCard.border}`,
+            boxShadow: isDarkMode
+              ? "0 4px 20px rgba(0, 0, 0, 0.3), 0 0 30px rgba(163, 230, 53, 0.06), inset 0 1px 0 rgba(255,255,255,0.04)"
+              : "0 4px 16px rgba(0, 0, 0, 0.06)",
+          }}
+        >
+          <div
+            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl"
+            style={{
+              backgroundColor: isDarkMode ? "rgba(163, 230, 53, 0.15)" : "rgba(132, 204, 22, 0.1)",
+              boxShadow: isDarkMode ? "0 0 12px rgba(163, 230, 53, 0.1)" : "none",
+            }}
+          >
+            <Plus className="h-6 w-6" style={{ color: themeColors.customHabitCard.icon }} />
+          </div>
+          <div className="flex-1 text-left">
+            <p className="text-sm font-bold uppercase tracking-wide" style={{ color: themeColors.customHabitCard.text }}>
+              CRIAR HÁBITO PERSONALIZADO
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: themeColors.customHabitCard.subtitle }}>
+              Defina sua própria meta do zero
+            </p>
+          </div>
+          <ChevronRight className="h-5 w-5 flex-shrink-0" style={{ color: themeColors.customHabitCard.chevron }} />
+        </button>
+      </div>
 
-      {/* Lista de hábitos */}
-      {selectedCategoryData && (
+      {/* Separator */}
+      <div className="px-6">
+        <div className="h-px" style={{ backgroundColor: themeColors.separator }} />
+      </div>
+
+      {/* Task List */}
+      {selectedCategoryData && selectedCategoryData.tasks.length > 0 && (
         <div className="space-y-3 px-4">
-          <p className={`text-[10px] font-bold uppercase tracking-widest px-2 ${themeColors.sectionTitle}`}>
+          <p
+            className="text-sm font-medium px-2"
+            style={{ color: themeColors.categoryLabel }}
+          >
             Selecione uma tarefa
           </p>
           {selectedCategoryData.tasks.map((tpl) => {
             const TaskIcon = tpl.iconKey ? getHabitIcon(tpl.iconKey as any) : getHabitIcon(selectedCategoryData.iconKey);
-            const isHealthTask = tpl.auto_complete_source === "health";
             return (
               <button
                 key={tpl.id}
@@ -769,23 +898,31 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
                 className="group flex w-full items-center justify-between rounded-2xl px-4 py-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
                   backgroundColor: themeColors.taskButton.bg,
-                  boxShadow: themeColors.taskButton.shadow,
+                  boxShadow: isDarkMode
+                    ? "0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.03)"
+                    : themeColors.taskButton.shadow,
+                  border: isDarkMode ? "1px solid rgba(255,255,255,0.05)" : "1px solid rgba(0,0,0,0.06)",
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.taskButton.iconBg}`}>
+                  <div
+                    className="flex h-11 w-11 items-center justify-center rounded-xl"
+                    style={{
+                      backgroundColor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
+                    }}
+                  >
                     {TaskIcon && <TaskIcon className={`h-6 w-6 ${themeColors.taskButton.iconColor}`} />}
                   </div>
-                  <div className="flex items-center gap-2 text-left">
-                    {isHealthTask && (
-                      <svg className={`h-4 w-4 ${themeColors.taskButton.text} opacity-80`} fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                      </svg>
-                    )}
+                  <div className="text-left">
                     <p className={`text-base font-bold ${themeColors.taskButton.text}`}>{tpl.name}</p>
+                    {tpl.description && (
+                      <p className="text-xs mt-0.5" style={{ color: themeColors.taskDescription }}>
+                        {tpl.description}
+                      </p>
+                    )}
                   </div>
                 </div>
-                <ChevronRight className={`h-5 w-5 transition-colors ${themeColors.taskButton.chevron}`} />
+                <ChevronRight className={`h-5 w-5 flex-shrink-0 transition-colors ${themeColors.taskButton.chevron}`} />
               </button>
             );
           })}
@@ -803,6 +940,27 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     </motion.div>
   );
 
+  const [showCustomTimes, setShowCustomTimes] = useState(false);
+
+  const frequencyOptions: Array<{ value: FrequencyType; label: string }> = [
+    { value: "once", label: "Uma vez" },
+    { value: "daily", label: "Todo dia" },
+    { value: "fixed_days", label: "Específicos" },
+  ];
+
+  const periodData: Array<{ id: "morning" | "afternoon" | "evening"; name: string; icon: React.ReactNode; range: string }> = [
+    { id: "morning", name: "Manhã", icon: <Sun className="h-6 w-6" />, range: "06:00 - 12:00" },
+    { id: "afternoon", name: "Tarde", icon: <Sunset className="h-6 w-6" />, range: "12:00 - 18:00" },
+    { id: "evening", name: "Noite", icon: <Moon className="h-6 w-6" />, range: "18:00 - 00:00" },
+  ];
+
+  const getFrequencySummary = () => {
+    if (frequencyType === "daily" && selectedDays.length === 7) return "Todos os dias";
+    if (frequencyType === "fixed_days") return `${selectedDays.length} dias`;
+    if (frequencyType === "once") return dueDate ? new Date(dueDate + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "short" }) : "";
+    return "";
+  };
+
   const DetailsStep = (
     <motion.div
       key="details"
@@ -810,340 +968,314 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -16 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-6 pb-6 pt-4"
+      className="space-y-7 pb-6 pt-2"
     >
-      {/* Hero Circle Section */}
-      <div className="flex flex-col items-center gap-4 py-4">
-        <HeroCircle
-          iconKey={selectedTemplate?.iconKey ? (selectedTemplate.iconKey as any) : selectedCategoryData?.iconKey ?? null}
-          color={isDarkMode ? UNIFIED_COLOR : "#FFFFFF"}
-          isAutoTask={selectedTemplateAuto}
-          isDarkMode={isDarkMode}
-        />
-
-        {/* Task Title */}
-        <div className="w-full px-6 text-center">
-          <p className={`text-2xl font-bold uppercase tracking-wide ${themeColors.bodyText}`}>
-            {habitName || "NOME DO HÁBITO"}
-          </p>
-        </div>
-      </div>
-
       {/* Health Integration Alert */}
       {selectedTemplateAuto && (
-        <div className={`mx-4 flex items-start gap-3 rounded-xl border p-4 ${themeColors.card}`}>
+        <div className="mx-4 flex items-start gap-3 rounded-xl p-4"
+          style={{
+            backgroundColor: themeColors.detailsCard.bg,
+            border: `1px solid ${themeColors.detailsCard.border}`,
+          }}
+        >
           <svg className={`h-5 w-5 flex-shrink-0 mt-0.5 ${themeColors.healthIcon}`} fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
           </svg>
           <div className="flex-1">
-            <p className={`text-sm font-medium ${themeColors.bodyText}`}>
-              Esta tarefa usa dados do app Saúde.
-            </p>
-            <p className={`mt-1 text-xs ${themeColors.bodyTextSecondary}`}>
-              Conceda permissão ao Habitz quando solicitado.
-            </p>
+            <p className={`text-sm font-medium ${themeColors.bodyText}`}>Esta tarefa usa dados do app Saúde.</p>
+            <p className={`mt-1 text-xs ${themeColors.bodyTextSecondary}`}>Conceda permissão ao Habitz quando solicitado.</p>
           </div>
         </div>
       )}
 
-      {/* Title Input */}
-      <div className="px-4">
-        <Label className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-          TÍTULO
-        </Label>
-        <Input
-          value={habitName}
-          onChange={(e) => setHabitName(e.target.value)}
-          placeholder="Digite o nome da tarefa"
-          maxLength={18}
-          autoComplete="off"
-          className={`mt-2 rounded-xl ${themeColors.input}`}
-        />
-        <p className={`mt-1.5 text-right text-xs ${themeColors.sectionTitle}`}>
-          {habitName.length} / 18
-        </p>
-      </div>
+      {/* ── FREQUÊNCIA ── */}
+      <div className="space-y-4 px-4">
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: themeColors.categoryLabel }}>
+            FREQUÊNCIA
+          </p>
+          {getFrequencySummary() && (
+            <p className={`text-xs font-medium ${themeColors.bodyTextSecondary}`}>
+              {getFrequencySummary()}
+            </p>
+          )}
+        </div>
 
-      {/* Live Preview Card */}
-      <div className="px-4">
-        <Label className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-          PREVIEW
-        </Label>
-        <motion.div
-          layout
-          className={`mt-2 overflow-hidden rounded-2xl border-2 ${themeColors.card}`}
-          style={{
-            borderColor: isDarkMode ? UNIFIED_COLOR : "#E2E8F0", // Borda visível no light
-            backgroundColor: isDarkMode ? undefined : "#F8FAFC", // slate-50 no light
-          }}
-        >
-          <div className="p-4">
-            {/* Mini Dashboard Card Preview */}
-            <div className="flex items-center gap-3">
-              {/* Icon */}
-              <motion.div
-                layout
-                className="flex h-12 w-12 items-center justify-center rounded-xl"
+        {/* Frequency Cards */}
+        <div className="grid grid-cols-3 gap-3">
+          {frequencyOptions.map((opt) => {
+            const isActive = frequencyType === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setFrequencyType(opt.value)}
+                className="flex flex-col items-center gap-2 rounded-xl py-4 px-2 transition-all duration-200 active:scale-[0.97]"
                 style={{
-                  backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "#F1F5F9", // slate-100 no light
+                  backgroundColor: themeColors.detailsCard.bg,
+                  border: `1.5px solid ${isActive ? themeColors.detailsCard.activeBorder : themeColors.detailsCard.border}`,
+                  boxShadow: isActive ? themeColors.detailsCard.activeShadow : "none",
                 }}
               >
-                {(() => {
-                  const PreviewIcon = selectedTemplate?.iconKey
-                    ? getHabitIcon(selectedTemplate.iconKey as any)
-                    : selectedCategoryData?.iconKey
-                      ? getHabitIcon(selectedCategoryData.iconKey)
-                      : null;
-                  return PreviewIcon ? (
-                    <PreviewIcon
-                      className="h-6 w-6"
-                      style={{ color: isDarkMode ? UNIFIED_COLOR : "#65A30D" }} // lime-600 no light
-                    />
-                  ) : (
-                    <Target className="h-6 w-6" style={{ color: isDarkMode ? UNIFIED_COLOR : "#65A30D" }} />
-                  );
-                })()}
-              </motion.div>
+                <Calendar className="h-5 w-5" style={{ color: isActive ? (isDarkMode ? "#A3E635" : "#65A30D") : (isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)") }} />
+                <span className="text-xs font-semibold" style={{ color: isActive ? (isDarkMode ? "#A3E635" : "#65A30D") : (isDarkMode ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)") }}>
+                  {opt.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <motion.p
-                  layout
-                  className={`text-sm font-bold truncate ${themeColors.bodyText}`}
-                >
-                  {habitName || "Nome do hábito"}
-                </motion.p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className={`text-xs ${themeColors.bodyTextSecondary}`}>
-                    {goalValue && goalValue > 0 ? `${goalValue} ${unit !== "none" ? unit : ""}` : "Completar"}
-                  </span>
-                  <span className={`text-xs ${themeColors.bodyTextMuted}`}>•</span>
-                  <span className={`text-xs ${themeColors.bodyTextSecondary}`}>
-                    {frequencyType === "daily" ? "Diário" : frequencyType === "once" ? "Uma vez" : `${selectedDays.length} dias`}
-                  </span>
-                </div>
-              </div>
-
-              {/* Checkbox Preview */}
-              <div
-                className="flex h-8 w-8 items-center justify-center rounded-full border-2"
-                style={{
-                  borderColor: isDarkMode ? UNIFIED_COLOR : "#CBD5E1", // slate-300 no light
-                }}
-              />
-            </div>
-
-            {/* Period Badge */}
-            <div className="mt-3 flex items-center gap-2">
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase ${themeColors.periodIcon.selectedBg}`}
-                style={{
-                  backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "#ECFCCB", // lime-100 no light
-                  color: isDarkMode ? UNIFIED_COLOR : "#3F6212", // lime-800 no light
-                }}
-              >
-                {periods.find(p => p.id === selectedPeriod)?.icon}{" "}
-                {periods.find(p => p.id === selectedPeriod)?.name}
-              </span>
-              {notificationsEnabled && (
-                <span
-                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold"
+        {/* Day Pills (daily / fixed_days) */}
+        {(frequencyType === "daily" || frequencyType === "fixed_days") && (
+          <div className="flex items-center justify-between gap-2 pt-1">
+            {weekdays.map((day) => {
+              const isSelected = selectedDays.includes(day.id);
+              return (
+                <button
+                  key={day.id}
+                  type="button"
+                  onClick={() => toggleDay(day.id)}
+                  aria-pressed={isSelected}
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold transition-all duration-200 active:scale-[0.93]"
                   style={{
-                    backgroundColor: isDarkMode ? "rgba(163,230,53,0.15)" : "#ECFCCB", // lime-100 no light
-                    color: isDarkMode ? UNIFIED_COLOR : "#3F6212", // lime-800 no light
+                    backgroundColor: isSelected ? themeColors.dayPill.activeBg : themeColors.dayPill.inactiveBg,
+                    border: `1.5px solid ${isSelected ? themeColors.dayPill.activeBorder : themeColors.dayPill.inactiveBorder}`,
+                    color: isSelected ? themeColors.dayPill.activeText : themeColors.dayPill.inactiveText,
+                    boxShadow: isSelected ? (isDarkMode ? "0 0 10px rgba(163, 230, 53, 0.15)" : "0 0 8px rgba(132, 204, 22, 0.1)") : "none",
                   }}
                 >
-                  <Bell className="h-3 w-3" /> {reminderTime}
-                </span>
-              )}
-            </div>
+                  {day.label}
+                </button>
+              );
+            })}
           </div>
-        </motion.div>
-      </div>
+        )}
 
-      {/* Smart Goal Card - Metas inteligentes baseadas no hábito */}
-      {selectedTemplateId && (
-        <SmartGoalCard
-          habitId={selectedTemplateId}
-          value={goalValue}
-          unit={unit}
-          onChange={setGoalValue}
-          onUnitChange={setUnit}
-          isDarkMode={isDarkMode}
-        />
-      )}
-
-      {/* Task Days Card */}
-      <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
-              <Calendar className={`h-6 w-6 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Frequência
-              </p>
-              <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {frequencyType === "daily" ? "Todo dia" : frequencyType === "once" ? "Uma vez" : "Dias específicos"}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className={`border-t px-4 py-4 space-y-3 ${themeColors.headerBorder}`}>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { value: "daily", label: "Todo dia" },
-              { value: "fixed_days", label: "Dias específicos" },
-              { value: "once", label: "Uma vez" },
-            ].map((freqOption) => (
-              <button
-                key={freqOption.value}
-                type="button"
-                onClick={() => setFrequencyType(freqOption.value as FrequencyType)}
-                className={`rounded-lg py-2.5 text-xs font-semibold transition-all duration-200 ${
-                  frequencyType === freqOption.value
-                    ? themeColors.buttonActive
-                    : themeColors.buttonInactive
-                }`}
+        {/* Date Picker (once) — Popover + Calendar */}
+        {frequencyType === "once" && (
+          <div className="space-y-3 pt-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: themeColors.categoryLabel }}>
+              DATA ESCOLHIDA
+            </p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-4 rounded-xl px-4 py-4 transition-all duration-200"
+                  style={{
+                    backgroundColor: themeColors.detailsCard.bg,
+                    border: `1px solid ${themeColors.detailsCard.border}`,
+                  }}
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: isDarkMode ? "rgba(163,230,53,0.12)" : "rgba(132,204,22,0.1)" }}>
+                    <Calendar className="h-5 w-5" style={{ color: isDarkMode ? "#A3E635" : "#65A30D" }} />
+                  </div>
+                  <p className={`flex-1 text-left text-lg font-bold ${themeColors.bodyText}`}>
+                    {dueDate
+                      ? new Date(dueDate + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })
+                      : "Selecionar data"}
+                  </p>
+                  <Calendar className="h-5 w-5" style={{ color: isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto rounded-xl border-0 p-0"
+                style={{
+                  backgroundColor: isDarkMode ? "rgb(20, 20, 20)" : "#FFFFFF",
+                  boxShadow: isDarkMode ? "0 8px 32px rgba(0,0,0,0.6), 0 0 16px rgba(163,230,53,0.05)" : "0 8px 32px rgba(0,0,0,0.12)",
+                  border: isDarkMode ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(0,0,0,0.08)",
+                }}
               >
-                {freqOption.label}
-              </button>
-            ))}
-          </div>
-          <div>{renderFrequencyFields()}</div>
-        </div>
-      </div>
-
-      {/* Times Per Day Selector Card */}
-      <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
-              <Target className={`h-6 w-6 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Vezes por Dia
-              </p>
-              <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {timesPerDay === 1 ? "1 vez" : `${timesPerDay} vezes`}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className={`border-t px-4 py-4 space-y-3 ${themeColors.headerBorder}`}>
-          <div className="flex gap-2 flex-wrap">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((count) => (
-              <button
-                key={count}
-                type="button"
-                onClick={() => setTimesPerDay(count)}
-                className={`w-10 h-10 rounded-full text-xs font-semibold transition-all duration-200 ${
-                  timesPerDay === count
-                    ? themeColors.buttonActive
-                    : themeColors.buttonInactive
-                }`}
-              >
-                {count}x
-              </button>
-            ))}
-          </div>
-          <p className={`text-xs ${themeColors.sectionTitle}`}>
-            Cada clique no Dashboard incrementa o contador até completar
-          </p>
-        </div>
-      </div>
-
-      {/* Period Selector Card */}
-      <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
-              <Sun className={`h-6 w-6 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Período do Dia
-              </p>
-              <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {periods.find(p => p.id === selectedPeriod)?.name}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className={`border-t px-4 py-4 ${themeColors.headerBorder}`}>
-          <div className="grid grid-cols-3 gap-2">
-            {periods.map((period) => (
-              <button
-                key={period.id}
-                type="button"
-                aria-pressed={selectedPeriod === period.id}
-                onClick={() => setSelectedPeriod(period.id)}
-                className={`flex flex-col items-center gap-1 rounded-xl py-3 text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
-                  selectedPeriod === period.id
-                    ? themeColors.periodIcon.selectedBg
-                    : `bg-transparent ${themeColors.periodIcon.unselectedText}`
-                }`}
-              >
-                <span className={`${selectedPeriod === period.id ? themeColors.periodIcon.selectedText : themeColors.periodIcon.unselectedText}`}>
-                  {period.icon}
-                </span>
-                <span className="text-xs font-semibold">{period.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Notifications Card */}
-      <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
-              <Bell className={`h-6 w-6 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Notificações
-              </p>
-              <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {notificationsEnabled ? "Ativadas" : "Desativadas"}
-              </p>
-            </div>
-          </div>
-          <Switch
-            checked={notificationsEnabled}
-            onCheckedChange={handleNotificationToggle}
-            disabled={pushLoading}
-            className="data-[state=checked]:bg-primary"
-          />
-        </div>
-
-        {notificationsEnabled && (
-          <div className={`border-t px-4 py-4 space-y-3 ${themeColors.headerBorder}`}>
-            {/* Time Picker */}
-            <div className="rounded-xl border border-border/60 bg-muted/10 p-3">
-              <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${themeColors.iconBg}`}>
-                  <Clock className={`h-5 w-5 ${themeColors.iconColor}`} />
-                </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-semibold ${themeColors.bodyText}`}>Horário do lembrete</p>
-                  <input
-                    type="time"
-                    value={reminderTime}
-                    onChange={(e) => setReminderTime(e.target.value)}
-                    className={`mt-2 h-11 w-full rounded-lg px-3 ${themeColors.input}`}
-                  />
-                </div>
-              </div>
-            </div>
+                <CalendarComponent
+                  mode="single"
+                  locale={ptBR}
+                  selected={dueDate ? new Date(dueDate + "T12:00:00") : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      const y = date.getFullYear();
+                      const m = String(date.getMonth() + 1).padStart(2, "0");
+                      const d = String(date.getDate()).padStart(2, "0");
+                      setDueDate(`${y}-${m}-${d}`);
+                    }
+                  }}
+                  fromDate={new Date()}
+                  className="rounded-xl"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         )}
       </div>
 
-      {/* CTA Button - Go to Confirm */}
+      {/* ── VEZES POR DIA ── */}
+      <div className="space-y-4 px-4">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: themeColors.categoryLabel }}>
+          VEZES POR DIA
+        </p>
+        <div className="grid grid-cols-4 gap-3">
+          {[1, 2, 3].map((count) => {
+            const isActive = timesPerDay === count && !showCustomTimes;
+            return (
+              <button
+                key={count}
+                type="button"
+                onClick={() => { setTimesPerDay(count); setShowCustomTimes(false); }}
+                className="flex flex-col items-center justify-center rounded-xl py-4 transition-all duration-200 active:scale-[0.97]"
+                style={{
+                  backgroundColor: themeColors.detailsCard.bg,
+                  border: `1.5px solid ${isActive ? themeColors.detailsCard.activeBorder : themeColors.detailsCard.border}`,
+                  boxShadow: isActive ? themeColors.detailsCard.activeShadow : "none",
+                }}
+              >
+                <span className="text-lg font-bold" style={{ color: isActive ? (isDarkMode ? "#A3E635" : "#65A30D") : (isDarkMode ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)") }}>
+                  {count}x
+                </span>
+                {count === 1 && (
+                  <span className="text-[9px] font-semibold uppercase tracking-wide mt-0.5" style={{ color: isActive ? (isDarkMode ? "#A3E635" : "#65A30D") : (isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)") }}>
+                    META
+                  </span>
+                )}
+              </button>
+            );
+          })}
+          {/* Custom (+) button */}
+          <button
+            type="button"
+            onClick={() => setShowCustomTimes(true)}
+            className="flex items-center justify-center rounded-xl py-4 transition-all duration-200 active:scale-[0.97]"
+            style={{
+              backgroundColor: themeColors.detailsCard.bg,
+              border: `1.5px solid ${showCustomTimes || timesPerDay > 3 ? themeColors.detailsCard.activeBorder : themeColors.detailsCard.border}`,
+              boxShadow: showCustomTimes || timesPerDay > 3 ? themeColors.detailsCard.activeShadow : "none",
+            }}
+          >
+            {showCustomTimes || timesPerDay > 3 ? (
+              <span className="text-lg font-bold" style={{ color: isDarkMode ? "#A3E635" : "#65A30D" }}>
+                {timesPerDay}x
+              </span>
+            ) : (
+              <Plus className="h-6 w-6" style={{ color: isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)" }} />
+            )}
+          </button>
+        </div>
+        {showCustomTimes && (
+          <Input
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={20}
+            value={timesPerDay}
+            onChange={(e) => setTimesPerDay(Math.max(1, Number(e.target.value) || 1))}
+            placeholder="Quantas vezes?"
+            className={`rounded-xl ${themeColors.input}`}
+          />
+        )}
+      </div>
+
+      {/* ── PERÍODO DO DIA ── */}
+      <div className="space-y-4 px-4">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: themeColors.categoryLabel }}>
+          PERÍODO DO DIA
+        </p>
+        <div className="grid grid-cols-3 gap-3">
+          {periodData.map((p) => {
+            const isActive = selectedPeriod === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setSelectedPeriod(p.id)}
+                aria-pressed={isActive}
+                className="flex flex-col items-center gap-2 rounded-xl py-5 px-2 transition-all duration-200 active:scale-[0.97]"
+                style={{
+                  backgroundColor: themeColors.detailsCard.bg,
+                  border: `1.5px solid ${isActive ? themeColors.detailsCard.activeBorder : themeColors.detailsCard.border}`,
+                  boxShadow: isActive ? themeColors.detailsCard.activeShadow : "none",
+                }}
+              >
+                <span style={{ color: isActive ? (isDarkMode ? "#A3E635" : "#65A30D") : (isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)") }}>
+                  {p.icon}
+                </span>
+                <span className="text-xs font-bold" style={{ color: isActive ? (isDarkMode ? "#FFFFFF" : "#1F2937") : (isDarkMode ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)") }}>
+                  {p.name}
+                </span>
+                <span className="text-[10px]" style={{ color: isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}>
+                  {p.range}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── HORÁRIO DO LEMBRETE ── */}
+      <div className="space-y-4 px-4">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: themeColors.categoryLabel }}>
+          HORÁRIO DO LEMBRETE
+        </p>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="flex w-full items-center gap-4 rounded-xl px-4 py-4 transition-all duration-200"
+              style={{
+                backgroundColor: themeColors.reminderCard.bg,
+                border: `1px solid ${themeColors.reminderCard.border}`,
+              }}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: isDarkMode ? "rgba(163,230,53,0.12)" : "rgba(132,204,22,0.1)" }}>
+                <Clock className="h-5 w-5" style={{ color: themeColors.reminderCard.iconColor }} />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-xl font-bold" style={{ color: themeColors.reminderCard.timeText }}>
+                  {reminderTime}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: themeColors.reminderCard.subtitleText }}>
+                  Notificação diária
+                </p>
+              </div>
+              <Pencil className="h-5 w-5" style={{ color: isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }} />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-auto rounded-xl border-0 p-4"
+            style={{
+              backgroundColor: isDarkMode ? "rgb(20, 20, 20)" : "#FFFFFF",
+              boxShadow: isDarkMode ? "0 8px 32px rgba(0,0,0,0.6), 0 0 16px rgba(163,230,53,0.05)" : "0 8px 32px rgba(0,0,0,0.12)",
+              border: isDarkMode ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(0,0,0,0.08)",
+              // CSS variable for drum gradient fades
+              "--drum-bg": isDarkMode ? "rgb(20, 20, 20)" : "#FFFFFF",
+            } as React.CSSProperties}
+          >
+            <div className="flex items-center gap-2">
+              <DrumColumn
+                options={HOURS}
+                value={reminderTime.split(":")[0]}
+                onChange={(h) => {
+                  setReminderTime(`${h}:${reminderTime.split(":")[1]}`);
+                  setNotificationsEnabled(true);
+                }}
+              />
+              <span className={`text-2xl font-bold ${themeColors.bodyText}`}>:</span>
+              <DrumColumn
+                options={MINUTES}
+                value={(() => {
+                  const m = parseInt(reminderTime.split(":")[1], 10);
+                  const rounded = Math.round(m / 5) * 5;
+                  return String(rounded >= 60 ? 0 : rounded).padStart(2, "0");
+                })()}
+                onChange={(m) => {
+                  setReminderTime(`${reminderTime.split(":")[0]}:${m}`);
+                  setNotificationsEnabled(true);
+                }}
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      {/* ── CTA BUTTON ── */}
       <div
         className="px-4 pt-4"
         style={{ paddingBottom: 'max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom)))' }}
@@ -1151,20 +1283,20 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
         <button
           onClick={() => setStep("confirm")}
           disabled={!habitName.trim()}
-          className="h-14 w-full rounded-xl text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100"
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100"
           style={{
-            backgroundColor: !habitName.trim()
-              ? (isDarkMode ? 'rgba(163, 230, 53, 0.3)' : '#E2E8F0')
-              : (isDarkMode ? UNIFIED_COLOR : '#FFFFFF'),
+            background: !habitName.trim()
+              ? themeColors.ctaButton.disabledBg
+              : themeColors.ctaButton.bg,
             color: !habitName.trim()
-              ? (isDarkMode ? 'rgba(0, 0, 0, 0.5)' : '#94A3B8')
-              : (isDarkMode ? '#000000' : '#65A30D'),
+              ? themeColors.ctaButton.disabledText
+              : themeColors.ctaButton.text,
             boxShadow: !habitName.trim()
               ? 'none'
-              : (isDarkMode ? '0 4px 24px rgba(163, 230, 53, 0.3)' : '0 4px 24px rgba(255, 255, 255, 0.3)'),
+              : themeColors.ctaButton.shadow,
           }}
         >
-          CONTINUAR
+          PRÓXIMO PASSO <ArrowRight className="h-5 w-5" />
         </button>
       </div>
     </motion.div>
@@ -1203,6 +1335,16 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
     return `${goalValue} ${unitLabels[unit] || ""}`.trim();
   };
 
+  const heroImageUrl = getHeroImage(
+    selectedTemplate?.iconKey ?? selectedCategoryData?.iconKey ?? null,
+    selectedCategoryData?.id
+  );
+  const HabitIcon = selectedTemplate?.iconKey
+    ? getHabitIcon(selectedTemplate.iconKey as any)
+    : selectedCategoryData?.iconKey
+      ? getHabitIcon(selectedCategoryData.iconKey)
+      : null;
+
   const ConfirmStep = (
     <motion.div
       key="confirm"
@@ -1210,189 +1352,169 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -16 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-6 pb-6 pt-6"
+      className="space-y-7 pb-6 pt-2"
     >
-      {/* Hero Section - Larger icon and name */}
-      <div className="flex flex-col items-center gap-5 px-6">
-        {/* Large Hero Circle */}
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.1, duration: 0.3 }}
-        >
-          <HeroCircle
-            iconKey={selectedTemplate?.iconKey ? (selectedTemplate.iconKey as any) : selectedCategoryData?.iconKey ?? null}
-            color={isDarkMode ? UNIFIED_COLOR : "#FFFFFF"}
-            isAutoTask={selectedTemplateAuto}
-            size="lg"
-            isDarkMode={isDarkMode}
-          />
-        </motion.div>
-
-        {/* Habit Name */}
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.15, duration: 0.3 }}
-          className="text-center"
-        >
-          <h2 className={`text-2xl font-bold uppercase tracking-wide ${themeColors.bodyText}`}>
-            {habitName}
-          </h2>
-          {selectedCategoryData && (
-            <p className={`mt-1 text-sm ${themeColors.bodyTextSecondary}`}>
-              {selectedCategoryData.name}
-            </p>
-          )}
-        </motion.div>
+      {/* Section Label + Heading */}
+      <div className="px-6">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: themeColors.categoryLabel }}>
+          RESUMO FINAL
+        </p>
+        <h2 className={`mt-2 text-2xl font-bold ${themeColors.bodyText}`}>
+          Confirmar Tarefa
+        </h2>
       </div>
 
-      {/* Health Integration Notice */}
-      {selectedTemplateAuto && (
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.3 }}
-          className={`mx-4 flex items-center gap-3 rounded-xl border p-3 ${themeColors.card}`}
-        >
-          <svg className={`h-5 w-5 flex-shrink-0 ${themeColors.healthIcon}`} fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-          </svg>
-          <p className={`text-sm ${themeColors.bodyTextSecondary}`}>
-            Conectado ao app Saúde
-          </p>
-        </motion.div>
-      )}
+      {/* Hero Card with Image */}
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.35 }}
+        className="mx-4 relative rounded-2xl overflow-hidden"
+        style={{
+          height: 220,
+          boxShadow: isDarkMode
+            ? "0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(163,230,53,0.04)"
+            : "0 8px 32px rgba(0,0,0,0.12)",
+        }}
+      >
+        {/* Background Image */}
+        <img
+          src={heroImageUrl}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* Gradient Overlay */}
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.15) 100%)" }}
+        />
+        {/* Content */}
+        <div className="relative h-full flex flex-col justify-end p-5">
+          {/* Category Badge */}
+          {selectedCategoryData && (
+            <span
+              className="self-start rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider mb-2"
+              style={{
+                backgroundColor: "rgba(163, 230, 53, 0.15)",
+                color: "#A3E635",
+                border: "1px solid rgba(163, 230, 53, 0.2)",
+              }}
+            >
+              {selectedCategoryData.name}
+            </span>
+          )}
+          {/* Habit Name */}
+          <h3 className="text-2xl font-bold text-white leading-tight">
+            {habitName}
+          </h3>
+        </div>
+        {/* Icon Badge (bottom-right) */}
+        {HabitIcon && (
+          <div
+            className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full"
+            style={{
+              backgroundColor: "rgba(0,0,0,0.5)",
+              backdropFilter: "blur(8px)",
+              border: "1px solid rgba(163, 230, 53, 0.3)",
+            }}
+          >
+            <HabitIcon className="h-5 w-5" style={{ color: "#A3E635" }} />
+          </div>
+        )}
+      </motion.div>
 
       {/* Summary Cards */}
       <motion.div
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.25, duration: 0.3 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
         className="space-y-3 px-4"
       >
-        {/* Goal Summary */}
-        <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
-          <div className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
-              <Target className={`h-5 w-5 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Meta
-              </p>
-              <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
-                {getGoalText()}
-              </p>
-            </div>
+        {/* Frequency */}
+        <div
+          className="flex items-center gap-5 rounded-xl px-4 py-4"
+          style={{
+            backgroundColor: themeColors.detailsCard.bg,
+            border: `1px solid ${themeColors.detailsCard.border}`,
+          }}
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: isDarkMode ? "rgba(163,230,53,0.12)" : "rgba(132,204,22,0.1)" }}>
+            <Calendar className="h-5 w-5" style={{ color: isDarkMode ? "#A3E635" : "#65A30D" }} />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em]" style={{ color: themeColors.categoryLabel }}>
+              FREQUÊNCIA
+            </p>
+            <p className={`text-base font-bold ${themeColors.bodyText}`}>
+              {getFrequencyText()}
+            </p>
           </div>
         </div>
 
-        {/* Frequency Summary */}
-        <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
-          <div className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
-              <Calendar className={`h-5 w-5 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Frequência
-              </p>
-              <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
-                {getFrequencyText()}
-              </p>
-            </div>
+        {/* Period */}
+        <div
+          className="flex items-center gap-5 rounded-xl px-4 py-4"
+          style={{
+            backgroundColor: themeColors.detailsCard.bg,
+            border: `1px solid ${themeColors.detailsCard.border}`,
+          }}
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: isDarkMode ? "rgba(163,230,53,0.12)" : "rgba(132,204,22,0.1)" }}>
+            {selectedPeriod === "morning" ? <Sun className="h-5 w-5" style={{ color: isDarkMode ? "#A3E635" : "#65A30D" }} /> :
+             selectedPeriod === "afternoon" ? <Sunset className="h-5 w-5" style={{ color: isDarkMode ? "#A3E635" : "#65A30D" }} /> :
+             <Moon className="h-5 w-5" style={{ color: isDarkMode ? "#A3E635" : "#65A30D" }} />}
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em]" style={{ color: themeColors.categoryLabel }}>
+              PERÍODO
+            </p>
+            <p className={`text-base font-bold ${themeColors.bodyText}`}>
+              {periods.find(p => p.id === selectedPeriod)?.name}
+            </p>
           </div>
         </div>
 
-        {/* Times Per Day Summary */}
-        {timesPerDay > 1 && (
-          <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
-            <div className="flex items-center gap-3">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
-                <Target className={`h-5 w-5 ${themeColors.iconColor}`} />
-              </div>
-              <div>
-                <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                  Vezes por Dia
-                </p>
-                <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
-                  {timesPerDay} vezes
-                </p>
-              </div>
-            </div>
+        {/* Reminder */}
+        <div
+          className="flex items-center gap-5 rounded-xl px-4 py-4"
+          style={{
+            backgroundColor: themeColors.detailsCard.bg,
+            border: `1px solid ${themeColors.detailsCard.border}`,
+          }}
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: isDarkMode ? "rgba(163,230,53,0.12)" : "rgba(132,204,22,0.1)" }}>
+            <Clock className="h-5 w-5" style={{ color: isDarkMode ? "#A3E635" : "#65A30D" }} />
           </div>
-        )}
-
-        {/* Period Summary */}
-        <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
-          <div className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
-              <Sun className={`h-5 w-5 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Período
-              </p>
-              <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
-                {periods.find(p => p.id === selectedPeriod)?.emoji} {periods.find(p => p.id === selectedPeriod)?.name}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Notifications Summary */}
-        <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
-          <div className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
-              <Bell className={`h-5 w-5 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Notificações
-              </p>
-              <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
-                {notificationsEnabled ? `${reminderTime} • ${soundOptions.find((s) => s.value === notificationSound)?.label ?? "Padrão"}` : "Desativadas"}
-              </p>
-            </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em]" style={{ color: themeColors.categoryLabel }}>
+              LEMBRETE
+            </p>
+            <p className={`text-base font-bold ${themeColors.bodyText}`}>
+              {reminderTime}
+            </p>
           </div>
         </div>
       </motion.div>
 
-      {/* Edit Button */}
+      {/* Save CTA */}
       <motion.div
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.3 }}
-        className="px-4"
-      >
-        <button
-          onClick={() => setStep("details")}
-          className={`w-full rounded-xl py-3 text-sm font-semibold transition-all duration-200 ${themeColors.buttonInactive}`}
-        >
-          Editar configurações
-        </button>
-      </motion.div>
-
-      {/* Save Button */}
-      <motion.div
-        initial={{ y: 10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.35, duration: 0.3 }}
         className="px-4 pt-2"
         style={{ paddingBottom: 'max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom)))' }}
       >
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="h-14 w-full rounded-xl text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
-            backgroundColor: isDarkMode ? UNIFIED_COLOR : "#FFFFFF",
-            color: isDarkMode ? "#000000" : "#65A30D",
-            boxShadow: isDarkMode ? "0 4px 24px rgba(163, 230, 53, 0.3)" : "0 4px 24px rgba(255, 255, 255, 0.3)",
+            background: isSaving ? themeColors.ctaButton.disabledBg : themeColors.ctaButton.bg,
+            color: isSaving ? themeColors.ctaButton.disabledText : themeColors.ctaButton.text,
+            boxShadow: isSaving ? "none" : themeColors.ctaButton.shadow,
           }}
         >
-          {isSaving ? "SALVANDO..." : "SALVAR TAREFA"}
+          {isSaving ? "SALVANDO..." : (<>SALVAR TAREFA <Check className="h-5 w-5" /></>)}
         </button>
       </motion.div>
     </motion.div>
@@ -1415,7 +1537,7 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       <div
         ref={contentScrollRef}
         onScroll={handleScroll}
-        className="flex-1 px-4 py-6 overflow-y-auto"
+        className={`flex-1 px-4 py-6 ${step === "confirm" ? "overflow-hidden" : "overflow-y-auto"}`}
         style={{ paddingTop: 'calc(10rem + env(safe-area-inset-top))' }}
       >
         <AnimatePresence mode="wait">

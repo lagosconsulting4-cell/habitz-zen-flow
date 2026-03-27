@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { motion } from "motion/react";
 
 interface CircularProgressProps {
@@ -8,6 +9,8 @@ interface CircularProgressProps {
   progressColor?: string;
   className?: string;
   children?: React.ReactNode;
+  /** Enable glow/bloom effect on the progress arc */
+  glow?: boolean;
 }
 
 export const CircularProgress = ({
@@ -17,8 +20,11 @@ export const CircularProgress = ({
   trackColor = "currentColor",
   progressColor = "white",
   className = "",
-  children
+  children,
+  glow = true,
 }: CircularProgressProps) => {
+  const id = useId();
+  const filterId = `glow-${id}`;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
@@ -30,6 +36,19 @@ export const CircularProgress = ({
         height={size}
         className="transform -rotate-90"
       >
+        {/* Glow filter definition */}
+        {glow && (
+          <defs>
+            <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+        )}
+
         {/* Track circle */}
         <circle
           cx={size / 2}
@@ -41,7 +60,26 @@ export const CircularProgress = ({
           className="opacity-100"
         />
 
-        {/* Progress circle */}
+        {/* Glow layer — blurred copy of progress arc */}
+        {glow && progress > 0 && (
+          <motion.circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={progressColor}
+            strokeWidth={strokeWidth + 4}
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeLinecap="round"
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: offset }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            filter={`url(#${filterId})`}
+            opacity={0.5}
+          />
+        )}
+
+        {/* Progress circle (sharp, on top) */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}

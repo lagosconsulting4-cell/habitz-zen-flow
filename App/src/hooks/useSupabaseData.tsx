@@ -83,7 +83,7 @@ export const useBooks = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('books')
-        .select('id, title, author, description, image_url, affiliate_link, rating')
+        .select('id, title, author, description, image_url, affiliate_link, rating, category')
         .order('rating', { ascending: false })
         .limit(20); // Limit to reduce payload
 

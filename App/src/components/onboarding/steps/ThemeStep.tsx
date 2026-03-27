@@ -78,7 +78,7 @@ export const ThemeStep = () => {
           firstContent={<ThemeMockup theme="light" />}
           secondContent={<ThemeMockup theme="dark" />}
           slideMode="drag"
-          initialSliderPercentage={50}
+          initialSliderPercentage={20}
           showHandlebar={true}
           className="w-full max-w-xs h-[200px] rounded-xl border border-border shadow-lg"
           onSliderChange={setSliderPosition}

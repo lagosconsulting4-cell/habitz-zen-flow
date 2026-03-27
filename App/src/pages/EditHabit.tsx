@@ -11,6 +11,10 @@ import {
   Sun,
   Sunset,
   Moon,
+  Plus,
+  Pencil,
+  ArrowRight,
+  Check,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTheme } from "@/hooks/useTheme";
@@ -24,7 +28,7 @@ import { getBRTDateString } from "@/utils/date";
 import { useAppPreferences } from "@/hooks/useAppPreferences";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { haptic } from "@/lib/haptics";
-import { HabitIconKey, getHabitIcon, getHabitIconWithFallback } from "@/components/icons/HabitIcons";
+import { HabitIconKey, getHabitIcon, getHabitIconWithFallback, CATEGORY_ICON_MAP, DEFAULT_HABIT_ICON } from "@/components/icons/HabitIcons";
 import { HeroCircle } from "@/components/HeroCircle";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -35,6 +39,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getHabitFormTheme } from "@/theme/habitFormTheme";
+import { DrumColumn, HOURS, MINUTES } from "@/components/ui/time-drum-picker";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; icon: React.ReactNode }> = [
   { id: "morning", name: "Manhã", icon: <Sun className="h-5 w-5" /> },
@@ -102,6 +108,7 @@ const EditHabit = () => {
   const [notificationSound, setNotificationSound] = useState<"default" | "soft" | "bright">("default");
   const [reminderTime, setReminderTime] = useState<string>("08:00");
   const [timesPerDay, setTimesPerDay] = useState<number>(1);
+  const [showCustomTimes, setShowCustomTimes] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [step, setStep] = useState<Step>("details");
   const [habitLoaded, setHabitLoaded] = useState(false);
@@ -429,6 +436,30 @@ const EditHabit = () => {
     </div>
   );
 
+  const effectiveIconKey: HabitIconKey =
+    (selectedIconKey && getHabitIcon(selectedIconKey as HabitIconKey) ? selectedIconKey as HabitIconKey : null)
+    ?? (CATEGORY_ICON_MAP[selectedCategory] as HabitIconKey | undefined)
+    ?? DEFAULT_HABIT_ICON;
+
+  const frequencyOptions: Array<{ value: FrequencyType; label: string }> = [
+    { value: "once", label: "Uma vez" },
+    { value: "daily", label: "Todo dia" },
+    { value: "fixed_days", label: "Específicos" },
+  ];
+
+  const periodData: Array<{ id: "morning" | "afternoon" | "evening"; name: string; icon: React.ReactNode; range: string }> = [
+    { id: "morning", name: "Manhã", icon: <Sun className="h-6 w-6" />, range: "06:00 - 12:00" },
+    { id: "afternoon", name: "Tarde", icon: <Sunset className="h-6 w-6" />, range: "12:00 - 18:00" },
+    { id: "evening", name: "Noite", icon: <Moon className="h-6 w-6" />, range: "18:00 - 00:00" },
+  ];
+
+  const getFrequencySummary = () => {
+    if (frequencyType === "daily" && selectedDays.length === 7) return "Todos os dias";
+    if (frequencyType === "fixed_days") return `${selectedDays.length} dias`;
+    if (frequencyType === "once") return dueDate ? new Date(dueDate + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "short" }) : "";
+    return "";
+  };
+
   const DetailsStep = (
     <motion.div
       key="details"
@@ -436,12 +467,12 @@ const EditHabit = () => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -16 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-6 pb-6 pt-4"
+      className="space-y-7 pb-6 pt-2"
     >
       {/* Hero Circle Section */}
       <div className="flex flex-col items-center gap-4 py-4">
         <HeroCircle
-          iconKey={selectedIconKey as HabitIconKey | null}
+          iconKey={effectiveIconKey}
           color={isDarkMode ? UNIFIED_COLOR : "#FFFFFF"}
           isAutoTask={false}
           isDarkMode={isDarkMode}
@@ -453,11 +484,11 @@ const EditHabit = () => {
         </div>
       </div>
 
-      {/* Title Input */}
+      {/* ── TÍTULO ── */}
       <div className="px-4">
-        <Label className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: themeColors.categoryLabel }}>
           TÍTULO
-        </Label>
+        </p>
         <Input
           value={habitName}
           onChange={(e) => setHabitName(e.target.value)}
@@ -470,62 +501,261 @@ const EditHabit = () => {
         </p>
       </div>
 
-      {/* Category Selection */}
-      <div className="px-4">
-        <Label className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-          CATEGORIA
-        </Label>
-        <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Categoria">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              role="radio"
-              aria-checked={selectedCategory === cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
-                selectedCategory === cat.id
-                  ? themeColors.buttonActive
-                  : themeColors.buttonInactive
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+      {/* ── FREQUÊNCIA ── */}
+      <div className="space-y-4 px-4">
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: themeColors.categoryLabel }}>
+            FREQUÊNCIA
+          </p>
+          {getFrequencySummary() && (
+            <p className={`text-xs font-medium ${themeColors.bodyTextSecondary}`}>
+              {getFrequencySummary()}
+            </p>
+          )}
         </div>
+
+        {/* Frequency Cards */}
+        <div className="grid grid-cols-3 gap-3">
+          {frequencyOptions.map((opt) => {
+            const isActive = frequencyType === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setFrequencyType(opt.value)}
+                className="flex flex-col items-center gap-2 rounded-xl py-4 px-2 transition-all duration-200 active:scale-[0.97]"
+                style={{
+                  backgroundColor: themeColors.detailsCard.bg,
+                  border: `1.5px solid ${isActive ? themeColors.detailsCard.activeBorder : themeColors.detailsCard.border}`,
+                  boxShadow: isActive ? themeColors.detailsCard.activeShadow : "none",
+                }}
+              >
+                <Calendar className="h-5 w-5" style={{ color: isActive ? (isDarkMode ? "#A3E635" : "#65A30D") : (isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)") }} />
+                <span className="text-xs font-semibold" style={{ color: isActive ? (isDarkMode ? "#A3E635" : "#65A30D") : (isDarkMode ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)") }}>
+                  {opt.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Day Pills (daily / fixed_days) */}
+        {(frequencyType === "daily" || frequencyType === "fixed_days") && (
+          <div className="flex items-center justify-between gap-2 pt-1">
+            {weekdays.map((day) => {
+              const isSelected = selectedDays.includes(day.id);
+              return (
+                <button
+                  key={day.id}
+                  type="button"
+                  onClick={() => toggleDay(day.id)}
+                  aria-pressed={isSelected}
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold transition-all duration-200 active:scale-[0.93]"
+                  style={{
+                    backgroundColor: isSelected ? themeColors.dayPill.activeBg : themeColors.dayPill.inactiveBg,
+                    border: `1.5px solid ${isSelected ? themeColors.dayPill.activeBorder : themeColors.dayPill.inactiveBorder}`,
+                    color: isSelected ? themeColors.dayPill.activeText : themeColors.dayPill.inactiveText,
+                    boxShadow: isSelected ? (isDarkMode ? "0 0 10px rgba(163, 230, 53, 0.15)" : "0 0 8px rgba(132, 204, 22, 0.1)") : "none",
+                  }}
+                >
+                  {day.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Date Picker (once) */}
+        {frequencyType === "once" && (
+          <div className="space-y-2 pt-1">
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              min={getBRTDateString()}
+              className={`h-11 w-full rounded-xl px-3 ${themeColors.input}`}
+            />
+            {dueDate && (
+              <p className={`text-xs ${themeColors.bodyTextSecondary}`}>
+                {new Date(dueDate + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Period Selection */}
-      <div className="px-4">
-        <Label className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+      {/* ── VEZES POR DIA ── */}
+      <div className="space-y-4 px-4">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: themeColors.categoryLabel }}>
+          VEZES POR DIA
+        </p>
+        <div className="grid grid-cols-4 gap-3">
+          {[1, 2, 3].map((count) => {
+            const isActive = timesPerDay === count && !showCustomTimes;
+            return (
+              <button
+                key={count}
+                type="button"
+                onClick={() => { setTimesPerDay(count); setShowCustomTimes(false); }}
+                className="flex flex-col items-center justify-center rounded-xl py-4 transition-all duration-200 active:scale-[0.97]"
+                style={{
+                  backgroundColor: themeColors.detailsCard.bg,
+                  border: `1.5px solid ${isActive ? themeColors.detailsCard.activeBorder : themeColors.detailsCard.border}`,
+                  boxShadow: isActive ? themeColors.detailsCard.activeShadow : "none",
+                }}
+              >
+                <span className="text-lg font-bold" style={{ color: isActive ? (isDarkMode ? "#A3E635" : "#65A30D") : (isDarkMode ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)") }}>
+                  {count}x
+                </span>
+                {count === 1 && (
+                  <span className="text-[9px] font-semibold uppercase tracking-wide mt-0.5" style={{ color: isActive ? (isDarkMode ? "#A3E635" : "#65A30D") : (isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)") }}>
+                    META
+                  </span>
+                )}
+              </button>
+            );
+          })}
+          {/* Custom (+) button */}
+          <button
+            type="button"
+            onClick={() => setShowCustomTimes(true)}
+            className="flex items-center justify-center rounded-xl py-4 transition-all duration-200 active:scale-[0.97]"
+            style={{
+              backgroundColor: themeColors.detailsCard.bg,
+              border: `1.5px solid ${showCustomTimes || timesPerDay > 3 ? themeColors.detailsCard.activeBorder : themeColors.detailsCard.border}`,
+              boxShadow: showCustomTimes || timesPerDay > 3 ? themeColors.detailsCard.activeShadow : "none",
+            }}
+          >
+            {showCustomTimes || timesPerDay > 3 ? (
+              <span className="text-lg font-bold" style={{ color: isDarkMode ? "#A3E635" : "#65A30D" }}>
+                {timesPerDay}x
+              </span>
+            ) : (
+              <Plus className="h-6 w-6" style={{ color: isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)" }} />
+            )}
+          </button>
+        </div>
+        {showCustomTimes && (
+          <Input
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={20}
+            value={timesPerDay}
+            onChange={(e) => setTimesPerDay(Math.max(1, Number(e.target.value) || 1))}
+            placeholder="Quantas vezes?"
+            className={`rounded-xl ${themeColors.input}`}
+          />
+        )}
+      </div>
+
+      {/* ── PERÍODO DO DIA ── */}
+      <div className="space-y-4 px-4">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: themeColors.categoryLabel }}>
           PERÍODO DO DIA
-        </Label>
-        <div className="mt-2 grid grid-cols-3 gap-2" role="radiogroup" aria-label="Período do dia">
-          {periods.map((period) => (
-            <button
-              key={period.id}
-              type="button"
-              role="radio"
-              aria-checked={selectedPeriod === period.id}
-              onClick={() => setSelectedPeriod(period.id)}
-              className={`rounded-xl py-3 text-sm font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
-                selectedPeriod === period.id
-                  ? themeColors.buttonActive
-                  : themeColors.buttonInactive
-              }`}
-            >
-              {period.name}
-            </button>
-          ))}
+        </p>
+        <div className="grid grid-cols-3 gap-3">
+          {periodData.map((p) => {
+            const isActive = selectedPeriod === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setSelectedPeriod(p.id)}
+                aria-pressed={isActive}
+                className="flex flex-col items-center gap-2 rounded-xl py-5 px-2 transition-all duration-200 active:scale-[0.97]"
+                style={{
+                  backgroundColor: themeColors.detailsCard.bg,
+                  border: `1.5px solid ${isActive ? themeColors.detailsCard.activeBorder : themeColors.detailsCard.border}`,
+                  boxShadow: isActive ? themeColors.detailsCard.activeShadow : "none",
+                }}
+              >
+                <span style={{ color: isActive ? (isDarkMode ? "#A3E635" : "#65A30D") : (isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)") }}>
+                  {p.icon}
+                </span>
+                <span className="text-xs font-bold" style={{ color: isActive ? (isDarkMode ? "#FFFFFF" : "#1F2937") : (isDarkMode ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)") }}>
+                  {p.name}
+                </span>
+                <span className="text-[10px]" style={{ color: isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}>
+                  {p.range}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Goal Input */}
+      {/* ── HORÁRIO DO LEMBRETE ── */}
+      <div className="space-y-4 px-4">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: themeColors.categoryLabel }}>
+          HORÁRIO DO LEMBRETE
+        </p>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="flex w-full items-center gap-4 rounded-xl px-4 py-4 transition-all duration-200"
+              style={{
+                backgroundColor: themeColors.reminderCard.bg,
+                border: `1px solid ${themeColors.reminderCard.border}`,
+              }}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: isDarkMode ? "rgba(163,230,53,0.12)" : "rgba(132,204,22,0.1)" }}>
+                <Clock className="h-5 w-5" style={{ color: themeColors.reminderCard.iconColor }} />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-xl font-bold" style={{ color: themeColors.reminderCard.timeText }}>
+                  {reminderTime}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: themeColors.reminderCard.subtitleText }}>
+                  Notificação diária
+                </p>
+              </div>
+              <Pencil className="h-5 w-5" style={{ color: isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }} />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-auto rounded-xl border-0 p-4"
+            style={{
+              backgroundColor: isDarkMode ? "rgb(20, 20, 20)" : "#FFFFFF",
+              boxShadow: isDarkMode ? "0 8px 32px rgba(0,0,0,0.6), 0 0 16px rgba(163,230,53,0.05)" : "0 8px 32px rgba(0,0,0,0.12)",
+              border: isDarkMode ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(0,0,0,0.08)",
+              "--drum-bg": isDarkMode ? "rgb(20, 20, 20)" : "#FFFFFF",
+            } as React.CSSProperties}
+          >
+            <div className="flex items-center gap-2">
+              <DrumColumn
+                options={HOURS}
+                value={reminderTime.split(":")[0]}
+                onChange={(h) => {
+                  setReminderTime(`${h}:${reminderTime.split(":")[1]}`);
+                  setNotificationsEnabled(true);
+                }}
+              />
+              <span className={`text-2xl font-bold ${themeColors.bodyText}`}>:</span>
+              <DrumColumn
+                options={MINUTES}
+                value={(() => {
+                  const m = parseInt(reminderTime.split(":")[1], 10);
+                  const rounded = Math.round(m / 5) * 5;
+                  return String(rounded >= 60 ? 0 : rounded).padStart(2, "0");
+                })()}
+                onChange={(m) => {
+                  setReminderTime(`${reminderTime.split(":")[0]}:${m}`);
+                  setNotificationsEnabled(true);
+                }}
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      {/* ── META (OPCIONAL) ── */}
       <div className="px-4">
-        <Label className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-4" style={{ color: themeColors.categoryLabel }}>
           META (OPCIONAL)
-        </Label>
-        <div className="mt-2 grid grid-cols-2 gap-3">
+        </p>
+        <div className="grid grid-cols-2 gap-3">
           <Input
             type="number"
             inputMode="numeric"
@@ -553,152 +783,28 @@ const EditHabit = () => {
         </div>
       </div>
 
-      {/* Frequency Card */}
-      <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
-              <Calendar className={`h-6 w-6 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Frequência
-              </p>
-              <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {frequencyType === "daily" ? "Todo dia" : frequencyType === "once" ? "Uma vez" : "Dias específicos"}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className={`border-t px-4 py-4 space-y-3 ${themeColors.headerBorder}`}>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { value: "daily", label: "Todo dia" },
-              { value: "fixed_days", label: "Dias específicos" },
-              { value: "once", label: "Uma vez" },
-            ].map((freqOption) => (
-              <button
-                key={freqOption.value}
-                type="button"
-                onClick={() => setFrequencyType(freqOption.value as FrequencyType)}
-                className={`rounded-lg py-2.5 text-xs font-semibold transition-all duration-200 ${
-                  frequencyType === freqOption.value
-                    ? themeColors.buttonActive
-                    : themeColors.buttonInactive
-                }`}
-              >
-                {freqOption.label}
-              </button>
-            ))}
-          </div>
-          <div>{renderFrequencyFields()}</div>
-        </div>
-      </div>
-
-      {/* Times Per Day Selector Card */}
-      <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
-              <Target className={`h-6 w-6 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Vezes por Dia
-              </p>
-              <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {timesPerDay === 1 ? "1 vez" : `${timesPerDay} vezes`}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className={`border-t px-4 py-4 space-y-3 ${themeColors.headerBorder}`}>
-          <div className="flex gap-2 flex-wrap">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((count) => (
-              <button
-                key={count}
-                type="button"
-                onClick={() => setTimesPerDay(count)}
-                className={`w-10 h-10 rounded-full text-xs font-semibold transition-all duration-200 ${
-                  timesPerDay === count
-                    ? themeColors.buttonActive
-                    : themeColors.buttonInactive
-                }`}
-              >
-                {count}x
-              </button>
-            ))}
-          </div>
-          <p className={`text-xs ${themeColors.sectionTitle}`}>
-            Cada clique no Dashboard incrementa o contador até completar
-          </p>
-        </div>
-      </div>
-
-      {/* Notifications Card */}
-      <div className={`mx-4 overflow-hidden rounded-2xl border ${themeColors.card}`}>
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeColors.iconBg}`}>
-              <Bell className={`h-6 w-6 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Notificações
-              </p>
-              <p className={`text-base font-semibold ${themeColors.bodyText}`}>
-                {notificationsEnabled ? "Ativadas" : "Desativadas"}
-              </p>
-            </div>
-          </div>
-          <Switch
-            checked={notificationsEnabled}
-            onCheckedChange={handleNotificationToggle}
-            disabled={pushLoading}
-            className="data-[state=checked]:bg-primary"
-          />
-        </div>
-
-        {notificationsEnabled && (
-          <div className={`border-t px-4 py-4 space-y-3 ${themeColors.headerBorder}`}>
-            {/* Time Picker */}
-            <div className="rounded-xl border border-border/60 bg-muted/10 p-3">
-              <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${themeColors.iconBg}`}>
-                  <Clock className={`h-5 w-5 ${themeColors.iconColor}`} />
-                </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-semibold ${themeColors.bodyText}`}>Horário do lembrete</p>
-                  <input
-                    type="time"
-                    value={reminderTime}
-                    onChange={(e) => setReminderTime(e.target.value)}
-                    aria-label="Horário do lembrete"
-                    className={`mt-2 h-11 w-full rounded-lg px-3 ${themeColors.input}`}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* CTA Button - Go to Confirm */}
+      {/* ── CTA BUTTON ── */}
       <div
         className="px-4 pt-4"
         style={{ paddingBottom: 'max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom)))' }}
       >
         <button
-          onClick={() => setStep("confirm")}
-          disabled={!habitName.trim()}
-          className="h-14 w-full rounded-xl text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleSave}
+          disabled={!habitName.trim() || isSaving}
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100"
           style={{
-            backgroundColor: isDarkMode ? UNIFIED_COLOR : "#FFFFFF",
-            color: isDarkMode ? "#000000" : "#65A30D",
-            boxShadow: isDarkMode ? "0 4px 24px rgba(163, 230, 53, 0.3)" : "0 4px 24px rgba(255, 255, 255, 0.3)",
+            background: !habitName.trim() || isSaving
+              ? themeColors.ctaButton.disabledBg
+              : themeColors.ctaButton.bg,
+            color: !habitName.trim() || isSaving
+              ? themeColors.ctaButton.disabledText
+              : themeColors.ctaButton.text,
+            boxShadow: !habitName.trim() || isSaving
+              ? 'none'
+              : themeColors.ctaButton.shadow,
           }}
         >
-          CONTINUAR
+          {isSaving ? "SALVANDO..." : <><Check className="h-5 w-5" /> SALVAR TAREFA</>}
         </button>
       </div>
     </motion.div>

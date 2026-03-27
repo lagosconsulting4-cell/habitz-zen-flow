@@ -54,6 +54,7 @@ export const SwipeContextProvider = ({ children }: SwipeContextProviderProps) =>
   const location = useLocation();
   const navigate = useNavigate();
   const isNavigatingRef = useRef(false);
+  const isSwipingRef = useRef(false);
   const pathnameRef = useRef(location.pathname);
 
   useEffect(() => {
@@ -96,20 +97,44 @@ export const SwipeContextProvider = ({ children }: SwipeContextProviderProps) =>
   useEffect(() => {
     if (!emblaApi) return;
 
-    const onSettle = () => { isNavigatingRef.current = false; };
+    const onPointerDown = () => { isSwipingRef.current = true; };
 
+    // On pointer release: immediately update nav and URL before animation completes
+    const onPointerUp = () => {
+      if (isNavigatingRef.current) return;
+      const index = emblaApi.selectedScrollSnap();
+      setCurrentIndex(index);
+      const route = SWIPEABLE_ROUTES.find(r => r.index === index);
+      if (route && route.path !== pathnameRef.current) {
+        navigate(route.path, { replace: true });
+      }
+    };
+
+    const onSettle = () => {
+      isNavigatingRef.current = false;
+      isSwipingRef.current = false;
+      // Safety net: ensure currentIndex is always in sync after animation
+      setCurrentIndex(emblaApi.selectedScrollSnap());
+    };
+
+    emblaApi.on("pointerDown", onPointerDown);
+    emblaApi.on("pointerUp", onPointerUp);
     emblaApi.on("select", onSelect);
     emblaApi.on("settle", onSettle);
 
     return () => {
+      emblaApi.off("pointerDown", onPointerDown);
+      emblaApi.off("pointerUp", onPointerUp);
       emblaApi.off("select", onSelect);
       emblaApi.off("settle", onSettle);
     };
-  }, [emblaApi, onSelect]);
+  }, [emblaApi, onSelect, navigate]);
 
-  // Sync carousel with URL when location changes
+  // Sync carousel with URL when location changes externally (browser back, direct URL)
+  // Skips when user is actively swiping to avoid race condition with onPointerUp
   useEffect(() => {
     if (!emblaApi || !currentRouteConfig) return;
+    if (isSwipingRef.current) return;
 
     const targetIndex = currentRouteConfig.index;
     const currentCarouselIndex = emblaApi.selectedScrollSnap();

@@ -1,34 +1,27 @@
 /**
- * JourneyDayCompleteModal — Celebration popup when all habits for the day are completed
- * Follows pattern from LevelUpModal.tsx
+ * JourneyDayCompleteModal — Celebration popup when all journey habits for the day are completed.
  *
- * Milestone System:
- * - Days 7, 14, 21: escalated celebration — more particles, sound, haptic, no auto-dismiss
- * - All days: sound (dayComplete) + haptic (medium) on open
- * - Milestone badges use exclusive geometric design — no generic icons
- * - Architecture ready for commissioned artwork via milestone.artUrl
+ * Features:
+ * - Journey cover image at the top with gradient fade
+ * - Check circle with glow overlapping image/content boundary
+ * - Milestone system (Days 7, 14, 21): escalated celebration, no auto-dismiss
+ * - Phase/journey completion variants
+ * - Sound + haptic on open
+ * - Auto-dismiss after 6s for regular days
  */
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { CheckCircle2, ArrowRight, Award } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Check, X, Gem, Share2, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { getJourneyTheme } from "@/components/JourneyIllustration";
+import { GEM_VALUES } from "@/hooks/useGamification";
 import { sounds } from "@/lib/sounds";
 import { haptic } from "@/lib/haptics";
 
 // ============================================
 // Milestone Configuration
-// Days 7, 14, 21 — escalated celebration
-// artUrl: slot for future commissioned artwork
 // ============================================
 
 interface MilestoneConfig {
@@ -38,7 +31,6 @@ interface MilestoneConfig {
   particleCount: number;
   soundFn: () => void;
   hapticFn: () => void;
-  artUrl?: string; // future: custom illustration from Supabase Storage
 }
 
 const MILESTONES: Record<number, MilestoneConfig> = {
@@ -71,6 +63,10 @@ const MILESTONES: Record<number, MilestoneConfig> = {
   },
 };
 
+// ============================================
+// Component
+// ============================================
+
 export interface JourneyDayCompleteModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -97,20 +93,10 @@ export const JourneyDayCompleteModal = ({
   themeSlug,
 }: JourneyDayCompleteModalProps) => {
   const [showContent, setShowContent] = useState(false);
-  const percent = Math.round((dayNumber / totalDays) * 100);
   const theme = getJourneyTheme(themeSlug);
 
-  // Milestone derived state
   const milestone = MILESTONES[dayNumber];
   const isMilestone = !!milestone;
-  const particleCount = milestone?.particleCount ?? (phaseCompleted ? 10 : 6);
-
-  // Milestone titles
-  const milestoneTitle: Record<number, string> = {
-    7: "1 Semana Concluída",
-    14: "2 Semanas Concluídas",
-    21: "21 Dias. Hábito Formado.",
-  };
 
   useEffect(() => {
     if (isOpen) {
@@ -121,7 +107,7 @@ export const JourneyDayCompleteModal = ({
     }
   }, [isOpen]);
 
-  // Auto-dismiss after 6 seconds — skipped for milestones, phase, and journey complete
+  // Auto-dismiss after 6s — skipped for milestones, phase, and journey complete
   useEffect(() => {
     if (isOpen && !journeyCompleted && !phaseCompleted && !isMilestone) {
       const timer = setTimeout(onClose, 6000);
@@ -132,7 +118,7 @@ export const JourneyDayCompleteModal = ({
   // Sound + haptic on open
   useEffect(() => {
     if (!isOpen) return;
-    if (journeyCompleted) return; // GraduationModal handles its own
+    if (journeyCompleted) return;
     if (isMilestone) {
       milestone.soundFn();
       milestone.hapticFn();
@@ -143,236 +129,237 @@ export const JourneyDayCompleteModal = ({
       sounds.dayComplete();
       haptic.medium();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        className={cn(
-          "max-w-sm border-2 overflow-hidden text-white",
-          "bg-gradient-to-br from-zinc-900/95 to-zinc-950/95"
-        )}
-        style={{
-          borderColor: `${theme.color}4D`,
-          boxShadow: `0 0 30px ${theme.color}33`,
-        }}
-      >
-        {/* Floating particles — count escalates with milestone */}
-        {isOpen && Array.from({ length: particleCount }).map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 100, x: Math.random() * 60 - 30 }}
-            animate={{
-              opacity: [0, 0.5, 0],
-              y: -80,
-              x: Math.random() * 60 - 30,
-            }}
-            transition={{
-              duration: 2.5,
-              delay: i * 0.3,
-              repeat: Infinity,
-              repeatDelay: 1.5,
-            }}
-            className="absolute w-1.5 h-1.5 rounded-full pointer-events-none"
-            style={{
-              backgroundColor: theme.color,
-              left: `${10 + (i * 80) / particleCount}%`,
-              bottom: 0,
-            }}
-          />
-        ))}
+  if (!isOpen) return null;
 
-        <AnimatePresence mode="wait">
-          {showContent && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.3 }}
-              className="relative z-10"
+  const title = journeyCompleted
+    ? "Jornada Completa!"
+    : phaseCompleted
+      ? "Fase Completa!"
+      : `${journeyTitle} Completa!`;
+
+  return createPortal(
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center"
+      >
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute inset-0 bg-black/90 backdrop-blur-md"
+          onClick={onClose}
+        />
+
+        {/* Card */}
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.9, opacity: 0, y: 20 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="relative w-full max-w-sm mx-4 rounded-3xl overflow-hidden"
+          style={{ backgroundColor: "#0A0A0A" }}
+        >
+          {/* Cover image area */}
+          <div className="relative w-full h-48 overflow-hidden">
+            {theme.backgroundImage ? (
+              <img
+                src={theme.backgroundImage}
+                alt=""
+                aria-hidden="true"
+                className="w-full h-full object-cover object-center"
+              />
+            ) : (
+              <div
+                className="w-full h-full"
+                style={{
+                  background: `radial-gradient(ellipse at center, ${theme.color}40 0%, ${theme.color}10 50%, transparent 80%)`,
+                }}
+              />
+            )}
+            {/* Bottom gradient fade */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: "linear-gradient(to bottom, transparent 30%, rgba(10,10,10,0.6) 60%, #0A0A0A 100%)",
+              }}
+            />
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:bg-black/60 transition-colors"
+              aria-label="Fechar"
             >
-              <DialogHeader className="items-center text-center space-y-4">
-                {/* Animated day number — milestone adds outer ping ring */}
+              <X size={16} />
+            </button>
+          </div>
+
+          {/* Check circle — overlaps image/content boundary */}
+          <div className="relative flex justify-center" style={{ marginTop: "-36px" }}>
+            <AnimatePresence>
+              {showContent && (
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
                   transition={{
                     type: "spring",
                     stiffness: 200,
                     damping: 15,
                     delay: 0.1,
                   }}
-                  className="mx-auto w-20 h-20 rounded-full flex items-center justify-center border-2 relative"
+                  className="relative z-10 w-[72px] h-[72px] rounded-full flex items-center justify-center"
                   style={{
-                    background: `linear-gradient(135deg, ${theme.color}4D, ${theme.color}1A)`,
-                    borderColor: `${theme.color}66`,
-                    boxShadow: `0 0 20px ${theme.color}4D`,
+                    background: `linear-gradient(135deg, ${theme.color}, ${theme.color}CC)`,
+                    boxShadow: `0 0 30px ${theme.color}80, 0 0 60px ${theme.color}40, 0 4px 20px rgba(0,0,0,0.4)`,
                   }}
                 >
-                  {/* Pulse ring for milestone days */}
-                  {isMilestone && (
-                    <span
-                      className="absolute inset-0 rounded-full animate-ping opacity-20"
-                      style={{ backgroundColor: theme.color }}
-                    />
-                  )}
-                  {phaseCompleted ? (
-                    <Award className="w-10 h-10 relative z-10" style={{ color: theme.color }} />
-                  ) : (
-                    <span className="text-2xl font-bold relative z-10" style={{ color: theme.color }}>
-                      {dayNumber}
-                    </span>
-                  )}
+                  <Check className="w-8 h-8 text-white" strokeWidth={3} />
                 </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
-                {/* Title */}
-                <DialogTitle className="text-xl font-bold text-white">
-                  {journeyCompleted
-                    ? "Jornada Completa!"
-                    : phaseCompleted
-                      ? "Fase Completa!"
-                      : isMilestone
-                        ? milestoneTitle[dayNumber]
-                        : `Dia ${dayNumber} Completo`}
-                </DialogTitle>
-
-                {/* Subtitle */}
-                <DialogDescription className="text-sm text-white/60">
-                  {journeyTitle}
-                </DialogDescription>
-
-                {/* Phase badge */}
-                {phaseCompleted && phaseBadgeName && (
-                  <motion.div
+          {/* Content area */}
+          <div className="px-6 pb-6 pt-3">
+            <AnimatePresence mode="wait">
+              {showContent && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                  className="flex flex-col items-center text-center"
+                >
+                  {/* Title */}
+                  <motion.h2
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl border"
-                    style={{
-                      backgroundColor: `${theme.color}1A`,
-                      borderColor: `${theme.color}33`,
-                    }}
+                    className="text-xl font-bold text-white mt-2"
                   >
-                    <Award className="w-4 h-4" style={{ color: theme.color }} />
-                    <span className="text-sm font-semibold" style={{ color: theme.color }}>
-                      {phaseBadgeName}
-                    </span>
-                  </motion.div>
-                )}
+                    {title}
+                  </motion.h2>
 
-                {/* Milestone badge — geometric design, no generic icons */}
-                {isMilestone && (
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.3 }}
-                    className="flex flex-col items-center gap-2 w-full"
+                  {/* Subtitle */}
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-sm text-white/50 mt-2 max-w-[280px] leading-relaxed"
                   >
-                    {/* Geometric badge — slot for future commissioned artwork */}
-                    <div
-                      className="relative px-5 py-3 w-full"
+                    Você concluiu todos os hábitos desta jornada hoje.
+                    {" "}Sua consistência está em{" "}
+                    <span className="font-bold" style={{ color: theme.color }}>
+                      {dayNumber} dias
+                    </span>.
+                  </motion.p>
+
+                  {/* Phase badge */}
+                  {phaseCompleted && phaseBadgeName && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.45 }}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl border mt-3"
                       style={{
-                        border: `1px solid ${theme.color}50`,
-                        borderRadius: "12px",
-                        background: `linear-gradient(135deg, ${theme.color}15, ${theme.color}08)`,
-                        boxShadow: `0 0 30px ${theme.color}20, inset 0 1px 0 ${theme.color}20`,
+                        backgroundColor: `${theme.color}15`,
+                        borderColor: `${theme.color}33`,
                       }}
                     >
-                      {/* Corner accents */}
-                      <span className="absolute top-1.5 left-1.5 w-2 h-2 border-t border-l"
-                        style={{ borderColor: theme.color }} />
-                      <span className="absolute top-1.5 right-1.5 w-2 h-2 border-t border-r"
-                        style={{ borderColor: theme.color }} />
-                      <span className="absolute bottom-1.5 left-1.5 w-2 h-2 border-b border-l"
-                        style={{ borderColor: theme.color }} />
-                      <span className="absolute bottom-1.5 right-1.5 w-2 h-2 border-b border-r"
-                        style={{ borderColor: theme.color }} />
+                      <Award className="w-4 h-4" style={{ color: theme.color }} />
+                      <span className="text-sm font-semibold" style={{ color: theme.color }}>
+                        {phaseBadgeName}
+                      </span>
+                    </motion.div>
+                  )}
 
+                  {/* Milestone badge */}
+                  {isMilestone && (
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.45 }}
+                      className="mt-3 px-5 py-2.5 rounded-xl border text-center"
+                      style={{
+                        borderColor: `${theme.color}50`,
+                        background: `linear-gradient(135deg, ${theme.color}15, ${theme.color}08)`,
+                      }}
+                    >
                       <p
-                        className="text-[10px] tracking-[0.25em] uppercase text-center font-bold"
+                        className="text-[10px] tracking-[0.25em] uppercase font-bold"
                         style={{ color: theme.color }}
                       >
                         {milestone.badge}
                       </p>
-                      <p className="text-xs text-white/50 text-center mt-0.5">
+                      <p className="text-xs text-white/50 mt-0.5">
                         {milestone.subtitle}
                       </p>
-                    </div>
+                    </motion.div>
+                  )}
 
-                    {/* Motivational message */}
-                    <p className="text-xs text-white/40 text-center leading-relaxed max-w-[240px]">
-                      {milestone.message}
-                    </p>
-                  </motion.div>
-                )}
-
-                {/* Progress bar */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="w-full space-y-2"
-                >
-                  <div className="flex justify-between text-xs text-white/40">
-                    <span>Progresso</span>
-                    <span>{percent}%</span>
-                  </div>
-                  <div className="w-full h-2.5 bg-white/10 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: `${Math.max(0, percent - 4)}%` }}
-                      animate={{ width: `${percent}%` }}
-                      transition={{ duration: 0.6, delay: 0.5 }}
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: theme.color }}
-                    />
-                  </div>
-                </motion.div>
-
-                {/* New habit preview */}
-                {newHabitPreview && (
+                  {/* Gems reward chip */}
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    className="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10"
+                    transition={{ delay: 0.5 }}
+                    className="flex flex-col items-center gap-1 mt-5 px-6 py-3 rounded-2xl border border-white/5"
+                    style={{ backgroundColor: "#1a1a1a" }}
                   >
-                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                    <div className="text-left">
-                      <p className="text-[10px] text-white/40 uppercase tracking-wider">
-                        Amanhã
-                      </p>
-                      <p className="text-xs text-white/80">{newHabitPreview}</p>
-                    </div>
+                    <Gem className="w-5 h-5 text-lime-400" />
+                    <p className="text-sm font-bold text-white">
+                      +{GEM_VALUES.JOURNEY_DAY_COMPLETE} Gemas
+                    </p>
+                    <p className="text-[9px] uppercase tracking-widest text-white/40">
+                      Recompensa
+                    </p>
                   </motion.div>
-                )}
-              </DialogHeader>
 
-              {/* Close button — shown for phase complete, journey complete, and milestones */}
-              {(phaseCompleted || journeyCompleted || isMilestone) && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
-                  className="mt-6"
-                >
-                  <Button
-                    onClick={onClose}
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
+                  {/* CTA buttons */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.7 }}
+                    className="w-full mt-5 space-y-3"
                   >
-                    {journeyCompleted
-                      ? "Ver Graduação"
-                      : isMilestone
-                        ? "Continuar Jornada"
-                        : "Continuar"}
-                  </Button>
+                    <Button
+                      onClick={onClose}
+                      className="w-full h-12 rounded-full bg-gradient-to-b from-lime-300 to-lime-500 hover:from-lime-200 hover:to-lime-400 text-black font-bold text-sm border-0"
+                      style={{
+                        boxShadow:
+                          "0 4px 24px rgba(163, 230, 53, 0.35), 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.25)",
+                      }}
+                    >
+                      {journeyCompleted ? "Ver Graduação" : "Fechar"}
+                    </Button>
+                    <button
+                      onClick={() => {
+                        const text = `Completei todos os hábitos da ${journeyTitle} hoje! ${dayNumber} dias de consistência 🔥\n\n#Bora #Habitz`;
+                        if (navigator.share) {
+                          navigator.share({ text }).catch(() => {});
+                        } else {
+                          navigator.clipboard.writeText(text).catch(() => {});
+                        }
+                      }}
+                      className="w-full flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-widest text-white/30 hover:text-white/50 transition-colors py-2"
+                    >
+                      <Share2 size={12} />
+                      Compartilhar Jornada
+                    </button>
+                  </motion.div>
                 </motion.div>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </DialogContent>
-    </Dialog>
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>,
+    document.body
   );
 };
 

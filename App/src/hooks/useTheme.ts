@@ -10,7 +10,7 @@ type Theme = "light" | "dark" | "system";
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem("theme") as Theme;
-    return stored || "system";
+    return stored || "dark";
   });
 
   const resolvedTheme = useMemo<"light" | "dark">(() => {

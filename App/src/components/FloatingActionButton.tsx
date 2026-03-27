@@ -17,7 +17,7 @@ export const FloatingActionButton = ({ className }: FloatingActionButtonProps) =
   const navigate = useNavigate();
   const location = useLocation();
 
-  if (location.pathname !== "/dashboard") return null;
+  if (location.pathname !== "/habits") return null;
 
   return createPortal(
     <motion.button
