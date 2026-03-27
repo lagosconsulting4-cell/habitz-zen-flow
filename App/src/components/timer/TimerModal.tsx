@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useTimer, getTargetSeconds, formatTime } from "@/hooks/useTimer";
 import type { Habit } from "@/components/CircularHabitCard";
 
-// Import image as Vite asset — guarantees correct path regardless of base URL
-import timerNatureImg from "/images/timer-nature.jpg?url";
+const timerNatureImg = `${import.meta.env.BASE_URL}images/timer-nature.jpg`;
 
 interface TimerModalProps {
   habit: Habit;
