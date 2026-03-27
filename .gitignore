@@ -6,3 +6,17 @@ Landing/node_modules/
 Landing/dist/
 .env
 .DS_Store
+
+# Development artifacts
+.playwright-mcp/
+App/dev-dist/
+App/supabase/.temp/
+supabase/.temp/
+.superpowers/
+App/scripts/
+nul
+*.sql.bak
+.claude/settings.local.json
+
+# Dev screenshots (root level only)
+/*.png
