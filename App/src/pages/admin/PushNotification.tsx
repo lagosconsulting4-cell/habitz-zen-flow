@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, X, Bell, Send, User } from "lucide-react";
+import { Search, X, Bell, Send, User, Radio } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserResult {
@@ -25,6 +25,10 @@ const AdminPushNotification = () => {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [broadcastTitle, setBroadcastTitle] = useState("Novidades no Bora");
+  const [broadcastMessage, setBroadcastMessage] = useState("Melhoramos a experiência do app para você — nova sessão de hábitos, visual mais limpo e mais. Abra e confira!");
+  const [broadcastSending, setBroadcastSending] = useState(false);
+  const [broadcastResult, setBroadcastResult] = useState<{ sent: number; failed: number; total: number; userCount: number } | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -129,6 +133,39 @@ const AdminPushNotification = () => {
       }
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleBroadcast = async () => {
+    if (!broadcastTitle.trim() || !broadcastMessage.trim()) {
+      toast.error("Preencha título e mensagem");
+      return;
+    }
+    const confirmed = window.confirm(
+      `Enviar push para TODOS os usuários com subscription ativa?\n\nTítulo: ${broadcastTitle}\nMensagem: ${broadcastMessage}`
+    );
+    if (!confirmed) return;
+
+    setBroadcastSending(true);
+    setBroadcastResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("broadcast-push", {
+        body: {
+          title: broadcastTitle.trim(),
+          body: broadcastMessage.trim(),
+          tag: "bora-broadcast",
+          data: { url: "/app/" },
+        },
+      });
+      if (error) {
+        toast.error(`Erro: ${error.message}`);
+        return;
+      }
+      const result = data as { sent: number; failed: number; total: number; userCount: number };
+      setBroadcastResult(result);
+      toast.success(`Broadcast enviado! ${result.sent} enviados, ${result.failed} falharam.`);
+    } finally {
+      setBroadcastSending(false);
     }
   };
 
@@ -257,6 +294,79 @@ const AdminPushNotification = () => {
         >
           <Send className="h-4 w-4" />
           {sending ? "Enviando..." : "Enviar Push"}
+        </Button>
+      </Card>
+
+      {/* Broadcast Card */}
+      <Card className="p-6 space-y-5 border-amber-500/30">
+        <div>
+          <h2 className="font-bold flex items-center gap-2">
+            <Radio className="h-4 w-4 text-amber-500" />
+            Broadcast — Todos os usuários
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            Envia para todos com push ativo. Use com moderação.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="bc-title">Título</Label>
+          <Input
+            id="bc-title"
+            value={broadcastTitle}
+            onChange={(e) => setBroadcastTitle(e.target.value)}
+            maxLength={100}
+          />
+          <p className="text-xs text-muted-foreground text-right">{broadcastTitle.length}/100</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="bc-body">Mensagem</Label>
+          <Textarea
+            id="bc-body"
+            value={broadcastMessage}
+            onChange={(e) => setBroadcastMessage(e.target.value)}
+            rows={3}
+            maxLength={300}
+          />
+          <p className="text-xs text-muted-foreground text-right">{broadcastMessage.length}/300</p>
+        </div>
+
+        {(broadcastTitle || broadcastMessage) && (
+          <div className="rounded-lg border bg-muted/30 p-4 space-y-1">
+            <div className="flex items-center gap-2 mb-2">
+              <Bell className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground font-medium">Preview</span>
+            </div>
+            {broadcastTitle && <p className="text-sm font-semibold">{broadcastTitle}</p>}
+            {broadcastMessage && <p className="text-sm text-muted-foreground">{broadcastMessage}</p>}
+          </div>
+        )}
+
+        {broadcastResult && (
+          <div className="rounded-lg border bg-muted/20 p-4 text-sm space-y-1">
+            <p className="font-medium">Resultado do último broadcast</p>
+            <p className="text-muted-foreground">
+              Usuários com subscription: <span className="text-foreground font-medium">{broadcastResult.userCount}</span>
+            </p>
+            <p className="text-muted-foreground">
+              Enviados: <span className="text-green-600 font-medium">{broadcastResult.sent}</span>
+              {" · "}
+              Falharam: <span className="text-red-500 font-medium">{broadcastResult.failed}</span>
+              {" · "}
+              Total: <span className="text-foreground font-medium">{broadcastResult.total}</span>
+            </p>
+          </div>
+        )}
+
+        <Button
+          className="w-full gap-2 border-amber-500/50 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 hover:text-amber-700"
+          variant="outline"
+          onClick={handleBroadcast}
+          disabled={broadcastSending || !broadcastTitle.trim() || !broadcastMessage.trim()}
+        >
+          <Radio className="h-4 w-4" />
+          {broadcastSending ? "Enviando broadcast..." : "Enviar Broadcast"}
         </Button>
       </Card>
     </div>
