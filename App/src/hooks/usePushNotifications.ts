@@ -70,7 +70,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     });
   }, [isIOS, isStandalone, isSupported, canUsePush]);
 
-  // Verificar se já está inscrito
+  // Verificar se já está inscrito + sync silencioso com DB
   useEffect(() => {
     const checkSubscription = async () => {
       if (!swRegistration || !canUsePush) return;
@@ -78,6 +78,29 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       try {
         const subscription = await swRegistration.pushManager.getSubscription();
         setIsSubscribed(!!subscription);
+
+        // Se browser tem subscription mas DB pode estar desatualizado, re-sync silencioso
+        if (subscription) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: existing } = await supabase
+              .from("push_subscriptions")
+              .select("id")
+              .eq("endpoint", subscription.endpoint)
+              .maybeSingle();
+
+            if (!existing) {
+              const json = subscription.toJSON();
+              await supabase.from("push_subscriptions").upsert({
+                user_id: user.id,
+                endpoint: subscription.endpoint,
+                p256dh: json.keys?.p256dh || "",
+                auth: json.keys?.auth || "",
+              }, { onConflict: "endpoint" });
+              console.log("[Push] Re-synced subscription to DB");
+            }
+          }
+        }
       } catch (err) {
         console.error("[Push] Erro ao verificar subscription:", err);
       }
