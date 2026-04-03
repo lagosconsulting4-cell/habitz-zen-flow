@@ -10,6 +10,12 @@ import { Button } from "@/components/ui/button";
 
 const BG = `${import.meta.env.BASE_URL}backgrounds/arte1.webp`;
 
+const YEARS_LABELS: Record<string, string> = {
+  "2-3_anos":   "2 a 3 anos",
+  "4-5_anos":   "4 a 5 anos",
+  "perdi_conta": "muitos anos",
+};
+
 const IDENTITY_PHRASE: Record<string, string> = {
   productivity: "faz mais com menos energia desperdiçada",
   health:       "cuida do corpo todo dia",
@@ -39,7 +45,7 @@ export const S10RoutineConfirm = memo(function S10RoutineConfirm() {
   const name = quizData?.name || collectedName || "";
   const identityPhrase = confirmedObjective ? IDENTITY_PHRASE[confirmedObjective] : null;
   const projectedFeeling = quizData?.projected_feeling || null;
-  const yearsPromising = quizData?.years_promising || null;
+  const yearsPromising = quizData?.years_promising ? (YEARS_LABELS[quizData.years_promising] ?? null) : null;
 
   const confirmed = useMemo(
     () => generatedHabits.filter((h) => selectedHabitIds.has(h.id)),

@@ -28,7 +28,13 @@ export const S20Celebration = memo(function S20Celebration() {
   }, [shouldReduceMotion]);
 
   const name = collectedName || quizData?.name || "você";
-  const yearsPromising = quizData?.years_promising || null;
+
+  const YEARS_LABELS: Record<string, string> = {
+    "2-3_anos": "2 a 3 anos",
+    "4-5_anos": "4 a 5 anos",
+    "perdi_conta": "muitos anos",
+  };
+  const yearsPromising = quizData?.years_promising ? (YEARS_LABELS[quizData.years_promising] ?? null) : null;
 
   return (
     <div className="h-[100dvh] relative bg-black overflow-hidden flex flex-col">
@@ -80,7 +86,7 @@ export const S20Celebration = memo(function S20Celebration() {
           transition={{ delay: 0.4, duration: 0.4 }}
           style={{ fontSize: 16, color: "rgba(255,255,255,0.72)", maxWidth: 300, lineHeight: 1.55 }}
         >
-          {yearsPromising && yearsPromising !== "menos de 1 ano"
+          {yearsPromising
             ? <>Faz {yearsPromising} que você busca isso.<br />Agora você tem um sistema. Use-o um dia de cada vez.</>
             : <>Você tem um sistema agora.<br />Use-o um dia de cada vez.</>
           }
