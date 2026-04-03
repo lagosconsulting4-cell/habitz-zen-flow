@@ -143,7 +143,7 @@ export const S14Notifications = memo(function S14Notifications() {
           transition={{ delay: 0.15, duration: 0.4 }}
           className="text-base text-muted-foreground leading-relaxed mb-8"
         >
-          Quer que a gente te avise na hora certa de cada hábito? Quem ativa os lembretes mantém o hábito por muito mais tempo. É a diferença entre a primeira semana e o segundo mês.
+          Quem ativa os lembretes mantém o hábito por muito mais tempo.
         </motion.p>
 
         {/* Error display */}

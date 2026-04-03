@@ -265,15 +265,15 @@ export const S4WakeSleepTime = memo(function S4WakeSleepTime() {
         className="mb-6"
       >
         <h2 className="text-2xl font-bold text-foreground">
-          Como é o seu dia, no geral?
+          A que horas você acorda e dorme?
         </h2>
         <p className="text-base text-muted-foreground mt-2">
-          A gente vai encaixar os hábitos nos seus horários livres, não disputar com eles.
+          Usamos isso para encaixar os hábitos no seu horário livre, não disputar com ele.
         </p>
       </motion.div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
+      <div className="flex-1 min-h-0 flex flex-col justify-center max-w-md mx-auto w-full overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

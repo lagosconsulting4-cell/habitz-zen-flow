@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect, useRef, memo } from "react";
-import { motion } from "motion/react";
+import { useState, useMemo, memo } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Button } from "@/components/ui/button";
 import {
   DndContext,
   closestCenter,
@@ -18,7 +19,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Check, Sunrise, Sun, Moon } from "lucide-react";
+import { GripVertical, Check, ChevronLeft, Sunrise, Sun, Moon } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HabitGlyph } from "@/components/icons/HabitGlyph";
@@ -29,35 +30,71 @@ import type { RecommendedHabitV2 } from "../generateRecommendationsV2";
 // CONSTANTS
 // ============================================================================
 
-const SELECTION_LIMITS: Record<string, number> = {
-  never: 4,
-  tried: 6,
-  already_have: 8,
+// Micro-tags: map recommendation_sources entries to readable Portuguese labels
+const SOURCE_LABELS: Record<string, string> = {
+  "objective:productivity": "foco",
+  "objective:health":       "saúde",
+  "objective:mental":       "equilíbrio",
+  "objective:routine":      "consistência",
+  "objective:avoid":        "liberdade do celular",
+  "challenge:procrastination": "procrastinação",
+  "challenge:focus":        "foco",
+  "challenge:anxiety":      "ansiedade",
+  "challenge:tiredness":    "energia",
+  "challenge:motivation":   "motivação",
+  "challenge:forgetfulness":"memória",
+  "area:work":              "trabalho",
+  "area:physical":          "saúde física",
+  "area:mind":              "mente",
+  "area:relationships":     "relações",
+  "profession:entrepreneur":"empreendedores",
+  "profession:student":     "estudantes",
+  "profession:employed":    "rotina CLT",
+  "profession:clt":         "rotina CLT",
 };
 
-const PERIOD_CONFIG: Record<string, { label: string; Icon: LucideIcon; iconColor: string }> = {
-  morning:   { label: "Manhã", Icon: Sunrise, iconColor: "text-amber-500"  },
-  afternoon: { label: "Tarde", Icon: Sun,     iconColor: "text-orange-400" },
-  evening:   { label: "Noite", Icon: Moon,    iconColor: "text-amber-400"  },
+function getHabitTag(sources: string[]): string | null {
+  // Prefer challenge > area > objective
+  const priority = ["challenge:", "area:", "profession:", "objective:"];
+  for (const prefix of priority) {
+    const found = sources.find(s => s.startsWith(prefix));
+    if (found && SOURCE_LABELS[found]) return SOURCE_LABELS[found];
+  }
+  return null;
+}
+
+const PERIOD_CONFIG: Record<string, { label: string; Icon: LucideIcon; dot: string }> = {
+  morning:   { label: "Manhã",  Icon: Sunrise, dot: "bg-amber-400"  },
+  afternoon: { label: "Tarde",  Icon: Sun,     dot: "bg-orange-400" },
+  evening:   { label: "Noite",  Icon: Moon,    dot: "bg-indigo-400" },
 };
 
 type Period = keyof typeof PERIOD_CONFIG;
 type Tab = "weekday" | "weekend";
+
+// Frases curtas por objetivo — header editorial
+const OBJECTIVE_PHRASE: Record<string, string> = {
+  productivity: "ter mais foco",
+  health:       "cuidar do corpo",
+  mental:       "ter mais equilíbrio",
+  routine:      "criar consistência",
+  avoid:        "se libertar das distrações",
+};
 
 // ============================================================================
 // DENSITY SYSTEM
 // ============================================================================
 
 const DENSITY_STYLES = {
-  normal:  { cardPy: "py-2.5", handlePy: "py-3",   cardGap: "space-y-1.5", groupGap: "space-y-4", nameSize: "text-sm",  timeSize: "text-xs",      iconSize: "md" as const },
-  compact: { cardPy: "py-1.5", handlePy: "py-2",   cardGap: "space-y-1",   groupGap: "space-y-3", nameSize: "text-sm",  timeSize: "text-xs",      iconSize: "sm" as const },
-  dense:   { cardPy: "py-1",   handlePy: "py-1.5", cardGap: "space-y-0.5", groupGap: "space-y-2", nameSize: "text-xs",  timeSize: "text-[10px]",  iconSize: "sm" as const },
+  normal:  { cardPy: "py-2.5", handlePy: "py-3",   cardGap: "space-y-1.5", groupGap: "space-y-4", nameSize: "text-sm",  timeSize: "text-xs",     iconSize: "md" as const },
+  compact: { cardPy: "py-1.5", handlePy: "py-2",   cardGap: "space-y-1",   groupGap: "space-y-3", nameSize: "text-sm",  timeSize: "text-xs",     iconSize: "sm" as const },
+  dense:   { cardPy: "py-1",   handlePy: "py-1.5", cardGap: "space-y-0.5", groupGap: "space-y-2", nameSize: "text-xs",  timeSize: "text-[10px]", iconSize: "sm" as const },
 };
 
 type DensityStyles = typeof DENSITY_STYLES.normal;
 
 // ============================================================================
-// SORTABLE HABIT CARD
+// SORTABLE HABIT CARD — redesigned selection state
 // ============================================================================
 
 interface HabitCardProps {
@@ -92,28 +129,29 @@ function SortableHabitCard({ habit, selected, disabled, onToggle, showWeekendTim
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group flex items-center rounded-xl border transition-colors overflow-hidden",
+        "group flex items-center rounded-xl border transition-all duration-200 overflow-hidden",
         selected
-          ? "border-primary/40 bg-primary/5"
-          : "border-border bg-card",
-        isDragging && "opacity-60 shadow-lg z-10",
-        disabled && !selected && "opacity-40 pointer-events-none",
+          ? "border-primary/50 bg-primary/8 shadow-[0_0_0_1px_hsl(var(--primary)/0.15),inset_3px_0_0_hsl(var(--primary))]"
+          : "border-border/50 bg-card/50",
+        isDragging && "opacity-60 shadow-lg z-10 scale-[1.01]",
+        disabled && !selected && "opacity-35 pointer-events-none",
       )}
     >
-      {/* Drag handle — hidden until hover/focus */}
+      {/* Drag handle */}
       <button
         {...attributes}
         {...listeners}
         className={cn(
-          "touch-none pl-3 text-transparent group-hover:text-muted-foreground/40 focus-visible:text-muted-foreground/40 cursor-grab active:cursor-grabbing shrink-0 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm transition-colors self-stretch flex items-center min-h-[44px]",
+          "touch-none pl-3 text-transparent group-hover:text-muted-foreground/30 focus-visible:text-muted-foreground/40 cursor-grab active:cursor-grabbing shrink-0 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm transition-colors self-stretch flex items-center min-h-[44px]",
+          selected && "group-hover:text-primary/30",
         )}
         tabIndex={0}
         aria-label={`Reordenar ${habit.name}`}
       >
-        <GripVertical size={20} />
+        <GripVertical size={16} />
       </button>
 
-      {/* Clickable content area — full row toggle */}
+      {/* Clickable area */}
       <button
         onClick={onToggle}
         disabled={disabled && !selected}
@@ -121,7 +159,7 @@ function SortableHabitCard({ habit, selected, disabled, onToggle, showWeekendTim
           "flex-1 flex items-center gap-3 px-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
           ds.cardPy,
         )}
-        aria-label={selected ? `Desmarcar ${habit.name}` : `Selecionar ${habit.name}`}
+        aria-label={selected ? `Remover ${habit.name} da rotina` : `Adicionar ${habit.name} de volta`}
       >
         {/* Icon */}
         <div className="shrink-0">
@@ -138,26 +176,44 @@ function SortableHabitCard({ habit, selected, disabled, onToggle, showWeekendTim
         <div className="flex-1 min-w-0">
           <p className={cn(
             ds.nameSize,
-            "font-medium truncate",
+            "font-medium truncate transition-colors duration-150",
             selected ? "text-foreground" : "text-muted-foreground",
           )}>
             {habit.name}
           </p>
-          <p className={cn(ds.timeSize, "text-muted-foreground/60")}>
-            {time} · {duration} min
-          </p>
+          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <p className={cn(ds.timeSize, "text-muted-foreground/50")}>
+              {time} · {duration}min
+            </p>
+            {(() => {
+              const tag = getHabitTag(habit.recommendation_sources || []);
+              return tag ? (
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary/70 font-medium leading-none">
+                  {tag}
+                </span>
+              ) : null;
+            })()}
+          </div>
         </div>
 
-        {/* Checkbox indicator */}
+        {/* Check */}
         <span
           className={cn(
-            "shrink-0 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors",
+            "shrink-0 w-5 h-5 rounded-md border-[1.5px] flex items-center justify-center transition-all duration-150",
             selected
-              ? "bg-primary border-primary text-primary-foreground"
-              : "border-muted-foreground/30",
+              ? "bg-primary border-primary"
+              : "border-muted-foreground/25",
           )}
         >
-          {selected && <Check size={14} strokeWidth={3} />}
+          {selected && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            >
+              <Check size={11} strokeWidth={3} className="text-primary-foreground" />
+            </motion.div>
+          )}
         </span>
       </button>
     </div>
@@ -165,7 +221,7 @@ function SortableHabitCard({ habit, selected, disabled, onToggle, showWeekendTim
 }
 
 // ============================================================================
-// PERIOD GROUP
+// PERIOD GROUP — editorial header style
 // ============================================================================
 
 interface PeriodGroupProps {
@@ -184,12 +240,14 @@ function PeriodGroup({ period, habits, selectedIds, isAtLimit, onToggle, showWee
   const config = PERIOD_CONFIG[period];
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2 px-1">
-        <config.Icon size={14} className={cn(config.iconColor, "shrink-0")} />
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+    <div className={ds.groupGap}>
+      {/* Editorial period header */}
+      <div className="flex items-center gap-2 px-0.5 mb-1">
+        <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", config.dot)} />
+        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 flex-1">
           {config.label}
         </span>
+        <config.Icon size={10} className="text-muted-foreground/40" />
       </div>
 
       <SortableContext items={habits.map((h) => h.id)} strategy={verticalListSortingStrategy}>
@@ -224,15 +282,35 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
     habitExperience,
     weekendDiff,
     hasFoquinhaData,
+    quizData,
+    collectedName,
+    confirmedObjective,
+    nextStep,
+    prevStep,
   } = useOnboardingV2();
+
+  const [confirming, setConfirming] = useState(false);
+
+  const handleConfirm = () => {
+    setConfirming(true);
+    setTimeout(() => nextStep(), 900);
+  };
 
   const showTabs = weekendDiff !== "same";
   const [activeTab, setActiveTab] = useState<Tab>("weekday");
 
-  const limit = SELECTION_LIMITS[habitExperience || "tried"] || 6;
-  const isAtLimit = selectedHabitIds.size >= limit;
+  // Derived display values
+  const name = quizData?.name || collectedName || "";
+  const objectivePhrase = confirmedObjective ? OBJECTIVE_PHRASE[confirmedObjective] : null;
+  const totalMinutes = useMemo(() =>
+    Array.from(selectedHabitIds).reduce((sum, id) => {
+      const h = generatedHabits.find(h => h.id === id);
+      return sum + (h?.duration || 0);
+    }, 0),
+    [generatedHabits, selectedHabitIds]
+  );
 
-  // Adaptive density based on habit count
+  // Adaptive density
   const density = useMemo(() => {
     const n = generatedHabits.length;
     if (n <= 6) return "normal";
@@ -242,55 +320,27 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
 
   const ds = DENSITY_STYLES[density];
 
-  // Shake dot row when limit is first reached
-  const [shakeLimit, setShakeLimit] = useState(false);
-  const prevIsAtLimit = useRef(false);
-  useEffect(() => {
-    if (isAtLimit && !prevIsAtLimit.current) {
-      setShakeLimit(true);
-      const t = setTimeout(() => setShakeLimit(false), 400);
-      return () => clearTimeout(t);
-    }
-    prevIsAtLimit.current = isAtLimit;
-  }, [isAtLimit]);
-
   // DnD sensors
-  const pointerSensor = useSensor(PointerSensor, {
-    activationConstraint: { distance: 5 },
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: { delay: 150, tolerance: 5 },
-  });
-  const keyboardSensor = useSensor(KeyboardSensor, {
-    coordinateGetter: sortableKeyboardCoordinates,
-  });
+  const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } });
+  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } });
+  const keyboardSensor = useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates });
   const sensors = useSensors(pointerSensor, touchSensor, keyboardSensor);
 
-  // Filter habits by tab
+  // Filter by tab
   const filteredHabits = useMemo(() => {
     if (!showTabs) return generatedHabits;
     if (activeTab === "weekday") {
-      return generatedHabits.filter((h) =>
-        h.frequency_days.some((d) => d >= 1 && d <= 5)
-      );
+      return generatedHabits.filter((h) => h.frequency_days.some((d) => d >= 1 && d <= 5));
     }
-    return generatedHabits.filter((h) =>
-      h.frequency_days.some((d) => d === 0 || d === 6)
-    );
+    return generatedHabits.filter((h) => h.frequency_days.some((d) => d === 0 || d === 6));
   }, [generatedHabits, activeTab, showTabs]);
 
-  // Group by period, sorted by suggested_time
+  // Group by period
   const groupedHabits = useMemo(() => {
-    const groups: Record<Period, RecommendedHabitV2[]> = {
-      morning: [],
-      afternoon: [],
-      evening: [],
-    };
+    const groups: Record<Period, RecommendedHabitV2[]> = { morning: [], afternoon: [], evening: [] };
     for (const habit of filteredHabits) {
       const period = (habit.period as Period) || "morning";
-      if (groups[period]) {
-        groups[period].push(habit);
-      }
+      if (groups[period]) groups[period].push(habit);
     }
     const timeKey = activeTab === "weekend" ? "weekend_time" : "suggested_time";
     for (const period of Object.keys(groups) as Period[]) {
@@ -301,34 +351,26 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
     return groups;
   }, [filteredHabits, activeTab]);
 
-  // Handle drag end — reorder within the same period
+  // DnD handler — reorder within same period (logic unchanged)
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-
     const activeId = active.id as string;
     const overId = over.id as string;
-
     const findPeriod = (id: string): Period | null => {
       for (const [period, habits] of Object.entries(groupedHabits)) {
         if (habits.some((h) => h.id === id)) return period as Period;
       }
       return null;
     };
-
     const activePeriod = findPeriod(activeId);
     const overPeriod = findPeriod(overId);
-
     if (!activePeriod || activePeriod !== overPeriod) return;
-
     const periodHabits = groupedHabits[activePeriod];
     const oldIndex = periodHabits.findIndex((h) => h.id === activeId);
     const newIndex = periodHabits.findIndex((h) => h.id === overId);
-
     if (oldIndex === -1 || newIndex === -1) return;
-
     const reordered = arrayMove(periodHabits, oldIndex, newIndex);
-
     const newHabits = generatedHabits.map((h) => h);
     const periodIds = new Set(reordered.map((h) => h.id));
     let reorderIdx = 0;
@@ -341,45 +383,93 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
   };
 
   return (
-    <div className="h-full flex flex-col px-6 pt-3 pb-1">
+    <div className="h-full flex flex-col px-5 pt-4 pb-0 relative">
 
-      {/* ── Zona 1: Header FIXO — título + subtítulo ── */}
-      <div className="flex-shrink-0 max-w-md mx-auto w-full">
+      {/* ── Overlay animado de confirmação ── */}
+      <AnimatePresence>
+        {confirming && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              className="w-20 h-20 rounded-full bg-primary/15 border-2 border-primary/40 flex items-center justify-center mb-4"
+            >
+              <Check className="w-9 h-9 text-primary" strokeWidth={2.5} />
+            </motion.div>
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="text-lg font-bold text-foreground"
+            >
+              Rotina configurada
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── ZONA 1: Header editorial — nome + objetivo + badge de tempo ── */}
+      <div className="flex-shrink-0 max-w-md mx-auto w-full mb-4">
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="text-center mb-3"
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="flex items-start justify-between gap-3"
         >
-          <h2 className="text-2xl font-bold text-foreground">
-            {hasFoquinhaData ? "Sua rotina personalizada" : "Essa é a sua rotina."}
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {hasFoquinhaData
-              ? `${generatedHabits.filter((h: any) => h._isExisting).length} da Foquinha + ${generatedHabits.filter((h: any) => !h._isExisting).length} sugestões novas`
-              : `${generatedHabits.length} hábitos selecionados para você`}
-          </p>
+          {/* Left: name + objective */}
+          <div className="min-w-0">
+            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-primary mb-0.5">
+              {hasFoquinhaData ? "Rotina Atualizada" : "Sua Rotina"}
+            </p>
+            <h2 className="text-[26px] font-bold leading-[1.1] text-foreground truncate">
+              {name ? `${name},` : "Pronto."}
+            </h2>
+            {objectivePhrase && (
+              <p className="text-sm text-muted-foreground mt-0.5 leading-snug">
+                montada para {objectivePhrase}.
+              </p>
+            )}
+          </div>
+
+          {/* Right: total time badge */}
+          {totalMinutes > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.25, duration: 0.35, type: "spring", stiffness: 300 }}
+              className="shrink-0 mt-1"
+            >
+              <div className="px-2.5 py-1.5 rounded-full bg-primary/10 border border-primary/25 text-center">
+                <p className="text-xs font-bold text-primary tabular-nums">~{totalMinutes}min</p>
+                <p className="text-[9px] text-primary/60 leading-none">por dia</p>
+              </div>
+            </motion.div>
+          )}
         </motion.div>
       </div>
 
-      {/* ── Zona 2: Centralizada — tabs + dots + lista ── */}
-      {/* Outer: centra o conteúdo quando curto; Inner: scrolla quando longo */}
-      <div className="flex-1 min-h-0 flex flex-col justify-center overflow-hidden">
+      {/* ── ZONA 2: Conteúdo com scroll ── */}
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.4 }}
+          transition={{ delay: 0.15, duration: 0.4 }}
           className="overflow-y-auto max-h-full max-w-md mx-auto w-full"
         >
-          {/* Tabs */}
+          {/* Tabs weekday/weekend */}
           {showTabs && (
-            <div className="flex gap-2 justify-center mb-3">
+            <div className="flex gap-2 mb-3">
               {(["weekday", "weekend"] as Tab[]).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={cn(
-                    "px-4 py-2 rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                    "px-3 py-1.5 rounded-full text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                     activeTab === tab
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-muted/80",
@@ -391,34 +481,26 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
             </div>
           )}
 
-          {/* Dot-row selection indicator */}
-          <div className="flex justify-end mb-2">
-            <motion.div
-              animate={shakeLimit ? { x: [0, -5, 5, -3, 3, 0] } : { x: 0 }}
-              transition={{ duration: 0.35 }}
-              className="flex items-center gap-1.5"
-            >
-              {Array.from({ length: limit }, (_, i) => (
-                <span
-                  key={i}
-                  className={cn(
-                    "w-1.5 h-1.5 rounded-full transition-colors",
-                    i < selectedHabitIds.size ? "bg-primary" : "bg-muted-foreground/20",
-                  )}
-                />
-              ))}
-            </motion.div>
+          {/* ── Pill: hábitos na rotina + instrução ── */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+              <span className="tabular-nums">{selectedHabitIds.size}</span>
+              <span className="font-normal opacity-80">hábitos na sua rotina</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground/60">
+              Toque para remover · Arraste para reordenar
+            </p>
           </div>
 
-          {/* Lista de hábitos */}
+          {/* ── Lista de hábitos ── */}
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
           >
             {hasFoquinhaData ? (
-              <div className="w-full pb-2 space-y-4">
-                {/* Section: Foquinha habits */}
+              <div className="w-full pb-2 space-y-5">
+                {/* Foquinha habits */}
                 {(() => {
                   const foquinhaList = filteredHabits.filter((h: any) => h._isExisting);
                   if (foquinhaList.length === 0) return null;
@@ -429,9 +511,10 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
                   }
                   return (
                     <div>
-                      <div className="flex items-center gap-2 mb-2 px-1">
-                        <span className="text-sm font-semibold text-primary">Da Foquinha</span>
-                        <span className="text-xs text-muted-foreground">(já ativos)</span>
+                      <div className="flex items-center gap-2 mb-2 px-0.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">Da Foquinha</span>
+                        <span className="text-[10px] text-muted-foreground">(já ativos)</span>
                       </div>
                       <div className={cn("w-full", ds.groupGap)}>
                         {(["morning", "afternoon", "evening"] as Period[]).map((period) =>
@@ -441,7 +524,7 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
                               period={period}
                               habits={fGroups[period]}
                               selectedIds={selectedHabitIds}
-                              isAtLimit={isAtLimit}
+                              isAtLimit={false}
                               onToggle={toggleHabit}
                               showWeekendTime={activeTab === "weekend"}
                               ds={ds}
@@ -452,7 +535,7 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
                     </div>
                   );
                 })()}
-                {/* Section: New suggestions */}
+                {/* New suggestions */}
                 {(() => {
                   const newList = filteredHabits.filter((h: any) => !h._isExisting);
                   if (newList.length === 0) return null;
@@ -463,9 +546,10 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
                   }
                   return (
                     <div>
-                      <div className="flex items-center gap-2 mb-2 px-1 mt-3">
-                        <span className="text-sm font-semibold text-foreground">Sugestões novas</span>
-                        <span className="text-xs text-muted-foreground">(toque para adicionar)</span>
+                      <div className="flex items-center gap-2 mb-2 px-0.5 mt-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40 shrink-0" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Sugestões novas</span>
+                        <span className="text-[10px] text-muted-foreground/50">(toque para adicionar)</span>
                       </div>
                       <div className={cn("w-full", ds.groupGap)}>
                         {(["morning", "afternoon", "evening"] as Period[]).map((period) =>
@@ -475,7 +559,7 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
                               period={period}
                               habits={nGroups[period]}
                               selectedIds={selectedHabitIds}
-                              isAtLimit={isAtLimit}
+                              isAtLimit={false}
                               onToggle={toggleHabit}
                               showWeekendTime={activeTab === "weekend"}
                               ds={ds}
@@ -495,7 +579,7 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
                     period={period}
                     habits={groupedHabits[period]}
                     selectedIds={selectedHabitIds}
-                    isAtLimit={isAtLimit}
+                    isAtLimit={false}
                     onToggle={toggleHabit}
                     showWeekendTime={activeTab === "weekend"}
                     ds={ds}
@@ -507,6 +591,28 @@ export const S9RoutinePreview = memo(function S9RoutinePreview() {
         </motion.div>
       </div>
 
+      {/* ── CTA bar ── */}
+      <div
+        className="flex-shrink-0 flex items-center gap-3 px-0 py-3"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 12px)" }}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={prevStep}
+          onMouseDown={(e) => e.preventDefault()}
+          className="h-10 w-10 shrink-0"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <Button
+          onClick={handleConfirm}
+          disabled={selectedHabitIds.size === 0 || confirming}
+          className="flex-1 h-12 text-base font-semibold gap-2"
+        >
+          Confirmar minha rotina →
+        </Button>
+      </div>
     </div>
   );
 });

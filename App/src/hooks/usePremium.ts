@@ -6,6 +6,7 @@ interface PremiumProfile {
   premium_since: string | null;
   phone: string | null;
   has_completed_onboarding: boolean | null;
+  onboarding_completed_at: string | null;
 }
 
 export const usePremium = (userId?: string) => {
@@ -18,7 +19,7 @@ export const usePremium = (userId?: string) => {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("is_premium, premium_since, phone, has_completed_onboarding")
+        .select("is_premium, premium_since, phone, has_completed_onboarding, onboarding_completed_at")
         .eq("user_id", userId)
         .single();
 
@@ -72,6 +73,7 @@ export const usePremium = (userId?: string) => {
     isPremium: profileQuery.data?.is_premium ?? null,
     premiumSince: profileQuery.data?.premium_since ?? null,
     hasCompletedOnboarding: profileQuery.data?.has_completed_onboarding ?? null,
+    onboardingCompletedAt: profileQuery.data?.onboarding_completed_at ?? null,
     loading: profileQuery.isLoading,
     error: profileQuery.error,
     refresh: () => {

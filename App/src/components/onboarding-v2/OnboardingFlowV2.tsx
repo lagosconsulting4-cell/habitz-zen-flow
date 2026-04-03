@@ -39,7 +39,6 @@ const STEPS: StepConfig[] = [
   { id: 'welcome',         phase: 0 },
   { id: 'intro',           phase: 0 },
   { id: 'objective',       phase: 0 },
-  { id: 'pwa-soft',        phase: 0 },
   { id: 'wake-sleep',      phase: 1 },
   { id: 'weekend',         phase: 1 },
   { id: 'life-areas',      phase: 1 },
@@ -47,6 +46,7 @@ const STEPS: StepConfig[] = [
   { id: 'loading',         phase: 2 },
   { id: 'preview',         phase: 2 },
   { id: 'confirm',         phase: 2 },
+  { id: 'pwa-soft',        phase: 2 },
   { id: 'journeys-intro',  phase: 3 },
   { id: 'journey-select',  phase: 3 },
   { id: 'pwa-hard',        phase: 4, conditional: true },
@@ -75,6 +75,7 @@ const HIDE_BACK_ON = new Set([
 // Steps where bottom nav bar is hidden (step has its own CTA)
 const HIDE_NAV_ON = new Set([
   'welcome',
+  'preview',
   'confirm',
   'pwa-soft',
   'loading',

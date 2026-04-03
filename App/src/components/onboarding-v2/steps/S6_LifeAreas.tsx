@@ -26,12 +26,12 @@ export const S6LifeAreas = memo(function S6LifeAreas() {
           O que mais importa pra você agora?
         </h2>
         <p className="text-base text-muted-foreground mt-2">
-          Escolha as áreas que você quer trabalhar. Pode marcar mais de uma.
+          Além do seu objetivo, o que mais você quer trabalhar?
         </p>
       </motion.div>
 
       {/* Chips */}
-      <div className="flex-1 flex flex-col justify-center">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="grid grid-cols-2 gap-3 max-w-md mx-auto w-full">
           {LIFE_AREA_OPTIONS.map(({ value, label, Icon }, index) => {
             const isSelected = lifeAreas.includes(value);
@@ -82,7 +82,7 @@ export const S6LifeAreas = memo(function S6LifeAreas() {
           transition={{ delay: 0.5, duration: 0.4 }}
           className="text-sm text-muted-foreground/70 text-center mt-6"
         >
-          Suas escolhas definem os hábitos. Quanto mais honesto, melhor a rotina.
+          Quanto mais honesto, melhor a rotina.
         </motion.p>
       </div>
     </div>

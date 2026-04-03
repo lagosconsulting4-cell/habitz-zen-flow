@@ -23,11 +23,20 @@ const SELECTION_LIMITS: Record<string, number> = {
   already_have: 8,
 };
 
+const CHALLENGE_LABELS: Record<string, string> = {
+  procrastination: "sua dificuldade com procrastinação",
+  focus: "seus problemas de foco",
+  anxiety: "sua ansiedade",
+  tiredness: "sua falta de energia",
+  motivation: "sua motivação",
+  forgetfulness: "sua memória",
+};
+
 const BASE_MESSAGES = [
-  "Olhando o que você nos contou...",
-  "Encontrando os melhores momentos do dia...",
-  "Separando semana do fim de semana...",
-  null, // Dynamic — filled at render time
+  "Lendo suas respostas...",
+  "Encaixando hábitos no seu horário...",
+  null, // Dynamic — weekend or duration message
+  null, // Dynamic — challenge message
   null, // Dynamic — final message (Foquinha-aware)
 ];
 
@@ -104,11 +113,17 @@ export const S8LoadingRoutine = memo(function S8LoadingRoutine() {
 
   const name = quizData?.name || collectedName || "";
 
-  // Build messages with dynamic 4th entry
-  const objectiveLabel = OBJECTIVE_LABELS[confirmedObjective || ""] || "seu objetivo";
+  // Build messages with dynamic entries
+  const firstChallenge = quizData?.challenges?.[0];
+  const challengeLabel = firstChallenge ? CHALLENGE_LABELS[firstChallenge] : null;
   const messages = BASE_MESSAGES.map((m, i) => {
     if (m !== null) return m;
-    if (i === 3) return "Ajustando para o que você quer...";
+    if (i === 2) return weekendDiff !== "same"
+      ? "Ajustando para o seu fim de semana..."
+      : "Calculando o tempo certo para cada hábito...";
+    if (i === 3) return challengeLabel
+      ? `Levando em conta ${challengeLabel}...`
+      : "Ajustando para o que você quer...";
     // i === 4 — final message
     return hasFoquinhaData
       ? "Encontramos seus hábitos! Gerando sugestões complementares..."
@@ -216,9 +231,8 @@ export const S8LoadingRoutine = memo(function S8LoadingRoutine() {
         setSelectedHabitIds(autoSelected);
       } else {
         setGeneratedHabits(habits);
-
-        const limit = SELECTION_LIMITS[habitExperience ?? "tried"] || 6;
-        const autoSelected = new Set(habits.slice(0, limit).map((h) => h.id));
+        // Selecionar todos — a rotina vem pré-montada completa
+        const autoSelected = new Set(habits.map((h) => h.id));
         setSelectedHabitIds(autoSelected);
       }
 

@@ -171,30 +171,19 @@ export const S11JourneysIntro = memo(function S11JourneysIntro() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.4 }}
-            className="text-[13px] text-muted-foreground mt-1.5"
+            className="text-[15px] text-muted-foreground mt-2 leading-relaxed"
           >
-            Além da sua rotina diária, o Bora tem as Jornadas.
-          </motion.p>
-
-          {/* Bloco 1: copy explicativo */}
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, duration: 0.4, ease: "easeOut" }}
-            className="text-[15px] text-muted-foreground leading-relaxed"
-            style={{ marginTop: 14 }}
-          >
-            Missões de 30 dias com hábitos específicos para um objetivo. Um passo por dia.
+            Missões de 30 dias. Um passo por dia.
           </motion.p>
 
           {/* Bloco 2: frase de impacto */}
           <motion.p
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45, duration: 0.4, ease: "easeOut" }}
+            transition={{ delay: 0.4, duration: 0.4, ease: "easeOut" }}
             className="text-[15px] font-semibold text-foreground leading-relaxed mt-3"
           >
-            A rotina é o que você faz todos os dias. A Jornada é o que vai te levar pro outro nível.
+            A Jornada é o que vai te levar pro outro nível.
           </motion.p>
         </div>
       </div>

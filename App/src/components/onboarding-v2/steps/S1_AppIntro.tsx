@@ -11,8 +11,7 @@ const PROGRESS_TOTAL_PHASES = 5;
 const PHASE_0_FILL = 0.5;
 
 const PARAGRAPHS = [
-  "A maioria das pessoas tenta criar hábitos no improviso. Anota numa lista, tenta se lembrar, desiste em duas semanas.",
-  "O Bora funciona de outro jeito. A gente monta uma rotina real, feita para o seu dia, e vai do seu lado enquanto você executa.",
+  "Esqueça lista de tarefas e força de vontade. A gente monta uma rotina real, feita pro seu dia.",
   "Não é motivação. É estrutura.",
 ];
 

@@ -12,25 +12,25 @@ interface ExperienceOption {
 const EXPERIENCE_OPTIONS: ExperienceOption[] = [
   {
     value: "never",
-    title: "Nunca mantive nenhum de verdade",
-    description: "Sempre começo, mas não dura.",
+    title: "Estou começando do zero",
+    description: "Nunca mantive um hábito por muito tempo.",
   },
   {
     value: "tried",
-    title: "Já tentei, mas não chegou longe",
-    description: "Alguns funcionaram por um tempo.",
+    title: "Já tentei, mas não durou",
+    description: "Funcionou por um tempo, mas parou.",
   },
   {
     value: "already_have",
-    title: "Já tenho alguns, quero ir além",
-    description: "Quero melhorar o que já existe.",
+    title: "Já tenho hábitos e quero mais",
+    description: "Quero melhorar e expandir o que existe.",
   },
 ];
 
 const CONDITIONAL_COPY: Record<HabitExperience, string> = {
-  never: "Começamos com poucos hábitos. Consistência com 4 vale mais do que abandono com 10.",
-  tried: "A rotina foi montada para se sustentar nos dias ruins. Não só nos bons.",
-  already_have: "Construímos em cima do que funciona e adicionamos o que faltava.",
+  never: "Sua rotina terá 4 hábitos — quantidade certa para criar consistência sem sobrecarregar.",
+  tried: "Sua rotina terá 6 hábitos, montados para se sustentar nos dias ruins também.",
+  already_have: "Sua rotina terá até 8 hábitos, construídos em cima do que já funciona.",
 };
 
 export const S7HabitExperience = memo(function S7HabitExperience() {
@@ -51,7 +51,7 @@ export const S7HabitExperience = memo(function S7HabitExperience() {
       </motion.div>
 
       {/* Cards */}
-      <div className="flex-1 flex flex-col justify-center">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="space-y-3 max-w-md mx-auto w-full">
           {EXPERIENCE_OPTIONS.map((option, index) => (
             <motion.div
@@ -71,16 +71,6 @@ export const S7HabitExperience = memo(function S7HabitExperience() {
             </motion.div>
           ))}
         </div>
-
-        {/* Static microcopy */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.4 }}
-          className="text-sm text-muted-foreground/70 text-center mt-4"
-        >
-          Não existe resposta errada. Isso só muda como a gente monta sua rotina.
-        </motion.p>
 
         {/* Conditional microcopy */}
         <AnimatePresence mode="wait">

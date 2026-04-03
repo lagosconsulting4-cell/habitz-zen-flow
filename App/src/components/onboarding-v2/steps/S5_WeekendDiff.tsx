@@ -12,25 +12,20 @@ interface WeekendOption {
 const WEEKEND_OPTIONS: WeekendOption[] = [
   {
     value: "same",
-    title: "Bastante parecido",
-    description: "Minha rotina não muda muito.",
+    title: "Mais ou menos igual",
+    description: "Acordo no mesmo horário, faço coisas parecidas.",
   },
   {
     value: "different",
     title: "Bem diferente",
-    description: "Tenho muito mais tempo livre.",
-  },
-  {
-    value: "varies",
-    title: "Depende muito",
-    description: "Às vezes sim, às vezes não.",
+    description: "Tenho mais tempo livre e liberdade de horário.",
   },
 ];
 
 const CONDITIONAL_COPY: Record<WeekendDiff, string> = {
-  same: "Perfeito. Mesmos hábitos todos os dias. Mais simples de manter.",
-  different: "Ótimo. Vamos montar uma rotina diferente para cada período. Mais leve no fim de semana, mais focada durante a semana.",
-  varies: "Ótimo. Vamos montar uma rotina diferente para cada período. Mais leve no fim de semana, mais focada durante a semana.",
+  same: "Mesmos hábitos todos os dias. Mais simples de manter.",
+  different: "Rotina diferente para cada período. Mais leve no fim de semana.",
+  varies: "Vamos adaptar conforme o dia.",
 };
 
 export const S5WeekendDiff = memo(function S5WeekendDiff() {
@@ -51,7 +46,7 @@ export const S5WeekendDiff = memo(function S5WeekendDiff() {
       </motion.div>
 
       {/* Cards */}
-      <div className="flex-1 flex flex-col justify-center">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="space-y-3 max-w-md mx-auto w-full">
           {WEEKEND_OPTIONS.map((option, index) => (
             <motion.div

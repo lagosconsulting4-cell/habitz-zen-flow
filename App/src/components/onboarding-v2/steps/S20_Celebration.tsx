@@ -28,6 +28,7 @@ export const S20Celebration = memo(function S20Celebration() {
   }, [shouldReduceMotion]);
 
   const name = collectedName || quizData?.name || "você";
+  const yearsPromising = quizData?.years_promising || null;
 
   return (
     <div className="h-[100dvh] relative bg-black overflow-hidden flex flex-col">
@@ -68,8 +69,8 @@ export const S20Celebration = memo(function S20Celebration() {
           transition={{ delay: 0.2, duration: 0.4 }}
           style={{ fontSize: 34, fontWeight: 700, color: "#fff", marginBottom: 10, lineHeight: 1.15 }}
         >
-          Tudo{" "}
-          <span style={{ color: "hsl(var(--primary))" }}>pronto</span>
+          Sua rotina está{" "}
+          <span style={{ color: "hsl(var(--primary))" }}>no ar</span>
           , {name}.
         </motion.h1>
 
@@ -77,9 +78,12 @@ export const S20Celebration = memo(function S20Celebration() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.4 }}
-          style={{ fontSize: 16, color: "rgba(255,255,255,0.72)", maxWidth: 280, lineHeight: 1.55 }}
+          style={{ fontSize: 16, color: "rgba(255,255,255,0.72)", maxWidth: 300, lineHeight: 1.55 }}
         >
-          A parte difícil foi essa: decidir começar.<br />O resto vem um dia de cada vez.
+          {yearsPromising && yearsPromising !== "menos de 1 ano"
+            ? <>Faz {yearsPromising} que você busca isso.<br />Agora você tem um sistema. Use-o um dia de cada vez.</>
+            : <>Você tem um sistema agora.<br />Use-o um dia de cada vez.</>
+          }
         </motion.p>
       </div>
 
@@ -103,7 +107,7 @@ export const S20Celebration = memo(function S20Celebration() {
               Salvando...
             </>
           ) : (
-            "Conhecer o App"
+            "Ver minha rotina"
           )}
         </Button>
       </motion.div>

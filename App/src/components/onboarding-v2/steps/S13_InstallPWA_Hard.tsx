@@ -85,7 +85,7 @@ export const S13InstallPWAHard = memo(function S13InstallPWAHard() {
           transition={{ duration: 0.4 }}
           className="text-2xl font-bold text-foreground mb-4 text-center"
         >
-          Você ainda não instalou o app.
+          Instale o app para receber seus lembretes.
         </motion.h2>
 
         {/* Copy — more direct/urgent than S3 */}
@@ -95,7 +95,7 @@ export const S13InstallPWAHard = memo(function S13InstallPWAHard() {
           transition={{ delay: 0.15, duration: 0.4 }}
           className="text-base text-muted-foreground leading-relaxed mb-2 text-center"
         >
-          Sem a instalação, você não vai receber lembretes. E sem lembretes, a chance de esquecer os hábitos nos primeiros dias é alta.
+          Sua rotina está pronta. Para receber o aviso na hora certa de cada hábito, instale o app na sua tela inicial.
         </motion.p>
 
         <motion.p

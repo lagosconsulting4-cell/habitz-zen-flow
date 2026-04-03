@@ -19,6 +19,7 @@ import { GemToast, AchievementToast } from "@/components/gamification";
 import { FreezeUsedToast } from "@/components/gamification/FreezeUsedToast";
 import { FreezeBadge } from "@/components/gamification/FreezeBadge";
 import { useHabits } from "@/hooks/useHabits";
+import { usePremium } from "@/hooks/usePremium";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/integrations/supabase/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,6 +48,15 @@ const Dashboard = () => {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const { user } = useAuth();
+  const { onboardingCompletedAt } = usePremium(user?.id);
+
+  // Detecta se é o primeiro dia pós-onboarding (últimas 48h)
+  const isFirstDayAfterOnboarding = useMemo(() => {
+    if (!onboardingCompletedAt) return false;
+    const completedAt = new Date(onboardingCompletedAt).getTime();
+    const hoursSince = (Date.now() - completedAt) / (1000 * 60 * 60);
+    return hoursSince < 48;
+  }, [onboardingCompletedAt]);
   const { awardHabitXP, awardStreakBonus, awardPerfectDayBonus, awardJourneyDayGems, awardJourneyPhaseGems, awardJourneyCompleteGems, unlockAchievement, isAchievementUnlocked, getAchievementProgress, updateStreak, freezeUsedToday, progress: userProgress } = useGamification(user?.id);
   const isGamificationEnabled = !hideGamification;
   const queryClient = useQueryClient();
@@ -768,57 +778,111 @@ const Dashboard = () => {
         style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
         {todayHabits.length === 0 ? (
-          /* Empty State Premium */
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="flex flex-col items-center justify-center py-12 md:py-16"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.3 }}
-              className="mb-6"
-            >
-              <div className="relative w-20 h-20 rounded-full flex items-center justify-center bg-primary/10 dark:bg-primary/15">
-                <Sparkles size={32} strokeWidth={1.5} className="text-primary" />
-              </div>
-            </motion.div>
+            {isFirstDayAfterOnboarding ? (
+              /* ── Day-1 state: rotina criada, sem hábitos hoje ── */
+              <>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.3 }}
+                  className="mb-6"
+                >
+                  <div className="relative w-20 h-20 rounded-full flex items-center justify-center bg-primary/15">
+                    <Sparkles size={30} strokeWidth={1.5} className="text-primary" />
+                    {/* Pulse ring */}
+                    <div className="absolute inset-0 rounded-full border-2 border-primary/30 animate-ping" style={{ animationDuration: "2.5s" }} />
+                  </div>
+                </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.3 }}
-              className="text-center mb-8"
-            >
-              <h3 className="text-xl font-bold mb-2 text-foreground">
-                Comece sua transformação
-              </h3>
-              <p className="text-sm text-muted-foreground max-w-[260px]">
-                Escolha uma jornada e tenha hábitos prontos no seu dashboard
-              </p>
-            </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                  className="text-center mb-8 px-4"
+                >
+                  <h3 className="text-xl font-bold mb-2 text-foreground">
+                    Sua rotina está pronta!
+                  </h3>
+                  <p className="text-sm text-muted-foreground max-w-[280px] leading-relaxed">
+                    Hoje não tem hábitos agendados — mas amanhã começa. Você também pode criar um hábito avulso para hoje.
+                  </p>
+                </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.3 }}
-              className="flex flex-col items-center gap-3"
-            >
-              <Button
-                onClick={() => navigate("/journeys")}
-                className="h-14 px-8 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base shadow-lg shadow-primary/25 transition-all hover:scale-105 active:scale-95"
-              >
-                Explorar Jornadas
-              </Button>
-              <button
-                onClick={() => navigate("/create")}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                ou criar meu próprio hábito
-              </button>
-            </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.3 }}
+                  className="flex flex-col items-center gap-3"
+                >
+                  <Button
+                    onClick={() => navigate("/create")}
+                    className="h-13 px-8 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base shadow-lg shadow-primary/20 transition-all"
+                  >
+                    Criar hábito para hoje
+                  </Button>
+                  <button
+                    onClick={() => navigate("/journeys")}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    ou explorar jornadas
+                  </button>
+                </motion.div>
+              </>
+            ) : (
+              /* ── Empty state padrão ── */
+              <>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.3 }}
+                  className="mb-6"
+                >
+                  <div className="relative w-20 h-20 rounded-full flex items-center justify-center bg-primary/10 dark:bg-primary/15">
+                    <Sparkles size={32} strokeWidth={1.5} className="text-primary" />
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                  className="text-center mb-8"
+                >
+                  <h3 className="text-xl font-bold mb-2 text-foreground">
+                    Comece sua transformação
+                  </h3>
+                  <p className="text-sm text-muted-foreground max-w-[260px]">
+                    Escolha uma jornada e tenha hábitos prontos no seu dashboard
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.3 }}
+                  className="flex flex-col items-center gap-3"
+                >
+                  <Button
+                    onClick={() => navigate("/journeys")}
+                    className="h-14 px-8 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base shadow-lg shadow-primary/25 transition-all hover:scale-105 active:scale-95"
+                  >
+                    Explorar Jornadas
+                  </Button>
+                  <button
+                    onClick={() => navigate("/create")}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    ou criar meu próprio hábito
+                  </button>
+                </motion.div>
+              </>
+            )}
           </motion.div>
         ) : (
           <>
