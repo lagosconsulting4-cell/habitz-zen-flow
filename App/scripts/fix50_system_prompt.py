@@ -22,8 +22,8 @@ OLD_TEXT = '  - Dias especificos ("seg, qua, sex"): frequency_type:"fixed_days",
 
 NEW_TEXT = '''  - Dias especificos: frequency_type:"fixed_days", days_of_week conforme MAPEAMENTO OBRIGATORIO abaixo.
   MAPEAMENTO DIAS (NUNCA erre): 0=Domingo, 1=Segunda, 2=Terca, 3=Quarta, 4=Quinta, 5=Sexta, 6=Sabado
-  EXEMPLOS: "segunda"→[1], "terca"→[2], "quarta"→[3], "quinta"→[4], "sexta"→[5], "sabado"→[6], "domingo"→[0]
-  "seg a sex"→[1,2,3,4,5] | "fim de semana"→[0,6] | "seg,qua,sex"→[1,3,5] | "todo dia"→[0,1,2,3,4,5,6]
+  EXEMPLOS: "segunda"->[1], "terca"->[2], "quarta"->[3], "quinta"->[4], "sexta"->[5], "sabado"->[6], "domingo"->[0]
+  "seg a sex"->[1,2,3,4,5] | "fim de semana"->[0,6] | "seg,qua,sex"->[1,3,5] | "todo dia"->[0,1,2,3,4,5,6]
   NUNCA use 0 para segunda! 0=DOMINGO.
 
   DUPLICATAS - REGRA ESTRITA:
