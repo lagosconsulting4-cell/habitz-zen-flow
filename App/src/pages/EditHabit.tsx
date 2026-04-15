@@ -191,13 +191,6 @@ const EditHabit = () => {
     );
   };
 
-  // Scroll to top when step changes
-  useEffect(() => {
-    if (contentScrollRef.current) {
-      contentScrollRef.current.scrollTop = 0;
-    }
-    setIsScrolled(false);
-  }, [step]);
 
   // Handle scroll for header opacity
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
