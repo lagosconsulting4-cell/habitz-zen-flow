@@ -2,10 +2,8 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
-  X,
   Target,
   Calendar,
-  Bell,
   Clock,
   Loader2,
   Sun,
@@ -13,15 +11,28 @@ import {
   Moon,
   Plus,
   Pencil,
-  ArrowRight,
   Check,
+  MoreVertical,
+  Archive,
+  ArchiveRestore,
+  Trash2,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { useTheme } from "@/hooks/useTheme";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useHabits, Habit } from "@/hooks/useHabits";
 import { getBRTDateString } from "@/utils/date";
@@ -41,6 +52,13 @@ import {
 import { getHabitFormTheme } from "@/theme/habitFormTheme";
 import { DrumColumn, HOURS, MINUTES } from "@/components/ui/time-drum-picker";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const periods: Array<{ id: "morning" | "afternoon" | "evening"; name: string; icon: React.ReactNode }> = [
   { id: "morning", name: "Manhã", icon: <Sun className="h-5 w-5" /> },
@@ -79,7 +97,6 @@ const categories = [
   { id: "outro", label: "Outro" },
 ];
 
-type Step = "details" | "confirm";
 type FrequencyType = "daily" | "fixed_days" | "once";
 
 const UNIFIED_COLOR = "#A3E635";
@@ -88,7 +105,7 @@ const EditHabit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { habits, updateHabit, loading: habitsLoading } = useHabits();
+  const { habits, updateHabit, archiveHabit, restoreHabit, deleteHabit, loading: habitsLoading } = useHabits();
   const { prefs } = useAppPreferences();
   const { resolvedTheme } = useTheme();
   const { isSupported: pushSupported, isSubscribed: pushSubscribed, subscribe: pushSubscribe, isLoading: pushLoading } = usePushNotifications();
@@ -110,7 +127,7 @@ const EditHabit = () => {
   const [timesPerDay, setTimesPerDay] = useState<number>(1);
   const [showCustomTimes, setShowCustomTimes] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [step, setStep] = useState<Step>("details");
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [habitLoaded, setHabitLoaded] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const contentScrollRef = useRef<HTMLDivElement>(null);
@@ -282,6 +299,22 @@ const EditHabit = () => {
     }
   };
 
+  const handleArchiveToggle = async () => {
+    if (!habit) return;
+    if (habit.is_active) {
+      await archiveHabit(habit.id);
+    } else {
+      await restoreHabit(habit.id);
+    }
+    navigate("/habits");
+  };
+
+  const handleDelete = async () => {
+    if (!habit) return;
+    await deleteHabit(habit.id);
+    navigate("/habits");
+  };
+
   const renderFrequencyFields = () => {
     if (frequencyType === "once") {
       return (
@@ -343,37 +376,6 @@ const EditHabit = () => {
     return null;
   };
 
-  const getFrequencyText = () => {
-    if (frequencyType === "daily") return "Todos os dias";
-    if (frequencyType === "once") {
-      if (!dueDate) return "Uma vez";
-      return new Date(dueDate + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" });
-    }
-    if (frequencyType === "fixed_days") {
-      const sortedDays = [...selectedDays].sort((a, b) => {
-        const order = [1, 2, 3, 4, 5, 6, 0];
-        return order.indexOf(a) - order.indexOf(b);
-      });
-      return sortedDays.map((d) => weekdays.find((w) => w.id === d)?.label).join(", ");
-    }
-    return "Personalizado";
-  };
-
-  const getGoalText = () => {
-    if (!goalValue || goalValue <= 0) return "Completar";
-    const unitLabels: Record<string, string> = {
-      none: "",
-      steps: "passos",
-      minutes: "minutos",
-      km: "km",
-      hours: "horas",
-      pages: "páginas",
-      liters: "litros",
-      custom: "unidades",
-    };
-    return `${goalValue} ${unitLabels[unit] || ""}`.trim();
-  };
-
   // Loading state
   if (habitsLoading || !habitLoaded) {
     return (
@@ -404,35 +406,42 @@ const EditHabit = () => {
 
   const HeaderBar = (
     <div className={`flex items-center justify-between px-4 py-4 border-b ${themeColors.headerBorder}`}>
-      {step === "confirm" ? (
-        <button
-          onClick={() => setStep("details")}
-          className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
-          aria-label="Voltar"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-      ) : (
-        <button
-          onClick={() => navigate("/habits")}
-          className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
-          aria-label="Voltar"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-      )}
-      <div className="text-center">
-        <p className={`text-base font-semibold tracking-wide ${themeColors.headerText}`}>
-          {step === "details" ? "Editar Tarefa" : "Confirmar Alterações"}
-        </p>
-      </div>
       <button
         onClick={() => navigate("/habits")}
         className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
-        aria-label="Fechar"
+        aria-label="Voltar"
       >
-        <X className="h-5 w-5" />
+        <ArrowLeft className="h-5 w-5" />
       </button>
+      <p className={`text-base font-semibold tracking-wide ${themeColors.headerText}`}>
+        Editar Tarefa
+      </p>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${themeColors.headerIcon}`}
+            aria-label="Mais opções"
+          >
+            <MoreVertical className="h-5 w-5" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={handleArchiveToggle}>
+            {habit?.is_active ? (
+              <><Archive className="mr-2 h-4 w-4" /> Arquivar Hábito</>
+            ) : (
+              <><ArchiveRestore className="mr-2 h-4 w-4" /> Reativar Hábito</>
+            )}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => setShowDeleteDialog(true)}
+            className="text-red-500 focus:text-red-500"
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> Excluir Hábito
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 
@@ -810,163 +819,6 @@ const EditHabit = () => {
     </motion.div>
   );
 
-  const ConfirmStep = (
-    <motion.div
-      key="confirm"
-      initial={{ opacity: 0, x: 16 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -16 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-6 pb-6 pt-6"
-    >
-      {/* Hero Section */}
-      <div className="flex flex-col items-center gap-5 px-6">
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.1, duration: 0.3 }}
-        >
-          <HeroCircle
-            iconKey={selectedIconKey as HabitIconKey | null}
-            color={isDarkMode ? UNIFIED_COLOR : "#FFFFFF"}
-            isAutoTask={false}
-            size="lg"
-            isDarkMode={isDarkMode}
-          />
-        </motion.div>
-
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.15, duration: 0.3 }}
-          className="text-center"
-        >
-          <h2 className={`text-2xl font-bold uppercase tracking-wide ${themeColors.bodyText}`}>
-            {habitName}
-          </h2>
-          <p className={`mt-1 text-sm ${themeColors.bodyTextSecondary}`}>
-            {categories.find((c) => c.id === selectedCategory)?.label || selectedCategory}
-          </p>
-        </motion.div>
-      </div>
-
-      {/* Summary Cards */}
-      <motion.div
-        initial={{ y: 10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.25, duration: 0.3 }}
-        className="space-y-3 px-4"
-      >
-        {/* Goal Summary */}
-        <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
-          <div className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
-              <Target className={`h-5 w-5 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Meta
-              </p>
-              <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
-                {getGoalText()}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Frequency Summary */}
-        <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
-          <div className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
-              <Calendar className={`h-5 w-5 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Frequência
-              </p>
-              <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
-                {getFrequencyText()}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Times Per Day Summary */}
-        {timesPerDay > 1 && (
-          <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
-            <div className="flex items-center gap-3">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
-                <Target className={`h-5 w-5 ${themeColors.iconColor}`} />
-              </div>
-              <div>
-                <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                  Vezes por Dia
-                </p>
-                <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
-                  {timesPerDay} vezes
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Notifications Summary */}
-        <div className={`flex items-center justify-between rounded-xl border p-4 ${themeColors.card}`}>
-          <div className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeColors.iconBg}`}>
-              <Bell className={`h-5 w-5 ${themeColors.iconColor}`} />
-            </div>
-            <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${themeColors.sectionTitle}`}>
-                Notificações
-              </p>
-              <p className={`text-sm font-semibold ${themeColors.bodyText}`}>
-                {notificationsEnabled ? `Ativadas • ${soundOptions.find((s) => s.value === notificationSound)?.label ?? "Padrão"}` : "Desativadas"}
-              </p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Edit Button */}
-      <motion.div
-        initial={{ y: 10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.3 }}
-        className="px-4"
-      >
-        <button
-          onClick={() => setStep("details")}
-          className={`w-full rounded-xl py-3 text-sm font-semibold transition-all duration-200 ${themeColors.buttonInactive}`}
-        >
-          Editar configurações
-        </button>
-      </motion.div>
-
-      {/* Save Button */}
-      <motion.div
-        initial={{ y: 10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.35, duration: 0.3 }}
-        className="px-4 pt-2"
-        style={{ paddingBottom: 'max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom)))' }}
-      >
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="h-14 w-full rounded-xl text-base font-bold uppercase tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{
-            backgroundColor: isDarkMode ? UNIFIED_COLOR : "#FFFFFF",
-            color: isDarkMode ? "#000000" : "#65A30D",
-            boxShadow: isDarkMode ? "0 4px 24px rgba(163, 230, 53, 0.3)" : "0 4px 24px rgba(255, 255, 255, 0.3)",
-          }}
-        >
-          {isSaving ? "SALVANDO..." : "SALVAR ALTERAÇÕES"}
-        </button>
-      </motion.div>
-    </motion.div>
-  );
-
   return (
     <div className={`min-h-screen flex flex-col ${themeColors.background || 'bg-background'}`}>
       {/* Fixed header - z-20 and always opaque background to prevent content overlap */}
@@ -986,11 +838,28 @@ const EditHabit = () => {
         className="flex-1 px-4 py-6 overflow-y-auto"
         style={{ paddingTop: 'calc(7rem + env(safe-area-inset-top))' }}
       >
-        <AnimatePresence mode="wait">
-          {step === "details" && DetailsStep}
-          {step === "confirm" && ConfirmStep}
-        </AnimatePresence>
+        {DetailsStep}
       </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir hábito?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Essa ação não pode ser desfeita. O hábito e todo seu histórico serão removidos permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
