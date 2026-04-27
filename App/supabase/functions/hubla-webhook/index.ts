@@ -461,13 +461,11 @@ serve(async (req) => {
             break;
           }
         } else {
-          // Update phone for existing user if not set
           if (userData.phone) {
             await supabaseAdmin
               .from("profiles")
               .update({ phone: userData.phone })
-              .eq("user_id", userId)
-              .is("phone", null);
+              .eq("user_id", userId);
           }
         }
 
@@ -800,8 +798,7 @@ serve(async (req) => {
             await supabaseAdmin
               .from("profiles")
               .update({ phone: userData.phone })
-              .eq("user_id", userId)
-              .is("phone", null);
+              .eq("user_id", userId);
           }
         }
 
@@ -1064,8 +1061,7 @@ serve(async (req) => {
           await supabaseAdmin
             .from("profiles")
             .update({ phone })
-            .eq("user_id", userId)
-            .is("phone", null);
+            .eq("user_id", userId);
         }
 
         // Upsert purchase — use transactionId:groupId for uniqueness

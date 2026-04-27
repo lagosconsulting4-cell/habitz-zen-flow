@@ -165,6 +165,46 @@ const extractPaymentReference = (payload: JsonRecord): string | null => {
   return null;
 };
 
+const extractCustomerPhone = (payload: JsonRecord): string | null => {
+  const directKeys = ["phone", "customer_phone", "cliente_telefone", "buyer_phone", "telefone", "celular", "whatsapp", "mobile_phone"];
+  for (const key of directKeys) {
+    const candidate = payload[key];
+    if (typeof candidate === "string" && candidate.trim() !== "") {
+      return candidate.trim();
+    }
+    if (typeof candidate === "number") {
+      return String(candidate);
+    }
+  }
+
+  const nestedKeys = ["customer", "buyer", "cliente", "usuario", "dados_cliente"];
+  for (const key of nestedKeys) {
+    const nested = ensureRecord(payload[key]);
+    if (nested) {
+      const phone = extractCustomerPhone(nested);
+      if (phone) {
+        return phone;
+      }
+    }
+  }
+
+  const data = ensureRecord(payload["data"]);
+  if (data) {
+    const phone = extractCustomerPhone(data);
+    if (phone) {
+      return phone;
+    }
+  }
+
+  return null;
+};
+
+const normalizePhone = (raw: string | null): string | null => {
+  if (!raw) return null;
+  const digits = raw.replace(/\D/g, "");
+  return digits.length >= 10 ? digits : null;
+};
+
 const mapStatus = (eventName: string): PurchaseStatus => {
   if (!eventName) {
     return "open";
@@ -261,6 +301,7 @@ serve(async (req) => {
     const paymentReference = extractPaymentReference(payload);
     const providerSessionId = sessionId ?? paymentReference ?? `kiwify-${crypto.randomUUID()}`;
     const providerPaymentIntent = paymentReference ?? null;
+    const phone = normalizePhone(extractCustomerPhone(payload));
 
     const { error: pendingErr } = await supabaseAdmin
       .from("pending_purchases")
@@ -273,6 +314,7 @@ serve(async (req) => {
           amount_cents: amountCents,
           currency,
           status,
+          phone,
         },
         { onConflict: "provider_session_id" }
       );

@@ -401,13 +401,11 @@ serve(async (req) => {
             console.log(`✅ User account created from checkout for ${customerEmail}`);
           } else {
             console.log(`✅ Found existing user for ${customerEmail}`);
-            // Update phone if available and profile doesn't have one yet
             if (customerPhone && userId) {
               const { error: phoneError } = await supabaseAdmin
                 .from("profiles")
                 .update({ phone: customerPhone })
-                .eq("user_id", userId)
-                .is("phone", null);
+                .eq("user_id", userId);
               if (!phoneError) {
                 console.log(`📱 Phone updated for existing user: ${userId}`);
               }
@@ -502,12 +500,10 @@ serve(async (req) => {
 
           console.log(`✅ User account created automatically for ${customerEmail}`);
         } else if (customerPhone) {
-          // User already existed — update phone if profile doesn't have one yet
           const { error: phoneError } = await supabaseAdmin
             .from("profiles")
             .update({ phone: customerPhone })
-            .eq("user_id", userId)
-            .is("phone", null);
+            .eq("user_id", userId);
           if (!phoneError) {
             console.log(`📱 Phone updated for existing user: ${userId}`);
           }
