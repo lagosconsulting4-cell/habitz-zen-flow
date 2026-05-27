@@ -11,6 +11,11 @@
       "permanent": false
     },
     {
+      "source": "/thor",
+      "destination": "https://apps.apple.com/us/app/thor-finance-pal/id6772835632",
+      "permanent": false
+    },
+    {
       "source": "/daniel",
       "destination": "/tiktok?v=daniel.almeidaaaa",
       "permanent": false
