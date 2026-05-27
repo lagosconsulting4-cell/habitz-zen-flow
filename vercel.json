@@ -6,7 +6,7 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/henrique",
+      "source": "/bruno",
       "destination": "/tiktok?v=henrique.bora",
       "permanent": false
     },
