@@ -12,16 +12,16 @@
     rel="stylesheet" />
   <style>
     :root {
-      --bg: #ffffff;
-      --text: #111111;
-      --muted: #6b7280;
       --accent: #1f3d2b;
       --accent-soft: #e8f0ea;
+      --text: #111111;
+      --muted: #6b7280;
       --line: #e5e7eb;
+      --bg: #ffffff;
     }
     * { box-sizing: border-box; }
+    html, body { margin: 0; }
     body {
-      margin: 0;
       font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
@@ -31,21 +31,42 @@
       justify-content: center;
       padding: 24px;
     }
-    .card {
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
+
+    /* Seta animada apontando pros 3 pontinhos (canto superior direito) */
+    .arrow-hint {
+      position: fixed;
+      top: 8px;
+      right: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: var(--accent);
+      z-index: 10;
+      animation: bounce 1.2s ease-in-out infinite;
+      pointer-events: none;
     }
+    .arrow-hint .dots { font-size: 26px; line-height: 1; }
+    .arrow-hint .lbl { font-size: 11px; font-weight: 600; max-width: 120px; text-align: center; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .card { width: 100%; max-width: 420px; text-align: center; }
     .logo {
-      width: 96px; height: 96px;
+      width: 104px; height: 104px;
       margin: 0 auto 20px;
+      border-radius: 24px;
       display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+      background: var(--accent-soft);
     }
-    .logo img { width: 100%; height: 100%; object-fit: contain; }
-    h1 { font-size: 26px; font-weight: 700; margin: 0 0 24px; color: var(--accent); }
-    .lead { font-size: 18px; font-weight: 600; line-height: 1.4; margin: 0 0 28px; }
-    .steps { text-align: left; margin: 0 0 28px; padding: 0; list-style: none; }
-    .step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
+    .logo img { width: 100%; height: 100%; object-fit: cover; }
+    h1 { font-size: 26px; font-weight: 700; margin: 0 0 22px; color: var(--accent); }
+    .lead { font-size: 17px; font-weight: 600; line-height: 1.4; margin: 0 0 26px; }
+    .steps { text-align: left; margin: 0 0 26px; padding: 0; list-style: none; }
+    .step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
     .num {
       flex: none; width: 28px; height: 28px; border-radius: 50%;
       background: var(--accent-soft); color: var(--accent);
@@ -54,7 +75,7 @@
     }
     .step-text { font-size: 16px; line-height: 1.4; padding-top: 3px; }
     .step-text b { color: var(--accent); }
-    .divider { height: 1px; background: var(--line); margin: 24px 0; }
+    .divider { height: 1px; background: var(--line); margin: 22px 0; }
     .btn {
       display: flex; align-items: center; justify-content: center; gap: 10px;
       width: 100%; padding: 16px; border: none; border-radius: 999px;
@@ -72,6 +93,11 @@
 </head>
 
 <body>
+  <div class="arrow-hint">
+    <div class="dots">⋯ ↗</div>
+    <div class="lbl">toque aqui</div>
+  </div>
+
   <main class="card">
     <div class="logo" id="logo"></div>
     <h1 id="title">Carregando…</h1>
@@ -93,31 +119,62 @@
 
   <script>
     (function () {
-      // Catálogo: banner -> destino + nome. Preserva UTMs vindos do /tiktok.
+      // Catálogo por produto: destino + nome + tema (cor) + logo.
       var DEST = {
-        foquinha: { name: "Foquinha AÍ", url: "https://www.foquinhaai.life" },
-        thor: { name: "Thor — Amigo Financeiro", url: "https://www.meuthor.com.br" },
-        bora: { name: "Bora", url: "https://habitz.life/bora" },
+        foquinha: {
+          name: "Foquinha AÍ",
+          url: "https://www.foquinhaai.life",
+          accent: "#e8732e", accentSoft: "#fdeee2",
+          logo: "/tiktok/assets/foquinha_sm.png",
+        },
+        thor: {
+          // Thor vai DIRETO pra App Store (decisão do dono).
+          name: "Thor — Amigo Financeiro",
+          url: "https://apps.apple.com/us/app/thor-finance-pal/id6772835632",
+          accent: "#101828", accentSoft: "#e6e9ef",
+          logo: "/tiktok/assets/thor_sm.png",
+        },
+        bora: {
+          name: "Bora",
+          url: "https://habitz.life/bora",
+          accent: "#1f3d2b", accentSoft: "#e8f0ea",
+          logo: "/tiktok/assets/bora_sm.png",
+        },
       };
 
       var params = new URLSearchParams(window.location.search);
       var key = params.get("b") || "bora";
       var d = DEST[key] || DEST.bora;
 
-      // monta destino com UTMs (repassa os que vieram)
+      // tema
+      document.documentElement.style.setProperty("--accent", d.accent);
+      document.documentElement.style.setProperty("--accent-soft", d.accentSoft);
+      document.title = d.name;
+
+      // logo
+      var logoEl = document.getElementById("logo");
+      var img = document.createElement("img");
+      img.src = d.logo; img.alt = d.name;
+      img.onerror = function () { logoEl.textContent = d.name.charAt(0); };
+      logoEl.appendChild(img);
+
+      // destino com UTMs (App Store ignora utm, mas LP/site usam)
       var dest = new URL(d.url);
-      ["utm_source", "utm_medium", "utm_content", "utm_campaign", "utm_term", "v"].forEach(function (p) {
-        var val = params.get(p);
-        if (val) dest.searchParams.set(p === "v" ? "utm_content" : p, val);
-      });
-      // garante origem tiktok
-      if (!dest.searchParams.get("utm_source")) dest.searchParams.set("utm_source", "tiktok");
-      if (!dest.searchParams.get("utm_medium")) dest.searchParams.set("utm_medium", "organic");
+      var isStore = dest.hostname.indexOf("apps.apple.com") === 0 || dest.hostname.indexOf("play.google") >= 0;
+      if (!isStore) {
+        ["utm_source", "utm_medium", "utm_content", "utm_campaign", "utm_term"].forEach(function (p) {
+          var val = params.get(p);
+          if (val) dest.searchParams.set(p, val);
+        });
+        var v = params.get("v");
+        if (v && !dest.searchParams.get("utm_content")) dest.searchParams.set("utm_content", v);
+        if (!dest.searchParams.get("utm_source")) dest.searchParams.set("utm_source", "tiktok");
+        if (!dest.searchParams.get("utm_medium")) dest.searchParams.set("utm_medium", "organic");
+      }
       var destUrl = dest.href;
 
       document.getElementById("title").textContent = d.name;
-      var openBtn = document.getElementById("openBtn");
-      openBtn.href = destUrl;
+      document.getElementById("openBtn").href = destUrl;
 
       var copyBtn = document.getElementById("copyBtn");
       copyBtn.addEventListener("click", function () {
