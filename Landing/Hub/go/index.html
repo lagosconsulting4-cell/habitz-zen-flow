@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Abrir no navegador</title>
+  <meta name="description" content="Abra no seu navegador para continuar." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #111111;
+      --muted: #6b7280;
+      --accent: #1f3d2b;
+      --accent-soft: #e8f0ea;
+      --line: #e5e7eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+    .logo {
+      width: 96px; height: 96px;
+      margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo img { width: 100%; height: 100%; object-fit: contain; }
+    h1 { font-size: 26px; font-weight: 700; margin: 0 0 24px; color: var(--accent); }
+    .lead { font-size: 18px; font-weight: 600; line-height: 1.4; margin: 0 0 28px; }
+    .steps { text-align: left; margin: 0 0 28px; padding: 0; list-style: none; }
+    .step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
+    .num {
+      flex: none; width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent-soft); color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 14px;
+    }
+    .step-text { font-size: 16px; line-height: 1.4; padding-top: 3px; }
+    .step-text b { color: var(--accent); }
+    .divider { height: 1px; background: var(--line); margin: 24px 0; }
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 16px; border: none; border-radius: 999px;
+      background: var(--accent); color: #fff; font-size: 16px; font-weight: 600;
+      font-family: inherit; cursor: pointer; text-decoration: none;
+    }
+    .copy {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 16px; background: none; border: none; color: var(--muted);
+      font-size: 15px; font-family: inherit; cursor: pointer;
+    }
+    .copy.done { color: var(--accent); }
+  </style>
+  <script async src="https://cdn.utmify.com.br/scripts/utms/latest.js"></script>
+</head>
+
+<body>
+  <main class="card">
+    <div class="logo" id="logo"></div>
+    <h1 id="title">Carregando…</h1>
+    <p class="lead">Para acessar, siga estes dois passos:</p>
+    <ul class="steps">
+      <li class="step">
+        <span class="num">1</span>
+        <span class="step-text">Toque em <b>⋯ no canto superior direito</b></span>
+      </li>
+      <li class="step">
+        <span class="num">2</span>
+        <span class="step-text">Depois em <b>"Abrir no navegador"</b></span>
+      </li>
+    </ul>
+    <div class="divider"></div>
+    <a class="btn" id="openBtn" href="#">👆 Ou toque e segure para abrir o link</a>
+    <button class="copy" id="copyBtn">🔗 Copiar link</button>
+  </main>
+
+  <script>
+    (function () {
+      // Catálogo: banner -> destino + nome. Preserva UTMs vindos do /tiktok.
+      var DEST = {
+        foquinha: { name: "Foquinha AÍ", url: "https://www.foquinhaai.life" },
+        thor: { name: "Thor — Amigo Financeiro", url: "https://www.meuthor.com.br" },
+        bora: { name: "Bora", url: "https://habitz.life/bora" },
+      };
+
+      var params = new URLSearchParams(window.location.search);
+      var key = params.get("b") || "bora";
+      var d = DEST[key] || DEST.bora;
+
+      // monta destino com UTMs (repassa os que vieram)
+      var dest = new URL(d.url);
+      ["utm_source", "utm_medium", "utm_content", "utm_campaign", "utm_term", "v"].forEach(function (p) {
+        var val = params.get(p);
+        if (val) dest.searchParams.set(p === "v" ? "utm_content" : p, val);
+      });
+      // garante origem tiktok
+      if (!dest.searchParams.get("utm_source")) dest.searchParams.set("utm_source", "tiktok");
+      if (!dest.searchParams.get("utm_medium")) dest.searchParams.set("utm_medium", "organic");
+      var destUrl = dest.href;
+
+      document.getElementById("title").textContent = d.name;
+      var openBtn = document.getElementById("openBtn");
+      openBtn.href = destUrl;
+
+      var copyBtn = document.getElementById("copyBtn");
+      copyBtn.addEventListener("click", function () {
+        navigator.clipboard.writeText(destUrl).then(function () {
+          copyBtn.textContent = "✓ Link copiado";
+          copyBtn.classList.add("done");
+          setTimeout(function () {
+            copyBtn.textContent = "🔗 Copiar link";
+            copyBtn.classList.remove("done");
+          }, 2000);
+        }).catch(function () {});
+      });
+    })();
+  </script>
+</body>
+
+</html>
