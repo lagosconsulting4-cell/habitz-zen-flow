@@ -188,16 +188,14 @@ export const QuizProvider: React.FC<QuizProviderProps> = ({ children }) => {
   // State - Status
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
 
-  // TODO: ThemeSelectionStep (personalização de tema) será reintroduzido em breve como step 1
-  // 32 Steps: Hero(0), PainRecognition(1), MindRacing(2), CycleAwareness(3),
-  // Objective(4), Time(5), FeedbackTime(6), Energy(7), Profession(8), FeedbackAdapt(9),
-  // Age(10), FeedbackAgeChart(11), Challenges(12), Gender(13), SocialProofChart(14),
-  // ConsistencyFeeling(15), ProjectedFeeling[SLIDER](16), Testimonials(17), YearsPromising[EMOJI](18),
-  // Urgency(19), PotentialChart(20), FeatureSeeding[MULTI](21), ScientificProof(22), AppExplanation(23),
-  // AnalysisLoading(24), Diagnosis(25), Transformation(26), Similarity(27),
-  // DataCollection[EMAIL](28), NameStep(29), PhoneStep[WPP](30),
-  // LoadingPlan(31), SubscriptionOffers[+EXIT](32)
-  const totalSteps = 33;
+  // Arco simplificado (ver Doc/NOVA COPY_BORA/ARCO_EMOCIONAL.md) — 27 steps, 1 pico (Transformation), sem prova repetida nem chicote de culpa.
+  // Ato1 Reconhecimento: Hero(0), PainRecognition(1), MindRacing(2), YearsPromising(3)
+  // Ato2 Personalização: Objective(4), Time(5), FeedbackTime(6), Energy(7), Profession(8), Age(9), Challenges(10), Gender(11), ConsistencyFeeling(12), ProjectedFeeling(13), FeatureSeeding(14), AppExplanation(15)
+  // Ato3 Prova: Testimonials(16)
+  // Ato4 Bridge+Identidade+Oferta: AnalysisLoading(17), Diagnosis(18), Transformation(19), Similarity(20), Urgency(21), DataCollection(22), Name(23), Phone(24), LoadingPlan(25), SubscriptionOffers(26)
+  // Removidos (preservados em arquivo p/ possível A/B): CycleAwareness, FeedbackAdapt, FeedbackAgeChart, SocialProofChart, PotentialChart, ScientificProof
+  // NOTE: isStepValid abaixo é legado/não consumido — navegação usa ContinueButton[disabled] + nextStep (relativo).
+  const totalSteps = 27;
 
   // ============================================================================
   // NAVIGATION

@@ -140,7 +140,7 @@ export const LoadingStep: React.FC<LoadingStepProps> = ({ onComplete }) => {
             {LOADING_PHASES[currentPhase]?.label}
           </h2>
           <p className="text-sm text-slate-400">
-            Estamos criando seu plano personalizado
+            Estamos montando a sua rotina
           </p>
         </motion.div>
       </AnimatePresence>

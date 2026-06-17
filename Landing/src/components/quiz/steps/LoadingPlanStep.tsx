@@ -6,7 +6,7 @@ import { Star, Check } from "lucide-react";
 const LOADING_STEPS = [
   { label: "Preparando seu dia", duration: 2000 },
   { label: "Escolhendo os melhores hábitos", duration: 2500 },
-  { label: "Salvando seu plano", duration: 2000 },
+  { label: "Salvando sua rotina", duration: 2000 },
 ];
 
 const TESTIMONIALS = [
@@ -90,8 +90,8 @@ export const LoadingPlanStep = () => {
         className="text-center space-y-2"
       >
         <h2 className="text-2xl md:text-3xl font-bold text-white">
-          Criando seu <br />
-          <span className="text-lime-400">Plano Personalizado</span>
+          Montando sua <br />
+          <span className="text-lime-400">Rotina</span>
         </h2>
       </motion.div>
 

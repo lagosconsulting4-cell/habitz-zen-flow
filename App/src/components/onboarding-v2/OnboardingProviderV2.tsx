@@ -395,6 +395,7 @@ export const OnboardingProviderV2: React.FC<OnboardingProviderV2Props> = ({ chil
         const { error: habitError } = await supabase.from("habits").insert({
           user_id: user.id,
           name: habit.name,
+          description: habit.description ?? null,
           category: mapCategory(habit.category),
           period: habit.period,
           emoji: habit.icon,

@@ -37,7 +37,7 @@ export function DashboardHeroSection({
     totalHabits > 0 ? Math.round((completedHabits / totalHabits) * 100) : 0;
   const remaining = totalHabits - completedHabits;
   const greeting = getGreeting(percent);
-  const firstName = displayName?.split(" ")[0] || "Habitz";
+  const firstName = displayName?.split(" ")[0] || "Bora";
 
   return (
     <motion.div
@@ -112,7 +112,7 @@ export function DashboardHeroSection({
               onClick={() => navigate("/progress")}
               className="w-full h-10 rounded-full border-border/60 text-foreground font-medium text-sm hover:bg-accent/10"
             >
-              Ver Analiticos
+              Ver meu progresso
             </Button>
           </div>
         </div>

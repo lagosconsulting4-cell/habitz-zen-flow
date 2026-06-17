@@ -15,7 +15,7 @@ const CommitmentStep: React.FC = () => {
                     Última etapa.
                 </h2>
                 <p className="text-slate-400">
-                    O protocolo exato usado para destravar sua rotina está pronto.
+                    A sua rotina personalizada está pronta.
                 </p>
             </div>
 

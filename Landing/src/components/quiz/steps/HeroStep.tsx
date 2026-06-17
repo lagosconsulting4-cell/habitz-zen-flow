@@ -15,6 +15,8 @@ export const HeroStep = () => {
         className="absolute inset-0 w-full h-full object-cover object-center"
         style={{ transform: "scale(1.05)", transformOrigin: "center center" }}
         loading="eager"
+        fetchPriority="high"
+        decoding="async"
         aria-hidden
       />
 

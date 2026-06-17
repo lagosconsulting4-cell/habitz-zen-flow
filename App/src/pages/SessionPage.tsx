@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   BookOpen,
   Check,
+  ChevronDown,
   ChevronRight,
   Dumbbell,
   FlaskConical,
@@ -26,6 +27,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { haptic } from "@/lib/haptics";
 import { useHabits, type Habit } from "@/hooks/useHabits";
 import { useTimer } from "@/hooks/useTimer";
+import { supabase } from "@/integrations/supabase/client";
 
 function hexToRgba(hex: string, alpha: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -358,6 +360,10 @@ const DailySessionView = () => {
 
   const { toggleHabit, completions, getHabitsForDate } = useHabits();
 
+  // W1: "como fazer" na Sessão — descrição (execução) por hábito + qual está aberto
+  const [descById, setDescById] = useState<Record<string, string>>({});
+  const [openHow, setOpenHow] = useState<string | null>(null);
+
   const completedIds = useMemo(
     () => new Set(completions.map((c) => c.habit_id)),
     [completions]
@@ -373,6 +379,27 @@ const DailySessionView = () => {
         return ta.localeCompare(tb);
       });
   }, [getHabitsForDate]);
+
+  // W1: busca best-effort a descrição ("como fazer") dos hábitos do dia.
+  // Tolerante: se a coluna `description` ainda não existir, não mostra nada (app segue normal).
+  useEffect(() => {
+    const ids = allDayHabits.map((h) => h.id);
+    if (ids.length === 0) { setDescById({}); return; }
+    let cancelled = false;
+    supabase
+      .from("habits")
+      .select("id, description")
+      .in("id", ids)
+      .then(({ data, error }) => {
+        if (cancelled || error || !data) return;
+        const map: Record<string, string> = {};
+        for (const row of data) {
+          if (row.description) map[row.id] = row.description as string;
+        }
+        setDescById(map);
+      });
+    return () => { cancelled = true; };
+  }, [allDayHabits]);
 
   const PERIOD_ORDER = ["morning", "afternoon", "evening"] as const;
   const PERIOD_LABELS: Record<string, string> = { morning: "Manhã", afternoon: "Tarde", evening: "Noite" };
@@ -524,6 +551,24 @@ const DailySessionView = () => {
                       }}>
                         {statusLabel(status, habit)}
                       </p>
+                      {descById[habit.id] && (
+                        <div className="mt-1.5" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            onClick={() => { haptic.light(); setOpenHow(openHow === habit.id ? null : habit.id); }}
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold"
+                            style={{ color: ringAccent }}
+                          >
+                            Como fazer
+                            <ChevronDown className={cn("h-3 w-3 transition-transform", openHow === habit.id && "rotate-180")} />
+                          </button>
+                          {openHow === habit.id && (
+                            <p className="mt-1 text-xs leading-relaxed" style={{ color: textMuted }}>
+                              {descById[habit.id]}
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {/* Horário + chevron */}

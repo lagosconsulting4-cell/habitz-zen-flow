@@ -45,7 +45,7 @@ const howItWorksNew = [
   },
   {
     title: "O Poder do 1%",
-    description: "Melhore 1% todos os dias. Em um ano, você será 37x melhor. O algoritmo garante que você nunca estagne.",
+    description: "Melhore 1% todos os dias. É como juros compostos: pequenos passos consistentes viram uma diferença enorme ao longo do ano.",
     icon: LineChart,
     gradient: "from-lime-300/20 to-emerald-400/20",
     className: "col-span-1 md:col-span-2 lg:col-span-1",
@@ -59,9 +59,9 @@ const testimonials = [
     age: 22,
     role: "Fundadora de Startup",
     photo: "https://i.ibb.co/7t5yRpDd/Gemini-Generated-Image-i7pejzi7pejzi7pe.png",
-    quote: "Meu negócio decolou depois que comecei a usar o Bora. Antes era só correria e incêndio pra apagar. Agora consigo focar no que realmente importa. Meu faturamento dobrou em 3 meses!",
+    quote: "Antes era só correria e incêndio pra apagar. Com o Bora minha rotina ficou previsível e eu consigo focar no que realmente importa, sem viver no modo urgência.",
     rating: 5,
-    metric: "Faturamento 2x em 3 meses",
+    metric: "Mais foco, menos caos",
   },
   {
     name: "Lucas Fernandes",

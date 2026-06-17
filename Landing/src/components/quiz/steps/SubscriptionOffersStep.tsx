@@ -140,9 +140,9 @@ export const SubscriptionOffersStep = () => {
           <p className="text-xs font-bold uppercase tracking-widest text-lime-400">Tudo pronto</p>
           <h2 className="text-2xl font-black text-white leading-tight">
             {name ? (
-              <>{name}, seu <span className="text-lime-400">plano personalizado</span> está pronto</>
+              <>{name}, sua <span className="text-lime-400">rotina</span> já está pronta</>
             ) : (
-              <>Seu <span className="text-lime-400">plano personalizado</span> está pronto</>
+              <>Sua <span className="text-lime-400">rotina</span> já está pronta</>
             )}
           </h2>
           <p className="text-sm text-slate-400">Desbloqueie agora e comece ainda hoje</p>
