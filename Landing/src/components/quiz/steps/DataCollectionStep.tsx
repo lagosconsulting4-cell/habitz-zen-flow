@@ -55,7 +55,7 @@ export const DataCollectionStep = () => {
         className="text-center mb-8 px-4"
       >
         <h2 className="text-2xl sm:text-3xl font-bold text-white">
-          Salve o seu plano personalizado
+          Salve a sua rotina
         </h2>
       </motion.div>
 

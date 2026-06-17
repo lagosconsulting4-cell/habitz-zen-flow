@@ -69,7 +69,7 @@ export const CongratsStep = () => {
           🎉 Parabéns!
         </h1>
         <h2 className="text-xl sm:text-2xl font-bold text-lime-400 mb-3">
-          Seu plano personalizado está pronto!
+          Sua rotina já está pronta!
         </h2>
         <p className="text-base text-slate-400">
           Com base nas suas respostas, criamos uma rotina que vai te ajudar a conquistar seus objetivos

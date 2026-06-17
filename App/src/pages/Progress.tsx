@@ -218,7 +218,7 @@ const Progress = () => {
           className="mb-6"
         >
           <h1 className="text-2xl font-bold text-foreground">
-            Analíticos & Insights
+            Sua evolução
           </h1>
           <div
             className={cn(

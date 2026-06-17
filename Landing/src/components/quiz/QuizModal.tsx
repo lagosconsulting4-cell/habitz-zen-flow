@@ -78,15 +78,17 @@ export const QuizContent = ({ onClose }: { onClose?: () => void }) => {
   // Renderiza o step atual
   const renderStep = () => {
     switch (currentStep) {
+      // === ATO 1 — Reconhecimento (anti-culpa) ===
       case 0:
         return <HeroStep />;
-      // case 1 (ThemeSelectionStep) removido temporariamente — volta em breve
       case 1:
         return <PainRecognitionStep />;
       case 2:
         return <MindRacingStep />;
       case 3:
-        return <CycleAwarenessStep />;
+        return <YearsPromisingStep />;
+
+      // === ATO 2 — Personalização leve ===
       case 4:
         return <ObjectiveStep />;
       case 5:
@@ -98,58 +100,46 @@ export const QuizContent = ({ onClose }: { onClose?: () => void }) => {
       case 8:
         return <ProfessionStep />;
       case 9:
-        return <FeedbackAdaptStep />;
-      case 10:
         return <AgeStep />;
-      case 11:
-        return <FeedbackAgeChartStep />;
-      case 12:
+      case 10:
         return <ChallengesStep />;
-      case 13:
+      case 11:
         return <GenderStep />;
-      case 14:
-        return <SocialProofChartStep />;
-      case 15:
+      case 12:
         return <ConsistencyFeelingStep />;
-      case 16:
+      case 13:
         return <ProjectedFeelingStep />;
-      case 17:
-        return <TestimonialsStep />;
-      case 18:
-        return <YearsPromisingStep />;
-      case 19:
-        return <UrgencyStep />;
-      case 20:
-        return <PotentialChartStep />;
-      case 21:
+      case 14:
         return <FeatureSeedingStep />;
-      case 22:
-        return <ScientificProofStep />;
-      case 23:
+      case 15:
         return <AppExplanationStep />;
 
-      // === DEEP BRIDGE ===
-      case 24:
+      // === ATO 3 — Prova consolidada ===
+      case 16:
+        return <TestimonialsStep />;
+
+      // === ATO 4 — Bridge + pico de identidade ===
+      case 17:
         return <AnalysisLoadingStep />;
-      case 25:
+      case 18:
         return <DiagnosisStep />;
-      case 26:
+      case 19:
         return <TransformationStep />;
-      case 27:
+      case 20:
         return <SimilarityMatchStep />;
 
-      // === DATA COLLECTION ===
-      case 28:
+      // === Urgência (perto da oferta) + coleta + oferta ===
+      case 21:
+        return <UrgencyStep />;
+      case 22:
         return <DataCollectionStep />;
-      case 29:
+      case 23:
         return <NameStep />;
-      case 30:
+      case 24:
         return <PhoneStep />;
-
-      // === LOADING + OFFER ===
-      case 31:
+      case 25:
         return <LoadingPlanStep />;
-      case 32:
+      case 26:
         return <SubscriptionOffersStep />;
       default:
         return null;
@@ -158,10 +148,10 @@ export const QuizContent = ({ onClose }: { onClose?: () => void }) => {
 
   return (
     <div className={cn("flex flex-col h-full", themeConfig.cssClass)} style={{ backgroundColor: "var(--q-bg)" }}>
-      {/* Header com progresso - Oculto no Hero (0), FeedbackAdapt (9), Testimonials (17), ScientificProof (22), AppExplanation (23), Offer (32) */}
+      {/* Header com progresso - Oculto no Hero (0), AppExplanation (15), Testimonials (16), Offer (26) */}
       <div className={cn(
         "sticky top-0 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/5 z-10",
-        (currentStep === 0 || currentStep === 9 || currentStep === 17 || currentStep === 22 || currentStep === 23 || currentStep === 32) && "hidden"
+        (currentStep === 0 || currentStep === 15 || currentStep === 16 || currentStep === 26) && "hidden"
       )}>
         <div className="flex items-center justify-between p-4 gap-3">
           {/* Botão Voltar à esquerda */}
@@ -207,7 +197,7 @@ export const QuizContent = ({ onClose }: { onClose?: () => void }) => {
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         <div className={cn(
           "max-w-2xl mx-auto min-h-full",
-          (currentStep === 0 || currentStep === 9 || currentStep === 17 || currentStep === 22 || currentStep === 23) ? "p-0" : currentStep === 32 ? "px-4 pt-6 pb-8" : "px-4 pt-12 pb-8"
+          (currentStep === 0 || currentStep === 15 || currentStep === 16) ? "p-0" : currentStep === 26 ? "px-4 pt-6 pb-8" : "px-4 pt-12 pb-8"
         )}>
           <AnimatePresence mode="wait">
             <motion.div

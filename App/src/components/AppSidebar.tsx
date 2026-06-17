@@ -39,7 +39,7 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 interface AppSidebarProps {
-  onOpenMore: () => void;
+  onOpenMore?: () => void;
 }
 
 const AppSidebar = ({ onOpenMore }: AppSidebarProps) => {
@@ -163,9 +163,11 @@ const AppSidebar = ({ onOpenMore }: AppSidebarProps) => {
           <Plus className="mr-2 h-4 w-4" />
           Novo habito
         </Button>
-        <Button className="w-full" variant="ghost" onClick={onOpenMore}>
-          Descobrir mais
-        </Button>
+        {onOpenMore && (
+          <Button className="w-full" variant="ghost" onClick={onOpenMore}>
+            Descobrir mais
+          </Button>
+        )}
       </div>
     </aside>
   );

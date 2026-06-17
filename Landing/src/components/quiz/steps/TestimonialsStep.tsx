@@ -19,7 +19,7 @@ const TESTIMONIALS = [
     avatar: "JS",
     avatarBg: "from-pink-500 to-rose-600",
     quote: "tentei de tudo mesmo. planner, academia, dieta... nada durava. o Bora foi o unico q se adaptou a mim, nao eu a ele 😅",
-    result: "✅ Perdeu 6kg em 10 semanas",
+    result: "✅ 10 semanas mantendo a rotina",
     src: "https://i.ibb.co/PZx78q3m/download-16.jpg",
   },
   {

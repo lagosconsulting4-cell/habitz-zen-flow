@@ -64,9 +64,9 @@ const DiagnosisStep: React.FC = () => {
     const diagnosis = getDiagnosis();
 
     const getLevelLabel = (level: number) => {
-        if (level >= 70) return "Alto impacto";
-        if (level >= 40) return "Médio";
-        return "Leve";
+        if (level >= 70) return "Foco principal";
+        if (level >= 40) return "Dá pra ajustar";
+        return "Tranquilo";
     };
 
     return (
@@ -96,7 +96,7 @@ const DiagnosisStep: React.FC = () => {
                     Seu perfil, {name || "você"}
                 </p>
                 <h2 className="text-xl font-bold text-white">
-                    Resumo do que encontramos
+                    Sua leitura de rotina
                 </h2>
             </motion.div>
 
@@ -108,7 +108,7 @@ const DiagnosisStep: React.FC = () => {
                 className="bg-[#121214] border border-white/10 rounded-2xl p-4 space-y-3"
             >
                 <div className="flex items-center justify-between">
-                    <p className="text-sm text-slate-400">Nível de impacto na sua rotina</p>
+                    <p className="text-sm text-slate-400">O que mais pesa na sua rotina hoje</p>
                     <span className="text-xs font-bold px-3 py-1 rounded-full bg-red-500/10 text-red-400">
                         {getLevelLabel(diagnosis.level)}
                     </span>
@@ -139,7 +139,7 @@ const DiagnosisStep: React.FC = () => {
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
                     <AlertTriangle size={14} className="text-red-400" />
                     <span className="text-red-400 text-xs font-bold uppercase tracking-wider">
-                        Detectado
+                        No seu radar
                     </span>
                 </div>
 

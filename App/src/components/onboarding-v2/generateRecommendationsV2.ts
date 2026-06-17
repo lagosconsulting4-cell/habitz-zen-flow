@@ -217,7 +217,7 @@ const OBJECTIVE_TEMPLATES: Record<string, HabitTemplate[]> = {
       defaultDuration: 10, defaultPeriod: 'evening', defaultFrequencyDays: [5], priority: 7,
     },
     {
-      code: 'DIR-MENT-SAT', name: 'Tempo Não-Estruturado',
+      code: 'DIR-MENT-SAT', name: 'Pausa sem objetivo (20 min)',
       description: 'Uma hora sem agenda. Qualquer coisa offline que o "eu sem obrigações" escolheria.',
       category: 'mente', habit_type: 'directed', icon: '🌿', icon_key: 'relax', color: '#14B8A6',
       defaultDuration: 60, defaultPeriod: 'any', defaultFrequencyDays: [6], priority: 6,
@@ -231,7 +231,7 @@ const OBJECTIVE_TEMPLATES: Record<string, HabitTemplate[]> = {
   ],
   routine: [
     {
-      code: 'ANCHOR-ROUT-01', name: 'Como o dia começa',
+      code: 'ANCHOR-ROUT-01', name: 'Ritual de acordar (água, luz, cama)',
       description: '4 ações na mesma ordem imutável: água → luz → cama → café. O cérebro automatiza sequências rápido.',
       category: 'time_routine', habit_type: 'anchor', icon: '🌅', icon_key: 'morning_routine', color: '#F59E0B',
       defaultDuration: 15, defaultPeriod: 'dawn', defaultFrequencyDays: [0,1,2,3,4,5,6], priority: 10,
@@ -243,7 +243,7 @@ const OBJECTIVE_TEMPLATES: Record<string, HabitTemplate[]> = {
       defaultDuration: 10, defaultPeriod: 'evening', defaultFrequencyDays: [0,1,2,3,4,5,6], priority: 9,
     },
     {
-      code: 'DIR-ROUT-MON', name: 'Plano da semana',
+      code: 'DIR-ROUT-MON', name: 'Planejar a semana',
       description: 'Distribuir tarefas pelos dias. Não lista infinita. Decidir "isso vai na quarta". Agendar o que importa.',
       category: 'time_routine', habit_type: 'directed', icon: '📐', icon_key: 'plan_day', color: '#3B82F6',
       defaultDuration: 20, defaultPeriod: 'morning', defaultFrequencyDays: [1], priority: 8,
@@ -255,7 +255,7 @@ const OBJECTIVE_TEMPLATES: Record<string, HabitTemplate[]> = {
       defaultDuration: 15, defaultPeriod: 'any', defaultFrequencyDays: [3], priority: 6,
     },
     {
-      code: 'DIR-ROUT-SUN', name: 'Reset Completo',
+      code: 'DIR-ROUT-SUN', name: 'Fechar a semana',
       description: 'Fechar o ciclo da semana: o que foi feito, o que não foi, o que carregar. Reset no domingo = 60% mais consistente.',
       category: 'time_routine', habit_type: 'directed', icon: '🔄', icon_key: 'review', color: '#8B5CF6',
       defaultDuration: 30, defaultPeriod: 'afternoon', defaultFrequencyDays: [0], priority: 8,
@@ -281,7 +281,7 @@ const OBJECTIVE_TEMPLATES: Record<string, HabitTemplate[]> = {
       defaultDuration: 5, defaultPeriod: 'morning', defaultFrequencyDays: [1], priority: 8,
     },
     {
-      code: 'DIR-AVOI-TUE-THU', name: 'O que fazer no lugar',
+      code: 'DIR-AVOI-TUE-THU', name: 'Trocar o hábito ruim por outro',
       description: 'No horário em que o celular mais te chama, fazer outra coisa no lugar. Hábitos ruins não somem por força de vontade — são substituídos.',
       category: 'avoid', habit_type: 'directed', icon: '🔀', icon_key: 'swap', color: '#F59E0B',
       defaultDuration: 10, defaultPeriod: 'any', defaultFrequencyDays: [2,4], priority: 7,
@@ -320,7 +320,7 @@ const CHALLENGE_TEMPLATES: Record<string, HabitTemplate[]> = {
       defaultDuration: 2, defaultPeriod: 'morning', defaultFrequencyDays: [1,2,3,4,5], priority: 8,
     },
     {
-      code: 'SUPP-PROC-02', name: 'Negociação de 5 Minutos',
+      code: 'SUPP-PROC-02', name: 'Comece por só 5 minutos',
       description: '"Só 5 minutos. Depois posso parar." Na maioria das vezes, o cérebro entra em execução e continua.',
       category: 'productivity', habit_type: 'support', icon: '⏱️', icon_key: 'timer', color: '#F59E0B',
       defaultDuration: 5, defaultPeriod: 'any', defaultFrequencyDays: [1,2,3,4,5], priority: 7,
@@ -342,7 +342,7 @@ const CHALLENGE_TEMPLATES: Record<string, HabitTemplate[]> = {
   ],
   forgetfulness: [
     {
-      code: 'SUPP-FORG-01', name: 'Esvaziamento da Cabeça',
+      code: 'SUPP-FORG-01', name: 'Esvaziar a cabeça no papel',
       description: 'Antes de dormir: despejar tudo num único lugar. Não organizar. "Salvar" para o cérebro descansar.',
       category: 'mente', habit_type: 'support', icon: '🧠', icon_key: 'brain_dump', color: '#8B5CF6',
       defaultDuration: 5, defaultPeriod: 'evening', defaultFrequencyDays: [0,1,2,3,4,5,6], priority: 8,
@@ -356,7 +356,7 @@ const CHALLENGE_TEMPLATES: Record<string, HabitTemplate[]> = {
   ],
   tiredness: [
     {
-      code: 'SUPP-TIRE-01', name: 'Caminhada Anti-Crash',
+      code: 'SUPP-TIRE-01', name: 'Caminhada depois do almoço',
       description: '12 min de caminhada no horário do crash (13h-16h). Mais eficaz que cafeína, sem pico-e-queda.',
       category: 'corpo', habit_type: 'support', icon: '🚶‍♂️', icon_key: 'walk', color: '#10B981',
       defaultDuration: 12, defaultPeriod: 'afternoon', defaultFrequencyDays: [1,2,3,4,5], priority: 7,
@@ -384,13 +384,13 @@ const CHALLENGE_TEMPLATES: Record<string, HabitTemplate[]> = {
   ],
   motivation: [
     {
-      code: 'SUPP-MOTI-01', name: 'Ver onde você já chegou',
+      code: 'SUPP-MOTI-01', name: 'Ver o quanto você já avançou',
       description: 'Antes de dormir: uma coisa que fiz hoje que o eu de 3 meses atrás não faria. Cria a evidência.',
       category: 'mente', habit_type: 'support', icon: '⭐', icon_key: 'star', color: '#F59E0B',
       defaultDuration: 2, defaultPeriod: 'evening', defaultFrequencyDays: [0,1,2,3,4,5,6], priority: 8,
     },
     {
-      code: 'SUPP-MOTI-02', name: 'Lembrança de quem você está se tornando',
+      code: 'SUPP-MOTI-02', name: 'Lembrar quem você quer ser',
       description: 'Frase escrita, relida toda manhã: "Sou alguém que [comportamento]." O cérebro usa identidade para decisões.',
       category: 'mente', habit_type: 'support', icon: '🪞', icon_key: 'identity', color: '#EC4899',
       defaultDuration: 1, defaultPeriod: 'dawn', defaultFrequencyDays: [0,1,2,3,4,5,6], priority: 7,
@@ -434,7 +434,7 @@ const LIFE_AREA_TEMPLATES: Record<string, HabitTemplate[]> = {
   ],
   mind: [
     {
-      code: 'COMP-MIND-01', name: 'Tempo Sem Agenda',
+      code: 'COMP-MIND-01', name: 'Tempo livre, sem planos',
       description: '20 min sem objetivo. Sem celular, produção ou consumo. Descanso cognitivo real.',
       category: 'mente', habit_type: 'complement', icon: '🍃', icon_key: 'relax', color: '#14B8A6',
       defaultDuration: 20, defaultPeriod: 'afternoon', defaultFrequencyDays: [0,1,2,3,4,5,6], priority: 5,
@@ -486,7 +486,7 @@ const PROFESSION_TEMPLATES: Record<string, HabitTemplate> = {
     defaultDuration: 15, defaultPeriod: 'late_afternoon', defaultFrequencyDays: [1,2,3,4,5], priority: 7, profession: 'clt',
   },
   entrepreneur: {
-    code: 'ENT-01', name: 'Uma Hora Sem Operação',
+    code: 'ENT-01', name: 'Uma hora só de estratégia',
     description: 'Sem mensagens, decisões operacionais ou incêndios. Só estratégia ou descanso. Sem isso, o modo operacional consome 100%.',
     category: 'productivity', habit_type: 'support', icon: '🏖️', icon_key: 'strategic', color: '#10B981',
     defaultDuration: 60, defaultPeriod: 'morning', defaultFrequencyDays: [1,2,3,4,5], priority: 7, profession: 'entrepreneur',

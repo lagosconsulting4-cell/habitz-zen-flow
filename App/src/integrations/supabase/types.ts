@@ -690,6 +690,7 @@ export type Database = {
           color: string | null
           created_at: string
           days_of_week: number[]
+          description: string | null
           due_date: string | null
           duration_minutes: number | null
           emoji: string | null
@@ -729,6 +730,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           days_of_week?: number[]
+          description?: string | null
           due_date?: string | null
           duration_minutes?: number | null
           emoji?: string | null
@@ -768,6 +770,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           days_of_week?: number[]
+          description?: string | null
           due_date?: string | null
           duration_minutes?: number | null
           emoji?: string | null

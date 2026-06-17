@@ -34,7 +34,7 @@ const personas = {
         role: "Designer Freelancer",
         image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop",
         pain: "Caos total, prazos estourados",
-        gain: "Dobrou faturamento (R$ 8k → R$ 16k)",
+        gain: "Rotina de trabalho sob controle, sem caos",
         stat: "100% dos prazos cumpridos",
         timeline: "Em 60 dias",
         detail: "Conseguiu pegar 3 clientes novos sem sobrecarregar"

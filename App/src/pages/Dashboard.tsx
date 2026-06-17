@@ -7,6 +7,7 @@ import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { DashboardSkeleton } from "@/components/ui/skeleton";
 
 import { DashboardHeroSection } from "@/components/DashboardHeroSection";
+import { XPBar } from "@/components/XPBar";
 import { HabitListItem } from "@/components/HabitListItem";
 import { WeeklyOverview } from "@/components/WeeklyOverview";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
@@ -774,7 +775,7 @@ const Dashboard = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 px-4 pb-navbar space-y-5 max-w-xl mx-auto w-full"
+        className="flex-1 px-4 pb-navbar space-y-5 max-w-xl md:max-w-3xl mx-auto w-full"
         style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
         {todayHabits.length === 0 ? (
@@ -807,12 +808,17 @@ const Dashboard = () => {
                   className="text-center mb-8 px-4"
                 >
                   <h3 className="text-xl font-bold mb-2 text-foreground">
-                    Sua rotina está pronta!
+                    Boa! Sua rotina já está montada.
                   </h3>
-                  <p className="text-sm text-muted-foreground max-w-[280px] leading-relaxed">
-                    Hoje não tem hábitos agendados — mas amanhã começa. Você também pode criar um hábito avulso para hoje.
+                  <p className="text-sm text-muted-foreground max-w-[300px] leading-relaxed">
+                    Cada hábito começa no melhor dia pra ele — então hoje pode estar mais leve. Que tal já dar o primeiro passo?
                   </p>
                 </motion.div>
+
+                {/* XP já conquistado no onboarding — progresso visível desde o dia 1 */}
+                <div className="w-full max-w-[320px] mb-8">
+                  <XPBar />
+                </div>
 
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -892,6 +898,9 @@ const Dashboard = () => {
               completedHabits={completedCount}
               journeyTitle={primaryJourneyTitle}
             />
+
+            {/* Nível / XP — progressão visível (revela a gamificação que já existe) */}
+            <XPBar />
 
             {/* 2. Weekly Outlook */}
             <WeeklyOverview

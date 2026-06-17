@@ -72,7 +72,7 @@ export const AppExplanationStep = () => {
           transition={{ delay: 0.3, duration: 0.5 }}
           className="text-lg md:text-xl text-slate-400 mb-16 text-center"
         >
-          Entenda por que o método BORA funciona onde outros falharam
+          Entenda como o Bora te ajuda a manter a rotina no dia a dia
         </motion.p>
 
         {/* Accordion */}
