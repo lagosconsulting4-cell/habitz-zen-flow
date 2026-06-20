@@ -30,12 +30,11 @@ import { useTracking } from "@/hooks/useTracking";
 const CHECKOUT_ANUAL_URL = "https://pay.hub.la/91TKYeHy1alHwSXn8yJz";
 
 // Telas reais do app (Landing/public/images/lp) — showcase "por dentro do app".
-// Mock "top" da tela de pricing do quiz (phone "App Bora").
-const FEATURE_MOCK = "https://i.ibb.co/8gCMLMS8/image-10.png";
-const APP_FEATURES = [
-  { title: "Seu dia, organizado", desc: "A rotina de hoje já vem montada. Você não decide nada de manhã, só executa." },
-  { title: "Feita pra você", desc: "Responde umas perguntas rápidas e sua rotina nasce pronta, do seu jeito." },
-  { title: "Sua evolução visível", desc: "Streak, consistência e o quanto você já avançou. Todo dia." },
+// Telas reais do app novo (prints) — Landing/public/images/lp.
+const APP_SCREENS = [
+  { src: "/images/lp/app-home.png", title: "Seu dia, em círculos", desc: "Abre e vê só os hábitos de hoje. Toca pra concluir." },
+  { src: "/images/lp/app-progress.png", title: "Sua evolução visível", desc: "Nível, streak e consistência num lugar só." },
+  { src: "/images/lp/app-journeys.png", title: "Jornadas guiadas", desc: "Programas que adicionam hábitos prontos à sua rotina." },
 ];
 
 // ============ DATA ============
@@ -383,46 +382,35 @@ const BoraLanding = () => {
             </p>
           </motion.div>
 
-          <div className="flex flex-col items-center gap-12 lg:flex-row lg:gap-16">
-            {/* Mock da tela de pricing do quiz (o "top") */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.92 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="relative mx-auto w-full max-w-md lg:max-w-lg flex-shrink-0"
-            >
-              <div className="absolute inset-0 -z-10 scale-90 rounded-[3rem] bg-gradient-to-tr from-lime-500/25 to-yellow-500/10 blur-3xl" />
-              <img
-                src={FEATURE_MOCK}
-                alt="App Bora"
-                loading="lazy"
-                decoding="async"
-                className="w-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
-              />
-            </motion.div>
-
-            {/* Benefícios */}
-            <div className="flex-1 space-y-7">
-              {APP_FEATURES.map((f, i) => (
-                <motion.div
-                  key={f.title}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1, duration: 0.4 }}
-                  className="flex items-start gap-4"
-                >
-                  <div className="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-lime-400/20 bg-lime-400/10">
-                    <Check className="h-5 w-5 text-lime-400" />
+          <div className="grid grid-cols-1 gap-12 sm:grid-cols-3 sm:gap-6">
+            {APP_SCREENS.map((screen, i) => (
+              <motion.div
+                key={screen.src}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.12, duration: 0.5 }}
+                className={i === 1 ? "sm:-translate-y-8" : ""}
+              >
+                {/* Moldura de celular em volta do print real */}
+                <div className="relative mx-auto w-[210px]">
+                  <div className="absolute inset-0 -z-10 scale-90 rounded-[3rem] bg-gradient-to-tr from-lime-500/25 to-yellow-500/10 blur-3xl" />
+                  <div className="rounded-[2.4rem] border-[3px] border-[#1b1b1d] bg-black p-1 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+                    <img
+                      src={screen.src}
+                      alt={screen.title}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full rounded-[2.05rem]"
+                    />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white">{f.title}</h3>
-                    <p className="mt-1 text-sm leading-relaxed text-slate-400">{f.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                </div>
+                <div className="mt-6 text-center">
+                  <h3 className="text-lg font-bold text-white">{screen.title}</h3>
+                  <p className="mx-auto mt-1.5 max-w-[240px] text-sm leading-relaxed text-slate-400">{screen.desc}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
