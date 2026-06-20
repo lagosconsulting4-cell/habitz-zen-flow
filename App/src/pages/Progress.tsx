@@ -11,6 +11,7 @@ import { ProgressSkeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { HabitGlyph } from "@/components/icons/HabitGlyph";
 import { HabitIconKey } from "@/components/icons/HabitIcons";
+import { XPBar } from "@/components/XPBar";
 
 const DAY_LABELS = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
 const DAY_LABELS_SHORT = ["D", "S", "T", "Q", "Q", "S", "S"];
@@ -232,6 +233,9 @@ const Progress = () => {
             Últimos 30 dias
           </div>
         </motion.div>
+
+        {/* Nível em destaque — topo da evolução */}
+        <XPBar className="mb-4" />
 
         {/* Current Streak Card */}
         <motion.div

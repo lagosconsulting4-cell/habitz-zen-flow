@@ -16,11 +16,10 @@ interface NavItem {
 
 // Navigation items - all are swipeable
 const navItems: NavItem[] = [
-  { id: "home",     label: "Home",     icon: Home,       path: "/dashboard", index: 0 },
-  { id: "habits",   label: "Hábitos",  icon: ListChecks, path: "/habits",    index: 1 },
-  { id: "journeys", label: "Jornadas", icon: Compass,    path: "/journeys",  index: 2 },
-  { id: "progress", label: "Streaks",  icon: TrendingUp, path: "/progress",  index: 3 },
-  { id: "profile",  label: "Perfil",   icon: User,       path: "/profile",   index: 4 },
+  { id: "home",     label: "Hoje",      icon: ListChecks, path: "/dashboard", index: 0 },
+  { id: "progress", label: "Progresso", icon: TrendingUp, path: "/progress",  index: 1 },
+  { id: "journeys", label: "Jornadas",  icon: Compass,    path: "/journeys",  index: 2 },
+  { id: "profile",  label: "Perfil",    icon: User,       path: "/profile",   index: 3 },
 ];
 
 const transition = { type: "spring", stiffness: 400, damping: 30 } as const;

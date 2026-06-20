@@ -7,7 +7,7 @@ import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { DashboardSkeleton } from "@/components/ui/skeleton";
 
 import { DashboardHeroSection } from "@/components/DashboardHeroSection";
-import { XPBar } from "@/components/XPBar";
+import { CircularHabitCard } from "@/components/CircularHabitCard";
 import { HabitListItem } from "@/components/HabitListItem";
 import { WeeklyOverview } from "@/components/WeeklyOverview";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
@@ -815,11 +815,6 @@ const Dashboard = () => {
                   </p>
                 </motion.div>
 
-                {/* XP já conquistado no onboarding — progresso visível desde o dia 1 */}
-                <div className="w-full max-w-[320px] mb-8">
-                  <XPBar />
-                </div>
-
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -892,28 +887,23 @@ const Dashboard = () => {
           </motion.div>
         ) : (
           <>
-            {/* 1. Hero Section — progress ring + greeting + CTAs */}
-            <DashboardHeroSection
-              totalHabits={todayHabits.length}
-              completedHabits={completedCount}
-              journeyTitle={primaryJourneyTitle}
-            />
-
-            {/* Nível / XP — progressão visível (revela a gamificação que já existe) */}
-            <XPBar />
-
-            {/* 2. Weekly Outlook */}
-            <WeeklyOverview
-              getCompletionForDate={getCompletionForDate}
-              isDarkMode={isDarkMode}
-              variant="dashboard"
-              consistencyPercent={weeklyInsight?.thisWeekConsistency || 0}
-            />
-
-            {/* Streak Protection Status */}
-            {isGamificationEnabled && (
-              <FreezeBadge userId={user?.id} variant="full" />
-            )}
+            {/* Mini-progresso do dia (Home enxuta: só os hábitos + um indicador discreto) */}
+            <div className="pt-1">
+              <div className="flex items-end justify-between">
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">Hoje</h1>
+                <span className="text-sm font-medium tabular-nums text-muted-foreground">
+                  {completedCount} de {todayHabits.length} concluídos
+                </span>
+              </div>
+              <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                <motion.div
+                  className="h-full rounded-full bg-primary"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${todayHabits.length ? Math.round((completedCount / todayHabits.length) * 100) : 0}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+              </div>
+            </div>
 
             {/* Freeze auto-used today banner */}
             {isGamificationEnabled && freezeUsedToday && (
@@ -952,8 +942,8 @@ const Dashboard = () => {
                       </span>
                     </div>
 
-                    {/* Habit list */}
-                    <div className="space-y-2">
+                    {/* Hábitos — círculo + ícone + anel + legenda (grid 2 colunas) */}
+                    <div className="grid grid-cols-2 justify-items-center gap-x-4 gap-y-7 pt-1">
                       {habits.map((habit, index) => (
                         <motion.div
                           key={habit.id}
@@ -961,15 +951,13 @@ const Dashboard = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.15, delay: Math.min(index * 0.04, 0.2) }}
                         >
-                          <HabitListItem
+                          <CircularHabitCard
                             habit={habit as Habit}
+                            progress={isCompletedToday(habit.id) ? 100 : 0}
                             completed={isCompletedToday(habit.id)}
                             onToggle={() => handleToggle(habit as Habit)}
                             streakDays={habit.streak}
-                            journeyTitle={getJourneyTitleForHabit(habit.id)}
-                            isTimedHabit={isTimedHabit(habit.unit)}
-                            onTimerClick={() => setTimerHabit(habit as Habit)}
-                            themeColor={getThemeColorForHabit(habit.id)}
+                            isDarkMode={isDarkMode}
                           />
                         </motion.div>
                       ))}
