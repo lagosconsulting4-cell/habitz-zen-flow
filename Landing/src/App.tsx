@@ -136,9 +136,19 @@ const App = () => (
               }
             />
 
-            {/* Bora Quiz - Fullscreen (primary for TikTok ads) */}
+            {/* Bora — landing direta pro checkout (sem quiz). Quiz preservado em /bora/quiz (revert / A-B). */}
             <Route
               path="/bora"
+              element={
+                <PathPrefixProvider prefix="/bora">
+                  <BoraLanding />
+                </PathPrefixProvider>
+              }
+            />
+
+            {/* Quiz antigo preservado (revert / A-B) */}
+            <Route
+              path="/bora/quiz"
               element={
                 <PathPrefixProvider prefix="/bora">
                   <BoraQuizPage />

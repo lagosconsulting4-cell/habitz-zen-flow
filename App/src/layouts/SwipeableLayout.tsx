@@ -13,10 +13,9 @@ const Profile = lazy(() => import("@/pages/Profile"));
 // Route to index mapping (Create is excluded - it's a modal overlay)
 export const SWIPEABLE_ROUTES = [
   { path: "/dashboard", index: 0 },
-  { path: "/habits",    index: 1 },
+  { path: "/progress",  index: 1 },
   { path: "/journeys",  index: 2 },
-  { path: "/progress",  index: 3 },
-  { path: "/profile",   index: 4 },
+  { path: "/profile",   index: 3 },
 ] as const;
 
 export const SWIPEABLE_PATHS = new Set(SWIPEABLE_ROUTES.map(r => r.path));
@@ -178,17 +177,17 @@ export const SwipeableCarousel = () => {
   return (
     <div className="overflow-hidden w-full h-dvh" ref={emblaRef}>
       <div className="flex h-full">
-        {/* Slide 0: Dashboard */}
+        {/* Slide 0: Hoje (hábitos do dia) */}
         <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto overflow-x-hidden h-full will-change-transform")}>
           <Suspense fallback={<PageLoader />}>
             <Dashboard />
           </Suspense>
         </div>
 
-        {/* Slide 1: Hábitos */}
+        {/* Slide 1: Progresso */}
         <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto overflow-x-hidden h-full will-change-transform")}>
           <Suspense fallback={<PageLoader />}>
-            <MyHabits />
+            <Progress />
           </Suspense>
         </div>
 
@@ -199,14 +198,7 @@ export const SwipeableCarousel = () => {
           </Suspense>
         </div>
 
-        {/* Slide 3: Progress/Streaks */}
-        <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto overflow-x-hidden h-full will-change-transform")}>
-          <Suspense fallback={<PageLoader />}>
-            <Progress />
-          </Suspense>
-        </div>
-
-        {/* Slide 4: Profile */}
+        {/* Slide 3: Perfil */}
         <div className={cn("min-w-0 shrink-0 grow-0 basis-full overflow-y-auto overflow-x-hidden h-full will-change-transform")}>
           <Suspense fallback={<PageLoader />}>
             <Profile />

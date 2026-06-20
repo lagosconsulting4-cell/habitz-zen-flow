@@ -24,8 +24,8 @@ const MOTIVOS_FOQUINHA = [
 const SOLUCOES: Record<string, Record<string, string>> = {
     Bora: {
         rotina: "Refizemos o mapeamento de dores do zero. A nova versão gera rotinas mais simples e muito mais aderentes ao dia a dia real.",
-        notificacao: "As notificações do Bora funcionam direto no navegador/PWA — é só ativar em 1 toque. Nosso suporte te ajuda a deixar tudo funcionando.",
-        appstore: "O Bora roda no navegador e você instala na tela inicial pra usar como app — sem loja, sem ocupar espaço, atualizando sozinho.",
+        notificacao: "As notificações do Bora funcionam direto no navegador/PWA. É só ativar em 1 toque, e o suporte te ajuda a deixar tudo funcionando.",
+        appstore: "O Bora roda no navegador e você instala na tela inicial pra usar como app, sem loja, sem ocupar espaço e atualizando sozinho.",
         financeiro: "Entendemos. Por isso criamos uma condição especial para quem já foi cliente — por muito menos do que você pagava antes.",
         outro: "Fizemos mudanças profundas no produto. Queremos que você veja por você mesmo antes de decidir.",
     },

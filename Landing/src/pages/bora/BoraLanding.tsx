@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/carousel";
 import {
   ArrowRight,
+  Check,
   Zap,
   Star,
   Users,
@@ -23,6 +24,19 @@ import {
 import { staggerContainer, staggerItem } from "@/hooks/useAnimations";
 import { QuizModal } from "@/components/quiz/QuizModal";
 import { useTracking } from "@/hooks/useTracking";
+
+// /bora agora é landing direta pro checkout (sem quiz). Link do checkout anual (Hubla);
+// o preço (R$47/ano) é configurado no provedor — aqui só exibimos e mandamos pra lá.
+const CHECKOUT_ANUAL_URL = "https://pay.hub.la/91TKYeHy1alHwSXn8yJz";
+
+// Telas reais do app (Landing/public/images/lp) — showcase "por dentro do app".
+// Mock "top" da tela de pricing do quiz (phone "App Bora").
+const FEATURE_MOCK = "https://i.ibb.co/8gCMLMS8/image-10.png";
+const APP_FEATURES = [
+  { title: "Seu dia, organizado", desc: "A rotina de hoje já vem montada. Você não decide nada de manhã, só executa." },
+  { title: "Feita pra você", desc: "Responde umas perguntas rápidas e sua rotina nasce pronta, do seu jeito." },
+  { title: "Sua evolução visível", desc: "Streak, consistência e o quanto você já avançou. Todo dia." },
+];
 
 // ============ DATA ============
 
@@ -53,42 +67,35 @@ const howItWorksNew = [
   },
 ];
 
+// Depoimentos do quiz (mesma voz, mais reais) — TestimonialsStep.
 const testimonials = [
   {
-    name: "Camila Souza",
-    age: 22,
-    role: "Fundadora de Startup",
-    photo: "https://i.ibb.co/7t5yRpDd/Gemini-Generated-Image-i7pejzi7pejzi7pe.png",
-    quote: "Antes era só correria e incêndio pra apagar. Com o Bora minha rotina ficou previsível e eu consigo focar no que realmente importa, sem viver no modo urgência.",
-    rating: 5,
-    metric: "Mais foco, menos caos",
+    name: "Marcos A.",
+    role: "São Paulo, SP",
+    photo: "https://i.ibb.co/5Wtxy3SP/download-15.jpg",
+    quote: "cara eu to sem palavras... na segunda semana ja tava acordando sem precisar de alarme. nunca achei q ia conseguir isso",
+    result: "4 meses de consistência",
   },
   {
-    name: "Lucas Fernandes",
-    age: 20,
-    role: "Estagiário de Marketing",
-    photo: "https://i.ibb.co/xtXmcTS3/Gemini-Generated-Image-ixzgp8ixzgp8ixzg.png",
-    quote: "Achava que produtividade era pra 'gente grande', mas o Bora me mostrou que não. Entreguei todos os projetos no prazo e ainda tive tempo pra minha vida social. Me senti um pro!",
-    rating: 5,
-    metric: "100% de projetos no prazo",
+    name: "Juliana S.",
+    role: "Belo Horizonte, MG",
+    photo: "https://i.ibb.co/PZx78q3m/download-16.jpg",
+    quote: "tentei de tudo mesmo. planner, academia, dieta... nada durava. o Bora foi o unico q se adaptou a mim, nao eu a ele 😅",
+    result: "10 semanas mantendo a rotina",
   },
   {
-    name: "Ana Clara Lima",
-    age: 24,
-    role: "Designer Freelancer",
-    photo: "https://picsum.photos/seed/woman/150/150",
-    quote: "Chega de procrastinar! O Bora me ajudou a organizar meus clientes, prazos e ainda sobrou tempo pra criar conteúdo pro meu portfólio. Finalmente consigo dar conta de tudo sem virar a noite.",
-    rating: 5,
-    metric: "Mais clientes, menos stress",
+    name: "Rafael C.",
+    role: "Fortaleza, CE",
+    photo: "https://i.ibb.co/5xYjH4q6/jin.jpg",
+    quote: "to mais disposto, dormindo melhor, mais focado no trampo. tudo isso sem mudar minha vida de cabeca pra baixo",
+    result: "Produtividade no pico",
   },
   {
-    name: "Pedro Henrique",
-    age: 19,
-    role: "Estudante e Vendedor",
-    photo: "https://i.ibb.co/TMPp1Kw1/Gemini-Generated-Image-200v6k200v6k200v.png",
-    quote: "Conciliar faculdade e trabalho era um caos. O Bora me deu um método pra otimizar meu tempo e energia. Agora consigo estudar, trabalhar e ainda ir pra academia sem me sentir esgotado.",
-    rating: 5,
-    metric: "Equilíbrio vida-estudo-trabalho",
+    name: "Larissa M.",
+    role: "Recife, PE",
+    photo: "https://i.ibb.co/V6PdXHc/download-17.jpg",
+    quote: "achei q ia ser complicado mas e muito simples. tipo o duolingo mas pra habitos. ja to a 2 meses sem pular um dia 🔥",
+    result: "2 meses sem pular um dia",
   },
 ];
 
@@ -135,35 +142,40 @@ const BoraLanding = () => {
 
   const handleCTA = (location: string) => {
     trackCTA(location);
-    setQuizOpen(true);
+    // Vai direto pro checkout anual (R$47/ano), repassando UTMs (mesma lógica do funil).
+    const currentParams = window.location.search;
+    const sep = CHECKOUT_ANUAL_URL.includes("?") ? "&" : "?";
+    let url = CHECKOUT_ANUAL_URL + (currentParams ? sep + currentParams.substring(1) : "");
+    const sp = new URLSearchParams(currentParams);
+    const utmContent = sp.get("utm_content") || sp.get("v");
+    if (utmContent && !url.includes("src=")) url += `&src=${utmContent}`;
+    window.location.href = url;
   };
 
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-slate-50 font-['Plus_Jakarta_Sans',sans-serif] selection:bg-lime-500/30 selection:text-lime-200">
 
-      {/* ============ STICKY HEADER ============ */}
+      {/* ============ NAVBAR — liquid glass flutuante ============ */}
       <motion.header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-          ? "bg-[#0A0A0B]/80 backdrop-blur-xl border-b border-white/5"
-          : "bg-transparent"
-          }`}
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
+        className="fixed inset-x-0 top-3 z-50 px-4"
+        initial={{ y: -80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <a href="#" className="flex items-center gap-2 group">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 rounded-[20px] border border-white/10 bg-white/[0.07] px-3.5 py-2.5 backdrop-blur-2xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_32px_rgba(0,0,0,0.45)]">
+          <a href="#" className="group flex items-center gap-2.5">
             <img
-              src="/assets/logo_bora.png"
-              alt="BORA Logo"
-              className="w-8 h-8 object-contain group-hover:drop-shadow-[0_0_8px_rgba(163,230,53,0.5)] transition-all duration-300"
+              src="/assets/bora-app-icon.png"
+              alt="Bora"
+              className="h-9 w-9 rounded-[11px] object-cover shadow-lg ring-1 ring-white/10 transition-transform duration-300 group-hover:scale-105"
             />
+            <span className="text-lg font-bold tracking-tight text-white">Bora</span>
           </a>
 
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
             <Button
               onClick={() => handleCTA("header")}
-              className="bg-white hover:bg-slate-200 text-slate-900 font-semibold px-6 py-2 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all"
+              className="rounded-full bg-lime-400 px-5 py-2 text-sm font-bold text-slate-950 shadow-[0_0_20px_rgba(163,230,53,0.35)] transition-all hover:bg-lime-300"
             >
               Começar agora
             </Button>
@@ -202,7 +214,7 @@ const BoraLanding = () => {
               transition={{ duration: 1, delay: 0.2 }}
             >
               <img
-                src="/images/lp/hero_mockup.png"
+                src="/images/lp/hero_mockup.webp"
                 alt="App Interface"
                 className="w-[280px] drop-shadow-2xl rotate-[-2deg]"
               />
@@ -292,7 +304,7 @@ const BoraLanding = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[600px] bg-gradient-to-tr from-lime-500/20 to-yellow-500/20 rounded-full blur-[80px]" />
 
             <img
-              src="/images/lp/hero_mockup.png"
+              src="/images/lp/hero_mockup.webp"
               alt="App Interface"
               className="relative z-10 w-[450px] drop-shadow-2xl rotate-[-4deg] hover:rotate-0 transition-transform duration-700 ease-out"
             />
@@ -350,6 +362,71 @@ const BoraLanding = () => {
         </div>
       </section>
 
+      {/* ============ APP SHOWCASE — telas reais do app ============ */}
+      <section className="relative overflow-hidden bg-[#0A0A0B] py-24 px-4 sm:px-6">
+        {/* glow ambiente */}
+        <div className="pointer-events-none absolute left-1/2 top-1/3 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-lime-500/10 blur-[140px]" />
+
+        <div className="relative z-10 mx-auto max-w-7xl">
+          <motion.div
+            className="mb-16 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-lime-400">Por dentro do app</span>
+            <h2 className="mt-3 text-4xl font-bold tracking-tight text-white md:text-5xl">
+              Seu sistema, na <span className="text-lime-400">palma da mão</span>
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-400">
+              Rotina clara no dia a dia, sua evolução visível e um plano montado pra você. Sem complicação.
+            </p>
+          </motion.div>
+
+          <div className="flex flex-col items-center gap-12 lg:flex-row lg:gap-16">
+            {/* Mock da tela de pricing do quiz (o "top") */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="relative mx-auto w-full max-w-md lg:max-w-lg flex-shrink-0"
+            >
+              <div className="absolute inset-0 -z-10 scale-90 rounded-[3rem] bg-gradient-to-tr from-lime-500/25 to-yellow-500/10 blur-3xl" />
+              <img
+                src={FEATURE_MOCK}
+                alt="App Bora"
+                loading="lazy"
+                decoding="async"
+                className="w-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
+              />
+            </motion.div>
+
+            {/* Benefícios */}
+            <div className="flex-1 space-y-7">
+              {APP_FEATURES.map((f, i) => (
+                <motion.div
+                  key={f.title}
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.4 }}
+                  className="flex items-start gap-4"
+                >
+                  <div className="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-lime-400/20 bg-lime-400/10">
+                    <Check className="h-5 w-5 text-lime-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">{f.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-slate-400">{f.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ============ TESTIMONIALS (INFINITE SCROLL FEEL) ============ */}
       <section className="py-24 relative overflow-hidden bg-[#0A0A0B]">
         <Carousel opts={{ align: "start", loop: true }} className="w-full max-w-7xl mx-auto px-4">
@@ -373,6 +450,11 @@ const BoraLanding = () => {
                       <Star key={i} className="w-4 h-4 text-lime-500" fill="currentColor" />
                     ))}
                   </div>
+                  {testimonial.result && (
+                    <span className="mb-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-lime-400/10 px-3 py-1 text-xs font-semibold text-lime-400">
+                      <Check className="h-3.5 w-3.5" /> {testimonial.result}
+                    </span>
+                  )}
                   <p className="text-slate-300 mb-6 flex-grow leading-relaxed">
                     "{testimonial.quote}"
                   </p>
@@ -403,16 +485,46 @@ const BoraLanding = () => {
             Torne seus objetivos <span className="text-lime-400">inevitáveis.</span>
           </h2>
           <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
-            Pare de lutar contra sua rotina. O sistema Bora alinha seus hábitos diários com quem você quer se tornar — automaticamente.
+            Pare de lutar contra sua rotina. O sistema Bora alinha seus hábitos diários com quem você quer se tornar, no automático.
           </p>
 
-          <Button
-            onClick={() => handleCTA("final_cta")}
-            className="group bg-white text-slate-900 hover:bg-lime-400 text-lg px-12 py-8 rounded-full font-bold shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_60px_rgba(163,230,53,0.4)] transition-all duration-500"
-          >
-            INICIAR ANÁLISE
-            <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
-          </Button>
+          {/* Oferta — card glass */}
+          <div className="mx-auto max-w-md rounded-[2rem] border border-lime-400/30 bg-white/[0.04] p-8 text-left shadow-[0_0_60px_rgba(163,230,53,0.12)] backdrop-blur-xl">
+            <div className="text-center">
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-lime-400">Acesso completo • 1 ano</span>
+              <div className="mt-3 flex items-end justify-center gap-2">
+                <span className="text-6xl font-black leading-none text-white">R$ 5,15</span>
+                <span className="mb-2 text-sm text-slate-400">/mês</span>
+              </div>
+              <p className="mt-2 text-sm text-slate-400">em até 12x, ou R$ 47 à vista. Menos que um café por mês.</p>
+            </div>
+
+            <ul className="mt-6 space-y-3">
+              {[
+                "Sua rotina personalizada, pronta pra começar",
+                "Jornadas guiadas, meditações e hub de livros",
+                "Progresso, streaks e conquistas pra te manter firme",
+                "Funciona offline e instala na tela inicial",
+              ].map((b) => (
+                <li key={b} className="flex items-start gap-3 text-sm text-slate-200">
+                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-lime-400" />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+
+            <Button
+              onClick={() => handleCTA("final_cta")}
+              className="group mt-7 w-full rounded-2xl bg-lime-400 py-7 text-base font-bold text-slate-950 shadow-[0_0_30px_rgba(163,230,53,0.3)] transition-all hover:bg-lime-300 hover:shadow-[0_0_50px_rgba(163,230,53,0.5)]"
+            >
+              QUERO MEU ACESSO
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Button>
+
+            <p className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
+              <ShieldCheck className="h-4 w-4 text-lime-400" /> 7 dias de garantia. Não curtiu, a gente devolve.
+            </p>
+          </div>
         </div>
       </section>
 
