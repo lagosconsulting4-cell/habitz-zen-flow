@@ -20,6 +20,9 @@ import {
   Target,
   LineChart,
   Sparkles,
+  MessageSquare,
+  Wand2,
+  CircleCheck,
 } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/hooks/useAnimations";
 import { QuizModal } from "@/components/quiz/QuizModal";
@@ -41,25 +44,25 @@ const APP_SCREENS = [
 
 const howItWorksNew = [
   {
-    title: "Caminho do Menor Esforço",
-    description: "Não dependa de força de vontade. Tornamos o comportamento certo a ação mais fácil do seu dia.",
-    icon: Zap,
+    title: "Você responde",
+    description: "Conta seu objetivo e como é o seu dia. Leva 1 minuto.",
+    icon: MessageSquare,
     gradient: "from-lime-400/20 to-lime-600/20",
     className: "col-span-1 md:col-span-2 lg:col-span-1",
     number: "01",
   },
   {
-    title: "Identidade > Hábito",
-    description: "Pare de 'tentar' e comece a 'ser'. Moldamos sua autoimagem para que a disciplina venha de dentro para fora, sem sofrimento.",
-    icon: Brain,
+    title: "O Bora monta",
+    description: "Sua rotina personalizada nasce pronta, do seu jeito.",
+    icon: Wand2,
     gradient: "from-emerald-400/20 to-emerald-600/20",
     className: "col-span-1 md:col-span-2 lg:col-span-1",
     number: "02",
   },
   {
-    title: "O Poder do 1%",
-    description: "Melhore 1% todos os dias. É como juros compostos: pequenos passos consistentes viram uma diferença enorme ao longo do ano.",
-    icon: LineChart,
+    title: "Você faz",
+    description: "Marca os círculos do dia e sobe de nível.",
+    icon: CircleCheck,
     gradient: "from-lime-300/20 to-emerald-400/20",
     className: "col-span-1 md:col-span-2 lg:col-span-1",
     number: "03",
@@ -201,8 +204,8 @@ const BoraLanding = () => {
               className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tighter text-white"
               variants={staggerItem}
             >
-              Seja a sua <br />
-              <span className="text-lime-400">melhor versão.</span>
+              O aplicativo de rotinas <br />
+              mais visto do <span className="text-lime-400">TikTok</span>
             </motion.h1>
 
             {/* Mobile Mockup Position (Visible on Mobile only/Interleaved) */}
@@ -225,7 +228,7 @@ const BoraLanding = () => {
               className="text-xl text-slate-400 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               variants={staggerItem}
             >
-              Para ser sua melhor versão, você não precisa de sorte, precisa de um sistema. O Bora organiza sua rotina para que seus objetivos se tornem inevitáveis.
+              O Bora já montou mais de 10.000 rotinas personalizadas. Só falta a sua.
             </motion.p>
 
             <motion.div
@@ -237,7 +240,7 @@ const BoraLanding = () => {
                 size="lg"
                 className="bg-lime-400 hover:bg-lime-500 text-slate-950 text-lg px-8 py-7 rounded-full font-bold shadow-[0_0_30px_rgba(163,230,53,0.3)] hover:shadow-[0_0_50px_rgba(163,230,53,0.5)] transition-all duration-500"
               >
-                Construir o meu novo eu
+                Criar minha rotina
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </motion.div>
@@ -260,8 +263,8 @@ const BoraLanding = () => {
                   ))}
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-white font-bold text-sm">2.000+</span>
-                  <span className="text-slate-400 text-xs">Membros Ativos</span>
+                  <span className="text-white font-bold text-sm">Mais visto</span>
+                  <span className="text-slate-400 text-xs">no TikTok</span>
                 </div>
               </div>
 
@@ -322,10 +325,10 @@ const BoraLanding = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              O Sistema <span className="text-lime-400">Bora</span>
+              Não é você. É a <span className="text-lime-400">rotina errada.</span>
             </h2>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              Como o Bora ajuda você a construir sua melhor versão, dia após dia.
+              O Bora monta uma que combina com você. Você só segue.
             </p>
           </motion.div>
 
@@ -375,10 +378,10 @@ const BoraLanding = () => {
           >
             <span className="text-xs font-bold uppercase tracking-[0.25em] text-lime-400">Por dentro do app</span>
             <h2 className="mt-3 text-4xl font-bold tracking-tight text-white md:text-5xl">
-              Seu sistema, na <span className="text-lime-400">palma da mão</span>
+              Leve que nem <span className="text-lime-400">joguinho</span>
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-400">
-              Rotina clara no dia a dia, sua evolução visível e um plano montado pra você. Sem complicação.
+              Tipo Duolingo, mas pra hábitos.
             </p>
           </motion.div>
 
@@ -420,8 +423,8 @@ const BoraLanding = () => {
         <Carousel opts={{ align: "start", loop: true }} className="w-full max-w-7xl mx-auto px-4">
           <div className="mb-12 flex items-end justify-between">
             <div className="max-w-md">
-              <h2 className="text-3xl font-bold text-white mb-2">Comunidade Ativa</h2>
-              <p className="text-slate-400">Junte-se a mais de 2.000 pessoas que já calibraram seus sistemas.</p>
+              <h2 className="text-3xl font-bold text-white mb-2">Quem parou de tentar e começou a fazer</h2>
+              <p className="text-slate-400">Gente real que montou a rotina e ficou.</p>
             </div>
             <div className="hidden md:flex gap-4">
               <CarouselPrevious className="static translate-y-0 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-lime-400" />
@@ -469,12 +472,9 @@ const BoraLanding = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-lime-900/20 to-[#0A0A0B]" />
 
         <div className="relative z-10 max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 tracking-tight">
-            Torne seus objetivos <span className="text-lime-400">inevitáveis.</span>
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-10 tracking-tight">
+            Sua rotina tá pronta. <span className="text-lime-400">Só falta você.</span>
           </h2>
-          <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
-            Pare de lutar contra sua rotina. O sistema Bora alinha seus hábitos diários com quem você quer se tornar, no automático.
-          </p>
 
           {/* Oferta — card glass */}
           <div className="mx-auto max-w-md rounded-[2rem] border border-lime-400/30 bg-white/[0.04] p-8 text-left shadow-[0_0_60px_rgba(163,230,53,0.12)] backdrop-blur-xl">
@@ -489,9 +489,9 @@ const BoraLanding = () => {
 
             <ul className="mt-6 space-y-3">
               {[
-                "Sua rotina personalizada, pronta pra começar",
-                "Jornadas guiadas, meditações e hub de livros",
-                "Progresso, streaks e conquistas pra te manter firme",
+                "Sua rotina personalizada, montada pra você",
+                "Jornadas guiadas, meditações e biblioteca",
+                "Sequências, níveis e XP pra te manter firme",
                 "Funciona offline e instala na tela inicial",
               ].map((b) => (
                 <li key={b} className="flex items-start gap-3 text-sm text-slate-200">
@@ -505,7 +505,7 @@ const BoraLanding = () => {
               onClick={() => handleCTA("final_cta")}
               className="group mt-7 w-full rounded-2xl bg-lime-400 py-7 text-base font-bold text-slate-950 shadow-[0_0_30px_rgba(163,230,53,0.3)] transition-all hover:bg-lime-300 hover:shadow-[0_0_50px_rgba(163,230,53,0.5)]"
             >
-              QUERO MEU ACESSO
+              Criar minha rotina
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
 
