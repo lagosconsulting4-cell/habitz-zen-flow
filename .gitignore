@@ -20,3 +20,7 @@ nul
 
 # Dev screenshots (root level only)
 /*.png
+
+# Dispute evidence — contains customer PII, keep local only (publish only the generic playbook)
+docs/disputa-*.md
+docs/evidencia-*/
