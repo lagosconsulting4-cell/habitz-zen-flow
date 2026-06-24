@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { Sparkles, Plus, Bell, ChevronRight, Sun, Sunrise, Sunset, Moon, Shield } from "lucide-react";
+import { Sparkles, Plus, Bell, ChevronRight, Sun, Sunrise, Sunset, Moon, Shield, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { DashboardSkeleton } from "@/components/ui/skeleton";
@@ -891,9 +891,19 @@ const Dashboard = () => {
             <div className="pt-1">
               <div className="flex items-end justify-between">
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">Hoje</h1>
-                <span className="text-sm font-medium tabular-nums text-muted-foreground">
-                  {completedCount} de {todayHabits.length} concluídos
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium tabular-nums text-muted-foreground">
+                    {completedCount} de {todayHabits.length} concluídos
+                  </span>
+                  {/* Gerenciar hábitos (editar/excluir) — a tela /habits saiu do nav */}
+                  <button
+                    onClick={() => navigate("/habits")}
+                    aria-label="Gerenciar hábitos"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+                  >
+                    <Settings2 className="w-[18px] h-[18px]" />
+                  </button>
+                </div>
               </div>
               <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                 <motion.div

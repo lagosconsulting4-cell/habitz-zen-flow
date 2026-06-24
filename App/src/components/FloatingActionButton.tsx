@@ -17,7 +17,9 @@ export const FloatingActionButton = ({ className }: FloatingActionButtonProps) =
   const navigate = useNavigate();
   const location = useLocation();
 
-  if (location.pathname !== "/habits") return null;
+  // Aparece na Home (/dashboard) e na tela de gerenciar (/habits) — sem isso,
+  // não havia como adicionar hábito depois que a aba "Meus Hábitos" saiu do nav.
+  if (location.pathname !== "/habits" && location.pathname !== "/dashboard") return null;
 
   return createPortal(
     <motion.button
