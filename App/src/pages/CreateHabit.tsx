@@ -970,6 +970,21 @@ const renderTemplateFrequency = (template: HabitTemplate) => {
       transition={{ duration: 0.25, ease: "easeOut" }}
       className="space-y-7 pb-6 pt-2"
     >
+      {/* ── NOME DO HÁBITO ── (sem isso, hábito personalizado fica sem nome e o botão trava) */}
+      <div className="space-y-3 px-4">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: themeColors.categoryLabel }}>
+          NOME DO HÁBITO
+        </p>
+        <Input
+          value={habitName}
+          onChange={(e) => setHabitName(e.target.value)}
+          placeholder="Ex.: Beber água, Ler 10 páginas..."
+          maxLength={60}
+          autoFocus={!habitName.trim()}
+          className={`rounded-xl ${themeColors.input}`}
+        />
+      </div>
+
       {/* Health Integration Alert */}
       {selectedTemplateAuto && (
         <div className="mx-4 flex items-start gap-3 rounded-xl p-4"
